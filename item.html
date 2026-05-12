@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Item — Hunter House Archive</title>
+<style>
+  :root {
+    --ink: #202020;
+    --muted: #6a6a6a;
+    --rule: #e2e2e2;
+    --soft: #f7f5f0;
+    --link: #2a4a8b;
+    --accent: #8b3a2a;
+    --note: #8a7a3a;
+    --paper: #f4f0e6;
+    --bg: #fafaf7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    margin: 0;
+    line-height: 1.5;
+    font-size: 14px;
+  }
+  .frame {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 32px 80px;
+  }
+  .crumb {
+    margin-bottom: 24px;
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .crumb a {
+    color: var(--link);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--link);
+  }
+  .crumb a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .item {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .item-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--soft);
+  }
+  .item-header .qid {
+    color: var(--muted);
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+  .item-header .label {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-size: 26px;
+    font-weight: 500;
+    margin: 6px 0 8px;
+    letter-spacing: -0.005em;
+    line-height: 1.2;
+  }
+  .item-header .desc {
+    color: var(--muted);
+    font-size: 14px;
+    font-style: italic;
+  }
+  .item-header .aliases {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .item-header .aliases-label { font-style: italic; margin-right: 4px; }
+  .item-header .aliases span.alias {
+    background: #ebe7dc;
+    padding: 1px 7px;
+    border-radius: 2px;
+    margin-right: 4px;
+    font-style: normal;
+    display: inline-block;
+    margin-top: 2px;
+  }
+
+  .statements {
+    padding: 16px 24px 24px;
+  }
+  .section-heading {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin: 22px 0 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--rule);
+    font-weight: 600;
+  }
+  .section-heading:first-child { margin-top: 6px; }
+
+  .stmt {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 14px;
+    padding: 9px 0;
+    border-bottom: 1px dotted #eee;
+  }
+  .stmt:last-child { border-bottom: none; }
+  .prop {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .val {
+    font-size: 13.5px;
+    word-break: break-word;
+  }
+  .val .qlink {
+    color: var(--link);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--link);
+  }
+  .val .qlink:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  .val .stringval {
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 12.5px;
+    color: var(--ink);
+  }
+  .val .multival {
+    display: block;
+    padding: 2px 0;
+  }
+  .val .external {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--accent);
+  }
+  .qual {
+    display: block;
+    margin-top: 4px;
+    margin-left: 14px;
+    font-size: 12.5px;
+    color: #555;
+  }
+  .qual::before { content: "↳ "; color: #aaa; }
+  .qual b { font-weight: 500; color: var(--muted); }
+
+  .ref {
+    display: block;
+    margin-top: 3px;
+    margin-left: 14px;
+    font-size: 11.5px;
+    color: var(--note);
+    font-style: italic;
+  }
+  .ref::before { content: "📖 "; font-style: normal; }
+
+  .reverse {
+    background: #fbf9f4;
+    padding: 16px 24px 20px;
+    border-top: 1px solid var(--rule);
+    font-size: 13px;
+  }
+  .reverse h3 {
+    margin: 0 0 10px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .reverse .count {
+    color: var(--ink);
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .reverse .count a {
+    color: var(--link);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--link);
+  }
+  .reverse .empty-rev {
+    color: var(--muted);
+    font-size: 12.5px;
+    font-style: italic;
+  }
+
+  .status {
+    background: var(--soft);
+    border: 1px solid var(--rule);
+    padding: 14px 18px;
+    margin-bottom: 28px;
+    font-size: 13px;
+    color: var(--muted);
+    font-family: "SF Mono", "Menlo", monospace;
+  }
+  .status.error { background: #f5e0d0; color: #8b3a2a; border-color: #e0b8a0; }
+
+  .footer-meta {
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule);
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+  .footer-meta a {
+    color: var(--link);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--link);
+  }
+
+  @media (max-width: 640px) {
+    .frame { padding: 18px 16px 60px; }
+    .item-header .label { font-size: 22px; }
+    .stmt { grid-template-columns: 1fr; gap: 4px; }
+    .prop { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; }
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <div class="crumb">
+    <a href="index.html">← Hunter House Archive</a>
+  </div>
+
+  <div id="status" class="status">Loading item…</div>
+
+  <article id="item" class="item" style="display:none;">
+    <div class="item-header">
+      <div class="qid" id="qid"></div>
+      <div class="label" id="label"></div>
+      <div class="desc" id="desc"></div>
+      <div class="aliases" id="aliases" style="display:none;"></div>
+    </div>
+    <div class="statements" id="statements"></div>
+    <div class="reverse" id="reverse"></div>
+  </article>
+
+  <div class="footer-meta" id="footer-meta" style="display:none;"></div>
+
+</div>
+
+<script>
+  // ---------------------------------------------------------------------
+  // Configuration
+  // ---------------------------------------------------------------------
+  const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
+  const API_URL = WIKIBASE_URL + "/w/api.php";
+  const SPARQL_URL = WIKIBASE_URL + "/query/sparql";
+
+  // Section grouping. Property labels are matched (case-insensitive) and the
+  // matching statements go under that heading. Anything unmatched ends up in
+  // "Other". This is a pragmatic first pass — refine as the property
+  // vocabulary stabilizes.
+  const SECTIONS = [
+    { name: "Identity",        keys: ["instance of", "label", "title", "subclass of", "type"] },
+    { name: "People",          keys: ["architect", "client", "creator", "participant", "founder", "director", "original architect", "presenter", "organizer"] },
+    { name: "Locative",        keys: ["location", "located in", "headquarters", "street address", "coordinate location", "venue", "area of", "part of area", "contains area"] },
+    { name: "Temporal",        keys: ["start date", "end date", "point in time", "built date", "removed date", "founded", "dissolved", "demolished date", "date of design", "date of construction"] },
+    { name: "Phase / Work",    keys: ["part of", "has phase", "addition to", "based on", "phase type", "area type", "construction status", "realization status", "project status", "built in phase", "modified in phase", "removed in phase"] },
+    { name: "Source",          keys: ["source collection", "custodian", "parent collection", "fonds reference", "finding aid url", "subject of", "features", "documents"] },
+    { name: "Identifiers",     keys: ["hh archive id", "caa archive reference", "wikidata id", "geonames id", "isil", "official website"] },
+  ];
+
+  // ---------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------
+  function escapeHTML(s) {
+    if (s == null) return "";
+    return String(s).replace(/[&<>"']/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+  }
+
+  function setStatus(msg, cls) {
+    const el = document.getElementById("status");
+    el.textContent = msg;
+    el.className = "status" + (cls ? " " + cls : "");
+  }
+
+  function getQID() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("id");
+  }
+
+  async function fetchEntity(qid) {
+    const url = API_URL +
+      "?action=wbgetentities" +
+      "&ids=" + encodeURIComponent(qid) +
+      "&languages=en" +
+      "&format=json" +
+      "&origin=*";
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("API " + res.status + " " + res.statusText);
+    const json = await res.json();
+    if (json.error) throw new Error(json.error.info || json.error.code);
+    return json.entities[qid];
+  }
+
+  // Resolve a batch of entity IDs (mix of Q-IDs and P-IDs) to their labels.
+  async function fetchLabels(ids) {
+    if (ids.length === 0) return {};
+    const unique = [...new Set(ids)];
+    const labels = {};
+    // wbgetentities accepts max 50 ids per call.
+    for (let i = 0; i < unique.length; i += 50) {
+      const batch = unique.slice(i, i + 50);
+      const url = API_URL +
+        "?action=wbgetentities" +
+        "&ids=" + encodeURIComponent(batch.join("|")) +
+        "&languages=en" +
+        "&props=labels" +
+        "&format=json" +
+        "&origin=*";
+      const res = await fetch(url);
+      if (!res.ok) continue;
+      const json = await res.json();
+      if (!json.entities) continue;
+      for (const id of batch) {
+        const e = json.entities[id];
+        if (e && e.labels && e.labels.en) {
+          labels[id] = e.labels.en.value;
+        }
+      }
+    }
+    return labels;
+  }
+
+  // ---------------------------------------------------------------------
+  // Formatting datavalues
+  // ---------------------------------------------------------------------
+  function formatValue(dv, labels) {
+    if (!dv) return "";
+    const t = dv.type;
+    const v = dv.value;
+    if (t === "wikibase-entityid") {
+      const id = v.id;
+      const label = labels[id] || id;
+      // Q-items link to item.html; P-properties don't link for now.
+      if (id.startsWith("Q")) {
+        return `<a class="qlink" href="item.html?id=${encodeURIComponent(id)}">${escapeHTML(label)}</a> <span style="color:#aaa;font-family:monospace;font-size:11px;">(${escapeHTML(id)})</span>`;
+      }
+      return escapeHTML(label) + ` <span style="color:#aaa;font-family:monospace;font-size:11px;">(${escapeHTML(id)})</span>`;
+    }
+    if (t === "string") {
+      return `<span class="stringval">${escapeHTML(v)}</span>`;
+    }
+    if (t === "monolingualtext") {
+      return escapeHTML(v.text) + ` <span style="color:#aaa;font-size:11px;">(${escapeHTML(v.language)})</span>`;
+    }
+    if (t === "time") {
+      // v.time looks like "+2026-04-15T00:00:00Z"; precision 9=year, 10=month, 11=day.
+      const isoIsh = v.time.replace(/^\+/, "");
+      const date = isoIsh.split("T")[0];
+      const [y, m, d] = date.split("-");
+      let display = y;
+      if (v.precision >= 10) display = `${y}-${m}`;
+      if (v.precision >= 11) display = `${y}-${m}-${d}`;
+      return `<span class="stringval">${escapeHTML(display)}</span>`;
+    }
+    if (t === "quantity") {
+      return `<span class="stringval">${escapeHTML(v.amount.replace(/^\+/, ""))}</span>`;
+    }
+    if (t === "globecoordinate") {
+      return `<span class="stringval">${v.latitude.toFixed(4)}, ${v.longitude.toFixed(4)}</span>`;
+    }
+    if (t === "url" || (typeof v === "string" && /^https?:\/\//.test(v))) {
+      const u = typeof v === "string" ? v : v.toString();
+      return `<a class="external" href="${escapeHTML(u)}" target="_blank" rel="noopener">${escapeHTML(u)}</a>`;
+    }
+    return `<span class="stringval">${escapeHTML(JSON.stringify(v))}</span>`;
+  }
+
+  // ---------------------------------------------------------------------
+  // Reverse references: SPARQL for "what points at this item"
+  // ---------------------------------------------------------------------
+  async function fetchReverseRefs(qid) {
+    const entityURI = WIKIBASE_URL + "/entity/" + qid;
+    const q = `
+      SELECT ?prop ?propLabel (COUNT(?subject) AS ?count) WHERE {
+        ?subject ?prop <${entityURI}> .
+        ?propEntity <http://wikiba.se/ontology#directClaim> ?prop .
+        OPTIONAL { ?propEntity rdfs:label ?propLabel . FILTER(LANG(?propLabel) = "en") }
+      }
+      GROUP BY ?prop ?propLabel
+      ORDER BY DESC(?count)
+    `;
+    const url = SPARQL_URL + "?query=" + encodeURIComponent(q) + "&format=json";
+    try {
+      const res = await fetch(url, { headers: { Accept: "application/sparql-results+json" } });
+      if (!res.ok) return [];
+      const json = await res.json();
+      return json.results.bindings.map(r => ({
+        propURI: r.prop.value,
+        propLabel: r.propLabel ? r.propLabel.value : r.prop.value.split("/").pop(),
+        count: parseInt(r.count.value, 10),
+      }));
+    } catch (e) {
+      console.warn("reverse refs query failed:", e);
+      return [];
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------
+  function renderHeader(entity) {
+    const qid = entity.id;
+    const label = entity.labels && entity.labels.en ? entity.labels.en.value : qid;
+    const desc = entity.descriptions && entity.descriptions.en ? entity.descriptions.en.value : "";
+    const aliases = entity.aliases && entity.aliases.en ? entity.aliases.en.map(a => a.value) : [];
+
+    document.title = label + " — Hunter House Archive";
+    document.getElementById("qid").textContent = qid + " · Item";
+    document.getElementById("label").textContent = label;
+    document.getElementById("desc").textContent = desc;
+
+    if (aliases.length > 0) {
+      const al = document.getElementById("aliases");
+      al.style.display = "";
+      al.innerHTML = `<span class="aliases-label">also known as:</span> ` +
+        aliases.map(a => `<span class="alias">${escapeHTML(a)}</span>`).join("");
+    }
+  }
+
+  function categorizeStatement(propLabel) {
+    const lower = propLabel.toLowerCase();
+    for (const section of SECTIONS) {
+      if (section.keys.includes(lower)) return section.name;
+    }
+    return "Other";
+  }
+
+  function renderStatements(claims, propLabels, valueLabels) {
+    const container = document.getElementById("statements");
+    container.innerHTML = "";
+
+    if (!claims || Object.keys(claims).length === 0) {
+      container.innerHTML = `<div style="padding:20px 0;color:var(--muted);font-style:italic;">No statements yet.</div>`;
+      return;
+    }
+
+    // Group claims by section
+    const sections = {};
+    for (const pid in claims) {
+      const propLabel = propLabels[pid] || pid;
+      const sectionName = categorizeStatement(propLabel);
+      if (!sections[sectionName]) sections[sectionName] = [];
+      sections[sectionName].push({ pid, propLabel, claims: claims[pid] });
+    }
+
+    // Render in canonical section order, then "Other" last
+    const orderedNames = [...SECTIONS.map(s => s.name), "Other"];
+    orderedNames.forEach(sectionName => {
+      if (!sections[sectionName]) return;
+      const heading = document.createElement("div");
+      heading.className = "section-heading";
+      heading.textContent = sectionName;
+      container.appendChild(heading);
+
+      sections[sectionName].forEach(({ pid, propLabel, claims }) => {
+        const stmt = document.createElement("div");
+        stmt.className = "stmt";
+
+        const valuesHTML = claims.map(c => {
+          if (!c.mainsnak || c.mainsnak.snaktype !== "value") return "";
+          let html = `<span class="multival">${formatValue(c.mainsnak.datavalue, valueLabels)}</span>`;
+
+          // Qualifiers
+          if (c.qualifiers) {
+            for (const qpid in c.qualifiers) {
+              const qLabel = propLabels[qpid] || qpid;
+              c.qualifiers[qpid].forEach(q => {
+                if (q.snaktype !== "value") return;
+                html += `<span class="qual"><b>${escapeHTML(qLabel)}:</b> ${formatValue(q.datavalue, valueLabels)}</span>`;
+              });
+            }
+          }
+          return html;
+        }).join("");
+
+        stmt.innerHTML = `
+          <div class="prop">${escapeHTML(propLabel)} <span style="color:#bbb;font-family:monospace;font-size:11px;">(${escapeHTML(pid)})</span></div>
+          <div class="val">${valuesHTML}</div>
+        `;
+        container.appendChild(stmt);
+      });
+    });
+  }
+
+  function renderReverse(refs, qid) {
+    const container = document.getElementById("reverse");
+    container.innerHTML = `<h3>What links here (reverse references)</h3>`;
+    if (refs.length === 0) {
+      container.innerHTML += `<div class="empty-rev">Nothing in the Wikibase currently points at this item.</div>`;
+      return;
+    }
+    const queryLink = SPARQL_URL.replace("/sparql", "/") +
+      "#" + encodeURIComponent("SELECT ?subject ?subjectLabel WHERE {\n  ?subject ?prop <" + WIKIBASE_URL + "/entity/" + qid + "> .\n  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\". }\n}");
+    refs.forEach(r => {
+      const div = document.createElement("div");
+      div.className = "count";
+      div.innerHTML = `→ ${r.count} ${r.count === 1 ? "item" : "items"} <span style="color:#aaa">via</span> <span style="color:var(--ink);">${escapeHTML(r.propLabel)}</span>`;
+      container.appendChild(div);
+    });
+    const note = document.createElement("div");
+    note.style.marginTop = "10px";
+    note.style.fontSize = "12px";
+    note.style.color = "var(--muted)";
+    note.innerHTML = `Listed by property. Run a <a href="${queryLink}" target="_blank" rel="noopener">SPARQL query</a> to see the linking items themselves.`;
+    container.appendChild(note);
+  }
+
+  function renderFooter(qid) {
+    const fm = document.getElementById("footer-meta");
+    fm.style.display = "";
+    fm.innerHTML = `
+      View on Wikibase:
+      <a href="${WIKIBASE_URL}/wiki/Item:${qid}" target="_blank" rel="noopener">${WIKIBASE_URL}/wiki/Item:${qid}</a>
+    `;
+  }
+
+  // ---------------------------------------------------------------------
+  // Main
+  // ---------------------------------------------------------------------
+  (async function main() {
+    const qid = getQID();
+    if (!qid) {
+      setStatus("No item ID in URL. Open this page with ?id=Q1 (or any item ID).", "error");
+      return;
+    }
+
+    try {
+      const entity = await fetchEntity(qid);
+      if (!entity || entity.missing !== undefined) {
+        setStatus("Item " + qid + " not found in Wikibase.", "error");
+        return;
+      }
+
+      renderHeader(entity);
+
+      // Collect all the entity IDs we need to resolve labels for:
+      // property IDs from claims, and entity IDs from values & qualifiers.
+      const propIDs = new Set();
+      const valueQIDs = new Set();
+      const claims = entity.claims || {};
+      for (const pid in claims) {
+        propIDs.add(pid);
+        claims[pid].forEach(c => {
+          if (c.mainsnak && c.mainsnak.datavalue && c.mainsnak.datavalue.type === "wikibase-entityid") {
+            valueQIDs.add(c.mainsnak.datavalue.value.id);
+          }
+          if (c.qualifiers) {
+            for (const qpid in c.qualifiers) {
+              propIDs.add(qpid);
+              c.qualifiers[qpid].forEach(q => {
+                if (q.datavalue && q.datavalue.type === "wikibase-entityid") {
+                  valueQIDs.add(q.datavalue.value.id);
+                }
+              });
+            }
+          }
+        });
+      }
+
+      const labels = await fetchLabels([...propIDs, ...valueQIDs]);
+      const propLabels = {};
+      const valueLabels = {};
+      propIDs.forEach(pid => propLabels[pid] = labels[pid] || pid);
+      valueQIDs.forEach(qid => valueLabels[qid] = labels[qid] || qid);
+
+      renderStatements(claims, propLabels, valueLabels);
+
+      // Reverse references in parallel after the main render
+      document.getElementById("status").style.display = "none";
+      document.getElementById("item").style.display = "";
+      renderFooter(qid);
+
+      const refs = await fetchReverseRefs(qid);
+      renderReverse(refs, qid);
+
+    } catch (err) {
+      console.error(err);
+      setStatus("Couldn't load item: " + err.message, "error");
+    }
+  })();
+</script>
+
+</body>
+</html>
