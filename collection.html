@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collection — Hunter House Archive</title>
+<style>
+  :root {
+    --ink: #202020;
+    --muted: #6a6a6a;
+    --rule: #e2e2e2;
+    --soft: #f7f5f0;
+    --link: #2a4a8b;
+    --accent: #8b3a2a;
+    --note: #8a7a3a;
+    --paper: #f4f0e6;
+    --bg: #fafaf7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    margin: 0;
+    line-height: 1.5;
+    font-size: 14px;
+  }
+  .frame {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 32px 32px 80px;
+  }
+  .crumb {
+    margin-bottom: 24px;
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .crumb a {
+    color: var(--link);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--link);
+  }
+  .crumb a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .article {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .article-header {
+    padding: 22px 28px 18px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--paper);
+  }
+  .article-header .kicker {
+    color: var(--muted);
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .article-header .label {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-size: 28px;
+    font-weight: 500;
+    margin: 6px 0 8px;
+    letter-spacing: -0.005em;
+    line-height: 1.2;
+  }
+  .article-header .desc {
+    color: var(--ink);
+    font-size: 14.5px;
+    max-width: 780px;
+  }
+  .article-header .aliases {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .article-header .aliases span.alias {
+    background: #e8e0c8;
+    padding: 1px 7px;
+    border-radius: 2px;
+    margin-right: 4px;
+    font-style: normal;
+    display: inline-block;
+  }
+
+  .area {
+    padding: 22px 28px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .area:last-child { border-bottom: none; }
+  .area-title {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin: 0 0 14px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .area-empty {
+    color: var(--muted);
+    font-size: 12.5px;
+    font-style: italic;
+  }
+
+  .field {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 14px;
+    padding: 8px 0;
+    border-bottom: 1px dotted #eee;
+  }
+  .field:last-child { border-bottom: none; }
+  .field .key {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .field .key small {
+    display: block;
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 10.5px;
+    font-weight: 400;
+    color: #b8b8b8;
+    margin-top: 2px;
+  }
+  .field .val {
+    font-size: 13.5px;
+    color: var(--ink);
+    word-break: break-word;
+  }
+  .field .val .qlink {
+    color: var(--link);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--link);
+  }
+  .field .val .qlink:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  .field .val .external {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--accent);
+  }
+  .field .val .stringval {
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 12.5px;
+  }
+  .field .val .multival {
+    display: block;
+    padding: 2px 0;
+  }
+
+  /* Holdings summary */
+  .holdings-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-top: 6px;
+  }
+  .holding-card {
+    background: var(--soft);
+    border: 1px solid var(--rule);
+    padding: 12px 14px;
+    border-radius: 3px;
+  }
+  .holding-card .num {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .holding-card .kind {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .holdings-total {
+    margin-top: 10px;
+    font-size: 12.5px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* Export */
+  .export-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .btn {
+    padding: 7px 14px;
+    background: white;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 2px;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn:hover { background: var(--ink); color: white; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn:disabled:hover { background: white; color: var(--ink); }
+  .export-note {
+    color: var(--muted);
+    font-size: 12px;
+    font-style: italic;
+  }
+
+  /* Holdings list */
+  .holdings-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
+  }
+  .h-item {
+    background: var(--soft);
+    border: 1px solid var(--rule);
+    padding: 10px 12px;
+    border-radius: 3px;
+    text-decoration: none;
+    color: var(--ink);
+    display: block;
+    font-size: 12.5px;
+  }
+  .h-item:hover { border-color: var(--link); }
+  .h-item .h-qid {
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+  .h-item .h-label {
+    color: var(--ink);
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+  .h-item .h-type {
+    color: var(--muted);
+    font-size: 11px;
+    font-style: italic;
+  }
+  .holdings-overflow {
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 12px;
+    font-style: italic;
+  }
+
+  .status {
+    background: var(--soft);
+    border: 1px solid var(--rule);
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    color: var(--muted);
+    font-family: "SF Mono", "Menlo", monospace;
+  }
+  .status.error { background: #f5e0d0; color: #8b3a2a; border-color: #e0b8a0; }
+  .substatus {
+    color: var(--muted);
+    font-size: 12px;
+    font-style: italic;
+    margin-top: 6px;
+  }
+
+  .footer-meta {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule);
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+  .footer-meta a {
+    color: var(--link);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--link);
+  }
+
+  @media (max-width: 720px) {
+    .frame { padding: 18px 16px 60px; }
+    .article-header .label { font-size: 22px; }
+    .field { grid-template-columns: 1fr; gap: 4px; }
+    .field .key { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; }
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <div class="crumb"><a href="index.html">← Hunter House Archive</a></div>
+
+  <div id="status" class="status">Loading collection…</div>
+
+  <article class="article" id="article" style="display:none;">
+    <div class="article-header">
+      <div class="kicker" id="kicker">Source Collection</div>
+      <div class="label" id="label"></div>
+      <div class="desc" id="desc"></div>
+      <div class="aliases" id="aliases" style="display:none;"></div>
+    </div>
+
+    <section class="area" id="area-identity">
+      <h2 class="area-title">Identity area</h2>
+      <div id="identity-fields"></div>
+    </section>
+
+    <section class="area" id="area-context">
+      <h2 class="area-title">Context area</h2>
+      <div id="context-fields"></div>
+    </section>
+
+    <section class="area" id="area-content">
+      <h2 class="area-title">Content and structure</h2>
+      <div id="content-fields"></div>
+    </section>
+
+    <section class="area" id="area-conditions">
+      <h2 class="area-title">Conditions of access and use</h2>
+      <div id="conditions-fields"></div>
+    </section>
+
+    <section class="area">
+      <h2 class="area-title">Holdings summary</h2>
+      <div id="holdings-summary-host">
+        <div class="area-empty">Counting items in this collection…</div>
+      </div>
+    </section>
+
+    <section class="area">
+      <h2 class="area-title">Export</h2>
+      <div class="export-row">
+        <button class="btn" id="btn-csv" disabled>Download CSV</button>
+        <button class="btn" id="btn-json" disabled>Download JSON</button>
+        <span class="export-note" id="export-note">Waiting for holdings to load…</span>
+      </div>
+    </section>
+
+    <section class="area" id="area-holdings">
+      <h2 class="area-title">Holdings <span id="holdings-count-inline" style="font-family:'SF Mono',Menlo,monospace;font-size:11px;color:var(--muted);font-weight:normal;letter-spacing:0.04em;"></span></h2>
+      <div id="holdings-list-host">
+        <div class="area-empty">Loading items…</div>
+      </div>
+    </section>
+
+    <section class="area" id="area-other" style="display:none;">
+      <h2 class="area-title">Other statements</h2>
+      <div id="other-fields"></div>
+    </section>
+  </article>
+
+  <div class="footer-meta" id="footer-meta" style="display:none;"></div>
+
+</div>
+
+<script>
+  // ---------------------------------------------------------------------
+  // Configuration
+  // ---------------------------------------------------------------------
+  const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
+  const API_URL = WIKIBASE_URL + "/w/api.php";
+  const SPARQL_URL = WIKIBASE_URL + "/query/sparql";
+  const HOLDINGS_PREVIEW_LIMIT = 60;   // items shown inline; export covers all
+  const HOLDINGS_EXPORT_LIMIT = 5000;  // cap on the export query
+
+  // Map ISAD(G)-style finding-aid sections to property labels. As your
+  // Institution spec grows (extent, scope and content, conditions of
+  // access, etc.), add the labels here and they appear in the right area.
+  const AREAS = {
+    "identity-fields": [
+      "instance of",
+      "level of description",
+      "title",
+      "founded",
+      "dissolved",
+      "date of creation",
+      "start date",
+      "end date",
+      "extent",
+      "extent and medium",
+      "fonds reference",
+      "hh archive id",
+      "isil",
+    ],
+    "context-fields": [
+      "name of creator",
+      "creator",
+      "founder",
+      "director",
+      "custodian",
+      "parent collection",
+      "headquarters",
+      "location",
+      "biographical history",
+      "administrative history",
+      "immediate source of acquisition",
+      "acquisition date",
+    ],
+    "content-fields": [
+      "scope and content",
+      "accruals",
+      "system of arrangement",
+      "appraisal",
+    ],
+    "conditions-fields": [
+      "conditions governing access",
+      "conditions of access",
+      "conditions governing reproduction",
+      "rights",
+      "copyright status",
+      "copyright holder",
+      "language of material",
+      "language",
+      "finding aid url",
+      "accession policy url",
+      "official website",
+      "wikidata id",
+    ],
+  };
+
+  // Property labels we don't want to repeat in "Other statements" since they
+  // appear in the header (label/description/aliases handle themselves).
+  const SUPPRESS_FROM_OTHER = new Set();
+  Object.values(AREAS).flat().forEach(k => SUPPRESS_FROM_OTHER.add(k));
+
+  // ---------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------
+  function escapeHTML(s) {
+    if (s == null) return "";
+    return String(s).replace(/[&<>"']/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+  }
+  function setStatus(msg, cls) {
+    const el = document.getElementById("status");
+    el.textContent = msg;
+    el.className = "status" + (cls ? " " + cls : "");
+  }
+  function getQID() {
+    return new URLSearchParams(window.location.search).get("id");
+  }
+  function qidFromURI(uri) { return uri.split("/").pop(); }
+
+  async function fetchEntity(qid) {
+    const url = API_URL +
+      "?action=wbgetentities&ids=" + encodeURIComponent(qid) +
+      "&languages=en&format=json&origin=*";
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("API " + res.status);
+    const json = await res.json();
+    if (json.error) throw new Error(json.error.info || json.error.code);
+    return json.entities[qid];
+  }
+
+  async function fetchLabels(ids) {
+    if (ids.length === 0) return {};
+    const unique = [...new Set(ids)];
+    const labels = {};
+    for (let i = 0; i < unique.length; i += 50) {
+      const batch = unique.slice(i, i + 50);
+      const url = API_URL +
+        "?action=wbgetentities&ids=" + encodeURIComponent(batch.join("|")) +
+        "&languages=en&props=labels&format=json&origin=*";
+      try {
+        const res = await fetch(url);
+        if (!res.ok) continue;
+        const json = await res.json();
+        if (!json.entities) continue;
+        for (const id of batch) {
+          const e = json.entities[id];
+          if (e && e.labels && e.labels.en) labels[id] = e.labels.en.value;
+        }
+      } catch (e) { console.warn("label batch failed:", e); }
+    }
+    return labels;
+  }
+
+  async function sparql(query) {
+    const url = SPARQL_URL + "?query=" + encodeURIComponent(query) + "&format=json";
+    const res = await fetch(url, { headers: { Accept: "application/sparql-results+json" } });
+    if (!res.ok) throw new Error("SPARQL " + res.status);
+    const json = await res.json();
+    return json.results.bindings;
+  }
+
+  // ---------------------------------------------------------------------
+  // Formatting datavalues (mirrors item.html with the same idiom)
+  // ---------------------------------------------------------------------
+  function formatValue(dv, labels) {
+    if (!dv) return "";
+    const t = dv.type;
+    const v = dv.value;
+    if (t === "wikibase-entityid") {
+      const id = v.id;
+      const label = labels[id] || id;
+      if (id.startsWith("Q")) {
+        return `<a class="qlink" href="item.html?id=${encodeURIComponent(id)}">${escapeHTML(label)}</a>`;
+      }
+      return escapeHTML(label);
+    }
+    if (t === "string") {
+      if (/^https?:\/\//.test(v)) {
+        return `<a class="external" href="${escapeHTML(v)}" target="_blank" rel="noopener">${escapeHTML(v)}</a>`;
+      }
+      return `<span class="stringval">${escapeHTML(v)}</span>`;
+    }
+    if (t === "monolingualtext") {
+      return escapeHTML(v.text);
+    }
+    if (t === "time") {
+      const isoIsh = v.time.replace(/^\+/, "");
+      const [date] = isoIsh.split("T");
+      const [y, m, d] = date.split("-");
+      let display = y;
+      if (v.precision >= 10) display = `${y}-${m}`;
+      if (v.precision >= 11) display = `${y}-${m}-${d}`;
+      return `<span class="stringval">${escapeHTML(display)}</span>`;
+    }
+    if (t === "quantity") {
+      return `<span class="stringval">${escapeHTML(v.amount.replace(/^\+/, ""))}</span>`;
+    }
+    if (t === "globecoordinate") {
+      return `<span class="stringval">${v.latitude.toFixed(4)}, ${v.longitude.toFixed(4)}</span>`;
+    }
+    if (t === "url") {
+      return `<a class="external" href="${escapeHTML(v)}" target="_blank" rel="noopener">${escapeHTML(v)}</a>`;
+    }
+    return `<span class="stringval">${escapeHTML(JSON.stringify(v))}</span>`;
+  }
+
+  function formatClaim(claim, labels) {
+    if (!claim.mainsnak || claim.mainsnak.snaktype !== "value") return "";
+    return `<span class="multival">${formatValue(claim.mainsnak.datavalue, labels)}</span>`;
+  }
+
+  // ---------------------------------------------------------------------
+  // Render header & statement areas
+  // ---------------------------------------------------------------------
+  function renderHeader(entity, isCollection) {
+    const qid = entity.id;
+    const label = entity.labels && entity.labels.en ? entity.labels.en.value : qid;
+    const desc = entity.descriptions && entity.descriptions.en ? entity.descriptions.en.value : "";
+    const aliases = entity.aliases && entity.aliases.en ? entity.aliases.en.map(a => a.value) : [];
+
+    document.title = label + " — Hunter House Archive";
+    document.getElementById("kicker").textContent = (isCollection ? "Source Collection" : "Institution") + " · " + qid;
+    document.getElementById("label").textContent = label;
+    document.getElementById("desc").textContent = desc;
+    if (aliases.length > 0) {
+      const al = document.getElementById("aliases");
+      al.style.display = "";
+      al.innerHTML = `also known as: ` +
+        aliases.map(a => `<span class="alias">${escapeHTML(a)}</span>`).join("");
+    }
+  }
+
+  function renderAreas(claims, propLabels, valueLabels) {
+    // Group claims by which area their property label maps to.
+    const buckets = { "identity-fields": [], "context-fields": [], "content-fields": [], "conditions-fields": [], "other-fields": [] };
+
+    for (const pid in claims) {
+      const propLabel = (propLabels[pid] || pid).toLowerCase();
+      let placed = false;
+      for (const areaKey of Object.keys(AREAS)) {
+        if (AREAS[areaKey].includes(propLabel)) {
+          buckets[areaKey].push({ pid, propLabel: propLabels[pid] || pid, claims: claims[pid] });
+          placed = true;
+          break;
+        }
+      }
+      if (!placed && !SUPPRESS_FROM_OTHER.has(propLabel)) {
+        buckets["other-fields"].push({ pid, propLabel: propLabels[pid] || pid, claims: claims[pid] });
+      }
+    }
+
+    function renderInto(hostId, group) {
+      const host = document.getElementById(hostId);
+      if (group.length === 0) {
+        host.innerHTML = `<div class="area-empty">No statements in this area yet.</div>`;
+        return;
+      }
+      host.innerHTML = group.map(({ pid, propLabel, claims }) => `
+        <div class="field">
+          <div class="key">${escapeHTML(propLabel)}<small>${escapeHTML(pid)}</small></div>
+          <div class="val">${claims.map(c => formatClaim(c, valueLabels)).join("")}</div>
+        </div>
+      `).join("");
+    }
+
+    renderInto("identity-fields", buckets["identity-fields"]);
+    renderInto("context-fields", buckets["context-fields"]);
+    renderInto("content-fields", buckets["content-fields"]);
+    renderInto("conditions-fields", buckets["conditions-fields"]);
+
+    if (buckets["other-fields"].length > 0) {
+      document.getElementById("area-other").style.display = "";
+      renderInto("other-fields", buckets["other-fields"]);
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // Holdings: find items that point at this collection.
+  //
+  // We try the "named" path first (items linked via a property labeled
+  // "source collection"). If that returns nothing, we fall back to "any
+  // incoming property" — useful while the property vocabulary is still
+  // being created and labels haven't stabilized.
+  // ---------------------------------------------------------------------
+  async function fetchHoldings(qid) {
+    const entityURI = WIKIBASE_URL + "/entity/" + qid;
+
+    // Phase 1: items linked via a "source collection"-labeled property
+    const namedQ = `
+      SELECT DISTINCT ?item ?itemLabel ?type ?typeLabel WHERE {
+        ?prop <http://wikiba.se/ontology#directClaim> ?direct .
+        ?prop rdfs:label "source collection"@en .
+        ?item ?direct <${entityURI}> .
+        OPTIONAL { ?item rdfs:label ?itemLabel . FILTER(LANG(?itemLabel) = "en") }
+        OPTIONAL {
+          ?typeProp <http://wikiba.se/ontology#directClaim> ?typeDirect .
+          ?typeProp rdfs:label "instance of"@en .
+          ?item ?typeDirect ?type .
+          OPTIONAL { ?type rdfs:label ?typeLabel . FILTER(LANG(?typeLabel) = "en") }
+        }
+      }
+      LIMIT ${HOLDINGS_EXPORT_LIMIT}
+    `;
+
+    let rows = [];
+    try {
+      rows = await sparql(namedQ);
+    } catch (e) {
+      console.warn("named-property holdings query failed:", e);
+    }
+
+    if (rows.length > 0) return { rows, mode: "named" };
+
+    // Phase 2: any incoming reference
+    const anyQ = `
+      SELECT DISTINCT ?item ?itemLabel ?type ?typeLabel WHERE {
+        ?item ?p <${entityURI}> .
+        ?prop <http://wikiba.se/ontology#directClaim> ?p .
+        OPTIONAL { ?item rdfs:label ?itemLabel . FILTER(LANG(?itemLabel) = "en") }
+        OPTIONAL {
+          ?typeProp <http://wikiba.se/ontology#directClaim> ?typeDirect .
+          ?typeProp rdfs:label "instance of"@en .
+          ?item ?typeDirect ?type .
+          OPTIONAL { ?type rdfs:label ?typeLabel . FILTER(LANG(?typeLabel) = "en") }
+        }
+      }
+      LIMIT ${HOLDINGS_EXPORT_LIMIT}
+    `;
+    try {
+      rows = await sparql(anyQ);
+    } catch (e) {
+      console.warn("any-incoming holdings query failed:", e);
+      rows = [];
+    }
+    return { rows, mode: "any" };
+  }
+
+  function renderHoldings(rows, mode) {
+    // De-dupe by item qid; keep first type per item
+    const map = new Map();
+    rows.forEach(r => {
+      const qid = qidFromURI(r.item.value);
+      if (!map.has(qid)) {
+        map.set(qid, {
+          qid,
+          label: r.itemLabel ? r.itemLabel.value : null,
+          typeQID: r.type ? qidFromURI(r.type.value) : null,
+          typeLabel: r.typeLabel ? r.typeLabel.value : null,
+        });
+      }
+    });
+    const items = [...map.values()];
+
+    // Summary by type
+    const byType = {};
+    items.forEach(it => {
+      const key = it.typeLabel || it.typeQID || "Untyped";
+      byType[key] = (byType[key] || 0) + 1;
+    });
+
+    const summaryHost = document.getElementById("holdings-summary-host");
+    if (items.length === 0) {
+      summaryHost.innerHTML = `<div class="area-empty">No items currently point at this collection.</div>`;
+    } else {
+      const typeKeys = Object.keys(byType).sort((a, b) => byType[b] - byType[a]);
+      summaryHost.innerHTML = `
+        <div class="holdings-summary">
+          ${typeKeys.map(k => `
+            <div class="holding-card">
+              <div class="num">${byType[k]}</div>
+              <div class="kind">${escapeHTML(k)}</div>
+            </div>
+          `).join("")}
+        </div>
+        <div class="holdings-total">
+          ${items.length} ${items.length === 1 ? "item" : "items"} total
+          ${mode === "any" ? ' — counted via any incoming reference (no "source collection" property defined yet)' : ' — items with explicit "source collection" links'}
+        </div>
+      `;
+    }
+
+    // Inline list (capped)
+    const listHost = document.getElementById("holdings-list-host");
+    const inlineCount = document.getElementById("holdings-count-inline");
+    inlineCount.textContent = items.length > 0 ? `(${items.length} total)` : "";
+
+    if (items.length === 0) {
+      listHost.innerHTML = `<div class="area-empty">Nothing to list.</div>`;
+    } else {
+      const preview = items.slice(0, HOLDINGS_PREVIEW_LIMIT);
+      listHost.innerHTML = `
+        <div class="holdings-list">
+          ${preview.map(it => `
+            <a class="h-item" href="item.html?id=${encodeURIComponent(it.qid)}">
+              <div class="h-qid">${escapeHTML(it.qid)}</div>
+              <div class="h-label">${escapeHTML(it.label || it.qid)}</div>
+              <div class="h-type">${escapeHTML(it.typeLabel || "untyped")}</div>
+            </a>
+          `).join("")}
+        </div>
+        ${items.length > HOLDINGS_PREVIEW_LIMIT
+          ? `<div class="holdings-overflow">Showing ${HOLDINGS_PREVIEW_LIMIT} of ${items.length}. Use the CSV/JSON export above to retrieve the full list.</div>`
+          : ""}
+      `;
+    }
+
+    // Wire up export
+    if (items.length > 0) {
+      document.getElementById("btn-csv").disabled = false;
+      document.getElementById("btn-json").disabled = false;
+      document.getElementById("export-note").textContent = `${items.length} items ready to export.`;
+      document.getElementById("btn-csv").onclick = () => exportCSV(items);
+      document.getElementById("btn-json").onclick = () => exportJSON(items);
+    } else {
+      document.getElementById("export-note").textContent = "No items to export.";
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // Export
+  // ---------------------------------------------------------------------
+  function downloadBlob(content, filename, mime) {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+  function csvEscape(s) {
+    if (s == null) return "";
+    const str = String(s);
+    if (/[",\n\r]/.test(str)) return `"${str.replace(/"/g, '""')}"`;
+    return str;
+  }
+  function collectionSlug() {
+    const label = document.getElementById("label").textContent || "collection";
+    return label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+  function exportCSV(items) {
+    const headers = ["qid", "label", "type_qid", "type_label", "wikibase_url"];
+    const rows = items.map(it => [
+      it.qid,
+      it.label || "",
+      it.typeQID || "",
+      it.typeLabel || "",
+      WIKIBASE_URL + "/wiki/Item:" + it.qid,
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(csvEscape).join(",")).join("\n");
+    downloadBlob(csv, `${collectionSlug()}-holdings.csv`, "text/csv;charset=utf-8");
+  }
+  function exportJSON(items) {
+    const payload = {
+      collection: {
+        qid: getQID(),
+        label: document.getElementById("label").textContent,
+        wikibase_url: WIKIBASE_URL + "/wiki/Item:" + getQID(),
+        exported_at: new Date().toISOString(),
+      },
+      holdings: items.map(it => ({
+        qid: it.qid,
+        label: it.label,
+        type_qid: it.typeQID,
+        type_label: it.typeLabel,
+        wikibase_url: WIKIBASE_URL + "/wiki/Item:" + it.qid,
+      })),
+    };
+    downloadBlob(JSON.stringify(payload, null, 2), `${collectionSlug()}-holdings.json`, "application/json");
+  }
+
+  // ---------------------------------------------------------------------
+  // Main
+  // ---------------------------------------------------------------------
+  (async function main() {
+    const qid = getQID();
+    if (!qid) {
+      setStatus("No collection ID in URL. Open with ?id=Q1.", "error");
+      return;
+    }
+    try {
+      const entity = await fetchEntity(qid);
+      if (!entity || entity.missing !== undefined) {
+        setStatus("Collection " + qid + " not found.", "error");
+        return;
+      }
+
+      // Verify this is plausibly an archival collection by inspecting
+      // `instance of` value labels — but render anyway if it isn't.
+      // (Useful for previewing the page on any Institution Item.)
+
+      // Collect IDs to resolve
+      const propIDs = new Set();
+      const valueQIDs = new Set();
+      const claims = entity.claims || {};
+      for (const pid in claims) {
+        propIDs.add(pid);
+        claims[pid].forEach(c => {
+          if (c.mainsnak && c.mainsnak.datavalue && c.mainsnak.datavalue.type === "wikibase-entityid") {
+            valueQIDs.add(c.mainsnak.datavalue.value.id);
+          }
+        });
+      }
+      const labels = await fetchLabels([...propIDs, ...valueQIDs]);
+      const propLabels = {}; propIDs.forEach(p => propLabels[p] = labels[p] || p);
+      const valueLabels = {}; valueQIDs.forEach(q => valueLabels[q] = labels[q] || q);
+
+      // Determine if this looks like an archival collection (heuristic on instance-of label)
+      let isCollection = false;
+      for (const pid in claims) {
+        if ((propLabels[pid] || "").toLowerCase() === "instance of") {
+          claims[pid].forEach(c => {
+            if (c.mainsnak && c.mainsnak.datavalue && c.mainsnak.datavalue.type === "wikibase-entityid") {
+              const lbl = (valueLabels[c.mainsnak.datavalue.value.id] || "").toLowerCase();
+              if (lbl === "archive" || lbl === "archival collection") isCollection = true;
+            }
+          });
+        }
+      }
+
+      renderHeader(entity, isCollection);
+      renderAreas(claims, propLabels, valueLabels);
+
+      // Footer
+      const fm = document.getElementById("footer-meta");
+      fm.style.display = "";
+      fm.innerHTML = `View on Wikibase: <a href="${WIKIBASE_URL}/wiki/Item:${qid}" target="_blank" rel="noopener">${WIKIBASE_URL}/wiki/Item:${qid}</a> · <a href="item.html?id=${encodeURIComponent(qid)}">View raw statements →</a>`;
+
+      // Reveal article, then load holdings asynchronously
+      document.getElementById("status").style.display = "none";
+      document.getElementById("article").style.display = "";
+
+      const { rows, mode } = await fetchHoldings(qid);
+      renderHoldings(rows, mode);
+
+    } catch (err) {
+      console.error(err);
+      setStatus("Couldn't load collection: " + err.message, "error");
+    }
+  })();
+</script>
+
+</body>
+</html>

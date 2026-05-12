@@ -519,12 +519,15 @@
     container.appendChild(note);
   }
 
-  function renderFooter(qid) {
+  function renderFooter(qid, isCollection) {
     const fm = document.getElementById("footer-meta");
     fm.style.display = "";
+    const findingAidLink = isCollection
+      ? ` · <a href="collection.html?id=${encodeURIComponent(qid)}">View as finding aid →</a>`
+      : "";
     fm.innerHTML = `
       View on Wikibase:
-      <a href="${WIKIBASE_URL}/wiki/Item:${qid}" target="_blank" rel="noopener">${WIKIBASE_URL}/wiki/Item:${qid}</a>
+      <a href="${WIKIBASE_URL}/wiki/Item:${qid}" target="_blank" rel="noopener">${WIKIBASE_URL}/wiki/Item:${qid}</a>${findingAidLink}
     `;
   }
 
@@ -577,12 +580,25 @@
       propIDs.forEach(pid => propLabels[pid] = labels[pid] || pid);
       valueQIDs.forEach(qid => valueLabels[qid] = labels[qid] || qid);
 
+      // Detect archival-collection type to surface the finding-aid link.
+      const COLLECTION_TYPE_LABELS = new Set(["archive", "archival collection"]);
+      let isCollection = false;
+      for (const pid in claims) {
+        if ((propLabels[pid] || "").toLowerCase() !== "instance of") continue;
+        claims[pid].forEach(c => {
+          if (c.mainsnak && c.mainsnak.datavalue && c.mainsnak.datavalue.type === "wikibase-entityid") {
+            const lbl = (valueLabels[c.mainsnak.datavalue.value.id] || "").toLowerCase();
+            if (COLLECTION_TYPE_LABELS.has(lbl)) isCollection = true;
+          }
+        });
+      }
+
       renderStatements(claims, propLabels, valueLabels);
 
       // Reverse references in parallel after the main render
       document.getElementById("status").style.display = "none";
       document.getElementById("item").style.display = "";
-      renderFooter(qid);
+      renderFooter(qid, isCollection);
 
       const refs = await fetchReverseRefs(qid);
       renderReverse(refs, qid);
