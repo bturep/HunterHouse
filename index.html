@@ -265,6 +265,9 @@
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL = WIKIBASE_URL + "/query/sparql";
   const ITEM_PAGE = "item.html";
+  const COLLECTION_PAGE = "collection.html";
+  // Type labels that should link to the finding-aid view, not the raw item view.
+  const COLLECTION_TYPES = new Set(["archive", "archival collection"]);
 
   // ---------------------------------------------------------------------
   // SPARQL query: every Item with its label, description, and the labels
@@ -380,15 +383,22 @@
       section.className = "type-section";
       section.dataset.type = typeKey;
 
-      const cards = items.map(it => `
-        <a class="card" href="${ITEM_PAGE}?id=${encodeURIComponent(it.qid)}">
-          <div class="qid">${escapeHTML(it.qid)}</div>
+      const cards = items.map(it => {
+        const isCollection = COLLECTION_TYPES.has(typeKey.toLowerCase());
+        const href = (isCollection ? COLLECTION_PAGE : ITEM_PAGE) + "?id=" + encodeURIComponent(it.qid);
+        const badge = isCollection
+          ? `<span style="float:right;font-family:'SF Mono',Menlo,monospace;font-size:10px;color:var(--accent);letter-spacing:0.04em;">FINDING AID →</span>`
+          : "";
+        return `
+        <a class="card" href="${href}">
+          <div class="qid">${escapeHTML(it.qid)}${badge}</div>
           <div class="label">${escapeHTML(it.label || it.qid)}</div>
           ${it.description
             ? `<div class="desc">${escapeHTML(it.description)}</div>`
             : `<div class="nodesc">no description</div>`}
         </a>
-      `).join("");
+      `;
+      }).join("");
 
       section.innerHTML = `
         <h2>${escapeHTML(typeKey)}</h2>
