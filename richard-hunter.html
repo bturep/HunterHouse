@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Richard Hunter — Hunter House Foundation</title>
+<style>
+  :root {
+    --ink: #202020;
+    --muted: #6a6a6a;
+    --rule: #e2e2e2;
+    --soft: #f7f5f0;
+    --link: #2a4a8b;
+    --accent: #8b3a2a;
+    --paper: #f4f0e6;
+    --bg: #fafaf7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    margin: 0;
+    line-height: 1.5;
+    font-size: 14px;
+  }
+  .site-header {
+    border-bottom: 1px solid var(--rule);
+    background: white;
+    padding: 18px 0 14px;
+  }
+  .site-frame {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .site-brand {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .site-brand a { color: var(--ink); text-decoration: none; }
+  .site-brand .sub { color: var(--muted); font-weight: 400; }
+  .site-nav { display: flex; gap: 22px; flex-wrap: wrap; }
+  .site-nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    letter-spacing: 0.02em;
+    padding-bottom: 4px;
+    border-bottom: 1px solid transparent;
+  }
+  .site-nav a:hover { color: var(--ink); }
+  .site-nav a.current { color: var(--ink); border-bottom-color: var(--accent); }
+
+  .frame {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 32px 80px;
+  }
+  .page-title {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-size: 36px;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+    margin: 0 0 4px;
+  }
+  .page-dates {
+    font-family: "SF Mono", "Menlo", monospace;
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    margin: 0 0 32px;
+  }
+  h2 {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    margin: 44px 0 14px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--rule);
+  }
+  p {
+    font-size: 15px;
+    line-height: 1.7;
+    margin: 0 0 16px;
+    color: var(--ink);
+  }
+  a { color: var(--link); text-decoration: none; border-bottom: 1px dotted var(--link); }
+  a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  em { font-style: italic; }
+  strong { font-weight: 600; }
+
+  .exhibit-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .exhibit-list li {
+    padding: 12px 0;
+    border-bottom: 1px dotted #ddd;
+    font-size: 14.5px;
+  }
+  .exhibit-list li:last-child { border-bottom: none; }
+  .exhibit-list .year {
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+    display: inline-block;
+    width: 60px;
+  }
+  .exhibit-list .title {
+    font-style: italic;
+  }
+
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 6px 18px;
+    margin: 14px 0 8px;
+  }
+  .project-grid li {
+    list-style: none;
+    font-size: 13.5px;
+    color: var(--ink);
+    padding: 4px 0;
+  }
+  .project-grid li .place {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .crumb {
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-bottom: 18px;
+    letter-spacing: 0.04em;
+  }
+  .crumb a { color: var(--link); border-bottom: 1px dotted var(--link); }
+
+  .attribution {
+    background: var(--soft);
+    border-left: 3px solid var(--rule);
+    padding: 12px 18px;
+    margin: 28px 0;
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  footer.colophon {
+    margin-top: 80px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+    font-size: 12px;
+    color: var(--muted);
+    font-family: "SF Mono", "Menlo", monospace;
+    line-height: 1.7;
+  }
+  @media (max-width: 720px) {
+    .site-frame { padding: 0 18px; }
+    .frame { padding: 32px 18px 60px; }
+    .page-title { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-frame">
+    <div class="site-brand"><a href="index.html">Hunter House <span class="sub">Foundation</span></a></div>
+    <nav class="site-nav">
+      <a href="the-house.html">The House</a>
+      <a href="archive.html">Archive</a>
+      <a href="browse.html">Browse</a>
+      <a href="richard-hunter.html" class="current">Richard Hunter</a>
+      <a href="about.html">About</a>
+    </nav>
+  </div>
+</header>
+
+<div class="frame">
+
+  <div class="crumb"><a href="index.html">Home</a> · Richard Hunter</div>
+
+  <h1 class="page-title">Richard Morrow Hunter</h1>
+  <div class="page-dates">PHOENIX, ARIZONA, 1930 — VICTORIA, BRITISH COLUMBIA, 14 JANUARY 2023</div>
+
+  <p>Richard Morrow Hunter was born and raised in Phoenix, Arizona. He studied architecture at the University of Colorado and the School of Architecture at the University of Oklahoma. After graduating from the University of Oklahoma in 1958, Hunter established his practice initially in California and Alaska before he moved to Victoria, British Columbia, in 1968. He married Frances Mead in 1963 in Kyoto, Japan.</p>
+
+  <p>His work is influenced by the American organic school, notably Frank Lloyd Wright and Bruce Goff, and the drawings of German architect Eric Mendelsohn.</p>
+
+  <h2>Built work</h2>
+
+  <p>Hunter's major projects were largely residences located in Victoria and the Pacific Coast area:</p>
+
+  <ul class="project-grid">
+    <li>Cook Residence</li>
+    <li>House for Jean-Louis Denux</li>
+    <li>House for Margaret Haines</li>
+    <li>Hunter Residence <span class="place">— his own home, begun 1970</span></li>
+    <li>House Addition for Jim &amp; Phillippa Kerr</li>
+    <li>Killam Residence</li>
+    <li>Martin Residence</li>
+    <li>Pumple House</li>
+    <li>Rankin Residence</li>
+    <li>The Rose Residence</li>
+    <li>Garden for Mr. &amp; Mrs. Ken Sebryk</li>
+    <li>Sievert Residence</li>
+  </ul>
+
+  <p>Projects outside the Victoria area include the Intermediate Care Home in Terrace, BC; the Mt. Baldy Zen Centre and Bathhouse in California; House for Deborah Pomeroy and the Rabinowitz Residence, both in Fairbanks, Alaska; House for Kyozan Joshu Sasaki in California; and House and Garden for Motozo and Haruko Torii in Kyoto, Japan.</p>
+
+  <h2>Exhibitions and publications</h2>
+
+  <ul class="exhibit-list">
+    <li>
+      <span class="year">2024</span>
+      <span class="title">From the Ground, Into the Light: Organic Architecture of the Islands, 1950–2000</span>
+      — Wentworth Villa Architecture Museum, Victoria
+    </li>
+    <li>
+      <span class="year">2023</span>
+      <span class="title">Renegades: Bruce Goff and the American School of Architecture</span>
+      — University of Oklahoma Press
+    </li>
+    <li>
+      <span class="year">1995</span>
+      <span class="title">The Architect's Dwelling: A Self-Portrait</span>
+      — Maison d'Etre, Montreal
+    </li>
+  </ul>
+
+  <h2>The Hunter Residence</h2>
+
+  <p>The Hunter Residence at 203 Goward Road, Prospect Lake, is the most extensively documented of Hunter's works. He began designing for the property in 1969 and continued to revise it for more than fifty years. The full archive of drawings, photographs, and materials documenting the house is held by the Hunter House Foundation and the Canadian Architectural Archives.</p>
+
+  <p><a href="the-house.html">Read more about the house →</a><br>
+  <a href="browse.html">Browse the collection →</a></p>
+
+  <div class="attribution">
+    Biographical note adapted from the Richard Hunter fonds (F0076), <a href="https://searcharchives.ucalgary.ca/richard-hunter" target="_blank" rel="noopener">Canadian Architectural Archives, University of Calgary</a>.
+  </div>
+
+  <footer class="colophon">
+    Hunter House Foundation · Brandon Poole, project lead
+  </footer>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The House — Hunter House Foundation</title>
+<style>
+  :root {
+    --ink: #202020;
+    --muted: #6a6a6a;
+    --rule: #e2e2e2;
+    --soft: #f7f5f0;
+    --link: #2a4a8b;
+    --accent: #8b3a2a;
+    --paper: #f4f0e6;
+    --bg: #fafaf7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    margin: 0;
+    line-height: 1.5;
+    font-size: 14px;
+  }
+
+  /* Shared site header */
+  .site-header {
+    border-bottom: 1px solid var(--rule);
+    background: white;
+    padding: 18px 0 14px;
+  }
+  .site-frame {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .site-brand {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .site-brand a { color: var(--ink); text-decoration: none; }
+  .site-brand .sub { color: var(--muted); font-weight: 400; }
+  .site-nav { display: flex; gap: 22px; flex-wrap: wrap; }
+  .site-nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    letter-spacing: 0.02em;
+    padding-bottom: 4px;
+    border-bottom: 1px solid transparent;
+  }
+  .site-nav a:hover { color: var(--ink); }
+  .site-nav a.current { color: var(--ink); border-bottom-color: var(--accent); }
+
+  .frame {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 32px 80px;
+  }
+
+  /* Reading-page typography */
+  .page-title {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-size: 36px;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+    margin: 0 0 8px;
+  }
+  .page-sub {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 16px;
+    margin: 0 0 36px;
+  }
+  h2 {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    margin: 44px 0 14px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--rule);
+  }
+  p {
+    font-size: 15px;
+    line-height: 1.7;
+    margin: 0 0 16px;
+    color: var(--ink);
+  }
+  p.lede {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--ink);
+    margin-bottom: 28px;
+  }
+  a { color: var(--link); text-decoration: none; border-bottom: 1px dotted var(--link); }
+  a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  em { font-style: italic; }
+  strong { font-weight: 600; }
+
+  /* Pull quote */
+  .pullquote {
+    border-left: 3px solid var(--accent);
+    padding: 8px 24px;
+    margin: 28px 0;
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-style: italic;
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+
+  /* Start-here pathway list */
+  .pathway-list {
+    background: var(--soft);
+    border: 1px solid var(--rule);
+    padding: 22px 26px 24px;
+    margin: 28px 0 16px;
+    border-radius: 3px;
+  }
+  .pathway-list h3 {
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    margin: 0 0 16px;
+    font-weight: 600;
+  }
+  .pathway-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .pathway-list li {
+    padding: 10px 0;
+    border-bottom: 1px dotted #ddd;
+    font-size: 14px;
+  }
+  .pathway-list li:last-child { border-bottom: none; }
+  .pathway-list li .label {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-size: 16px;
+    color: var(--ink);
+    display: block;
+    margin-bottom: 3px;
+  }
+  .pathway-list li .why {
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .pathway-list .pending {
+    font-style: italic;
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  /* Crumb */
+  .crumb {
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-bottom: 18px;
+    letter-spacing: 0.04em;
+  }
+  .crumb a {
+    color: var(--link);
+    border-bottom: 1px dotted var(--link);
+  }
+
+  footer.colophon {
+    margin-top: 80px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+    font-size: 12px;
+    color: var(--muted);
+    font-family: "SF Mono", "Menlo", monospace;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 720px) {
+    .site-frame { padding: 0 18px; }
+    .frame { padding: 32px 18px 60px; }
+    .page-title { font-size: 28px; }
+    .pullquote { padding: 8px 16px; font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-frame">
+    <div class="site-brand"><a href="index.html">Hunter House <span class="sub">Foundation</span></a></div>
+    <nav class="site-nav">
+      <a href="the-house.html" class="current">The House</a>
+      <a href="archive.html">Archive</a>
+      <a href="browse.html">Browse</a>
+      <a href="richard-hunter.html">Richard Hunter</a>
+      <a href="about.html">About</a>
+    </nav>
+  </div>
+</header>
+
+<div class="frame">
+
+  <div class="crumb"><a href="index.html">Home</a> · The House</div>
+
+  <h1 class="page-title">The House</h1>
+  <div class="page-sub">203 Goward Road · Prospect Lake · Saanich, BC</div>
+
+  <p class="lede">
+    The Hunter Residence was never finished in any conventional sense. Richard Hunter began designing for the Prospect Lake property in 1969, following the design and construction of the neighbouring Rankin House at 187 Goward Road, and was still drawing additions in 2020, three years before his death at ninety-two. The archive spans that entire period.
+  </p>
+
+  <p>This is the archive's central quality. Most architectural collections document what was designed and built. This one documents the ongoing negotiation between an architect and his own home across five decades: the schemes that were abandoned, the permits that took years to pursue, the rooms that were built and then removed, the ideas that lay dormant for a decade before returning in built form. The drawings are not a finished story. They are a working record.</p>
+
+  <p>The house itself reflects this. Two architecturally distinct wings, built a generation apart, embody different phases of Hunter's design thinking. A dining room conceived through eight iterative schemes over more than a decade finally reached permit in 2018. A speculative Zen dojo drawn in 1977 found its descendant in a Japanese garden built forty years later. The archive makes these arcs legible.</p>
+
+  <h2>The drawing record</h2>
+
+  <p>The Hunter House Collection drawings — 110 items — are the working core of the archive. They represent Richard Hunter's personal file: the drawings he made, kept, and annotated across four decades of work on his own property. They are not a polished set. They include speculative sketches alongside formal permit submissions, undated schemes alongside precisely dated construction documents, drawings by Richard alongside engineering drawings commissioned from Harold Engineering and Brown and Grant Engineering.</p>
+
+  <p>The collection organizes naturally into project sets — coherent groups of drawings that belong to a single design or construction phase. These sets reveal the house's development as a series of distinct episodes rather than a continuous process: the 1990 West Wing addition permit set; the eight dining room schemes; the Entry Garden arc; the 2018 East Wing permit, submitted, revised, and resubmitted within six weeks.</p>
+
+  <p>The relationship between the Hunter House Collection and the Canadian Architectural Archives materials is significant. Richard donated his original build documentation to the CAA — the 1970–74 Scheme 1A drawings, the early photographs. What he kept were the working files for everything that came after. The two collections are complementary halves of a single record, currently held separately and described independently, but designed to be read together.</p>
+
+  <h2>Design arcs</h2>
+
+  <p>Several long threads run through the drawing record, each crossing multiple project sets and years.</p>
+
+  <p><strong>The East Wing.</strong> The most sustained arc. A 2008 drawing labelled "Hunter Haus Phase 2" appears to mark the conceptual beginning of a planned expansion to the east side of the house. What follows is twelve years of iterative work: eight undated dining room schemes; a 2010 design drawing; a 2018 permit submission rejected and resubmitted; engineering drawings for custom-built windows completed in 2019; construction refinements extending into 2020. The East Wing's dining room, sunroom, bathroom, and skywalk are programmatically and spatially interrelated — a change to one reshapes the others — and the bluff condition on which they sit adds structural and technical complexity that helps explain the length of the design process. Budget constraints following the major West Wing buildout of the 1990s likely contributed as well.</p>
+
+  <p><strong>The West Wing.</strong> Different in character — concentrated, vertical, resolved more quickly. The 1990 permit set for the Hunter Haus Addition covers four floor levels and a tower, and the subsequent construction drawings through 1996 represent a largely coherent build sequence. The West Wing's architectural language — multi-level, stacked, tower-focused — is distinct from the horizontal, room-by-room logic of the East Wing work that follows it.</p>
+
+  <p><strong>The Entry Garden and Kotatsu.</strong> Runs from 2005 through 2015, with a nine-year gap between an initial design and a return to the project that culminated in construction. The Kotatsu — a Japanese low table traditionally positioned over a heat source — is the terminal object in a sequence that begins with a land survey, passes through multiple landscape design drawings, and ends with an irrigation plan.</p>
+
+  <div class="pullquote">
+    "The ideas on these pages are efforts at reaffirming values of personality, feeling, and owner participation in the construction of a more diverse and human habitat." — Richard Hunter
+  </div>
+
+  <h2>Where to begin in the collection</h2>
+
+  <div class="pathway-list">
+    <h3>Curated entry points</h3>
+    <div class="pending">
+      A curated set of items will be linked here as the archive is published. Planned entry documents include:
+    </div>
+    <ul>
+      <li>
+        <span class="label">Speculative pre-design drawings for the 1974 East Wing</span>
+        <span class="why">The earliest record of an idea that would take another twelve years to reach permit.</span>
+      </li>
+      <li>
+        <span class="label">The mid-1980s coloured document</span>
+        <span class="why">A drawing that acts as a legend for the 1990s West Wing addition.</span>
+      </li>
+      <li>
+        <span class="label">Key letters held in the archive</span>
+        <span class="why">Correspondence that frames the design decisions across decades.</span>
+      </li>
+      <li>
+        <span class="label">The Fulker Collection photographs</span>
+        <span class="why">Professional documentation of the original 1974 structure, before any of the subsequent additions.</span>
+      </li>
+      <li>
+        <span class="label">Gary Snyder letters</span>
+        <span class="why">To be added when ingested into the archive.</span>
+      </li>
+    </ul>
+  </div>
+
+  <p style="margin-top:32px;"><a href="browse.html">Browse the full collection →</a></p>
+
+  <footer class="colophon">
+    Hunter House Foundation · Brandon Poole, project lead<br>
+    Adapted from the Hunter House Archive Overview, May 2026.
+  </footer>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Browse — Hunter House Foundation</title>
+<style>
+  :root {
+    --ink: #202020;
+    --muted: #6a6a6a;
+    --rule: #e2e2e2;
+    --soft: #f7f5f0;
+    --link: #2a4a8b;
+    --accent: #8b3a2a;
+    --note: #8a7a3a;
+    --paper: #f4f0e6;
+    --bg: #fafaf7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    margin: 0;
+    line-height: 1.5;
+    font-size: 14px;
+  }
+  .frame {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 36px 32px 80px;
+  }
+
+  /* Shared site header */
+  .site-header {
+    border-bottom: 1px solid var(--rule);
+    background: white;
+    padding: 18px 0 14px;
+  }
+  .site-frame {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .site-brand {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .site-brand a { color: var(--ink); text-decoration: none; }
+  .site-brand .sub { color: var(--muted); font-weight: 400; }
+  .site-nav { display: flex; gap: 22px; flex-wrap: wrap; }
+  .site-nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    letter-spacing: 0.02em;
+    padding-bottom: 4px;
+    border-bottom: 1px solid transparent;
+  }
+  .site-nav a:hover { color: var(--ink); }
+  .site-nav a.current { color: var(--ink); border-bottom-color: var(--accent); }
+
+  .page-head {
+    margin-bottom: 28px;
+  }
+  .page-head h1 {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-size: 28px;
+    font-weight: 500;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+  .page-head p {
+    margin: 4px 0 0;
+    color: var(--muted);
+    max-width: 720px;
+    font-size: 14.5px;
+  }
+  .page-head .meta {
+    margin-top: 14px;
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+  .page-head .meta a {
+    color: var(--link);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--link);
+  }
+  .page-head .meta a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .status {
+    background: var(--soft);
+    border: 1px solid var(--rule);
+    padding: 14px 18px;
+    margin-bottom: 28px;
+    font-size: 13px;
+    color: var(--muted);
+    font-family: "SF Mono", "Menlo", monospace;
+  }
+  .status.error { background: #f5e0d0; color: #8b3a2a; border-color: #e0b8a0; }
+  .status.ok { color: var(--ink); }
+  .status .count { color: var(--ink); font-weight: 600; }
+
+  .controls {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .controls input[type="search"] {
+    flex: 1;
+    min-width: 240px;
+    padding: 8px 12px;
+    border: 1px solid var(--rule);
+    background: white;
+    font-family: inherit;
+    font-size: 13.5px;
+    color: var(--ink);
+    border-radius: 2px;
+  }
+  .controls input[type="search"]:focus {
+    outline: none;
+    border-color: var(--link);
+  }
+  .controls .filter {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .controls .filter button {
+    padding: 5px 10px;
+    border: 1px solid var(--rule);
+    background: white;
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 2px;
+    letter-spacing: 0.02em;
+  }
+  .controls .filter button:hover { color: var(--ink); }
+  .controls .filter button.active {
+    background: var(--ink);
+    color: white;
+    border-color: var(--ink);
+  }
+
+  .type-section {
+    margin-bottom: 36px;
+  }
+  .type-section h2 {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0 0 4px;
+    color: var(--ink);
+  }
+  .type-section .type-meta {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 14px;
+    font-family: "SF Mono", "Menlo", monospace;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .card {
+    background: white;
+    border: 1px solid var(--rule);
+    padding: 14px 16px 16px;
+    border-radius: 3px;
+    text-decoration: none;
+    color: var(--ink);
+    display: block;
+    transition: border-color 0.12s, box-shadow 0.12s;
+  }
+  .card:hover {
+    border-color: var(--link);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card .qid {
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+  }
+  .card .label {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0 0 4px;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+    line-height: 1.25;
+  }
+  .card .desc {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.45;
+    font-style: italic;
+  }
+  .card .nodesc {
+    font-size: 12.5px;
+    color: #b8b8b8;
+    font-style: italic;
+  }
+
+  .empty {
+    padding: 60px 24px;
+    text-align: center;
+    color: var(--muted);
+    background: var(--soft);
+    border: 1px dashed var(--rule);
+  }
+  .empty .big {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-size: 22px;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .empty .small {
+    font-size: 13px;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  footer.colophon {
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+    font-size: 12px;
+    color: var(--muted);
+    font-family: "SF Mono", "Menlo", monospace;
+    line-height: 1.7;
+  }
+  footer.colophon a {
+    color: var(--link);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--link);
+  }
+  footer.colophon a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  @media (max-width: 600px) {
+    .frame { padding: 24px 18px 60px; }
+    header.masthead h1 { font-size: 24px; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-frame">
+    <div class="site-brand"><a href="index.html">Hunter House <span class="sub">Foundation</span></a></div>
+    <nav class="site-nav">
+      <a href="the-house.html">The House</a>
+      <a href="archive.html">Archive</a>
+      <a href="browse.html" class="current">Browse</a>
+      <a href="richard-hunter.html">Richard Hunter</a>
+      <a href="about.html">About</a>
+    </nav>
+  </div>
+</header>
+
+<div class="frame">
+
+  <div class="page-head">
+    <h1>Browse the collection</h1>
+    <p>Every Item in the Wikibase, grouped by type. Filter by category or search by label and description.</p>
+    <div class="meta">
+      Data:
+      <a href="https://hunterhouse.wikibase.cloud" target="_blank" rel="noopener">hunterhouse.wikibase.cloud</a>
+      &nbsp;·&nbsp;
+      <a href="https://hunterhouse.wikibase.cloud/query/" target="_blank" rel="noopener">SPARQL endpoint</a>
+      &nbsp;·&nbsp;
+      <a href="https://github.com/bturep/HunterHouse" target="_blank" rel="noopener">source</a>
+    </div>
+  </div>
+
+  <div id="status" class="status">Loading items from Wikibase…</div>
+
+  <div id="controls" class="controls" style="display:none;">
+    <input type="search" id="search" placeholder="Filter by label or description…" autocomplete="off">
+    <div id="filter" class="filter"></div>
+  </div>
+
+  <div id="results"></div>
+
+  <footer class="colophon">
+    Hunter House Foundation · Brandon Poole, project lead<br>
+    This page queries the live Wikibase at every load. Edits in Wikibase appear here on refresh.
+  </footer>
+
+</div>
+
+<script>
+  // ---------------------------------------------------------------------
+  // Configuration
+  // ---------------------------------------------------------------------
+  const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
+  const SPARQL_URL = WIKIBASE_URL + "/query/sparql";
+  const ITEM_PAGE = "item.html";
+  const COLLECTION_PAGE = "collection.html";
+  // Type labels that should link to the finding-aid view, not the raw item view.
+  const COLLECTION_TYPES = new Set(["archive", "archival collection"]);
+
+  // ---------------------------------------------------------------------
+  // SPARQL query: every Item with its label, description, and the labels
+  // of its `instance of` (P-?) values. We don't know the property ID of
+  // `instance of` on this instance yet, so we discover it by querying for
+  // any item whose label is "instance of".
+  //
+  // Two-phase: (1) find the instance-of property; (2) list items, joining
+  // their type label. If phase 1 fails or returns nothing, fall back to
+  // listing all items without typing.
+  // ---------------------------------------------------------------------
+  const Q_FIND_INSTANCE_OF = `
+    SELECT ?prop WHERE {
+      ?prop rdfs:label "instance of"@en .
+      ?prop a <http://wikiba.se/ontology#Property> .
+    } LIMIT 1
+  `;
+
+  function qListItemsByType(instanceOfPropDirectURI) {
+    // instanceOfPropDirectURI: full URI like https://hunterhouse.wikibase.cloud/prop/direct/P1
+    return `
+      SELECT ?item ?itemLabel ?itemDescription ?type ?typeLabel WHERE {
+        ?item a <http://wikiba.se/ontology#Item> .
+        OPTIONAL { ?item rdfs:label ?itemLabel . FILTER(LANG(?itemLabel) = "en") }
+        OPTIONAL { ?item schema:description ?itemDescription . FILTER(LANG(?itemDescription) = "en") }
+        OPTIONAL {
+          ?item <${instanceOfPropDirectURI}> ?type .
+          OPTIONAL { ?type rdfs:label ?typeLabel . FILTER(LANG(?typeLabel) = "en") }
+        }
+      }
+      LIMIT 1000
+    `;
+  }
+
+  const Q_LIST_ITEMS_NO_TYPE = `
+    SELECT ?item ?itemLabel ?itemDescription WHERE {
+      ?item a <http://wikiba.se/ontology#Item> .
+      OPTIONAL { ?item rdfs:label ?itemLabel . FILTER(LANG(?itemLabel) = "en") }
+      OPTIONAL { ?item schema:description ?itemDescription . FILTER(LANG(?itemDescription) = "en") }
+    }
+    LIMIT 1000
+  `;
+
+  // ---------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------
+  async function sparql(query) {
+    const url = SPARQL_URL + "?query=" + encodeURIComponent(query) + "&format=json";
+    const res = await fetch(url, { headers: { Accept: "application/sparql-results+json" } });
+    if (!res.ok) throw new Error("SPARQL " + res.status + " " + res.statusText);
+    const json = await res.json();
+    return json.results.bindings;
+  }
+
+  function qidFromURI(uri) {
+    // e.g. https://hunterhouse.wikibase.cloud/entity/Q14  ->  Q14
+    return uri.split("/").pop();
+  }
+
+  function pidFromURI(uri) {
+    // e.g. https://hunterhouse.wikibase.cloud/entity/P1   ->  P1
+    return uri.split("/").pop();
+  }
+
+  function directURIFromPID(pid) {
+    return WIKIBASE_URL + "/prop/direct/" + pid;
+  }
+
+  function setStatus(msg, cls) {
+    const el = document.getElementById("status");
+    el.textContent = msg;
+    el.className = "status" + (cls ? " " + cls : "");
+  }
+
+  function escapeHTML(s) {
+    if (s == null) return "";
+    return String(s).replace(/[&<>"']/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+  }
+
+  // ---------------------------------------------------------------------
+  // Rendering
+  // ---------------------------------------------------------------------
+  function render(itemsByType) {
+    const container = document.getElementById("results");
+    container.innerHTML = "";
+
+    const typeKeys = Object.keys(itemsByType).sort((a, b) => {
+      // "Untyped" goes last; otherwise alphabetical
+      if (a === "Untyped") return 1;
+      if (b === "Untyped") return -1;
+      return a.localeCompare(b);
+    });
+
+    if (typeKeys.length === 0) {
+      container.innerHTML = `
+        <div class="empty">
+          <div class="big">No items yet.</div>
+          <div class="small">The Wikibase is set up but contains no Items so far. As Items are created — Works, People, Phases, Archive Items — they'll appear here automatically on the next page load.</div>
+        </div>`;
+      return;
+    }
+
+    // Filter chips
+    const filter = document.getElementById("filter");
+    filter.innerHTML = `<button data-type="__all" class="active">All</button>` +
+      typeKeys.map(t => `<button data-type="${escapeHTML(t)}">${escapeHTML(t)} (${itemsByType[t].length})</button>`).join("");
+
+    typeKeys.forEach(typeKey => {
+      const items = itemsByType[typeKey];
+      const section = document.createElement("section");
+      section.className = "type-section";
+      section.dataset.type = typeKey;
+
+      const cards = items.map(it => {
+        const isCollection = COLLECTION_TYPES.has(typeKey.toLowerCase());
+        const href = (isCollection ? COLLECTION_PAGE : ITEM_PAGE) + "?id=" + encodeURIComponent(it.qid);
+        const badge = isCollection
+          ? `<span style="float:right;font-family:'SF Mono',Menlo,monospace;font-size:10px;color:var(--accent);letter-spacing:0.04em;">FINDING AID →</span>`
+          : "";
+        return `
+        <a class="card" href="${href}">
+          <div class="qid">${escapeHTML(it.qid)}${badge}</div>
+          <div class="label">${escapeHTML(it.label || it.qid)}</div>
+          ${it.description
+            ? `<div class="desc">${escapeHTML(it.description)}</div>`
+            : `<div class="nodesc">no description</div>`}
+        </a>
+      `;
+      }).join("");
+
+      section.innerHTML = `
+        <h2>${escapeHTML(typeKey)}</h2>
+        <div class="type-meta">${items.length} ${items.length === 1 ? "item" : "items"}</div>
+        <div class="grid">${cards}</div>
+      `;
+      container.appendChild(section);
+    });
+  }
+
+  function applyFilters() {
+    const q = document.getElementById("search").value.trim().toLowerCase();
+    const activeBtn = document.querySelector("#filter button.active");
+    const activeType = activeBtn ? activeBtn.dataset.type : "__all";
+
+    document.querySelectorAll(".type-section").forEach(section => {
+      const matchesType = (activeType === "__all") || (section.dataset.type === activeType);
+      let anyVisible = false;
+      section.querySelectorAll(".card").forEach(card => {
+        const text = card.textContent.toLowerCase();
+        const matchesQuery = !q || text.includes(q);
+        const show = matchesType && matchesQuery;
+        card.style.display = show ? "" : "none";
+        if (show) anyVisible = true;
+      });
+      section.style.display = anyVisible ? "" : "none";
+    });
+  }
+
+  // ---------------------------------------------------------------------
+  // Main
+  // ---------------------------------------------------------------------
+  (async function main() {
+    try {
+      // Phase 1: find `instance of` property ID, if it exists.
+      let instanceOfDirectURI = null;
+      try {
+        const propRows = await sparql(Q_FIND_INSTANCE_OF);
+        if (propRows.length > 0) {
+          const pid = pidFromURI(propRows[0].prop.value);
+          instanceOfDirectURI = directURIFromPID(pid);
+        }
+      } catch (e) {
+        // Non-fatal — fall through to no-type query.
+        console.warn("Could not resolve 'instance of' property:", e);
+      }
+
+      // Phase 2: list items.
+      const query = instanceOfDirectURI
+        ? qListItemsByType(instanceOfDirectURI)
+        : Q_LIST_ITEMS_NO_TYPE;
+      const rows = await sparql(query);
+
+      // Group by type label.
+      const byType = {};
+      const seen = new Set();
+
+      rows.forEach(r => {
+        const qid = qidFromURI(r.item.value);
+        const key = qid + "|" + (r.type ? r.type.value : "");
+        if (seen.has(key)) return; // Items can have multiple `instance of` values
+        seen.add(key);
+
+        const typeLabel = (r.typeLabel && r.typeLabel.value) || (r.type ? qidFromURI(r.type.value) : "Untyped");
+        if (!byType[typeLabel]) byType[typeLabel] = [];
+
+        // De-dupe by qid within a type group
+        if (byType[typeLabel].some(x => x.qid === qid)) return;
+
+        byType[typeLabel].push({
+          qid: qid,
+          label: r.itemLabel ? r.itemLabel.value : null,
+          description: r.itemDescription ? r.itemDescription.value : null,
+        });
+      });
+
+      const total = Object.values(byType).reduce((n, arr) => n + arr.length, 0);
+      setStatus(`Loaded `, "ok");
+      const span = document.createElement("span");
+      span.className = "count";
+      span.textContent = total + (total === 1 ? " item" : " items");
+      document.getElementById("status").appendChild(span);
+      document.getElementById("status").appendChild(document.createTextNode(
+        " from " + Object.keys(byType).length + " " + (Object.keys(byType).length === 1 ? "type" : "types") +
+        (instanceOfDirectURI ? "" : " (instance-of property not yet defined; items shown ungrouped)")
+      ));
+
+      document.getElementById("controls").style.display = "flex";
+      render(byType);
+
+      // Wire up filters
+      document.getElementById("search").addEventListener("input", applyFilters);
+      document.getElementById("filter").addEventListener("click", e => {
+        if (e.target.tagName !== "BUTTON") return;
+        document.querySelectorAll("#filter button").forEach(b => b.classList.remove("active"));
+        e.target.classList.add("active");
+        applyFilters();
+      });
+
+    } catch (err) {
+      console.error(err);
+      setStatus("Couldn't load items: " + err.message, "error");
+      document.getElementById("results").innerHTML = `
+        <div class="empty">
+          <div class="big">Wikibase unreachable</div>
+          <div class="small">The page tried to query <code>${escapeHTML(SPARQL_URL)}</code> and got an error. Either the endpoint is down, CORS is blocked, or the URL needs adjusting in the page source. Open the browser console for details.</div>
+        </div>`;
+    }
+  })();
+</script>
+
+</body>
+</html>
