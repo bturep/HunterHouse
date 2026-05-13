@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>About the Archive — Hunter House Foundation</title>
+<title>The Archive — Hunter House Foundation</title>
 <meta name="viewport" content="width=1400">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,13 +13,17 @@
     display:grid;grid-template-columns:repeat(2,1fr);gap:1px;
     background:var(--rule);border:1px solid var(--rule);margin:32px 0 36px;
   }
-  .coll{background:var(--bg);padding:18px 22px;display:flex;flex-direction:column;gap:8px;text-decoration:none;color:inherit}
-  .coll:hover{background:var(--paper)}
+  .coll{background:var(--bg);padding:18px 22px;display:flex;flex-direction:column;gap:8px;color:inherit}
   .coll .hd{display:flex;justify-content:space-between;align-items:baseline}
   .coll .id-c{font-family:var(--mono);font-size:10.5px;color:var(--red);letter-spacing:0.14em;font-weight:500}
   .coll .ct{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em}
   .coll h4{font-size:16px;font-weight:500;letter-spacing:-0.015em;color:var(--ink);margin:2px 0 0}
   .coll p{font-size:13px;line-height:1.55;color:var(--muted);margin:0}
+  .coll .custodian{
+    font-family:var(--mono);font-size:10px;color:var(--ink);letter-spacing:0.06em;
+    margin-top:6px;padding-top:6px;border-top:1px dotted var(--rule);
+  }
+  .coll .custodian .lb{color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-right:8px}
 
   .id-table{width:100%;border-collapse:collapse;margin:24px 0 32px;font-size:13.5px}
   .id-table th,.id-table td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--rule-soft);vertical-align:top}
@@ -39,6 +43,33 @@
   .vocab-tags span.red{background:var(--red-pale);border-color:var(--red-pale);color:var(--red-deep)}
   .vocab-tags span.green{background:var(--copper-pale);border-color:var(--copper-pale);color:var(--copper-deep)}
 
+  .platform-box{
+    background:var(--paper);border:1px solid var(--rule);padding:22px 26px;
+    margin:24px 0 32px;display:grid;grid-template-columns:1fr auto;gap:36px;align-items:center;
+  }
+  .platform-box .l p{font-size:14px;line-height:1.6;color:var(--ink);margin-bottom:10px}
+  .platform-box .l p:last-child{margin-bottom:0}
+  .platform-box .r{
+    display:flex;flex-direction:column;gap:8px;
+    font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.04em;text-align:right;
+  }
+  .platform-box .r a{
+    color:var(--copper-deep);text-decoration:none;
+    border-bottom:1px solid var(--copper-pale);white-space:nowrap;
+  }
+  .platform-box .r a:hover{border-bottom-color:var(--copper-deep)}
+  .platform-box .r .lb{color:var(--ink);font-weight:500;letter-spacing:0.14em;text-transform:uppercase;font-size:9.5px;margin-top:4px}
+  .platform-box .r .lb:first-child{margin-top:0}
+
+  .browse-back{
+    margin-top:48px;padding-top:24px;border-top:1px solid var(--ink);
+  }
+  .browse-back a{
+    font-family:var(--mono);font-size:12px;color:var(--ink);letter-spacing:0.08em;
+    text-transform:uppercase;border-bottom:1px solid var(--ink);padding-bottom:4px;text-decoration:none;
+  }
+  .browse-back a:hover{color:var(--red-deep);border-bottom-color:var(--red-deep)}
+
   .coll .id-c,.coll .ct,.vocab-tags span{white-space:nowrap}
 </style>
 </head>
@@ -54,26 +85,26 @@
     <a href="the-house.html">House</a>
     <a href="archive.html" class="on">Archive</a>
     <a href="about.html">About</a>
+    <a href="browse.html">Browse</a>
   </nav>
-  <div class="site-topright">v0.4</div>
+  <div class="site-topright">v0.5</div>
 </header>
 
 <div class="crumbs">
   <div class="path">
     <a href="index.html">Home</a>
     <span class="sep">/</span>
-    <span>About the Archive</span>
+    <span>The Archive</span>
   </div>
-  <div class="right">Chapter · 02 / 05</div>
+  <div class="right"></div>
 </div>
 
 <div class="frame">
 
   <div class="page-stamp">
-    <span class="n">§ 02</span>
     <span>A catalogue of a single house</span>
   </div>
-  <h1 class="page-title">About the <span class="ital">archive</span>.</h1>
+  <h1 class="page-title">The Archive</h1>
   <div class="page-sub">
     <span><b>147</b> items</span>
     <span>·</span>
@@ -86,66 +117,79 @@
 
   <article class="prose">
 
-    <p class="lede">The Hunter House Archive is a structured catalogue of drawings, photographs, and related materials documenting the design and continuous revision of the Hunter Residence. It draws from six source collections, each with a distinct provenance.</p>
+    <p class="lede">The Hunter House Archive is a structured catalogue of drawings, photographs, correspondence, and related materials assembled from six source collections. It is hosted on Wikibase, the open-source structured-data platform that underlies Wikidata, and is openly queryable through SPARQL and a JSON API. <a href="browse.html">Browse the full catalogue · 147 items →</a></p>
 
-    <h2 id="collections"><span><span class="n">01</span> &nbsp;The collections</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">six provenances</span></h2>
+    <h2 id="collections"><span>Source collections</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">six provenances</span></h2>
 
-    <p>The archive recognizes six source collections. The complementary character of the two largest is significant: Hunter donated his original 1970–74 build documentation to the Canadian Architectural Archives; what he kept were the working files for everything that came after. The two collections describe the same building from opposite ends of its lifespan.</p>
+    <p>The archive draws from six collections of varied provenance — two institutional, four held by individuals connected to Hunter's life and practice. Each is described below. None of these cards links elsewhere; collections will receive their own finding-aid pages as cataloguing completes.</p>
 
     <div class="collections">
-      <a class="coll" href="collection.html">
+
+      <div class="coll">
         <div class="hd">
           <span class="id-c">HHC</span>
           <span class="ct">110 items</span>
         </div>
         <h4>Hunter House Collection</h4>
-        <p>Working drawings retained by Hunter — the post-build record. Speculative sketches alongside permit submissions, undated schemes alongside dated construction documents. 1975–2020.</p>
-      </a>
-      <a class="coll" href="#">
+        <p>Hunter's own working files, retained at the residence: architectural drawings from 1979 onward, surveys, engineering documents, and ephemera. The primary collection.</p>
+        <div class="custodian"><span class="lb">Custodian</span>Hunter House Foundation</div>
+      </div>
+
+      <div class="coll">
         <div class="hd">
           <span class="id-c">CAA</span>
           <span class="ct">18 items</span>
         </div>
         <h4>Canadian Architectural Archives</h4>
-        <p>The original 1970–74 Scheme 1A drawings and early photographs, donated by Hunter in 1985. Held by the University of Calgary, fonds F0076.</p>
-      </a>
-      <a class="coll" href="#">
+        <p>Richard Hunter fonds, accession 2019.61 — 344 drawings, 62 photographs, 0.22 linear metres of textual records spanning 1955–2010. Donated by Hunter in 2019 and 2021.</p>
+        <div class="custodian"><span class="lb">Custodian</span>University of Calgary</div>
+      </div>
+
+      <div class="coll">
         <div class="hd">
           <span class="id-c">FUL</span>
           <span class="ct">9 items</span>
         </div>
-        <h4>Fulker Collection</h4>
-        <p>Professional photographs of the original 1974 structure, taken by William Fulker prior to the West Wing addition.</p>
-      </a>
-      <a class="coll" href="#">
+        <h4>John Fulker Collection</h4>
+        <p>Professional photographs of the Hunter Residence by Victoria photographer John Fulker, documenting the original structure prior to subsequent additions.</p>
+        <div class="custodian"><span class="lb">Custodian</span>West Vancouver Museum</div>
+      </div>
+
+      <div class="coll">
         <div class="hd">
-          <span class="id-c">SNY</span>
-          <span class="ct">4 items</span>
+          <span class="id-c">GES</span>
+          <span class="ct">[Pending]</span>
         </div>
-        <h4>Snyder Correspondence</h4>
-        <p>Letters between Hunter and the poet Gary Snyder, 1977–1983. Concerns the Zen dojo scheme and the broader question of regional architectural language.</p>
-      </a>
-      <a class="coll" href="#">
+        <h4>Eric Gessinger Collection</h4>
+        <p>Hunter's furniture drawings, gifted to the cabinetmaker who produced the chairs for the 2018 Dining Room Addition.</p>
+        <div class="custodian"><span class="lb">Custodian</span>Eric Gessinger</div>
+      </div>
+
+      <div class="coll">
         <div class="hd">
-          <span class="id-c">ENG</span>
-          <span class="ct">5 items</span>
+          <span class="id-c">FRH</span>
+          <span class="ct">[Pending]</span>
         </div>
-        <h4>Engineering Drawings</h4>
-        <p>Drawings commissioned by Hunter from Harold Engineering and Brown and Grant Engineering for the East Wing structural conditions on the bluff.</p>
-      </a>
-      <a class="coll" href="#">
+        <h4>Frances Hunter Collection</h4>
+        <p>Personal materials, correspondence, and photographs retained by Frances Hunter following Richard Hunter's death in 2023.</p>
+        <div class="custodian"><span class="lb">Custodian</span>Frances Hunter</div>
+      </div>
+
+      <div class="coll">
         <div class="hd">
-          <span class="id-c">MIS</span>
-          <span class="ct">1 item</span>
+          <span class="id-c">IVH</span>
+          <span class="ct">[Pending]</span>
         </div>
-        <h4>Miscellaneous</h4>
-        <p>Material that doesn't fit the other five, retained for context — a 2008 sketch on the back of an envelope, the 1986 building inspector's letter.</p>
-      </a>
+        <h4>Ivan Hunter Collection</h4>
+        <p>Family photographs held by Hunter's son.</p>
+        <div class="custodian"><span class="lb">Custodian</span>Ivan Hunter</div>
+      </div>
+
     </div>
 
-    <h2 id="ids"><span><span class="n">02</span> &nbsp;How items are identified</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">archive ID schema</span></h2>
+    <h2 id="ids"><span>Archive identifiers</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">permanent ID schema</span></h2>
 
-    <p>Every item in the archive receives a permanent, unique Archive ID at the time of ingestion. Archive IDs are permanent — once assigned, an ID is never reused, reassigned, or altered. The number after the dash is a four-digit zero-padded sequence; the letter before it identifies the type of material.</p>
+    <p>Every item receives a permanent, unique Archive ID at ingestion. IDs are never reused, reassigned, or altered. The letter identifies the material; the four-digit sequence is zero-padded and runs in order of cataloguing.</p>
 
     <table class="id-table">
       <thead>
@@ -160,11 +204,9 @@
       </tbody>
     </table>
 
-    <h2 id="catalogue"><span><span class="n">03</span> &nbsp;How the catalogue works</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">controlled vocabulary</span></h2>
+    <h2 id="catalogue"><span>Controlled vocabulary</span></h2>
 
-    <p>The archive is maintained as a structured database with a controlled vocabulary. Drawings are classified by type (plan, elevation, section, detail, framing plan), by use (construction, design development, schematic), by built status, and by the project set they belong to. Areas of the house are tagged from a hierarchical vocabulary of thirty-five terms.</p>
-
-    <p>A small selection of those terms:</p>
+    <p>Items are classified by type, by use, by built status, and by the project set they belong to. Areas of the house are tagged from a hierarchical vocabulary of thirty-five terms. The same item appears in multiple indexes — it can be located by date, area, phase, drawing type, or project set.</p>
 
     <div class="vocab-tags">
       <span class="red">Elevation</span>
@@ -193,20 +235,39 @@
       <span>Removed</span>
     </div>
 
-    <p>The structured catalogue allows the archive to be read at multiple resolutions. A drawing can be located by date, by area, by phase, by drawing type, or by the project set it belongs to. The same drawing appears in multiple browsable indexes.</p>
+    <h2 id="platform"><span>Platform &amp; access</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">Wikibase</span></h2>
 
-    <h2 id="access"><span><span class="n">04</span> &nbsp;Access</span></h2>
+    <p>The archive is hosted on Wikibase, the open-source structured-data platform that underlies Wikidata. Items, properties, and statements are stored as a graph and queried via SPARQL or a JSON API. The Foundation maintains its instance at <code style="font-family:var(--mono);font-size:13px">hunterhouse.wikibase.cloud</code>; this site reads from it directly.</p>
 
-    <p>The catalogue is open and queryable. The data is published as a Wikibase, supporting both browsing through this site and direct SPARQL queries against the underlying graph. Image files are released under a Public — Hunter House Foundation license unless an individual item carries different rights metadata.</p>
+    <p>Image files are released under a Public — Hunter House Foundation license unless an individual item carries different rights metadata.</p>
 
-    <p><a href="browse.html" target="_blank" rel="noopener">Browse the catalogue →</a> &nbsp;·&nbsp; <a href="https://hunterhouse.wikibase.cloud/query/" target="_blank" rel="noopener">SPARQL endpoint →</a> &nbsp;·&nbsp; <a href="https://hunterhouse.wikibase.cloud" target="_blank" rel="noopener">Data dump (JSON) →</a></p>
+    <div class="platform-box">
+      <div class="l">
+        <p><strong>Open data.</strong> The catalogue is published as structured data, queryable in full through the endpoints opposite.</p>
+        <p>Researchers wishing to consult high-resolution master files or unpublished collections should contact the project lead — see <a href="about.html" style="color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)">About</a>.</p>
+      </div>
+      <div class="r">
+        <span class="lb">Wikibase instance</span>
+        <a href="https://hunterhouse.wikibase.cloud" target="_blank" rel="noopener">hunterhouse.wikibase.cloud ↗</a>
+        <span class="lb">SPARQL endpoint</span>
+        <a href="https://hunterhouse.wikibase.cloud/query/" target="_blank" rel="noopener">query/ ↗</a>
+        <span class="lb">JSON API</span>
+        <a href="https://hunterhouse.wikibase.cloud/w/api.php" target="_blank" rel="noopener">w/api.php ↗</a>
+        <span class="lb">Source code</span>
+        <a href="https://github.com/bturep/HunterHouse" target="_blank" rel="noopener">github.com/bturep ↗</a>
+      </div>
+    </div>
+
+    <div class="browse-back">
+      <a href="browse.html">Browse the full catalogue · 147 items →</a>
+    </div>
 
   </article>
 
   <footer class="colophon">
-    <div class="l"><b>Chapter 02 / 05</b> · About the Archive</div>
-    <div class="c">Catalogue v0.4 · 2026 · 05 · 12</div>
-    <div class="r"><a href="richard-hunter.html">Next · Richard Hunter →</a></div>
+    <div class="l"><b>The Archive</b></div>
+    <div class="c">Catalogue v0.5 · 2026 · 05 · 12</div>
+    <div class="r"><a href="about.html">Next · About →</a></div>
   </footer>
 
 </div>
