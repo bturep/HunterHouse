@@ -177,17 +177,95 @@
     </div>
   </section>
 
-  <section class="featured-band">
+  <section class="featured-band" id="featured-band">
     <div class="head">
-      <div class="l">Recently catalogued <em>seven plates · May 2026</em></div>
-      <a class="all" href="browse.html">View all 147 →</a>
+      <div class="l">Recently catalogued <em id="feat-caption">—</em></div>
+      <a class="all" href="browse.html">View all <span id="feat-total">—</span> →</a>
     </div>
-    <a href="item.html"><div class="ti"></div><div class="cap"><span class="id">HH-A-0007</span><span>1970</span></div></a>
-    <a href="item.html"><div class="ti"></div><div class="cap"><span class="id">HH-A-0008</span><span>1970</span></div></a>
-    <a href="item.html"><div class="ti"></div><div class="cap"><span class="id">HH-A-0027</span><span>1985</span></div></a>
-    <a href="item.html"><div class="ti"></div><div class="cap"><span class="id">HH-A-0028</span><span>1986</span></div></a>
-    <a href="item.html"><div class="ti"></div><div class="cap"><span class="id">HH-A-0035</span><span>1992</span></div></a>
+    <div id="featured-tiles" style="display:contents"></div>
   </section>
+
+  <script>
+  (async function() {
+    const WB  = "https://hunterhouse.wikibase.cloud";
+    const API = WB + "/w/api.php";
+    const SP  = WB + "/query/sparql";
+
+    function esc(s) {
+      if (s == null) return "";
+      return String(s).replace(/[&<>"']/g, c =>
+        ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    }
+    function qnum(q) { return parseInt(q.slice(1), 10); }
+    function extractYear(claims) {
+      for (const pid in claims) {
+        for (const c of claims[pid]) {
+          const dv = c.mainsnak?.datavalue;
+          if (dv?.type === "time") {
+            const t = dv.value?.time;
+            if (t) return t.replace(/^\+/, "").substring(0, 4);
+          }
+        }
+      }
+      return null;
+    }
+
+    try {
+      // Fetch all QIDs from SPARQL, sort descending (newest first)
+      const sparqlRes = await fetch(
+        SP + "?query=" + encodeURIComponent(
+          `SELECT ?item WHERE { ?item rdfs:label ?l . FILTER(LANG(?l)="en") FILTER(REGEX(STR(?item),"/entity/Q[0-9]+$")) } LIMIT 2000`
+        ) + "&format=json",
+        { headers: { Accept: "application/sparql-results+json" } }
+      );
+      const sparqlData = await sparqlRes.json();
+      const allQids = sparqlData.results.bindings
+        .map(r => r.item.value.split("/").pop())
+        .sort((a, b) => qnum(b) - qnum(a));
+
+      document.getElementById("feat-total").textContent = allQids.length;
+
+      // Probe top 100 QIDs for P96 + P2 (labels included for free)
+      const probe = allQids.slice(0, 100);
+      const batches = [probe.slice(0, 50), probe.slice(50)];
+      const candidates = [];
+
+      await Promise.all(batches.map(async batch => {
+        if (!batch.length) return;
+        const url = API + "?action=wbgetentities&ids=" + encodeURIComponent(batch.join("|")) +
+                    "&props=claims|labels&format=json&origin=*";
+        const json = await (await fetch(url)).json();
+        for (const qid of batch) {
+          const entity = json.entities?.[qid];
+          if (!entity) continue;
+          const p96 = entity.claims?.P96?.[0]?.mainsnak?.datavalue?.value;
+          if (!p96) continue;
+          const p2   = entity.claims?.P2?.[0]?.mainsnak?.datavalue?.value;
+          const year = extractYear(entity.claims || {});
+          const label = entity.labels?.en?.value;
+          candidates.push({ qid, label, archiveId: p2, previewUrl: p96, year });
+        }
+      }));
+
+      candidates.sort((a, b) => qnum(b) - qnum(a));
+      const top5 = candidates.slice(0, 5);
+      if (!top5.length) return;
+
+      const month = new Date().toLocaleString("en-US", { month: "long" });
+      const yr    = new Date().getFullYear();
+      document.getElementById("feat-caption").textContent =
+        top5.length + " plates · " + month + " " + yr;
+
+      document.getElementById("featured-tiles").innerHTML = top5.map(item => `
+        <a href="item.html?id=${esc(item.qid)}">
+          <div class="ti"><img src="${esc(item.previewUrl)}" alt="${esc(item.label || item.qid)}" loading="lazy"></div>
+          <div class="cap"><span class="id">${esc(item.archiveId || item.qid)}</span><span>${esc(item.year || "—")}</span></div>
+        </a>
+      `).join("");
+
+    } catch (e) { console.warn("featured band:", e); }
+  })();
+  </script>
 
   <section class="columns">
     <div>
