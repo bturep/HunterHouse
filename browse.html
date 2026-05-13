@@ -312,58 +312,39 @@
   // Configuration
   // ---------------------------------------------------------------------
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
-  const SPARQL_URL = WIKIBASE_URL + "/query/sparql";
-  const ITEM_PAGE = "item.html";
+  const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
+  const API_URL      = WIKIBASE_URL + "/w/api.php";
+  const ITEM_PAGE       = "item.html";
   const COLLECTION_PAGE = "collection.html";
-  // Type labels that should link to the finding-aid view, not the raw item view.
   const COLLECTION_TYPES = new Set(["archive", "archival collection"]);
 
   // ---------------------------------------------------------------------
-  // SPARQL query: every Item with its label, description, and the labels
-  // of its `instance of` (P-?) values. We don't know the property ID of
-  // `instance of` on this instance yet, so we discover it by querying for
-  // any item whose label is "instance of".
+  // SPARQL: list all Q-items with their labels and descriptions.
   //
-  // Two-phase: (1) find the instance-of property; (2) list items, joining
-  // their type label. If phase 1 fails or returns nothing, fall back to
-  // listing all items without typing.
+  // Note: `?item a <wikibase:Item>` does not work on this Wikibase Cloud
+  // instance (returns 0 results). Use rdfs:label + REGEX to select only
+  // Q-entities and exclude P-properties.
+  //
+  // Claim data (P1 = instance of) is not indexed in SPARQL on this
+  // instance, so type grouping is handled via the Wikibase REST API below.
   // ---------------------------------------------------------------------
-  const Q_FIND_INSTANCE_OF = `
-    SELECT ?prop WHERE {
-      ?prop rdfs:label "instance of"@en .
-      ?prop a <http://wikiba.se/ontology#Property> .
-    } LIMIT 1
-  `;
-
-  function qListItemsByType(instanceOfPropDirectURI) {
-    // instanceOfPropDirectURI: full URI like https://hunterhouse.wikibase.cloud/prop/direct/P1
-    return `
-      SELECT ?item ?itemLabel ?itemDescription ?type ?typeLabel WHERE {
-        ?item a <http://wikiba.se/ontology#Item> .
-        OPTIONAL { ?item rdfs:label ?itemLabel . FILTER(LANG(?itemLabel) = "en") }
-        OPTIONAL { ?item schema:description ?itemDescription . FILTER(LANG(?itemDescription) = "en") }
-        OPTIONAL {
-          ?item <${instanceOfPropDirectURI}> ?type .
-          OPTIONAL { ?type rdfs:label ?typeLabel . FILTER(LANG(?typeLabel) = "en") }
-        }
-      }
-      LIMIT 1000
-    `;
-  }
-
-  const Q_LIST_ITEMS_NO_TYPE = `
+  const Q_LIST_ITEMS = `
     SELECT ?item ?itemLabel ?itemDescription WHERE {
-      ?item a <http://wikiba.se/ontology#Item> .
-      OPTIONAL { ?item rdfs:label ?itemLabel . FILTER(LANG(?itemLabel) = "en") }
-      OPTIONAL { ?item schema:description ?itemDescription . FILTER(LANG(?itemDescription) = "en") }
+      ?item rdfs:label ?itemLabel .
+      FILTER(LANG(?itemLabel) = "en")
+      FILTER(REGEX(STR(?item), "/entity/Q[0-9]+$"))
+      OPTIONAL {
+        ?item schema:description ?itemDescription .
+        FILTER(LANG(?itemDescription) = "en")
+      }
     }
-    LIMIT 1000
+    LIMIT 2000
   `;
 
   // ---------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------
-  async function sparql(query) {
+  async function sparqlQuery(query) {
     const url = SPARQL_URL + "?query=" + encodeURIComponent(query) + "&format=json";
     const res = await fetch(url, { headers: { Accept: "application/sparql-results+json" } });
     if (!res.ok) throw new Error("SPARQL " + res.status + " " + res.statusText);
@@ -371,18 +352,52 @@
     return json.results.bindings;
   }
 
+  // Fetch P1 (instance of) claims for a list of QIDs via the Wikibase API.
+  // Returns {qid → typeQID} for items that have a P1 claim.
+  async function fetchTypeMap(qids) {
+    const typeMap = {};
+    const batches = [];
+    for (let i = 0; i < qids.length; i += 50) batches.push(qids.slice(i, i + 50));
+    await Promise.all(batches.map(async batch => {
+      try {
+        const url = API_URL + "?action=wbgetentities&ids=" + encodeURIComponent(batch.join("|")) +
+                    "&props=claims&format=json&origin=*";
+        const res = await fetch(url);
+        const json = await res.json();
+        for (const qid of batch) {
+          const typeQID = json.entities?.[qid]?.claims?.P1?.[0]
+                            ?.mainsnak?.datavalue?.value?.id;
+          if (typeQID) typeMap[qid] = typeQID;
+        }
+      } catch (e) { console.warn("API type fetch failed:", e); }
+    }));
+    return typeMap;
+  }
+
+  // Fetch English labels for a list of QIDs via the Wikibase API.
+  // Returns {qid → label string}.
+  async function fetchLabels(qids) {
+    const labels = {};
+    const unique = [...new Set(qids)];
+    const batches = [];
+    for (let i = 0; i < unique.length; i += 50) batches.push(unique.slice(i, i + 50));
+    await Promise.all(batches.map(async batch => {
+      try {
+        const url = API_URL + "?action=wbgetentities&ids=" + encodeURIComponent(batch.join("|")) +
+                    "&props=labels&format=json&origin=*";
+        const res = await fetch(url);
+        const json = await res.json();
+        for (const qid of batch) {
+          const v = json.entities?.[qid]?.labels?.en?.value;
+          if (v) labels[qid] = v;
+        }
+      } catch (e) { console.warn("API label fetch failed:", e); }
+    }));
+    return labels;
+  }
+
   function qidFromURI(uri) {
-    // e.g. https://hunterhouse.wikibase.cloud/entity/Q14  ->  Q14
     return uri.split("/").pop();
-  }
-
-  function pidFromURI(uri) {
-    // e.g. https://hunterhouse.wikibase.cloud/entity/P1   ->  P1
-    return uri.split("/").pop();
-  }
-
-  function directURIFromPID(pid) {
-    return WIKIBASE_URL + "/prop/direct/" + pid;
   }
 
   function setStatus(msg, cls) {
@@ -482,63 +497,66 @@
   // ---------------------------------------------------------------------
   (async function main() {
     try {
-      // Phase 1: find `instance of` property ID, if it exists.
-      let instanceOfDirectURI = null;
-      try {
-        const propRows = await sparql(Q_FIND_INSTANCE_OF);
-        if (propRows.length > 0) {
-          const pid = pidFromURI(propRows[0].prop.value);
-          instanceOfDirectURI = directURIFromPID(pid);
-        }
-      } catch (e) {
-        // Non-fatal — fall through to no-type query.
-        console.warn("Could not resolve 'instance of' property:", e);
-      }
+      // Step 1: get all Q-items (labels + descriptions) from SPARQL.
+      setStatus("Loading items from Wikibase…");
+      const rows = await sparqlQuery(Q_LIST_ITEMS);
 
-      // Phase 2: list items.
-      const query = instanceOfDirectURI
-        ? qListItemsByType(instanceOfDirectURI)
-        : Q_LIST_ITEMS_NO_TYPE;
-      const rows = await sparql(query);
-
-      // Group by type label.
-      const byType = {};
-      const seen = new Set();
-
+      const itemMap = {};
       rows.forEach(r => {
         const qid = qidFromURI(r.item.value);
-        const key = qid + "|" + (r.type ? r.type.value : "");
-        if (seen.has(key)) return; // Items can have multiple `instance of` values
-        seen.add(key);
-
-        const typeLabel = (r.typeLabel && r.typeLabel.value) || (r.type ? qidFromURI(r.type.value) : "Untyped");
-        if (!byType[typeLabel]) byType[typeLabel] = [];
-
-        // De-dupe by qid within a type group
-        if (byType[typeLabel].some(x => x.qid === qid)) return;
-
-        byType[typeLabel].push({
-          qid: qid,
-          label: r.itemLabel ? r.itemLabel.value : null,
-          description: r.itemDescription ? r.itemDescription.value : null,
-        });
+        if (!itemMap[qid]) {
+          itemMap[qid] = {
+            qid,
+            label:       r.itemLabel       ? r.itemLabel.value       : qid,
+            description: r.itemDescription ? r.itemDescription.value : null,
+          };
+        }
       });
 
-      const total = Object.values(byType).reduce((n, arr) => n + arr.length, 0);
-      setStatus(`Loaded `, "ok");
+      const qids = Object.keys(itemMap);
+      if (qids.length === 0) {
+        setStatus("No items found in Wikibase.");
+        document.getElementById("results").innerHTML = `
+          <div class="empty">
+            <div class="big">No items yet.</div>
+            <div class="small">The Wikibase is set up but contains no Items so far. As Items are created they'll appear here automatically on the next page load.</div>
+          </div>`;
+        return;
+      }
+
+      // Step 2: fetch P1 (instance of) claims via API to group items by type.
+      setStatus(`Loading type data for ${qids.length} items…`);
+      const typeMap = await fetchTypeMap(qids);
+
+      // Step 3: fetch labels for the type QIDs.
+      const typeQIDs = [...new Set(Object.values(typeMap))];
+      const typeLabels = typeQIDs.length > 0 ? await fetchLabels(typeQIDs) : {};
+
+      // Step 4: group items by type label.
+      const byType = {};
+      qids.forEach(qid => {
+        const typeQID   = typeMap[qid];
+        const typeLabel = typeQID ? (typeLabels[typeQID] || typeQID) : "Untyped";
+        if (!byType[typeLabel]) byType[typeLabel] = [];
+        byType[typeLabel].push(itemMap[qid]);
+      });
+
+      // Update status.
+      const total     = qids.length;
+      const typeCount = Object.keys(byType).length;
+      setStatus("Loaded ", "ok");
       const span = document.createElement("span");
-      span.className = "count";
+      span.className   = "count";
       span.textContent = total + (total === 1 ? " item" : " items");
       document.getElementById("status").appendChild(span);
       document.getElementById("status").appendChild(document.createTextNode(
-        " from " + Object.keys(byType).length + " " + (Object.keys(byType).length === 1 ? "type" : "types") +
-        (instanceOfDirectURI ? "" : " (instance-of property not yet defined; items shown ungrouped)")
+        " from " + typeCount + " " + (typeCount === 1 ? "type" : "types")
       ));
 
       document.getElementById("controls").style.display = "flex";
       render(byType);
 
-      // Wire up filters
+      // Wire up filters.
       document.getElementById("search").addEventListener("input", applyFilters);
       document.getElementById("filter").addEventListener("click", e => {
         if (e.target.tagName !== "BUTTON") return;
