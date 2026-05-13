@@ -9,135 +9,73 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/verso.css">
 <style>
-  /* ── status ── */
-  .status{
-    background:var(--paper);border:1px solid var(--rule);padding:12px 18px;margin-bottom:24px;
-    font-size:12px;color:var(--muted);font-family:var(--mono);letter-spacing:0.04em;
-  }
+  /* status */
+  .status{background:var(--paper);border:1px solid var(--rule);padding:12px 18px;margin-bottom:24px;font-size:12px;color:var(--muted);font-family:var(--mono);letter-spacing:0.04em}
   .status.error{background:var(--red-pale);color:var(--red-deep);border-color:var(--red-pale)}
-  .substatus{color:var(--muted);font-size:11px;font-style:italic;margin-top:6px}
 
-  /* ── finding aid layout ── */
+  /* finding-aid layout */
   .fa-layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:64px;align-items:start}
 
   .fa-toc{position:sticky;top:24px;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.06em}
-  .fa-toc .hd{
-    font-family:var(--mono);font-size:10px;color:var(--ink);letter-spacing:0.22em;text-transform:uppercase;
-    padding-bottom:8px;border-bottom:1px solid var(--ink);margin-bottom:14px;font-weight:500;
-  }
+  .fa-toc .hd{font-family:var(--mono);font-size:10px;color:var(--ink);letter-spacing:0.22em;text-transform:uppercase;padding-bottom:8px;border-bottom:1px solid var(--ink);margin-bottom:14px;font-weight:500}
   .fa-toc ol{list-style:none;margin:0;padding:0}
   .fa-toc li{padding:7px 0;display:grid;grid-template-columns:24px 1fr;gap:10px;align-items:baseline}
   .fa-toc li .n{color:var(--red);font-weight:500}
-  .fa-toc a{color:var(--muted);text-decoration:none}
+  .fa-toc a{color:var(--muted);text-decoration:none;white-space:nowrap}
   .fa-toc a:hover{color:var(--ink)}
 
   .fa-section{margin-bottom:48px}
-  .fa-section-head{
-    display:flex;justify-content:space-between;align-items:baseline;
-    padding-bottom:10px;border-bottom:1px solid var(--ink);margin-bottom:20px;
-  }
-  .fa-section-head .l{
-    font-family:var(--mono);font-size:11px;color:var(--ink);letter-spacing:0.22em;text-transform:uppercase;font-weight:500;
-    display:flex;align-items:baseline;gap:14px;
-  }
+  .fa-section-head{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:10px;border-bottom:1px solid var(--ink);margin-bottom:20px}
+  .fa-section-head .l{font-family:var(--mono);font-size:11px;color:var(--ink);letter-spacing:0.22em;text-transform:uppercase;font-weight:500;display:flex;align-items:baseline;gap:14px}
   .fa-section-head .l .n{color:var(--red);font-weight:400}
-  .fa-section-head .r{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase}
-  .fa-section .area-empty{color:var(--muted);font-size:12.5px;font-style:italic;padding:8px 0}
+  .fa-section-head .r{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;white-space:nowrap}
 
-  /* ── finding aid KV rows ── */
+  /* finding-aid KV */
   .fa-kv{margin:0}
-  .fa-kv .row,.field{
-    display:grid;grid-template-columns:200px 1fr;gap:32px;align-items:baseline;
-    padding:12px 0;border-bottom:1px solid var(--rule-soft);
-  }
-  .fa-kv .row:last-child,.field:last-child{border-bottom:0}
-  .fa-kv dt,.field .key{
-    font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap;
-  }
-  .fa-kv dd,.field .val{font-size:14px;color:var(--ink);line-height:1.55;letter-spacing:-0.005em}
-  .fa-kv dd p,.field .val p{margin-bottom:8px}
-  .fa-kv dd p:last-child,.field .val p:last-child{margin-bottom:0}
-  .fa-kv dd a,.field .val a,.field .val .qlink{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
-  .field .val .stringval{font-family:var(--mono);font-size:12.5px}
-  .field .val .multival{display:block;padding:2px 0}
-  .field .val .external{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
-  .field .key small{
-    display:block;font-family:var(--mono);font-size:10px;font-weight:400;
-    color:var(--hint);margin-top:2px;
-  }
+  .fa-kv .row{display:grid;grid-template-columns:200px 1fr;gap:32px;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--rule-soft)}
+  .fa-kv .row:last-child{border-bottom:0}
+  .fa-kv dt{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap}
+  .fa-kv dd{font-size:14px;color:var(--ink);line-height:1.55;letter-spacing:-0.005em}
+  .fa-kv dd p{margin-bottom:8px}
+  .fa-kv dd p:last-child{margin-bottom:0}
+  .fa-kv dd a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
+  .fa-kv dd a:hover{border-bottom-color:var(--copper-deep)}
+  .fa-kv dd .stringval{font-family:var(--mono);font-size:12.5px}
+  .fa-kv dd .multival{display:block;padding:2px 0}
+  .fa-kv dd .external{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
+  .fa-kv dd .qlink{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
+  .area-empty{color:var(--muted);font-size:12.5px;font-style:italic;padding:8px 0}
 
-  /* ── article header ── */
-  .article{background:var(--paper);border:1px solid var(--rule)}
-  .article-header{padding:20px 24px 16px;border-bottom:1px solid var(--ink);background:var(--bg)}
-  .article-header .kicker{
-    color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px;
-  }
-  .article-header .label{font-size:30px;font-weight:500;margin:0 0 8px;letter-spacing:-0.02em;line-height:1.1;color:var(--ink)}
-  .article-header .desc{color:var(--muted);font-size:14.5px;max-width:780px;line-height:1.55}
-  .article-header .aliases{margin-top:10px;color:var(--muted);font-size:12px}
-  .article-header .aliases span.alias{
-    background:var(--soft);padding:1px 7px;margin-right:4px;
-    display:inline-block;font-family:var(--mono);font-size:11px;
-  }
+  /* holdings table */
+  .holdings{width:100%;border-collapse:collapse;margin:8px 0;font-size:13px}
+  .holdings th{text-align:left;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;font-weight:500;padding:8px 14px 8px 0;border-bottom:1px solid var(--ink);white-space:nowrap}
+  .holdings td{padding:8px 14px 8px 0;border-bottom:1px solid var(--rule-soft);font-size:13.5px;vertical-align:top}
+  .holdings tr:last-child td{border-bottom:0}
+  .holdings .n{text-align:right;font-family:var(--mono);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .holdings .pre{font-family:var(--mono);color:var(--red);font-size:12px;letter-spacing:0.04em;white-space:nowrap}
+  .holdings a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
+  .holdings a:hover{border-bottom-color:var(--copper-deep)}
 
-  .area{padding:22px 28px;border-bottom:1px solid var(--rule)}
-  .area:last-child{border-bottom:none}
-  .area-title{
-    font-family:var(--mono);font-size:10px;color:var(--ink);letter-spacing:0.22em;text-transform:uppercase;
-    font-weight:500;margin:0 0 16px;padding-bottom:8px;border-bottom:1px solid var(--rule);
-    display:flex;justify-content:space-between;align-items:baseline;
-  }
-  .area-title span{color:var(--muted);font-weight:400;font-size:10px;letter-spacing:0.08em}
+  /* export bar */
+  .export-bar{margin-top:48px;padding-top:18px;border-top:1px solid var(--ink);display:flex;gap:1px;background:var(--ink);width:fit-content}
+  .export-bar .btn{font:inherit;font-size:12.5px;height:34px;padding:0 16px;border:0;cursor:pointer;background:var(--bg);color:var(--ink);display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+  .export-bar .btn:first-child{background:var(--ink);color:var(--bg)}
+  .export-bar .btn:hover{background:var(--soft)}
+  .export-bar .btn:first-child:hover{background:#000}
+  .export-bar .btn:disabled{opacity:0.4;cursor:not-allowed}
+  .export-bar .btn:disabled:hover{background:var(--bg);color:var(--ink)}
+  .export-bar .btn:first-child:disabled:hover{background:var(--ink);color:var(--bg)}
 
-  /* ── holdings summary ── */
-  .holdings-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:6px}
-  .holding-card{background:var(--bg);border:1px solid var(--rule);padding:12px 14px}
-  .holding-card .num{font-size:28px;font-weight:500;color:var(--ink);line-height:1;margin-bottom:4px;letter-spacing:-0.02em}
-  .holding-card .kind{font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:0.04em}
-  .holdings-total{margin-top:10px;font-size:12px;color:var(--muted);font-style:italic}
-
-  /* ── export ── */
-  .export-row{display:flex;gap:1px;background:var(--ink);width:fit-content;margin-top:8px}
-  .btn{
-    padding:0 16px;height:34px;background:var(--bg);color:var(--ink);
-    font-family:var(--mono);font-size:12px;border:0;cursor:pointer;letter-spacing:0.04em;
-    display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
-  }
-  .btn:hover{background:var(--soft)}
-  .btn:first-child{background:var(--ink);color:var(--bg)}
-  .btn:first-child:hover{background:#000}
-  .btn:disabled{opacity:0.4;cursor:not-allowed}
-  .btn:disabled:hover{background:var(--bg);color:var(--ink)}
-  .export-note{color:var(--muted);font-size:11px;font-family:var(--mono);margin-top:10px;font-style:italic}
-
-  /* ── holdings list ── */
-  .holdings-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule)}
-  .h-item{
-    background:var(--bg);padding:12px 14px;
-    text-decoration:none;color:inherit;display:block;font-size:12.5px;
-    transition:background 0.1s;
-  }
-  .h-item:hover{background:var(--paper)}
-  .h-item .h-qid{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:3px;letter-spacing:0.04em}
-  .h-item .h-label{color:var(--ink);font-weight:500;margin-bottom:2px;letter-spacing:-0.005em}
-  .h-item .h-type{color:var(--muted);font-size:11px;font-style:italic}
-  .holdings-overflow{margin-top:12px;color:var(--muted);font-size:11px;font-family:var(--mono)}
-
-  /* ── footer meta ── */
-  .footer-meta{
-    margin-top:24px;padding-top:16px;border-top:1px dotted var(--rule);
-    font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.04em;
-  }
+  /* footer meta */
+  .footer-meta{margin-top:24px;padding-top:16px;border-top:1px dotted var(--rule);font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.04em}
   .footer-meta a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
 
-  .fa-toc a,.fa-section-head .l > *,.fa-section-head .r{white-space:nowrap}
+  .fa-section-head .l > *{white-space:nowrap}
 
   @media(max-width:720px){
     .fa-layout{grid-template-columns:1fr}
     .fa-toc{display:none}
-    .field{grid-template-columns:1fr;gap:4px}
-    .field .key{font-size:10px}
-    .article-header .label{font-size:22px}
+    .fa-kv .row{grid-template-columns:1fr;gap:4px}
   }
 </style>
 </head>
@@ -173,15 +111,21 @@
 
   <div id="status" class="status">Loading collection…</div>
 
-  <article class="article" id="article" style="display:none;">
-    <div class="article-header">
-      <div class="kicker" id="kicker">Source Collection</div>
-      <div class="label" id="label"></div>
-      <div class="desc" id="desc"></div>
-      <div class="aliases" id="aliases" style="display:none;"></div>
+  <div id="fa-page" style="display:none">
+
+    <div class="page-stamp">
+      <span class="n">FA · <span id="ps-archid">—</span></span>
+      <span>Source collection · Finding aid</span>
+    </div>
+    <h1 class="page-title" id="page-title">Collection</h1>
+    <div class="page-sub" id="page-sub">
+      <span><span class="archid-mono" id="ps-archid-sub">—</span></span>
+      <span><b id="ps-count">—</b> items</span>
+      <span>·</span>
+      <span>Held by the Foundation</span>
     </div>
 
-    <div class="fa-layout" style="padding:28px 0">
+    <div class="fa-layout" style="margin-top:40px">
 
       <aside class="fa-toc">
         <div class="hd">ISAD(G) sections</div>
@@ -190,8 +134,9 @@
           <li><span class="n">02</span><a href="#area-context">Context</a></li>
           <li><span class="n">03</span><a href="#area-content">Content &amp; structure</a></li>
           <li><span class="n">04</span><a href="#area-conditions">Conditions of access</a></li>
-          <li><span class="n">05</span><a href="#area-holdings">Holdings summary</a></li>
-          <li><span class="n">06</span><a href="#area-list">Holdings list</a></li>
+          <li><span class="n">05</span><a href="#area-allied">Allied materials</a></li>
+          <li><span class="n">06</span><a href="#area-control">Description control</a></li>
+          <li><span class="n">07</span><a href="#area-holdings">Holdings summary</a></li>
         </ol>
       </aside>
 
@@ -225,45 +170,41 @@
           <div id="conditions-fields"></div>
         </section>
 
+        <section class="fa-section" id="area-allied">
+          <div class="fa-section-head">
+            <div class="l"><span class="n">05</span> Allied materials</div>
+          </div>
+          <div id="allied-fields"></div>
+        </section>
+
+        <section class="fa-section" id="area-control">
+          <div class="fa-section-head">
+            <div class="l"><span class="n">06</span> Description control</div>
+          </div>
+          <div id="control-fields"></div>
+        </section>
+
         <section class="fa-section" id="area-holdings">
           <div class="fa-section-head">
-            <div class="l"><span class="n">05</span> Holdings summary</div>
+            <div class="l"><span class="n">07</span> Holdings summary</div>
+            <div class="r" id="holdings-note">Loading…</div>
           </div>
-          <div id="holdings-summary-host">
+          <div id="holdings-host">
             <div class="area-empty">Counting items in this collection…</div>
           </div>
         </section>
 
-        <section class="fa-section">
-          <div class="fa-section-head">
-            <div class="l"><span class="n">—</span> Export</div>
-          </div>
-          <div class="export-row">
-            <button class="btn" id="btn-csv" disabled>↓ Export CSV</button>
-            <button class="btn" id="btn-json" disabled>Export JSON</button>
-          </div>
-          <div class="export-note" id="export-note">Waiting for holdings to load…</div>
-        </section>
-
-        <section class="fa-section" id="area-list">
-          <div class="fa-section-head">
-            <div class="l"><span class="n">06</span> Holdings <span id="holdings-count-inline" style="color:var(--muted);font-weight:400;font-size:10px;letter-spacing:0.06em"></span></div>
-          </div>
-          <div id="holdings-list-host">
-            <div class="area-empty">Loading items…</div>
-          </div>
-        </section>
-
-        <section class="fa-section" id="area-other" style="display:none;">
-          <div class="fa-section-head">
-            <div class="l"><span class="n">—</span> Other statements</div>
-          </div>
-          <div id="other-fields"></div>
-        </section>
+        <div class="export-bar">
+          <button class="btn" id="btn-json" disabled type="button"><span style="font-family:var(--mono)">↓</span> Export as JSON</button>
+          <button class="btn" id="btn-csv" disabled type="button">Export as CSV</button>
+          <button class="btn" disabled type="button">EAD finding aid</button>
+          <button class="btn" disabled type="button">Print as PDF</button>
+        </div>
 
       </div>
     </div>
-  </article>
+
+  </div>
 
   <div class="footer-meta" id="footer-meta" style="display:none;"></div>
 
@@ -276,92 +217,67 @@
 </div>
 
 <script>
-  // ---------------------------------------------------------------------
-  // Configuration
-  // ---------------------------------------------------------------------
+  // ── configuration ─────────────────────────────────────────────────────────
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
-  const API_URL = WIKIBASE_URL + "/w/api.php";
-  const SPARQL_URL = WIKIBASE_URL + "/query/sparql";
-  const HOLDINGS_PREVIEW_LIMIT = 60;   // items shown inline; export covers all
-  const HOLDINGS_EXPORT_LIMIT = 5000;  // cap on the export query
+  const API_URL      = WIKIBASE_URL + "/w/api.php";
+  const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
+  const HOLDINGS_EXPORT_LIMIT = 5000;
 
-  // Map ISAD(G)-style finding-aid sections to property labels. As your
-  // Institution spec grows (extent, scope and content, conditions of
-  // access, etc.), add the labels here and they appear in the right area.
+  // ISAD(G) section → property labels
   const AREAS = {
     "identity-fields": [
-      "instance of",
-      "level of description",
-      "title",
-      "founded",
-      "dissolved",
-      "date of creation",
-      "start date",
-      "end date",
-      "extent",
-      "extent and medium",
-      "fonds reference",
-      "hh archive id",
-      "isil",
+      "instance of", "level of description", "title", "founded", "dissolved",
+      "date of creation", "start date", "end date", "extent", "extent and medium",
+      "fonds reference", "hh archive id", "isil",
     ],
     "context-fields": [
-      "name of creator",
-      "creator",
-      "founder",
-      "director",
-      "custodian",
-      "parent collection",
-      "headquarters",
-      "location",
-      "biographical history",
-      "administrative history",
-      "immediate source of acquisition",
-      "acquisition date",
+      "name of creator", "creator", "founder", "director", "custodian",
+      "parent collection", "headquarters", "location", "biographical history",
+      "administrative history", "custodial history",
+      "immediate source of acquisition", "acquisition date",
     ],
     "content-fields": [
-      "scope and content",
-      "accruals",
-      "system of arrangement",
-      "appraisal",
+      "scope and content", "accruals", "system of arrangement",
+      "appraisal", "appraisal and destruction",
     ],
     "conditions-fields": [
-      "conditions governing access",
-      "conditions of access",
-      "conditions governing reproduction",
-      "rights",
-      "copyright status",
-      "copyright holder",
-      "language of material",
-      "language",
-      "finding aid url",
-      "accession policy url",
-      "official website",
-      "wikidata id",
+      "conditions governing access", "conditions of access",
+      "conditions governing reproduction", "rights", "copyright status",
+      "copyright holder", "language of material", "language",
+      "physical condition", "finding aid url", "accession policy url",
+      "official website", "wikidata id",
+    ],
+    "allied-fields": [
+      "related units", "related materials", "publication note",
+      "copies", "existence of copies", "originals",
+    ],
+    "control-fields": [
+      "archivist's note", "rules and conventions", "date of description",
+      "rules", "conventions", "description level",
     ],
   };
 
-  // Property labels we don't want to repeat in "Other statements" since they
-  // appear in the header (label/description/aliases handle themselves).
   const SUPPRESS_FROM_OTHER = new Set();
   Object.values(AREAS).flat().forEach(k => SUPPRESS_FROM_OTHER.add(k));
 
-  // ---------------------------------------------------------------------
-  // Helpers
-  // ---------------------------------------------------------------------
+  // ── helpers ───────────────────────────────────────────────────────────────
+
   function escapeHTML(s) {
     if (s == null) return "";
-    return String(s).replace(/[&<>"']/g, c => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-    }[c]));
+    return String(s).replace(/[&<>"']/g,
+      c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   }
+
   function setStatus(msg, cls) {
     const el = document.getElementById("status");
     el.textContent = msg;
     el.className = "status" + (cls ? " " + cls : "");
   }
+
   function getQID() {
     return new URLSearchParams(window.location.search).get("id");
   }
+
   function qidFromURI(uri) { return uri.split("/").pop(); }
 
   async function fetchEntity(qid) {
@@ -406,16 +322,14 @@
     return json.results.bindings;
   }
 
-  // ---------------------------------------------------------------------
-  // Formatting datavalues (mirrors item.html with the same idiom)
-  // ---------------------------------------------------------------------
-  function formatValue(dv, labels) {
+  // ── formatting ────────────────────────────────────────────────────────────
+
+  function formatValue(dv, valueLabels) {
     if (!dv) return "";
-    const t = dv.type;
-    const v = dv.value;
+    const t = dv.type, v = dv.value;
     if (t === "wikibase-entityid") {
-      const id = v.id;
-      const label = labels[id] || id;
+      const id    = v.id;
+      const label = valueLabels[id] || id;
       if (id.startsWith("Q")) {
         return `<a class="qlink" href="item.html?id=${encodeURIComponent(id)}">${escapeHTML(label)}</a>`;
       }
@@ -427,64 +341,45 @@
       }
       return `<span class="stringval">${escapeHTML(v)}</span>`;
     }
-    if (t === "monolingualtext") {
-      return escapeHTML(v.text);
-    }
+    if (t === "monolingualtext") return escapeHTML(v.text);
     if (t === "time") {
-      const isoIsh = v.time.replace(/^\+/, "");
-      const [date] = isoIsh.split("T");
-      const [y, m, d] = date.split("-");
-      let display = y;
-      if (v.precision >= 10) display = `${y}-${m}`;
-      if (v.precision >= 11) display = `${y}-${m}-${d}`;
-      return `<span class="stringval">${escapeHTML(display)}</span>`;
+      const [y, m, d] = v.time.replace(/^\+/, "").split("T")[0].split("-");
+      if (v.precision >= 11) return `<span class="stringval">${y}-${m}-${d}</span>`;
+      if (v.precision >= 10) return `<span class="stringval">${y}-${m}</span>`;
+      return `<span class="stringval">${y}</span>`;
     }
-    if (t === "quantity") {
-      return `<span class="stringval">${escapeHTML(v.amount.replace(/^\+/, ""))}</span>`;
-    }
-    if (t === "globecoordinate") {
-      return `<span class="stringval">${v.latitude.toFixed(4)}, ${v.longitude.toFixed(4)}</span>`;
-    }
-    if (t === "url") {
-      return `<a class="external" href="${escapeHTML(v)}" target="_blank" rel="noopener">${escapeHTML(v)}</a>`;
-    }
+    if (t === "quantity") return `<span class="stringval">${v.amount.replace(/^\+/, "")}</span>`;
+    if (t === "globecoordinate") return `<span class="stringval">${v.latitude.toFixed(4)}, ${v.longitude.toFixed(4)}</span>`;
+    if (t === "url") return `<a class="external" href="${escapeHTML(v)}" target="_blank" rel="noopener">${escapeHTML(v)}</a>`;
     return `<span class="stringval">${escapeHTML(JSON.stringify(v))}</span>`;
   }
 
-  function formatClaim(claim, labels) {
+  function formatClaim(claim, valueLabels) {
     if (!claim.mainsnak || claim.mainsnak.snaktype !== "value") return "";
-    return `<span class="multival">${formatValue(claim.mainsnak.datavalue, labels)}</span>`;
+    return `<span class="multival">${formatValue(claim.mainsnak.datavalue, valueLabels)}</span>`;
   }
 
-  // ---------------------------------------------------------------------
-  // Render header & statement areas
-  // ---------------------------------------------------------------------
-  function renderHeader(entity, isCollection) {
-    const qid = entity.id;
-    const label = entity.labels && entity.labels.en ? entity.labels.en.value : qid;
-    const desc = entity.descriptions && entity.descriptions.en ? entity.descriptions.en.value : "";
-    const aliases = entity.aliases && entity.aliases.en ? entity.aliases.en.map(a => a.value) : [];
+  // ── render page header ────────────────────────────────────────────────────
+
+  function renderPageHeader(entity, archiveId) {
+    const qid   = entity.id;
+    const label = entity.labels?.en?.value || qid;
 
     document.title = label + " — Hunter House Archive";
-    document.getElementById("kicker").textContent = (isCollection ? "Source Collection" : "Institution") + " · " + qid;
-    document.getElementById("label").textContent = label;
-    document.getElementById("desc").textContent = desc;
+    document.getElementById("crumb-label").textContent = label;
+    document.getElementById("page-title").textContent  = label + ".";
 
-    // Update crumb
-    const crumbLabel = document.getElementById("crumb-label");
-    if (crumbLabel) crumbLabel.textContent = label || qid;
-
-    if (aliases.length > 0) {
-      const al = document.getElementById("aliases");
-      al.style.display = "";
-      al.innerHTML = `also known as: ` +
-        aliases.map(a => `<span class="alias">${escapeHTML(a)}</span>`).join("");
-    }
+    const aid = archiveId || qid;
+    document.getElementById("ps-archid").textContent     = aid;
+    document.getElementById("ps-archid-sub").textContent = aid;
   }
 
+  // ── render ISAD(G) sections ───────────────────────────────────────────────
+
   function renderAreas(claims, propLabels, valueLabels) {
-    // Group claims by which area their property label maps to.
-    const buckets = { "identity-fields": [], "context-fields": [], "content-fields": [], "conditions-fields": [], "other-fields": [] };
+    const buckets = {};
+    for (const key of Object.keys(AREAS)) buckets[key] = [];
+    buckets["other-fields"] = [];
 
     for (const pid in claims) {
       const propLabel = (propLabels[pid] || pid).toLowerCase();
@@ -503,41 +398,43 @@
 
     function renderInto(hostId, group) {
       const host = document.getElementById(hostId);
+      if (!host) return;
       if (group.length === 0) {
         host.innerHTML = `<div class="area-empty">No statements in this area yet.</div>`;
         return;
       }
-      host.innerHTML = group.map(({ pid, propLabel, claims }) => `
-        <div class="field">
-          <div class="key">${escapeHTML(propLabel)}<small>${escapeHTML(pid)}</small></div>
-          <div class="val">${claims.map(c => formatClaim(c, valueLabels)).join("")}</div>
-        </div>
-      `).join("");
+      const dl = document.createElement("dl");
+      dl.className = "fa-kv";
+      group.forEach(({ propLabel, claims }) => {
+        const row = document.createElement("div");
+        row.className = "row";
+        const dt = document.createElement("dt");
+        dt.textContent = propLabel;
+        const dd = document.createElement("dd");
+        dd.innerHTML = claims
+          .map(c => formatClaim(c, valueLabels))
+          .filter(Boolean)
+          .join("");
+        row.appendChild(dt);
+        row.appendChild(dd);
+        dl.appendChild(row);
+      });
+      host.appendChild(dl);
     }
 
-    renderInto("identity-fields", buckets["identity-fields"]);
-    renderInto("context-fields", buckets["context-fields"]);
-    renderInto("content-fields", buckets["content-fields"]);
+    renderInto("identity-fields",   buckets["identity-fields"]);
+    renderInto("context-fields",    buckets["context-fields"]);
+    renderInto("content-fields",    buckets["content-fields"]);
     renderInto("conditions-fields", buckets["conditions-fields"]);
-
-    if (buckets["other-fields"].length > 0) {
-      document.getElementById("area-other").style.display = "";
-      renderInto("other-fields", buckets["other-fields"]);
-    }
+    renderInto("allied-fields",     buckets["allied-fields"]);
+    renderInto("control-fields",    buckets["control-fields"]);
   }
 
-  // ---------------------------------------------------------------------
-  // Holdings: find items that point at this collection.
-  //
-  // We try the "named" path first (items linked via a property labeled
-  // "source collection"). If that returns nothing, we fall back to "any
-  // incoming property" — useful while the property vocabulary is still
-  // being created and labels haven't stabilized.
-  // ---------------------------------------------------------------------
+  // ── holdings ──────────────────────────────────────────────────────────────
+
   async function fetchHoldings(qid) {
     const entityURI = WIKIBASE_URL + "/entity/" + qid;
 
-    // Phase 1: items linked via a "source collection"-labeled property
     const namedQ = `
       SELECT DISTINCT ?item ?itemLabel ?type ?typeLabel WHERE {
         ?prop <http://wikiba.se/ontology#directClaim> ?direct .
@@ -550,20 +447,13 @@
           ?item ?typeDirect ?type .
           OPTIONAL { ?type rdfs:label ?typeLabel . FILTER(LANG(?typeLabel) = "en") }
         }
-      }
-      LIMIT ${HOLDINGS_EXPORT_LIMIT}
-    `;
+      } LIMIT ${HOLDINGS_EXPORT_LIMIT}`;
 
     let rows = [];
-    try {
-      rows = await sparql(namedQ);
-    } catch (e) {
-      console.warn("named-property holdings query failed:", e);
-    }
+    try { rows = await sparql(namedQ); } catch (e) { console.warn("named holdings query failed:", e); }
 
     if (rows.length > 0) return { rows, mode: "named" };
 
-    // Phase 2: any incoming reference
     const anyQ = `
       SELECT DISTINCT ?item ?itemLabel ?type ?typeLabel WHERE {
         ?item ?p <${entityURI}> .
@@ -575,157 +465,136 @@
           ?item ?typeDirect ?type .
           OPTIONAL { ?type rdfs:label ?typeLabel . FILTER(LANG(?typeLabel) = "en") }
         }
-      }
-      LIMIT ${HOLDINGS_EXPORT_LIMIT}
-    `;
-    try {
-      rows = await sparql(anyQ);
-    } catch (e) {
-      console.warn("any-incoming holdings query failed:", e);
-      rows = [];
-    }
+      } LIMIT ${HOLDINGS_EXPORT_LIMIT}`;
+
+    try { rows = await sparql(anyQ); } catch (e) { console.warn("any-incoming query failed:", e); rows = []; }
     return { rows, mode: "any" };
   }
 
-  function renderHoldings(rows, mode) {
-    // De-dupe by item qid; keep first type per item
+  function renderHoldings(rows) {
     const map = new Map();
     rows.forEach(r => {
       const qid = qidFromURI(r.item.value);
       if (!map.has(qid)) {
         map.set(qid, {
           qid,
-          label: r.itemLabel ? r.itemLabel.value : null,
-          typeQID: r.type ? qidFromURI(r.type.value) : null,
-          typeLabel: r.typeLabel ? r.typeLabel.value : null,
+          label:     r.itemLabel  ? r.itemLabel.value  : null,
+          typeQID:   r.type       ? qidFromURI(r.type.value) : null,
+          typeLabel: r.typeLabel  ? r.typeLabel.value  : null,
         });
       }
     });
     const items = [...map.values()];
 
-    // Summary by type
+    // Update count in page-sub
+    document.getElementById("ps-count").textContent = items.length;
+
+    // Group by type for table
     const byType = {};
     items.forEach(it => {
       const key = it.typeLabel || it.typeQID || "Untyped";
       byType[key] = (byType[key] || 0) + 1;
     });
 
-    const summaryHost = document.getElementById("holdings-summary-host");
+    const host = document.getElementById("holdings-host");
+    const noteEl = document.getElementById("holdings-note");
+
     if (items.length === 0) {
-      summaryHost.innerHTML = `<div class="area-empty">No items currently point at this collection.</div>`;
+      host.innerHTML = `<div class="area-empty">No items currently point at this collection.</div>`;
+      noteEl.textContent = "0 items";
     } else {
       const typeKeys = Object.keys(byType).sort((a, b) => byType[b] - byType[a]);
-      summaryHost.innerHTML = `
-        <div class="holdings-summary">
-          ${typeKeys.map(k => `
-            <div class="holding-card">
-              <div class="num">${byType[k]}</div>
-              <div class="kind">${escapeHTML(k)}</div>
-            </div>
-          `).join("")}
-        </div>
-        <div class="holdings-total">
-          ${items.length} ${items.length === 1 ? "item" : "items"} total
-          ${mode === "any" ? ' — counted via any incoming reference (no "source collection" property defined yet)' : ' — items with explicit "source collection" links'}
-        </div>
-      `;
+      const tableRows = typeKeys.map(k =>
+        `<tr>
+          <td class="pre">HH</td>
+          <td><a href="browse.html?type=${encodeURIComponent(k)}">${escapeHTML(k)}</a></td>
+          <td>—</td>
+          <td class="n">${byType[k]}</td>
+        </tr>`
+      ).join("");
+      host.innerHTML = `
+        <table class="holdings">
+          <thead>
+            <tr>
+              <th style="width:100px">Prefix</th>
+              <th>Type</th>
+              <th>Predominant dates</th>
+              <th class="n" style="width:60px">Count</th>
+            </tr>
+          </thead>
+          <tbody>${tableRows}</tbody>
+        </table>`;
+      noteEl.textContent = "by type · " + items.length + " total";
     }
 
-    // Inline list (capped)
-    const listHost = document.getElementById("holdings-list-host");
-    const inlineCount = document.getElementById("holdings-count-inline");
-    inlineCount.textContent = items.length > 0 ? `(${items.length} total)` : "";
-
-    if (items.length === 0) {
-      listHost.innerHTML = `<div class="area-empty">Nothing to list.</div>`;
-    } else {
-      const preview = items.slice(0, HOLDINGS_PREVIEW_LIMIT);
-      listHost.innerHTML = `
-        <div class="holdings-list">
-          ${preview.map(it => `
-            <a class="h-item" href="item.html?id=${encodeURIComponent(it.qid)}">
-              <div class="h-qid">${escapeHTML(it.qid)}</div>
-              <div class="h-label">${escapeHTML(it.label || it.qid)}</div>
-              <div class="h-type">${escapeHTML(it.typeLabel || "untyped")}</div>
-            </a>
-          `).join("")}
-        </div>
-        ${items.length > HOLDINGS_PREVIEW_LIMIT
-          ? `<div class="holdings-overflow">Showing ${HOLDINGS_PREVIEW_LIMIT} of ${items.length}. Use the CSV/JSON export above to retrieve the full list.</div>`
-          : ""}
-      `;
-    }
-
-    // Wire up export
+    // Enable exports
     if (items.length > 0) {
-      document.getElementById("btn-csv").disabled = false;
+      document.getElementById("btn-csv").disabled  = false;
       document.getElementById("btn-json").disabled = false;
-      document.getElementById("export-note").textContent = `${items.length} items ready to export.`;
-      document.getElementById("btn-csv").onclick = () => exportCSV(items);
-      document.getElementById("btn-json").onclick = () => exportJSON(items);
-    } else {
-      document.getElementById("export-note").textContent = "No items to export.";
+      document.getElementById("btn-csv").onclick   = () => exportCSV(items);
+      document.getElementById("btn-json").onclick  = () => exportJSON(items);
     }
   }
 
-  // ---------------------------------------------------------------------
-  // Export
-  // ---------------------------------------------------------------------
+  // ── export ────────────────────────────────────────────────────────────────
+
   function downloadBlob(content, filename, mime) {
     const blob = new Blob([content], { type: mime });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
   }
+
   function csvEscape(s) {
     if (s == null) return "";
     const str = String(s);
     if (/[",\n\r]/.test(str)) return `"${str.replace(/"/g, '""')}"`;
     return str;
   }
+
   function collectionSlug() {
-    const label = document.getElementById("label").textContent || "collection";
+    const label = document.getElementById("page-title").textContent || "collection";
     return label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   }
+
   function exportCSV(items) {
     const headers = ["qid", "label", "type_qid", "type_label", "wikibase_url"];
-    const rows = items.map(it => [
-      it.qid,
-      it.label || "",
-      it.typeQID || "",
-      it.typeLabel || "",
+    const rows    = items.map(it => [
+      it.qid, it.label || "", it.typeQID || "", it.typeLabel || "",
       WIKIBASE_URL + "/wiki/Item:" + it.qid,
     ]);
-    const csv = [headers, ...rows].map(r => r.map(csvEscape).join(",")).join("\n");
-    downloadBlob(csv, `${collectionSlug()}-holdings.csv`, "text/csv;charset=utf-8");
-  }
-  function exportJSON(items) {
-    const payload = {
-      collection: {
-        qid: getQID(),
-        label: document.getElementById("label").textContent,
-        wikibase_url: WIKIBASE_URL + "/wiki/Item:" + getQID(),
-        exported_at: new Date().toISOString(),
-      },
-      holdings: items.map(it => ({
-        qid: it.qid,
-        label: it.label,
-        type_qid: it.typeQID,
-        type_label: it.typeLabel,
-        wikibase_url: WIKIBASE_URL + "/wiki/Item:" + it.qid,
-      })),
-    };
-    downloadBlob(JSON.stringify(payload, null, 2), `${collectionSlug()}-holdings.json`, "application/json");
+    downloadBlob(
+      [headers, ...rows].map(r => r.map(csvEscape).join(",")).join("\n"),
+      collectionSlug() + "-holdings.csv", "text/csv;charset=utf-8"
+    );
   }
 
-  // ---------------------------------------------------------------------
-  // Main
-  // ---------------------------------------------------------------------
+  function exportJSON(items) {
+    const qid = getQID();
+    downloadBlob(
+      JSON.stringify({
+        collection: {
+          qid,
+          label: document.getElementById("page-title").textContent,
+          wikibase_url: WIKIBASE_URL + "/wiki/Item:" + qid,
+          exported_at:  new Date().toISOString(),
+        },
+        holdings: items.map(it => ({
+          qid:         it.qid,
+          label:       it.label,
+          type_qid:    it.typeQID,
+          type_label:  it.typeLabel,
+          wikibase_url: WIKIBASE_URL + "/wiki/Item:" + it.qid,
+        })),
+      }, null, 2),
+      collectionSlug() + "-holdings.json", "application/json"
+    );
+  }
+
+  // ── main ──────────────────────────────────────────────────────────────────
+
   (async function main() {
     const qid = getQID();
     if (!qid) {
@@ -739,53 +608,46 @@
         return;
       }
 
-      // Verify this is plausibly an archival collection by inspecting
-      // `instance of` value labels — but render anyway if it isn't.
-      // (Useful for previewing the page on any Institution Item.)
-
-      // Collect IDs to resolve
-      const propIDs = new Set();
+      const propIDs   = new Set();
       const valueQIDs = new Set();
-      const claims = entity.claims || {};
+      const claims    = entity.claims || {};
       for (const pid in claims) {
         propIDs.add(pid);
         claims[pid].forEach(c => {
-          if (c.mainsnak && c.mainsnak.datavalue && c.mainsnak.datavalue.type === "wikibase-entityid") {
+          if (c.mainsnak?.datavalue?.type === "wikibase-entityid") {
             valueQIDs.add(c.mainsnak.datavalue.value.id);
           }
         });
       }
-      const labels = await fetchLabels([...propIDs, ...valueQIDs]);
-      const propLabels = {}; propIDs.forEach(p => propLabels[p] = labels[p] || p);
-      const valueLabels = {}; valueQIDs.forEach(q => valueLabels[q] = labels[q] || q);
 
-      // Determine if this looks like an archival collection (heuristic on instance-of label)
-      let isCollection = false;
+      const labels      = await fetchLabels([...propIDs, ...valueQIDs]);
+      const propLabels  = {}; propIDs.forEach(p   => propLabels[p]  = labels[p]  || p);
+      const valueLabels = {}; valueQIDs.forEach(q => valueLabels[q] = labels[q]  || q);
+
+      // Extract archive ID for page header
+      let archiveId = null;
       for (const pid in claims) {
-        if ((propLabels[pid] || "").toLowerCase() === "instance of") {
-          claims[pid].forEach(c => {
-            if (c.mainsnak && c.mainsnak.datavalue && c.mainsnak.datavalue.type === "wikibase-entityid") {
-              const lbl = (valueLabels[c.mainsnak.datavalue.value.id] || "").toLowerCase();
-              if (lbl === "archive" || lbl === "archival collection") isCollection = true;
-            }
-          });
+        if ((propLabels[pid] || "").toLowerCase() === "hh archive id") {
+          const c = claims[pid][0];
+          if (c?.mainsnak?.snaktype === "value" && c.mainsnak.datavalue.type === "string") {
+            archiveId = c.mainsnak.datavalue.value;
+          }
         }
       }
 
-      renderHeader(entity, isCollection);
+      renderPageHeader(entity, archiveId);
       renderAreas(claims, propLabels, valueLabels);
 
-      // Footer
       const fm = document.getElementById("footer-meta");
       fm.style.display = "";
-      fm.innerHTML = `<a href="${WIKIBASE_URL}/wiki/Item:${qid}" target="_blank" rel="noopener">${WIKIBASE_URL}/wiki/Item:${qid}</a> · <a href="item.html?id=${encodeURIComponent(qid)}">View raw statements →</a>`;
+      fm.innerHTML = `<a href="${WIKIBASE_URL}/wiki/Item:${qid}" target="_blank" rel="noopener">${WIKIBASE_URL}/wiki/Item:${qid}</a>` +
+        ` · <a href="item.html?id=${encodeURIComponent(qid)}">View raw statements →</a>`;
 
-      // Reveal article, then load holdings asynchronously
       document.getElementById("status").style.display = "none";
-      document.getElementById("article").style.display = "";
+      document.getElementById("fa-page").style.display = "";
 
-      const { rows, mode } = await fetchHoldings(qid);
-      renderHoldings(rows, mode);
+      const { rows } = await fetchHoldings(qid);
+      renderHoldings(rows);
 
     } catch (err) {
       console.error(err);
