@@ -1,312 +1,215 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
 <title>Hunter House Foundation</title>
+<meta name="viewport" content="width=1400">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/verso.css">
 <style>
-  :root {
-    --ink: #202020;
-    --muted: #6a6a6a;
-    --rule: #e2e2e2;
-    --soft: #f7f5f0;
-    --link: #2a4a8b;
-    --accent: #8b3a2a;
-    --note: #8a7a3a;
-    --paper: #f4f0e6;
-    --bg: #fafaf7;
+  .hero{padding:64px 0 56px;border-bottom:1px solid var(--ink);margin-bottom:48px}
+  .hero-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:64px;align-items:end}
+  .hero-note{max-width:760px}
+  .hero-note .stamp{
+    font-family:var(--mono);font-size:10.5px;color:var(--red);letter-spacing:0.22em;text-transform:uppercase;
+    margin-bottom:28px;font-weight:500;display:flex;gap:14px;align-items:baseline;white-space:nowrap;
   }
-  * { box-sizing: border-box; }
-  body {
-    font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    color: var(--ink);
-    background: var(--bg);
-    margin: 0;
-    line-height: 1.5;
-    font-size: 14px;
+  .hero-note .stamp .n{color:var(--muted);font-weight:400}
+  .hero-note blockquote{font-size:56px;font-weight:300;color:var(--ink);letter-spacing:-0.025em;line-height:1.05}
+  .hero-note .attr{
+    font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;
+    margin-top:30px;display:flex;gap:14px;align-items:baseline;
   }
+  .hero-note .attr b{color:var(--ink);font-weight:500}
+  .hero-meta{display:grid;grid-template-columns:auto 1fr;gap:14px 16px;align-self:end;font-size:13px;line-height:1.55}
+  .hero-meta dt{
+    font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.18em;text-transform:uppercase;
+    white-space:nowrap;padding-top:2px;
+  }
+  .hero-meta dd{color:var(--ink);letter-spacing:-0.005em}
+  .hero-meta dd b{font-weight:500}
+  .hero-meta dd a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
 
-  /* Shared site header */
-  .site-header {
-    border-bottom: 1px solid var(--rule);
-    background: white;
-    padding: 18px 0 14px;
+  .epigraph{
+    display:grid;grid-template-columns:1fr 240px;gap:48px;align-items:end;
+    padding:24px 0 28px 24px;margin-bottom:64px;
+    border-left:2px solid var(--copper);max-width:1080px;
   }
-  .site-frame {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 32px;
-    flex-wrap: wrap;
+  .epigraph blockquote{font-size:23px;line-height:1.45;color:var(--ink);letter-spacing:-0.01em;font-weight:300}
+  .epigraph .attr{
+    font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:0.14em;text-transform:uppercase;
+    text-align:right;line-height:1.7;
   }
-  .site-brand {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 18px;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-  }
-  .site-brand a { color: var(--ink); text-decoration: none; }
-  .site-brand .sub { color: var(--muted); font-weight: 400; }
-  .site-nav { display: flex; gap: 22px; flex-wrap: wrap; }
-  .site-nav a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 13.5px;
-    letter-spacing: 0.02em;
-    padding-bottom: 4px;
-    border-bottom: 1px solid transparent;
-  }
-  .site-nav a:hover { color: var(--ink); }
-  .site-nav a.current { color: var(--ink); border-bottom-color: var(--accent); }
+  .epigraph .attr b{color:var(--ink);font-weight:500;display:block}
 
-  .frame {
-    max-width: 1080px;
-    margin: 0 auto;
-    padding: 56px 32px 80px;
+  .lede-row{display:grid;grid-template-columns:1fr 1.4fr;gap:48px;margin-bottom:56px;align-items:start}
+  .lede-row .stamp-head{
+    font-family:var(--mono);font-size:11px;color:var(--red);letter-spacing:0.22em;text-transform:uppercase;
+    padding-bottom:10px;border-bottom:1px solid var(--ink);margin-bottom:18px;font-weight:500;
   }
+  .lede-row p{font-size:16px;line-height:1.6;color:var(--ink);margin-bottom:16px;letter-spacing:-0.005em}
 
-  /* Hero */
-  .hero {
-    margin-bottom: 64px;
+  .featured-band{
+    background:var(--paper);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+    margin:0 -36px 64px;padding:24px 36px;
+    display:grid;grid-template-columns:repeat(5,1fr);gap:14px;align-items:start;
   }
-  .hero .epigraph {
-    border-top: 1px solid var(--accent);
-    border-bottom: 1px solid var(--accent);
-    background: #fbf7ee;
-    padding: 26px 32px;
-    margin-bottom: 40px;
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-style: italic;
-    font-size: 17px;
-    line-height: 1.55;
-    color: var(--ink);
-    max-width: 760px;
+  .featured-band a{display:block;text-decoration:none;color:inherit}
+  .featured-band .ti{
+    background:#fff;aspect-ratio:4/3;overflow:hidden;border:1px solid var(--rule);
+    display:flex;align-items:center;justify-content:center;padding:6px;
   }
-  .hero .epigraph .attr {
-    display: block;
-    margin-top: 14px;
-    font-family: "SF Mono", "Menlo", monospace;
-    font-style: normal;
-    font-size: 11.5px;
-    color: var(--muted);
-    text-align: right;
-    letter-spacing: 0.04em;
-  }
-  .hero h1 {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 38px;
-    font-weight: 500;
-    letter-spacing: -0.015em;
-    line-height: 1.15;
-    margin: 0 0 14px;
-    max-width: 760px;
-  }
-  .hero .lede {
-    font-size: 16px;
-    line-height: 1.65;
-    color: var(--ink);
-    max-width: 680px;
-  }
+  .featured-band .ti img{max-width:100%;max-height:100%;object-fit:contain;filter:saturate(0.92)}
+  .featured-band .cap{font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:0.06em;margin-top:6px;display:flex;justify-content:space-between}
+  .featured-band .cap .id{color:var(--red);font-weight:500}
+  .featured-band .head{grid-column:1 / -1;display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+  .featured-band .head .l{font-family:var(--mono);font-size:11px;color:var(--ink);letter-spacing:0.22em;text-transform:uppercase;font-weight:500}
+  .featured-band .head .l em{font-style:normal;text-transform:none;color:var(--copper-deep);letter-spacing:-0.005em;margin-left:14px;font-size:14px;font-weight:500}
+  .featured-band .head .all{font-family:var(--mono);font-size:11px;color:var(--copper-deep);text-decoration:none;letter-spacing:0.04em;text-transform:uppercase}
 
-  /* Where to begin */
-  .section-rule {
-    font-family: "SF Mono", "Menlo", monospace;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: var(--muted);
-    margin: 0 0 22px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--rule);
-  }
-
-  .pathways {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-    margin-bottom: 64px;
-  }
-  .pathway {
-    background: white;
-    border: 1px solid var(--rule);
-    padding: 20px 22px 22px;
-    border-radius: 3px;
-    text-decoration: none;
-    color: var(--ink);
-    display: block;
-    transition: border-color 0.12s, transform 0.12s;
-  }
-  .pathway:hover {
-    border-color: var(--accent);
-    transform: translateY(-1px);
-  }
-  .pathway .num {
-    font-family: "SF Mono", "Menlo", monospace;
-    font-size: 10.5px;
-    color: var(--accent);
-    letter-spacing: 0.1em;
-    margin-bottom: 10px;
-  }
-  .pathway h3 {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 19px;
-    font-weight: 500;
-    margin: 0 0 8px;
-    color: var(--ink);
-    letter-spacing: -0.005em;
-  }
-  .pathway p {
-    margin: 0;
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.5;
-  }
-  .pathway .more {
-    margin-top: 12px;
-    font-size: 12px;
-    color: var(--link);
-    font-family: "SF Mono", "Menlo", monospace;
-    letter-spacing: 0.04em;
-  }
-
-  /* Two-column institutional block */
-  .columns {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    margin-bottom: 56px;
-  }
-  .columns h2 {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 20px;
-    font-weight: 500;
-    margin: 0 0 12px;
-    letter-spacing: -0.005em;
-  }
-  .columns p {
-    margin: 0 0 12px;
-    font-size: 14px;
-    line-height: 1.65;
-    color: var(--ink);
-  }
-  .columns .muted { color: var(--muted); }
-  .columns a {
-    color: var(--link);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--link);
-  }
-  .columns a:hover { color: var(--accent); border-bottom-color: var(--accent); }
-
-  footer.colophon {
-    margin-top: 80px;
-    padding-top: 24px;
-    border-top: 1px solid var(--rule);
-    font-size: 12px;
-    color: var(--muted);
-    font-family: "SF Mono", "Menlo", monospace;
-    line-height: 1.7;
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-  footer.colophon a {
-    color: var(--link);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--link);
-  }
-  footer.colophon a:hover { color: var(--accent); border-bottom-color: var(--accent); }
-
-  @media (max-width: 720px) {
-    .site-frame { padding: 0 18px; }
-    .frame { padding: 32px 18px 60px; }
-    .hero h1 { font-size: 28px; }
-    .hero .epigraph { padding: 20px 22px; font-size: 15px; }
-    .columns { grid-template-columns: 1fr; gap: 28px; }
-  }
+  .hero-meta dt,.hero-meta dd b,.featured-band .cap > *,.featured-band .head .l em,.featured-band .head .all{white-space:nowrap}
 </style>
 </head>
 <body>
 
-<header class="site-header">
-  <div class="site-frame">
-    <div class="site-brand"><a href="index.html">Hunter House <span class="sub">Foundation</span></a></div>
-    <nav class="site-nav">
-      <a href="the-house.html">The House</a>
-      <a href="archive.html">Archive</a>
-      <a href="browse.html">Browse</a>
-      <a href="richard-hunter.html">Richard Hunter</a>
-      <a href="about.html">About</a>
-    </nav>
+<header class="site-top">
+  <div class="markid">
+    <span class="h">HH</span>
+    <span class="name">Hunter House <span class="dim">· Foundation</span></span>
   </div>
+  <nav class="site-nav">
+    <a href="the-house.html">House</a>
+    <a href="archive.html">Archive</a>
+    <a href="browse.html">Browse</a>
+    <a href="richard-hunter.html">Hunter</a>
+    <a href="about.html">About</a>
+  </nav>
+  <div class="site-topright">147 items · v0.4</div>
 </header>
 
-<div class="frame">
+<div class="frame wide">
 
   <section class="hero">
-    <div class="epigraph">
-      Architecture, the sheltering art, is a repository of human experience. It connects mathematics, the sciences and history with the arts, gathering from each a measure of understanding the universe, the biosphere, mind.
-      <span class="attr">— Richard Hunter</span>
+    <div class="hero-grid">
+      <div class="hero-note">
+        <div class="stamp">
+          <span>Notebook · 1986</span>
+          <span class="n">East Wing portfolio, cover</span>
+        </div>
+        <blockquote>Drawings against drawings.</blockquote>
+        <div class="attr">
+          <span><b>R. Hunter</b></span>
+          <span>· annotation, in pencil</span>
+        </div>
+      </div>
+      <dl class="hero-meta">
+        <dt>Location</dt>
+        <dd>203 Goward Road<br>Prospect Lake · Saanich BC</dd>
+        <dt>Dates</dt>
+        <dd><b>1970 — 2020</b></dd>
+        <dt>Extent</dt>
+        <dd>147 items · 6 collections</dd>
+        <dt>Architect</dt>
+        <dd><a href="richard-hunter.html">Richard Hunter</a><br>1932 — 2023</dd>
+      </dl>
     </div>
-    <h1>The Hunter Residence and its archive.</h1>
-    <p class="lede">
-      The Hunter House Foundation stewards the residence Richard Hunter designed for his family at 203 Goward Road, Prospect Lake, and revised continuously across more than five decades. The archive catalogues the drawings, photographs, and related materials that document this fifty-year working record.
-    </p>
   </section>
 
+  <div class="epigraph">
+    <blockquote>Architecture, the sheltering art, is a repository of human experience. It connects mathematics, the sciences and history with the arts — gathering from each a measure of understanding the universe, the biosphere, mind.</blockquote>
+    <div class="attr">
+      <b>Richard Hunter</b>
+      1932 — 2023<br>
+      Notebook, undated
+    </div>
+  </div>
+
+  <div class="lede-row">
+    <div>
+      <div class="stamp-head">An archive in one address</div>
+      <p style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.06em;line-height:1.7">
+        Drawings · Photographs · Letters<br>
+        Plans · Elevations · Sections · Details<br>
+        Studies · Pencil · Coloured pencil<br>
+        Engineering documents · Permit sets<br>
+        <br>
+        <b style="color:var(--ink)">1970 — 2020</b>
+      </p>
+    </div>
+    <div>
+      <p>The Hunter House Foundation stewards the residence Richard Hunter designed for his family at 203 Goward Road, Prospect Lake, and revised continuously across more than five decades. The archive catalogues drawings, photographs and related materials documenting this fifty-year working record — schemes abandoned, permits resubmitted, rooms built and removed, ideas held in reserve for a decade before reappearing in built form.</p>
+      <p>The archive is open and queryable. The catalogue is maintained as a Wikibase; this site is the public reading room.</p>
+    </div>
+  </div>
+
   <section>
-    <div class="section-rule">Where to begin</div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--ink);letter-spacing:0.22em;text-transform:uppercase;padding-bottom:10px;border-bottom:1px solid var(--ink);margin-bottom:0;font-weight:500;display:flex;justify-content:space-between;align-items:baseline;">
+      <span><span style="color:var(--red);margin-right:14px">§</span>Where to begin</span>
+      <span style="color:var(--muted);font-weight:400;letter-spacing:0.06em">04 entry points</span>
+    </div>
     <div class="pathways">
       <a class="pathway" href="the-house.html">
-        <div class="num">01</div>
-        <h3>The House</h3>
-        <p>An introduction to the Hunter Residence as architecture and as a record of architectural authorship across fifty years.</p>
+        <div class="num">01 / House</div>
+        <h3>The <span class="ital">house</span></h3>
+        <p>The residence as architecture and as a working record across fifty years — the East Wing's twelve-year arc, the West Wing's vertical resolution, the Kotatsu's nine-year gap.</p>
         <div class="more">Read →</div>
       </a>
       <a class="pathway" href="archive.html">
-        <div class="num">02</div>
-        <h3>About the Archive</h3>
-        <p>How the archive is organized: six source collections, nine item types, and a structured catalogue maintained as a Wikibase.</p>
+        <div class="num">02 / Catalogue</div>
+        <h3>About the archive</h3>
+        <p>Six source collections. Nine item types. Permanent identifiers. A structured catalogue maintained as a Wikibase, openly queryable.</p>
         <div class="more">Read →</div>
       </a>
       <a class="pathway" href="browse.html">
-        <div class="num">03</div>
-        <h3>Browse the Collection</h3>
-        <p>Every item in the archive — drawings, photographs, people, events, works — searchable and filterable by type.</p>
+        <div class="num">03 / Index</div>
+        <h3>Browse the <span class="ital">catalogue</span></h3>
+        <p>Every plate. Filter by phase, area, drawing type. Read or pull individual records.</p>
         <div class="more">Browse →</div>
       </a>
       <a class="pathway" href="richard-hunter.html">
-        <div class="num">04</div>
+        <div class="num">04 / Architect</div>
         <h3>Richard Hunter</h3>
-        <p>Biographical record, exhibitions, publications, and a selection of items that frame Hunter's broader practice.</p>
+        <p>Biographical record, exhibitions, publications and built work — a Bruce Goff-trained architect who designed three houses and lived in one.</p>
         <div class="more">Read →</div>
       </a>
     </div>
+  </section>
+
+  <section class="featured-band">
+    <div class="head">
+      <div class="l">Recently catalogued <em>seven plates · May 2026</em></div>
+      <a class="all" href="browse.html">View all 147 →</a>
+    </div>
+    <a href="item.html"><div class="ti"><img src="" alt=""></div><div class="cap"><span class="id">HH-A-0007</span><span>1970</span></div></a>
+    <a href="item.html"><div class="ti"><img src="" alt=""></div><div class="cap"><span class="id">HH-A-0008</span><span>1970</span></div></a>
+    <a href="item.html"><div class="ti"><img src="" alt=""></div><div class="cap"><span class="id">HH-A-0027</span><span>1985</span></div></a>
+    <a href="item.html"><div class="ti"><img src="" alt=""></div><div class="cap"><span class="id">HH-A-0028</span><span>1986</span></div></a>
+    <a href="item.html"><div class="ti"><img src="" alt=""></div><div class="cap"><span class="id">HH-A-0035</span><span>1992</span></div></a>
   </section>
 
   <section class="columns">
     <div>
-      <h2>The Foundation</h2>
-      <p>The Hunter House Foundation stewards the residence and the archival legacy of its architect. Its overarching aim is to realize the speculative futures embedded in Hunter's drawings — among them a cantilevered Skywalk and the unfinished East Wing developments — and to open the archive to scholars, students, and the public.</p>
+      <h2><span style="color:var(--red);margin-right:14px">§</span>The Foundation</h2>
+      <p>The Hunter House Foundation stewards the residence and the archival legacy of its architect. Its overarching aim is to realize the speculative futures embedded in Hunter's drawings — among them a cantilevered Skywalk and the unfinished East Wing developments — and to open the archive to scholars, students and the public.</p>
       <p class="muted"><a href="about.html">About the Foundation →</a></p>
     </div>
     <div>
-      <h2>Source &amp; data</h2>
-      <p>The archive is maintained as a structured database — every item recorded with a permanent identifier, a controlled vocabulary, and links to related works, places, and people. The data is open and queryable.</p>
-      <p class="muted">
-        Wikibase: <a href="https://hunterhouse.wikibase.cloud" target="_blank" rel="noopener">hunterhouse.wikibase.cloud</a><br>
-        SPARQL: <a href="https://hunterhouse.wikibase.cloud/query/" target="_blank" rel="noopener">query endpoint</a><br>
-        Source: <a href="https://github.com/bturep/HunterHouse" target="_blank" rel="noopener">GitHub</a>
+      <h2><span style="color:var(--red);margin-right:14px">§</span>Source &amp; data</h2>
+      <p>The archive is maintained as a structured database — every item assigned a permanent identifier, classified with a controlled vocabulary and linked to related works, places and people. The data is open and queryable.</p>
+      <p class="muted" style="font-family:var(--mono);font-size:11.5px;line-height:1.8">
+        Wikibase &nbsp;·&nbsp; <a href="https://hunterhouse.wikibase.cloud" target="_blank" rel="noopener">hunterhouse.wikibase.cloud</a><br>
+        SPARQL &nbsp;·&nbsp; <a href="https://hunterhouse.wikibase.cloud/query/" target="_blank" rel="noopener">query endpoint</a><br>
+        Source &nbsp;·&nbsp; <a href="https://github.com/bturep/HunterHouse" target="_blank" rel="noopener">github.com/bturep/HunterHouse</a>
       </p>
     </div>
   </section>
 
   <footer class="colophon">
-    <div>Hunter House Foundation · Victoria, British Columbia</div>
-    <div>Project lead: Brandon Poole</div>
+    <div class="l"><b>Hunter House Foundation</b> · Victoria, British Columbia</div>
+    <div class="c">Catalogue v0.4 · 2026 · 05 · 12</div>
+    <div class="r">Project lead · <b>Brandon Poole</b></div>
   </footer>
 
 </div>
