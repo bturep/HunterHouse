@@ -19,9 +19,13 @@
   }
   .portrait .placeholder{
     font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.14em;text-transform:uppercase;
-    text-align:center;line-height:1.7;
+    text-align:center;line-height:1.7;padding:0 18px;
   }
   .portrait .placeholder b{display:block;color:var(--ink);font-weight:500;margin-top:4px}
+  .portrait .placeholder .cite{
+    display:block;margin-top:14px;font-size:9.5px;color:var(--hint);
+    letter-spacing:0.08em;line-height:1.6;text-transform:none;
+  }
   .portrait::before{content:"";position:absolute;inset:14px;border:1px solid var(--rule-soft);pointer-events:none}
 
   .fact-card{border:1px solid var(--rule);background:var(--bg)}
@@ -37,33 +41,28 @@
   .fact-card .fc-row:first-of-type{border-top:0}
   .fact-card dt{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap}
   .fact-card dd{color:var(--ink);letter-spacing:-0.005em}
+  .fact-card dd.pending{color:var(--hint);font-family:var(--mono);font-size:11px;letter-spacing:0.04em}
 
-  .timeline{margin:32px 0;border-top:1px solid var(--ink)}
-  .tlrow{
-    display:grid;grid-template-columns:84px 1fr;gap:24px;
-    padding:14px 0;border-bottom:1px solid var(--rule-soft);align-items:baseline;
+  .placeholder-block{
+    background:var(--paper);border:1px dashed var(--rule);padding:18px 22px;
+    margin:18px 0;font-family:var(--mono);font-size:12px;color:var(--muted);
+    letter-spacing:0.02em;line-height:1.65;
   }
-  .tlrow .yr{
-    font-family:var(--mono);font-size:12px;color:var(--red);letter-spacing:0.04em;
-    font-variant-numeric:tabular-nums;font-weight:500;white-space:nowrap;
-  }
-  .tlrow .ev{font-size:14.5px;color:var(--ink);letter-spacing:-0.005em;line-height:1.55}
-  .tlrow .ev em{font-style:italic;color:var(--ink)}
-  .tlrow .ev .place{
-    font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.04em;margin-left:8px;text-transform:uppercase;
+  .placeholder-block .lbl{
+    display:inline-block;font-size:9.5px;color:var(--red);letter-spacing:0.18em;
+    text-transform:uppercase;font-weight:500;margin-right:8px;
   }
 
-  .works{
-    display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
-    background:var(--rule);border:1px solid var(--rule);margin:24px 0 32px;
+  .browse-back{
+    margin-top:48px;padding-top:24px;border-top:1px solid var(--ink);
   }
-  .work{background:var(--bg);padding:18px 22px;display:flex;flex-direction:column;gap:8px}
-  .work .yr{font-family:var(--mono);font-size:10.5px;color:var(--red);letter-spacing:0.14em;font-weight:500}
-  .work h4{font-size:16px;font-weight:500;letter-spacing:-0.015em;color:var(--ink)}
-  .work .place{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:0.04em}
-  .work p{font-size:13px;line-height:1.55;color:var(--muted);margin:6px 0 0}
+  .browse-back a{
+    font-family:var(--mono);font-size:12px;color:var(--ink);letter-spacing:0.08em;
+    text-transform:uppercase;border-bottom:1px solid var(--ink);padding-bottom:4px;text-decoration:none;
+  }
+  .browse-back a:hover{color:var(--red-deep);border-bottom-color:var(--red-deep)}
 
-  .tlrow .ev .place,.fact-card .fc-head > *,.portrait .placeholder b,.work .yr,.work .place{white-space:nowrap}
+  .fact-card .fc-head > *,.portrait .placeholder b{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -78,8 +77,9 @@
     <a href="the-house.html">House</a>
     <a href="archive.html">Archive</a>
     <a href="about.html">About</a>
+    <a href="browse.html">Browse</a>
   </nav>
-  <div class="site-topright">v0.4</div>
+  <div class="site-topright">v0.5</div>
 </header>
 
 <div class="crumbs">
@@ -88,87 +88,53 @@
     <span class="sep">/</span>
     <span>Richard Hunter</span>
   </div>
-  <div class="right">Chapter · 03 / 05</div>
+  <div class="right"></div>
 </div>
 
 <div class="frame">
 
   <div class="page-stamp">
-    <span class="n">§ 03</span>
-    <span>The architect</span>
+    <span>Architect</span>
   </div>
-  <h1 class="page-title">Richard <span class="ital">Hunter</span></h1>
+  <h1 class="page-title">Richard Hunter</h1>
   <div class="page-sub">
-    <span><b>1932 — 2023</b></span>
+    <span><b>b. [unknown] · d. 14 January 2023</b></span>
     <span>·</span>
-    <span>Bruce Goff, Norman, Oklahoma</span>
-    <span>·</span>
-    <span>Three built projects</span>
+    <span>Phoenix, AZ — Victoria, BC</span>
   </div>
 
   <div class="bio-grid">
 
     <article class="prose">
 
-      <p class="lede">Richard Hunter (1932 — 2023) was a Canadian architect trained under Bruce Goff at the University of Oklahoma. Across a working life of more than six decades he completed three built projects — the Bond House (1965), the Rankin House (1968) and his own Hunter Residence at Prospect Lake (1970 — 2020) — and produced a substantial body of unbuilt work, much of it speculative, all of it retained.</p>
+      <p class="lede">Richard Morrow Hunter was an architect trained at the University of Colorado and the University of Oklahoma, graduating in 1958. He established his practice in California and Alaska before relocating to Victoria, British Columbia, in 1968. His residence at 203 Goward Road occupied him from 1970 until 2020 — five decades of continuous design on a single site.</p>
 
-      <p>The Hunter Residence is the most extensively documented of the three. It is the only project of which Hunter remained the sole architect, the sole client, and the sole resident across its entire life. The archive of drawings he kept for that house is the principal subject of this Foundation.</p>
+      <p>The Hunter Residence is the most extensively documented project in his archive. Across its fifty years, Hunter remained its sole architect, sole client, and sole resident. The working file he kept of its drawings is the principal subject of this Foundation. <a href="browse.html">Browse the full catalogue · 147 items →</a></p>
 
-      <h2 id="formation"><span><span class="n">01</span> &nbsp;Formation</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">Norman, Oklahoma · 1955 — 1961</span></h2>
+      <h2 id="formation"><span>Formation</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">[Lorem ipsum]</span></h2>
 
-      <p>Hunter studied architecture at the University of Oklahoma under Bruce Goff, who chaired the School of Architecture from 1947 to 1956. Goff's pedagogy — a refusal of the International Style orthodoxy, an insistence on the idiosyncratic and the regional, a deep interest in vernacular form — left a lasting impression. The geometric vocabulary visible in Hunter's first independent project, the Bond House, draws directly on the Goff workshop's enthusiasm for the diagonal grid, the centred plan, and the integration of landscape into the building's geometry.</p>
-
-      <p>Hunter graduated in 1961 and worked briefly in Goff's Oklahoma practice before moving to British Columbia in 1964.</p>
-
-      <h2 id="works"><span><span class="n">02</span> &nbsp;Built work</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">three projects</span></h2>
-
-      <div class="works">
-        <div class="work">
-          <span class="yr">1965</span>
-          <h4>Bond House</h4>
-          <span class="place">Oklahoma City</span>
-          <p>Hunter's first independent commission. Diagonal-grid plan with a centred fireplace mass; a clear inheritance from the Goff workshop.</p>
-        </div>
-        <div class="work">
-          <span class="yr">1968</span>
-          <h4>Rankin House</h4>
-          <span class="place">187 Goward Road, Prospect Lake</span>
-          <p>Hunter's introduction to the Goward Road context — built immediately north of the parcel that would later become his own home.</p>
-        </div>
-        <div class="work">
-          <span class="yr">1970 — 2020</span>
-          <h4>Hunter Residence</h4>
-          <span class="place">203 Goward Road, Prospect Lake</span>
-          <p>The fifty-year project. Two architecturally distinct wings, built a generation apart, with a tower, skywalk, and garden interventions extending into Hunter's late eighties.</p>
-        </div>
+      <div class="placeholder-block">
+        <span class="lbl">[Placeholder]</span>
+        Section in development. Will trace Hunter's training, the influence of the American organic school — Frank Lloyd Wright, Bruce Goff — and of the drawings of Erich Mendelsohn. Material drawn from the CAA biographical record, the <em>Renegades</em> volume from the Oklahoma School Architecture Press, and primary correspondence held in the archive.
       </div>
 
-      <h2 id="timeline"><span><span class="n">03</span> &nbsp;Selected chronology</span></h2>
+      <h2 id="timeline"><span>Selected chronology</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">[In progress]</span></h2>
 
-      <div class="timeline">
-        <div class="tlrow"><span class="yr">1932</span><span class="ev">Born in Calgary, Alberta. <span class="place">Calgary AB</span></span></div>
-        <div class="tlrow"><span class="yr">1955</span><span class="ev">Begins architecture at the University of Oklahoma under Bruce Goff. <span class="place">Norman OK</span></span></div>
-        <div class="tlrow"><span class="yr">1961</span><span class="ev">Graduates. Works briefly in Goff's Oklahoma practice.</span></div>
-        <div class="tlrow"><span class="yr">1964</span><span class="ev">Returns to British Columbia. <span class="place">Victoria BC</span></span></div>
-        <div class="tlrow"><span class="yr">1965</span><span class="ev">Completes the <em>Bond House</em>, Oklahoma City — his first independent commission.</span></div>
-        <div class="tlrow"><span class="yr">1968</span><span class="ev">Completes the <em>Rankin House</em> at 187 Goward Road, Prospect Lake.</span></div>
-        <div class="tlrow"><span class="yr">1969</span><span class="ev">Begins design for the Hunter Residence at 203 Goward Road.</span></div>
-        <div class="tlrow"><span class="yr">1970 — 74</span><span class="ev">Original build — Scheme 1A — completed.</span></div>
-        <div class="tlrow"><span class="yr">1977</span><span class="ev">Draws speculative Zen dojo scheme. Begins correspondence with the poet Gary Snyder.</span></div>
-        <div class="tlrow"><span class="yr">1985</span><span class="ev">Donates the 1970 – 74 build documentation to the Canadian Architectural Archives, fonds F0076.</span></div>
-        <div class="tlrow"><span class="yr">1990</span><span class="ev">West Wing addition reaches permit; construction begins.</span></div>
-        <div class="tlrow"><span class="yr">1992</span><span class="ev">Series of seven <em>Colour Studies</em> for the West Wing exterior. <span class="place">HHC · A-0029 — A-0035</span></span></div>
-        <div class="tlrow"><span class="yr">2008</span><span class="ev">First sketches for the East Wing addition — "Hunter Haus Phase 2".</span></div>
-        <div class="tlrow"><span class="yr">2018</span><span class="ev">East Wing permit submitted, rejected, revised, resubmitted within six weeks.</span></div>
-        <div class="tlrow"><span class="yr">2020</span><span class="ev">Final drawings — East Wing construction refinements.</span></div>
-        <div class="tlrow"><span class="yr">2023</span><span class="ev">Dies at the Hunter Residence, aged 91.</span></div>
+      <div class="placeholder-block">
+        <span class="lbl">[In progress]</span>
+        Chronology under revision. Current entries are being curated to balance biographical, intellectual, and architectural threads rather than emphasising career milestones. A working draft is held in the project's research database; this section will be populated as items are confirmed against primary sources.
       </div>
 
-      <h2 id="exhibitions"><span><span class="n">04</span> &nbsp;Exhibitions &amp; publications</span></h2>
+      <h2 id="exhibitions"><span>Exhibitions &amp; publications</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">[In progress]</span></h2>
 
-      <p>Hunter's work was rarely exhibited during his lifetime. Two notable inclusions: the 1977 group show <em>Architects of British Columbia</em> at the Vancouver Art Gallery (Rankin House drawings); and the 2003 retrospective <em>Bruce Goff &amp; the American School</em> at the National Building Museum, Washington DC (Bond House plans).</p>
+      <div class="placeholder-block">
+        <span class="lbl">[In progress]</span>
+        Exhibitions and publications under research. Confirmed records are catalogued as Wikibase Items in the archive; this prose summary will follow.
+      </div>
 
-      <p>A monograph, <em>Hunter House: Fifty Years</em>, is in preparation by the Foundation.</p>
+      <div class="browse-back">
+        <a href="browse.html">Browse the full catalogue · 147 items →</a>
+      </div>
 
     </article>
 
@@ -178,26 +144,29 @@
         <div class="placeholder">
           Portrait<br>
           <b>Richard Hunter</b>
-          c. 1972 · TBD
+          <span class="cite">
+            Photograph: Bruce Stotesbury, <em>Times Colonist</em>, 23 October 2006.<br>
+            Accompanying the article <em>Forever Natural</em> on the donation of land surrounding the Hunter Residence to conservancy. [HH-A-#### · pending]
+          </span>
         </div>
       </div>
 
       <div class="fact-card">
         <div class="fc-head"><span>Bio · key facts</span><span style="color:rgba(243,241,236,0.6)">07</span></div>
-        <div class="fc-row"><dt>Born</dt><dd>14 March 1932, Calgary AB</dd></div>
-        <div class="fc-row"><dt>Died</dt><dd>2 November 2023, Saanich BC</dd></div>
-        <div class="fc-row"><dt>Education</dt><dd>B.Arch., University of Oklahoma, 1961</dd></div>
-        <div class="fc-row"><dt>Teacher</dt><dd>Bruce Goff</dd></div>
-        <div class="fc-row"><dt>Practice</dt><dd>Independent, Victoria BC, 1964 — 2020</dd></div>
+        <div class="fc-row"><dt>Born</dt><dd class="pending">[year pending], Phoenix, AZ</dd></div>
+        <div class="fc-row"><dt>Died</dt><dd>14 January 2023</dd></div>
+        <div class="fc-row"><dt>Education</dt><dd>University of Colorado<br>University of Oklahoma, 1958</dd></div>
+        <div class="fc-row"><dt>Practice</dt><dd>California · Alaska<br>Victoria BC, 1968 — 2020</dd></div>
+        <div class="fc-row"><dt>Influences</dt><dd>Wright · Goff · Mendelsohn</dd></div>
         <div class="fc-row"><dt>Fonds</dt><dd><a href="https://searcharchives.ucalgary.ca/richard-hunter-accession" target="_blank" rel="noopener" style="color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)">CAA F0076</a></dd></div>
-        <div class="fc-row"><dt>Wikibase</dt><dd style="font-family:var(--mono);color:var(--muted);font-size:12px">Q42</dd></div>
+        <div class="fc-row"><dt>Wikibase</dt><dd><a href="https://hunterhouse.wikibase.cloud/wiki/Item:Q201" target="_blank" rel="noopener" style="font-family:var(--mono);color:var(--copper-deep);font-size:12px;text-decoration:none;border-bottom:1px solid var(--copper-pale)">Q201 ↗</a></dd></div>
       </div>
 
       <div style="font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:0.06em;padding-top:14px;border-top:1px dotted var(--rule);line-height:1.7">
         <div style="color:var(--ink);font-weight:500;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:8px">External</div>
         <a href="https://searcharchives.ucalgary.ca/richard-hunter-accession" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:none;display:block">CAA finding aid · F0076 →</a>
-        <a href="#" style="color:var(--muted);text-decoration:none;display:block">Wikipedia entry →</a>
-        <a href="#" style="color:var(--muted);text-decoration:none;display:block">CAB obituary, 2024 →</a>
+        <span style="color:var(--hint);display:block">Wikipedia entry · [pending]</span>
+        <span style="color:var(--hint);display:block">Times Colonist obituary · [pending]</span>
       </div>
 
     </aside>
@@ -205,9 +174,9 @@
   </div>
 
   <footer class="colophon">
-    <div class="l"><b>Chapter 03 / 05</b> · Richard Hunter</div>
+    <div class="l"><b>Richard Hunter</b></div>
     <div class="c">Adapted from the CAA biographical record · F0076</div>
-    <div class="r"><a href="about.html">Next · The Foundation →</a></div>
+    <div class="r"><a href="the-house.html">Next · House →</a></div>
   </footer>
 
 </div>
