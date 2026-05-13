@@ -310,10 +310,14 @@
   }
 
   function findPreviewUrl(claims) {
+    // P96 is the preview image property (Wikibase url datatype → datavalue.type "string")
+    const p96 = claims?.P96?.[0]?.mainsnak;
+    if (p96?.snaktype === "value" && p96.datavalue?.value) return p96.datavalue.value;
+
+    // Fallback: scan all string claims for any image URL
     for (const pid in claims) {
       for (const c of claims[pid]) {
-        if (c.mainsnak && c.mainsnak.snaktype === "value" &&
-            c.mainsnak.datavalue.type === "string") {
+        if (c.mainsnak?.snaktype === "value" && c.mainsnak.datavalue?.type === "string") {
           const v = c.mainsnak.datavalue.value;
           if (/^https?:\/\/.+\.(jpg|jpeg|png|webp)(\?.*)?$/i.test(v)) return v;
         }
