@@ -660,12 +660,15 @@
       const typeQIDs   = [...new Set(Object.values(typeMap))];
       const typeLabels = typeQIDs.length ? await fetchLabels(typeQIDs) : {};
 
+      // Only show items that have a preview image (P96 set)
+      const imageQids = qids.filter(qid => previewMap[qid]);
+
       const byType = {};
-      qids.forEach(qid => {
+      imageQids.forEach(qid => {
         const tqid  = typeMap[qid];
         const tlbl  = tqid ? (typeLabels[tqid] || tqid) : "Untyped";
         if (!byType[tlbl]) byType[tlbl] = [];
-        byType[tlbl].push({ ...itemMap[qid], previewUrl: previewMap[qid] || null });
+        byType[tlbl].push({ ...itemMap[qid], previewUrl: previewMap[qid] });
       });
 
       buildList(byType);
