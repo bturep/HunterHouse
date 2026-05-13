@@ -9,19 +9,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/verso.css">
 <style>
-  .layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:64px;align-items:start}
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:64px;align-items:start}
+
   .toc{position:sticky;top:24px;padding-top:8px;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.06em}
   .toc .hd{
     font-family:var(--mono);font-size:10px;color:var(--ink);letter-spacing:0.22em;text-transform:uppercase;
     padding-bottom:8px;border-bottom:1px solid var(--ink);margin-bottom:14px;font-weight:500;
   }
   .toc ol{list-style:none;margin:0;padding:0}
-  .toc li{padding:6px 0;border-bottom:1px dotted var(--rule);display:flex;gap:10px}
+  .toc li{padding:0;border-bottom:1px dotted var(--rule)}
   .toc li:last-child{border-bottom:0}
-  .toc .n{color:var(--red);font-weight:500;min-width:18px}
-  .toc a{color:var(--muted);text-decoration:none}
-  .toc a:hover{color:var(--ink)}
+  .toc li a{
+    display:block;padding:9px 0;color:var(--muted);text-decoration:none;
+    transition:color 0.12s, padding 0.12s;
+  }
+  .toc li a:hover{color:var(--ink);padding-left:6px}
   .toc li.on a{color:var(--ink)}
+  .toc li.on a::before{content:"→ ";color:var(--red)}
 
   .arcs{
     display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
@@ -54,7 +58,16 @@
   }
   .entry-list .row .status.pending{color:var(--muted);background:var(--soft)}
 
-  .toc a,.toc li > *,.arc .span > *{white-space:nowrap}
+  .browse-back{
+    margin-top:48px;padding-top:24px;border-top:1px solid var(--ink);
+  }
+  .browse-back a{
+    font-family:var(--mono);font-size:12px;color:var(--ink);letter-spacing:0.08em;
+    text-transform:uppercase;border-bottom:1px solid var(--ink);padding-bottom:4px;text-decoration:none;
+  }
+  .browse-back a:hover{color:var(--red-deep);border-bottom-color:var(--red-deep)}
+
+  .toc a,.arc .span > *{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -69,8 +82,9 @@
     <a href="the-house.html" class="on">House</a>
     <a href="archive.html">Archive</a>
     <a href="about.html">About</a>
+    <a href="browse.html">Browse</a>
   </nav>
-  <div class="site-topright">v0.4</div>
+  <div class="site-topright">v0.5</div>
 </header>
 
 <div class="crumbs">
@@ -79,43 +93,40 @@
     <span class="sep">/</span>
     <span>The House</span>
   </div>
-  <div class="right">Chapter · 01 / 05</div>
+  <div class="right"></div>
 </div>
 
 <div class="frame">
 
   <div class="page-stamp">
-    <span class="n">§ 01</span>
     <span>The Residence at Prospect Lake</span>
   </div>
-  <h1 class="page-title">A house drawn for <span class="ital">fifty years</span>.</h1>
+  <h1 class="page-title">Fifty years on one site.</h1>
   <div class="page-sub">
     <span>203 Goward Road · Prospect Lake · Saanich BC</span>
     <span>·</span>
     <span><b>1970 — 2020</b></span>
-    <span>·</span>
-    <span>110 items in collection</span>
   </div>
 
   <div class="layout">
 
     <article class="prose">
 
-      <p class="lede">The Hunter Residence was never finished in any conventional sense. Richard Hunter began designing for the Prospect Lake property in 1969, following the design and construction of the neighbouring Rankin House at 187 Goward Road, and was still drawing additions in 2020 — three years before his death at ninety-two. The archive spans that entire period.</p>
+      <p class="lede">The Hunter Residence was never finished in any conventional sense. Hunter began designing for the Prospect Lake property in 1970 and was still drawing additions in 2020 — three years before his death. The archive spans that period without interruption. <a href="browse.html">Browse the full catalogue · 147 items →</a></p>
 
-      <p>This is the archive's central quality. Most architectural collections document what was designed and built. This one documents the ongoing negotiation between an architect and his own home across five decades: the schemes that were abandoned, the permits that took years to pursue, the rooms that were built and then removed, the ideas that lay dormant for a decade before returning in built form. The drawings are not a finished story. They are a working record.</p>
+      <p>This is the archive's central quality. It documents an ongoing negotiation between an architect and his own home across five decades: schemes abandoned, permits pursued for years, rooms built and then removed, ideas held in reserve for a decade before reappearing in built form. The drawings are not a finished story. They are a working record.</p>
 
-      <p>The house itself reflects this. Two architecturally distinct wings, built a generation apart, embody different phases of Hunter's design thinking. A dining room conceived through eight iterative schemes over more than a decade finally reached permit in 2018. A speculative Zen dojo drawn in 1977 found its descendant in a Japanese garden built forty years later. The archive makes these arcs legible.</p>
+      <p>The house reflects this directly. Two architecturally distinct wings, built a generation apart, embody different phases of Hunter's design thinking. A dining room conceived through eight iterative schemes over more than a decade finally reached permit in 2018. A speculative Zen scheme drawn in the 1970s found its descendant in a Japanese garden built decades later.</p>
 
-      <h2 id="record"><span><span class="n">02</span> &nbsp;The drawing record</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">110 items</span></h2>
+      <h2 id="record"><span>The drawing record</span></h2>
 
-      <p>The Hunter House Collection drawings — 110 items — are the working core of the archive. They represent Richard Hunter's personal file: the drawings he made, kept, and annotated across four decades of work on his own property. They are not a polished set. They include speculative sketches alongside formal permit submissions, undated schemes alongside precisely dated construction documents, drawings by Richard alongside engineering drawings commissioned from Harold Engineering and Brown and Grant Engineering.</p>
+      <p>The Hunter House Collection is the working core: drawings Hunter made, kept, and annotated across four decades on his own property. It is not a polished set. Speculative sketches sit beside formal permit submissions; undated schemes beside dated construction documents; Hunter's own drawings beside engineering work commissioned from outside firms.</p>
 
-      <p>The collection organizes naturally into project sets — coherent groups of drawings that belong to a single design or construction phase. These sets reveal the house's development as a series of distinct episodes rather than a continuous process: the 1990 West Wing addition permit set; the eight dining room schemes; the Entry Garden arc; the 2018 East Wing permit, submitted, revised, and resubmitted within six weeks.</p>
+      <p>The collection organizes naturally into project sets — coherent groups belonging to a single design or construction phase. These sets reveal the house's development as a series of distinct episodes rather than a continuous process: the West Wing permit set, the dining room schemes, the Entry Garden arc, the East Wing permit submitted, revised, and resubmitted within six weeks.</p>
 
-      <p>The relationship between the Hunter House Collection and the Canadian Architectural Archives materials is significant. Richard donated his original build documentation to the CAA — the 1970–74 Scheme 1A drawings, the early photographs. What he kept were the working files for everything that came after. The two collections are complementary halves of a single record, currently held separately and described independently, but designed to be read together.</p>
+      <p>The Canadian Architectural Archives holds the complementary record. Hunter donated his original build documentation to the CAA in 2019 and 2021 — the 1970s drawings and early photographs. What he kept were the working files for everything that followed. The two collections describe the same building from opposite ends of its lifespan, held separately and designed to be read together.</p>
 
-      <h2 id="arcs"><span><span class="n">03</span> &nbsp;Design arcs</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">three principal threads</span></h2>
+      <h2 id="arcs"><span>Design arcs</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">three principal threads</span></h2>
 
       <p>Several long threads run through the drawing record, each crossing multiple project sets and years.</p>
 
@@ -123,20 +134,20 @@
         <div class="arc">
           <span class="yr">1974 — 2020</span>
           <h4>East Wing</h4>
-          <p>Twelve years of iterative work: eight undated dining room schemes; a 2010 design; a 2018 permit submission rejected and resubmitted; engineering drawings for custom-built windows; refinements extending into 2020.</p>
-          <span class="span"><span>46 years</span><span><b>62 items</b></span></span>
+          <p>Iterative work across decades: eight undated dining room schemes; a 2010 design; a 2018 permit rejected and resubmitted; engineering for custom-built windows; refinements extending into 2020.</p>
+          <span class="span"><span>[In progress]</span><span><b>[#] items</b></span></span>
         </div>
         <div class="arc">
           <span class="yr">1990 — 1996</span>
           <h4>West Wing</h4>
-          <p>Concentrated, vertical, resolved more quickly. The 1990 permit set covers four floor levels and a tower; subsequent construction drawings through 1996 represent a largely coherent build sequence.</p>
-          <span class="span"><span>6 years</span><span><b>41 items</b></span></span>
+          <p>Concentrated, vertical, resolved more quickly. The 1990 permit set covers four floor levels and a tower; construction drawings through 1996 represent a largely coherent build sequence.</p>
+          <span class="span"><span>6 years</span><span><b>[#] items</b></span></span>
         </div>
         <div class="arc">
           <span class="yr">2005 — 2015</span>
           <h4>Entry Garden &amp; Kotatsu</h4>
-          <p>Runs through a nine-year gap between initial design and a return to the project. The Kotatsu — a Japanese low table over a heat source — is the terminal object in a sequence that begins with a land survey and ends with an irrigation plan.</p>
-          <span class="span"><span>10 years</span><span><b>18 items</b></span></span>
+          <p>A nine-year gap divides the sequence. Begins with a land survey, passes through landscape designs, ends with an irrigation plan and the construction of the exterior kotatsu — a Japanese low table positioned over a heat source.</p>
+          <span class="span"><span>10 years</span><span><b>[#] items</b></span></span>
         </div>
       </div>
 
@@ -145,9 +156,9 @@
         <span class="attr">Richard Hunter · undated notebook</span>
       </div>
 
-      <h2 id="begin"><span><span class="n">04</span> &nbsp;Where to begin in the collection</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">curated entry points</span></h2>
+      <h2 id="begin"><span>Where to begin in the collection</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">curated entry points</span></h2>
 
-      <p>A curated set of items will be linked here as the archive is published. The planned entry documents — each chosen because it opens onto a longer thread of the record — are listed below.</p>
+      <p>A curated set of items will be linked here as the archive is published. Each is chosen because it opens onto a longer thread of the record.</p>
 
       <div class="entry-list">
         <div class="row">
@@ -156,7 +167,7 @@
             <div class="ti">Speculative pre-design drawings for the <em>1974 East Wing</em></div>
             <div class="why">The earliest record of an idea that would take another twelve years to reach permit.</div>
           </div>
-          <span class="status pending">Pending ingest</span>
+          <span class="status pending">[Pending ingest]</span>
         </div>
         <div class="row">
           <span class="n">02</span>
@@ -170,9 +181,9 @@
           <span class="n">03</span>
           <div>
             <div class="ti">Key letters held in the archive</div>
-            <div class="why">Correspondence that frames the design decisions across decades.</div>
+            <div class="why">Correspondence framing design decisions across decades.</div>
           </div>
-          <span class="status pending">Pending ingest</span>
+          <span class="status pending">[Pending ingest]</span>
         </div>
         <div class="row">
           <span class="n">04</span>
@@ -180,7 +191,7 @@
             <div class="ti">The <em>Fulker Collection</em> photographs</div>
             <div class="why">Professional documentation of the original 1974 structure, before any of the subsequent additions.</div>
           </div>
-          <span class="status pending">Pending ingest</span>
+          <span class="status pending">[Pending ingest]</span>
         </div>
         <div class="row">
           <span class="n">05</span>
@@ -188,37 +199,39 @@
             <div class="ti">Gary Snyder letters</div>
             <div class="why">To be added when ingested into the archive.</div>
           </div>
-          <span class="status pending">Pending ingest</span>
+          <span class="status pending">[Pending ingest]</span>
         </div>
       </div>
 
-      <p style="margin-top:40px"><a href="browse.html" target="_blank" rel="noopener" style="font-family:var(--mono);font-size:12px;color:var(--ink);letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid var(--ink);padding-bottom:4px;text-decoration:none">Browse the full catalogue · 147 items →</a></p>
+      <div class="browse-back">
+        <a href="browse.html">Browse the full catalogue · 147 items →</a>
+      </div>
 
     </article>
 
     <aside class="toc">
       <div class="hd">Contents</div>
       <ol>
-        <li class="on"><span class="n">01</span><a href="#">A working record</a></li>
-        <li><span class="n">02</span><a href="#record">The drawing record</a></li>
-        <li><span class="n">03</span><a href="#arcs">Design arcs</a></li>
-        <li><span class="n">04</span><a href="#begin">Where to begin</a></li>
+        <li class="on"><a href="#top">A working record</a></li>
+        <li><a href="#record">The drawing record</a></li>
+        <li><a href="#arcs">Design arcs</a></li>
+        <li><a href="#begin">Where to begin</a></li>
       </ol>
 
-      <div class="hd" style="margin-top:36px">In this chapter</div>
+      <div class="hd" style="margin-top:36px">Filter the catalogue</div>
       <ol>
-        <li><span class="n">→</span><a href="browse.html" target="_blank" rel="noopener">East Wing items</a></li>
-        <li><span class="n">→</span><a href="browse.html" target="_blank" rel="noopener">West Wing items</a></li>
-        <li><span class="n">→</span><a href="browse.html" target="_blank" rel="noopener">Entry Garden</a></li>
+        <li><a href="browse.html?phase=East%20Wing">East Wing</a></li>
+        <li><a href="browse.html?phase=West%20Wing">West Wing</a></li>
+        <li><a href="browse.html?phase=Entry%20Garden">Entry Garden</a></li>
       </ol>
     </aside>
 
   </div>
 
   <footer class="colophon">
-    <div class="l"><b>Chapter 01 / 05</b> · The House</div>
+    <div class="l"><b>The House</b></div>
     <div class="c">Adapted from the Hunter House Archive Overview · May 2026</div>
-    <div class="r"><a href="archive.html">Next chapter · About the Archive →</a></div>
+    <div class="r"><a href="archive.html">Next · Archive →</a></div>
   </footer>
 
 </div>
