@@ -18,36 +18,42 @@
   .mandate .col h4{font-size:17px;font-weight:500;letter-spacing:-0.015em;color:var(--ink)}
   .mandate .col p{font-size:13px;line-height:1.55;color:var(--muted);margin:0}
 
-  .people{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin:24px 0 32px}
-  .person{
-    border:1px solid var(--rule);background:var(--bg);padding:18px 22px;
-    display:grid;grid-template-columns:64px 1fr;gap:18px;align-items:start;
-  }
-  .person .av{
-    width:64px;height:64px;background:var(--paper);border:1px solid var(--rule);
-    display:flex;align-items:center;justify-content:center;
-    font-family:var(--mono);font-size:18px;color:var(--ink);letter-spacing:0.04em;font-weight:500;
-  }
-  .person .role{font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:4px;font-weight:500}
-  .person .name{font-size:15px;font-weight:500;letter-spacing:-0.015em;color:var(--ink);margin-bottom:4px}
-  .person .bio{font-size:12.5px;line-height:1.55;color:var(--muted)}
-
+  /* fellowship — primary block */
   .fellowship{
     background:var(--paper);border:1px solid var(--rule);
-    padding:32px 36px;margin:36px 0;
+    padding:32px 36px;margin:24px 0 40px;
     display:grid;grid-template-columns:1fr 240px;gap:36px;align-items:center;
   }
   .fellowship h3{font-size:22px;font-weight:500;letter-spacing:-0.02em;margin-bottom:8px}
   .fellowship p{font-size:14px;line-height:1.6;color:var(--ink);margin:0}
   .fellowship .cta{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
-  .fellowship .cta a{
+  .fellowship .cta a.apply{
     font-family:var(--mono);font-size:11px;color:var(--bg);background:var(--ink);
     text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;
     padding:10px 16px;display:inline-flex;align-items:center;gap:8px;
   }
-  .fellowship .cta a:hover{background:#000}
+  .fellowship .cta a.apply:hover{background:#000}
   .fellowship .cta .when{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:0.04em}
+  .fellowship .cta a.prospectus{
+    font-family:var(--sans);font-size:13px;color:var(--ink);letter-spacing:-0.005em;
+    text-decoration:none;border-bottom:1px solid var(--ink);padding-bottom:2px;
+  }
+  .fellowship .cta a.prospectus:hover{color:var(--red-deep);border-bottom-color:var(--red-deep)}
 
+  /* people list (compressed, not cards) */
+  .people-list{margin:24px 0 36px;border-top:1px solid var(--ink)}
+  .people-list .p{
+    display:grid;grid-template-columns:200px 1fr;gap:32px;
+    padding:14px 0;border-bottom:1px solid var(--rule-soft);align-items:baseline;
+  }
+  .people-list .p .role{
+    font-family:var(--mono);font-size:10px;color:var(--muted);
+    letter-spacing:0.16em;text-transform:uppercase;font-weight:500;
+  }
+  .people-list .p .name{font-size:14.5px;font-weight:500;letter-spacing:-0.005em;color:var(--ink);margin-bottom:3px}
+  .people-list .p .bio{font-size:12.5px;line-height:1.55;color:var(--muted)}
+
+  /* contact */
   .contact{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin:32px 0}
   .contact .b{border-top:1px solid var(--ink);padding-top:14px}
   .contact .b .lbl{
@@ -58,7 +64,16 @@
   .contact .b a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale);font-family:var(--mono);font-size:13px;letter-spacing:0.02em}
   .contact .b a:hover{border-bottom-color:var(--copper-deep)}
 
-  .person .role,.fellowship .cta a,.fellowship .cta .when,.mandate .col .n,.contact .b .lbl{white-space:nowrap}
+  .browse-back{
+    margin-top:48px;padding-top:24px;border-top:1px solid var(--ink);
+  }
+  .browse-back a{
+    font-family:var(--mono);font-size:12px;color:var(--ink);letter-spacing:0.08em;
+    text-transform:uppercase;border-bottom:1px solid var(--ink);padding-bottom:4px;text-decoration:none;
+  }
+  .browse-back a:hover{color:var(--red-deep);border-bottom-color:var(--red-deep)}
+
+  .fellowship .cta .when,.mandate .col .n,.contact .b .lbl{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -73,8 +88,9 @@
     <a href="the-house.html">House</a>
     <a href="archive.html">Archive</a>
     <a href="about.html" class="on">About</a>
+    <a href="browse.html">Browse</a>
   </nav>
-  <div class="site-topright">v0.4</div>
+  <div class="site-topright">v0.5</div>
 </header>
 
 <div class="crumbs">
@@ -83,107 +99,102 @@
     <span class="sep">/</span>
     <span>About the Foundation</span>
   </div>
-  <div class="right">Chapter · 04 / 05</div>
+  <div class="right"></div>
 </div>
 
 <div class="frame">
 
   <div class="page-stamp">
-    <span class="n">§ 04</span>
-    <span>Foundation · Mandate · People</span>
+    <span>Foundation · Mandate · Fellowship</span>
   </div>
-  <h1 class="page-title">About the <span class="ital">Foundation</span>.</h1>
+  <h1 class="page-title">About the Foundation</h1>
   <div class="page-sub">
     <span>Victoria, British Columbia</span>
     <span>·</span>
-    <span>Est. <b>2024</b></span>
+    <span>Est. <b>2026</b></span>
     <span>·</span>
     <span>Not-for-profit</span>
   </div>
 
   <article class="prose" style="max-width:none">
 
-    <p class="lede">The Hunter House Foundation stewards the residence and the archival legacy of its architect. Its overarching aim is to realize the speculative futures embedded in Hunter's drawings — among them a cantilevered Skywalk and the unfinished East Wing developments — and to open the archive to scholars, students and the public.</p>
+    <p class="lede">The Hunter House Foundation stewards the residence at 203 Goward Road and the archival legacy of its architect. Its overarching aim is to realize the speculative futures embedded in Hunter's drawings — among them a cantilevered Skywalk and the unfinished East Wing developments — and to open the archive to scholars, students, and the public.</p>
 
-    <h2 id="mandate"><span><span class="n">01</span> &nbsp;Mandate</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">three columns of work</span></h2>
+    <h2 id="mandate"><span>Mandate</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">three columns of work</span></h2>
 
     <div class="mandate">
       <div class="col">
         <span class="n">01 / Stewardship</span>
-        <h4>Preserve the <span class="ital">residence</span></h4>
+        <h4>Preserve the residence</h4>
         <p>Maintain the building and grounds at 203 Goward Road as a working architectural environment — habitable, photographable, available to researchers under defined conditions.</p>
       </div>
       <div class="col">
         <span class="n">02 / Catalogue</span>
         <h4>Publish the archive</h4>
-        <p>Catalogue every item — drawings, photographs, correspondence, engineering documents — under a permanent identifier scheme. Maintain the structured catalogue as a Wikibase. Open the data.</p>
+        <p>Catalogue every item under a permanent identifier scheme. Maintain the structured catalogue as a Wikibase. Open the data.</p>
       </div>
       <div class="col">
         <span class="n">03 / Realize</span>
-        <h4>Build what was <span class="ital">drawn</span></h4>
-        <p>Where the drawings record speculative additions that were never built — the cantilevered Skywalk, the unbuilt East Wing rooms, the Zen dojo scheme — investigate the feasibility of completing them.</p>
+        <h4>Build what was drawn</h4>
+        <p>Where the drawings record speculative additions that were never built — the cantilevered Skywalk, the unbuilt East Wing rooms, the Zen scheme — investigate the feasibility of completing them.</p>
       </div>
     </div>
 
-    <h2 id="people"><span><span class="n">02</span> &nbsp;People</span></h2>
-
-    <div class="people">
-    <div class="person">
-      <div class="av">BP</div>
-      <div>
-        <div class="role">Project lead</div>
-        <div class="name">Brandon Poole</div>
-        <div class="bio">Architect and researcher. Oversees the cataloguing program, the Wikibase migration and the public site. Based in Victoria.</div>
-      </div>
-    </div>
-    <div class="person">
-      <div class="av">FM</div>
-      <div>
-        <div class="role">Founding steward</div>
-        <div class="name">Floyd Marinescu</div>
-        <div class="bio">Established the Foundation with Olivia Jol on acquiring the Hunter Residence in 2023. Directs long-range planning and the financial stewardship of the property.</div>
-      </div>
-    </div>
-    <div class="person">
-      <div class="av">OJ</div>
-      <div>
-        <div class="role">Founding steward</div>
-        <div class="name">Olivia Jol</div>
-        <div class="bio">Established the Foundation with Floyd Marinescu on acquiring the Hunter Residence in 2023. Art historian by training; guides design decisions and the studio program.</div>
-      </div>
-    </div>
-    <div class="person">
-    <div class="av">B?</div>
-    <div>
-      <div class="role">Master carpenter</div>
-      <div class="name">Brin [surname]</div>
-      <div class="bio">Carpenter to the house. Holds the practical knowledge of its structure and detailing across years of continuous work; executes built additions, repairs, and refinements on site.</div>
-    </div>
-  </div>
-  <div class="person">
-    <div class="av">EG</div>
-    <div>
-      <div class="role">Master cabinetmaker</div>
-      <div class="name">Eric Gessinger</div>
-      <div class="bio">Cabinetmaker to the house. Designed and produced the chairs for the 2018 Dining Room Addition, and is custodian of Hunter's furniture drawings, gifted to the Foundation in connection with that work.</div>
-    </div>
-  </div>
-
-    <h2 id="fellowship"><span><span class="n">03</span> &nbsp;Fellowship</span></h2>
+    <h2 id="fellowship"><span>Fellowship</span></h2>
 
     <div class="fellowship">
       <div>
-        <h3>The Hunter <span class="ital">House Fellowship</span></h3>
-        <p>A residency program for one architect, scholar or writer per year, working from the residence with access to the archive. Open to applicants from any country. The fellowship covers travel, lodging at the residence, and a modest stipend for three months of residency.</p>
+        <h3>The Hunter House Fellowship</h3>
+        <p>A residency program for one architect, scholar, or writer per year, working from the residence with access to the archive. Open to applicants from any country. The fellowship covers travel, lodging at the residence, and a modest stipend for three months of residency.</p>
       </div>
       <div class="cta">
-        <a href="#">Apply for 2027 <span style="font-family:var(--mono)">→</span></a>
+        <a class="apply" href="#">Apply for 2027 <span style="font-family:var(--mono)">→</span></a>
         <span class="when">Applications open Sept 2026</span>
-        <span class="when"><a href="#" style="color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)">Read the prospectus (PDF)</a></span>
+        <a class="prospectus" href="#">Read the prospectus (PDF) →</a>
       </div>
     </div>
 
-    <h2 id="contact"><span><span class="n">04</span> &nbsp;Contact</span></h2>
+    <h2 id="people"><span>People</span></h2>
+
+    <div class="people-list">
+      <div class="p">
+        <span class="role">Founding steward</span>
+        <div>
+          <div class="name">Floyd Marinescu</div>
+          <div class="bio">Established the Foundation with Olivia Jol on acquiring the Hunter Residence in 2023. Directs long-range planning and the financial stewardship of the property.</div>
+        </div>
+      </div>
+      <div class="p">
+        <span class="role">Founding steward</span>
+        <div>
+          <div class="name">Olivia Jol</div>
+          <div class="bio">Established the Foundation with Floyd Marinescu on acquiring the Hunter Residence in 2023. Art historian by training; guides design decisions and the studio program.</div>
+        </div>
+      </div>
+      <div class="p">
+        <span class="role">Master carpenter</span>
+        <div>
+          <div class="name">Brin [surname]</div>
+          <div class="bio">Carpenter to the house. Holds the practical knowledge of its structure and detailing across years of continuous work; executes built additions, repairs, and refinements on site.</div>
+        </div>
+      </div>
+      <div class="p">
+        <span class="role">Master cabinetmaker</span>
+        <div>
+          <div class="name">Eric Gessinger</div>
+          <div class="bio">Cabinetmaker to the house. Designed and produced the chairs for the 2018 Dining Room Addition; custodian of Hunter's furniture drawings, gifted to the Foundation in connection with that work.</div>
+        </div>
+      </div>
+      <div class="p">
+        <span class="role">Project lead</span>
+        <div>
+          <div class="name">Brandon Poole</div>
+          <div class="bio">Architect and researcher. Oversees the cataloguing program, the Wikibase migration, and the public site. Based in Victoria.</div>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="contact"><span>Contact</span></h2>
 
     <div class="contact">
       <div class="b">
@@ -194,7 +205,7 @@
           Prospect Lake · Saanich BC<br>
           Canada V8B 4S5
         </p>
-        <p><a href="mailto:hello@hunterhousefoundation.com">hello@hunterhousefoundation.com</a></p>
+        <p><a href="mailto:mail@hunterhousefoundation.com">mail@hunterhousefoundation.com</a></p>
       </div>
       <div class="b">
         <div class="lbl">Researcher access</div>
@@ -203,10 +214,14 @@
       </div>
     </div>
 
+    <div class="browse-back">
+      <a href="browse.html">Browse the full catalogue · 147 items →</a>
+    </div>
+
   </article>
 
   <footer class="colophon">
-    <div class="l"><b>Chapter 04 / 05</b> · About the Foundation</div>
+    <div class="l"><b>About the Foundation</b></div>
     <div class="c">Hunter House Foundation · Victoria BC</div>
     <div class="r"><a href="browse.html">Next · Browse →</a></div>
   </footer>
