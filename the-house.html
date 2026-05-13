@@ -9,24 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/verso.css">
 <style>
-  .layout{display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:64px;align-items:start}
-
-  .toc{position:sticky;top:24px;padding-top:8px;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.06em}
-  .toc .hd{
-    font-family:var(--mono);font-size:10px;color:var(--ink);letter-spacing:0.22em;text-transform:uppercase;
-    padding-bottom:8px;border-bottom:1px solid var(--ink);margin-bottom:14px;font-weight:500;
-  }
-  .toc ol{list-style:none;margin:0;padding:0}
-  .toc li{padding:0;border-bottom:1px dotted var(--rule)}
-  .toc li:last-child{border-bottom:0}
-  .toc li a{
-    display:block;padding:9px 0;color:var(--muted);text-decoration:none;
-    transition:color 0.12s, padding 0.12s;
-  }
-  .toc li a:hover{color:var(--ink);padding-left:6px}
-  .toc li.on a{color:var(--ink)}
-  .toc li.on a::before{content:"→ ";color:var(--red)}
-
   .arcs{
     display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
     background:var(--rule);border:1px solid var(--rule);margin:32px 0 24px;
@@ -58,16 +40,7 @@
   }
   .entry-list .row .status.pending{color:var(--muted);background:var(--soft)}
 
-  .browse-back{
-    margin-top:48px;padding-top:24px;border-top:1px solid var(--ink);
-  }
-  .browse-back a{
-    font-family:var(--mono);font-size:12px;color:var(--ink);letter-spacing:0.08em;
-    text-transform:uppercase;border-bottom:1px solid var(--ink);padding-bottom:4px;text-decoration:none;
-  }
-  .browse-back a:hover{color:var(--red-deep);border-bottom-color:var(--red-deep)}
-
-  .toc a,.arc .span > *{white-space:nowrap}
+  .arc .span > *{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -82,7 +55,6 @@
     <a href="the-house.html" class="on">House</a>
     <a href="archive.html">Archive</a>
     <a href="about.html">About</a>
-    <a href="browse.html">Browse</a>
   </nav>
   <div class="site-topright">v0.5</div>
 </header>
@@ -108,11 +80,11 @@
     <span><b>1970 — 2020</b></span>
   </div>
 
-  <div class="layout">
+  <div class="reading-layout">
 
     <article class="prose">
 
-      <p class="lede">The Hunter Residence was never finished in any conventional sense. Hunter began designing for the Prospect Lake property in 1970 and was still drawing additions in 2020 — three years before his death. The archive spans that period without interruption. <a href="browse.html">Browse the full catalogue · 147 items →</a></p>
+      <p class="lede">The Hunter Residence was never finished in any conventional sense. Hunter began designing for the Prospect Lake property in 1970 and was still drawing additions in 2020 — three years before his death. The archive spans that period without interruption. <a href="browse.html" target="_blank">Browse the full catalogue · 147 items →</a></p>
 
       <p>This is the archive's central quality. It documents an ongoing negotiation between an architect and his own home across five decades: schemes abandoned, permits pursued for years, rooms built and then removed, ideas held in reserve for a decade before reappearing in built form. The drawings are not a finished story. They are a working record.</p>
 
@@ -203,27 +175,30 @@
         </div>
       </div>
 
-      <div class="browse-back">
-        <a href="browse.html">Browse the full catalogue · 147 items →</a>
+      <div class="browse-cta">
+        <a href="browse.html" target="_blank">Browse the full catalogue · 147 items →</a>
       </div>
 
     </article>
 
-    <aside class="toc">
-      <div class="hd">Contents</div>
-      <ol>
-        <li class="on"><a href="#top">A working record</a></li>
-        <li><a href="#record">The drawing record</a></li>
-        <li><a href="#arcs">Design arcs</a></li>
-        <li><a href="#begin">Where to begin</a></li>
-      </ol>
+    <aside class="aside-toc">
+      <div>
+        <div class="toc-hd">Contents</div>
+        <ol>
+          <li class="on"><a href="#top">A working record</a></li>
+          <li><a href="#record">The drawing record</a></li>
+          <li><a href="#arcs">Design arcs</a></li>
+          <li><a href="#begin">Where to begin</a></li>
+        </ol>
+      </div>
 
-      <div class="hd" style="margin-top:36px">Filter the catalogue</div>
-      <ol>
-        <li><a href="browse.html?phase=East%20Wing">East Wing</a></li>
-        <li><a href="browse.html?phase=West%20Wing">West Wing</a></li>
-        <li><a href="browse.html?phase=Entry%20Garden">Entry Garden</a></li>
-      </ol>
+      <div class="aside-block">
+        <span class="aside-lbl">Filter the catalogue</span>
+        <span class="aside-sub">Phase</span>
+        <a href="browse.html?phase=East%20Wing" target="_blank" style="display:block;margin-bottom:6px">East Wing →</a>
+        <a href="browse.html?phase=West%20Wing" target="_blank" style="display:block;margin-bottom:6px">West Wing →</a>
+        <a href="browse.html?phase=Entry%20Garden" target="_blank" style="display:block">Entry Garden →</a>
+      </div>
     </aside>
 
   </div>
