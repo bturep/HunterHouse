@@ -2,19 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Browse — Hunter House Archive</title>
+<title>Browse the catalogue — Hunter House Foundation</title>
 <meta name="viewport" content="width=1400">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/verso.css">
 <style>
-  html,body{height:100%;overflow:hidden}
+  /* browse-surface overrides */
+  html,body{overflow:hidden}
+  .site-top{padding:14px 28px}
+  .site-nav a{padding:5px 16px}
 
   /* ── controls bar ── */
   .controls{
-    display:flex;align-items:stretch;gap:0;
-    padding:0 36px;border-bottom:1px solid var(--ink);background:var(--bg);
+    display:flex;align-items:stretch;
+    padding:0 28px;border-bottom:1px solid var(--ink);background:var(--bg);
   }
   .search{
     flex:1;display:flex;align-items:center;gap:10px;
@@ -35,152 +38,256 @@
   .fbtn .val{font-size:12px;color:var(--ink);white-space:nowrap}
   .fbtn .val .car{font-family:var(--mono);font-size:9px;color:var(--hint);margin-left:6px}
   .fbtn:hover{background:var(--soft)}
-  .fbtn.active{background:var(--ink)}
-  .fbtn.active .lbl{color:rgba(250,246,232,0.6)}
-  .fbtn.active .val{color:var(--bg)}
-  .fbtn.active .val .car{color:rgba(250,246,232,0.6)}
-  .fbtn.active:hover{background:var(--ink)}
+  .fbtn.active{background:var(--copper-pale)}
+  .fbtn.active .lbl{color:var(--copper-deep)}
+  .fbtn.active .val{color:var(--copper-deep)}
+  .fbtn.active:hover{background:var(--copper-pale)}
   .ctrl-count{
-    display:flex;align-items:center;padding:0 18px;
+    display:flex;align-items:center;padding:0 22px;
     font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:0.04em;font-variant-numeric:tabular-nums;white-space:nowrap;
   }
   .ctrl-count b{color:var(--ink);font-weight:500;margin-right:4px}
 
-  /* ── shell ── */
+  /* ── three-column shell ── */
   .shell{
-    display:grid;grid-template-columns:minmax(560px,640px) 1fr;
-    height:calc(100vh - 100px);min-height:560px;
+    display:grid;grid-template-columns:28% 1fr 28%;
+    height:calc(100vh - 53px - 41px);min-height:520px;
   }
-  .pane-list{border-right:1px solid var(--ink);display:flex;flex-direction:column;min-width:0;overflow:hidden}
-  .pane-preview{background:var(--bg);padding:32px 40px;overflow-y:auto;min-width:0;position:relative}
+  .pane-list{border-right:1px solid var(--ink);display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
+  .pane-image{background:var(--paper);display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative}
+  .pane-meta{border-left:1px solid var(--ink);display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
 
-  /* ── row head ── */
-  .rowhead{
-    display:grid;grid-template-columns:36px 96px 1fr 80px 56px;gap:14px;
-    padding:9px 24px;
+  /* ── list pane ── */
+  .list-head{
+    display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
+    padding:9px 20px;
     font-family:var(--mono);font-size:9.5px;color:var(--muted);
     letter-spacing:0.18em;text-transform:uppercase;
     border-bottom:1px solid var(--ink);flex-shrink:0;
   }
-  .rowhead .r{text-align:right}
-
+  .list-head .r{text-align:right}
   .rows{flex:1;overflow-y:auto}
 
-  /* ── rows ── */
-  .row{
-    display:grid;grid-template-columns:36px 96px 1fr 80px 56px;gap:14px;
-    padding:11px 24px;align-items:baseline;cursor:pointer;
-    border-bottom:1px dashed var(--rule);position:relative;
-  }
-  .row .ix{font-family:var(--mono);font-size:10.5px;color:var(--hint);letter-spacing:0;font-variant-numeric:tabular-nums;white-space:nowrap}
-  .row .archid{font-family:var(--mono);font-size:12px;color:var(--ink);letter-spacing:0.02em;font-weight:500;white-space:nowrap}
-  .row .title{font-size:13.5px;letter-spacing:-0.005em;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-  .row .title .ph{font-family:var(--mono);font-size:10.5px;color:var(--copper-deep);margin-left:12px;letter-spacing:0.02em;white-space:nowrap}
-  .row .year{font-family:var(--mono);font-size:11.5px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums;letter-spacing:0;white-space:nowrap}
-  .row .ty{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:right;letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap}
-  .row:hover{background:var(--soft)}
-  .row.sel{background:var(--ink)}
-  .row.sel .ix,.row.sel .archid,.row.sel .title,.row.sel .year,.row.sel .ty{color:var(--bg)}
-  .row.sel .title .ph{color:#a3c4b6}
-  .row.sel .ix{color:#e36a4f}
-  .row.sel::before{
-    content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);
-    width:6px;height:6px;border-radius:50%;background:#e36a4f;
-    box-shadow:0 0 0 2px var(--ink);
-  }
-
-  /* ── phase divider ── */
   .phase-divider{
     display:grid;grid-template-columns:1fr auto;gap:14px;
-    padding:18px 24px 8px;border-bottom:1px solid var(--ink);
+    padding:16px 20px 6px;border-bottom:1px solid var(--ink);
     font-family:var(--mono);font-size:10px;color:var(--copper-deep);
     letter-spacing:0.18em;text-transform:uppercase;background:var(--bg);
   }
   .phase-divider .r{color:var(--muted);white-space:nowrap}
 
-  /* ── preview pane ── */
-  .preview-head{
-    display:grid;grid-template-columns:1fr auto;align-items:end;
-    padding-bottom:14px;border-bottom:1px solid var(--ink);margin-bottom:24px;
+  .row{
+    display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
+    padding:11px 20px;align-items:start;cursor:pointer;
+    border-bottom:1px dashed var(--rule);position:relative;
   }
-  .archid-big{font-family:var(--mono);font-size:24px;color:var(--ink);font-weight:500;letter-spacing:0.02em;white-space:nowrap}
-  .archid-big .br{color:var(--red)}
-  .preview-sub{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:0.18em;text-transform:uppercase;margin-top:8px;white-space:nowrap}
-  .preview-nav{display:flex;gap:14px;font-family:var(--mono);font-size:11px}
-  .preview-nav a{color:var(--muted);text-decoration:none;white-space:nowrap}
-  .preview-nav a:hover{color:var(--ink)}
-
-  .plate{
-    background:#fff;border:1px solid var(--ink);position:relative;overflow:hidden;
-    aspect-ratio:3/2;margin-bottom:14px;
-    display:flex;align-items:center;justify-content:center;
+  .row .archid{
+    font-family:var(--mono);font-size:11px;color:var(--ink);
+    letter-spacing:0.02em;font-weight:500;white-space:nowrap;padding-top:2px;
+    display:flex;align-items:baseline;gap:6px;
   }
-  .plate img{width:100%;height:100%;object-fit:contain;display:block}
-  .plate-placeholder{font-family:var(--mono);font-size:10px;color:var(--hint);letter-spacing:0.12em;text-transform:uppercase}
-
-  .plate-caption{
-    display:grid;grid-template-columns:auto 1fr auto;gap:20px;
-    padding:10px 0;margin-bottom:28px;
-    font-family:var(--mono);font-size:10px;color:var(--muted);
-    letter-spacing:0.12em;text-transform:uppercase;
-    border-bottom:1px dotted var(--rule);
+  .row .archid .tmark{
+    font-family:var(--mono);font-size:8.5px;color:var(--copper-deep);
+    letter-spacing:0.08em;text-transform:uppercase;font-weight:500;
+    padding:0 4px;border:1px solid var(--copper-pale);
+    background:var(--copper-pale);border-radius:1px;line-height:1.35;flex-shrink:0;
   }
-  .plate-caption .l{color:var(--ink);font-weight:500;white-space:nowrap}
-  .plate-caption .m{text-align:center;letter-spacing:0.04em}
-  .plate-caption span:last-child{white-space:nowrap}
-
-  .pv-title{font-size:28px;font-weight:500;color:var(--ink);letter-spacing:-0.02em;line-height:1.12;margin-bottom:8px;max-width:600px}
-  .pv-orig{
-    font-family:var(--mono);font-size:10.5px;color:var(--muted);
-    letter-spacing:0.06em;margin-bottom:24px;text-transform:uppercase;
-    display:flex;gap:12px;align-items:baseline;
+  .row.sel .archid .tmark{color:var(--red-deep);border-color:var(--red-pale);background:var(--red-pale)}
+  .row .title-wrap{min-width:0;overflow:hidden}
+  .row .title{
+    font-size:13px;letter-spacing:-0.005em;color:var(--ink);
+    line-height:1.35;overflow:hidden;text-overflow:ellipsis;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
   }
-  .pv-orig .lb{color:var(--hint);letter-spacing:0.2em;white-space:nowrap}
-  .pv-orig .vl{color:var(--ink)}
-
-  .pv-lede{
-    font-family:var(--sans);font-size:15px;line-height:1.55;color:var(--ink);
-    max-width:540px;margin-bottom:26px;letter-spacing:-0.005em;font-weight:300;
+  .row .ph{
+    font-family:var(--mono);font-size:9.5px;color:var(--copper-deep);
+    letter-spacing:0.04em;margin-top:4px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
-
-  .pv-meta{
-    display:grid;grid-template-columns:96px 1fr;gap:9px 24px;
-    padding-top:18px;border-top:1px solid var(--rule);max-width:560px;
+  .row .year{
+    font-family:var(--mono);font-size:11px;color:var(--muted);
+    text-align:right;font-variant-numeric:tabular-nums;
+    white-space:nowrap;padding-top:2px;
   }
-  .pv-meta dt{font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;padding-top:3px;white-space:nowrap}
-  .pv-meta dd{font-size:13px;color:var(--ink);letter-spacing:-0.005em}
-  .pv-meta dd a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
-  .pill{display:inline-flex;align-items:center;height:19px;padding:0 8px;background:var(--copper-pale);color:var(--copper-deep);font-size:11px;margin-right:4px;white-space:nowrap}
+  .row:hover{background:var(--soft)}
+  .row.sel{background:var(--red-tint)}
+  .row.sel::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red)}
+  .row.sel .archid{color:var(--red-deep)}
 
-  .pv-actions{margin-top:26px;display:flex;align-items:stretch;gap:1px;background:var(--ink);width:fit-content}
+  /* ── image pane ── */
+  .image-head{
+    display:flex;justify-content:space-between;align-items:baseline;
+    padding:12px 24px;border-bottom:1px solid var(--ink);background:var(--bg);flex-shrink:0;
+  }
+  .image-head .l{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;letter-spacing:0.02em;white-space:nowrap}
+  .image-head .l .pos{color:var(--muted);font-weight:400;margin-left:12px}
+  .image-head .r{display:flex;gap:14px;align-items:baseline}
+  .image-head .r a{font-family:var(--mono);font-size:10.5px;color:var(--muted);text-decoration:none;letter-spacing:0.04em;white-space:nowrap}
+  .image-head .r a:hover{color:var(--ink)}
+  .image-head .r a.disabled{color:var(--hint);pointer-events:none}
+
+  .image-stage{
+    flex:1;position:relative;overflow:hidden;
+    background:var(--paper);display:flex;align-items:center;justify-content:center;
+  }
+  .image-stage .canvas{
+    width:100%;height:100%;position:relative;overflow:hidden;cursor:grab;
+  }
+  .image-stage .canvas.grabbing{cursor:grabbing}
+  .image-stage .canvas.no-zoom{cursor:default}
+  .image-stage img{
+    position:absolute;top:50%;left:50%;transform-origin:0 0;
+    user-select:none;-webkit-user-drag:none;pointer-events:none;
+    max-width:none;max-height:none;display:block;
+    border:1px solid var(--rule);box-shadow:0 8px 24px -10px rgba(30,28,26,0.22);
+  }
+  .image-stage .placeholder{
+    font-family:var(--mono);font-size:10.5px;color:var(--hint);
+    letter-spacing:0.12em;text-transform:uppercase;text-align:center;
+    width:100%;height:100%;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:6px;
+  }
+  .image-stage .placeholder b{color:var(--muted);font-weight:500}
+
+  .zoom-ctl{
+    position:absolute;bottom:16px;right:16px;
+    display:flex;align-items:stretch;
+    background:var(--bg);border:1px solid var(--ink);
+    font-family:var(--mono);font-size:11px;user-select:none;z-index:5;
+  }
+  .zoom-ctl button{
+    background:none;border:0;font:inherit;color:var(--ink);
+    padding:6px 12px;cursor:pointer;border-right:1px solid var(--rule);
+    display:flex;align-items:center;justify-content:center;min-width:30px;
+  }
+  .zoom-ctl button:last-child{border-right:0}
+  .zoom-ctl button:hover{background:var(--soft)}
+  .zoom-ctl button:disabled{color:var(--hint);cursor:not-allowed}
+  .zoom-ctl button:disabled:hover{background:var(--bg)}
+  .zoom-ctl .pct{padding:6px 12px;color:var(--muted);border-right:1px solid var(--rule);font-variant-numeric:tabular-nums;min-width:54px;text-align:center}
+
+  .image-foot{
+    padding:10px 24px;border-top:1px solid var(--rule);background:var(--bg);
+    display:flex;justify-content:space-between;align-items:baseline;
+    font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em;flex-shrink:0;
+  }
+  .image-foot .l{color:var(--ink);font-weight:500;white-space:nowrap}
+  .image-foot .m{color:var(--muted);letter-spacing:0.04em}
+  .image-foot .r a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
+
+  /* ── meta pane ── */
+  .meta-head{
+    padding:12px 22px;border-bottom:1px solid var(--ink);background:var(--bg);
+    display:flex;justify-content:space-between;align-items:baseline;flex-shrink:0;
+  }
+  .meta-head .l{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
+  .meta-head .l .n{color:var(--red);margin-right:10px;font-weight:400}
+  .meta-head .r{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em;white-space:nowrap}
+  .meta-body{flex:1;overflow-y:auto;padding:22px 22px 32px}
+
+  .meta-title{font-size:21px;font-weight:500;color:var(--ink);letter-spacing:-0.015em;line-height:1.2;margin-bottom:8px}
+  .meta-orig{
+    font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;
+    padding:6px 0;margin-bottom:18px;border-bottom:1px dotted var(--rule);
+  }
+  .meta-orig .lb{color:var(--hint);margin-right:8px;letter-spacing:0.14em}
+  .meta-orig .vl{color:var(--ink);font-weight:500;letter-spacing:0.04em}
+  .meta-lede{font-size:13px;line-height:1.6;color:var(--ink);margin-bottom:24px;font-weight:300;letter-spacing:-0.005em}
+
+  .meta-section{margin-bottom:24px}
+  .meta-section h3{
+    font-family:var(--mono);font-size:9.5px;color:var(--ink);
+    letter-spacing:0.18em;text-transform:uppercase;font-weight:500;
+    padding-bottom:8px;border-bottom:1px solid var(--ink);margin-bottom:12px;
+    display:flex;justify-content:space-between;align-items:baseline;
+  }
+  .meta-section h3 .n{color:var(--red);font-weight:400;margin-right:8px}
+  .meta-section h3 .ct{color:var(--muted);font-weight:400;letter-spacing:0.06em}
+
+  .kv{margin:0}
+  .kv > .row{
+    display:grid;grid-template-columns:84px 1fr;gap:14px;
+    padding:7px 0;border-bottom:1px solid var(--rule-soft);
+    align-items:baseline;cursor:default;border-left:0;
+  }
+  .kv > .row::before{display:none}
+  .kv > .row:last-child{border-bottom:0}
+  .kv > .row:hover{background:transparent}
+  .kv dt{font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap}
+  .kv dd{font-size:12.5px;color:var(--ink);letter-spacing:-0.005em;line-height:1.5}
+  .kv dd a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
+  .kv dd a:hover{border-bottom-color:var(--copper-deep)}
+
+  /* browse-local pill/archid (smaller than verso.css defaults) */
+  .pill{display:inline-flex;align-items:center;height:18px;padding:0 7px;background:var(--copper-pale);color:var(--copper-deep);font-size:10.5px;margin:0 3px 3px 0;white-space:nowrap}
+  .archid-mono{font-family:var(--mono);font-size:11px;color:var(--red);background:var(--red-pale);padding:1.5px 7px;letter-spacing:0.04em;white-space:nowrap}
+
+  .meta-actions{display:flex;align-items:stretch;gap:1px;background:var(--ink);width:fit-content;margin-bottom:20px}
   .btn{
-    display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 16px;
-    font:inherit;font-size:12.5px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 14px;
+    font:inherit;font-size:11.5px;cursor:pointer;
     background:var(--ink);color:var(--bg);border:0;white-space:nowrap;text-decoration:none;
   }
-  .btn .ar{font-family:var(--mono)}
+  .btn .ar{font-family:var(--mono);font-size:11px}
   .btn:hover{background:#000}
   .btn.ghost{background:var(--bg);color:var(--ink)}
   .btn.ghost:hover{background:var(--soft)}
 
-  .kbd-hint{
-    margin-top:24px;padding-top:14px;border-top:1px solid var(--rule);
-    font-family:var(--mono);font-size:10.5px;color:var(--muted);
-    display:flex;gap:22px;align-items:center;letter-spacing:0.04em;text-transform:uppercase;
+  /* ── graph-position panel ── */
+  .graph-section{margin-top:8px}
+  .graph-section h3{
+    font-family:var(--mono);font-size:9.5px;color:var(--ink);
+    letter-spacing:0.18em;text-transform:uppercase;font-weight:500;
+    padding-bottom:8px;border-bottom:1px solid var(--ink);margin-bottom:14px;
+    display:flex;justify-content:space-between;align-items:baseline;
   }
-  .kbd-hint kbd{
-    display:inline-flex;align-items:center;justify-content:center;
-    min-width:18px;height:18px;padding:0 5px;font-size:10px;
-    border:1px solid var(--rule);background:var(--bg);color:var(--ink);
-    margin:0 4px;letter-spacing:0;text-transform:none;
-  }
-  .kbd-hint span{white-space:nowrap}
+  .graph-section h3 .n{color:var(--red);font-weight:400;margin-right:8px}
+  .graph-section h3 .ct{color:var(--muted);font-weight:400;letter-spacing:0.06em;font-size:9px}
 
-  .preview-empty{
-    display:flex;align-items:center;justify-content:center;height:100%;
-    font-family:var(--mono);font-size:11px;color:var(--hint);letter-spacing:0.1em;text-transform:uppercase;
+  .graph-path{margin-bottom:18px;font-family:var(--mono);font-size:10px;letter-spacing:0.04em;line-height:1.7}
+  .graph-path .node{display:grid;grid-template-columns:18px 60px 1fr;gap:8px;align-items:baseline;padding:5px 0}
+  .graph-path .node .tick{color:var(--hint);font-size:9px;text-align:center}
+  .graph-path .node .rel{color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-size:8.5px;white-space:nowrap;padding-top:1px}
+  .graph-path .node .lbl{font-size:11.5px;color:var(--ink);letter-spacing:-0.005em;font-family:var(--sans);font-weight:500;line-height:1.35}
+  .graph-path .node.this .tick{color:var(--red);font-size:11px;line-height:1}
+  .graph-path .node.this .lbl{color:var(--red-deep)}
+  .graph-path .node a.lbl{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale);font-weight:400}
+  .graph-path .node a.lbl:hover{border-bottom-color:var(--copper-deep)}
+  .graph-path .connector{margin-left:9px;padding-left:17px;border-left:1px dotted var(--rule);height:8px}
+
+  .graph-siblings{margin-bottom:18px}
+  .graph-siblings .lbl-row{
+    display:flex;justify-content:space-between;align-items:baseline;
+    font-family:var(--mono);font-size:8.5px;color:var(--muted);
+    letter-spacing:0.14em;text-transform:uppercase;
+    padding-bottom:7px;margin-bottom:6px;border-bottom:1px dotted var(--rule);
   }
+  .graph-siblings .lbl-row .ct{color:var(--hint)}
+  .graph-siblings .sib{
+    display:grid;grid-template-columns:78px 1fr 28px;gap:8px;
+    padding:5px 0;align-items:baseline;font-size:11px;line-height:1.35;
+    text-decoration:none;color:inherit;cursor:pointer;
+  }
+  .graph-siblings .sib:hover{background:var(--soft)}
+  .graph-siblings .sib.current{background:var(--red-tint);cursor:default}
+  .graph-siblings .sib.current:hover{background:var(--red-tint)}
+  .graph-siblings .sib .id{font-family:var(--mono);font-size:9.5px;color:var(--ink);letter-spacing:0.04em;font-weight:500}
+  .graph-siblings .sib.current .id{color:var(--red-deep)}
+  .graph-siblings .sib .t{color:var(--ink);letter-spacing:-0.005em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .graph-siblings .sib .pos{font-family:var(--mono);font-size:9px;color:var(--muted);text-align:right}
+  .graph-siblings .sib.current .pos{color:var(--red)}
+
+  .graph-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:14px}
+  .graph-actions a{background:var(--bg);padding:9px 10px;text-decoration:none;color:var(--ink);display:flex;flex-direction:column;gap:2px;transition:background 0.1s}
+  .graph-actions a:hover{background:var(--soft)}
+  .graph-actions a .top{font-family:var(--mono);font-size:8.5px;color:var(--muted);letter-spacing:0.14em;text-transform:uppercase}
+  .graph-actions a .bot{font-family:var(--mono);font-size:10.5px;color:var(--ink);letter-spacing:0.02em;display:flex;justify-content:space-between;align-items:baseline}
+  .graph-actions a .bot .ar{color:var(--copper-deep);font-size:10px}
+  .graph-actions a:hover .bot .ar{color:var(--ink)}
+
+  .graph-empty{font-family:var(--mono);font-size:10px;color:var(--hint);letter-spacing:0.04em;line-height:1.6;padding:8px 0}
+  .empty{display:flex;align-items:center;justify-content:center;height:100%;font-family:var(--mono);font-size:11px;color:var(--hint);letter-spacing:0.1em;text-transform:uppercase;text-align:center;padding:24px}
   .load-msg{padding:24px;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.06em}
   .error-msg{padding:24px;font-family:var(--mono);font-size:11px;color:var(--red);letter-spacing:0.04em}
 </style>
@@ -193,24 +300,27 @@
     <span class="name">Hunter House <span class="dim">· Foundation</span></span>
   </div>
   <nav class="site-nav">
+    <a href="richard-hunter.html">Hunter</a>
     <a href="the-house.html">House</a>
     <a href="archive.html">Archive</a>
-    <a href="browse.html" class="on">Browse</a>
-    <a href="richard-hunter.html">Hunter</a>
     <a href="about.html">About</a>
   </nav>
-  <div class="site-topright" id="topright">— items · v0.4</div>
+  <div class="site-topright" id="topright">— items · v0.5</div>
 </header>
 
 <div class="controls">
   <div class="search">
     <span class="sym">/</span>
-    <input id="search-input" placeholder="Search by title, ID, or type…" autocomplete="off">
+    <input id="search-input" placeholder="Search by title, ID, type, or phase…" autocomplete="off">
     <kbd>/</kbd>
   </div>
   <div class="fbtn" id="fbtn-sort">
     <span class="lbl">Sort</span>
-    <span class="val">Type <span class="car">▾</span></span>
+    <span class="val" id="fbtn-sort-val">Chronological <span class="car">▾</span></span>
+  </div>
+  <div class="fbtn" id="fbtn-phase">
+    <span class="lbl">Phase</span>
+    <span class="val" id="fbtn-phase-val">All <span class="car">▾</span></span>
   </div>
   <div class="fbtn" id="fbtn-type">
     <span class="lbl">Type</span>
@@ -224,87 +334,103 @@
 <div class="shell">
 
   <section class="pane-list">
-    <div class="rowhead">
-      <span>№</span>
+    <div class="list-head">
       <span>ID</span>
-      <span>Title · Type</span>
-      <span class="r">—</span>
-      <span class="r">Type</span>
+      <span>Title · Phase</span>
+      <span class="r">Year</span>
     </div>
     <div class="rows" id="rows">
-      <div class="load-msg">Loading items from Wikibase…</div>
+      <div class="load-msg">Loading catalogue from Wikibase…</div>
     </div>
   </section>
 
-  <section class="pane-preview" id="preview">
-    <div class="preview-empty">Select an item from the list</div>
+  <section class="pane-image">
+    <div class="image-head">
+      <span class="l"><span id="ih-id">—</span> <span class="pos" id="ih-pos"></span></span>
+      <span class="r">
+        <a href="#" id="nav-prev">← prev</a>
+        <a href="#" id="nav-next">next →</a>
+      </span>
+    </div>
+    <div class="image-stage" id="stage">
+      <div class="canvas" id="canvas">
+        <div class="placeholder">Select an item<b id="ph-name"></b></div>
+      </div>
+      <div class="zoom-ctl">
+        <button id="zoom-out" type="button" title="Zoom out">−</button>
+        <span class="pct" id="zoom-pct">100%</span>
+        <button id="zoom-in" type="button" title="Zoom in">+</button>
+        <button id="zoom-fit" type="button" title="Fit to frame">fit</button>
+      </div>
+    </div>
+    <div class="image-foot">
+      <span class="l" id="if-id">—</span>
+      <span class="m" id="if-date">—</span>
+      <span class="r"><a href="#" id="if-full" target="_blank" rel="noopener">↗ Open full size</a></span>
+    </div>
+  </section>
+
+  <section class="pane-meta">
+    <div class="meta-head">
+      <span class="l"><span class="n">§</span>Record</span>
+      <span class="r" id="meta-source">—</span>
+    </div>
+    <div class="meta-body" id="meta-body">
+      <div class="empty">Select an item from the list</div>
+    </div>
   </section>
 
 </div>
 
 <script>
-  // ── Config ──────────────────────────────────────────────────────────
+  // ── Config ────────────────────────────────────────────────────────────────
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
 
-  // ── State ────────────────────────────────────────────────────────────
-  let allItems       = [];   // flat array, ordered by type group
-  let visibleIndexes = [];   // allItems indexes currently visible
-  let selectedIdx    = -1;   // index into allItems
-  let activeType     = null; // null = all types
+  // ── State ─────────────────────────────────────────────────────────────────
+  const state = {
+    items: [],
+    filtered: [],
+    selectedId: null,
+    sort: "date-asc",
+    search: "",
+    filterPhase: "",
+    filterType: "",
+  };
 
-  // ── SPARQL query (unchanged) ─────────────────────────────────────────
-  const Q_LIST_ITEMS = `
-    SELECT ?item ?itemLabel ?itemDescription WHERE {
-      ?item rdfs:label ?itemLabel .
-      FILTER(LANG(?itemLabel) = "en")
-      FILTER(REGEX(STR(?item), "/entity/Q[0-9]+$"))
-      OPTIONAL {
-        ?item schema:description ?itemDescription .
-        FILTER(LANG(?itemDescription) = "en")
-      }
-    }
-    LIMIT 2000
-  `;
+  const SORTS = [
+    { k:"date-asc",  label:"Chronological" },
+    { k:"date-desc", label:"Reverse chronological" },
+    { k:"phase",     label:"By phase" },
+    { k:"type",      label:"By drawing type" },
+    { k:"id",        label:"By archive ID" },
+  ];
 
-  // ── Helpers (unchanged) ──────────────────────────────────────────────
-  async function sparqlQuery(query) {
-    const url = SPARQL_URL + "?query=" + encodeURIComponent(query) + "&format=json";
+  // ── Utilities ─────────────────────────────────────────────────────────────
+  const $ = sel => document.querySelector(sel);
+  const escapeHTML = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const yearOf = d => d ? d.slice(0, 4) : "";
+  const imageUrl = it => it.image || null;
+  const uniqueSorted = arr => Array.from(new Set(arr)).filter(Boolean).sort();
+
+  function chunks(arr, n) {
+    const out = [];
+    for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n));
+    return out;
+  }
+
+  // ── Wikibase fetch layer ──────────────────────────────────────────────────
+  async function sparqlQuery(q) {
+    const url = SPARQL_URL + "?query=" + encodeURIComponent(q) + "&format=json";
     const res = await fetch(url, { headers: { Accept: "application/sparql-results+json" } });
     if (!res.ok) throw new Error("SPARQL " + res.status);
     return (await res.json()).results.bindings;
   }
 
-  async function fetchTypeMap(qids) {
-    const typeMap    = {};   // qid → type QID
-    const previewMap = {};   // qid → preview URL string
-    const batches = [];
-    for (let i = 0; i < qids.length; i += 50) batches.push(qids.slice(i, i + 50));
-    await Promise.all(batches.map(async batch => {
-      try {
-        const url = API_URL + "?action=wbgetentities&ids=" + encodeURIComponent(batch.join("|")) +
-                    "&props=claims&format=json&origin=*";
-        const json = await (await fetch(url)).json();
-        for (const qid of batch) {
-          const entity = json.entities?.[qid];
-          if (!entity) continue;
-          const tqid = entity.claims?.P1?.[0]?.mainsnak?.datavalue?.value?.id;
-          if (tqid) typeMap[qid] = tqid;
-          const purl = entity.claims?.P96?.[0]?.mainsnak?.datavalue?.value;
-          if (purl) previewMap[qid] = purl;
-        }
-      } catch (e) { console.warn("type fetch failed:", e); }
-    }));
-    return { typeMap, previewMap };
-  }
-
   async function fetchLabels(qids) {
     const labels = {};
-    const unique = [...new Set(qids)];
-    const batches = [];
-    for (let i = 0; i < unique.length; i += 50) batches.push(unique.slice(i, i + 50));
-    await Promise.all(batches.map(async batch => {
+    await Promise.all(chunks([...new Set(qids)].filter(Boolean), 50).map(async batch => {
       try {
         const url = API_URL + "?action=wbgetentities&ids=" + encodeURIComponent(batch.join("|")) +
                     "&props=labels&format=json&origin=*";
@@ -313,370 +439,640 @@
           const v = json.entities?.[qid]?.labels?.en?.value;
           if (v) labels[qid] = v;
         }
-      } catch (e) { console.warn("label fetch failed:", e); }
+      } catch {}
     }));
     return labels;
   }
 
-  function qidFromURI(uri) { return uri.split("/").pop(); }
+  async function loadFromWikibase() {
+    const Q = `SELECT ?item ?itemLabel ?itemDescription WHERE {
+      ?item rdfs:label ?itemLabel . FILTER(LANG(?itemLabel) = "en")
+      FILTER(REGEX(STR(?item), "/entity/Q[0-9]+$"))
+      OPTIONAL { ?item schema:description ?itemDescription . FILTER(LANG(?itemDescription) = "en") }
+    } LIMIT 2000`;
 
-  function escapeHTML(s) {
-    if (s == null) return "";
-    return String(s).replace(/[&<>"']/g, c =>
-      ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
-  }
-
-  // ── Render helpers ───────────────────────────────────────────────────
-  const TYPE_ABBREVS = {
-    "archive item": "Item", "archival item": "Item", "drawing": "Draw.",
-    "photograph": "Photo", "phase": "Phase", "work": "Work",
-    "person": "Person", "institution": "Inst.", "place": "Place",
-    "event": "Event", "building": "Bldg.", "area": "Area",
-  };
-
-  function abbreviateType(t) {
-    return TYPE_ABBREVS[t.toLowerCase()] ||
-      t.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 5);
-  }
-
-  // Format a QID for display as a large mono archive ID in the preview pane
-  function formatBigId(qid) {
-    // Q–NNN style with red separator
-    return `Q<span class="br">–</span>${escapeHTML(qid.slice(1))}`;
-  }
-
-  // ── Build the row list ───────────────────────────────────────────────
-  function buildList(itemsByType) {
-    // Sort: Archive Item first, Untyped last, rest alphabetical
-    const typeOrder = Object.keys(itemsByType).sort((a, b) => {
-      if (a === "Untyped") return 1;
-      if (b === "Untyped") return -1;
-      const aIsArchive = a.toLowerCase().includes("archive item") || a.toLowerCase().includes("archival");
-      const bIsArchive = b.toLowerCase().includes("archive item") || b.toLowerCase().includes("archival");
-      if (aIsArchive && !bIsArchive) return -1;
-      if (!aIsArchive && bIsArchive) return 1;
-      return a.localeCompare(b);
+    const rows = await sparqlQuery(Q);
+    const meta = {};
+    rows.forEach(r => {
+      const qid = r.item.value.split("/").pop();
+      if (!meta[qid]) meta[qid] = {
+        label: r.itemLabel?.value || qid,
+        description: r.itemDescription?.value || null,
+      };
     });
 
-    allItems = [];
-    typeOrder.forEach(typeKey => {
-      const sorted = itemsByType[typeKey].slice().sort((a, b) =>
-        (a.label || "").localeCompare(b.label || ""));
-      sorted.forEach(item => allItems.push({ ...item, typeKey }));
-    });
+    const allQids = Object.keys(meta);
+    const claimsMap = {};
+    const linkedQids = new Set();
 
-    document.getElementById("topright").textContent = allItems.length + " items · v0.4";
+    await Promise.all(chunks(allQids, 50).map(async batch => {
+      try {
+        const url = API_URL + "?action=wbgetentities&ids=" + encodeURIComponent(batch.join("|")) +
+                    "&props=claims&format=json&origin=*";
+        const json = await (await fetch(url)).json();
+        for (const qid of batch) {
+          const entity = json.entities?.[qid];
+          if (!entity?.claims) continue;
+          claimsMap[qid] = entity.claims;
+          for (const pid in entity.claims) {
+            for (const c of entity.claims[pid]) {
+              if (c.mainsnak?.snaktype === "value" && c.mainsnak.datavalue?.type === "wikibase-entityid") {
+                linkedQids.add(c.mainsnak.datavalue.value.id);
+              }
+            }
+          }
+        }
+      } catch {}
+    }));
 
-    renderRows(allItems);
-    syncVisibleIndexes();
-    updateCount();
+    const entityLabels = await fetchLabels([...linkedQids]);
 
-    // Auto-select from URL or first item
-    const urlId = new URLSearchParams(location.search).get("id");
-    if (urlId) {
-      const idx = allItems.findIndex(it => it.qid === urlId);
-      if (idx >= 0) { selectItem(idx, false); return; }
+    function qlabel(qid) { return qid ? (entityLabels[qid] || null) : null; }
+    function firstQID(claims, pid) { return claims?.[pid]?.[0]?.mainsnak?.datavalue?.value?.id || null; }
+    function firstStr(claims, pid) {
+      const dv = claims?.[pid]?.[0]?.mainsnak?.datavalue;
+      if (!dv) return null;
+      if (dv.type === "string") return dv.value;
+      if (dv.type === "wikibase-entityid") return qlabel(dv.value.id);
+      return null;
     }
-    if (allItems.length > 0) selectItem(0, false);
+    function allQIDs(claims, pid) {
+      return (claims?.[pid] || []).map(c => c.mainsnak?.datavalue?.value?.id).filter(Boolean);
+    }
+    function firstDate(claims) {
+      for (const pid in claims) {
+        for (const c of (claims[pid] || [])) {
+          const dv = c.mainsnak?.datavalue;
+          if (dv?.type === "time") {
+            return dv.value.time.replace(/^\+/, "").split("T")[0];
+          }
+        }
+      }
+      return null;
+    }
+
+    const items = [];
+    for (const qid of allQids) {
+      const claims = claimsMap[qid];
+      if (!claims) continue;
+      const archiveId = firstStr(claims, "P2");
+      const image     = claims?.P96?.[0]?.mainsnak?.datavalue?.value;
+      if (!archiveId || !image) continue;
+
+      const phaseQID = firstQID(claims, "P62") || firstQID(claims, "P84");
+      const typeQID  = firstQID(claims, "P88");
+      const areaQIDs = allQIDs(claims, "P87");
+      const p1QID    = firstQID(claims, "P1");
+      const srcQID   = firstQID(claims, "P79");
+      const creQID   = firstQID(claims, "P80");
+
+      items.push({
+        qid,
+        id:               archiveId,
+        title:            meta[qid]?.label || archiveId,
+        date:             firstDate(claims),
+        phase:            phaseQID ? qlabel(phaseQID) : null,
+        phaseQID,
+        areas:            areaQIDs.map(qlabel).filter(Boolean),
+        type:             typeQID ? qlabel(typeQID) : null,
+        use:              firstStr(claims, "P89"),
+        builtStatus:      firstStr(claims, "P92"),
+        creator:          creQID ? qlabel(creQID) : null,
+        itemType:         p1QID ? qlabel(p1QID) : null,
+        sourceCollection: srcQID ? qlabel(srcQID) : null,
+        rights:           firstStr(claims, "P93"),
+        image,
+        notes:            meta[qid]?.description || null,
+      });
+    }
+
+    items.sort((a, b) => (a.id || "").localeCompare(b.id || ""));
+    return items;
   }
 
-  function renderRows(items) {
-    const rowsEl = document.getElementById("rows");
-    rowsEl.innerHTML = "";
+  // ── Filter + sort ─────────────────────────────────────────────────────────
+  function applyFilters() {
+    const q = state.search.trim().toLowerCase();
+    state.filtered = state.items.filter(it => {
+      if (state.filterPhase && it.phase !== state.filterPhase) return false;
+      if (state.filterType  && it.type  !== state.filterType)  return false;
+      if (q) {
+        const hay = [it.id, it.title, it.phase, it.type, it.use, (it.areas||[]).join(" "), it.creator, it.notes||""].join(" ").toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+    const sorters = {
+      "date-asc":  (a,b) => (a.date||"").localeCompare(b.date||""),
+      "date-desc": (a,b) => (b.date||"").localeCompare(a.date||""),
+      "phase":     (a,b) => (a.phase||"").localeCompare(b.phase||"") || (a.date||"").localeCompare(b.date||""),
+      "type":      (a,b) => (a.type||"").localeCompare(b.type||"")   || (a.date||"").localeCompare(b.date||""),
+      "id":        (a,b) => (a.id||"").localeCompare(b.id||""),
+    };
+    state.filtered.sort(sorters[state.sort] || sorters["date-asc"]);
+  }
 
-    let currentType = null;
-    let globalN = 0;
+  // ── Render list ───────────────────────────────────────────────────────────
+  const TYPE_MARKS = {
+    "drawing":"D","photograph":"Ph","letter":"L","correspondence":"L",
+    "engineering":"En","engineering document":"En","notebook":"N","sketch":"N",
+    "ephemera":"E","permit":"Pm","report":"R",
+  };
+  function typeMark(itemType) {
+    if (!itemType) return "";
+    return TYPE_MARKS[itemType.toLowerCase()] || itemType.slice(0,1).toUpperCase();
+  }
 
-    items.forEach((item, i) => {
-      if (item.typeKey !== currentType) {
-        currentType = item.typeKey;
-        const count = items.filter(it => it.typeKey === currentType).length;
+  function renderList() {
+    const container = $("#rows");
+    container.innerHTML = "";
+
+    if (state.filtered.length === 0) {
+      container.innerHTML = `<div class="empty">No items match</div>`;
+      updateCount();
+      return;
+    }
+
+    const grouped = state.sort === "phase";
+    const frag = document.createDocumentFragment();
+    let lastPhase = null;
+
+    state.filtered.forEach(it => {
+      if (grouped && it.phase !== lastPhase) {
+        lastPhase = it.phase;
+        const count = state.filtered.filter(x => x.phase === lastPhase).length;
         const d = document.createElement("div");
         d.className = "phase-divider";
-        d.dataset.type = currentType;
-        d.innerHTML = `<span>${escapeHTML(currentType)}</span><span class="r">${String(count).padStart(2, "0")} items</span>`;
-        rowsEl.appendChild(d);
+        d.innerHTML = `<span>${escapeHTML(lastPhase||"—")}</span><span class="r">${String(count).padStart(2,"0")} items</span>`;
+        frag.appendChild(d);
       }
-
-      globalN++;
       const row = document.createElement("div");
-      row.className = "row";
-      row.dataset.idx = String(i);
-      row.dataset.type = item.typeKey;
-      row.innerHTML =
-        `<span class="ix">${String(globalN).padStart(2, "0")}</span>` +
-        `<span class="archid">${escapeHTML(item.qid)}</span>` +
-        `<span class="title">${escapeHTML(item.label || item.qid)}</span>` +
-        `<span class="year">—</span>` +
-        `<span class="ty">${escapeHTML(abbreviateType(item.typeKey))}</span>`;
-      row.addEventListener("click", () => selectItem(i));
-      rowsEl.appendChild(row);
-    });
-  }
-
-  function syncVisibleIndexes() {
-    visibleIndexes = [];
-    document.querySelectorAll(".row").forEach(row => {
-      if (row.style.display !== "none") {
-        visibleIndexes.push(parseInt(row.dataset.idx, 10));
-      }
-    });
-  }
-
-  // ── Selection ────────────────────────────────────────────────────────
-  function selectItem(allIdx, pushState = true) {
-    document.querySelectorAll(".row.sel").forEach(r => r.classList.remove("sel"));
-
-    if (allIdx < 0 || allIdx >= allItems.length) return;
-    selectedIdx = allIdx;
-
-    const row = document.querySelector(`.row[data-idx="${allIdx}"]`);
-    if (row) {
-      row.classList.add("sel");
-      row.scrollIntoView({ block: "nearest" });
-    }
-
-    const item = allItems[allIdx];
-    if (pushState) {
-      history.pushState({ idx: allIdx, qid: item.qid }, "",
-        `?id=${encodeURIComponent(item.qid)}`);
-    }
-
-    renderPreview(item, allIdx);
-  }
-
-  function selectPrev() {
-    const pos = visibleIndexes.indexOf(selectedIdx);
-    if (pos > 0) selectItem(visibleIndexes[pos - 1]);
-  }
-
-  function selectNext() {
-    const pos = visibleIndexes.indexOf(selectedIdx);
-    if (pos >= 0 && pos < visibleIndexes.length - 1) selectItem(visibleIndexes[pos + 1]);
-  }
-
-  // ── Preview pane ─────────────────────────────────────────────────────
-  function renderPreview(item, allIdx) {
-    const pane = document.getElementById("preview");
-
-    const visPos = visibleIndexes.indexOf(allIdx);
-    const visTot = visibleIndexes.length;
-    const num = String(visPos + 1).padStart(2, "0");
-    const tot = String(visTot).padStart(2, "0");
-
-    const hasPrev = visPos > 0;
-    const hasNext = visPos < visibleIndexes.length - 1;
-
-    const prevLink = hasPrev
-      ? `<a href="#" id="pv-prev">← prev</a>`
-      : `<span style="color:var(--hint)">← prev</span>`;
-    const nextLink = hasNext
-      ? `<a href="#" id="pv-next">next →</a>`
-      : `<span style="color:var(--hint)">next →</span>`;
-
-    const descHtml = item.description
-      ? `<p class="pv-lede">${escapeHTML(item.description)}</p>`
-      : "";
-
-    pane.innerHTML = `
-      <div class="preview-head">
-        <div class="lh">
-          <div class="archid-big">${formatBigId(item.qid)}</div>
-          <div class="preview-sub">${escapeHTML(item.typeKey || "Item")} · ${num} / ${tot}</div>
+      row.className = "row" + (it.id === state.selectedId ? " sel" : "");
+      row.dataset.id = it.id;
+      const tmark = typeMark(it.itemType);
+      row.innerHTML = `
+        <span class="archid">${tmark ? `<span class="tmark" title="${escapeHTML(it.itemType)}">${tmark}</span>` : ""}${escapeHTML(it.id)}</span>
+        <div class="title-wrap">
+          <div class="title">${escapeHTML(it.title)}</div>
+          <div class="ph">${escapeHTML(it.phase || "")}</div>
         </div>
-        <div class="preview-nav">${prevLink}${nextLink}</div>
-      </div>
-
-      <div class="plate">
-        ${item.previewUrl
-          ? `<img src="${escapeHTML(item.previewUrl)}" alt="${escapeHTML(item.label || item.qid)}">`
-          : `<div class="plate-placeholder">No image</div>`}
-      </div>
-
-      <div class="plate-caption">
-        <span class="l">${escapeHTML(item.qid)}</span>
-        <span class="m">${escapeHTML(item.typeKey || "—")}</span>
-        <span>↗ Full record</span>
-      </div>
-
-      <h1 class="pv-title">${escapeHTML(item.label || item.qid)}</h1>
-      <div class="pv-orig">
-        <span class="lb">Type</span>
-        <span class="vl">${escapeHTML(item.typeKey || "—")}</span>
-      </div>
-
-      ${descHtml}
-
-      <dl class="pv-meta">
-        <dt>Wikibase</dt>
-        <dd style="font-family:var(--mono);font-size:11px;color:var(--muted)">${escapeHTML(item.qid)}</dd>
-        ${item.description ? `<dt>Description</dt><dd>${escapeHTML(item.description)}</dd>` : ""}
-      </dl>
-
-      <div class="pv-actions">
-        <a class="btn" href="item.html?id=${encodeURIComponent(item.qid)}">Open record <span class="ar">→</span></a>
-        <button class="btn ghost" type="button" onclick="navigator.clipboard?.writeText(location.href)">Copy link</button>
-      </div>
-
-      <div class="kbd-hint">
-        <span><kbd>↑</kbd><kbd>↓</kbd> Nav</span>
-        <span><kbd>↵</kbd> Open</span>
-        <span><kbd>/</kbd> Search</span>
-        <span><kbd>F</kbd> Filter</span>
-      </div>
-    `;
-
-    const pp = document.getElementById("pv-prev");
-    const pn = document.getElementById("pv-next");
-    if (pp) pp.addEventListener("click", e => { e.preventDefault(); selectPrev(); });
-    if (pn) pn.addEventListener("click", e => { e.preventDefault(); selectNext(); });
-  }
-
-  // ── Search / filter ──────────────────────────────────────────────────
-  function applySearch() {
-    const q = document.getElementById("search-input").value.trim().toLowerCase();
-
-    document.querySelectorAll(".row").forEach(row => {
-      const text = (row.textContent || "").toLowerCase();
-      const matchesSearch = !q || text.includes(q);
-      const matchesType = !activeType || row.dataset.type === activeType;
-      row.style.display = matchesSearch && matchesType ? "" : "none";
+        <span class="year">${escapeHTML(yearOf(it.date))}</span>
+      `;
+      frag.appendChild(row);
     });
-
-    // Hide dividers that have no visible rows below them
-    document.querySelectorAll(".phase-divider").forEach(div => {
-      let next = div.nextElementSibling;
-      let any = false;
-      while (next && !next.classList.contains("phase-divider")) {
-        if (next.classList.contains("row") && next.style.display !== "none") any = true;
-        next = next.nextElementSibling;
-      }
-      div.style.display = any ? "" : "none";
-    });
-
-    syncVisibleIndexes();
+    container.appendChild(frag);
     updateCount();
   }
 
   function updateCount() {
-    const total   = allItems.length;
-    const matched = visibleIndexes.length;
-    const el = document.getElementById("count-display");
-    const lb = document.getElementById("count-label");
+    const total   = state.items.length;
+    const showing = state.filtered.length;
+    const el = $("#count-display");
+    const lb = $("#count-label");
     if (!el) return;
-    if (matched === total) {
-      el.textContent = String(total).padStart(2, "0");
-      lb.textContent = "items";
+    el.textContent = String(showing).padStart(2, "0");
+    lb.textContent = showing === total ? "items" : `of ${total}`;
+    if (total > 0) $("#topright").textContent = `${total} items · v0.5`;
+  }
+
+  // ── Image pane (pan + zoom) ───────────────────────────────────────────────
+  let currentImg = null;
+  let zoomState = { scale:1, fitScale:1, tx:0, ty:0, naturalW:0, naturalH:0 };
+
+  function renderImage(item) {
+    const canvas = $("#canvas");
+    const idx = state.filtered.findIndex(i => i.id === item.id);
+    const pos = idx >= 0 ? `${idx+1} of ${state.filtered.length}` : "";
+
+    $("#ih-id").textContent = item.id;
+    $("#ih-pos").textContent = pos;
+    $("#if-id").textContent  = item.id;
+    $("#if-date").textContent = item.date || "—";
+
+    $("#nav-prev").classList.toggle("disabled", idx <= 0);
+    $("#nav-next").classList.toggle("disabled", idx < 0 || idx >= state.filtered.length - 1);
+
+    const url = imageUrl(item);
+    canvas.innerHTML = "";
+    if (url) {
+      const full = $("#if-full");
+      full.href = url;
+      full.style.visibility = "";
+
+      const img = new Image();
+      img.alt = item.title;
+      img.draggable = false;
+      img.onload = () => {
+        zoomState.naturalW = img.naturalWidth;
+        zoomState.naturalH = img.naturalHeight;
+        currentImg = img;
+        canvas.appendChild(img);
+        fitToFrame();
+        canvas.classList.remove("no-zoom");
+      };
+      img.onerror = () => {
+        canvas.innerHTML = `<div class="placeholder">Preview failed<b>${escapeHTML(item.id)}</b></div>`;
+        currentImg = null;
+        canvas.classList.add("no-zoom");
+      };
+      img.src = url;
     } else {
-      el.textContent = String(matched).padStart(2, "0") + " / " + String(total).padStart(2, "0");
-      lb.textContent = "matched";
+      canvas.innerHTML = `<div class="placeholder">No image yet<b>${escapeHTML(item.id)}</b></div>`;
+      $("#if-full").style.visibility = "hidden";
+      currentImg = null;
+      canvas.classList.add("no-zoom");
     }
   }
 
-  // Type filter button
-  document.getElementById("fbtn-type").addEventListener("click", () => {
-    // Cycle through types
-    const types = [...new Set(allItems.map(it => it.typeKey))].sort();
-    if (!activeType) {
-      activeType = types[0];
+  function fitToFrame() {
+    if (!currentImg) return;
+    const stage = $("#stage");
+    const sw = stage.clientWidth, sh = stage.clientHeight;
+    const iw = zoomState.naturalW, ih = zoomState.naturalH;
+    if (!iw || !ih) return;
+    const pad = 40;
+    const fit = Math.min((sw - pad*2) / iw, (sh - pad*2) / ih, 1);
+    zoomState.fitScale = fit;
+    zoomState.scale = fit;
+    zoomState.tx = 0; zoomState.ty = 0;
+    applyTransform(); updateZoomUI();
+  }
+
+  function applyTransform() {
+    if (!currentImg) return;
+    const z = zoomState;
+    currentImg.style.transform =
+      `translate(${-z.naturalW*z.scale/2 + z.tx}px, ${-z.naturalH*z.scale/2 + z.ty}px) scale(${z.scale})`;
+  }
+
+  function updateZoomUI() {
+    const pct = Math.round((zoomState.scale / zoomState.fitScale) * 100);
+    $("#zoom-pct").textContent = pct + "%";
+    $("#zoom-out").disabled = zoomState.scale <= zoomState.fitScale * 0.5;
+    $("#zoom-in").disabled  = zoomState.scale >= zoomState.fitScale * 8;
+  }
+
+  function setZoom(newScale, cx, cy) {
+    if (!currentImg) return;
+    const z = zoomState;
+    const minS = z.fitScale * 0.5, maxS = z.fitScale * 8;
+    const clamped = Math.max(minS, Math.min(maxS, newScale));
+    const stage = $("#stage");
+    if (cx == null || cy == null) { cx = stage.clientWidth/2; cy = stage.clientHeight/2; }
+    const centerX = stage.clientWidth/2, centerY = stage.clientHeight/2;
+    const imgX = ((cx - centerX) - z.tx) / z.scale;
+    const imgY = ((cy - centerY) - z.ty) / z.scale;
+    z.scale = clamped;
+    z.tx = (cx - centerX) - imgX * clamped;
+    z.ty = (cy - centerY) - imgY * clamped;
+    constrainPan(); applyTransform(); updateZoomUI();
+  }
+
+  function constrainPan() {
+    const z = zoomState;
+    const stage = $("#stage");
+    const sw = stage.clientWidth, sh = stage.clientHeight;
+    const iw = z.naturalW * z.scale, ih = z.naturalH * z.scale;
+    if (iw <= sw) { z.tx = 0; } else { const m = (iw-sw)/2; z.tx = Math.max(-m, Math.min(m, z.tx)); }
+    if (ih <= sh) { z.ty = 0; } else { const m = (ih-sh)/2; z.ty = Math.max(-m, Math.min(m, z.ty)); }
+  }
+
+  function initPanZoom() {
+    const canvas = $("#canvas"), stage = $("#stage");
+    let pan = { active:false, startX:0, startY:0, startTx:0, startTy:0 };
+
+    canvas.addEventListener("mousedown", e => {
+      if (!currentImg || e.button !== 0) return;
+      pan = { active:true, startX:e.clientX, startY:e.clientY, startTx:zoomState.tx, startTy:zoomState.ty };
+      canvas.classList.add("grabbing"); e.preventDefault();
+    });
+    window.addEventListener("mousemove", e => {
+      if (!pan.active) return;
+      zoomState.tx = pan.startTx + (e.clientX - pan.startX);
+      zoomState.ty = pan.startTy + (e.clientY - pan.startY);
+      constrainPan(); applyTransform();
+    });
+    window.addEventListener("mouseup", () => { pan.active = false; canvas.classList.remove("grabbing"); });
+
+    stage.addEventListener("wheel", e => {
+      if (!currentImg) return;
+      e.preventDefault();
+      const rect = stage.getBoundingClientRect();
+      setZoom(zoomState.scale * (e.deltaY < 0 ? 1.12 : 0.89), e.clientX - rect.left, e.clientY - rect.top);
+    }, { passive:false });
+
+    canvas.addEventListener("dblclick", () => { if (currentImg) fitToFrame(); });
+    $("#zoom-in").addEventListener("click",  () => setZoom(zoomState.scale * 1.4));
+    $("#zoom-out").addEventListener("click", () => setZoom(zoomState.scale * 0.71));
+    $("#zoom-fit").addEventListener("click", fitToFrame);
+
+    let resizeT;
+    window.addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(fitToFrame, 120); });
+  }
+
+  // ── Meta pane ─────────────────────────────────────────────────────────────
+  function renderMeta(item) {
+    const body = $("#meta-body");
+    $("#meta-source").textContent = item.sourceCollection || "—";
+
+    const areasHtml = (item.areas || []).map(a => `<span class="pill">${escapeHTML(a)}</span>`).join("");
+
+    const descRows = [];
+    if (item.date)        descRows.push(["Date",    escapeHTML(item.date)]);
+    if (item.phase) {
+      const pos = item.setPosition ? ` <span style="color:var(--muted);font-family:var(--mono);font-size:10px;margin-left:4px">${escapeHTML(item.setPosition)}</span>` : "";
+      descRows.push(["Phase", escapeHTML(item.phase) + pos]);
+    }
+    if (areasHtml)        descRows.push(["Areas",   areasHtml]);
+    if (item.type)        descRows.push(["Type",    escapeHTML(item.type)]);
+    if (item.use)         descRows.push(["Use",     escapeHTML(item.use)]);
+    if (item.builtStatus) descRows.push(["Built",   escapeHTML(item.builtStatus)]);
+    if (item.creator)     descRows.push(["Creator", escapeHTML(item.creator)]);
+
+    const archRows = [];
+    archRows.push(["Archive ID", `<span class="archid-mono">${escapeHTML(item.id)}</span>`]);
+    if (item.itemType)         archRows.push(["Item type", escapeHTML(item.itemType)]);
+    if (item.sourceCollection) archRows.push(["Source",    escapeHTML(item.sourceCollection)]);
+    if (item.rights)           archRows.push(["Rights",    escapeHTML(item.rights)]);
+
+    const descHTML = descRows.map(([k,v]) => `<div class="row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+    const archHTML = archRows.map(([k,v]) => `<div class="row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+
+    // graph path: this → phase → work
+    const phaseLabel = item.phase || null;
+    const workLabel  = "Hunter Residence";
+
+    const siblings = phaseLabel
+      ? state.items
+          .filter(i => i.phase === phaseLabel)
+          .sort((a, b) => {
+            const ap = parseInt(a.setPosition) || 999;
+            const bp = parseInt(b.setPosition) || 999;
+            return ap !== bp ? ap - bp : (a.date||"").localeCompare(b.date||"");
+          })
+      : [];
+
+    // Graph action URLs — QIDs stored internally, never in the page UI
+    const wikibaseUrl = item.qid
+      ? `https://hunterhouse.wikibase.cloud/wiki/Item:${item.qid}`
+      : "#";
+    const sparqlQ = `SELECT ?prop ?propLabel ?value ?valueLabel WHERE {\n  <https://hunterhouse.wikibase.cloud/entity/${item.qid||"Q0"}> ?p ?value .\n  ?prop wikibase:directClaim ?p .\n  SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }\n}`;
+    const sparqlUrl = `https://hunterhouse.wikibase.cloud/query/#${encodeURIComponent(sparqlQ)}`;
+    const jsonUrl   = item.qid
+      ? `https://hunterhouse.wikibase.cloud/w/api.php?action=wbgetentities&ids=${item.qid}&format=json`
+      : "#";
+
+    let graphPathHTML = "";
+    if (phaseLabel) {
+      graphPathHTML = `
+        <div class="node this">
+          <span class="tick">●</span><span class="rel">This</span>
+          <span class="lbl">${escapeHTML(item.title)}</span>
+        </div>
+        <div class="connector"></div>
+        <div class="node">
+          <span class="tick">↑</span><span class="rel">part of</span>
+          <a class="lbl" href="browse.html?phase=${encodeURIComponent(phaseLabel)}">${escapeHTML(phaseLabel)}</a>
+        </div>
+        <div class="connector"></div>
+        <div class="node">
+          <span class="tick">↑</span><span class="rel">part of</span>
+          <span class="lbl" style="color:var(--muted);font-weight:400">${escapeHTML(workLabel)}</span>
+        </div>`;
     } else {
-      const idx = types.indexOf(activeType);
-      activeType = idx >= 0 && idx < types.length - 1 ? types[idx + 1] : null;
+      graphPathHTML = `<div class="graph-empty">No phase assigned. Item not yet linked into work hierarchy.</div>`;
     }
-    const btn = document.getElementById("fbtn-type");
-    const val = document.getElementById("fbtn-type-val");
-    if (activeType) {
-      btn.classList.add("active");
-      val.innerHTML = escapeHTML(activeType) + ` <span class="car">▾</span>`;
-    } else {
-      btn.classList.remove("active");
-      val.innerHTML = `All <span class="car">▾</span>`;
-    }
-    applySearch();
-  });
 
-  // ── Keyboard ─────────────────────────────────────────────────────────
-  document.addEventListener("keydown", e => {
-    const inInput = document.activeElement && document.activeElement.tagName === "INPUT";
+    let siblingsHTML = "";
+    if (siblings.length > 1) {
+      const rows = siblings.map(s => {
+        const isCurrent = s.id === item.id;
+        const pos = s.setPosition ? s.setPosition.split(" of ")[0] : "—";
+        return `<a class="sib${isCurrent ? " current" : ""}" ${isCurrent ? "" : `data-sib-id="${escapeHTML(s.id)}"`}>
+          <span class="id">${escapeHTML(s.id)}</span>
+          <span class="t">${escapeHTML(s.title)}</span>
+          <span class="pos">${escapeHTML(pos)}</span>
+        </a>`;
+      }).join("");
+      siblingsHTML = `
+        <div class="graph-siblings">
+          <div class="lbl-row"><span>Siblings in this phase</span><span class="ct">${siblings.length} total</span></div>
+          ${rows}
+        </div>`;
+    }
 
-    if (e.key === "/" && !inInput) {
-      e.preventDefault();
-      document.getElementById("search-input").focus();
-      return;
-    }
-    if ((e.key === "f" || e.key === "F") && !inInput) {
-      e.preventDefault();
-      document.getElementById("fbtn-type").click();
-      return;
-    }
-    if (e.key === "Escape" && inInput) {
-      document.getElementById("search-input").value = "";
-      document.getElementById("search-input").blur();
-      applySearch();
-      return;
-    }
-    if (e.key === "ArrowDown" && !inInput) {
-      e.preventDefault();
-      selectNext();
-      return;
-    }
-    if (e.key === "ArrowUp" && !inInput) {
-      e.preventDefault();
-      selectPrev();
-      return;
-    }
-    if (e.key === "Enter" && !inInput && selectedIdx >= 0) {
-      e.preventDefault();
-      window.location.href = "item.html?id=" + encodeURIComponent(allItems[selectedIdx].qid);
-      return;
-    }
-  });
+    const hasQID = !!item.qid;
+    const graphActionsHTML = `
+      <div class="graph-actions">
+        <a href="${escapeHTML(wikibaseUrl)}" ${hasQID ? `target="_blank" rel="noopener"` : `onclick="return false" style="opacity:0.55"`}>
+          <span class="top">Structured</span>
+          <span class="bot">Wikibase <span class="ar">↗</span></span>
+        </a>
+        <a href="${escapeHTML(sparqlUrl)}" ${hasQID ? `target="_blank" rel="noopener"` : `onclick="return false" style="opacity:0.55"`}>
+          <span class="top">Graph query</span>
+          <span class="bot">SPARQL <span class="ar">↗</span></span>
+        </a>
+        <a href="${escapeHTML(jsonUrl)}" ${hasQID ? `target="_blank" rel="noopener"` : `onclick="return false" style="opacity:0.55"`}>
+          <span class="top">Raw</span>
+          <span class="bot">JSON <span class="ar">↗</span></span>
+        </a>
+      </div>`;
 
-  document.getElementById("search-input").addEventListener("input", applySearch);
+    body.innerHTML = `
+      <h1 class="meta-title">${escapeHTML(item.title)}</h1>
+      ${item.originalTitle
+        ? `<div class="meta-orig"><span class="lb">Title block</span><span class="vl">${escapeHTML(item.originalTitle)}</span></div>`
+        : `<div style="height:14px"></div>`}
+      ${item.notes ? `<p class="meta-lede">${escapeHTML(item.notes)}</p>` : ""}
 
-  // ── Main ─────────────────────────────────────────────────────────────
+      <div class="meta-actions">
+        <a class="btn" href="item.html?id=${encodeURIComponent(item.id)}" target="_blank" rel="noopener">Open full record <span class="ar">→</span></a>
+        <button class="btn ghost" type="button" id="copy-link">Copy link</button>
+      </div>
+
+      <section class="meta-section">
+        <h3><span><span class="n">01</span>Description</span><span class="ct">${descRows.length} fields</span></h3>
+        <dl class="kv">${descHTML}</dl>
+      </section>
+      <section class="meta-section">
+        <h3><span><span class="n">02</span>Archival</span><span class="ct">${archRows.length} fields</span></h3>
+        <dl class="kv">${archHTML}</dl>
+      </section>
+      <section class="graph-section">
+        <h3><span><span class="n">03</span>In the graph</span><span class="ct">Wikibase context</span></h3>
+        <div class="graph-path">${graphPathHTML}</div>
+        ${siblingsHTML}
+        ${graphActionsHTML}
+      </section>
+    `;
+
+    $("#copy-link")?.addEventListener("click", e => {
+      const url = new URL(location.href);
+      url.searchParams.set("id", item.id);
+      navigator.clipboard?.writeText(url.toString());
+      e.currentTarget.textContent = "Copied";
+      setTimeout(() => e.currentTarget.textContent = "Copy link", 1200);
+    });
+
+    body.querySelectorAll(".sib[data-sib-id]").forEach(el => {
+      el.addEventListener("click", e => { e.preventDefault(); selectItem(el.dataset.sibId); });
+    });
+  }
+
+  // ── Selection ─────────────────────────────────────────────────────────────
+  function selectItem(id, opts = {}) {
+    if (!id) return;
+    state.selectedId = id;
+    const item = state.items.find(i => i.id === id);
+    if (!item) return;
+
+    document.querySelectorAll(".row.sel").forEach(r => r.classList.remove("sel"));
+    const row = document.querySelector(`.row[data-id="${CSS.escape(id)}"]`);
+    if (row) {
+      row.classList.add("sel");
+      if (opts.scrollIntoView !== false) {
+        const container = $("#rows");
+        const rect = row.getBoundingClientRect(), crect = container.getBoundingClientRect();
+        if (rect.top < crect.top || rect.bottom > crect.bottom) row.scrollIntoView({ block:"nearest" });
+      }
+    }
+
+    renderImage(item);
+    renderMeta(item);
+
+    const url = new URL(location.href);
+    url.searchParams.set("id", id);
+    history.replaceState({}, "", url);
+  }
+
+  function selectAdjacent(delta) {
+    const idx = state.filtered.findIndex(i => i.id === state.selectedId);
+    const next = idx + delta;
+    if (next >= 0 && next < state.filtered.length) selectItem(state.filtered[next].id);
+  }
+
+  // ── Controls ──────────────────────────────────────────────────────────────
+  function cycleFilter(values, currentValue) {
+    if (!currentValue) return values[0] || null;
+    const idx = values.indexOf(currentValue);
+    return (idx < 0 || idx >= values.length - 1) ? null : values[idx + 1];
+  }
+
+  function wireControls() {
+    $("#search-input").addEventListener("input", e => {
+      state.search = e.target.value;
+      applyFilters(); renderList();
+      if (!state.filtered.find(i => i.id === state.selectedId) && state.filtered.length) {
+        selectItem(state.filtered[0].id, { scrollIntoView:false });
+      }
+    });
+
+    $("#fbtn-sort").addEventListener("click", () => {
+      const keys = SORTS.map(s => s.k);
+      state.sort = keys[(keys.indexOf(state.sort) + 1) % keys.length];
+      const s = SORTS.find(x => x.k === state.sort);
+      $("#fbtn-sort-val").innerHTML = `${escapeHTML(s.label)} <span class="car">▾</span>`;
+      applyFilters(); renderList();
+    });
+
+    const phases = uniqueSorted(state.items.map(i => i.phase));
+    $("#fbtn-phase").addEventListener("click", () => {
+      state.filterPhase = cycleFilter(phases, state.filterPhase);
+      const btn = $("#fbtn-phase"), val = $("#fbtn-phase-val");
+      if (state.filterPhase) {
+        btn.classList.add("active");
+        const t = state.filterPhase.length > 22 ? state.filterPhase.slice(0,20)+"…" : state.filterPhase;
+        val.innerHTML = `${escapeHTML(t)} <span class="car">▾</span>`;
+      } else {
+        btn.classList.remove("active");
+        val.innerHTML = `All <span class="car">▾</span>`;
+      }
+      applyFilters(); renderList();
+      if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId)) {
+        selectItem(state.filtered[0].id, { scrollIntoView:false });
+      }
+    });
+
+    const types = uniqueSorted(state.items.map(i => i.type));
+    $("#fbtn-type").addEventListener("click", () => {
+      state.filterType = cycleFilter(types, state.filterType);
+      const btn = $("#fbtn-type"), val = $("#fbtn-type-val");
+      if (state.filterType) {
+        btn.classList.add("active");
+        val.innerHTML = `${escapeHTML(state.filterType)} <span class="car">▾</span>`;
+      } else {
+        btn.classList.remove("active");
+        val.innerHTML = `All <span class="car">▾</span>`;
+      }
+      applyFilters(); renderList();
+      if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId)) {
+        selectItem(state.filtered[0].id, { scrollIntoView:false });
+      }
+    });
+
+    $("#rows").addEventListener("click", e => {
+      const row = e.target.closest(".row");
+      if (row && row.dataset.id) selectItem(row.dataset.id);
+    });
+
+    $("#nav-prev").addEventListener("click", e => { e.preventDefault(); selectAdjacent(-1); });
+    $("#nav-next").addEventListener("click", e => { e.preventDefault(); selectAdjacent(+1); });
+
+    document.addEventListener("keydown", e => {
+      const inInput = e.target.matches("input, select, textarea");
+      if (e.key === "/" && !inInput) { e.preventDefault(); $("#search-input").focus(); return; }
+      if (e.key === "Escape" && inInput) { e.target.blur(); return; }
+      if (e.key === "ArrowDown" && !inInput) { e.preventDefault(); selectAdjacent(+1); }
+      if (e.key === "ArrowUp"   && !inInput) { e.preventDefault(); selectAdjacent(-1); }
+      if (e.key === "Enter"     && !inInput && state.selectedId) {
+        e.preventDefault();
+        window.open(`item.html?id=${encodeURIComponent(state.selectedId)}`, "_blank");
+      }
+    });
+  }
+
+  // ── Main (async load) ─────────────────────────────────────────────────────
   (async function main() {
     try {
-      const rows = await sparqlQuery(Q_LIST_ITEMS);
-
-      const itemMap = {};
-      rows.forEach(r => {
-        const qid = qidFromURI(r.item.value);
-        if (!itemMap[qid]) itemMap[qid] = {
-          qid,
-          label:       r.itemLabel       ? r.itemLabel.value       : qid,
-          description: r.itemDescription ? r.itemDescription.value : null,
-        };
-      });
-
-      const qids = Object.keys(itemMap);
-      if (qids.length === 0) {
-        document.getElementById("rows").innerHTML =
-          `<div class="load-msg">No items found in Wikibase.</div>`;
+      const items = await loadFromWikibase();
+      if (!items.length) {
+        $("#rows").innerHTML = `<div class="load-msg">No items with images found in Wikibase.</div>`;
         return;
       }
 
-      const { typeMap, previewMap } = await fetchTypeMap(qids);
-      const typeQIDs   = [...new Set(Object.values(typeMap))];
-      const typeLabels = typeQIDs.length ? await fetchLabels(typeQIDs) : {};
+      state.items = items;
 
-      // Only show items that have a preview image (P96 set)
-      const imageQids = qids.filter(qid => previewMap[qid]);
+      // Apply URL params before first render
+      const params     = new URLSearchParams(location.search);
+      const urlPhase   = params.get("phase");
+      const urlType    = params.get("type");
+      const urlId      = params.get("id");
 
-      const byType = {};
-      imageQids.forEach(qid => {
-        const tqid  = typeMap[qid];
-        const tlbl  = tqid ? (typeLabels[tqid] || tqid) : "Untyped";
-        if (!byType[tlbl]) byType[tlbl] = [];
-        byType[tlbl].push({ ...itemMap[qid], previewUrl: previewMap[qid] });
-      });
+      if (urlPhase) {
+        state.filterPhase = urlPhase;
+        $("#fbtn-phase").classList.add("active");
+        const t = urlPhase.length > 22 ? urlPhase.slice(0,20)+"…" : urlPhase;
+        $("#fbtn-phase-val").innerHTML = `${escapeHTML(t)} <span class="car">▾</span>`;
+      }
+      if (urlType) {
+        state.filterType = urlType;
+        $("#fbtn-type").classList.add("active");
+        $("#fbtn-type-val").innerHTML = `${escapeHTML(urlType)} <span class="car">▾</span>`;
+      }
 
-      buildList(byType);
+      applyFilters();
+      renderList();
+      wireControls();
+      initPanZoom();
+
+      const target = urlId && state.filtered.find(i => i.id === urlId)
+        ? urlId
+        : state.filtered[0]?.id;
+      if (target) selectItem(target, { scrollIntoView: !!urlId });
 
     } catch (err) {
       console.error(err);
-      document.getElementById("rows").innerHTML =
-        `<div class="error-msg">Error loading: ${escapeHTML(err.message)}</div>`;
+      $("#rows").innerHTML = `<div class="error-msg">Error loading: ${escapeHTML(err.message)}</div>`;
     }
   })();
 </script>

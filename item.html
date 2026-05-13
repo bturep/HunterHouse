@@ -102,10 +102,9 @@
     <span class="name">Hunter House <span class="dim">· Foundation</span></span>
   </div>
   <nav class="site-nav">
+    <a href="richard-hunter.html">Hunter</a>
     <a href="the-house.html">House</a>
     <a href="archive.html">Archive</a>
-    <a href="browse.html" class="on">Browse</a>
-    <a href="richard-hunter.html">Hunter</a>
     <a href="about.html">About</a>
   </nav>
   <div class="site-topright">v0.4</div>
@@ -113,7 +112,7 @@
 
 <div class="crumbs">
   <div class="path">
-    <a href="browse.html">← Browse</a>
+    <a href="browse.html" target="_blank" rel="noopener">← Browse</a>
     <span class="sep">/</span>
     <span id="crumb-label">Item</span>
   </div>
@@ -187,7 +186,7 @@
     <section class="related" id="related" style="display:none">
       <div class="hdr">
         <div class="l">Related items<em id="related-phase-label"></em></div>
-        <a class="all" href="browse.html">View all →</a>
+        <a class="all" href="browse.html" target="_blank" rel="noopener">View all →</a>
       </div>
       <div class="related-grid" id="related-grid"></div>
     </section>
@@ -197,7 +196,7 @@
   <footer class="colophon">
     <div class="l"><b>Hunter House Foundation</b> · Item record</div>
     <div class="c"><a href="https://hunterhouse.wikibase.cloud" target="_blank" rel="noopener">hunterhouse.wikibase.cloud</a></div>
-    <div class="r"><a href="browse.html">← Back to browse</a></div>
+    <div class="r"><a href="browse.html" target="_blank" rel="noopener">← Browse</a></div>
   </footer>
 
 </div>
@@ -221,8 +220,39 @@
     el.className = "status" + (cls ? " " + cls : "");
   }
 
-  function getQID() {
+  function getArchiveId() {
     return new URLSearchParams(window.location.search).get("id");
+  }
+
+  async function resolveArchiveIdToQID(archiveId) {
+    const q = `SELECT ?item WHERE {
+      ?item rdfs:label ?l . FILTER(LANG(?l) = "en")
+      FILTER(REGEX(STR(?item), "/entity/Q[0-9]+$"))
+    } LIMIT 2000`;
+    const sparqlRes = await fetch(
+      SPARQL_URL + "?query=" + encodeURIComponent(q) + "&format=json",
+      { headers: { Accept: "application/sparql-results+json" } }
+    );
+    if (!sparqlRes.ok) throw new Error("SPARQL " + sparqlRes.status);
+    const qids = (await sparqlRes.json()).results.bindings.map(r => r.item.value.split("/").pop());
+
+    const batches = [];
+    for (let i = 0; i < qids.length; i += 50) batches.push(qids.slice(i, i + 50));
+
+    const results = await Promise.all(batches.map(async batch => {
+      try {
+        const url = API_URL + "?action=wbgetentities&ids=" + encodeURIComponent(batch.join("|")) +
+                    "&props=claims&format=json&origin=*";
+        const json = await (await fetch(url)).json();
+        for (const qid of batch) {
+          const p2 = json.entities?.[qid]?.claims?.P2?.[0]?.mainsnak?.datavalue?.value;
+          if (p2 === archiveId) return qid;
+        }
+      } catch {}
+      return null;
+    }));
+
+    return results.find(r => r != null) || null;
   }
 
   async function fetchEntity(qid) {
@@ -344,7 +374,7 @@
 
     document.title = label + " — Hunter House Archive";
     document.getElementById("crumb-label").textContent = label;
-    document.getElementById("crumb-right").textContent = qid;
+    document.getElementById("crumb-right").textContent = archiveId || "";
 
     const archiveId = firstValue(claims, propLabels, valueLabels, "hh archive id", "archive id");
     const date      = firstValue(claims, propLabels, valueLabels, "date", "point in time", "start date", "date of creation", "date of design", "built date");
@@ -369,7 +399,7 @@
     if (date)     rhParts.push(`<span class="date">${escapeHTML(date)}</span>`);
     if (drawType) rhParts.push(`<span>${escapeHTML(drawType)}</span>`);
     if (itemType) rhParts.push(`<span>${escapeHTML(itemType)}</span>`);
-    document.getElementById("ph-rh").innerHTML = rhParts.join("") || `<span>${escapeHTML(qid)}</span>`;
+    document.getElementById("ph-rh").innerHTML = rhParts.join("") || `<span>${escapeHTML(archiveId || "")}</span>`;
 
     // plate
     const plateEl = document.getElementById("plate");
@@ -425,7 +455,7 @@
     if (digitized) archRows.push(kvRow("Digitized",  escapeHTML(digitized)));
     if (rights)    archRows.push(kvRow("Rights",     escapeHTML(rights)));
     archRows.push(kvRow("Wikibase",
-      `<span style="font-family:var(--mono);color:var(--muted);font-size:12px">${escapeHTML(qid)}</span>`));
+      `<a href="https://hunterhouse.wikibase.cloud/wiki/Item:${escapeHTML(qid)}" target="_blank" rel="noopener" style="font-family:var(--mono);font-size:12px">Open in Wikibase ↗</a>`));
     document.getElementById("kv-arch").innerHTML = archRows.join("");
     document.getElementById("arch-ct").textContent =
       archRows.length + " field" + (archRows.length !== 1 ? "s" : "");
@@ -460,17 +490,39 @@
       const rows = json.results.bindings;
       if (rows.length === 0) return;
 
+      const relatedItems = rows.map(r => ({
+        qid:   r.item.value.split("/").pop(),
+        label: r.itemLabel?.value || null,
+      }));
+
+      // Batch-fetch P2 (archive ID) and P96 (preview) for related items
+      const relMeta = {};
+      try {
+        const relUrl = API_URL + "?action=wbgetentities&ids=" +
+          encodeURIComponent(relatedItems.map(r => r.qid).join("|")) +
+          "&props=claims&format=json&origin=*";
+        const relJson = await (await fetch(relUrl)).json();
+        for (const { qid: rqid } of relatedItems) {
+          const entity = relJson.entities?.[rqid];
+          relMeta[rqid] = {
+            archiveId:  entity?.claims?.P2?.[0]?.mainsnak?.datavalue?.value || null,
+            previewUrl: entity?.claims?.P96?.[0]?.mainsnak?.datavalue?.value || null,
+          };
+        }
+      } catch {}
+
       document.getElementById("related-phase-label").textContent = " · " + phaseLabel;
-      document.getElementById("related-grid").innerHTML = rows.map(r => {
-        const rqid   = r.item.value.split("/").pop();
-        const rlabel = r.itemLabel ? r.itemLabel.value : rqid;
-        return `<a class="rcard" href="item.html?id=${encodeURIComponent(rqid)}">
-          <div class="ti"></div>
-          <div class="id-r">${escapeHTML(rqid)}</div>
-          <div class="ti-r">${escapeHTML(rlabel)}</div>
-          <div class="me-r">${escapeHTML(rqid)}</div>
-        </a>`;
-      }).join("");
+      document.getElementById("related-grid").innerHTML = relatedItems
+        .filter(({ qid: rqid }) => relMeta[rqid]?.archiveId)
+        .map(({ qid: rqid, label: rlabel }) => {
+          const { archiveId: rId, previewUrl } = relMeta[rqid];
+          return `<a class="rcard" href="item.html?id=${encodeURIComponent(rId)}" target="_blank" rel="noopener">
+            <div class="ti">${previewUrl ? `<img src="${escapeHTML(previewUrl)}" alt="${escapeHTML(rlabel||rId)}">` : ""}</div>
+            <div class="id-r">${escapeHTML(rId)}</div>
+            <div class="ti-r">${escapeHTML(rlabel || "")}</div>
+            <div class="me-r">—</div>
+          </a>`;
+        }).join("");
       document.getElementById("related").style.display = "";
     } catch (e) { /* skip related on error */ }
   }
@@ -478,16 +530,23 @@
   // ── main ──────────────────────────────────────────────────────────────────
 
   (async function main() {
-    const qid = getQID();
-    if (!qid) {
-      setStatus("No item ID in URL. Open this page with ?id=Q1 (or any item ID).", "error");
+    const archiveId = getArchiveId();
+    if (!archiveId) {
+      setStatus("No item ID in URL. Expected ?id=HH-A-0031", "error");
       return;
     }
 
     try {
+      setStatus("Resolving " + archiveId + "…");
+      const qid = await resolveArchiveIdToQID(archiveId);
+      if (!qid) {
+        setStatus("Item not found: " + archiveId, "error");
+        return;
+      }
+      setStatus("Loading record…");
       const entity = await fetchEntity(qid);
       if (!entity || entity.missing !== undefined) {
-        setStatus("Item " + qid + " not found in Wikibase.", "error");
+        setStatus("Item not found in Wikibase: " + archiveId, "error");
         return;
       }
 
