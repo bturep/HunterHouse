@@ -519,6 +519,7 @@
       if (!claims) continue;
       const archiveId = firstStr(claims, "P2");
       const image     = claims?.P96?.[0]?.mainsnak?.datavalue?.value;
+      const master    = claims?.P95?.[0]?.mainsnak?.datavalue?.value;
       if (!archiveId || !image) continue;
 
       const phaseQID = firstQID(claims, "P62") || firstQID(claims, "P84");
@@ -544,6 +545,7 @@
         sourceCollection: srcQID ? qlabel(srcQID) : null,
         rights:           firstStr(claims, "P93"),
         image,
+        master:           master || null,
         notes:            meta[qid]?.description || null,
       });
     }
@@ -658,8 +660,8 @@
     canvas.innerHTML = "";
     if (url) {
       const full = $("#if-full");
-      full.href = url;
-      full.style.visibility = "";
+      full.href = item.master || url;
+      full.style.visibility = item.master ? "" : "hidden";
 
       const img = new Image();
       img.alt = item.title;
