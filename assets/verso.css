@@ -35,7 +35,7 @@ a{color:inherit}
 /* ────────── site header ────────── */
 .site-top{
   display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:32px;
-  padding:18px 36px;border-bottom:1px solid var(--ink);background:var(--bg);
+  padding:14px 28px;border-bottom:1px solid var(--ink);background:var(--bg);
 }
 .markid{display:flex;align-items:baseline;gap:12px}
 .markid .h{
@@ -61,7 +61,7 @@ a{color:inherit}
 /* ────────── crumbs ────────── */
 .crumbs{
   display:grid;grid-template-columns:1fr auto;align-items:center;gap:24px;
-  padding:14px 36px;border-bottom:1px solid var(--ink);
+  padding:14px 28px;border-bottom:1px solid var(--ink);
   font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:0.06em;
 }
 .crumbs .path{display:flex;gap:12px;align-items:center;text-transform:uppercase;min-width:0;overflow:hidden}
@@ -72,7 +72,7 @@ a{color:inherit}
 .crumbs .right{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:0.06em;white-space:nowrap;text-transform:uppercase}
 
 /* ────────── page frame ────────── */
-.frame{max-width:1080px;margin:0 auto;padding:48px 36px 80px}
+.frame{max-width:1080px;margin:0 auto;padding:48px 28px 80px}
 .frame.wide{max-width:1280px}
 .frame.narrow{max-width:780px}
 
@@ -196,6 +196,60 @@ a{color:inherit}
   background:var(--copper-pale);color:var(--copper-deep);font-size:11px;
   margin:0 3px 0 0;border-radius:1px;white-space:nowrap;
 }
+
+/* ────────── reading layout (two-column: prose + aside) ────────── */
+.reading-layout{
+  display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:64px;align-items:start;
+}
+
+/* ────────── aside TOC (shared across reading pages) ────────── */
+.aside-toc{
+  position:sticky;top:24px;display:flex;flex-direction:column;gap:24px;
+  font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.06em;
+}
+.aside-toc .toc-hd{
+  font-family:var(--mono);font-size:10px;color:var(--ink);letter-spacing:0.22em;text-transform:uppercase;
+  padding-bottom:8px;border-bottom:1px solid var(--ink);margin-bottom:14px;font-weight:500;
+}
+.aside-toc ol{list-style:none;margin:0;padding:0}
+.aside-toc li{padding:0;border-bottom:1px dotted var(--rule)}
+.aside-toc li:last-child{border-bottom:0}
+.aside-toc li a{
+  display:block;padding:9px 0;color:var(--muted);text-decoration:none;
+  transition:color 0.12s,padding 0.12s;
+}
+.aside-toc li a:hover{color:var(--ink);padding-left:6px}
+.aside-toc li.on a{color:var(--ink)}
+.aside-toc li.on a::before{content:"→ ";color:var(--red)}
+
+/* aside meta block */
+.aside-block{border-top:1px solid var(--ink);padding-top:14px}
+.aside-block .aside-lbl{
+  font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.22em;text-transform:uppercase;
+  margin-bottom:14px;font-weight:500;display:block;
+}
+.aside-block p{font-size:13px;line-height:1.6;color:var(--ink);margin-bottom:10px}
+.aside-block a{
+  color:var(--copper-deep);text-decoration:none;
+  border-bottom:1px solid var(--copper-pale);
+  font-family:var(--mono);font-size:12px;letter-spacing:0.02em;white-space:nowrap;display:inline-block;
+}
+.aside-block a:hover{border-bottom-color:var(--copper-deep)}
+.aside-block .aside-sub{
+  font-family:var(--mono);font-size:9.5px;color:var(--ink);letter-spacing:0.14em;
+  text-transform:uppercase;font-weight:500;margin:10px 0 4px;display:block;
+}
+.aside-block .aside-sub:first-child{margin-top:0}
+
+/* ────────── browse CTA (bottom of every reading page) ────────── */
+.browse-cta{
+  margin-top:48px;padding-top:24px;border-top:1px solid var(--ink);
+}
+.browse-cta a{
+  font-family:var(--mono);font-size:12px;color:var(--ink);letter-spacing:0.08em;
+  text-transform:uppercase;border-bottom:1px solid var(--ink);padding-bottom:4px;text-decoration:none;
+}
+.browse-cta a:hover{color:var(--red-deep);border-bottom-color:var(--red-deep)}
 
 /* ────────── footer ────────── */
 .colophon{
