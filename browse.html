@@ -52,7 +52,7 @@
     display:grid;grid-template-columns:minmax(560px,640px) 1fr;
     height:calc(100vh - 100px);min-height:560px;
   }
-  .pane-list{border-right:1px solid var(--ink);display:flex;flex-direction:column;min-width:0}
+  .pane-list{border-right:1px solid var(--ink);display:flex;flex-direction:column;min-width:0;overflow:hidden}
   .pane-preview{background:var(--bg);padding:32px 40px;overflow-y:auto;min-width:0;position:relative}
 
   /* ── row head ── */
@@ -277,7 +277,8 @@
   }
 
   async function fetchTypeMap(qids) {
-    const typeMap = {};
+    const typeMap    = {};   // qid → type QID
+    const previewMap = {};   // qid → preview URL string
     const batches = [];
     for (let i = 0; i < qids.length; i += 50) batches.push(qids.slice(i, i + 50));
     await Promise.all(batches.map(async batch => {
@@ -286,12 +287,16 @@
                     "&props=claims&format=json&origin=*";
         const json = await (await fetch(url)).json();
         for (const qid of batch) {
-          const tqid = json.entities?.[qid]?.claims?.P1?.[0]?.mainsnak?.datavalue?.value?.id;
+          const entity = json.entities?.[qid];
+          if (!entity) continue;
+          const tqid = entity.claims?.P1?.[0]?.mainsnak?.datavalue?.value?.id;
           if (tqid) typeMap[qid] = tqid;
+          const purl = entity.claims?.P96?.[0]?.mainsnak?.datavalue?.value;
+          if (purl) previewMap[qid] = purl;
         }
       } catch (e) { console.warn("type fetch failed:", e); }
     }));
-    return typeMap;
+    return { typeMap, previewMap };
   }
 
   async function fetchLabels(qids) {
@@ -483,7 +488,9 @@
       </div>
 
       <div class="plate">
-        <div class="plate-placeholder">No image · open record for preview</div>
+        ${item.previewUrl
+          ? `<img src="${escapeHTML(item.previewUrl)}" alt="${escapeHTML(item.label || item.qid)}">`
+          : `<div class="plate-placeholder">No image</div>`}
       </div>
 
       <div class="plate-caption">
@@ -649,7 +656,7 @@
         return;
       }
 
-      const typeMap    = await fetchTypeMap(qids);
+      const { typeMap, previewMap } = await fetchTypeMap(qids);
       const typeQIDs   = [...new Set(Object.values(typeMap))];
       const typeLabels = typeQIDs.length ? await fetchLabels(typeQIDs) : {};
 
@@ -658,7 +665,7 @@
         const tqid  = typeMap[qid];
         const tlbl  = tqid ? (typeLabels[tqid] || tqid) : "Untyped";
         if (!byType[tlbl]) byType[tlbl] = [];
-        byType[tlbl].push(itemMap[qid]);
+        byType[tlbl].push({ ...itemMap[qid], previewUrl: previewMap[qid] || null });
       });
 
       buildList(byType);
