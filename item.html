@@ -30,6 +30,42 @@
     margin: 0 auto;
     padding: 32px 32px 80px;
   }
+
+  /* Shared site header */
+  .site-header {
+    border-bottom: 1px solid var(--rule);
+    background: white;
+    padding: 18px 0 14px;
+  }
+  .site-frame {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .site-brand {
+    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .site-brand a { color: var(--ink); text-decoration: none; }
+  .site-brand .sub { color: var(--muted); font-weight: 400; }
+  .site-nav { display: flex; gap: 22px; flex-wrap: wrap; }
+  .site-nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    letter-spacing: 0.02em;
+    padding-bottom: 4px;
+    border-bottom: 1px solid transparent;
+  }
+  .site-nav a:hover { color: var(--ink); }
+  .site-nav a.current { color: var(--ink); border-bottom-color: var(--accent); }
   .crumb {
     margin-bottom: 24px;
     font-family: "SF Mono", "Menlo", monospace;
@@ -225,10 +261,24 @@
 </style>
 </head>
 <body>
+
+<header class="site-header">
+  <div class="site-frame">
+    <div class="site-brand"><a href="index.html">Hunter House <span class="sub">Foundation</span></a></div>
+    <nav class="site-nav">
+      <a href="the-house.html">The House</a>
+      <a href="archive.html">Archive</a>
+      <a href="browse.html">Browse</a>
+      <a href="richard-hunter.html">Richard Hunter</a>
+      <a href="about.html">About</a>
+    </nav>
+  </div>
+</header>
+
 <div class="frame">
 
   <div class="crumb">
-    <a href="index.html">← Hunter House Archive</a>
+    <a href="browse.html">← Browse the collection</a>
   </div>
 
   <div id="status" class="status">Loading item…</div>

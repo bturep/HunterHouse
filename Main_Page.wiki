@@ -1,0 +1,106 @@
+__NOTOC__
+<div style="border-top:1px solid #8b3a2a; border-bottom:1px solid #8b3a2a; background:#fbf7ee; padding:22px 28px; margin-bottom:28px; font-family:'Iowan Old Style','Palatino',Georgia,serif;">
+<div style="font-size:1.05em; line-height:1.6; color:#202020; font-style:italic;">
+Architecture, the sheltering art, is a repository of human experience. It connects mathematics, the sciences and history with the arts, gathering from each a measure of understanding the universe, the biosphere, mind.
+</div>
+<div style="margin-top:10px; font-size:0.85em; color:#6a6a6a; text-align:right; font-style:normal; font-family:'SF Mono',Menlo,monospace; letter-spacing:0.04em;">— Richard Hunter</div>
+</div>
+
+<div style="font-family:'Iowan Old Style','Palatino',Georgia,serif; font-size:1.9em; color:#8b3a2a; font-weight:500; letter-spacing:-0.01em; margin-bottom:6px;">Hunter House Archive</div>
+<div style="color:#6a6a6a; font-size:0.95em; margin-bottom:24px; font-style:italic;">The structured record of the Hunter Residence and the architectural authorship of Richard Morrow Hunter, 1930–2023.</div>
+
+= About =
+
+The Hunter House Archive catalogues the drawings, photographs, and related materials documenting the design and continuous revision of the '''Hunter Residence''' at 203 Goward Road, Prospect Lake, Saanich. The house was designed by '''Richard Morrow Hunter''' (Phoenix, Arizona, 1930 – Victoria, British Columbia, 14 January 2023) for himself, his wife Frances Mead Hunter, and their children, and was occupied by the Hunter family from 1974 until 2023. It was then acquired by Floyd Marinescu and Olivia Jol, who established the '''Hunter House Foundation''' to steward the property and its archival legacy. This Wikibase is the Foundation's structured record.
+
+Hunter began designing for the Prospect Lake property in 1969, following the design and construction of the neighbouring '''Rankin Residence''' at 187 Goward Road. He was still drawing additions to the house in 2020, three years before his death at ninety-two. The archive spans that entire period.
+
+= The character of the record =
+
+Most architectural collections document what was designed and built. This one documents an ongoing negotiation between an architect and his own home across five decades: schemes abandoned, permits pursued for years, rooms built and then removed, ideas dormant for a decade before returning in built form. The drawings are not a finished story. They are a working record.
+
+The house itself reflects this. Two architecturally distinct wings, built a generation apart, embody different phases of Hunter's design thinking. A dining room conceived through eight iterative schemes over more than a decade finally reached permit in 2018. A speculative Zen dojo drawn in 1977 found its descendant in a Japanese garden built forty years later. The archive makes these arcs legible.
+
+= Source collections =
+
+The archive draws from six source collections. The complementary character of the two largest is significant: Hunter donated his original 1970–74 build documentation to the Canadian Architectural Archives and kept the working files for everything that came after. Together they form a continuous fifty-year drawing record of a single property.
+
+* '''Hunter House Collection''' — Richard Hunter's own working files: 110 architectural drawings made for the house from 1979 onward, together with surveys, engineering drawings, and ephemeral materials. The primary collection. Custodian: Hunter House Foundation.
+* '''Canadian Architectural Archives''' (University of Calgary) — Richard Hunter fonds, accession 2019.61, donated by Hunter in 2019 and 2021. 344 architectural drawings, 62 photographs, 0.22 linear meters of textual records. The Hunter Residence materials include the original 1970–74 build drawings, seven colour studies for the 1990s addition, and a run of family photographs documenting the early house. [https://searcharchives.ucalgary.ca/richard-hunter-accession Finding aid →]
+* '''John Fulker Collection''' — Photographs of the Hunter Residence by Victoria photographer John Fulker; the professional documentation of the original structure. Held at the West Vancouver Museum.
+* '''Eric Gessinger Collection''' — Furniture drawings by Richard Hunter, gifted to the furniture maker Eric Gessinger, who produced the chairs for the 2018 Dining Room Addition. Pending processing.
+* '''Frances Hunter Collection''' — Personal materials held by Frances Hunter. Pending processing.
+* '''Ivan Hunter Collection''' — Photographs held by Ivan Hunter. Pending processing.
+
+= Design arcs =
+
+Several long threads run through the drawing record, each crossing multiple project sets and years.
+
+'''The East Wing.''' Twelve years of iterative work beginning with a 2008 drawing labelled "Hunter Haus Phase 2": eight undated dining room schemes, a 2010 design drawing, a 2018 permit submitted and resubmitted within six weeks, engineering drawings for site-built windows in 2019, construction refinements extending into 2020. The East Wing's dining room, sunroom, bathroom, and skywalk are programmatically and spatially interrelated; the bluff condition on which they sit adds structural complexity. Budget constraints following the 1990s West Wing buildout likely contributed to the duration.
+
+'''The West Wing.''' Concentrated, vertical, resolved more quickly. The 1990 permit set for the Hunter Haus Addition covers four floor levels and a tower; subsequent construction drawings through 1996 represent a largely coherent build sequence. The West Wing's stacked tower language is distinct from the horizontal, room-by-room logic of the East Wing work that followed it.
+
+'''The Entry Garden and Kotatsu.''' A 2005–2015 arc with a nine-year gap mid-sequence between an initial design and a return to the project. Begins with a land survey, passes through multiple landscape design drawings, and ends with an irrigation plan and the construction of the exterior kotatsu — a Japanese low table traditionally positioned over a heat source.
+
+= Browse =
+
+The archive is organized into nine Item Types. Each has its own specification, controlled vocabulary, and identifier prefix.
+
+{| class="wikitable" style="font-size:0.95em;"
+! Item Type !! Covers !! ID prefix
+|-
+| '''Work''' || Buildings, additions, gardens, theoretical projects, and other authored architectural works by Richard Hunter || HH-W-####
+|-
+| '''Phase''' || Discrete design iterations, schemes, and sub-projects within a Work (the Hunter Residence has 38) || HH-PH-####
+|-
+| '''Area''' || Named architectural sub-parts of a Work — wings, rooms, towers, gardens, decks, built features (the Hunter Residence has 39) || HH-AR-####
+|-
+| '''Archive Item''' || The primary materials — drawings, photographs, correspondence, permits, interviews || HH-A-####
+|-
+| '''Person''' || Individuals connected to Hunter's practice and to the Foundation's stewardship || HH-P-####
+|-
+| '''Event''' || Dated occurrences — exhibitions, sojourns, interviews, site visits, screenings || HH-E-####
+|-
+| '''Institution''' || Source collections, covenant holders, educational institutions, religious communities, the Foundation itself || HH-I-####
+|-
+| '''Building''' || Discrete physical structures designed by others that Hunter renovated or added to (Sloss House, Kerr House, Whitney Museum) || HH-B-####
+|-
+| '''Place''' || Named geographic locations referenced by the archive || (Wikidata-linked)
+|}
+
+[[Special:AllPages]] · [[Special:ListProperties]] · [[Special:Search]]
+
+A web-rendered finding-aid view of the archive is published at [https://bturep.github.io/HunterHouse/ bturep.github.io/HunterHouse]. The Foundation's public-facing site is forthcoming at hunterhousefoundation.com. Both query this Wikibase live.
+
+= Recognition =
+
+Hunter's work has been recognized in several exhibitions and publications. He is included in ''Renegades: Bruce Goff and the American School of Architecture'' (University of Oklahoma Press), in the 1995 exhibition ''The Architect's Dwelling: A Self-Portrait'' at Maison d'Etre, Montreal, and in the 2024 exhibition ''From the Ground, Into the Light: Organic Architecture of the Islands, 1950–2000'' at Wentworth Villa, Victoria.
+
+= Tools =
+
+'''Browse'''
+* [[Special:AllPages]] — every page in the wiki
+* [[Special:ListProperties]] — properties currently defined
+* [[Special:Search]] — full-text search
+* [[Special:RecentChanges]] — recent edits
+
+'''Create and edit'''
+* [[Special:NewItem]] — create a new Item
+* [[Special:NewProperty]] — create a new Property (elevated permissions required)
+
+'''Query and access'''
+* [https://hunterhouse.wikibase.cloud/query/ SPARQL endpoint] — full graph queries
+* [https://hunterhouse.wikibase.cloud/w/api.php Action API] — programmatic access (<code>?action=wbgetentities&ids=Q1&format=json&origin=*</code>)
+
+= The Foundation =
+
+The Hunter House Foundation stewards the Hunter Residence and the archival legacy of its architect. The Foundation's overarching aim is to realize the speculative futures embedded in Hunter's drawings — among them a cantilevered Skywalk, an artist studio, and the unfinished East Wing developments — while opening the archive to scholars, students, and the public. The Hunter House Student Fellowship, to be circulated to academic architecture programs, will be one of its public-facing instruments.
+
+Project lead: Brandon Poole.
+
+= Status =
+
+Migration in progress. Items, properties, and controlled vocabularies are being instantiated phase by phase from a Notion source archive and from the CAA fonds metadata. The Wikibase will look sparse during the migration period and fill out as phases complete. Properties may be added or revised as the data model settles. The frontend renders whatever exists at any given moment.
+
+----
+<div style="font-size:0.85em; color:#6a6a6a; font-family:'SF Mono',Menlo,monospace;">Hunter House Foundation · Brandon Poole, project lead · Last revised 2026-05-12</div>
