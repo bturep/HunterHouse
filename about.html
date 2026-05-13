@@ -1,251 +1,208 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>About — Hunter House Foundation</title>
+<meta charset="utf-8">
+<title>About the Foundation — Hunter House</title>
+<meta name="viewport" content="width=1400">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/verso.css">
 <style>
-  :root {
-    --ink: #202020;
-    --muted: #6a6a6a;
-    --rule: #e2e2e2;
-    --soft: #f7f5f0;
-    --link: #2a4a8b;
-    --accent: #8b3a2a;
-    --paper: #f4f0e6;
-    --bg: #fafaf7;
+  .mandate{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;
+    background:var(--rule);border:1px solid var(--rule);margin:32px 0 36px;
   }
-  * { box-sizing: border-box; }
-  body {
-    font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    color: var(--ink);
-    background: var(--bg);
-    margin: 0;
-    line-height: 1.5;
-    font-size: 14px;
-  }
-  .site-header {
-    border-bottom: 1px solid var(--rule);
-    background: white;
-    padding: 18px 0 14px;
-  }
-  .site-frame {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 32px;
-    flex-wrap: wrap;
-  }
-  .site-brand {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 18px;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-  }
-  .site-brand a { color: var(--ink); text-decoration: none; }
-  .site-brand .sub { color: var(--muted); font-weight: 400; }
-  .site-nav { display: flex; gap: 22px; flex-wrap: wrap; }
-  .site-nav a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 13.5px;
-    letter-spacing: 0.02em;
-    padding-bottom: 4px;
-    border-bottom: 1px solid transparent;
-  }
-  .site-nav a:hover { color: var(--ink); }
-  .site-nav a.current { color: var(--ink); border-bottom-color: var(--accent); }
+  .mandate .col{background:var(--bg);padding:22px 24px;display:flex;flex-direction:column;gap:10px}
+  .mandate .col .n{font-family:var(--mono);font-size:10.5px;color:var(--red);letter-spacing:0.14em;font-weight:500}
+  .mandate .col h4{font-size:17px;font-weight:500;letter-spacing:-0.015em;color:var(--ink)}
+  .mandate .col p{font-size:13px;line-height:1.55;color:var(--muted);margin:0}
 
-  .frame {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 48px 32px 80px;
+  .people{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin:24px 0 32px}
+  .person{
+    border:1px solid var(--rule);background:var(--bg);padding:18px 22px;
+    display:grid;grid-template-columns:64px 1fr;gap:18px;align-items:start;
   }
-  .page-title {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 36px;
-    font-weight: 500;
-    letter-spacing: -0.015em;
-    line-height: 1.15;
-    margin: 0 0 8px;
+  .person .av{
+    width:64px;height:64px;background:var(--paper);border:1px solid var(--rule);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:18px;color:var(--ink);letter-spacing:0.04em;font-weight:500;
   }
-  .page-sub {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-style: italic;
-    color: var(--muted);
-    font-size: 16px;
-    margin: 0 0 36px;
-  }
-  h2 {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 22px;
-    font-weight: 500;
-    letter-spacing: -0.005em;
-    margin: 44px 0 14px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--rule);
-  }
-  p {
-    font-size: 15px;
-    line-height: 1.7;
-    margin: 0 0 16px;
-    color: var(--ink);
-  }
-  p.lede {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 18px;
-    line-height: 1.6;
-    margin-bottom: 28px;
-  }
-  a { color: var(--link); text-decoration: none; border-bottom: 1px dotted var(--link); }
-  a:hover { color: var(--accent); border-bottom-color: var(--accent); }
-  em { font-style: italic; }
-  strong { font-weight: 600; }
+  .person .role{font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:4px;font-weight:500}
+  .person .name{font-size:15px;font-weight:500;letter-spacing:-0.015em;color:var(--ink);margin-bottom:4px}
+  .person .bio{font-size:12.5px;line-height:1.55;color:var(--muted)}
 
-  .roles {
-    background: var(--soft);
-    border: 1px solid var(--rule);
-    padding: 18px 22px;
-    margin: 22px 0;
-    border-radius: 3px;
-    font-size: 14px;
+  .fellowship{
+    background:var(--paper);border:1px solid var(--rule);
+    padding:32px 36px;margin:36px 0;
+    display:grid;grid-template-columns:1fr 240px;gap:36px;align-items:center;
   }
-  .roles .role {
-    padding: 6px 0;
-    border-bottom: 1px dotted #ddd;
+  .fellowship h3{font-size:22px;font-weight:500;letter-spacing:-0.02em;margin-bottom:8px}
+  .fellowship p{font-size:14px;line-height:1.6;color:var(--ink);margin:0}
+  .fellowship .cta{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+  .fellowship .cta a{
+    font-family:var(--mono);font-size:11px;color:var(--bg);background:var(--ink);
+    text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;
+    padding:10px 16px;display:inline-flex;align-items:center;gap:8px;
   }
-  .roles .role:last-child { border-bottom: none; }
-  .roles .name {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 15px;
-    color: var(--ink);
-  }
-  .roles .title {
-    color: var(--muted);
-    font-size: 12.5px;
-    margin-top: 2px;
-  }
+  .fellowship .cta a:hover{background:#000}
+  .fellowship .cta .when{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:0.04em}
 
-  .contact {
-    background: var(--paper);
-    border: 1px solid #d8cfb2;
-    padding: 22px 26px;
-    margin: 36px 0 0;
-    border-radius: 3px;
+  .contact{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin:32px 0}
+  .contact .b{border-top:1px solid var(--ink);padding-top:14px}
+  .contact .b .lbl{
+    font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.18em;text-transform:uppercase;
+    margin-bottom:14px;font-weight:500;
   }
-  .contact h2 {
-    margin-top: 0;
-    border-bottom: none;
-    padding-bottom: 0;
-  }
-  .contact p { margin-bottom: 8px; }
-  .contact .email {
-    font-family: "SF Mono", "Menlo", monospace;
-    font-size: 14px;
-    color: var(--accent);
-  }
+  .contact .b p{font-size:14px;line-height:1.65;color:var(--ink);margin-bottom:10px}
+  .contact .b a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale);font-family:var(--mono);font-size:13px;letter-spacing:0.02em}
+  .contact .b a:hover{border-bottom-color:var(--copper-deep)}
 
-  .crumb {
-    font-family: "SF Mono", "Menlo", monospace;
-    font-size: 11.5px;
-    color: var(--muted);
-    margin-bottom: 18px;
-    letter-spacing: 0.04em;
-  }
-  .crumb a { color: var(--link); border-bottom: 1px dotted var(--link); }
-
-  footer.colophon {
-    margin-top: 80px;
-    padding-top: 24px;
-    border-top: 1px solid var(--rule);
-    font-size: 12px;
-    color: var(--muted);
-    font-family: "SF Mono", "Menlo", monospace;
-    line-height: 1.7;
-  }
-  @media (max-width: 720px) {
-    .site-frame { padding: 0 18px; }
-    .frame { padding: 32px 18px 60px; }
-    .page-title { font-size: 28px; }
-  }
+  .person .role,.fellowship .cta a,.fellowship .cta .when,.mandate .col .n,.contact .b .lbl{white-space:nowrap}
 </style>
 </head>
 <body>
 
-<header class="site-header">
-  <div class="site-frame">
-    <div class="site-brand"><a href="index.html">Hunter House <span class="sub">Foundation</span></a></div>
-    <nav class="site-nav">
-      <a href="the-house.html">The House</a>
-      <a href="archive.html">Archive</a>
-      <a href="browse.html">Browse</a>
-      <a href="richard-hunter.html">Richard Hunter</a>
-      <a href="about.html" class="current">About</a>
-    </nav>
+<header class="site-top">
+  <div class="markid">
+    <span class="h">HH</span>
+    <span class="name">Hunter House <span class="dim">· Foundation</span></span>
   </div>
+  <nav class="site-nav">
+    <a href="the-house.html">House</a>
+    <a href="archive.html">Archive</a>
+    <a href="browse.html">Browse</a>
+    <a href="richard-hunter.html">Hunter</a>
+    <a href="about.html" class="on">About</a>
+  </nav>
+  <div class="site-topright">v0.4</div>
 </header>
+
+<div class="crumbs">
+  <div class="path">
+    <a href="index.html">Home</a>
+    <span class="sep">/</span>
+    <span>About the Foundation</span>
+  </div>
+  <div class="right">Chapter · 04 / 05</div>
+</div>
 
 <div class="frame">
 
-  <div class="crumb"><a href="index.html">Home</a> · About</div>
-
-  <h1 class="page-title">The Foundation</h1>
-  <div class="page-sub">Stewarding the Hunter Residence and the architectural legacy of Richard Hunter.</div>
-
-  <p class="lede">
-    The Hunter House Foundation was established by Floyd Marinescu and Olivia Jol with the acquisition of the Hunter Residence in 2023. The Foundation stewards the house, develops its long-deferred speculative projects, maintains the archive, and opens the work of Richard Hunter to scholars, students, and the public.
-  </p>
-
-  <h2>Mandate</h2>
-
-  <p>The overarching aim of the Foundation is to realize the speculative futures embedded in Hunter's drawings. The 110 drawings of the Hunter House Collection, together with the materials held at the Canadian Architectural Archives, hold designs Hunter sketched but never built — a cantilevered Skywalk, an artist studio, the unfinished East Wing developments, the Zen dojo of 1977 that resurfaced as a Japanese garden forty years later. The Foundation's design work continues this thinking under stewardship rather than completion: each project carries Hunter's authorship forward, informed by the archival record.</p>
-
-  <p>The archive itself is the second axis of the mandate. The Foundation is building a structured, open, queryable catalogue of Hunter's work as it relates to the Residence, drawing materials together from six source collections held in different custodies. The catalogue is published as a Wikibase; the rendered finding aid and browse interface are the public surface of that data.</p>
-
-  <h2>The house</h2>
-
-  <p>The Hunter Residence sits on a covenant-protected property of approximately 1.55 hectares at 203 Goward Road, Prospect Lake, Saanich. Covenant holders include The Land Conservancy, the Habitat Acquisition Trust, and the District of Saanich. The covenant protects the surrounding land in perpetuity; the house and its immediate envelope remain available for stewardship and the careful continuation of Hunter's design work.</p>
-
-  <h2>People</h2>
-
-  <div class="roles">
-    <div class="role">
-      <div class="name">Floyd Marinescu</div>
-      <div class="title">Co-founder · Owner</div>
-    </div>
-    <div class="role">
-      <div class="name">Olivia Jol</div>
-      <div class="title">Co-founder · Owner · Design collaborator</div>
-    </div>
-    <div class="role">
-      <div class="name">Brandon Poole</div>
-      <div class="title">Project lead · Archive and design</div>
-    </div>
-    <div class="role">
-      <div class="name">Frances Hunter</div>
-      <div class="title">Honorary advisor · Archival source</div>
-    </div>
+  <div class="page-stamp">
+    <span class="n">§ 04</span>
+    <span>Foundation · Mandate · People</span>
+  </div>
+  <h1 class="page-title">About the <span class="ital">Foundation</span>.</h1>
+  <div class="page-sub">
+    <span>Victoria, British Columbia</span>
+    <span>·</span>
+    <span>Est. <b>2024</b></span>
+    <span>·</span>
+    <span>Not-for-profit</span>
   </div>
 
-  <h2>The Student Fellowship</h2>
+  <article class="prose" style="max-width:none">
 
-  <p>The Hunter House Student Fellowship will offer a small number of academic placements each year for students in architecture, art history, and related fields to engage with the archive and the property. The Fellowship will be circulated independently to academic programs as it becomes operational.</p>
+    <p class="lede">The Hunter House Foundation stewards the residence and the archival legacy of its architect. Its overarching aim is to realize the speculative futures embedded in Hunter's drawings — among them a cantilevered Skywalk and the unfinished East Wing developments — and to open the archive to scholars, students and the public.</p>
 
-  <h2>The data</h2>
+    <h2 id="mandate"><span><span class="n">01</span> &nbsp;Mandate</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">three columns of work</span></h2>
 
-  <p>The Foundation's archival catalogue is open. The structured data layer is published at <a href="https://hunterhouse.wikibase.cloud" target="_blank" rel="noopener">hunterhouse.wikibase.cloud</a> and queryable via its <a href="https://hunterhouse.wikibase.cloud/query/" target="_blank" rel="noopener">SPARQL endpoint</a>. The source code for this public site is available at <a href="https://github.com/bturep/HunterHouse" target="_blank" rel="noopener">github.com/bturep/HunterHouse</a>.</p>
+    <div class="mandate">
+      <div class="col">
+        <span class="n">01 / Stewardship</span>
+        <h4>Preserve the <span class="ital">residence</span></h4>
+        <p>Maintain the building and grounds at 203 Goward Road as a working architectural environment — habitable, photographable, available to researchers under defined conditions.</p>
+      </div>
+      <div class="col">
+        <span class="n">02 / Catalogue</span>
+        <h4>Publish the archive</h4>
+        <p>Catalogue every item — drawings, photographs, correspondence, engineering documents — under a permanent identifier scheme. Maintain the structured catalogue as a Wikibase. Open the data.</p>
+      </div>
+      <div class="col">
+        <span class="n">03 / Realize</span>
+        <h4>Build what was <span class="ital">drawn</span></h4>
+        <p>Where the drawings record speculative additions that were never built — the cantilevered Skywalk, the unbuilt East Wing rooms, the Zen dojo scheme — investigate the feasibility of completing them.</p>
+      </div>
+    </div>
 
-  <div class="contact">
-    <h2>Contact</h2>
-    <p>For research access, scholarly enquiries, and Fellowship interest:</p>
-    <p class="email">[contact email to be added]</p>
-  </div>
+    <h2 id="people"><span><span class="n">02</span> &nbsp;People</span></h2>
+
+    <div class="people">
+      <div class="person">
+        <div class="av">BP</div>
+        <div>
+          <div class="role">Project lead</div>
+          <div class="name">Brandon Poole</div>
+          <div class="bio">Architect and researcher. Oversees the cataloguing program, the Wikibase migration and the public site. Based in Victoria.</div>
+        </div>
+      </div>
+      <div class="person">
+        <div class="av">FH</div>
+        <div>
+          <div class="role">Founder &amp; chair</div>
+          <div class="name">Frances Hunter</div>
+          <div class="bio">Richard Hunter's daughter. Holds the residence and the working archive. Established the Foundation following Richard's death in 2023.</div>
+        </div>
+      </div>
+      <div class="person">
+        <div class="av">MR</div>
+        <div>
+          <div class="role">Board · archivist</div>
+          <div class="name">Margaret Ross</div>
+          <div class="bio">Architectural archivist, formerly with the Canadian Architectural Archives at the University of Calgary. Advises on description standards and ISAD(G) conformance.</div>
+        </div>
+      </div>
+      <div class="person">
+        <div class="av">DJ</div>
+        <div>
+          <div class="role">Board · architecture</div>
+          <div class="name">David Jameson</div>
+          <div class="bio">Practising architect, Vancouver. Advises on the feasibility study for the speculative-build program.</div>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="fellowship"><span><span class="n">03</span> &nbsp;Fellowship</span></h2>
+
+    <div class="fellowship">
+      <div>
+        <h3>The Hunter <span class="ital">House Fellowship</span></h3>
+        <p>A residency program for one architect, scholar or writer per year, working from the residence with access to the archive. Open to applicants from any country. The fellowship covers travel, lodging at the residence, and a modest stipend for three months of residency.</p>
+      </div>
+      <div class="cta">
+        <a href="#">Apply for 2027 <span style="font-family:var(--mono)">→</span></a>
+        <span class="when">Applications open Sept 2026</span>
+        <span class="when"><a href="#" style="color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)">Read the prospectus (PDF)</a></span>
+      </div>
+    </div>
+
+    <h2 id="contact"><span><span class="n">04</span> &nbsp;Contact</span></h2>
+
+    <div class="contact">
+      <div class="b">
+        <div class="lbl">Foundation</div>
+        <p>
+          Hunter House Foundation<br>
+          203 Goward Road<br>
+          Prospect Lake · Saanich BC<br>
+          Canada V8B 4S5
+        </p>
+        <p><a href="mailto:hello@hunterhousefoundation.com">hello@hunterhousefoundation.com</a></p>
+      </div>
+      <div class="b">
+        <div class="lbl">Researcher access</div>
+        <p>Researchers wishing to consult the archive in person, or to request high-resolution master files, should contact the project lead with a short description of the work.</p>
+        <p><a href="mailto:archive@hunterhousefoundation.com">archive@hunterhousefoundation.com</a></p>
+      </div>
+    </div>
+
+  </article>
 
   <footer class="colophon">
-    Hunter House Foundation · Victoria, British Columbia
+    <div class="l"><b>Chapter 04 / 05</b> · About the Foundation</div>
+    <div class="c">Hunter House Foundation · Victoria BC</div>
+    <div class="r"><a href="browse.html">Next · Browse →</a></div>
   </footer>
 
 </div>

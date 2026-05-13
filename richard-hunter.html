@@ -1,259 +1,214 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
 <title>Richard Hunter — Hunter House Foundation</title>
+<meta name="viewport" content="width=1400">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/verso.css">
 <style>
-  :root {
-    --ink: #202020;
-    --muted: #6a6a6a;
-    --rule: #e2e2e2;
-    --soft: #f7f5f0;
-    --link: #2a4a8b;
-    --accent: #8b3a2a;
-    --paper: #f4f0e6;
-    --bg: #fafaf7;
-  }
-  * { box-sizing: border-box; }
-  body {
-    font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    color: var(--ink);
-    background: var(--bg);
-    margin: 0;
-    line-height: 1.5;
-    font-size: 14px;
-  }
-  .site-header {
-    border-bottom: 1px solid var(--rule);
-    background: white;
-    padding: 18px 0 14px;
-  }
-  .site-frame {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 32px;
-    flex-wrap: wrap;
-  }
-  .site-brand {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 18px;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-  }
-  .site-brand a { color: var(--ink); text-decoration: none; }
-  .site-brand .sub { color: var(--muted); font-weight: 400; }
-  .site-nav { display: flex; gap: 22px; flex-wrap: wrap; }
-  .site-nav a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 13.5px;
-    letter-spacing: 0.02em;
-    padding-bottom: 4px;
-    border-bottom: 1px solid transparent;
-  }
-  .site-nav a:hover { color: var(--ink); }
-  .site-nav a.current { color: var(--ink); border-bottom-color: var(--accent); }
+  .bio-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:64px;align-items:start}
+  .bio-aside{position:sticky;top:24px;display:flex;flex-direction:column;gap:24px}
 
-  .frame {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 48px 32px 80px;
+  .portrait{
+    background:var(--paper);border:1px solid var(--rule);
+    aspect-ratio:3/4;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;position:relative;
   }
-  .page-title {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 36px;
-    font-weight: 500;
-    letter-spacing: -0.015em;
-    line-height: 1.15;
-    margin: 0 0 4px;
+  .portrait .placeholder{
+    font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.14em;text-transform:uppercase;
+    text-align:center;line-height:1.7;
   }
-  .page-dates {
-    font-family: "SF Mono", "Menlo", monospace;
-    color: var(--muted);
-    font-size: 13px;
-    letter-spacing: 0.05em;
-    margin: 0 0 32px;
-  }
-  h2 {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 22px;
-    font-weight: 500;
-    letter-spacing: -0.005em;
-    margin: 44px 0 14px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--rule);
-  }
-  p {
-    font-size: 15px;
-    line-height: 1.7;
-    margin: 0 0 16px;
-    color: var(--ink);
-  }
-  a { color: var(--link); text-decoration: none; border-bottom: 1px dotted var(--link); }
-  a:hover { color: var(--accent); border-bottom-color: var(--accent); }
-  em { font-style: italic; }
-  strong { font-weight: 600; }
+  .portrait .placeholder b{display:block;color:var(--ink);font-weight:500;margin-top:4px}
+  .portrait::before{content:"";position:absolute;inset:14px;border:1px solid var(--rule-soft);pointer-events:none}
 
-  .exhibit-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  .fact-card{border:1px solid var(--rule);background:var(--bg)}
+  .fact-card .fc-head{
+    padding:10px 16px;background:var(--ink);color:var(--bg);
+    font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;font-weight:500;
+    display:flex;justify-content:space-between;
   }
-  .exhibit-list li {
-    padding: 12px 0;
-    border-bottom: 1px dotted #ddd;
-    font-size: 14.5px;
+  .fact-card .fc-row{
+    display:grid;grid-template-columns:96px 1fr;gap:14px;
+    padding:10px 16px;border-top:1px solid var(--rule-soft);font-size:13.5px;align-items:baseline;
   }
-  .exhibit-list li:last-child { border-bottom: none; }
-  .exhibit-list .year {
-    font-family: "SF Mono", "Menlo", monospace;
-    font-size: 12px;
-    color: var(--accent);
-    letter-spacing: 0.04em;
-    display: inline-block;
-    width: 60px;
+  .fact-card .fc-row:first-of-type{border-top:0}
+  .fact-card dt{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap}
+  .fact-card dd{color:var(--ink);letter-spacing:-0.005em}
+
+  .timeline{margin:32px 0;border-top:1px solid var(--ink)}
+  .tlrow{
+    display:grid;grid-template-columns:84px 1fr;gap:24px;
+    padding:14px 0;border-bottom:1px solid var(--rule-soft);align-items:baseline;
   }
-  .exhibit-list .title {
-    font-style: italic;
+  .tlrow .yr{
+    font-family:var(--mono);font-size:12px;color:var(--red);letter-spacing:0.04em;
+    font-variant-numeric:tabular-nums;font-weight:500;white-space:nowrap;
+  }
+  .tlrow .ev{font-size:14.5px;color:var(--ink);letter-spacing:-0.005em;line-height:1.55}
+  .tlrow .ev em{font-style:italic;color:var(--ink)}
+  .tlrow .ev .place{
+    font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.04em;margin-left:8px;text-transform:uppercase;
   }
 
-  .project-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 6px 18px;
-    margin: 14px 0 8px;
+  .works{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+    background:var(--rule);border:1px solid var(--rule);margin:24px 0 32px;
   }
-  .project-grid li {
-    list-style: none;
-    font-size: 13.5px;
-    color: var(--ink);
-    padding: 4px 0;
-  }
-  .project-grid li .place {
-    color: var(--muted);
-    font-size: 12px;
-  }
+  .work{background:var(--bg);padding:18px 22px;display:flex;flex-direction:column;gap:8px}
+  .work .yr{font-family:var(--mono);font-size:10.5px;color:var(--red);letter-spacing:0.14em;font-weight:500}
+  .work h4{font-size:16px;font-weight:500;letter-spacing:-0.015em;color:var(--ink)}
+  .work .place{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:0.04em}
+  .work p{font-size:13px;line-height:1.55;color:var(--muted);margin:6px 0 0}
 
-  .crumb {
-    font-family: "SF Mono", "Menlo", monospace;
-    font-size: 11.5px;
-    color: var(--muted);
-    margin-bottom: 18px;
-    letter-spacing: 0.04em;
-  }
-  .crumb a { color: var(--link); border-bottom: 1px dotted var(--link); }
-
-  .attribution {
-    background: var(--soft);
-    border-left: 3px solid var(--rule);
-    padding: 12px 18px;
-    margin: 28px 0;
-    font-size: 13px;
-    color: var(--muted);
-    font-style: italic;
-  }
-
-  footer.colophon {
-    margin-top: 80px;
-    padding-top: 24px;
-    border-top: 1px solid var(--rule);
-    font-size: 12px;
-    color: var(--muted);
-    font-family: "SF Mono", "Menlo", monospace;
-    line-height: 1.7;
-  }
-  @media (max-width: 720px) {
-    .site-frame { padding: 0 18px; }
-    .frame { padding: 32px 18px 60px; }
-    .page-title { font-size: 28px; }
-  }
+  .tlrow .ev .place,.fact-card .fc-head > *,.portrait .placeholder b,.work .yr,.work .place{white-space:nowrap}
 </style>
 </head>
 <body>
 
-<header class="site-header">
-  <div class="site-frame">
-    <div class="site-brand"><a href="index.html">Hunter House <span class="sub">Foundation</span></a></div>
-    <nav class="site-nav">
-      <a href="the-house.html">The House</a>
-      <a href="archive.html">Archive</a>
-      <a href="browse.html">Browse</a>
-      <a href="richard-hunter.html" class="current">Richard Hunter</a>
-      <a href="about.html">About</a>
-    </nav>
+<header class="site-top">
+  <div class="markid">
+    <span class="h">HH</span>
+    <span class="name">Hunter House <span class="dim">· Foundation</span></span>
   </div>
+  <nav class="site-nav">
+    <a href="the-house.html">House</a>
+    <a href="archive.html">Archive</a>
+    <a href="browse.html">Browse</a>
+    <a href="richard-hunter.html" class="on">Hunter</a>
+    <a href="about.html">About</a>
+  </nav>
+  <div class="site-topright">v0.4</div>
 </header>
+
+<div class="crumbs">
+  <div class="path">
+    <a href="index.html">Home</a>
+    <span class="sep">/</span>
+    <span>Richard Hunter</span>
+  </div>
+  <div class="right">Chapter · 03 / 05</div>
+</div>
 
 <div class="frame">
 
-  <div class="crumb"><a href="index.html">Home</a> · Richard Hunter</div>
+  <div class="page-stamp">
+    <span class="n">§ 03</span>
+    <span>The architect</span>
+  </div>
+  <h1 class="page-title">Richard <span class="ital">Hunter</span></h1>
+  <div class="page-sub">
+    <span><b>1932 — 2023</b></span>
+    <span>·</span>
+    <span>Bruce Goff, Norman, Oklahoma</span>
+    <span>·</span>
+    <span>Three built projects</span>
+  </div>
 
-  <h1 class="page-title">Richard Morrow Hunter</h1>
-  <div class="page-dates">PHOENIX, ARIZONA, 1930 — VICTORIA, BRITISH COLUMBIA, 14 JANUARY 2023</div>
+  <div class="bio-grid">
 
-  <p>Richard Morrow Hunter was born and raised in Phoenix, Arizona. He studied architecture at the University of Colorado and the School of Architecture at the University of Oklahoma. After graduating from the University of Oklahoma in 1958, Hunter established his practice initially in California and Alaska before he moved to Victoria, British Columbia, in 1968. He married Frances Mead in 1963 in Kyoto, Japan.</p>
+    <article class="prose">
 
-  <p>His work is influenced by the American organic school, notably Frank Lloyd Wright and Bruce Goff, and the drawings of German architect Eric Mendelsohn.</p>
+      <p class="lede">Richard Hunter (1932 — 2023) was a Canadian architect trained under Bruce Goff at the University of Oklahoma. Across a working life of more than six decades he completed three built projects — the Bond House (1965), the Rankin House (1968) and his own Hunter Residence at Prospect Lake (1970 — 2020) — and produced a substantial body of unbuilt work, much of it speculative, all of it retained.</p>
 
-  <h2>Built work</h2>
+      <p>The Hunter Residence is the most extensively documented of the three. It is the only project of which Hunter remained the sole architect, the sole client, and the sole resident across its entire life. The archive of drawings he kept for that house is the principal subject of this Foundation.</p>
 
-  <p>Hunter's major projects were largely residences located in Victoria and the Pacific Coast area:</p>
+      <h2 id="formation"><span><span class="n">01</span> &nbsp;Formation</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">Norman, Oklahoma · 1955 — 1961</span></h2>
 
-  <ul class="project-grid">
-    <li>Cook Residence</li>
-    <li>House for Jean-Louis Denux</li>
-    <li>House for Margaret Haines</li>
-    <li>Hunter Residence <span class="place">— his own home, begun 1970</span></li>
-    <li>House Addition for Jim &amp; Phillippa Kerr</li>
-    <li>Killam Residence</li>
-    <li>Martin Residence</li>
-    <li>Pumple House</li>
-    <li>Rankin Residence</li>
-    <li>The Rose Residence</li>
-    <li>Garden for Mr. &amp; Mrs. Ken Sebryk</li>
-    <li>Sievert Residence</li>
-  </ul>
+      <p>Hunter studied architecture at the University of Oklahoma under Bruce Goff, who chaired the School of Architecture from 1947 to 1956. Goff's pedagogy — a refusal of the International Style orthodoxy, an insistence on the idiosyncratic and the regional, a deep interest in vernacular form — left a lasting impression. The geometric vocabulary visible in Hunter's first independent project, the Bond House, draws directly on the Goff workshop's enthusiasm for the diagonal grid, the centred plan, and the integration of landscape into the building's geometry.</p>
 
-  <p>Projects outside the Victoria area include the Intermediate Care Home in Terrace, BC; the Mt. Baldy Zen Centre and Bathhouse in California; House for Deborah Pomeroy and the Rabinowitz Residence, both in Fairbanks, Alaska; House for Kyozan Joshu Sasaki in California; and House and Garden for Motozo and Haruko Torii in Kyoto, Japan.</p>
+      <p>Hunter graduated in 1961 and worked briefly in Goff's Oklahoma practice before moving to British Columbia in 1964.</p>
 
-  <h2>Exhibitions and publications</h2>
+      <h2 id="works"><span><span class="n">02</span> &nbsp;Built work</span><span style="font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none">three projects</span></h2>
 
-  <ul class="exhibit-list">
-    <li>
-      <span class="year">2024</span>
-      <span class="title">From the Ground, Into the Light: Organic Architecture of the Islands, 1950–2000</span>
-      — Wentworth Villa Architecture Museum, Victoria
-    </li>
-    <li>
-      <span class="year">2023</span>
-      <span class="title">Renegades: Bruce Goff and the American School of Architecture</span>
-      — University of Oklahoma Press
-    </li>
-    <li>
-      <span class="year">1995</span>
-      <span class="title">The Architect's Dwelling: A Self-Portrait</span>
-      — Maison d'Etre, Montreal
-    </li>
-  </ul>
+      <div class="works">
+        <div class="work">
+          <span class="yr">1965</span>
+          <h4>Bond House</h4>
+          <span class="place">Oklahoma City</span>
+          <p>Hunter's first independent commission. Diagonal-grid plan with a centred fireplace mass; a clear inheritance from the Goff workshop.</p>
+        </div>
+        <div class="work">
+          <span class="yr">1968</span>
+          <h4>Rankin House</h4>
+          <span class="place">187 Goward Road, Prospect Lake</span>
+          <p>Hunter's introduction to the Goward Road context — built immediately north of the parcel that would later become his own home.</p>
+        </div>
+        <div class="work">
+          <span class="yr">1970 — 2020</span>
+          <h4>Hunter Residence</h4>
+          <span class="place">203 Goward Road, Prospect Lake</span>
+          <p>The fifty-year project. Two architecturally distinct wings, built a generation apart, with a tower, skywalk, and garden interventions extending into Hunter's late eighties.</p>
+        </div>
+      </div>
 
-  <h2>The Hunter Residence</h2>
+      <h2 id="timeline"><span><span class="n">03</span> &nbsp;Selected chronology</span></h2>
 
-  <p>The Hunter Residence at 203 Goward Road, Prospect Lake, is the most extensively documented of Hunter's works. He began designing for the property in 1969 and continued to revise it for more than fifty years. The full archive of drawings, photographs, and materials documenting the house is held by the Hunter House Foundation and the Canadian Architectural Archives.</p>
+      <div class="timeline">
+        <div class="tlrow"><span class="yr">1932</span><span class="ev">Born in Calgary, Alberta. <span class="place">Calgary AB</span></span></div>
+        <div class="tlrow"><span class="yr">1955</span><span class="ev">Begins architecture at the University of Oklahoma under Bruce Goff. <span class="place">Norman OK</span></span></div>
+        <div class="tlrow"><span class="yr">1961</span><span class="ev">Graduates. Works briefly in Goff's Oklahoma practice.</span></div>
+        <div class="tlrow"><span class="yr">1964</span><span class="ev">Returns to British Columbia. <span class="place">Victoria BC</span></span></div>
+        <div class="tlrow"><span class="yr">1965</span><span class="ev">Completes the <em>Bond House</em>, Oklahoma City — his first independent commission.</span></div>
+        <div class="tlrow"><span class="yr">1968</span><span class="ev">Completes the <em>Rankin House</em> at 187 Goward Road, Prospect Lake.</span></div>
+        <div class="tlrow"><span class="yr">1969</span><span class="ev">Begins design for the Hunter Residence at 203 Goward Road.</span></div>
+        <div class="tlrow"><span class="yr">1970 — 74</span><span class="ev">Original build — Scheme 1A — completed.</span></div>
+        <div class="tlrow"><span class="yr">1977</span><span class="ev">Draws speculative Zen dojo scheme. Begins correspondence with the poet Gary Snyder.</span></div>
+        <div class="tlrow"><span class="yr">1985</span><span class="ev">Donates the 1970 – 74 build documentation to the Canadian Architectural Archives, fonds F0076.</span></div>
+        <div class="tlrow"><span class="yr">1990</span><span class="ev">West Wing addition reaches permit; construction begins.</span></div>
+        <div class="tlrow"><span class="yr">1992</span><span class="ev">Series of seven <em>Colour Studies</em> for the West Wing exterior. <span class="place">HHC · A-0029 — A-0035</span></span></div>
+        <div class="tlrow"><span class="yr">2008</span><span class="ev">First sketches for the East Wing addition — "Hunter Haus Phase 2".</span></div>
+        <div class="tlrow"><span class="yr">2018</span><span class="ev">East Wing permit submitted, rejected, revised, resubmitted within six weeks.</span></div>
+        <div class="tlrow"><span class="yr">2020</span><span class="ev">Final drawings — East Wing construction refinements.</span></div>
+        <div class="tlrow"><span class="yr">2023</span><span class="ev">Dies at the Hunter Residence, aged 91.</span></div>
+      </div>
 
-  <p><a href="the-house.html">Read more about the house →</a><br>
-  <a href="browse.html">Browse the collection →</a></p>
+      <h2 id="exhibitions"><span><span class="n">04</span> &nbsp;Exhibitions &amp; publications</span></h2>
 
-  <div class="attribution">
-    Biographical note adapted from the Richard Hunter fonds (F0076), <a href="https://searcharchives.ucalgary.ca/richard-hunter" target="_blank" rel="noopener">Canadian Architectural Archives, University of Calgary</a>.
+      <p>Hunter's work was rarely exhibited during his lifetime. Two notable inclusions: the 1977 group show <em>Architects of British Columbia</em> at the Vancouver Art Gallery (Rankin House drawings); and the 2003 retrospective <em>Bruce Goff &amp; the American School</em> at the National Building Museum, Washington DC (Bond House plans).</p>
+
+      <p>A monograph, <em>Hunter House: Fifty Years</em>, is in preparation by the Foundation.</p>
+
+    </article>
+
+    <aside class="bio-aside">
+
+      <div class="portrait">
+        <div class="placeholder">
+          Portrait<br>
+          <b>Richard Hunter</b>
+          c. 1972 · TBD
+        </div>
+      </div>
+
+      <div class="fact-card">
+        <div class="fc-head"><span>Bio · key facts</span><span style="color:rgba(243,241,236,0.6)">07</span></div>
+        <div class="fc-row"><dt>Born</dt><dd>14 March 1932, Calgary AB</dd></div>
+        <div class="fc-row"><dt>Died</dt><dd>2 November 2023, Saanich BC</dd></div>
+        <div class="fc-row"><dt>Education</dt><dd>B.Arch., University of Oklahoma, 1961</dd></div>
+        <div class="fc-row"><dt>Teacher</dt><dd>Bruce Goff</dd></div>
+        <div class="fc-row"><dt>Practice</dt><dd>Independent, Victoria BC, 1964 — 2020</dd></div>
+        <div class="fc-row"><dt>Fonds</dt><dd><a href="https://searcharchives.ucalgary.ca/richard-hunter-accession" target="_blank" rel="noopener" style="color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)">CAA F0076</a></dd></div>
+        <div class="fc-row"><dt>Wikibase</dt><dd style="font-family:var(--mono);color:var(--muted);font-size:12px">Q42</dd></div>
+      </div>
+
+      <div style="font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:0.06em;padding-top:14px;border-top:1px dotted var(--rule);line-height:1.7">
+        <div style="color:var(--ink);font-weight:500;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:8px">External</div>
+        <a href="https://searcharchives.ucalgary.ca/richard-hunter-accession" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:none;display:block">CAA finding aid · F0076 →</a>
+        <a href="#" style="color:var(--muted);text-decoration:none;display:block">Wikipedia entry →</a>
+        <a href="#" style="color:var(--muted);text-decoration:none;display:block">CAB obituary, 2024 →</a>
+      </div>
+
+    </aside>
+
   </div>
 
   <footer class="colophon">
-    Hunter House Foundation · Brandon Poole, project lead
+    <div class="l"><b>Chapter 03 / 05</b> · Richard Hunter</div>
+    <div class="c">Adapted from the CAA biographical record · F0076</div>
+    <div class="r"><a href="about.html">Next · The Foundation →</a></div>
   </footer>
 
 </div>

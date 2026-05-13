@@ -1,285 +1,115 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
 <title>Item — Hunter House Archive</title>
+<meta name="viewport" content="width=1400">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/verso.css">
 <style>
-  :root {
-    --ink: #202020;
-    --muted: #6a6a6a;
-    --rule: #e2e2e2;
-    --soft: #f7f5f0;
-    --link: #2a4a8b;
-    --accent: #8b3a2a;
-    --note: #8a7a3a;
-    --paper: #f4f0e6;
-    --bg: #fafaf7;
+  /* ── status ── */
+  .status{
+    background:var(--paper);border:1px solid var(--rule);padding:12px 18px;margin-bottom:24px;
+    font-size:12px;color:var(--muted);font-family:var(--mono);letter-spacing:0.04em;
   }
-  * { box-sizing: border-box; }
-  body {
-    font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    color: var(--ink);
-    background: var(--bg);
-    margin: 0;
-    line-height: 1.5;
-    font-size: 14px;
+  .status.error{background:var(--red-pale);color:var(--red-deep);border-color:var(--red-pale)}
+
+  /* ── item card ── */
+  .item{background:var(--paper);border:1px solid var(--rule)}
+  .item-header{padding:20px 24px 16px;border-bottom:1px solid var(--ink);background:var(--bg)}
+  .item-header .qid{
+    color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;
+    margin-bottom:6px;
   }
-  .frame {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 32px 32px 80px;
+  .item-header .label{
+    font-size:32px;font-weight:500;margin:0 0 8px;letter-spacing:-0.02em;line-height:1.1;color:var(--ink);
+  }
+  .item-header .desc{color:var(--muted);font-size:15px;line-height:1.55;letter-spacing:-0.005em}
+  .item-header .aliases{margin-top:10px;color:var(--muted);font-size:12px}
+  .item-header .aliases-label{font-style:italic;margin-right:4px}
+  .item-header .aliases span.alias{
+    background:var(--soft);padding:1px 7px;margin-right:4px;
+    font-style:normal;display:inline-block;margin-top:2px;
+    font-family:var(--mono);font-size:11px;letter-spacing:0.02em;
   }
 
-  /* Shared site header */
-  .site-header {
-    border-bottom: 1px solid var(--rule);
-    background: white;
-    padding: 18px 0 14px;
+  /* ── statements ── */
+  .statements{padding:16px 24px 24px}
+  .section-heading{
+    font-family:var(--mono);font-size:10px;color:var(--ink);letter-spacing:0.22em;text-transform:uppercase;
+    font-weight:500;padding-bottom:8px;border-bottom:1px solid var(--ink);margin:28px 0 0;
   }
-  .site-frame {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 32px;
-    flex-wrap: wrap;
-  }
-  .site-brand {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 18px;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-  }
-  .site-brand a { color: var(--ink); text-decoration: none; }
-  .site-brand .sub { color: var(--muted); font-weight: 400; }
-  .site-nav { display: flex; gap: 22px; flex-wrap: wrap; }
-  .site-nav a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 13.5px;
-    letter-spacing: 0.02em;
-    padding-bottom: 4px;
-    border-bottom: 1px solid transparent;
-  }
-  .site-nav a:hover { color: var(--ink); }
-  .site-nav a.current { color: var(--ink); border-bottom-color: var(--accent); }
-  .crumb {
-    margin-bottom: 24px;
-    font-family: "SF Mono", "Menlo", monospace;
-    font-size: 12px;
-    color: var(--muted);
-  }
-  .crumb a {
-    color: var(--link);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--link);
-  }
-  .crumb a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  .section-heading:first-child{margin-top:6px}
 
-  .item {
-    background: white;
-    border: 1px solid var(--rule);
-    border-radius: 4px;
-    overflow: hidden;
+  .stmt{
+    display:grid;grid-template-columns:200px 1fr;gap:14px;
+    padding:10px 0;border-bottom:1px solid var(--rule-soft);
   }
-  .item-header {
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid var(--rule);
-    background: var(--soft);
-  }
-  .item-header .qid {
-    color: var(--muted);
-    font-family: "SF Mono", "Menlo", monospace;
-    font-size: 12px;
-    letter-spacing: 0.04em;
-  }
-  .item-header .label {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 26px;
-    font-weight: 500;
-    margin: 6px 0 8px;
-    letter-spacing: -0.005em;
-    line-height: 1.2;
-  }
-  .item-header .desc {
-    color: var(--muted);
-    font-size: 14px;
-    font-style: italic;
-  }
-  .item-header .aliases {
-    margin-top: 10px;
-    color: var(--muted);
-    font-size: 12px;
-  }
-  .item-header .aliases-label { font-style: italic; margin-right: 4px; }
-  .item-header .aliases span.alias {
-    background: #ebe7dc;
-    padding: 1px 7px;
-    border-radius: 2px;
-    margin-right: 4px;
-    font-style: normal;
-    display: inline-block;
-    margin-top: 2px;
-  }
+  .stmt:last-child{border-bottom:none}
+  .prop{color:var(--muted);font-size:12.5px;font-weight:400;font-family:var(--mono);letter-spacing:0.02em;padding-top:2px}
+  .val{font-size:13.5px;word-break:break-word;letter-spacing:-0.005em}
+  .val .qlink{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
+  .val .qlink:hover{border-bottom-color:var(--copper-deep)}
+  .val .stringval{font-family:var(--mono);font-size:12.5px;color:var(--ink)}
+  .val .multival{display:block;padding:2px 0}
+  .val .external{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
+  .qual{display:block;margin-top:4px;margin-left:14px;font-size:12px;color:var(--muted)}
+  .qual::before{content:"↳ ";color:var(--hint)}
+  .qual b{font-weight:500;color:var(--muted)}
 
-  .statements {
-    padding: 16px 24px 24px;
+  /* ── reverse references ── */
+  .reverse{background:var(--paper);padding:16px 24px 20px;border-top:1px solid var(--rule);font-size:13px}
+  .reverse h3{
+    font-family:var(--mono);font-size:10px;color:var(--ink);letter-spacing:0.22em;text-transform:uppercase;
+    font-weight:500;margin:0 0 14px;
   }
-  .section-heading {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--muted);
-    margin: 22px 0 10px;
-    padding-bottom: 5px;
-    border-bottom: 1px solid var(--rule);
-    font-weight: 600;
-  }
-  .section-heading:first-child { margin-top: 6px; }
+  .reverse .count{color:var(--ink);margin-bottom:4px;font-size:13.5px}
+  .reverse .count a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
+  .reverse .empty-rev{color:var(--muted);font-size:12.5px;font-style:italic}
 
-  .stmt {
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: 14px;
-    padding: 9px 0;
-    border-bottom: 1px dotted #eee;
+  /* ── footer meta ── */
+  .footer-meta{
+    margin-top:24px;padding-top:16px;border-top:1px dotted var(--rule);
+    font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.04em;
   }
-  .stmt:last-child { border-bottom: none; }
-  .prop {
-    color: var(--muted);
-    font-size: 13px;
-    font-weight: 500;
-  }
-  .val {
-    font-size: 13.5px;
-    word-break: break-word;
-  }
-  .val .qlink {
-    color: var(--link);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--link);
-  }
-  .val .qlink:hover { color: var(--accent); border-bottom-color: var(--accent); }
-  .val .stringval {
-    font-family: "SF Mono", "Menlo", monospace;
-    font-size: 12.5px;
-    color: var(--ink);
-  }
-  .val .multival {
-    display: block;
-    padding: 2px 0;
-  }
-  .val .external {
-    color: var(--accent);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--accent);
-  }
-  .qual {
-    display: block;
-    margin-top: 4px;
-    margin-left: 14px;
-    font-size: 12.5px;
-    color: #555;
-  }
-  .qual::before { content: "↳ "; color: #aaa; }
-  .qual b { font-weight: 500; color: var(--muted); }
+  .footer-meta a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
 
-  .ref {
-    display: block;
-    margin-top: 3px;
-    margin-left: 14px;
-    font-size: 11.5px;
-    color: var(--note);
-    font-style: italic;
-  }
-  .ref::before { content: "📖 "; font-style: normal; }
-
-  .reverse {
-    background: #fbf9f4;
-    padding: 16px 24px 20px;
-    border-top: 1px solid var(--rule);
-    font-size: 13px;
-  }
-  .reverse h3 {
-    margin: 0 0 10px;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--muted);
-    font-weight: 600;
-  }
-  .reverse .count {
-    color: var(--ink);
-    font-weight: 500;
-    margin-bottom: 4px;
-  }
-  .reverse .count a {
-    color: var(--link);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--link);
-  }
-  .reverse .empty-rev {
-    color: var(--muted);
-    font-size: 12.5px;
-    font-style: italic;
-  }
-
-  .status {
-    background: var(--soft);
-    border: 1px solid var(--rule);
-    padding: 14px 18px;
-    margin-bottom: 28px;
-    font-size: 13px;
-    color: var(--muted);
-    font-family: "SF Mono", "Menlo", monospace;
-  }
-  .status.error { background: #f5e0d0; color: #8b3a2a; border-color: #e0b8a0; }
-
-  .footer-meta {
-    margin-top: 28px;
-    padding-top: 18px;
-    border-top: 1px solid var(--rule);
-    font-family: "SF Mono", "Menlo", monospace;
-    font-size: 11.5px;
-    color: var(--muted);
-  }
-  .footer-meta a {
-    color: var(--link);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--link);
-  }
-
-  @media (max-width: 640px) {
-    .frame { padding: 18px 16px 60px; }
-    .item-header .label { font-size: 22px; }
-    .stmt { grid-template-columns: 1fr; gap: 4px; }
-    .prop { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; }
+  @media(max-width:640px){
+    .stmt{grid-template-columns:1fr;gap:4px}
+    .prop{font-size:10.5px;text-transform:uppercase;letter-spacing:0.08em}
+    .item-header .label{font-size:24px}
   }
 </style>
 </head>
 <body>
 
-<header class="site-header">
-  <div class="site-frame">
-    <div class="site-brand"><a href="index.html">Hunter House <span class="sub">Foundation</span></a></div>
-    <nav class="site-nav">
-      <a href="the-house.html">The House</a>
-      <a href="archive.html">Archive</a>
-      <a href="browse.html">Browse</a>
-      <a href="richard-hunter.html">Richard Hunter</a>
-      <a href="about.html">About</a>
-    </nav>
+<header class="site-top">
+  <div class="markid">
+    <span class="h">HH</span>
+    <span class="name">Hunter House <span class="dim">· Foundation</span></span>
   </div>
+  <nav class="site-nav">
+    <a href="the-house.html">House</a>
+    <a href="archive.html">Archive</a>
+    <a href="browse.html" class="on">Browse</a>
+    <a href="richard-hunter.html">Hunter</a>
+    <a href="about.html">About</a>
+  </nav>
+  <div class="site-topright">v0.4</div>
 </header>
 
-<div class="frame">
-
-  <div class="crumb">
-    <a href="browse.html">← Browse the collection</a>
+<div class="crumbs">
+  <div class="path">
+    <a href="browse.html">← Browse</a>
+    <span class="sep">/</span>
+    <span id="crumb-label">Item</span>
   </div>
+  <div class="right" id="crumb-right"></div>
+</div>
+
+<div class="frame">
 
   <div id="status" class="status">Loading item…</div>
 
@@ -295,6 +125,12 @@
   </article>
 
   <div class="footer-meta" id="footer-meta" style="display:none;"></div>
+
+  <footer class="colophon" style="margin-top:48px">
+    <div class="l"><b>Hunter House Foundation</b> · Item record</div>
+    <div class="c"><a href="https://hunterhouse.wikibase.cloud" target="_blank" rel="noopener">hunterhouse.wikibase.cloud</a></div>
+    <div class="r"><a href="browse.html">← Back to browse</a></div>
+  </footer>
 
 </div>
 
@@ -396,15 +232,15 @@
       const label = labels[id] || id;
       // Q-items link to item.html; P-properties don't link for now.
       if (id.startsWith("Q")) {
-        return `<a class="qlink" href="item.html?id=${encodeURIComponent(id)}">${escapeHTML(label)}</a> <span style="color:#aaa;font-family:monospace;font-size:11px;">(${escapeHTML(id)})</span>`;
+        return `<a class="qlink" href="item.html?id=${encodeURIComponent(id)}">${escapeHTML(label)}</a> <span style="color:var(--hint);font-family:var(--mono);font-size:11px;">(${escapeHTML(id)})</span>`;
       }
-      return escapeHTML(label) + ` <span style="color:#aaa;font-family:monospace;font-size:11px;">(${escapeHTML(id)})</span>`;
+      return escapeHTML(label) + ` <span style="color:var(--hint);font-family:var(--mono);font-size:11px;">(${escapeHTML(id)})</span>`;
     }
     if (t === "string") {
       return `<span class="stringval">${escapeHTML(v)}</span>`;
     }
     if (t === "monolingualtext") {
-      return escapeHTML(v.text) + ` <span style="color:#aaa;font-size:11px;">(${escapeHTML(v.language)})</span>`;
+      return escapeHTML(v.text) + ` <span style="color:var(--hint);font-size:11px;">(${escapeHTML(v.language)})</span>`;
     }
     if (t === "time") {
       // v.time looks like "+2026-04-15T00:00:00Z"; precision 9=year, 10=month, 11=day.
@@ -473,6 +309,10 @@
     document.getElementById("label").textContent = label;
     document.getElementById("desc").textContent = desc;
 
+    // Update crumb
+    const crumbLabel = document.getElementById("crumb-label");
+    if (crumbLabel) crumbLabel.textContent = label || qid;
+
     if (aliases.length > 0) {
       const al = document.getElementById("aliases");
       al.style.display = "";
@@ -538,7 +378,7 @@
         }).join("");
 
         stmt.innerHTML = `
-          <div class="prop">${escapeHTML(propLabel)} <span style="color:#bbb;font-family:monospace;font-size:11px;">(${escapeHTML(pid)})</span></div>
+          <div class="prop">${escapeHTML(propLabel)} <span style="color:var(--hint);font-size:10px;">(${escapeHTML(pid)})</span></div>
           <div class="val">${valuesHTML}</div>
         `;
         container.appendChild(stmt);
@@ -548,7 +388,7 @@
 
   function renderReverse(refs, qid) {
     const container = document.getElementById("reverse");
-    container.innerHTML = `<h3>What links here (reverse references)</h3>`;
+    container.innerHTML = `<h3>What links here</h3>`;
     if (refs.length === 0) {
       container.innerHTML += `<div class="empty-rev">Nothing in the Wikibase currently points at this item.</div>`;
       return;
@@ -558,14 +398,12 @@
     refs.forEach(r => {
       const div = document.createElement("div");
       div.className = "count";
-      div.innerHTML = `→ ${r.count} ${r.count === 1 ? "item" : "items"} <span style="color:#aaa">via</span> <span style="color:var(--ink);">${escapeHTML(r.propLabel)}</span>`;
+      div.innerHTML = `→ ${r.count} ${r.count === 1 ? "item" : "items"} <span style="color:var(--muted)">via</span> <span style="color:var(--ink);">${escapeHTML(r.propLabel)}</span>`;
       container.appendChild(div);
     });
     const note = document.createElement("div");
-    note.style.marginTop = "10px";
-    note.style.fontSize = "12px";
-    note.style.color = "var(--muted)";
-    note.innerHTML = `Listed by property. Run a <a href="${queryLink}" target="_blank" rel="noopener">SPARQL query</a> to see the linking items themselves.`;
+    note.style.cssText = "margin-top:10px;font-size:11px;color:var(--muted);font-family:var(--mono)";
+    note.innerHTML = `Run a <a href="${queryLink}" target="_blank" rel="noopener">SPARQL query</a> to see the linking items.`;
     container.appendChild(note);
   }
 
@@ -576,7 +414,6 @@
       ? ` · <a href="collection.html?id=${encodeURIComponent(qid)}">View as finding aid →</a>`
       : "";
     fm.innerHTML = `
-      View on Wikibase:
       <a href="${WIKIBASE_URL}/wiki/Item:${qid}" target="_blank" rel="noopener">${WIKIBASE_URL}/wiki/Item:${qid}</a>${findingAidLink}
     `;
   }

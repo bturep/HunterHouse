@@ -1,354 +1,175 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
 <title>Collection — Hunter House Archive</title>
+<meta name="viewport" content="width=1400">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/verso.css">
 <style>
-  :root {
-    --ink: #202020;
-    --muted: #6a6a6a;
-    --rule: #e2e2e2;
-    --soft: #f7f5f0;
-    --link: #2a4a8b;
-    --accent: #8b3a2a;
-    --note: #8a7a3a;
-    --paper: #f4f0e6;
-    --bg: #fafaf7;
+  /* ── status ── */
+  .status{
+    background:var(--paper);border:1px solid var(--rule);padding:12px 18px;margin-bottom:24px;
+    font-size:12px;color:var(--muted);font-family:var(--mono);letter-spacing:0.04em;
   }
-  * { box-sizing: border-box; }
-  body {
-    font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    color: var(--ink);
-    background: var(--bg);
-    margin: 0;
-    line-height: 1.5;
-    font-size: 14px;
-  }
-  .frame {
-    max-width: 1080px;
-    margin: 0 auto;
-    padding: 32px 32px 80px;
-  }
-  .crumb {
-    margin-bottom: 24px;
-    font-family: "SF Mono", "Menlo", monospace;
-    font-size: 12px;
-    color: var(--muted);
-  }
-  .crumb a {
-    color: var(--link);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--link);
-  }
-  .crumb a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  .status.error{background:var(--red-pale);color:var(--red-deep);border-color:var(--red-pale)}
+  .substatus{color:var(--muted);font-size:11px;font-style:italic;margin-top:6px}
 
-  /* Shared site header */
-  .site-header {
-    border-bottom: 1px solid var(--rule);
-    background: white;
-    padding: 18px 0 14px;
-  }
-  .site-frame {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 32px;
-    flex-wrap: wrap;
-  }
-  .site-brand {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 18px;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-  }
-  .site-brand a { color: var(--ink); text-decoration: none; }
-  .site-brand .sub { color: var(--muted); font-weight: 400; }
-  .site-nav { display: flex; gap: 22px; flex-wrap: wrap; }
-  .site-nav a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 13.5px;
-    letter-spacing: 0.02em;
-    padding-bottom: 4px;
-    border-bottom: 1px solid transparent;
-  }
-  .site-nav a:hover { color: var(--ink); }
-  .site-nav a.current { color: var(--ink); border-bottom-color: var(--accent); }
+  /* ── finding aid layout ── */
+  .fa-layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:64px;align-items:start}
 
-  .article {
-    background: white;
-    border: 1px solid var(--rule);
-    border-radius: 4px;
-    overflow: hidden;
+  .fa-toc{position:sticky;top:24px;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.06em}
+  .fa-toc .hd{
+    font-family:var(--mono);font-size:10px;color:var(--ink);letter-spacing:0.22em;text-transform:uppercase;
+    padding-bottom:8px;border-bottom:1px solid var(--ink);margin-bottom:14px;font-weight:500;
   }
-  .article-header {
-    padding: 22px 28px 18px;
-    border-bottom: 1px solid var(--rule);
-    background: var(--paper);
+  .fa-toc ol{list-style:none;margin:0;padding:0}
+  .fa-toc li{padding:7px 0;display:grid;grid-template-columns:24px 1fr;gap:10px;align-items:baseline}
+  .fa-toc li .n{color:var(--red);font-weight:500}
+  .fa-toc a{color:var(--muted);text-decoration:none}
+  .fa-toc a:hover{color:var(--ink)}
+
+  .fa-section{margin-bottom:48px}
+  .fa-section-head{
+    display:flex;justify-content:space-between;align-items:baseline;
+    padding-bottom:10px;border-bottom:1px solid var(--ink);margin-bottom:20px;
   }
-  .article-header .kicker {
-    color: var(--muted);
-    font-family: "SF Mono", "Menlo", monospace;
-    font-size: 11.5px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+  .fa-section-head .l{
+    font-family:var(--mono);font-size:11px;color:var(--ink);letter-spacing:0.22em;text-transform:uppercase;font-weight:500;
+    display:flex;align-items:baseline;gap:14px;
   }
-  .article-header .label {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 28px;
-    font-weight: 500;
-    margin: 6px 0 8px;
-    letter-spacing: -0.005em;
-    line-height: 1.2;
+  .fa-section-head .l .n{color:var(--red);font-weight:400}
+  .fa-section-head .r{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase}
+  .fa-section .area-empty{color:var(--muted);font-size:12.5px;font-style:italic;padding:8px 0}
+
+  /* ── finding aid KV rows ── */
+  .fa-kv{margin:0}
+  .fa-kv .row,.field{
+    display:grid;grid-template-columns:200px 1fr;gap:32px;align-items:baseline;
+    padding:12px 0;border-bottom:1px solid var(--rule-soft);
   }
-  .article-header .desc {
-    color: var(--ink);
-    font-size: 14.5px;
-    max-width: 780px;
+  .fa-kv .row:last-child,.field:last-child{border-bottom:0}
+  .fa-kv dt,.field .key{
+    font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap;
   }
-  .article-header .aliases {
-    margin-top: 10px;
-    color: var(--muted);
-    font-size: 12px;
-  }
-  .article-header .aliases span.alias {
-    background: #e8e0c8;
-    padding: 1px 7px;
-    border-radius: 2px;
-    margin-right: 4px;
-    font-style: normal;
-    display: inline-block;
+  .fa-kv dd,.field .val{font-size:14px;color:var(--ink);line-height:1.55;letter-spacing:-0.005em}
+  .fa-kv dd p,.field .val p{margin-bottom:8px}
+  .fa-kv dd p:last-child,.field .val p:last-child{margin-bottom:0}
+  .fa-kv dd a,.field .val a,.field .val .qlink{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
+  .field .val .stringval{font-family:var(--mono);font-size:12.5px}
+  .field .val .multival{display:block;padding:2px 0}
+  .field .val .external{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
+  .field .key small{
+    display:block;font-family:var(--mono);font-size:10px;font-weight:400;
+    color:var(--hint);margin-top:2px;
   }
 
-  .area {
-    padding: 22px 28px;
-    border-bottom: 1px solid var(--rule);
+  /* ── article header ── */
+  .article{background:var(--paper);border:1px solid var(--rule)}
+  .article-header{padding:20px 24px 16px;border-bottom:1px solid var(--ink);background:var(--bg)}
+  .article-header .kicker{
+    color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px;
   }
-  .area:last-child { border-bottom: none; }
-  .area-title {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    margin: 0 0 14px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--rule);
-  }
-  .area-empty {
-    color: var(--muted);
-    font-size: 12.5px;
-    font-style: italic;
+  .article-header .label{font-size:30px;font-weight:500;margin:0 0 8px;letter-spacing:-0.02em;line-height:1.1;color:var(--ink)}
+  .article-header .desc{color:var(--muted);font-size:14.5px;max-width:780px;line-height:1.55}
+  .article-header .aliases{margin-top:10px;color:var(--muted);font-size:12px}
+  .article-header .aliases span.alias{
+    background:var(--soft);padding:1px 7px;margin-right:4px;
+    display:inline-block;font-family:var(--mono);font-size:11px;
   }
 
-  .field {
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: 14px;
-    padding: 8px 0;
-    border-bottom: 1px dotted #eee;
+  .area{padding:22px 28px;border-bottom:1px solid var(--rule)}
+  .area:last-child{border-bottom:none}
+  .area-title{
+    font-family:var(--mono);font-size:10px;color:var(--ink);letter-spacing:0.22em;text-transform:uppercase;
+    font-weight:500;margin:0 0 16px;padding-bottom:8px;border-bottom:1px solid var(--rule);
+    display:flex;justify-content:space-between;align-items:baseline;
   }
-  .field:last-child { border-bottom: none; }
-  .field .key {
-    color: var(--muted);
-    font-size: 13px;
-    font-weight: 500;
-  }
-  .field .key small {
-    display: block;
-    font-family: "SF Mono", "Menlo", monospace;
-    font-size: 10.5px;
-    font-weight: 400;
-    color: #b8b8b8;
-    margin-top: 2px;
-  }
-  .field .val {
-    font-size: 13.5px;
-    color: var(--ink);
-    word-break: break-word;
-  }
-  .field .val .qlink {
-    color: var(--link);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--link);
-  }
-  .field .val .qlink:hover { color: var(--accent); border-bottom-color: var(--accent); }
-  .field .val .external {
-    color: var(--accent);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--accent);
-  }
-  .field .val .stringval {
-    font-family: "SF Mono", "Menlo", monospace;
-    font-size: 12.5px;
-  }
-  .field .val .multival {
-    display: block;
-    padding: 2px 0;
-  }
+  .area-title span{color:var(--muted);font-weight:400;font-size:10px;letter-spacing:0.08em}
 
-  /* Holdings summary */
-  .holdings-summary {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 14px;
-    margin-top: 6px;
-  }
-  .holding-card {
-    background: var(--soft);
-    border: 1px solid var(--rule);
-    padding: 12px 14px;
-    border-radius: 3px;
-  }
-  .holding-card .num {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 24px;
-    font-weight: 500;
-    color: var(--ink);
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-  .holding-card .kind {
-    font-size: 12px;
-    color: var(--muted);
-  }
-  .holdings-total {
-    margin-top: 10px;
-    font-size: 12.5px;
-    color: var(--muted);
-    font-style: italic;
-  }
+  /* ── holdings summary ── */
+  .holdings-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:6px}
+  .holding-card{background:var(--bg);border:1px solid var(--rule);padding:12px 14px}
+  .holding-card .num{font-size:28px;font-weight:500;color:var(--ink);line-height:1;margin-bottom:4px;letter-spacing:-0.02em}
+  .holding-card .kind{font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:0.04em}
+  .holdings-total{margin-top:10px;font-size:12px;color:var(--muted);font-style:italic}
 
-  /* Export */
-  .export-row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: center;
+  /* ── export ── */
+  .export-row{display:flex;gap:1px;background:var(--ink);width:fit-content;margin-top:8px}
+  .btn{
+    padding:0 16px;height:34px;background:var(--bg);color:var(--ink);
+    font-family:var(--mono);font-size:12px;border:0;cursor:pointer;letter-spacing:0.04em;
+    display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
   }
-  .btn {
-    padding: 7px 14px;
-    background: white;
-    border: 1px solid var(--ink);
-    color: var(--ink);
-    font-family: inherit;
-    font-size: 13px;
-    cursor: pointer;
-    border-radius: 2px;
-    text-decoration: none;
-    display: inline-block;
-  }
-  .btn:hover { background: var(--ink); color: white; }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn:disabled:hover { background: white; color: var(--ink); }
-  .export-note {
-    color: var(--muted);
-    font-size: 12px;
-    font-style: italic;
-  }
+  .btn:hover{background:var(--soft)}
+  .btn:first-child{background:var(--ink);color:var(--bg)}
+  .btn:first-child:hover{background:#000}
+  .btn:disabled{opacity:0.4;cursor:not-allowed}
+  .btn:disabled:hover{background:var(--bg);color:var(--ink)}
+  .export-note{color:var(--muted);font-size:11px;font-family:var(--mono);margin-top:10px;font-style:italic}
 
-  /* Holdings list */
-  .holdings-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 10px;
+  /* ── holdings list ── */
+  .holdings-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule)}
+  .h-item{
+    background:var(--bg);padding:12px 14px;
+    text-decoration:none;color:inherit;display:block;font-size:12.5px;
+    transition:background 0.1s;
   }
-  .h-item {
-    background: var(--soft);
-    border: 1px solid var(--rule);
-    padding: 10px 12px;
-    border-radius: 3px;
-    text-decoration: none;
-    color: var(--ink);
-    display: block;
-    font-size: 12.5px;
-  }
-  .h-item:hover { border-color: var(--link); }
-  .h-item .h-qid {
-    font-family: "SF Mono", "Menlo", monospace;
-    font-size: 10.5px;
-    color: var(--muted);
-    margin-bottom: 3px;
-  }
-  .h-item .h-label {
-    color: var(--ink);
-    font-weight: 500;
-    margin-bottom: 2px;
-  }
-  .h-item .h-type {
-    color: var(--muted);
-    font-size: 11px;
-    font-style: italic;
-  }
-  .holdings-overflow {
-    margin-top: 12px;
-    color: var(--muted);
-    font-size: 12px;
-    font-style: italic;
-  }
+  .h-item:hover{background:var(--paper)}
+  .h-item .h-qid{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:3px;letter-spacing:0.04em}
+  .h-item .h-label{color:var(--ink);font-weight:500;margin-bottom:2px;letter-spacing:-0.005em}
+  .h-item .h-type{color:var(--muted);font-size:11px;font-style:italic}
+  .holdings-overflow{margin-top:12px;color:var(--muted);font-size:11px;font-family:var(--mono)}
 
-  .status {
-    background: var(--soft);
-    border: 1px solid var(--rule);
-    padding: 14px 18px;
-    margin-bottom: 24px;
-    font-size: 13px;
-    color: var(--muted);
-    font-family: "SF Mono", "Menlo", monospace;
+  /* ── footer meta ── */
+  .footer-meta{
+    margin-top:24px;padding-top:16px;border-top:1px dotted var(--rule);
+    font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.04em;
   }
-  .status.error { background: #f5e0d0; color: #8b3a2a; border-color: #e0b8a0; }
-  .substatus {
-    color: var(--muted);
-    font-size: 12px;
-    font-style: italic;
-    margin-top: 6px;
-  }
+  .footer-meta a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
 
-  .footer-meta {
-    margin-top: 24px;
-    padding-top: 18px;
-    border-top: 1px solid var(--rule);
-    font-family: "SF Mono", "Menlo", monospace;
-    font-size: 11.5px;
-    color: var(--muted);
-  }
-  .footer-meta a {
-    color: var(--link);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--link);
-  }
+  .fa-toc a,.fa-section-head .l > *,.fa-section-head .r{white-space:nowrap}
 
-  @media (max-width: 720px) {
-    .frame { padding: 18px 16px 60px; }
-    .article-header .label { font-size: 22px; }
-    .field { grid-template-columns: 1fr; gap: 4px; }
-    .field .key { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; }
+  @media(max-width:720px){
+    .fa-layout{grid-template-columns:1fr}
+    .fa-toc{display:none}
+    .field{grid-template-columns:1fr;gap:4px}
+    .field .key{font-size:10px}
+    .article-header .label{font-size:22px}
   }
 </style>
 </head>
 <body>
 
-<header class="site-header">
-  <div class="site-frame">
-    <div class="site-brand"><a href="index.html">Hunter House <span class="sub">Foundation</span></a></div>
-    <nav class="site-nav">
-      <a href="the-house.html">The House</a>
-      <a href="archive.html">Archive</a>
-      <a href="browse.html">Browse</a>
-      <a href="richard-hunter.html">Richard Hunter</a>
-      <a href="about.html">About</a>
-    </nav>
+<header class="site-top">
+  <div class="markid">
+    <span class="h">HH</span>
+    <span class="name">Hunter House <span class="dim">· Foundation</span></span>
   </div>
+  <nav class="site-nav">
+    <a href="the-house.html">House</a>
+    <a href="archive.html">Archive</a>
+    <a href="browse.html" class="on">Browse</a>
+    <a href="richard-hunter.html">Hunter</a>
+    <a href="about.html">About</a>
+  </nav>
+  <div class="site-topright">v0.4</div>
 </header>
 
-<div class="frame">
+<div class="crumbs">
+  <div class="path">
+    <a href="index.html">Home</a>
+    <span class="sep">/</span>
+    <a href="archive.html">About the Archive</a>
+    <span class="sep">/</span>
+    <span id="crumb-label">Collection</span>
+  </div>
+  <div class="right">Finding Aid · ISAD(G)</div>
+</div>
 
-  <div class="crumb"><a href="browse.html">← Browse the collection</a></div>
+<div class="frame">
 
   <div id="status" class="status">Loading collection…</div>
 
@@ -360,56 +181,97 @@
       <div class="aliases" id="aliases" style="display:none;"></div>
     </div>
 
-    <section class="area" id="area-identity">
-      <h2 class="area-title">Identity area</h2>
-      <div id="identity-fields"></div>
-    </section>
+    <div class="fa-layout" style="padding:28px 0">
 
-    <section class="area" id="area-context">
-      <h2 class="area-title">Context area</h2>
-      <div id="context-fields"></div>
-    </section>
+      <aside class="fa-toc">
+        <div class="hd">ISAD(G) sections</div>
+        <ol>
+          <li><span class="n">01</span><a href="#area-identity">Identity statement</a></li>
+          <li><span class="n">02</span><a href="#area-context">Context</a></li>
+          <li><span class="n">03</span><a href="#area-content">Content &amp; structure</a></li>
+          <li><span class="n">04</span><a href="#area-conditions">Conditions of access</a></li>
+          <li><span class="n">05</span><a href="#area-holdings">Holdings summary</a></li>
+          <li><span class="n">06</span><a href="#area-list">Holdings list</a></li>
+        </ol>
+      </aside>
 
-    <section class="area" id="area-content">
-      <h2 class="area-title">Content and structure</h2>
-      <div id="content-fields"></div>
-    </section>
+      <div>
 
-    <section class="area" id="area-conditions">
-      <h2 class="area-title">Conditions of access and use</h2>
-      <div id="conditions-fields"></div>
-    </section>
+        <section class="fa-section" id="area-identity">
+          <div class="fa-section-head">
+            <div class="l"><span class="n">01</span> Identity statement</div>
+          </div>
+          <div id="identity-fields"></div>
+        </section>
 
-    <section class="area">
-      <h2 class="area-title">Holdings summary</h2>
-      <div id="holdings-summary-host">
-        <div class="area-empty">Counting items in this collection…</div>
+        <section class="fa-section" id="area-context">
+          <div class="fa-section-head">
+            <div class="l"><span class="n">02</span> Context</div>
+          </div>
+          <div id="context-fields"></div>
+        </section>
+
+        <section class="fa-section" id="area-content">
+          <div class="fa-section-head">
+            <div class="l"><span class="n">03</span> Content &amp; structure</div>
+          </div>
+          <div id="content-fields"></div>
+        </section>
+
+        <section class="fa-section" id="area-conditions">
+          <div class="fa-section-head">
+            <div class="l"><span class="n">04</span> Conditions of access &amp; use</div>
+          </div>
+          <div id="conditions-fields"></div>
+        </section>
+
+        <section class="fa-section" id="area-holdings">
+          <div class="fa-section-head">
+            <div class="l"><span class="n">05</span> Holdings summary</div>
+          </div>
+          <div id="holdings-summary-host">
+            <div class="area-empty">Counting items in this collection…</div>
+          </div>
+        </section>
+
+        <section class="fa-section">
+          <div class="fa-section-head">
+            <div class="l"><span class="n">—</span> Export</div>
+          </div>
+          <div class="export-row">
+            <button class="btn" id="btn-csv" disabled>↓ Export CSV</button>
+            <button class="btn" id="btn-json" disabled>Export JSON</button>
+          </div>
+          <div class="export-note" id="export-note">Waiting for holdings to load…</div>
+        </section>
+
+        <section class="fa-section" id="area-list">
+          <div class="fa-section-head">
+            <div class="l"><span class="n">06</span> Holdings <span id="holdings-count-inline" style="color:var(--muted);font-weight:400;font-size:10px;letter-spacing:0.06em"></span></div>
+          </div>
+          <div id="holdings-list-host">
+            <div class="area-empty">Loading items…</div>
+          </div>
+        </section>
+
+        <section class="fa-section" id="area-other" style="display:none;">
+          <div class="fa-section-head">
+            <div class="l"><span class="n">—</span> Other statements</div>
+          </div>
+          <div id="other-fields"></div>
+        </section>
+
       </div>
-    </section>
-
-    <section class="area">
-      <h2 class="area-title">Export</h2>
-      <div class="export-row">
-        <button class="btn" id="btn-csv" disabled>Download CSV</button>
-        <button class="btn" id="btn-json" disabled>Download JSON</button>
-        <span class="export-note" id="export-note">Waiting for holdings to load…</span>
-      </div>
-    </section>
-
-    <section class="area" id="area-holdings">
-      <h2 class="area-title">Holdings <span id="holdings-count-inline" style="font-family:'SF Mono',Menlo,monospace;font-size:11px;color:var(--muted);font-weight:normal;letter-spacing:0.04em;"></span></h2>
-      <div id="holdings-list-host">
-        <div class="area-empty">Loading items…</div>
-      </div>
-    </section>
-
-    <section class="area" id="area-other" style="display:none;">
-      <h2 class="area-title">Other statements</h2>
-      <div id="other-fields"></div>
-    </section>
+    </div>
   </article>
 
   <div class="footer-meta" id="footer-meta" style="display:none;"></div>
+
+  <footer class="colophon">
+    <div class="l"><b>Hunter House Foundation</b> · Finding Aid</div>
+    <div class="c"><a href="https://hunterhouse.wikibase.cloud" target="_blank" rel="noopener">hunterhouse.wikibase.cloud</a></div>
+    <div class="r"><a href="browse.html">← Browse all collections</a></div>
+  </footer>
 
 </div>
 
@@ -607,6 +469,11 @@
     document.getElementById("kicker").textContent = (isCollection ? "Source Collection" : "Institution") + " · " + qid;
     document.getElementById("label").textContent = label;
     document.getElementById("desc").textContent = desc;
+
+    // Update crumb
+    const crumbLabel = document.getElementById("crumb-label");
+    if (crumbLabel) crumbLabel.textContent = label || qid;
+
     if (aliases.length > 0) {
       const al = document.getElementById("aliases");
       al.style.display = "";
@@ -911,7 +778,7 @@
       // Footer
       const fm = document.getElementById("footer-meta");
       fm.style.display = "";
-      fm.innerHTML = `View on Wikibase: <a href="${WIKIBASE_URL}/wiki/Item:${qid}" target="_blank" rel="noopener">${WIKIBASE_URL}/wiki/Item:${qid}</a> · <a href="item.html?id=${encodeURIComponent(qid)}">View raw statements →</a>`;
+      fm.innerHTML = `<a href="${WIKIBASE_URL}/wiki/Item:${qid}" target="_blank" rel="noopener">${WIKIBASE_URL}/wiki/Item:${qid}</a> · <a href="item.html?id=${encodeURIComponent(qid)}">View raw statements →</a>`;
 
       // Reveal article, then load holdings asynchronously
       document.getElementById("status").style.display = "none";

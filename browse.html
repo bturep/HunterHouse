@@ -1,294 +1,117 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Browse — Hunter House Foundation</title>
+<meta charset="utf-8">
+<title>Browse — Hunter House Archive</title>
+<meta name="viewport" content="width=1400">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/verso.css">
 <style>
-  :root {
-    --ink: #202020;
-    --muted: #6a6a6a;
-    --rule: #e2e2e2;
-    --soft: #f7f5f0;
-    --link: #2a4a8b;
-    --accent: #8b3a2a;
-    --note: #8a7a3a;
-    --paper: #f4f0e6;
-    --bg: #fafaf7;
+  /* ── status bar ── */
+  .status{
+    background:var(--paper);border:1px solid var(--rule);padding:12px 18px;margin-bottom:24px;
+    font-size:12px;color:var(--muted);font-family:var(--mono);letter-spacing:0.04em;
   }
-  * { box-sizing: border-box; }
-  body {
-    font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    color: var(--ink);
-    background: var(--bg);
-    margin: 0;
-    line-height: 1.5;
-    font-size: 14px;
+  .status.error{background:var(--red-pale);color:var(--red-deep);border-color:var(--red-pale)}
+  .status.ok{color:var(--ink)}
+  .status .count{color:var(--ink);font-weight:500}
+
+  /* ── controls ── */
+  .controls{display:flex;gap:14px;align-items:center;margin-bottom:28px;flex-wrap:wrap}
+  .controls input[type="search"]{
+    flex:1;min-width:240px;padding:8px 12px;
+    border:1px solid var(--rule);background:var(--paper);
+    font-family:var(--mono);font-size:12px;color:var(--ink);letter-spacing:0.02em;
   }
-  .frame {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 36px 32px 80px;
+  .controls input[type="search"]:focus{outline:none;border-color:var(--ink)}
+  .controls .filter{display:flex;gap:4px;flex-wrap:wrap}
+  .controls .filter button{
+    padding:5px 12px;border:1px solid var(--rule);background:var(--paper);
+    font-family:var(--mono);font-size:11px;color:var(--muted);cursor:pointer;
+    letter-spacing:0.08em;text-transform:uppercase;
+  }
+  .controls .filter button:hover{color:var(--ink);border-color:var(--ink)}
+  .controls .filter button.active{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+  /* ── type sections ── */
+  .type-section{margin-bottom:48px}
+  .type-section h2{
+    font-family:var(--mono);font-size:11px;color:var(--ink);letter-spacing:0.22em;text-transform:uppercase;
+    padding-bottom:10px;border-bottom:1px solid var(--ink);margin-bottom:0;font-weight:500;
+    display:flex;justify-content:space-between;align-items:baseline;
+  }
+  .type-section .type-meta{
+    color:var(--muted);font-size:11px;margin-bottom:16px;margin-top:8px;
+    font-family:var(--mono);letter-spacing:0.04em;
   }
 
-  /* Shared site header */
-  .site-header {
-    border-bottom: 1px solid var(--rule);
-    background: white;
-    padding: 18px 0 14px;
+  /* ── card grid ── */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule)}
+  .card{
+    background:var(--bg);padding:16px 18px 18px;
+    text-decoration:none;color:inherit;display:block;
+    transition:background 0.1s;
   }
-  .site-frame {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 32px;
-    flex-wrap: wrap;
+  .card:hover{background:var(--paper)}
+  .card .qid{
+    font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em;margin-bottom:6px;
   }
-  .site-brand {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 18px;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-  }
-  .site-brand a { color: var(--ink); text-decoration: none; }
-  .site-brand .sub { color: var(--muted); font-weight: 400; }
-  .site-nav { display: flex; gap: 22px; flex-wrap: wrap; }
-  .site-nav a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 13.5px;
-    letter-spacing: 0.02em;
-    padding-bottom: 4px;
-    border-bottom: 1px solid transparent;
-  }
-  .site-nav a:hover { color: var(--ink); }
-  .site-nav a.current { color: var(--ink); border-bottom-color: var(--accent); }
+  .card .label{font-size:15px;font-weight:500;margin:0 0 5px;color:var(--ink);letter-spacing:-0.01em;line-height:1.25}
+  .card .desc{font-size:12.5px;color:var(--muted);line-height:1.5}
+  .card .nodesc{font-size:12.5px;color:var(--hint);font-style:italic}
 
-  .page-head {
-    margin-bottom: 28px;
+  /* ── empty state ── */
+  .empty{
+    padding:60px 24px;text-align:center;color:var(--muted);
+    background:var(--paper);border:1px solid var(--rule);
   }
-  .page-head h1 {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 28px;
-    font-weight: 500;
-    margin: 0 0 6px;
-    letter-spacing: -0.01em;
-  }
-  .page-head p {
-    margin: 4px 0 0;
-    color: var(--muted);
-    max-width: 720px;
-    font-size: 14.5px;
-  }
-  .page-head .meta {
-    margin-top: 14px;
-    font-family: "SF Mono", "Menlo", monospace;
-    font-size: 11.5px;
-    color: var(--muted);
-    letter-spacing: 0.02em;
-  }
-  .page-head .meta a {
-    color: var(--link);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--link);
-  }
-  .page-head .meta a:hover { color: var(--accent); border-bottom-color: var(--accent); }
-
-  .status {
-    background: var(--soft);
-    border: 1px solid var(--rule);
-    padding: 14px 18px;
-    margin-bottom: 28px;
-    font-size: 13px;
-    color: var(--muted);
-    font-family: "SF Mono", "Menlo", monospace;
-  }
-  .status.error { background: #f5e0d0; color: #8b3a2a; border-color: #e0b8a0; }
-  .status.ok { color: var(--ink); }
-  .status .count { color: var(--ink); font-weight: 600; }
-
-  .controls {
-    display: flex;
-    gap: 14px;
-    align-items: center;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-  }
-  .controls input[type="search"] {
-    flex: 1;
-    min-width: 240px;
-    padding: 8px 12px;
-    border: 1px solid var(--rule);
-    background: white;
-    font-family: inherit;
-    font-size: 13.5px;
-    color: var(--ink);
-    border-radius: 2px;
-  }
-  .controls input[type="search"]:focus {
-    outline: none;
-    border-color: var(--link);
-  }
-  .controls .filter {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-  .controls .filter button {
-    padding: 5px 10px;
-    border: 1px solid var(--rule);
-    background: white;
-    font-family: inherit;
-    font-size: 12px;
-    color: var(--muted);
-    cursor: pointer;
-    border-radius: 2px;
-    letter-spacing: 0.02em;
-  }
-  .controls .filter button:hover { color: var(--ink); }
-  .controls .filter button.active {
-    background: var(--ink);
-    color: white;
-    border-color: var(--ink);
-  }
-
-  .type-section {
-    margin-bottom: 36px;
-  }
-  .type-section h2 {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 20px;
-    font-weight: 500;
-    margin: 0 0 4px;
-    color: var(--ink);
-  }
-  .type-section .type-meta {
-    color: var(--muted);
-    font-size: 12px;
-    margin-bottom: 14px;
-    font-family: "SF Mono", "Menlo", monospace;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 14px;
-  }
-  .card {
-    background: white;
-    border: 1px solid var(--rule);
-    padding: 14px 16px 16px;
-    border-radius: 3px;
-    text-decoration: none;
-    color: var(--ink);
-    display: block;
-    transition: border-color 0.12s, box-shadow 0.12s;
-  }
-  .card:hover {
-    border-color: var(--link);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  }
-  .card .qid {
-    font-family: "SF Mono", "Menlo", monospace;
-    font-size: 10.5px;
-    color: var(--muted);
-    letter-spacing: 0.04em;
-    margin-bottom: 4px;
-  }
-  .card .label {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 16px;
-    font-weight: 500;
-    margin: 0 0 4px;
-    color: var(--ink);
-    letter-spacing: -0.005em;
-    line-height: 1.25;
-  }
-  .card .desc {
-    font-size: 12.5px;
-    color: var(--muted);
-    line-height: 1.45;
-    font-style: italic;
-  }
-  .card .nodesc {
-    font-size: 12.5px;
-    color: #b8b8b8;
-    font-style: italic;
-  }
-
-  .empty {
-    padding: 60px 24px;
-    text-align: center;
-    color: var(--muted);
-    background: var(--soft);
-    border: 1px dashed var(--rule);
-  }
-  .empty .big {
-    font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
-    font-size: 22px;
-    color: var(--ink);
-    margin-bottom: 10px;
-  }
-  .empty .small {
-    font-size: 13px;
-    max-width: 520px;
-    margin: 0 auto;
-  }
-
-  footer.colophon {
-    margin-top: 60px;
-    padding-top: 24px;
-    border-top: 1px solid var(--rule);
-    font-size: 12px;
-    color: var(--muted);
-    font-family: "SF Mono", "Menlo", monospace;
-    line-height: 1.7;
-  }
-  footer.colophon a {
-    color: var(--link);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--link);
-  }
-  footer.colophon a:hover { color: var(--accent); border-bottom-color: var(--accent); }
-
-  @media (max-width: 600px) {
-    .frame { padding: 24px 18px 60px; }
-    header.masthead h1 { font-size: 24px; }
-    .grid { grid-template-columns: 1fr; }
-  }
+  .empty .big{font-size:22px;font-weight:500;color:var(--ink);margin-bottom:10px;letter-spacing:-0.01em}
+  .empty .small{font-size:13px;max-width:520px;margin:0 auto;line-height:1.6}
 </style>
 </head>
 <body>
 
-<header class="site-header">
-  <div class="site-frame">
-    <div class="site-brand"><a href="index.html">Hunter House <span class="sub">Foundation</span></a></div>
-    <nav class="site-nav">
-      <a href="the-house.html">The House</a>
-      <a href="archive.html">Archive</a>
-      <a href="browse.html" class="current">Browse</a>
-      <a href="richard-hunter.html">Richard Hunter</a>
-      <a href="about.html">About</a>
-    </nav>
+<header class="site-top">
+  <div class="markid">
+    <span class="h">HH</span>
+    <span class="name">Hunter House <span class="dim">· Foundation</span></span>
   </div>
+  <nav class="site-nav">
+    <a href="the-house.html">House</a>
+    <a href="archive.html">Archive</a>
+    <a href="browse.html" class="on">Browse</a>
+    <a href="richard-hunter.html">Hunter</a>
+    <a href="about.html">About</a>
+  </nav>
+  <div class="site-topright">v0.4</div>
 </header>
 
-<div class="frame">
+<div class="crumbs">
+  <div class="path">
+    <a href="index.html">Home</a>
+    <span class="sep">/</span>
+    <span>Browse</span>
+  </div>
+  <div class="right">Catalogue index</div>
+</div>
 
-  <div class="page-head">
-    <h1>Browse the collection</h1>
-    <p>Every Item in the Wikibase, grouped by type. Filter by category or search by label and description.</p>
-    <div class="meta">
-      Data:
-      <a href="https://hunterhouse.wikibase.cloud" target="_blank" rel="noopener">hunterhouse.wikibase.cloud</a>
-      &nbsp;·&nbsp;
-      <a href="https://hunterhouse.wikibase.cloud/query/" target="_blank" rel="noopener">SPARQL endpoint</a>
-      &nbsp;·&nbsp;
-      <a href="https://github.com/bturep/HunterHouse" target="_blank" rel="noopener">source</a>
-    </div>
+<div class="frame wide">
+
+  <div class="page-stamp">
+    <span class="n">§ Index</span>
+    <span>All items · grouped by type</span>
+  </div>
+  <h1 class="page-title">Browse the catalogue.</h1>
+  <div class="page-sub">
+    <span>Every item in the Wikibase</span>
+    <span>·</span>
+    <span><a href="https://hunterhouse.wikibase.cloud" target="_blank" rel="noopener">hunterhouse.wikibase.cloud</a></span>
+    <span>·</span>
+    <span><a href="https://hunterhouse.wikibase.cloud/query/" target="_blank" rel="noopener">SPARQL endpoint</a></span>
+    <span>·</span>
+    <span><a href="https://github.com/bturep/HunterHouse" target="_blank" rel="noopener">source</a></span>
   </div>
 
   <div id="status" class="status">Loading items from Wikibase…</div>
@@ -301,8 +124,9 @@
   <div id="results"></div>
 
   <footer class="colophon">
-    Hunter House Foundation · Brandon Poole, project lead<br>
-    This page queries the live Wikibase at every load. Edits in Wikibase appear here on refresh.
+    <div class="l"><b>Hunter House Foundation</b> · Browse</div>
+    <div class="c">Queries the live Wikibase on every load</div>
+    <div class="r"><a href="https://hunterhouse.wikibase.cloud" target="_blank" rel="noopener">hunterhouse.wikibase.cloud →</a></div>
   </footer>
 
 </div>
@@ -451,7 +275,7 @@
         const isCollection = COLLECTION_TYPES.has(typeKey.toLowerCase());
         const href = (isCollection ? COLLECTION_PAGE : ITEM_PAGE) + "?id=" + encodeURIComponent(it.qid);
         const badge = isCollection
-          ? `<span style="float:right;font-family:'SF Mono',Menlo,monospace;font-size:10px;color:var(--accent);letter-spacing:0.04em;">FINDING AID →</span>`
+          ? `<span style="float:right;font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:0.04em;">FINDING AID →</span>`
           : "";
         return `
         <a class="card" href="${href}">
@@ -465,7 +289,7 @@
       }).join("");
 
       section.innerHTML = `
-        <h2>${escapeHTML(typeKey)}</h2>
+        <h2><span>${escapeHTML(typeKey)}</span><span style="color:var(--muted);font-weight:400;font-size:10px;letter-spacing:0.06em">${items.length} ${items.length === 1 ? "item" : "items"}</span></h2>
         <div class="type-meta">${items.length} ${items.length === 1 ? "item" : "items"}</div>
         <div class="grid">${cards}</div>
       `;
