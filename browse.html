@@ -60,8 +60,8 @@
 
   /* ── list pane ── */
   .list-head{
-    display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
-    padding:12px 20px;
+    display:grid;grid-template-columns:104px 1fr 50px;gap:12px;align-items:center;
+    height:41px;box-sizing:border-box;padding:0 20px;
     font-family:var(--mono);font-size:9.5px;color:var(--muted);
     letter-spacing:0.18em;text-transform:uppercase;
     border-bottom:1px solid var(--ink);flex-shrink:0;
@@ -117,8 +117,9 @@
 
   /* ── image pane ── */
   .image-head{
-    display:flex;justify-content:space-between;align-items:baseline;
-    padding:12px 24px;border-bottom:1px solid var(--ink);background:var(--bg);flex-shrink:0;
+    display:flex;justify-content:space-between;align-items:center;
+    height:41px;box-sizing:border-box;padding:0 24px;
+    border-bottom:1px solid var(--ink);background:var(--bg);flex-shrink:0;
   }
   .image-head .l{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;letter-spacing:0.02em;white-space:nowrap}
   .image-head .l .pos{color:var(--muted);font-weight:400;margin-left:12px}
@@ -178,8 +179,9 @@
 
   /* ── meta pane ── */
   .meta-head{
-    padding:12px 22px;border-bottom:1px solid var(--ink);background:var(--bg);
-    display:flex;justify-content:space-between;align-items:baseline;flex-shrink:0;
+    height:41px;box-sizing:border-box;padding:0 22px;
+    border-bottom:1px solid var(--ink);background:var(--bg);
+    display:flex;justify-content:space-between;align-items:center;flex-shrink:0;
   }
   .meta-head .l{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
   .meta-head .l .n{color:var(--red);margin-right:10px;font-weight:400}
