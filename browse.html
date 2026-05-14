@@ -78,7 +78,7 @@
   }
 
   /* ── list fleuron ── */
-  .list-fleuron{display:flex;justify-content:center;padding:40px 0 25vh}
+  .list-fleuron{display:flex;justify-content:center;align-items:center;height:25vh;margin-top:40px}
   .list-fleuron img{width:120px;height:120px;object-fit:contain;image-rendering:crisp-edges}
   .pane-list{border-right:1px solid var(--ink);display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
   .pane-image{background:var(--paper);display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative}
@@ -95,6 +95,19 @@
   .list-head .id-col{display:flex;align-items:center;gap:5px;position:relative}
   .list-head .r{text-align:right}
   .rows{flex:1;overflow-y:auto}
+
+  /* ── sort header buttons ── */
+  .sort-hd{
+    background:none;border:none;padding:0;margin:0;
+    font:inherit;color:inherit;letter-spacing:inherit;text-transform:inherit;
+    cursor:pointer;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;
+  }
+  .list-head > .sort-hd{width:100%}
+  .list-head > .sort-hd.r{justify-content:flex-end}
+  .sort-hd:hover{color:var(--ink)}
+  .sort-hd.active{color:var(--ink)}
+  .sort-arrow{font-size:7px;line-height:1;font-family:var(--sans);letter-spacing:0}
+  .sort-hd:not(.active):hover .sort-arrow::after{content:"↕";color:var(--rule)}
 
   /* ── legend button + popover ── */
   .legend-btn{
@@ -351,11 +364,6 @@
     <input id="search-input" placeholder="Search by title, ID, type, or phase…" autocomplete="off">
     <kbd>/</kbd>
   </div>
-  <div class="fbtn" id="fbtn-sort">
-    <span class="lbl">Sort</span>
-    <span class="val" id="fbtn-sort-val">Chronological <span class="car">▾</span></span>
-    <ul class="fdrop" id="fdrop-sort"></ul>
-  </div>
   <div class="fbtn" id="fbtn-collection">
     <span class="lbl">Source</span>
     <span class="val" id="fbtn-collection-val">All <span class="car">▾</span></span>
@@ -370,9 +378,11 @@
 
   <section class="pane-list">
     <div class="list-head">
-      <span class="id-col">ID</span>
-      <span>Title · Phase</span>
-      <span class="r">Year</span>
+      <span class="id-col">
+        <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>
+      </span>
+      <button class="sort-hd" data-sort-col="phase">Title · Phase<span class="sort-arrow" id="sa-phase"></span></button>
+      <button class="sort-hd r" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>
     </div>
     <div class="rows" id="rows">
       <div class="load-msg">Loading catalogue from Wikibase…</div>
@@ -428,16 +438,11 @@
     items: [],
     filtered: [],
     selectedId: null,
-    sort: "date-asc",
+    sortCol: "year",
+    sortDir: "asc",
     search: "",
     filterCollection: "",
   };
-
-  const SORTS = [
-    { k:"date-asc",  label:"Chronological" },
-    { k:"date-desc", label:"Reverse chronological" },
-    { k:"phase",     label:"By phase" },
-  ];
 
   const BADGE_LEGEND = [
     ["D",  "Drawing"],
@@ -609,12 +614,25 @@
       }
       return true;
     });
-    const sorters = {
-      "date-asc":  (a,b) => (a.date||"").localeCompare(b.date||"") || idNum(a) - idNum(b),
-      "date-desc": (a,b) => (b.date||"").localeCompare(a.date||"") || idNum(a) - idNum(b),
-      "phase":     (a,b) => (a.phase||"").localeCompare(b.phase||"") || idNum(a) - idNum(b),
+    const dir = state.sortDir === "asc" ? 1 : -1;
+    const comparators = {
+      "id":    (a, b) => dir * (idNum(a) - idNum(b)),
+      "phase": (a, b) => dir * (a.phase||"").localeCompare(b.phase||"") || idNum(a) - idNum(b),
+      "year":  (a, b) => dir * (a.date||"").localeCompare(b.date||"") || idNum(a) - idNum(b),
     };
-    state.filtered.sort(sorters[state.sort] || sorters["date-asc"]);
+    state.filtered.sort(comparators[state.sortCol] || comparators["year"]);
+  }
+
+  // ── Sort header UI ────────────────────────────────────────────────────────
+  function renderListHead() {
+    ["id", "phase", "year"].forEach(col => {
+      const btn   = document.querySelector(`.sort-hd[data-sort-col="${col}"]`);
+      const arrow = document.getElementById(`sa-${col}`);
+      if (!btn || !arrow) return;
+      const active = state.sortCol === col;
+      btn.classList.toggle("active", active);
+      arrow.textContent = active ? (state.sortDir === "asc" ? "↑" : "↓") : "";
+    });
   }
 
   // ── Render list ───────────────────────────────────────────────────────────
@@ -1058,17 +1076,25 @@
 
     document.addEventListener("click", closeAllDropdowns);
 
-    // Sort dropdown (no "All" — always has one active value)
-    wireDropdown("#fbtn-sort", "#fdrop-sort", "#fbtn-sort-val",
-      () => SORTS.map(s => ({ value: s.k, label: s.label })),
-      () => state.sort,
-      val => {
-        state.sort = val || "date-asc";
-        const s = SORTS.find(x => x.k === state.sort);
-        $("#fbtn-sort-val").innerHTML = `${escapeHTML(s?.label || "Chronological")} <span class="car">▾</span>`;
-        applyFilters(); renderList();
-      }
-    );
+    // Column-header sort
+    document.querySelectorAll(".sort-hd[data-sort-col]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const col = btn.dataset.sortCol;
+        if (state.sortCol === col) {
+          state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
+        } else {
+          state.sortCol = col;
+          state.sortDir = "asc";
+        }
+        renderListHead();
+        applyFilters();
+        renderList();
+        const url = new URL(location.href);
+        url.searchParams.set("sort", state.sortCol);
+        url.searchParams.set("dir",  state.sortDir);
+        history.replaceState({}, "", url);
+      });
+    });
 
     // Source collection dropdown
     wireDropdown("#fbtn-collection", "#fdrop-collection", "#fbtn-collection-val",
@@ -1128,9 +1154,14 @@
 
       state.items = items;
 
-      const params    = new URLSearchParams(location.search);
-      const urlColl   = params.get("collection");
-      const urlId     = params.get("id");
+      const params  = new URLSearchParams(location.search);
+      const urlSort = params.get("sort");
+      const urlDir  = params.get("dir");
+      const urlColl = params.get("collection");
+      const urlId   = params.get("id");
+
+      if (urlSort && ["id","phase","year"].includes(urlSort)) state.sortCol = urlSort;
+      if (urlDir  && ["asc","desc"].includes(urlDir))         state.sortDir = urlDir;
 
       if (urlColl) {
         state.filterCollection = urlColl;
@@ -1142,6 +1173,7 @@
       applyFilters();
       renderList();
       wireControls();
+      renderListHead();
       initPanZoom();
 
       addLegendButton($(".list-head .id-col"), BADGE_LEGEND);
