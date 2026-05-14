@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Browse the catalogue — Hunter House Foundation</title>
-<meta name="viewport" content="width=1400">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -351,6 +351,53 @@
   .empty{display:flex;align-items:center;justify-content:center;height:100%;font-family:var(--mono);font-size:11px;color:var(--hint);letter-spacing:0.1em;text-transform:uppercase;text-align:center;padding:24px}
   .load-msg{padding:24px;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.06em}
   .error-msg{padding:24px;font-family:var(--mono);font-size:11px;color:var(--red);letter-spacing:0.04em}
+
+  /* ── mobile tabs (hidden on desktop) ── */
+  .mobile-tabs{display:none}
+
+  @media (max-width:767px){
+    /* controls */
+    .controls{padding:0 12px;flex-wrap:wrap}
+    .search{
+      width:100%;flex:none;border-right:0;
+      border-bottom:1px solid var(--rule);
+      padding:8px 0;margin-right:0;
+    }
+    .search kbd{display:none}
+    .fbtn{padding:0 14px}
+
+    /* shell: vertical flex */
+    .shell{display:flex;flex-direction:column}
+
+    /* mobile tabs */
+    .mobile-tabs{
+      display:flex;flex-shrink:0;
+      border-bottom:1px solid var(--ink);background:var(--bg);
+    }
+    .mtab{
+      flex:1;padding:10px 0;
+      font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;
+      color:var(--muted);background:none;border:0;
+      border-right:1px solid var(--rule);cursor:pointer;
+    }
+    .mtab:last-child{border-right:0}
+    .mtab.active{color:var(--ink);background:var(--soft)}
+
+    /* panes: hide all, show active */
+    .pane-list,.pane-image,.pane-meta{
+      display:none;flex-direction:column;border:0;
+    }
+    .pane-list.mobile-active,.pane-image.mobile-active,.pane-meta.mobile-active{
+      display:flex;flex:1;min-height:0;
+    }
+
+    /* image pane: hide zoom controls (touch-scroll handles pan) */
+    .zoom-ctl{display:none}
+    .image-foot{flex-direction:column;gap:6px;align-items:flex-start}
+
+    /* meta pane: graph-actions single column */
+    .graph-actions{grid-template-columns:1fr}
+  }
 </style>
 </head>
 <body>
@@ -385,7 +432,13 @@
 
 <div class="shell">
 
-  <section class="pane-list">
+  <div class="mobile-tabs">
+    <button class="mtab active" data-pane="list">List</button>
+    <button class="mtab" data-pane="image">Item</button>
+    <button class="mtab" data-pane="meta">Record</button>
+  </div>
+
+  <section class="pane-list mobile-active">
     <div class="list-head">
       <span class="id-col">
         <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>
@@ -474,6 +527,16 @@
     const out = [];
     for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n));
     return out;
+  }
+
+  // ── Mobile tab switching ──────────────────────────────────────────────────
+  function switchMobileTab(pane) {
+    document.querySelectorAll(".mtab").forEach(t =>
+      t.classList.toggle("active", t.dataset.pane === pane));
+    ["list","image","meta"].forEach(p => {
+      const el = document.querySelector(`.pane-${p}`);
+      if (el) el.classList.toggle("mobile-active", p === pane);
+    });
   }
 
   // ── Wikibase fetch layer ──────────────────────────────────────────────────
@@ -981,6 +1044,7 @@
   // ── Selection ─────────────────────────────────────────────────────────────
   function selectItem(id, opts = {}) {
     if (!id) return;
+    if (window.matchMedia("(max-width:767px)").matches) switchMobileTab("image");
     state.selectedId = id;
     const item = state.items.find(i => i.id === id);
     if (!item) return;
@@ -1098,6 +1162,11 @@
         url.searchParams.set("dir",  state.sortDir);
         history.replaceState({}, "", url);
       });
+    });
+
+    // Mobile tabs
+    document.querySelectorAll(".mtab").forEach(tab => {
+      tab.addEventListener("click", () => switchMobileTab(tab.dataset.pane));
     });
 
     // Source collection dropdown

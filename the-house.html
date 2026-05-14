@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>The House — Hunter House Foundation</title>
-<meta name="viewport" content="width=1400">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -41,6 +41,12 @@
   .entry-list .row .status.pending{color:var(--muted);background:var(--soft)}
 
   .arc .span > *{white-space:nowrap}
+
+  @media (max-width:767px){
+    .arcs{grid-template-columns:1fr}
+    .entry-list .row{grid-template-columns:24px 1fr;gap:12px}
+    .entry-list .row .status{grid-column:2}
+  }
 </style>
 </head>
 <body>

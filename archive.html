@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>The Archive — Hunter House Foundation</title>
-<meta name="viewport" content="width=1400">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -44,6 +44,12 @@
   .vocab-tags span.green{background:var(--copper-pale);border-color:var(--copper-pale);color:var(--copper-deep)}
 
   .coll .id-c,.coll .ct,.vocab-tags span{white-space:nowrap}
+
+  @media (max-width:767px){
+    .collections{grid-template-columns:1fr}
+    .id-table{font-size:12px}
+    .id-table th,.id-table td{padding:8px 10px}
+  }
 </style>
 </head>
 <body>
