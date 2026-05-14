@@ -365,7 +365,7 @@
     <a href="archive.html" target="_blank">Archive</a>
     <a href="about.html" target="_blank">About</a>
   </nav>
-  <div class="site-topright" id="topright">— items · v0.5</div>
+  <div class="site-topright" id="topright">v0.5</div>
 </header>
 
 <div class="controls">
@@ -418,7 +418,6 @@
       </div>
     </div>
     <div class="image-foot">
-      <span class="l" id="if-id">—</span>
       <span class="m" id="if-date">—</span>
       <span class="r"><a href="#" id="if-full" target="_blank" rel="noopener">⤓ Download full size</a></span>
     </div>
@@ -602,7 +601,7 @@
         rights:           firstStr(claims, "P93"),
         image,
         master:           master || null,
-        notes:            meta[qid]?.description || null,
+        notes:            firstStr(claims, "P100") || null,
       });
     }
 
@@ -711,7 +710,7 @@
     if (!el) return;
     el.textContent = String(showing).padStart(2, "0");
     lb.textContent = showing === total ? "items" : `of ${total}`;
-    if (total > 0) $("#topright").textContent = `${total} items · v0.5`;
+    if (total > 0) $("#topright").textContent = `v0.5`;
   }
 
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
@@ -725,7 +724,6 @@
 
     $("#ih-id").textContent = item.id;
     $("#ih-pos").textContent = pos;
-    $("#if-id").textContent  = item.id;
     $("#if-date").textContent = item.date || "—";
 
     $("#nav-prev").classList.toggle("disabled", idx <= 0);
@@ -957,14 +955,7 @@
 
     body.innerHTML = `
       <h1 class="meta-title">${escapeHTML(item.title)}</h1>
-      ${item.originalTitle
-        ? `<div class="meta-orig"><span class="lb">Title block</span><span class="vl">${escapeHTML(item.originalTitle)}</span></div>`
-        : `<div style="height:14px"></div>`}
       ${item.notes ? `<p class="meta-lede">${escapeHTML(item.notes)}</p>` : ""}
-
-      <div class="meta-actions">
-        <button class="btn ghost" type="button" id="copy-link">Copy link</button>
-      </div>
 
       <section class="meta-section">
         <h3><span><span class="n">01</span>Description</span><span class="ct">${descRows.length} fields</span></h3>
@@ -981,14 +972,6 @@
         ${graphActionsHTML}
       </section>
     `;
-
-    $("#copy-link")?.addEventListener("click", e => {
-      const url = new URL(location.href);
-      url.searchParams.set("id", item.id);
-      navigator.clipboard?.writeText(url.toString());
-      e.currentTarget.textContent = "Copied ✓";
-      setTimeout(() => e.currentTarget.textContent = "Copy link", 1400);
-    });
 
     body.querySelectorAll(".sib[data-sib-id]").forEach(el => {
       el.addEventListener("click", e => { e.preventDefault(); selectItem(el.dataset.sibId); });
