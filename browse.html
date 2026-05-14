@@ -356,11 +356,6 @@
     <span class="val" id="fbtn-collection-val">All <span class="car">▾</span></span>
     <ul class="fdrop" id="fdrop-collection"></ul>
   </div>
-  <div class="fbtn" id="fbtn-type">
-    <span class="lbl">Item Type</span>
-    <span class="val" id="fbtn-type-val">All <span class="car">▾</span></span>
-    <ul class="fdrop" id="fdrop-type"></ul>
-  </div>
   <div class="ctrl-count">
     <b id="count-display">—</b> <span id="count-label">items</span>
   </div>
@@ -431,14 +426,12 @@
     sort: "date-asc",
     search: "",
     filterCollection: "",
-    filterItemType: "",
   };
 
   const SORTS = [
     { k:"date-asc",  label:"Chronological" },
     { k:"date-desc", label:"Reverse chronological" },
-    { k:"id",        label:"By archive ID" },
-    { k:"type",      label:"By drawing type" },
+    { k:"phase",     label:"By phase" },
   ];
 
   const BADGE_LEGEND = [
@@ -593,16 +586,17 @@
       });
     }
 
-    items.sort((a, b) => (a.id || "").localeCompare(b.id || ""));
+    items.sort((a, b) => idNum(a) - idNum(b));
     return items;
   }
 
   // ── Filter + sort ─────────────────────────────────────────────────────────
+  const idNum = it => parseInt((it.id || "").replace(/[^0-9]+/g, ""), 10) || 0;
+
   function applyFilters() {
     const q = state.search.trim().toLowerCase();
     state.filtered = state.items.filter(it => {
       if (state.filterCollection && it.sourceCollection !== state.filterCollection) return false;
-      if (state.filterItemType  && it.itemType !== state.filterItemType) return false;
       if (q) {
         const hay = [it.id, it.title, it.phase, it.type, it.use, (it.areas||[]).join(" "), it.creator, it.notes||""].join(" ").toLowerCase();
         if (!hay.includes(q)) return false;
@@ -610,10 +604,9 @@
       return true;
     });
     const sorters = {
-      "date-asc":  (a,b) => (a.date||"").localeCompare(b.date||""),
-      "date-desc": (a,b) => (b.date||"").localeCompare(a.date||""),
-      "type":      (a,b) => (a.type||"").localeCompare(b.type||"")   || (a.date||"").localeCompare(b.date||""),
-      "id":        (a,b) => (a.id||"").localeCompare(b.id||""),
+      "date-asc":  (a,b) => (a.date||"").localeCompare(b.date||"") || idNum(a) - idNum(b),
+      "date-desc": (a,b) => (b.date||"").localeCompare(a.date||"") || idNum(a) - idNum(b),
+      "phase":     (a,b) => (a.phase||"").localeCompare(b.phase||"") || idNum(a) - idNum(b),
     };
     state.filtered.sort(sorters[state.sort] || sorters["date-asc"]);
   }
@@ -1090,31 +1083,6 @@
       }
     );
 
-    // Item type dropdown
-    wireDropdown("#fbtn-type", "#fdrop-type", "#fbtn-type-val",
-      () => [
-        { value: null, label: "All" },
-        ...uniqueSorted(state.items.map(i => i.itemType)).map(v => ({ value: v, label: v }))
-      ],
-      () => state.filterItemType || null,
-      val => {
-        state.filterItemType = val || "";
-        const btn = $("#fbtn-type");
-        if (val) {
-          btn.classList.add("active");
-          const t = val.length > 20 ? val.slice(0,18)+"…" : val;
-          $("#fbtn-type-val").innerHTML = `${escapeHTML(t)} <span class="car">▾</span>`;
-        } else {
-          btn.classList.remove("active");
-          $("#fbtn-type-val").innerHTML = `All <span class="car">▾</span>`;
-        }
-        applyFilters(); renderList();
-        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId)) {
-          selectItem(state.filtered[0].id, { scrollIntoView:false });
-        }
-      }
-    );
-
     $("#rows").addEventListener("click", e => {
       const row = e.target.closest(".row");
       if (row && row.dataset.id) selectItem(row.dataset.id);
@@ -1149,7 +1117,6 @@
       state.items = items;
 
       const params    = new URLSearchParams(location.search);
-      const urlType   = params.get("type");
       const urlColl   = params.get("collection");
       const urlId     = params.get("id");
 
@@ -1158,12 +1125,6 @@
         $("#fbtn-collection").classList.add("active");
         const t = urlColl.length > 20 ? urlColl.slice(0,18)+"…" : urlColl;
         $("#fbtn-collection-val").innerHTML = `${escapeHTML(t)} <span class="car">▾</span>`;
-      }
-      if (urlType) {
-        state.filterItemType = urlType;
-        $("#fbtn-type").classList.add("active");
-        const t = urlType.length > 20 ? urlType.slice(0,18)+"…" : urlType;
-        $("#fbtn-type-val").innerHTML = `${escapeHTML(t)} <span class="car">▾</span>`;
       }
 
       applyFilters();
