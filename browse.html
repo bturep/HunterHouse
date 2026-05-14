@@ -535,13 +535,19 @@
 
   // ── Wikibase fetch layer ──────────────────────────────────────────────────
   async function sparqlQuery(q) {
-    const url = SPARQL_URL + "?query=" + encodeURIComponent(q) + "&format=json";
-    const res = await fetch(url, { headers: { Accept: "application/sparql-results+json" } });
+    const res = await fetch(SPARQL_URL + "?format=json", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/sparql-query",
+        "Accept": "application/sparql-results+json"
+      },
+      body: q
+    });
     if (!res.ok) throw new Error("SPARQL " + res.status);
     return (await res.json()).results.bindings;
   }
 
-  const CACHE_KEY = "hhf_catalogue_v4";
+  const CACHE_KEY = "hhf_catalogue_v5";
   const CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours
 
   function clearCache() {
