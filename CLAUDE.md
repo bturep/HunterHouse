@@ -20,6 +20,7 @@ This file is the persistent memory for this project. Follow these rules every se
 
 A static GitHub Pages site for the Hunter House Foundation + a live Wikibase at **hunterhouse.wikibase.cloud** cataloguing the architectural archive of Richard Morrow Hunter (1970–2020, 203 Goward Road, Saanich BC).
 
+- **Local path:** `/Users/brandonpoole/Projects/HunterHouse`
 - **GitHub repo:** github.com/bturep/HunterHouse
 - **Live site:** https://bturep.github.io/HunterHouse/
 - **Wikibase:** https://hunterhouse.wikibase.cloud
@@ -287,3 +288,16 @@ Append an entry after every major task. Format: `### YYYY-MM-DD — brief title`
 
 **Files changed this session**
 `assets/verso.css`, `assets/inverse.css` (new), `index.html`, `richard-hunter.html`, `the-house.html`, `archive.html`, `about.html`, `browse.html`, `WIKIBASE.md` (new), `scripts/patch_dates.py` (new), `CLAUDE.md` (this file, new)
+
+---
+
+### 2026-05-14 — Project consolidation, launcher, persistent memory system
+
+- All projects moved to `~/Projects/` — single consolidated location.
+- Repo moved from `~/github/HunterHouse` to `~/Projects/HunterHouse`. Remote unchanged.
+- `CLAUDE.md` updated with new local path and memory protocol instructions.
+- `~/.zshrc` updated with `claude()` project picker function — 3 projects: Hunter House, HHRCS, Poole Portfolio.
+- `CLAUDE.md` created for HHRCS (`~/Projects/HHRCS`) and Brandon-Poole (`~/Projects/Brandon-Poole`).
+- Apposite Studio kept at `~/Projects/Apposite-Studio` as archived record — not in launcher.
+- Deleted: `~/hhrcs_esp32` (no remote), `~/Documents/GitHub/brandonpoole` (emenel's repo), `~/ext4fuse`.
+- Git push/add/commit confirmed already pre-authorised in Claude Code `settings.local.json`.
