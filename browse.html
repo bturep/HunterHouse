@@ -538,7 +538,8 @@
       return (claims?.[pid] || []).map(c => c.mainsnak?.datavalue?.value?.id).filter(Boolean);
     }
     function firstDate(claims) {
-      for (const pid in claims) {
+      // P82=date created, P64=start date, P118=point in time — explicit priority, never P83 (date digitized)
+      for (const pid of ["P82", "P64", "P118"]) {
         for (const c of (claims[pid] || [])) {
           const dv = c.mainsnak?.datavalue;
           if (dv?.type === "time") {
