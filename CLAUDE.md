@@ -162,6 +162,46 @@ Note: the QS redirect chain sometimes fails. If items don't update, use `patch_d
 
 ---
 
+## Image pipeline — Cloudflare R2
+
+Archive images are hosted on Cloudflare R2 at **https://archive.hunterhousefoundation.com**.
+
+### Access
+- `rclone` is installed and configured with the `hh-r2:` remote
+- Credentials in `~/Documents/hh-wikibase-migration/.env` (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_ACCOUNT_ID)
+- Bucket name: `hunter-house-archive`
+
+### Useful rclone commands
+```bash
+rclone ls hh-r2:hunter-house-archive          # list all files in bucket
+rclone ls hh-r2:hunter-house-archive | grep HH-A-0044   # find a specific item
+rclone copy /local/file.jpg hh-r2:hunter-house-archive  # upload a file
+```
+
+### Filename convention
+```
+HH-A-0044_Untitled_Cascade_Deck_1987-06-01_prev.jpg   ← preview (P96)
+HH-A-0044_Untitled_Cascade_Deck_1987-06-01.jpg        ← master (P95)
+```
+Zero-padded ID, sanitized label, ISO date, `_prev` suffix for preview.
+
+### Migration scripts (in `~/Documents/hh-wikibase-migration/scripts/`)
+| Script | Purpose |
+|---|---|
+| `13a_r2_discover.py` | Probes public domain to find which files exist; builds `r2_manifest.tsv` |
+| `13b_r2_write_claims.py` | Writes P96/P95 image URLs back to Wikibase items from the manifest |
+| `13c_r2_manifest_from_local.py` | Builds manifest from a local file list instead of probing |
+
+All scripts load credentials from `.env` automatically. Run from the `scripts/` directory.
+
+### Workflow for adding images to new items
+1. Upload files to R2 via `rclone copy`
+2. Run `13a_r2_discover.py` (or `13c` if working from a local list) to build/update the manifest
+3. Run `13b_r2_write_claims.py` to write P96/P95 URLs to Wikibase
+4. Verify in browse.html — items with P96 appear in the gallery
+
+---
+
 ## Scripts
 
 ### `scripts/patch_dates.py`
