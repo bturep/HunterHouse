@@ -341,3 +341,21 @@ Append an entry after every major task. Format: `### YYYY-MM-DD — brief title`
 - Apposite Studio kept at `~/Projects/Apposite-Studio` as archived record — not in launcher.
 - Deleted: `~/hhrcs_esp32` (no remote), `~/Documents/GitHub/brandonpoole` (emenel's repo), `~/ext4fuse`.
 - Git push/add/commit confirmed already pre-authorised in Claude Code `settings.local.json`.
+
+---
+
+### 2026-05-14 — Splash entry page (v0.5) and view-transition patch
+
+**Site work**
+- Replaced `index.html` wholesale with the cinematic splash from `/Users/brandonpoole/Downloads/design_handoff_splash/`. The new page is a full-bleed film entry (Vimeo background loop, `v0.5` imprint, 56px title plate, animated "Enter →" cue). Click anywhere triggers a JS exit animation (JS + CSS), then navigates to `archive.html` at t=870ms.
+- Patched `assets/inverse.css`: inserted the 7-line `@view-transition` block after `:root{}`. This opts the reading pages into cross-document View Transitions and assigns `view-transition-name:hh-mark` to `.markid` — enabling the browser-native morph of the title plate from splash centre to reading-page corner on Chrome/Edge 126+ and Safari TP.
+- The four reading pages, `browse.html`, and `assets/verso.css` are untouched.
+
+**Tech notes**
+- Splash uses React 18.3.1 + @babel/standalone 7.29.0 (UMD CDN, SRI-pinned) for the Vimeo Film component. Same CDN pattern as existing site pages.
+- Vimeo video ID: `1184581518`. Film fades in on `play`/`playing` postMessage from player, with a 2 s fallback.
+- Cross-doc View Transitions are progressive enhancement — JS-only exit animation is the fallback for Safari/Firefox.
+- To swap Vimeo for a self-hosted MP4: see README in the handoff bundle (`_reference_only/`) — replace `<Film>` component body with a `<video autoPlay loop muted playsInline>` element.
+
+**Files changed**
+`index.html` (replaced), `assets/inverse.css` (view-transition block added)
