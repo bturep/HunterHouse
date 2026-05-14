@@ -78,7 +78,7 @@
   }
 
   /* ── list fleuron ── */
-  .list-fleuron{display:flex;justify-content:center;align-items:center;height:25vh;margin-top:40px}
+  .list-fleuron{display:flex;justify-content:center;align-items:center;height:25vh;margin-top:40px;padding-bottom:32px}
   .list-fleuron img{width:120px;height:120px;object-fit:contain;image-rendering:crisp-edges}
   .pane-list{border-right:1px solid var(--ink);display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
   .pane-image{background:var(--paper);display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative}
@@ -95,6 +95,15 @@
   .list-head .id-col{display:flex;align-items:center;gap:5px;position:relative}
   .list-head .r{text-align:right}
   .rows{flex:1;overflow-y:auto}
+
+  /* ── phase dividers ── */
+  .phase-divider{
+    display:grid;grid-template-columns:1fr auto;gap:14px;
+    padding:16px 20px 6px;border-bottom:1px solid var(--ink);
+    font-family:var(--mono);font-size:10px;color:var(--copper-deep);
+    letter-spacing:0.18em;text-transform:uppercase;background:var(--bg);
+  }
+  .phase-divider .r{color:var(--muted);white-space:nowrap}
 
   /* ── sort header buttons ── */
   .sort-hd{
@@ -458,7 +467,7 @@
   // ── Utilities ─────────────────────────────────────────────────────────────
   const $ = sel => document.querySelector(sel);
   const escapeHTML = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  const yearOf = d => d ? d.slice(0, 4) : "";
+  const yearOf = d => d ? d.slice(0, 4) : "—";
   const imageUrl = it => it.image || null;
   const uniqueSorted = arr => Array.from(new Set(arr)).filter(Boolean).sort();
 
@@ -615,10 +624,11 @@
       return true;
     });
     const dir = state.sortDir === "asc" ? 1 : -1;
+    const dateKey = it => it.date || "9999-99-99";
     const comparators = {
       "id":    (a, b) => dir * (idNum(a) - idNum(b)),
       "phase": (a, b) => dir * (a.phase||"").localeCompare(b.phase||"") || idNum(a) - idNum(b),
-      "year":  (a, b) => dir * (a.date||"").localeCompare(b.date||"") || idNum(a) - idNum(b),
+      "year":  (a, b) => dir * dateKey(a).localeCompare(dateKey(b)) || idNum(a) - idNum(b),
     };
     state.filtered.sort(comparators[state.sortCol] || comparators["year"]);
   }
@@ -656,8 +666,19 @@
       return;
     }
 
+    const grouped = state.sortCol === "phase";
     const frag = document.createDocumentFragment();
+    let lastPhase = null;
+
     state.filtered.forEach(it => {
+      if (grouped && it.phase !== lastPhase) {
+        lastPhase = it.phase;
+        const count = state.filtered.filter(x => x.phase === lastPhase).length;
+        const d = document.createElement("div");
+        d.className = "phase-divider";
+        d.innerHTML = `<span>${escapeHTML(lastPhase || "—")}</span><span class="r">${String(count).padStart(2,"0")} items</span>`;
+        frag.appendChild(d);
+      }
       const row = document.createElement("div");
       row.className = "row" + (it.id === state.selectedId ? " sel" : "");
       row.dataset.id = it.id;
