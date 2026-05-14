@@ -203,6 +203,151 @@ All scripts load credentials from `.env` automatically. Run from the `scripts/` 
 
 ---
 
+## Batch change protocol — safe workflow for bulk Wikibase edits
+
+Any operation that touches P2 (archive ID), P96/P95 (image URLs), or renames R2 files across many items must follow this protocol. It applies to the ID rename, any future re-numbering, and any bulk URL migration.
+
+### Why this matters
+Wikibase data is a live database — there is no git history for it. R2 files are the only copies of the images. A bad batch script can silently corrupt 150 items in seconds with no automatic undo. The protocol makes every change reversible.
+
+---
+
+### Step 0 — Export a snapshot before touching anything
+
+Run this SPARQL query and save the result as a TSV in `~/Documents/hh-wikibase-migration/data/snapshots/` with a datestamped filename:
+
+```sparql
+PREFIX wdt: <https://hunterhouse.wikibase.cloud/prop/direct/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?item ?qid ?archId ?legacyId ?label ?preview ?master ?collection WHERE {
+  ?item wdt:P2 ?archId .
+  BIND(STRAFTER(STR(?item), "/entity/") AS ?qid)
+  ?item rdfs:label ?label . FILTER(LANG(?label)="en")
+  OPTIONAL { ?item wdt:P97 ?legacyId }
+  OPTIONAL { ?item wdt:P96 ?preview }
+  OPTIONAL { ?item wdt:P95 ?master }
+  OPTIONAL { ?item wdt:P79 ?collection }
+} ORDER BY ?archId
+```
+
+Commit the snapshot to git before proceeding:
+```bash
+git add data/snapshots/
+git commit -m "Snapshot before <description of change>"
+```
+
+This snapshot is your ground truth. If anything goes wrong, it tells you exactly what every item looked like before.
+
+---
+
+### Step 1 — Create a git branch
+
+```bash
+git checkout -b migration/description-of-change
+```
+
+All scripts and mapping files for this change live on the branch. If the migration is abandoned, drop the branch and nothing is committed to main.
+
+---
+
+### Step 2 — Write the mapping file
+
+Before running any script, write a TSV mapping every old state to every new state:
+```
+qid    old_id        new_id        old_p96_url    new_p96_url
+Q331   HH-A-0027     HH-HHC-0027   https://...    https://...
+```
+
+Commit this mapping file to the branch. It is the ledger — the forward script reads it, and the revert script reads it in reverse.
+
+---
+
+### Step 3 — Write P97 (legacy ID) before changing P2
+
+For every item, write the current P2 value into P97 *first*, before changing P2. This burns the old ID into Wikibase itself as a permanent record, and is the recovery anchor if P2 gets corrupted.
+
+```python
+# Always do this before wbsetclaim on P2:
+add_claim(session, token, qid, "P97", old_id)   # legacy identifier
+```
+
+If the script fails partway through, items that were processed have P97 set. Items that weren't, still have the original P2. You can query for items where P2 ≠ P97 (when P97 exists) to find the boundary.
+
+---
+
+### Step 4 — R2: copy to new name, do NOT delete old files
+
+```bash
+rclone copy hh-r2:hunter-house-archive/HH-A-0027_name_date_prev.jpg \
+            hh-r2:hunter-house-archive/HH-HHC-0027_name_date_prev.jpg
+```
+
+Old files stay in the bucket until Step 6 (verification passes). This means both URLs are live simultaneously during the migration window — no broken images.
+
+---
+
+### Step 5 — Update P2 and P96/P95 in Wikibase
+
+Run the forward script. It reads the mapping file row by row:
+1. `wbsetclaim` P2 ← new ID
+2. `wbsetclaim` P96 ← new preview URL
+3. `wbsetclaim` P95 ← new master URL (if present)
+4. Log each QID as it completes
+
+Build in a dry-run mode (`--dry-run`) that prints actions without executing them. Always run dry-run first.
+
+---
+
+### Step 6 — Verify before deleting anything
+
+Run a SPARQL query to confirm:
+- All expected items now have the new P2 format
+- All P96 URLs resolve (HEAD probe each one)
+- No items are missing a P2
+
+Only after verification passes:
+```bash
+rclone delete hh-r2:hunter-house-archive/HH-A-0027_name_date_prev.jpg
+```
+
+---
+
+### Step 7 — Merge and tag
+
+```bash
+git checkout main
+git merge --no-ff migration/description-of-change
+git tag v0.X
+git push && git push --tags
+```
+
+---
+
+### Revert procedure (if something goes wrong)
+
+1. **Stop the forward script immediately.**
+2. Run the revert script — it reads the mapping file in reverse:
+   - Restore P2 from P97 on affected items
+   - Restore P96/P95 old URLs (old R2 files are still present)
+3. The snapshot from Step 0 is the reference for any items where state is ambiguous.
+4. Do not delete old R2 files until the revert is confirmed clean.
+
+---
+
+### Pending: ID rename migration (HH-A-XXXX → HH-HHC-XXXX)
+
+**Decision made 2026-05-14:**
+- All Hunter House Collection items: `HH-A-XXXX` → `HH-HHC-XXXX` (same number, same zero-padding)
+- CAA items: `HH-A-XXXX` → `HH-CAA-XXXX`
+- Fulker items: `HH-A-XXXX` → `HH-FUL-XXXX`
+- Each collection has its own sequence; numbers are preserved from current assignment
+- Type letter (D/P/E/L/N) becomes UI-only, derived from P1 (instance of), not embedded in ID
+- Old IDs preserved in P97 on every item
+
+Status: **not yet started** — protocol above must be followed when this begins.
+
+---
+
 ## Scripts
 
 ### `scripts/patch_dates.py`
