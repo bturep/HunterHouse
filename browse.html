@@ -541,7 +541,7 @@
     return (await res.json()).results.bindings;
   }
 
-  const CACHE_KEY = "hhf_catalogue_v5";
+  const CACHE_KEY = "hhf_catalogue_v6";
   const CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours
 
   function clearCache() {
@@ -562,6 +562,10 @@
     // with all labels resolved inline. Multi-valued P87 (areas) creates duplicate rows;
     // we collapse them in the loop below.
     const Q = `
+PREFIX wdt: <https://hunterhouse.wikibase.cloud/prop/direct/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX wikibase: <http://wikiba.se/ontology#>
+PREFIX bd: <http://www.bigdata.com/rdf#>
 SELECT ?item ?archId ?label ?img ?master
        ?d1 ?d2 ?d3
        ?phase ?phaseLabel ?phase2 ?phase2Label
