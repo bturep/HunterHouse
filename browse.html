@@ -412,7 +412,7 @@
     <a href="archive.html" target="_blank">Archive</a>
     <a href="about.html" target="_blank">About</a>
   </nav>
-  <div class="site-topright" id="topright">v0.5</div>
+  <div class="site-topright" id="topright" title="Double-click to refresh catalogue from Wikibase" style="cursor:default">v0.5</div>
 </header>
 
 <div class="controls">
@@ -523,12 +523,6 @@
   const imageUrl = it => it.image || null;
   const uniqueSorted = arr => Array.from(new Set(arr)).filter(Boolean).sort();
 
-  function chunks(arr, n) {
-    const out = [];
-    for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n));
-    return out;
-  }
-
   // ── Mobile tab switching ──────────────────────────────────────────────────
   function switchMobileTab(pane) {
     document.querySelectorAll(".mtab").forEach(t =>
@@ -547,128 +541,96 @@
     return (await res.json()).results.bindings;
   }
 
-  async function fetchLabels(qids) {
-    const labels = {};
-    await Promise.all(chunks([...new Set(qids)].filter(Boolean), 50).map(async batch => {
-      try {
-        const url = API_URL + "?action=wbgetentities&ids=" + encodeURIComponent(batch.join("|")) +
-                    "&props=labels&format=json&origin=*";
-        const json = await (await fetch(url)).json();
-        for (const qid of batch) {
-          const v = json.entities?.[qid]?.labels?.en?.value;
-          if (v) labels[qid] = v;
-        }
-      } catch {}
-    }));
-    return labels;
+  const CACHE_KEY = "hhf_catalogue_v4";
+  const CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours
+
+  function clearCache() {
+    try { localStorage.removeItem(CACHE_KEY); } catch {}
   }
 
   async function loadFromWikibase() {
-    const Q = `SELECT ?item ?itemLabel ?itemDescription WHERE {
-      ?item rdfs:label ?itemLabel . FILTER(LANG(?itemLabel) = "en")
-      FILTER(REGEX(STR(?item), "/entity/Q[0-9]+$"))
-      OPTIONAL { ?item schema:description ?itemDescription . FILTER(LANG(?itemDescription) = "en") }
-    } LIMIT 2000`;
+    // Serve from cache if fresh
+    try {
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (raw) {
+        const { ts, items } = JSON.parse(raw);
+        if (Date.now() - ts < CACHE_TTL) return items;
+      }
+    } catch {}
+
+    // Single SPARQL query — only items with P2 (archive ID) + P96 (preview image),
+    // with all labels resolved inline. Multi-valued P87 (areas) creates duplicate rows;
+    // we collapse them in the loop below.
+    const Q = `
+SELECT ?item ?archId ?label ?img ?master
+       ?d1 ?d2 ?d3
+       ?phase ?phaseLabel ?phase2 ?phase2Label
+       ?drawType ?drawTypeLabel
+       ?area ?areaLabel
+       ?itype ?itypeLabel
+       ?src ?srcLabel
+       ?creator ?creatorLabel
+       ?use
+       ?builtStatus ?builtStatusLabel
+       ?setPos ?notes
+WHERE {
+  ?item wdt:P2 ?archId .
+  ?item wdt:P96 ?img .
+  ?item rdfs:label ?label . FILTER(LANG(?label)="en")
+  OPTIONAL { ?item wdt:P95 ?master }
+  OPTIONAL { ?item wdt:P82 ?d1 }
+  OPTIONAL { ?item wdt:P64 ?d2 }
+  OPTIONAL { ?item wdt:P118 ?d3 }
+  OPTIONAL { ?item wdt:P62 ?phase . ?phase rdfs:label ?phaseLabel . FILTER(LANG(?phaseLabel)="en") }
+  OPTIONAL { ?item wdt:P84 ?phase2 . ?phase2 rdfs:label ?phase2Label . FILTER(LANG(?phase2Label)="en") }
+  OPTIONAL { ?item wdt:P88 ?drawType . ?drawType rdfs:label ?drawTypeLabel . FILTER(LANG(?drawTypeLabel)="en") }
+  OPTIONAL { ?item wdt:P87 ?area . ?area rdfs:label ?areaLabel . FILTER(LANG(?areaLabel)="en") }
+  OPTIONAL { ?item wdt:P1 ?itype . ?itype rdfs:label ?itypeLabel . FILTER(LANG(?itypeLabel)="en") }
+  OPTIONAL { ?item wdt:P79 ?src . ?src rdfs:label ?srcLabel . FILTER(LANG(?srcLabel)="en") }
+  OPTIONAL { ?item wdt:P80 ?creator . ?creator rdfs:label ?creatorLabel . FILTER(LANG(?creatorLabel)="en") }
+  OPTIONAL { ?item wdt:P89 ?use }
+  OPTIONAL { ?item wdt:P92 ?builtStatus . ?builtStatus rdfs:label ?builtStatusLabel . FILTER(LANG(?builtStatusLabel)="en") }
+  OPTIONAL { ?item wdt:P86 ?setPos }
+  OPTIONAL { ?item wdt:P100 ?notes }
+}`;
 
     const rows = await sparqlQuery(Q);
-    const meta = {};
-    rows.forEach(r => {
+    const dateStr = v => v ? v.replace(/^\+/, "").split("T")[0] : null;
+    const map = new Map();
+
+    for (const r of rows) {
       const qid = r.item.value.split("/").pop();
-      if (!meta[qid]) meta[qid] = {
-        label: r.itemLabel?.value || qid,
-        description: r.itemDescription?.value || null,
-      };
-    });
-
-    const allQids = Object.keys(meta);
-    const claimsMap = {};
-    const linkedQids = new Set();
-
-    await Promise.all(chunks(allQids, 50).map(async batch => {
-      try {
-        const url = API_URL + "?action=wbgetentities&ids=" + encodeURIComponent(batch.join("|")) +
-                    "&props=claims&format=json&origin=*";
-        const json = await (await fetch(url)).json();
-        for (const qid of batch) {
-          const entity = json.entities?.[qid];
-          if (!entity?.claims) continue;
-          claimsMap[qid] = entity.claims;
-          for (const pid in entity.claims) {
-            for (const c of entity.claims[pid]) {
-              if (c.mainsnak?.snaktype === "value" && c.mainsnak.datavalue?.type === "wikibase-entityid") {
-                linkedQids.add(c.mainsnak.datavalue.value.id);
-              }
-            }
-          }
-        }
-      } catch {}
-    }));
-
-    const entityLabels = await fetchLabels([...linkedQids]);
-
-    function qlabel(qid) { return qid ? (entityLabels[qid] || null) : null; }
-    function firstQID(claims, pid) { return claims?.[pid]?.[0]?.mainsnak?.datavalue?.value?.id || null; }
-    function firstStr(claims, pid) {
-      const dv = claims?.[pid]?.[0]?.mainsnak?.datavalue;
-      if (!dv) return null;
-      if (dv.type === "string") return dv.value;
-      if (dv.type === "wikibase-entityid") return qlabel(dv.value.id);
-      return null;
-    }
-    function allQIDs(claims, pid) {
-      return (claims?.[pid] || []).map(c => c.mainsnak?.datavalue?.value?.id).filter(Boolean);
-    }
-    function firstDate(claims) {
-      // P82=date created, P64=start date, P118=point in time — explicit priority, never P83 (date digitized)
-      for (const pid of ["P82", "P64", "P118"]) {
-        for (const c of (claims[pid] || [])) {
-          const dv = c.mainsnak?.datavalue;
-          if (dv?.type === "time") {
-            return dv.value.time.replace(/^\+/, "").split("T")[0];
-          }
-        }
+      if (!map.has(qid)) {
+        map.set(qid, {
+          qid,
+          id:               r.archId.value,
+          title:            r.label.value,
+          image:            r.img.value,
+          master:           r.master?.value || null,
+          date:             dateStr(r.d1?.value) || dateStr(r.d2?.value) || dateStr(r.d3?.value),
+          phase:            r.phaseLabel?.value || r.phase2Label?.value || null,
+          phaseQID:         r.phase?.value?.split("/").pop() || r.phase2?.value?.split("/").pop() || null,
+          areas:            [],
+          type:             r.drawTypeLabel?.value || null,
+          itemType:         r.itypeLabel?.value || null,
+          sourceCollection: r.srcLabel?.value || null,
+          creator:          r.creatorLabel?.value || null,
+          use:              r.use?.value || null,
+          builtStatus:      r.builtStatusLabel?.value || null,
+          setPosition:      r.setPos?.value || null,
+          notes:            r.notes?.value || null,
+        });
       }
-      return null;
+      const it = map.get(qid);
+      if (r.areaLabel?.value && !it.areas.includes(r.areaLabel.value)) {
+        it.areas.push(r.areaLabel.value);
+      }
     }
 
-    const items = [];
-    for (const qid of allQids) {
-      const claims = claimsMap[qid];
-      if (!claims) continue;
-      const archiveId = firstStr(claims, "P2");
-      const image     = claims?.P96?.[0]?.mainsnak?.datavalue?.value;
-      const master    = claims?.P95?.[0]?.mainsnak?.datavalue?.value;
-      if (!archiveId || !image) continue;
+    const items = [...map.values()].sort((a, b) => idNum(a) - idNum(b));
 
-      const phaseQID = firstQID(claims, "P62") || firstQID(claims, "P84");
-      const typeQID  = firstQID(claims, "P88");
-      const areaQIDs = allQIDs(claims, "P87");
-      const p1QID    = firstQID(claims, "P1");
-      const srcQID   = firstQID(claims, "P79");
-      const creQID   = firstQID(claims, "P80");
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), items })); } catch {}
 
-      items.push({
-        qid,
-        id:               archiveId,
-        title:            meta[qid]?.label || archiveId,
-        date:             firstDate(claims),
-        phase:            phaseQID ? qlabel(phaseQID) : null,
-        phaseQID,
-        areas:            areaQIDs.map(qlabel).filter(Boolean),
-        type:             typeQID ? qlabel(typeQID) : null,
-        use:              firstStr(claims, "P89"),
-        builtStatus:      firstStr(claims, "P92"),
-        creator:          creQID ? qlabel(creQID) : null,
-        itemType:         p1QID ? qlabel(p1QID) : null,
-        sourceCollection: srcQID ? qlabel(srcQID) : null,
-        rights:           firstStr(claims, "P93"),
-        image,
-        master:           master || null,
-        notes:            firstStr(claims, "P100") || null,
-      });
-    }
-
-    items.sort((a, b) => idNum(a) - idNum(b));
     return items;
   }
 
@@ -1218,6 +1180,11 @@
 
   // ── Main (async load) ─────────────────────────────────────────────────────
   (async function main() {
+    document.getElementById("topright").addEventListener("dblclick", () => {
+      clearCache();
+      location.reload();
+    });
+
     try {
       const items = await loadFromWikibase();
       if (!items.length) {

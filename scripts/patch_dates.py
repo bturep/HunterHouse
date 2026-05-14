@@ -2,14 +2,26 @@
 """
 Patch 18 undated archive items: add P82 date claim + update English description.
 Run: python3 scripts/patch_dates.py
-Prompts for Wikibase.cloud username and password.
+Loads bot credentials from ~/Documents/hh-wikibase-migration/.env automatically.
 """
 
 import json
-import getpass
+import os
 import requests
 
 API = "https://hunterhouse.wikibase.cloud/w/api.php"
+ENV_FILE = os.path.expanduser("~/Documents/hh-wikibase-migration/.env")
+
+
+def load_env(path):
+    env = {}
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                k, _, v = line.partition("=")
+                env[k.strip()] = v.strip()
+    return env
 
 ITEMS = [
     # (QID, archive_id, year)
@@ -86,13 +98,17 @@ def add_date(s, token, qid, year):
 
 
 def main():
-    username = input("Wikibase username: ").strip()
-    password = getpass.getpass("Wikibase password: ")
+    env = load_env(ENV_FILE)
+    bot_user = env.get("WIKIBASE_BOT_USER", "")
+    bot_pass = env.get("WIKIBASE_BOT_PASSWORD", "")
+    if not bot_user or not bot_pass:
+        raise SystemExit(f"Missing WIKIBASE_BOT_USER or WIKIBASE_BOT_PASSWORD in {ENV_FILE}")
+    print(f"Using bot: {bot_user}\n")
 
     s = requests.Session()
     s.headers.update({"User-Agent": "HunterHouseBot/1.0"})
 
-    login(s, username, password)
+    login(s, bot_user, bot_pass)
     token = csrf(s)
 
     for qid, aid, year in ITEMS:
