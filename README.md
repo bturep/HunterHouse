@@ -13,14 +13,11 @@ HunterHouse/
 ├── richard-hunter.html   Richard Hunter — biography, built work, exhibitions
 ├── about.html            About the Foundation — mandate, people, fellowship, contact
 │
-├── item.html             Single-Item detail (?id=Q1) — raw statements, reverse refs
-├── collection.html       Source-collection finding aid (?id=Q1) — ISAD(G) view + holdings export
-│
 ├── Main_Page.wiki        Wikitext source for hunterhouse.wikibase.cloud/wiki/Main_Page
 └── README.md             This file
 ```
 
-Three pages query the Wikibase live (`browse.html`, `item.html`, `collection.html`). The four narrative pages (`index`, `the-house`, `archive`, `richard-hunter`, `about`) are static prose, adapted from the Archive Overview and the CAA biographical record.
+One page queries the Wikibase live (`browse.html`). The four narrative pages (`index`, `the-house`, `archive`, `richard-hunter`, `about`) are static prose, adapted from the Archive Overview and the CAA biographical record.
 
 ## Site architecture
 
@@ -34,10 +31,6 @@ The IA follows the Foundation site plan:
 | Browse | The archive proper — filter and search | Live Wikibase query |
 | Richard Hunter | Biography, exhibitions, publications | CAA biographical record (F0076) |
 | About | Foundation mandate, people, fellowship, contact | Custom |
-
-Two pages support the IA but aren't in the top nav:
-- `item.html` — destination for any Q-ID; linked from `browse.html` cards and from prose links once items are catalogued
-- `collection.html` — finding-aid view for `archive` / `archival collection` Items; linked from `browse.html` and offered as a "view as finding aid" link from `item.html`
 
 ## Visual language
 
