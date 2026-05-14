@@ -535,14 +535,8 @@
 
   // ── Wikibase fetch layer ──────────────────────────────────────────────────
   async function sparqlQuery(q) {
-    const res = await fetch(SPARQL_URL + "?format=json", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/sparql-query",
-        "Accept": "application/sparql-results+json"
-      },
-      body: q
-    });
+    const url = SPARQL_URL + "?query=" + encodeURIComponent(q) + "&format=json";
+    const res = await fetch(url, { headers: { Accept: "application/sparql-results+json" } });
     if (!res.ok) throw new Error("SPARQL " + res.status);
     return (await res.json()).results.bindings;
   }

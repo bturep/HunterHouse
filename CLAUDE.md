@@ -129,7 +129,8 @@ Tab switching: `switchMobileTab(pane)` toggles `.mobile-active` on panes and `.a
 `firstDate()` reads P82 → P64 → P118 in order. Never reads P83 (date digitized — 2026 scan dates). Items with only P83 show "—" in browse.
 
 ### SPARQL queries
-Use **POST** with `Content-Type: application/sparql-query`. GET requests with URL-encoded queries return 0 results due to encoding issues with this Wikibase.cloud instance.
+- **In the browser (browse.html):** use **GET** with `encodeURIComponent`. Browser encoding works correctly. POST is blocked by CORS.
+- **In Python scripts:** use **POST** with `Content-Type: application/sparql-query`. Python's `urllib.parse.quote` mangles the query with GET; POST bypasses this.
 
 ---
 
