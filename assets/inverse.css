@@ -15,6 +15,14 @@
   --plate:#f0e9d8;
 }
 
+/* opt into cross-document view transitions; the splash → reading page
+   morph anchors the markid (shared view-transition-name 'hh-mark') */
+@view-transition{navigation:auto}
+.markid{view-transition-name:hh-mark}
+::view-transition-old(root),
+::view-transition-new(root){animation-duration:700ms;animation-timing-function:cubic-bezier(.4,0,.2,1)}
+::view-transition-group(hh-mark){animation-duration:900ms;animation-timing-function:cubic-bezier(.4,0,.2,1)}
+
 html,body{overflow-x:hidden}
 body{
   display:flex;flex-direction:column;min-height:100vh;

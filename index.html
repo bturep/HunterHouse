@@ -6,302 +6,211 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/verso.css">
 <style>
-  .hero{padding:64px 0 56px;border-bottom:1px solid var(--ink);margin-bottom:48px}
-  .hero-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:64px;align-items:end}
-  .hero-note{max-width:760px}
-  .hero-note .stamp{
-    font-family:var(--mono);font-size:10.5px;color:var(--red);letter-spacing:0.22em;text-transform:uppercase;
-    margin-bottom:28px;font-weight:500;display:flex;gap:14px;align-items:baseline;white-space:nowrap;
-  }
-  .hero-note .stamp .n{color:var(--muted);font-weight:400}
-  .hero-note blockquote{font-size:56px;font-weight:300;color:var(--ink);letter-spacing:-0.025em;line-height:1.05}
-  .hero-note .attr{
-    font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;
-    margin-top:30px;display:flex;gap:14px;align-items:baseline;
-  }
-  .hero-note .attr b{color:var(--ink);font-weight:500}
-  .hero-meta{display:grid;grid-template-columns:auto 1fr;gap:14px 16px;align-self:end;font-size:13px;line-height:1.55}
-  .hero-meta dt{
-    font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.18em;text-transform:uppercase;
-    white-space:nowrap;padding-top:2px;
-  }
-  .hero-meta dd{color:var(--ink);letter-spacing:-0.005em}
-  .hero-meta dd b{font-weight:500}
-  .hero-meta dd a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#0f0d0a;color:#f3f1ec;font-family:var(--sans)}
 
-  .epigraph{
-    display:grid;grid-template-columns:1fr 240px;gap:48px;align-items:end;
-    padding:24px 0 28px 24px;margin-bottom:64px;
-    border-left:2px solid var(--copper);max-width:1080px;
-  }
-  .epigraph blockquote{font-size:23px;line-height:1.45;color:var(--ink);letter-spacing:-0.01em;font-weight:300}
-  .epigraph .attr{
-    font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:0.14em;text-transform:uppercase;
-    text-align:right;line-height:1.7;
-  }
-  .epigraph .attr b{color:var(--ink);font-weight:500;display:block}
+  /* opt this page into cross-document view transitions — the browser will
+     morph matched elements (markid) between this page and the next. */
+  @view-transition{navigation:auto}
+  ::view-transition-old(root),
+  ::view-transition-new(root){animation-duration:700ms;animation-timing-function:cubic-bezier(.4,0,.2,1)}
+  ::view-transition-group(hh-mark){animation-duration:900ms;animation-timing-function:cubic-bezier(.4,0,.2,1)}
 
-  .lede-row{display:grid;grid-template-columns:1fr 1.4fr;gap:48px;margin-bottom:56px;align-items:start}
-  .lede-row .stamp-head{
-    font-family:var(--mono);font-size:11px;color:var(--red);letter-spacing:0.22em;text-transform:uppercase;
-    padding-bottom:10px;border-bottom:1px solid var(--ink);margin-bottom:18px;font-weight:500;
+  .splash{
+    position:fixed;inset:0;cursor:pointer;
+    display:flex;flex-direction:column;
+    text-decoration:none;color:inherit;
   }
-  .lede-row p{font-size:16px;line-height:1.6;color:var(--ink);margin-bottom:16px;letter-spacing:-0.005em}
 
-  .featured-band{
-    background:var(--paper);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
-    margin:0 -36px 64px;padding:24px 36px;
-    display:grid;grid-template-columns:repeat(5,1fr);gap:14px;align-items:start;
+  /* ── film ─────────────────────────────────────────────────── */
+  .film{
+    position:absolute;inset:0;overflow:hidden;
+    background:
+      radial-gradient(ellipse 70% 90% at 35% 45%, #2a2520 0%, transparent 60%),
+      radial-gradient(ellipse 80% 70% at 70% 60%, #1f1b16 0%, transparent 65%),
+      #0f0d0a;
   }
-  .featured-band a{display:block;text-decoration:none;color:inherit}
-  .featured-band .ti{
-    background:#fff;aspect-ratio:4/3;overflow:hidden;border:1px solid var(--rule);
-    display:flex;align-items:center;justify-content:center;padding:6px;
+  .film iframe{opacity:0;transition:opacity 700ms ease-out}
+  .film.ready iframe{opacity:1}
+
+  /* ── markid (centred, large, leads) ──────────────────────── */
+  .splash .mark{
+    position:absolute;left:50%;top:50%;
+    transform:translate(-50%,-50%) scale(1);
+    transform-origin:0 0;
+    font-size:56px;font-weight:300;letter-spacing:-0.022em;color:#f3f1ec;
+    white-space:nowrap;text-align:center;line-height:1.15;
+    text-shadow:0 1px 32px rgba(0,0,0,0.55);
+    z-index:5;pointer-events:none;
+    opacity:0;animation:mark-in 1400ms cubic-bezier(.2,.7,.2,1) 300ms forwards;
+    view-transition-name:hh-mark;
   }
-  .featured-band .ti img{max-width:100%;max-height:100%;object-fit:contain;filter:saturate(0.92)}
-  .featured-band .cap{font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:0.06em;margin-top:6px;display:flex;justify-content:space-between}
-  .featured-band .cap .id{color:var(--red);font-weight:500}
-  .featured-band .head{grid-column:1 / -1;display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
-  .featured-band .head .l{font-family:var(--mono);font-size:11px;color:var(--ink);letter-spacing:0.22em;text-transform:uppercase;font-weight:500}
-  .featured-band .head .l em{font-style:normal;text-transform:none;color:var(--copper-deep);letter-spacing:-0.005em;margin-left:14px;font-size:14px;font-weight:500}
-  .featured-band .head .all{font-family:var(--mono);font-size:11px;color:var(--copper-deep);text-decoration:none;letter-spacing:0.04em;text-transform:uppercase}
+  .splash .mark .dim{color:rgba(243,241,236,0.55);font-weight:300}
+  .splash .mark .place{
+    display:block;margin-top:18px;
+    font-family:var(--mono);font-size:11px;color:rgba(243,241,236,0.65);
+    letter-spacing:0.28em;text-transform:uppercase;font-weight:500;
+    text-shadow:0 1px 12px rgba(0,0,0,0.7);
+  }
+  @keyframes mark-in{
+    from{opacity:0;transform:translate(-50%,-46%) scale(1)}
+    to  {opacity:1;transform:translate(-50%,-50%) scale(1)}
+  }
 
-  .hero-meta dt,.hero-meta dd b,.featured-band .cap > *,.featured-band .head .l em,.featured-band .head .all{white-space:nowrap}
-
-  @media (max-width:767px){
-    .hero{padding:32px 0 24px}
-    .hero-grid{grid-template-columns:1fr;gap:20px}
-    .hero-note blockquote{font-size:34px}
-    .epigraph{grid-template-columns:1fr;gap:12px;padding:18px 0 18px 18px;margin-bottom:40px}
-    .epigraph .attr{text-align:left}
-    .lede-row{grid-template-columns:1fr;gap:24px;margin-bottom:40px}
-    .featured-band{
-      margin:0 -16px 40px;padding:16px;
-      grid-template-columns:repeat(2,1fr);gap:8px;
+  /* ── exit (JS-driven, works in every browser) ────────────── */
+  .splash.exiting{pointer-events:none;cursor:default}
+  .splash.exiting .film{transition:opacity 700ms cubic-bezier(.4,0,.2,1);opacity:0}
+  .splash.exiting::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:60px;
+    background:#f3f1ec;border-bottom:1px solid #1e1c1a;
+    opacity:0;animation:bar-in 600ms cubic-bezier(.4,0,.2,1) 250ms forwards;
+    z-index:3;
+  }
+  .splash.exiting::after{
+    content:"";position:absolute;top:60px;left:0;right:0;bottom:0;
+    background:#1e1c1a;
+    opacity:0;animation:bar-in 700ms cubic-bezier(.4,0,.2,1) 200ms forwards;
+    z-index:2;
+  }
+  @keyframes bar-in{to{opacity:1}}
+  .splash.exiting .imprint,
+  .splash.exiting .enter{transition:opacity 300ms ease-out;opacity:0}
+  .splash.exiting .mark .place{transition:opacity 250ms ease-out;opacity:0}
+  .splash.exiting .mark{
+    animation:mark-exit 900ms cubic-bezier(.4,0,.2,1) forwards;
+    z-index:10;
+  }
+  @keyframes mark-exit{
+    from{
+      transform:translate(-50%,-50%) scale(1);
+      color:#f3f1ec;
+      text-shadow:0 1px 32px rgba(0,0,0,0.55);
+    }
+    to{
+      transform:translate(calc(28px - 50vw), calc(22px - 50vh)) scale(0.24);
+      color:#1e1c1a;
+      text-shadow:none;
     }
   }
+
+  /* ── enter cue ───────────────────────────────────────────── */
+  .splash .enter{
+    position:absolute;right:36px;bottom:32px;z-index:5;
+    font-family:var(--mono);font-size:11px;color:rgba(243,241,236,0.7);
+    letter-spacing:0.32em;text-transform:uppercase;
+    display:flex;align-items:center;gap:14px;
+    text-shadow:0 1px 8px rgba(0,0,0,0.6);
+    pointer-events:none;
+    opacity:0;animation:enter-in 700ms ease-out 2200ms forwards;
+  }
+  .splash .enter .arrow{color:#e4a47e;font-size:13px;letter-spacing:0;animation:enter-pulse 2.4s ease-in-out 3000ms infinite}
+  @keyframes enter-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes enter-pulse{
+    0%,100%{transform:translateX(0)}
+    50%{transform:translateX(4px)}
+  }
+
+  /* ── version / corner mark (subtle imprint) ─────────────── */
+  .splash .imprint{
+    position:absolute;left:36px;top:28px;z-index:5;
+    font-family:var(--mono);font-size:10.5px;color:rgba(243,241,236,0.45);
+    letter-spacing:0.18em;text-transform:uppercase;
+    pointer-events:none;
+    opacity:0;animation:fade-in 700ms ease-out 2400ms forwards;
+  }
+  .splash .imprint b{color:rgba(243,241,236,0.85);font-weight:500;margin-right:8px}
+  @keyframes fade-in{from{opacity:0}to{opacity:1}}
+
+  /* hover/click feedback */
+  .splash:hover .enter{color:#f3f1ec}
+  .splash:hover .enter .arrow{color:#e4a47e}
+  .splash:active{transform:scale(0.998)}
 </style>
 </head>
 <body>
+<div id="root"></div>
 
-<header class="site-top">
-  <div class="markid">
-    <span class="name">Hunter House <span class="dim">Foundation</span></span>
-  </div>
-  <nav class="site-nav">
-    <a href="richard-hunter.html">Hunter</a>
-    <a href="the-house.html">House</a>
-    <a href="archive.html">Archive</a>
-    <a href="about.html">About</a>
-  </nav>
-  <div class="site-topright">147 items · v0.4</div>
-</header>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 
-<div class="frame wide">
+<script type="text/babel">
+  const { useRef, useState, useEffect } = React;
 
-  <section class="hero">
-    <div class="hero-grid">
-      <div class="hero-note">
-        <div class="stamp">
-          <span>Notebook · 1986</span>
-          <span class="n">East Wing portfolio, cover</span>
-        </div>
-        <blockquote>Drawings against drawings.</blockquote>
-        <div class="attr">
-          <span><b>R. Hunter</b></span>
-          <span>· annotation, in pencil</span>
-        </div>
+  function Film() {
+    const ref = useRef(null);
+    const [ready, setReady] = useState(false);
+
+    useEffect(() => {
+      const onMsg = (e) => {
+        if (typeof e.data !== 'string' || !e.origin.includes('vimeo.com')) return;
+        try {
+          const data = JSON.parse(e.data);
+          if (data.event === 'play' || data.event === 'playing') setReady(true);
+        } catch {}
+      };
+      window.addEventListener('message', onMsg);
+      const fallback = setTimeout(() => setReady(true), 2000);
+      return () => { window.removeEventListener('message', onMsg); clearTimeout(fallback); };
+    }, []);
+
+    const onLoad = () => {
+      try {
+        ref.current?.contentWindow?.postMessage(
+          JSON.stringify({ method: 'addEventListener', value: 'play' }),
+          'https://player.vimeo.com'
+        );
+      } catch {}
+    };
+
+    return (
+      <div className={"film" + (ready ? " ready" : "")}>
+        <iframe
+          ref={ref}
+          src="https://player.vimeo.com/video/1184581518?h=55333bb0b2&autoplay=1&loop=1&muted=1&background=1&dnt=1&api=1#t=440s"
+          frameBorder="0"
+          allow="autoplay; fullscreen; picture-in-picture"
+          title="Hunter House"
+          loading="eager"
+          onLoad={onLoad}
+          style={{
+            position:'absolute', top:'50%', left:'50%',
+            width:'max(100vw, 100vh * 16 / 9)',
+            height:'max(100vh, 100vw * 9 / 16)',
+            transform:'translate(-50%, -50%)',
+            border:0, pointerEvents:'none',
+          }}
+        />
       </div>
-      <dl class="hero-meta">
-        <dt>Location</dt>
-        <dd>203 Goward Road<br>Prospect Lake · Saanich BC</dd>
-        <dt>Dates</dt>
-        <dd><b>1970 — 2020</b></dd>
-        <dt>Extent</dt>
-        <dd>147 items · 6 collections</dd>
-        <dt>Architect</dt>
-        <dd><a href="richard-hunter.html">Richard Hunter</a><br>1932 — 2023</dd>
-      </dl>
-    </div>
-  </section>
+    );
+  }
 
-  <div class="epigraph">
-    <blockquote>Architecture, the sheltering art, is a repository of human experience. It connects mathematics, the sciences and history with the arts — gathering from each a measure of understanding the universe, the biosphere, mind.</blockquote>
-    <div class="attr">
-      <b>Richard Hunter</b>
-      1932 — 2023<br>
-      Notebook, undated
-    </div>
-  </div>
-
-  <div class="lede-row">
-    <div>
-      <div class="stamp-head">An archive in one address</div>
-      <p style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.06em;line-height:1.7">
-        Drawings · Photographs · Letters<br>
-        Plans · Elevations · Sections · Details<br>
-        Studies · Pencil · Coloured pencil<br>
-        Engineering documents · Permit sets<br>
-        <br>
-        <b style="color:var(--ink)">1970 — 2020</b>
-      </p>
-    </div>
-    <div>
-      <p>The Hunter House Foundation stewards the residence Richard Hunter designed for his family at 203 Goward Road, Prospect Lake, and revised continuously across more than five decades. The archive catalogues drawings, photographs and related materials documenting this fifty-year working record — schemes abandoned, permits resubmitted, rooms built and removed, ideas held in reserve for a decade before reappearing in built form.</p>
-      <p>The archive is open and queryable. The catalogue is maintained as a Wikibase; this site is the public reading room.</p>
-    </div>
-  </div>
-
-  <section>
-    <div style="font-family:var(--mono);font-size:11px;color:var(--ink);letter-spacing:0.22em;text-transform:uppercase;padding-bottom:10px;border-bottom:1px solid var(--ink);margin-bottom:0;font-weight:500;display:flex;justify-content:space-between;align-items:baseline;">
-      <span><span style="color:var(--red);margin-right:14px">§</span>Where to begin</span>
-      <span style="color:var(--muted);font-weight:400;letter-spacing:0.06em">04 entry points</span>
-    </div>
-    <div class="pathways">
-      <a class="pathway" href="the-house.html">
-        <div class="num">01 / House</div>
-        <h3>The <span class="ital">house</span></h3>
-        <p>The residence as architecture and as a working record across fifty years — the East Wing's twelve-year arc, the West Wing's vertical resolution, the Kotatsu's nine-year gap.</p>
-        <div class="more">Read →</div>
+  function Splash() {
+    const [exiting, setExiting] = useState(false);
+    const go = (e) => {
+      e.preventDefault();
+      if (exiting) return;
+      setExiting(true);
+      setTimeout(() => { window.location.href = 'archive.html'; }, 870);
+    };
+    return (
+      <a href="archive.html" onClick={go} className={"splash" + (exiting ? ' exiting' : '')} aria-label="Enter the Hunter House Foundation site">
+        <Film />
+        <div className="imprint"><b>2026</b>v0.5</div>
+        <div className="mark">
+          Hunter House <span className="dim">Foundation</span>
+          <span className="place">Victoria, British Columbia</span>
+        </div>
+        <div className="enter">
+          <span>Enter</span><span className="arrow">→</span>
+        </div>
       </a>
-      <a class="pathway" href="archive.html">
-        <div class="num">02 / Catalogue</div>
-        <h3>About the archive</h3>
-        <p>Six source collections. Nine item types. Permanent identifiers. A structured catalogue maintained as a Wikibase, openly queryable.</p>
-        <div class="more">Read →</div>
-      </a>
-      <a class="pathway" href="browse.html" target="_blank" rel="noopener">
-        <div class="num">03 / Index</div>
-        <h3>Browse the <span class="ital">catalogue</span></h3>
-        <p>Every plate. Filter by phase, area, drawing type. Read or pull individual records.</p>
-        <div class="more">Browse →</div>
-      </a>
-      <a class="pathway" href="richard-hunter.html">
-        <div class="num">04 / Architect</div>
-        <h3>Richard Hunter</h3>
-        <p>Biographical record, exhibitions, publications and built work — a Bruce Goff-trained architect who designed three houses and lived in one.</p>
-        <div class="more">Read →</div>
-      </a>
-    </div>
-  </section>
+    );
+  }
 
-  <section class="featured-band" id="featured-band">
-    <div class="head">
-      <div class="l">Recently catalogued <em id="feat-caption">—</em></div>
-      <a class="all" href="browse.html" target="_blank" rel="noopener">View all <span id="feat-total">—</span> →</a>
-    </div>
-    <div id="featured-tiles" style="display:contents"></div>
-  </section>
-
-  <script>
-  (async function() {
-    const WB  = "https://hunterhouse.wikibase.cloud";
-    const API = WB + "/w/api.php";
-    const SP  = WB + "/query/sparql";
-
-    function esc(s) {
-      if (s == null) return "";
-      return String(s).replace(/[&<>"']/g, c =>
-        ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-    }
-    function qnum(q) { return parseInt(q.slice(1), 10); }
-    function extractYear(claims) {
-      for (const pid in claims) {
-        for (const c of claims[pid]) {
-          const dv = c.mainsnak?.datavalue;
-          if (dv?.type === "time") {
-            const t = dv.value?.time;
-            if (t) return t.replace(/^\+/, "").substring(0, 4);
-          }
-        }
-      }
-      return null;
-    }
-
-    try {
-      // Fetch all QIDs from SPARQL, sort descending (newest first)
-      const sparqlRes = await fetch(
-        SP + "?query=" + encodeURIComponent(
-          `SELECT ?item WHERE { ?item rdfs:label ?l . FILTER(LANG(?l)="en") FILTER(REGEX(STR(?item),"/entity/Q[0-9]+$")) } LIMIT 2000`
-        ) + "&format=json",
-        { headers: { Accept: "application/sparql-results+json" } }
-      );
-      const sparqlData = await sparqlRes.json();
-      const allQids = sparqlData.results.bindings
-        .map(r => r.item.value.split("/").pop())
-        .sort((a, b) => qnum(b) - qnum(a));
-
-      document.getElementById("feat-total").textContent = allQids.length;
-
-      // Probe top 100 QIDs for P96 + P2 (labels included for free)
-      const probe = allQids.slice(0, 100);
-      const batches = [probe.slice(0, 50), probe.slice(50)];
-      const candidates = [];
-
-      await Promise.all(batches.map(async batch => {
-        if (!batch.length) return;
-        const url = API + "?action=wbgetentities&ids=" + encodeURIComponent(batch.join("|")) +
-                    "&props=claims|labels&format=json&origin=*";
-        const json = await (await fetch(url)).json();
-        for (const qid of batch) {
-          const entity = json.entities?.[qid];
-          if (!entity) continue;
-          const p96 = entity.claims?.P96?.[0]?.mainsnak?.datavalue?.value;
-          if (!p96) continue;
-          const p2   = entity.claims?.P2?.[0]?.mainsnak?.datavalue?.value;
-          const year = extractYear(entity.claims || {});
-          const label = entity.labels?.en?.value;
-          candidates.push({ qid, label, archiveId: p2, previewUrl: p96, year });
-        }
-      }));
-
-      candidates.sort((a, b) => qnum(b) - qnum(a));
-      const top5 = candidates.slice(0, 5);
-      if (!top5.length) return;
-
-      const month = new Date().toLocaleString("en-US", { month: "long" });
-      const yr    = new Date().getFullYear();
-      document.getElementById("feat-caption").textContent =
-        top5.length + " plates · " + month + " " + yr;
-
-      document.getElementById("featured-tiles").innerHTML = top5.map(item => `
-        <a href="item.html?id=${esc(item.qid)}">
-          <div class="ti"><img src="${esc(item.previewUrl)}" alt="${esc(item.label || item.qid)}" loading="lazy"></div>
-          <div class="cap"><span class="id">${esc(item.archiveId || item.qid)}</span><span>${esc(item.year || "—")}</span></div>
-        </a>
-      `).join("");
-
-    } catch (e) { console.warn("featured band:", e); }
-  })();
-  </script>
-
-  <section class="columns">
-    <div>
-      <h2><span style="color:var(--red);margin-right:14px">§</span>The Foundation</h2>
-      <p>The Hunter House Foundation stewards the residence and the archival legacy of its architect. Its overarching aim is to realize the speculative futures embedded in Hunter's drawings — among them a cantilevered Skywalk and the unfinished East Wing developments — and to open the archive to scholars, students and the public.</p>
-      <p class="muted"><a href="about.html">About the Foundation →</a></p>
-    </div>
-    <div>
-      <h2><span style="color:var(--red);margin-right:14px">§</span>Source &amp; data</h2>
-      <p>The archive is maintained as a structured database — every item assigned a permanent identifier, classified with a controlled vocabulary and linked to related works, places and people. The data is open and queryable.</p>
-      <p class="muted" style="font-family:var(--mono);font-size:11.5px;line-height:1.8">
-        Wikibase &nbsp;·&nbsp; <a href="https://hunterhouse.wikibase.cloud" target="_blank" rel="noopener">hunterhouse.wikibase.cloud</a><br>
-        SPARQL &nbsp;·&nbsp; <a href="https://hunterhouse.wikibase.cloud/query/" target="_blank" rel="noopener">query endpoint</a><br>
-        Source &nbsp;·&nbsp; <a href="https://github.com/bturep/HunterHouse" target="_blank" rel="noopener">github.com/bturep/HunterHouse</a>
-      </p>
-    </div>
-  </section>
-
-  <footer class="colophon">
-    <div class="l"><b>Hunter House Foundation</b> · Victoria, British Columbia</div>
-    <div class="c">Catalogue v0.4 · 2026 · 05 · 12</div>
-    <div class="r">Project lead · <b>Brandon Poole</b></div>
-  </footer>
-
-</div>
-
+  ReactDOM.createRoot(document.getElementById('root')).render(<Splash />);
+</script>
 </body>
 </html>
