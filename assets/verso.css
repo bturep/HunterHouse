@@ -38,10 +38,6 @@ a{color:inherit}
   padding:14px 28px;border-bottom:1px solid var(--ink);background:var(--bg);
 }
 .markid{display:flex;align-items:baseline;gap:12px}
-.markid .h{
-  display:inline-block;height:36px;width:auto;vertical-align:middle;
-  image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges;
-}
 .markid .name{font-size:13px;font-weight:500;letter-spacing:-0.005em;white-space:nowrap}
 .markid .name .dim{color:var(--muted);font-weight:400}
 .site-nav{
