@@ -528,6 +528,7 @@
         <div class="placeholder">Select an item<b id="ph-name"></b></div>
       </div>
       <div class="zoom-ctl">
+        <button id="zoom-rotate" type="button" title="Rotate 90°">↻</button>
         <button id="zoom-out" type="button" title="Zoom out">−</button>
         <span class="pct" id="zoom-pct">100%</span>
         <button id="zoom-in" type="button" title="Zoom in">+</button>
@@ -909,7 +910,7 @@ WHERE {
 
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
   let currentImg = null;
-  let zoomState = { scale:1, fitScale:1, tx:0, ty:0, naturalW:0, naturalH:0 };
+  let zoomState = { scale:1, fitScale:1, tx:0, ty:0, naturalW:0, naturalH:0, rotation:0 };
 
   function renderImage(item) {
     const canvas = $("#canvas");
@@ -934,6 +935,7 @@ WHERE {
       img.onload = () => {
         zoomState.naturalW = img.naturalWidth;
         zoomState.naturalH = img.naturalHeight;
+        zoomState.rotation = 0;
         currentImg = img;
         canvas.appendChild(img);
         fitToFrame();
@@ -957,7 +959,9 @@ WHERE {
     if (!currentImg) return;
     const stage = $("#stage");
     const sw = stage.clientWidth, sh = stage.clientHeight;
-    const iw = zoomState.naturalW, ih = zoomState.naturalH;
+    const transposed = zoomState.rotation % 180 !== 0;
+    const iw = transposed ? zoomState.naturalH : zoomState.naturalW;
+    const ih = transposed ? zoomState.naturalW : zoomState.naturalH;
     if (!iw || !ih) return;
     const pad = 40;
     const fit = Math.min((sw - pad*2) / iw, (sh - pad*2) / ih, 1);
@@ -971,7 +975,7 @@ WHERE {
     if (!currentImg) return;
     const z = zoomState;
     currentImg.style.transform =
-      `translate(${-z.naturalW*z.scale/2 + z.tx}px, ${-z.naturalH*z.scale/2 + z.ty}px) scale(${z.scale})`;
+      `translate(${-z.naturalW*z.scale/2 + z.tx}px, ${-z.naturalH*z.scale/2 + z.ty}px) scale(${z.scale}) rotate(${z.rotation}deg)`;
   }
 
   function updateZoomUI() {
@@ -1001,7 +1005,9 @@ WHERE {
     const z = zoomState;
     const stage = $("#stage");
     const sw = stage.clientWidth, sh = stage.clientHeight;
-    const iw = z.naturalW * z.scale, ih = z.naturalH * z.scale;
+    const transposed = z.rotation % 180 !== 0;
+    const iw = (transposed ? z.naturalH : z.naturalW) * z.scale;
+    const ih = (transposed ? z.naturalW : z.naturalH) * z.scale;
     if (iw <= sw) { z.tx = 0; } else { const m = (iw-sw)/2; z.tx = Math.max(-m, Math.min(m, z.tx)); }
     if (ih <= sh) { z.ty = 0; } else { const m = (ih-sh)/2; z.ty = Math.max(-m, Math.min(m, z.ty)); }
   }
@@ -1031,6 +1037,11 @@ WHERE {
     }, { passive:false });
 
     canvas.addEventListener("dblclick", () => { if (currentImg) fitToFrame(); });
+    $("#zoom-rotate").addEventListener("click", () => {
+      if (!currentImg) return;
+      zoomState.rotation = (zoomState.rotation + 90) % 360;
+      fitToFrame();
+    });
     $("#zoom-in").addEventListener("click",  () => setZoom(zoomState.scale * 1.4));
     $("#zoom-out").addEventListener("click", () => setZoom(zoomState.scale * 0.71));
     $("#zoom-fit").addEventListener("click", fitToFrame);
