@@ -690,7 +690,7 @@
     return (await res.json()).results.bindings;
   }
 
-  const CACHE_KEY = "hhf_catalogue_v20";
+  const CACHE_KEY = "hhf_catalogue_v21";
 
   function clearCache() {
     try { localStorage.removeItem(CACHE_KEY); } catch {}
@@ -951,47 +951,123 @@ WHERE {
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
   let currentImg = null;
   let zoomState = { scale:1, fitScale:1, tx:0, ty:0, naturalW:0, naturalH:0, rotation:0 };
+  let renderGen = 0; // incremented on each renderImage call; stale callbacks self-cancel
 
   function renderImage(item) {
     const canvas = $("#canvas");
     const idx = state.filtered.findIndex(i => i.id === item.id);
 
     $("#ih-id").textContent = (item.id || "").replace(/^HH-/, "");
-
     $("#nav-prev").classList.toggle("disabled", idx <= 0);
     $("#nav-next").classList.toggle("disabled", idx < 0 || idx >= state.filtered.length - 1);
 
     const url = imageUrl(item);
     canvas.innerHTML = "";
-    if (url) {
-      const full = $("#if-full");
-      full.href = item.master || url;
-      full.style.visibility = item.master ? "" : "hidden";
+    currentImg = null;
+    canvas.classList.add("no-zoom");
 
-      const img = new Image();
-      img.alt = item.title;
-      img.draggable = false;
-      img.onload = () => {
-        zoomState.naturalW = img.naturalWidth;
-        zoomState.naturalH = img.naturalHeight;
+    const gen = ++renderGen; // capture generation; stale callbacks will see gen !== renderGen
+
+    if (!url) {
+      canvas.innerHTML = `<div class="placeholder">No image yet<b>${displayId(item.id)}</b></div>`;
+      $("#if-full").style.visibility = "hidden";
+      return;
+    }
+
+    const dlBtn = $("#if-full");
+    dlBtn.href = item.master || url;
+    dlBtn.style.visibility = item.master ? "" : "hidden";
+
+    // Derive thumb URL; falls back gracefully if no _prev.jpg suffix
+    const thumbUrl = url.replace(/_prev\.jpg$/, "_thumb.jpg");
+    const hasThumb = thumbUrl !== url;
+
+    const fullImg  = new Image();
+    fullImg.alt      = item.title;
+    fullImg.draggable = false;
+
+    let thumbActive = false; // true once thumb is in the DOM
+
+    function showFull() {
+      if (gen !== renderGen) return; // stale — a newer item was selected
+      zoomState.naturalW = fullImg.naturalWidth;
+      zoomState.naturalH = fullImg.naturalHeight;
+
+      if (thumbActive) {
+        // Append full on top of thumb, already invisible
+        fullImg.style.opacity = "0";
+        canvas.appendChild(fullImg);
+        // fitToFrame writes into zoomState + applyTransform on currentImg (still thumb)
+        // Recalculate fit for full's actual dimensions while currentImg is still thumb,
+        // then switch currentImg and apply.
+        const stage = $("#stage");
+        const sw = stage.clientWidth, sh = stage.clientHeight;
+        const pad = 40;
+        const fit = Math.min(
+          (sw - pad*2) / fullImg.naturalWidth,
+          (sh - pad*2) / fullImg.naturalHeight, 1
+        );
+        zoomState.fitScale = fit;
+        zoomState.scale    = fit;
+        zoomState.tx = 0; zoomState.ty = 0;
+        currentImg = fullImg;
+        applyTransform(); updateZoomUI();
+
+        // Fade in full, then remove thumb
+        requestAnimationFrame(() => {
+          fullImg.style.transition = "opacity 300ms ease-in-out";
+          fullImg.style.opacity    = "1";
+          setTimeout(() => {
+            fullImg.style.transition = "";
+            const thumb = canvas.querySelector("img.hh-thumb");
+            if (thumb) canvas.removeChild(thumb);
+          }, 320);
+        });
+      } else {
+        // Full arrived before thumb (rare on cold load, normal on cached)
         zoomState.rotation = 0;
-        currentImg = img;
-        canvas.appendChild(img);
+        currentImg = fullImg;
+        canvas.appendChild(fullImg);
         fitToFrame();
-        canvas.classList.remove("no-zoom");
-      };
-      img.onerror = () => {
+      }
+      canvas.classList.remove("no-zoom");
+    }
+
+    fullImg.onload  = showFull;
+    fullImg.onerror = () => {
+      if (gen !== renderGen) return;
+      if (!thumbActive) {
         canvas.innerHTML = `<div class="placeholder">Preview failed<b>${displayId(item.id)}</b></div>`;
         currentImg = null;
         canvas.classList.add("no-zoom");
+      }
+      // If thumb is showing, leave it — better than nothing
+    };
+
+    if (hasThumb) {
+      const thumbImg  = new Image();
+      thumbImg.alt      = item.title;
+      thumbImg.draggable = false;
+      thumbImg.className = "hh-thumb";
+
+      thumbImg.onload = () => {
+        if (gen !== renderGen) return; // stale
+        if (currentImg === fullImg) return; // full already rendered, skip
+        zoomState.naturalW = thumbImg.naturalWidth;
+        zoomState.naturalH = thumbImg.naturalHeight;
+        zoomState.rotation = 0;
+        currentImg = thumbImg;
+        canvas.appendChild(thumbImg);
+        fitToFrame();
+        canvas.classList.remove("no-zoom");
+        thumbActive = true;
       };
-      img.src = url;
-    } else {
-      canvas.innerHTML = `<div class="placeholder">No image yet<b>${displayId(item.id)}</b></div>`;
-      $("#if-full").style.visibility = "hidden";
-      currentImg = null;
-      canvas.classList.add("no-zoom");
+      // onerror on thumb: silently ignored — full will show when ready
+
+      thumbImg.src = thumbUrl;
     }
+
+    fullImg.src = url; // start loading full immediately (parallel with thumb)
   }
 
   function fitToFrame() {
