@@ -458,6 +458,7 @@
   </nav>
   <div class="site-topright">
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode">◑</button>
+    <button class="theme-btn" id="fs-toggle" title="Enter fullscreen">⤢</button>
     <span id="topright" title="Double-click to refresh catalogue from Wikibase" style="cursor:default">v0.6</span>
   </div>
 </header>
@@ -1403,6 +1404,25 @@ WHERE {
 
     $("#nav-prev").addEventListener("click", e => { e.preventDefault(); selectAdjacent(-1); });
     $("#nav-next").addEventListener("click", e => { e.preventDefault(); selectAdjacent(+1); });
+
+    // Fullscreen toggle
+    const fsBtn = $("#fs-toggle");
+    if (fsBtn && document.fullscreenEnabled) {
+      fsBtn.addEventListener("click", () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          document.exitFullscreen();
+        }
+      });
+      document.addEventListener("fullscreenchange", () => {
+        const inFs = !!document.fullscreenElement;
+        fsBtn.textContent = inFs ? "⤡" : "⤢";
+        fsBtn.title = inFs ? "Exit fullscreen" : "Enter fullscreen";
+      });
+    } else if (fsBtn) {
+      fsBtn.style.display = "none"; // hide if API unavailable
+    }
 
     document.addEventListener("keydown", e => {
       const inInput = e.target.matches("input, select, textarea");
