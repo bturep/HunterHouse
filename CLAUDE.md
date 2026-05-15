@@ -334,30 +334,44 @@ git push && git push --tags
 
 ---
 
-### Pending: ID rename migration (HH-A-XXXX → HH-HHC-XXXX)
-
-**Decision made 2026-05-14:**
-- All Hunter House Collection items: `HH-A-XXXX` → `HH-HHC-XXXX` (same number, same zero-padding)
-- CAA items: `HH-A-XXXX` → `HH-CAA-XXXX`
-- Fulker items: `HH-A-XXXX` → `HH-FUL-XXXX`
-- Each collection has its own sequence; numbers are preserved from current assignment
-- Type letter (D/P/E/L/N) becomes UI-only, derived from P1 (instance of), not embedded in ID
-- Old IDs preserved in P97 on every item
+### ID rename migration (HH-A-XXXX → HH-HHC-XXXX / HH-CAA-XXXX)
 
 Status: **COMPLETE — 2026-05-14**
-- 149 items renamed in Wikibase (P2 updated, old ID saved to P97)
-- 290 R2 files copied to new names (old HH-A- files still in bucket, pending deletion)
-- browse.html cache bumped to v7, tagged v0.6
-- Revert script available at `scripts/revert_ids.py` if needed
+- 149 items renamed in Wikibase (P2 updated, old HH-A- ID saved to P97)
+- 290 R2 files copied to new names (old HH-A- files still in bucket, pending cleanup)
+- Revert script: `scripts/revert_ids.py`
+
+---
+
+### HHC renumber (HH-HHC-0036–0149 → HH-HHC-0001–0114)
+
+Status: **COMPLETE — 2026-05-14**, tagged v0.7
+- 114 HHC items renumbered in Wikibase (P2 updated, HH-HHC-003X IDs saved to P97)
+- 220 R2 files copied to new sequential names (old HH-HHC-003X files still in bucket, pending cleanup)
+- Post-renumber snapshot: `HH_Snapshot_2026-05-14_PostHHCRenumber.tsv`
+- Revert script: `scripts/revert_hhc_renumber.py`
+
+**PENDING: R2 cleanup — delete stale files**
+After verifying browse.html shows correct images, delete two sets of stale files from R2:
+1. Original `HH-A-XXXX` files (from pre-rename state)
+2. Intermediate `HH-HHC-003X` files (from first rename, before renumber)
+
+Use `rclone ls hh-r2:hunter-house-archive` to list and `rclone delete` to remove individually, or write a cleanup script from the mapping files.
 
 ---
 
 ## Scripts
 
-### `scripts/patch_dates.py`
-Adds P82 date claims and updates English descriptions on a hardcoded list of 18 items. Reads bot credentials from `.env`. No prompts.
+| Script | Purpose |
+|---|---|
+| `scripts/patch_dates.py` | Adds P82 date claims + updates descriptions on a hardcoded item list |
+| `scripts/rename_ids.py` | Forward script: HH-A-XXXX → HH-HHC-XXXX / HH-CAA-XXXX (COMPLETE) |
+| `scripts/revert_ids.py` | Revert script for above |
+| `scripts/renumber_hhc.py` | Forward script: HH-HHC-0036–0149 → HH-HHC-0001–0114 (COMPLETE) |
+| `scripts/revert_hhc_renumber.py` | Revert script for above |
+| `scripts/renumber_hhc_r2.sh` | rclone copy for HHC renumber R2 files (COMPLETE) |
 
-To adapt for a new batch: copy the script, replace the `ITEMS` list, adjust `desc` template and year in `main()`.
+All scripts load bot credentials from `~/Documents/hh-wikibase-migration/.env` automatically.
 
 ---
 
@@ -403,18 +417,19 @@ Q###|P82|+1992-00-00T00:00:00Z/9
 ### Create a new archive item (QuickStatements)
 ```
 CREATE
-LAST|Len|"HH-A-0148"
+LAST|Len|"HH-HHC-0115"
 LAST|Den|"architectural drawing; HHC; 1992"
 LAST|P1|Q88
-LAST|P2|"HH-A-0148"
+LAST|P2|"HH-HHC-0115"
 LAST|P79|Q180
 LAST|P80|Q201
 LAST|P82|+1992-00-00T00:00:00Z/9
 LAST|P62|Q###
 LAST|P88|Q99
-LAST|P96|"https://archive.hunterhousefoundation.com/preview/HH-A-0148.jpg"
+LAST|P96|"https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0115_Label_Date_prev.jpg"
 LAST|P100|"Prose note here."
 ```
+Next available HHC ID: **HH-HHC-0115**. Next available CAA ID: **HH-CAA-0036**.
 
 ### Add a new project phase
 ```
@@ -509,3 +524,29 @@ Append an entry after every major task. Format: `### YYYY-MM-DD — brief title`
 
 **Files changed**
 `index.html` (replaced), `assets/inverse.css` (view-transition block added)
+
+---
+
+### 2026-05-14 — HHC renumber + browse type mark fix (v0.7)
+
+**HHC renumber: HH-HHC-0036–0149 → HH-HHC-0001–0114**
+- 114 HHC items had IDs offset by +35 from original shared sequence with CAA items.
+- Decision: numbers are purely digital, no physical labels, so renumber to a clean sequence starting at 0001.
+- Protocol followed: mapping file generated, scripts written with dry-run, R2 copy first, Wikibase second.
+- `scripts/renumber_hhc.py` ran: 114/114, Errors: 0.
+- `scripts/renumber_hhc_r2.sh` ran: 220 files (110 previews + 110 masters) copied to new names.
+- Old R2 files (HH-A- prefix AND intermediate HH-HHC-003X) NOT yet deleted — pending cleanup pass.
+- Post-renumber snapshot saved: `HH_Snapshot_2026-05-14_PostHHCRenumber.tsv`
+- Revert script available: `scripts/revert_hhc_renumber.py`
+
+**browse.html type mark fix**
+- Type marks were showing wrong abbreviations (Ph, Pm, En) vs. user spec (P, PM, EN).
+- Corrected TYPE_MARKS and BADGE_LEGEND to: D, P, L, EN, N, E, PM, R.
+- Type marks derive from P1 (instance of) itypeLabel — not from the archive ID prefix.
+- Cache key bumped v7 → v8. Version display updated v0.5 → v0.6.
+
+**Tagged v0.7** on main. Next available HHC ID: HH-HHC-0115. Next CAA: HH-CAA-0036.
+
+**Remaining pending**
+- R2 cleanup: delete stale `HH-A-XXXX` and `HH-HHC-003X` files once browse.html verified.
+- WIKIBASE.md identifier schema section still shows old HH-A-#### format — needs updating.
