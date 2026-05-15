@@ -158,6 +158,8 @@
   .row .archid .tmark[data-type="PM"]{color:#4e6b40;border-color:#c8d9be;background:#e8f2e2}
   .row .archid .tmark[data-type="E"]{color:#6b4e6b;border-color:#d9bed9;background:#f2e8f2}
   .row .archid .tmark[data-type="R"]{color:#6b5a3d;border-color:#d9cdb8;background:#f2ede4}
+  .row .archid .tmark[data-type="LS"]{color:#3d6b5a;border-color:#bed9ce;background:#e2f2ec}
+  .row .archid .tmark[data-type="EN"]{color:#5a3d6b;border-color:#cdb8d9;background:#ede4f2}
   .row.sel .archid .tmark{color:var(--red-deep)!important;border-color:var(--red-pale)!important;background:var(--red-pale)!important}
   .row .title-wrap{min-width:0;overflow:hidden}
   .row .title{
@@ -512,8 +514,9 @@
   const BADGE_LEGEND = [
     ["D",  "Drawing"],
     ["P",  "Photograph"],
-    ["L",  "Letter / Correspondence"],
+    ["LS", "Land survey"],
     ["EN", "Engineering document"],
+    ["L",  "Letter / Correspondence"],
     ["N",  "Notebook / Sketch"],
     ["E",  "Ephemera"],
     ["PM", "Permit set"],
@@ -546,7 +549,7 @@
     return (await res.json()).results.bindings;
   }
 
-  const CACHE_KEY = "hhf_catalogue_v10";
+  const CACHE_KEY = "hhf_catalogue_v11";
   const CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours
 
   function clearCache() {
@@ -682,7 +685,7 @@ WHERE {
   const TYPE_MARKS = {
     "drawing":"D","photograph":"P","letter":"L","correspondence":"L",
     "engineering":"EN","engineering document":"EN","notebook":"N","sketch":"N",
-    "ephemera":"E","permit":"PM","report":"R",
+    "ephemera":"E","permit":"PM","report":"R","land survey":"LS",
   };
   function typeMark(itemType) {
     if (!itemType) return "";
