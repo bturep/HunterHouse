@@ -344,7 +344,11 @@ git push && git push --tags
 - Type letter (D/P/E/L/N) becomes UI-only, derived from P1 (instance of), not embedded in ID
 - Old IDs preserved in P97 on every item
 
-Status: **not yet started** — protocol above must be followed when this begins.
+Status: **COMPLETE — 2026-05-14**
+- 149 items renamed in Wikibase (P2 updated, old ID saved to P97)
+- 290 R2 files copied to new names (old HH-A- files still in bucket, pending deletion)
+- browse.html cache bumped to v7, tagged v0.6
+- Revert script available at `scripts/revert_ids.py` if needed
 
 ---
 
