@@ -18,6 +18,7 @@ Example:
 import subprocess, os, sys, tempfile, shutil
 
 DRY_RUN    = "--dry-run" in sys.argv
+THUMB_MODE = "--thumb" in sys.argv
 COLLECTION = next((a for a in sys.argv[1:] if a in ("hhc", "caa")), None)
 
 R2 = "hh-r2:hunter-house-archive"
@@ -25,15 +26,25 @@ COLLECTIONS = {
     "hhc": {
         "masters":  f"{R2}/hunter-house-collection/masters",
         "previews": f"{R2}/hunter-house-collection/previews",
+        "thumbs":   f"{R2}/hunter-house-collection/thumbs",
     },
     "caa": {
         "masters":  f"{R2}/canadian-architecture-archive/masters",
         "previews": f"{R2}/canadian-architecture-archive/previews",
+        "thumbs":   f"{R2}/canadian-architecture-archive/thumbs",
     },
 }
 
-SIZE    = 2000  # px on longest side
-QUALITY = 82    # JPEG quality
+if THUMB_MODE:
+    SIZE    = 600  # px on longest side
+    QUALITY = 75   # JPEG quality
+    SUFFIX  = "_thumb.jpg"
+    DEST_KEY = "thumbs"
+else:
+    SIZE    = 2000  # px on longest side
+    QUALITY = 82    # JPEG quality
+    SUFFIX  = "_prev.jpg"
+    DEST_KEY = "previews"
 
 
 def run(cmd):
@@ -52,15 +63,15 @@ def process(name, paths, tmpdir):
     ok = err = 0
 
     for master in masters:
-        base    = master[:-4]            # strip .tif
-        preview = f"{base}_prev.jpg"
+        base      = master[:-4]              # strip .tif
+        outname   = f"{base}{SUFFIX}"
         local_tif = os.path.join(tmpdir, master)
-        local_jpg = os.path.join(tmpdir, preview)
+        local_jpg = os.path.join(tmpdir, outname)
 
         print(f"  {base}", end="", flush=True)
 
         if DRY_RUN:
-            print(f"  →  {preview}  (dry run)")
+            print(f"  →  {outname}  (dry run)")
             ok += 1
             continue
 
@@ -76,7 +87,7 @@ def process(name, paths, tmpdir):
             kb = os.path.getsize(local_jpg) // 1024
             print(f" → {kb}KB", end="", flush=True)
 
-            run(["rclone", "copy", local_jpg, paths["previews"]])
+            run(["rclone", "copy", local_jpg, paths[DEST_KEY]])
             print(" ↑ done")
             ok += 1
 
@@ -88,6 +99,7 @@ def process(name, paths, tmpdir):
                 if os.path.exists(f):
                     os.remove(f)
 
+
     return ok, err
 
 
@@ -95,7 +107,9 @@ def main():
     targets = {COLLECTION: COLLECTIONS[COLLECTION]} if COLLECTION else COLLECTIONS
     tmpdir  = tempfile.mkdtemp(prefix="hh_prev_")
 
-    print(f"Target: {SIZE}px longest side, {QUALITY}% JPEG quality")
+    mode = "THUMB (600px/75%)" if THUMB_MODE else "PREVIEW (2000px/82%)"
+    print(f"Mode: {mode}")
+    print(f"Target: {SIZE}px longest side, {QUALITY}% JPEG quality → {SUFFIX}")
     print(f"Collections: {', '.join(targets).upper()}")
     if DRY_RUN:
         print("DRY RUN — no changes will be made")
