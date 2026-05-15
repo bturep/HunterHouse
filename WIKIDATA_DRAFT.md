@@ -25,6 +25,10 @@ LAST|P27|Q16
 LAST|P69|Q1075124
 LAST|P973|"https://searcharchives.ucalgary.ca/richard-hunter-accession"
 ```
+https://searcharchives.ucalgary.ca/richard-hunter-accession
+https://searcharchives.ucalgary.ca/richard-hunter
+Also link him to Bruce Goff, Erich Mendehlson, Gary Snyder 
+
 
 **Property notes:**
 - P31 Q5 = instance of: human
