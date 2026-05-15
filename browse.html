@@ -119,8 +119,12 @@
   .filter-badge.visible{display:inline-block}
 
   /* ── filter toggle button ── */
-  #filter-toggle{font-size:13px;letter-spacing:0;padding:0 2px;line-height:1}
-  #filter-toggle.fp-open{color:var(--ink)}
+  #filter-toggle{
+    background:none;border:0;padding:0;margin-left:8px;cursor:pointer;
+    font-family:var(--mono);font-size:13px;color:var(--muted);line-height:1;
+    vertical-align:middle;letter-spacing:0;
+  }
+  #filter-toggle:hover,#filter-toggle.fp-open{color:var(--ink)}
 
   /* ── filter panel ── */
   .filter-panel{
@@ -486,9 +490,8 @@
 
   <section class="pane-list mobile-active">
     <div class="list-head">
-      <span class="l">Browse<span class="filter-badge" id="filter-badge"></span></span>
+      <span class="l">Browse<span class="filter-badge" id="filter-badge"></span><button id="filter-toggle" title="Filter">›</button></span>
       <div class="sort-mini">
-        <button class="sort-hd" id="filter-toggle" title="Filter">›</button>
         <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>
         <button class="sort-hd" data-sort-col="phase">Phase<span class="sort-arrow" id="sa-phase"></span></button>
         <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>
