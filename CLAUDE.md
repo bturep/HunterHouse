@@ -166,7 +166,8 @@ See **`WIKIBASE.md`** for the full property table, all controlled-vocabulary QID
 | P82 | date created | year precision `/9` |
 | P88 | drawing type | Q98=plan, Q99=elevation, etc. |
 | P96 | preview image | URL — required for browse.html display |
-| P100 | notes | prose shown in meta pane |
+| P100 | notes | curator prose note — shown at bottom of record pane |
+| P142 | Physical location | archival path string, e.g. "S0004, SS0001, SSS0018, FL0003" |
 
 ### Bot patching via API
 ```bash
@@ -734,3 +735,27 @@ Append an entry after every major task. Format: `### YYYY-MM-DD — brief title`
 
 **Files changed**
 `index.html`, `browse.html`, `CLAUDE.md`
+
+---
+
+### 2026-05-15 — P142 Physical location + browse.html record pane overhaul (continued session)
+
+**Wikibase — P142 "Physical location" property**
+- New property P142 created (datatype: string) — stores the archival hierarchy path for CAA items.
+- Migration script `scripts/migrate_p142_location.py` moved paths from P100 into P142 for all 20 CAA drawing items.
+- 4 items were pure prose (no fonds path) — skipped.
+- 2 items had both a path and a "Note: ..." prose — path moved to P142, prose retained in P100.
+- 18 items had path only — P100 cleared after migration.
+- Example P142 value: `"S0004, SS0001, SSS0018, FL0003"`.
+
+**browse.html — record pane changes**
+- SPARQL extended with `OPTIONAL { ?item wdt:P142 ?location }`.
+- Location added to item model and search haystack.
+- Archival section now shows Location row: P142 string rendered as breadcrumb (`S0004 › SS0001 › SSS0018 › FL0003`) in `.location-path` mono style.
+- P100 notes removed from Archival section rows entirely.
+- P100 notes now appear as a `.curator-note` paragraph at the very bottom of the record pane — italic, muted, separated by a top border rule.
+- Removed dead `notesLabel()` and `formatNotes()` helper functions; removed `.fonds-path` CSS.
+- Cache key bumped v19 → v20.
+
+**Files changed**
+`browse.html`, `CLAUDE.md`, `scripts/migrate_p142_location.py` (new)
