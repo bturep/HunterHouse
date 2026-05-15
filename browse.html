@@ -292,17 +292,12 @@
   .kv dd a:hover{border-bottom-color:var(--copper-deep)}
 
   /* browse-local pill/archid (smaller than verso.css defaults) */
-  .pill{display:inline-flex;align-items:center;height:18px;padding:0 7px;font-size:10.5px;margin:0 3px 3px 0;white-space:nowrap;background:var(--copper-pale);color:var(--copper-deep)}
-  button.area-pill,button.type-pill,button.drawtype-pill{border:none;cursor:pointer;font-family:inherit}
-  /* area — copper/sage (default) */
-  button.area-pill{background:var(--copper-pale);color:var(--copper-deep)}
-  button.area-pill:hover,button.area-pill.active{background:var(--copper-deep);color:var(--bg)}
-  /* item type — slate blue */
-  button.type-pill{height:auto;padding:3px 8px;align-items:center;gap:0;background:#e4ecf4;color:#3a5470}
-  button.type-pill:hover,button.type-pill.active{background:#3a5470;color:var(--bg)}
-  /* drawing type — warm stone */
-  button.drawtype-pill{background:#ede8e0;color:#6b5540}
-  button.drawtype-pill:hover,button.drawtype-pill.active{background:#6b5540;color:var(--bg)}
+  .pill{display:inline-flex;align-items:center;height:18px;padding:0 7px;font-size:10.5px;margin:0 3px 3px 0;white-space:nowrap}
+  button.area-pill,button.type-pill,button.drawtype-pill{border:none;cursor:pointer;font-family:inherit;background:var(--pb,var(--copper-pale));color:var(--pf,var(--copper-deep))}
+  button.area-pill:hover,button.area-pill.active,
+  button.type-pill:hover,button.type-pill.active,
+  button.drawtype-pill:hover,button.drawtype-pill.active{background:var(--pd,var(--copper-deep));color:var(--bg)}
+  button.type-pill{height:auto;padding:3px 8px;align-items:center;gap:0}
   .archid-mono{font-family:var(--mono);font-size:11px;color:var(--red);background:var(--red-pale);padding:1.5px 7px;letter-spacing:0.04em;white-space:nowrap}
   .rights-note{display:block;font-size:10.5px;color:var(--muted);margin-top:3px;font-style:italic}
   /* dark mode overrides for hardcoded colours */
@@ -312,10 +307,6 @@
   html.dark .row .archid .tmark[data-type="R"]{color:#b0966a;border-color:rgba(176,150,106,0.3);background:rgba(176,150,106,0.12)}
   html.dark .row .archid .tmark[data-type="LS"]{color:#70aaa0;border-color:rgba(112,170,160,0.3);background:rgba(112,170,160,0.12)}
   html.dark .row .archid .tmark[data-type="EN"]{color:#9a7ac4;border-color:rgba(154,122,196,0.3);background:rgba(154,122,196,0.12)}
-  html.dark button.type-pill{background:rgba(90,130,170,0.18);color:#a0c0d8}
-  html.dark button.type-pill:hover,html.dark button.type-pill.active{background:#5a8aaa;color:var(--bg)}
-  html.dark button.drawtype-pill{background:rgba(160,130,100,0.18);color:#c8aa88}
-  html.dark button.drawtype-pill:hover,html.dark button.drawtype-pill.active{background:#8a6a48;color:var(--bg)}
   html.dark .list-fleuron img{filter:invert(1)}
 
   .meta-actions{display:flex;align-items:stretch;gap:1px;background:var(--ink);width:fit-content;margin-bottom:20px}
@@ -754,6 +745,34 @@ WHERE {
     return TYPE_MARKS[itemType.toLowerCase()] || itemType.slice(0,1).toUpperCase();
   }
 
+  // Pill colour palette — 6 muted tones matching the badge colours
+  const PILL_PALETTE = [
+    { pb:"#e8f2f8", pf:"#3d6b8a", pd:"#2a4a62" }, // blue (Photograph)
+    { pb:"#e8f2e2", pf:"#4e6b40", pd:"#354b2b" }, // green (Permit set)
+    { pb:"#f2e8f2", pf:"#6b4e6b", pd:"#4a344a" }, // mauve (Ephemera)
+    { pb:"#f2ede4", pf:"#6b5a3d", pd:"#4a3e2a" }, // warm brown (Report)
+    { pb:"#e2f2ec", pf:"#3d6b5a", pd:"#2a4a3e" }, // teal (Land survey)
+    { pb:"#ede4f2", pf:"#5a3d6b", pd:"#3e2a4a" }, // purple (Engineering)
+  ];
+  // Item type → pill colour, matched to badge colours
+  const TYPE_PILL_COLORS = {
+    "D":  { pb:"#dde6df", pf:"#365549", pd:"#243a31" }, // copper (Drawing)
+    "P":  PILL_PALETTE[0],
+    "PM": PILL_PALETTE[1],
+    "E":  PILL_PALETTE[2],
+    "R":  PILL_PALETTE[3],
+    "LS": PILL_PALETTE[4],
+    "EN": PILL_PALETTE[5],
+  };
+  function pillStyle(c) {
+    return `--pb:${c.pb};--pf:${c.pf};--pd:${c.pd}`;
+  }
+  function hashPillColor(str) {
+    let h = 5381;
+    for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
+    return PILL_PALETTE[Math.abs(h) % PILL_PALETTE.length];
+  }
+
   function renderList() {
     const container = $("#rows");
     container.innerHTML = "";
@@ -998,7 +1017,7 @@ WHERE {
     $("#meta-source").textContent = item.sourceCollection || "—";
 
     const areasHtml = (item.areas || []).map(a =>
-      `<button class="pill area-pill${state.filterArea === a ? " active" : ""}" data-area="${escapeHTML(a)}">${escapeHTML(a)}</button>`
+      `<button class="pill area-pill${state.filterArea === a ? " active" : ""}" style="${pillStyle(hashPillColor(a))}" data-area="${escapeHTML(a)}">${escapeHTML(a)}</button>`
     ).join("");
 
     const descRows = [];
@@ -1011,13 +1030,14 @@ WHERE {
     if (item.itemType) {
       const mark = typeMark(item.itemType);
       const isActive = state.filterType === item.itemType;
+      const tc = TYPE_PILL_COLORS[mark] || TYPE_PILL_COLORS["D"];
       descRows.push(["Item type",
-        `<button class="pill type-pill${isActive ? " active" : ""}" data-itype="${escapeHTML(item.itemType)}">${escapeHTML(item.itemType)}</button>`
+        `<button class="pill type-pill${isActive ? " active" : ""}" style="${pillStyle(tc)}" data-itype="${escapeHTML(item.itemType)}">${escapeHTML(item.itemType)}</button>`
       ]);
     }
     if (item.drawTypes?.length) {
       const drawHtml = sortDrawTypes(item.drawTypes).map(dt =>
-        `<button class="pill drawtype-pill${state.filterDrawType === dt ? " active" : ""}" data-drawtype="${escapeHTML(dt)}">${escapeHTML(dt)}</button>`
+        `<button class="pill drawtype-pill${state.filterDrawType === dt ? " active" : ""}" style="${pillStyle(hashPillColor(dt))}" data-drawtype="${escapeHTML(dt)}">${escapeHTML(dt)}</button>`
       ).join("");
       descRows.push(["Drawing type", drawHtml]);
     }
@@ -1033,7 +1053,7 @@ WHERE {
         : "Contact the Hunter House Foundation.";
       archRows.push(["Rights", `${escapeHTML(item.rights)}<span class="rights-note">${escapeHTML(contact)}</span>`]);
     }
-    if (item.archiveLink)  archRows.push(["Archive record", `<a href="${escapeHTML(item.archiveLink)}" target="_blank" rel="noopener">↗ External record</a>`]);
+    if (item.archiveLink)  archRows.push(["Archive record", `<a href="${escapeHTML(item.archiveLink)}" target="_blank" rel="noopener">↗ University of Calgary Special Collections</a>`]);
 
     const descHTML = descRows.map(([k,v]) => `<div class="row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
     const archHTML = archRows.map(([k,v]) => `<div class="row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
