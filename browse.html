@@ -86,7 +86,7 @@
   .list-head .l{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;letter-spacing:0.18em;text-transform:uppercase;display:flex;align-items:center;gap:6px}
   .sort-mini{display:flex;gap:14px;align-items:center}
   .sort-mini .sort-hd{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
-  .rows{flex:1;overflow-y:auto}
+  .rows{flex:1;overflow-y:auto;display:flex;flex-direction:column}
 
   /* ── phase dividers ── */
   .phase-divider{
@@ -390,8 +390,8 @@
 
   .graph-empty{font-family:var(--mono);font-size:10px;color:var(--hint);letter-spacing:0.04em;line-height:1.6;padding:8px 0}
   .empty{display:flex;align-items:center;justify-content:center;height:100%;font-family:var(--mono);font-size:11px;color:var(--hint);letter-spacing:0.1em;text-transform:uppercase;text-align:center;padding:24px}
-  .load-msg{padding:24px;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.06em}
-  .error-msg{padding:24px;font-family:var(--mono);font-size:11px;color:var(--red);letter-spacing:0.04em}
+  .load-msg{flex:1;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;color:var(--hint);letter-spacing:0.1em;text-transform:uppercase;text-align:center;padding:24px}
+  .error-msg{flex:1;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;color:var(--red);letter-spacing:0.04em;text-align:center;padding:24px}
 
   /* ── mobile tabs (hidden on desktop) ── */
   .mobile-tabs{display:none}
