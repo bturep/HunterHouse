@@ -631,7 +631,7 @@ WHERE {
       }
     }
 
-    const items = [...map.values()].sort((a, b) => idNum(a) - idNum(b));
+    const items = [...map.values()].sort((a, b) => (a.id || "").localeCompare(b.id || ""));
 
     try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), items })); } catch {}
 
@@ -654,9 +654,9 @@ WHERE {
     const dir = state.sortDir === "asc" ? 1 : -1;
     const dateKey = it => it.date || "9999-99-99";
     const comparators = {
-      "id":    (a, b) => dir * (idNum(a) - idNum(b)),
-      "phase": (a, b) => dir * (a.phase||"").localeCompare(b.phase||"") || idNum(a) - idNum(b),
-      "year":  (a, b) => dir * dateKey(a).localeCompare(dateKey(b)) || idNum(a) - idNum(b),
+      "id":    (a, b) => dir * (a.id || "").localeCompare(b.id || ""),
+      "phase": (a, b) => dir * (a.phase||"").localeCompare(b.phase||"") || (a.id||"").localeCompare(b.id||""),
+      "year":  (a, b) => dir * dateKey(a).localeCompare(dateKey(b)) || (a.id||"").localeCompare(b.id||""),
     };
     state.filtered.sort(comparators[state.sortCol] || comparators["year"]);
   }
