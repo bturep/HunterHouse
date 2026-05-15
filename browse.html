@@ -145,7 +145,7 @@
   .list-head > .sort-hd.r{justify-content:flex-end}
   .sort-hd:hover{color:var(--ink)}
   .sort-hd.active{color:var(--ink)}
-  .sort-arrow{font-size:7px;line-height:1;font-family:var(--sans);letter-spacing:0}
+  .sort-arrow{font-size:7px;line-height:1;font-family:var(--sans);letter-spacing:0;display:inline-block;min-width:9px;text-align:center}
   .sort-hd:not(.active):hover .sort-arrow::after{content:"↕";color:var(--rule)}
 
   /* ── filter badge on Browse label ── */
@@ -345,6 +345,18 @@
   .archid-mono{font-family:var(--mono);font-size:11px;color:var(--red);background:var(--red-pale);padding:1.5px 7px;letter-spacing:0.04em;white-space:nowrap}
   .rights-note{display:block;font-size:10.5px;color:var(--muted);margin-top:3px;font-style:italic}
   .fonds-path{display:block;font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:0.01em}
+  /* ── pill colour themes (replaces inline pillStyle) ── */
+  .pc-sage  {--pb:#dde6df;--pf:#365549;--pd:#243a31}
+  .pc-stone {--pb:#e8e2d6;--pf:#5a4830;--pd:#3c3020}
+  .pc-slate {--pb:#d8e2e8;--pf:#365264;--pd:#223548}
+  .pc-clay  {--pb:#ecddd3;--pf:#6b2a1e;--pd:#4a1c10}
+  .pc-moss  {--pb:#e0e8d0;--pf:#485430;--pd:#303c20}
+  html.dark .pc-sage  {--pb:rgba(54,85,73,0.18); --pf:#9cbfad;--pd:rgba(54,85,73,0.55)}
+  html.dark .pc-stone {--pb:rgba(90,72,48,0.18);  --pf:#c8a878;--pd:rgba(90,72,48,0.55)}
+  html.dark .pc-slate {--pb:rgba(54,82,100,0.18); --pf:#80a8c0;--pd:rgba(54,82,100,0.55)}
+  html.dark .pc-clay  {--pb:rgba(107,42,30,0.18); --pf:#c08878;--pd:rgba(107,42,30,0.55)}
+  html.dark .pc-moss  {--pb:rgba(72,84,48,0.18);  --pf:#98b068;--pd:rgba(72,84,48,0.55)}
+
   /* dark mode overrides for hardcoded colours */
   html.dark .row .archid .tmark[data-type="P"]{color:#7aafc4;border-color:rgba(122,175,196,0.3);background:rgba(122,175,196,0.12)}
   html.dark .row .archid .tmark[data-type="PM"]{color:#85aa70;border-color:rgba(133,170,112,0.3);background:rgba(133,170,112,0.12)}
@@ -851,20 +863,15 @@ WHERE {
   // Pill colour palette — 6 muted tones matching the badge colours
   // Pill colour tokens — drawn from the badge palette
   const PC = {
-    // Built from the two established poles: red #8b3a2a and sage #4f7a6b
-    sage:  { pb:"#dde6df", pf:"#365549", pd:"#243a31" },  // Areas — existing
-    stone: { pb:"#e8e2d6", pf:"#5a4830", pd:"#3c3020" },  // Item type — warm amber-tan (red hue shifted +25°, heavily desaturated)
-    slate: { pb:"#d8e2e8", pf:"#365264", pd:"#223548" },  // Drawing type — cool blue-grey (architectural)
-    clay:  { pb:"#ecddd3", pf:"#6b2a1e", pd:"#4a1c10" },  // Creator — uses --red-pale / --red-deep directly
-    moss:  { pb:"#e0e8d0", pf:"#485430", pd:"#303c20" },  // Built status — olive (midpoint between sage and stone)
+    sage:  { cls:"pc-sage"  },
+    stone: { cls:"pc-stone" },
+    slate: { cls:"pc-slate" },
+    clay:  { cls:"pc-clay"  },
+    moss:  { cls:"pc-moss"  },
   };
-  // All item type pills use stone — category colour, not per-value colour
   function itemTypePillColor() { return PC.stone; }
-  // All drawing type pills use slate — unified per category
   function drawTypePillColor() { return PC.slate; }
-  function pillStyle(c) {
-    return `--pb:${c.pb};--pf:${c.pf};--pd:${c.pd}`;
-  }
+  function pillCls(c) { return c ? c.cls : ""; }
 
   function renderList() {
     const container = $("#rows");
@@ -1083,7 +1090,7 @@ WHERE {
     $("#meta-source").textContent = item.sourceCollection || "—";
 
     const areasHtml = (item.areas || []).map(a =>
-      `<button class="pill area-pill${state.filterArea.has(a) ? " active" : ""}" style="${pillStyle(PC.sage)}" data-area="${escapeHTML(a)}">${escapeHTML(a)}</button>`
+      `<button class="pill area-pill ${pillCls(PC.sage)}${state.filterArea.has(a) ? " active" : ""}" data-area="${escapeHTML(a)}">${escapeHTML(a)}</button>`
     ).join("");
 
     const descRows = [];
@@ -1097,31 +1104,31 @@ WHERE {
     if (item.itemType) {
       const isActive = state.filterType.has(item.itemType);
       descRows.push(["Item type",
-        `<button class="pill type-pill${isActive ? " active" : ""}" style="${pillStyle(itemTypePillColor())}" data-itype="${escapeHTML(item.itemType)}">${escapeHTML(item.itemType)}</button>`
+        `<button class="pill type-pill ${pillCls(itemTypePillColor())}${isActive ? " active" : ""}" data-itype="${escapeHTML(item.itemType)}">${escapeHTML(item.itemType)}</button>`
       ]);
     }
     if (item.drawTypes?.length) {
       const drawHtml = sortDrawTypes(item.drawTypes).map(dt =>
-        `<button class="pill drawtype-pill${state.filterDrawType.has(dt) ? " active" : ""}" style="${pillStyle(drawTypePillColor(dt))}" data-drawtype="${escapeHTML(dt)}">${escapeHTML(dt)}</button>`
+        `<button class="pill drawtype-pill ${pillCls(drawTypePillColor(dt))}${state.filterDrawType.has(dt) ? " active" : ""}" data-drawtype="${escapeHTML(dt)}">${escapeHTML(dt)}</button>`
       ).join("");
       descRows.push(["Drawing type", drawHtml]);
     }
     if (item.medium)      descRows.push(["Medium", escapeHTML(item.medium)]);
     if (item.builtStatus) {
       const bsActive = state.filterBuiltStatus.has(item.builtStatus) ? " active" : "";
-      descRows.push(["Built", `<button class="pill builtstatus-pill${bsActive}" style="${pillStyle(PC.moss)}" data-builtstatus="${escapeHTML(item.builtStatus)}">${escapeHTML(item.builtStatus)}</button>`]);
+      descRows.push(["Built", `<button class="pill builtstatus-pill ${pillCls(PC.moss)}${bsActive}" data-builtstatus="${escapeHTML(item.builtStatus)}">${escapeHTML(item.builtStatus)}</button>`]);
     }
     if (item.creator) {
       const cActive = state.filterCreator.has(item.creator) ? " active" : "";
-      descRows.push([creatorLabel(item.itemType), `<button class="pill creator-pill${cActive}" style="${pillStyle(PC.clay)}" data-creator="${escapeHTML(item.creator)}">${escapeHTML(item.creator)}</button>`]);
+      descRows.push([creatorLabel(item.itemType), `<button class="pill creator-pill ${pillCls(PC.clay)}${cActive}" data-creator="${escapeHTML(item.creator)}">${escapeHTML(item.creator)}</button>`]);
     }
     if (item.designedBy) {
       const cActive = state.filterCreator.has(item.designedBy) ? " active" : "";
-      descRows.push(["Designed by", `<button class="pill creator-pill${cActive}" style="${pillStyle(PC.clay)}" data-creator="${escapeHTML(item.designedBy)}">${escapeHTML(item.designedBy)}</button>`]);
+      descRows.push(["Designed by", `<button class="pill creator-pill ${pillCls(PC.clay)}${cActive}" data-creator="${escapeHTML(item.designedBy)}">${escapeHTML(item.designedBy)}</button>`]);
     }
     if (item.builtBy) {
       const cActive = state.filterCreator.has(item.builtBy) ? " active" : "";
-      descRows.push(["Built by", `<button class="pill creator-pill${cActive}" style="${pillStyle(PC.clay)}" data-creator="${escapeHTML(item.builtBy)}">${escapeHTML(item.builtBy)}</button>`]);
+      descRows.push(["Built by", `<button class="pill creator-pill ${pillCls(PC.clay)}${cActive}" data-creator="${escapeHTML(item.builtBy)}">${escapeHTML(item.builtBy)}</button>`]);
     }
     if (item.heldBy)      descRows.push(["Held by", escapeHTML(item.heldBy)]);
 
@@ -1311,9 +1318,9 @@ WHERE {
 
     const group = (label, vals, activeSet, cls, attr, color) => {
       if (!vals.length) return "";
-      const s = color ? ` style="${pillStyle(color)}"` : "";
+      const pc = color ? ` ${pillCls(color)}` : "";
       const chips = vals.map(v =>
-        `<button class="fp-chip${activeSet.has(v) ? " on" : ""}"${s} data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}</button>`
+        `<button class="fp-chip${activeSet.has(v) ? " on" : ""}${pc}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}</button>`
       ).join("");
       return `<div class="fp-group fp-grp-${cls}"><div class="fp-lbl">${label}</div><div class="fp-chips">${chips}</div></div>`;
     };
