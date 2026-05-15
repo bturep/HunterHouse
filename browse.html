@@ -108,14 +108,14 @@
 
   /* ── list pane ── */
   .list-head{
-    display:flex;justify-content:space-between;align-items:center;
+    display:flex;align-items:center;
     height:41px;box-sizing:border-box;padding:0 20px 0 28px;
     border-bottom:1px solid var(--ink);flex-shrink:0;
   }
-  .list-head .l{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;letter-spacing:0.18em;text-transform:uppercase;display:flex;align-items:center;gap:6px;background:none;border:0;padding:0;cursor:pointer}
+  .list-head .l{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;letter-spacing:0.18em;text-transform:uppercase;display:flex;align-items:center;gap:6px;background:none;border:0;padding:0;cursor:pointer;flex-shrink:0}
   .list-head .l .filter-chevron{font-size:13px;color:var(--muted);letter-spacing:0;font-weight:400;line-height:1}
   .list-head .l:hover .filter-chevron,.list-head .l.fp-open .filter-chevron{color:var(--ink)}
-  .sort-mini{display:flex;gap:14px;align-items:center}
+  .sort-mini{flex:1;display:flex;gap:14px;align-items:center;padding:0 14px}
   .sort-mini .sort-hd{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
   .rows{flex:1;overflow-y:auto;display:flex;flex-direction:column;scrollbar-width:none}
   .rows::-webkit-scrollbar{display:none}
@@ -155,7 +155,7 @@
   .sort-hd.active{color:var(--ink)}
   .sort-arrow{font-size:7px;line-height:1;font-family:var(--sans);letter-spacing:0;display:inline-block;min-width:9px;text-align:center}
   .sort-hd:not(.active):hover .sort-arrow::after{content:"↕";color:var(--rule)}
-  .sort-hd[data-sort-col="year"]{justify-content:flex-end;min-width:50px}
+  .sort-year{flex-shrink:0;min-width:50px;justify-content:flex-end}
 
   /* ── filter badge on Browse label ── */
   .filter-badge{
@@ -539,8 +539,8 @@
       <div class="sort-mini">
         <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>
         <button class="sort-hd" data-sort-col="phase">Phase<span class="sort-arrow" id="sa-phase"></span></button>
-        <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>
       </div>
+      <button class="sort-hd sort-year" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>
     </div>
     <div class="filter-panel" id="filter-panel" hidden></div>
     <div class="rows" id="rows">
