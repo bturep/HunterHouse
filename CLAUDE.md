@@ -351,12 +351,9 @@ Status: **COMPLETE — 2026-05-14**, tagged v0.7
 - Post-renumber snapshot: `HH_Snapshot_2026-05-14_PostHHCRenumber.tsv`
 - Revert script: `scripts/revert_hhc_renumber.py`
 
-**PENDING: R2 cleanup — delete stale files**
-After verifying browse.html shows correct images, delete two sets of stale files from R2:
-1. Original `HH-A-XXXX` files (from pre-rename state)
-2. Intermediate `HH-HHC-003X` files (from first rename, before renumber)
-
-Use `rclone ls hh-r2:hunter-house-archive` to list and `rclone delete` to remove individually, or write a cleanup script from the mapping files.
+**COMPLETE: R2 cleanup — 2026-05-14**
+Deleted 510 stale files: 290 original `HH-A-XXXX` + 220 intermediate `HH-HHC-003X`.
+Script: `scripts/r2_cleanup.sh` (generated from both mapping files, kept for record).
 
 ---
 
