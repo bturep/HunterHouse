@@ -603,3 +603,33 @@ Append an entry after every major task. Format: `### YYYY-MM-DD — brief title`
 - SPARQL extended with `OPTIONAL { ?item wdt:P91 ?medium }`.
 - Medium added to item object, search haystack, and record pane as "Medium" row (after Drawing type, before Built).
 - Pushed and live.
+
+---
+
+### 2026-05-14 — CAA archival section polish + Wikidata preparation
+
+**browse.html — archival label improvements**
+- P100 notes moved from meta-lede paragraph into section 02 Archival as a row.
+- `notesLabel()` function: derives row label from `item.heldBy` — CAA items show "CAA fonds" (fonds-path notes) or "CAA note" (short curatorial). Other archives auto-derive from `ARCHIVE_ABBREV` map.
+- `formatNotes()` function: splits "Richard Hunter fonds (2019.61) — S0004…" at " — " onto two lines; fonds reference on line 1, hierarchy path muted below.
+- `archiveLinkLabel()` function: derives link text from `item.heldBy` — future non-CAA archives auto-labelled.
+- "Archive record" row renamed to "Finding aid".
+
+**Wikibase — P99 item-level AtoM links**
+- Confirmed AtoM URL pattern from user-provided link (FL0001 = 7-colour-studies-for-hunter-house).
+- Probed all 7 FL-level pages on searcharchives.ucalgary.ca — all live.
+- Updated P99 for all 25 CAA drawing items (0001–0009, 0020–0035) to item-level AtoM URLs.
+- FL mapping: FL0001→CAA-0029–0035, FL0002→0020–0024, FL0003→0001–0002, FL0004→0003–0006, FL0005→0007–0009, FL0006→0025–0027, FL0007→0028.
+- Photographs (CAA-0010–0019) left at series-level URL (hunter-residence-victoria-b-c-2) — no FL-level data.
+
+**Wikibase — P139 Wikidata QID property**
+- New property P139 "Wikidata QID" (datatype: external-id) created.
+- Purpose: cross-reference our Wikibase items to their Wikidata counterparts once those items are created.
+- Neither Richard Hunter nor the Canadian Architectural Archives currently has a Wikidata item.
+
+**Wikidata preparation — WIKIDATA_DRAFT.md**
+- File created at `/Users/brandonpoole/Projects/HunterHouse/WIKIDATA_DRAFT.md`.
+- Contains QuickStatements drafts for: (1) Richard Hunter person item, (2) Canadian Architectural Archives, (3) Richard Hunter fonds.
+- Contains full property mapping table: our Wikibase PID → Wikidata PID.
+- **Not yet submitted** — requires review before going live on Wikidata.
+- Once submitted: add resulting Q-numbers to P139 on Q201 (Hunter) and Q116 (CAA) in our Wikibase.
