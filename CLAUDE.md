@@ -385,6 +385,9 @@ Script: `scripts/r2_cleanup.sh` (generated from both mapping files, kept for rec
 | `scripts/renumber_hhc.py` | Forward script: HH-HHC-0036–0149 → HH-HHC-0001–0114 (COMPLETE) |
 | `scripts/revert_hhc_renumber.py` | Revert script for above |
 | `scripts/renumber_hhc_r2.sh` | rclone copy for HHC renumber R2 files (COMPLETE) |
+| `scripts/migrate_p142_location.py` | Migrated archival paths from P100 → P142 for CAA items (COMPLETE) |
+| `scripts/fix_p142_prose.py` | Audits/fixes P142 values where prose was mixed into the path |
+| `scripts/fill_p142_missing.py` | Filled P142 for CAA items with no location data (COMPLETE) |
 
 All scripts load bot credentials from `~/Documents/hh-wikibase-migration/.env` automatically.
 
@@ -780,3 +783,35 @@ for missing P142. Built path hierarchy from `identifier`/`parentId` columns.
 migration (`. Ref:` wasn't caught as a prose separator). Fixed via `scripts/fix_p142_prose.py`.
 
 **Script:** `scripts/fill_p142_missing.py`
+
+---
+
+### 2026-05-15 — Splash redesign, black flash fix, P142 completion
+
+**index.html — splash redesign**
+- Removed Inter Tight; splash now uses system monospace stack: `'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace`. No external font dependency — renders instantly.
+- Mark text redesigned to mirror browse header: `HUNTER HOUSE` at 30px weight 500 + `FOUNDATION` at 21px weight 400, both uppercase with wide letter-spacing. Same typographic DNA as the browse header mark.
+- Removed "Victoria, British Columbia" subtitle from splash mark.
+- Removed verso.css from index.html — the splash is fully self-contained and verso.css's body/background rules were cascading onto the dark splash and breaking it.
+- Mark-exit animation scale updated to 0.36 (30px → ~11px browse header size).
+
+**browse.html — black flash fix**
+- Removed `body{animation:body-in 450ms ease-out both}` — the splash's paper overlay handles the transition; browse.html should paint immediately.
+- Added `<meta name="color-scheme" content="light">` to prevent dark-mode browser chrome flashing black during navigation.
+
+**Wikibase — P142 data quality fixes**
+- `scripts/fix_p142_prose.py`: detected and fixed 2 items (CAA-0025, CAA-0027) where prose notes (`. Ref: folder-19_0X...`) were mixed into P142 during the original migration. Path trimmed to clean hierarchy; prose moved to P100.
+- `scripts/fill_p142_missing.py`: wrote P142 for all 15 remaining CAA items with no physical location. All 35 CAA items now have P142.
+
+**Key technical note — render-blocking fonts**
+Google Fonts `<link rel="stylesheet">` is render-blocking: the browser will not paint the page until the external CSS loads. On the splash this prevented the video and all content from appearing. Solution: use system fonts only on any page that must render instantly.
+
+**Scripts added this session**
+| Script | Purpose |
+|---|---|
+| `scripts/migrate_p142_location.py` | Migrated archival paths from P100 → P142 for CAA items |
+| `scripts/fix_p142_prose.py` | Fixed 2 items where prose was mixed into P142 |
+| `scripts/fill_p142_missing.py` | Filled P142 for 15 CAA items with no location data |
+
+**Files changed**
+`index.html`, `browse.html`, `CLAUDE.md`, `scripts/migrate_p142_location.py`, `scripts/fix_p142_prose.py`, `scripts/fill_p142_missing.py`
