@@ -618,7 +618,7 @@ SELECT ?item ?archId ?label ?img ?master
        ?creator ?creatorLabel
        ?use
        ?builtStatus ?builtStatusLabel
-       ?setPos ?notes
+       ?setPos ?notes ?medium
        ?rights ?rightsLabel
        ?heldBy ?heldByLabel
        ?archiveLink
@@ -641,6 +641,7 @@ WHERE {
   OPTIONAL { ?item wdt:P92 ?builtStatus . ?builtStatus rdfs:label ?builtStatusLabel . FILTER(LANG(?builtStatusLabel)="en") }
   OPTIONAL { ?item wdt:P86 ?setPos }
   OPTIONAL { ?item wdt:P100 ?notes }
+  OPTIONAL { ?item wdt:P91 ?medium }
   OPTIONAL { ?item wdt:P93 ?rights . ?rights rdfs:label ?rightsLabel . FILTER(LANG(?rightsLabel)="en") }
   OPTIONAL { ?item wdt:P94 ?heldBy . ?heldBy rdfs:label ?heldByLabel . FILTER(LANG(?heldByLabel)="en") }
   OPTIONAL { ?item wdt:P99 ?archiveLink }
@@ -671,6 +672,7 @@ WHERE {
           builtStatus:      r.builtStatusLabel?.value || null,
           setPosition:      r.setPos?.value || null,
           notes:            r.notes?.value || null,
+          medium:           r.medium?.value || null,
           rights:           r.rightsLabel?.value || null,
           heldBy:           r.heldByLabel?.value || null,
           archiveLink:      r.archiveLink?.value || null,
@@ -707,7 +709,7 @@ WHERE {
       if (state.filterType && it.itemType !== state.filterType) return false;
       if (state.filterDrawType && !(it.drawTypes||[]).includes(state.filterDrawType)) return false;
       if (q) {
-        const hay = [it.id, it.title, it.phase, (it.drawTypes||[]).join(" "), (it.areas||[]).join(" "), it.creator, it.notes||""].join(" ").toLowerCase();
+        const hay = [it.id, it.title, it.phase, (it.drawTypes||[]).join(" "), (it.areas||[]).join(" "), it.creator, it.medium||"", it.notes||""].join(" ").toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
@@ -1047,6 +1049,7 @@ WHERE {
       ).join("");
       descRows.push(["Drawing type", drawHtml]);
     }
+    if (item.medium)       descRows.push(["Medium",  escapeHTML(item.medium)]);
     if (item.builtStatus) descRows.push(["Built",   escapeHTML(item.builtStatus)]);
     if (item.creator)     descRows.push(["Creator", escapeHTML(item.creator)]);
     if (item.heldBy)      descRows.push(["Held by", escapeHTML(item.heldBy)]);
