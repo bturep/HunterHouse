@@ -746,31 +746,37 @@ WHERE {
   }
 
   // Pill colour palette — 6 muted tones matching the badge colours
-  const PILL_PALETTE = [
-    { pb:"#e8f2f8", pf:"#3d6b8a", pd:"#2a4a62" }, // blue (Photograph)
-    { pb:"#e8f2e2", pf:"#4e6b40", pd:"#354b2b" }, // green (Permit set)
-    { pb:"#f2e8f2", pf:"#6b4e6b", pd:"#4a344a" }, // mauve (Ephemera)
-    { pb:"#f2ede4", pf:"#6b5a3d", pd:"#4a3e2a" }, // warm brown (Report)
-    { pb:"#e2f2ec", pf:"#3d6b5a", pd:"#2a4a3e" }, // teal (Land survey)
-    { pb:"#ede4f2", pf:"#5a3d6b", pd:"#3e2a4a" }, // purple (Engineering)
-  ];
-  // Item type → pill colour, matched to badge colours
+  // Pill colour tokens — drawn from the badge palette
+  const PC = {
+    copper: { pb:"#dde6df", pf:"#365549", pd:"#243a31" },
+    blue:   { pb:"#e8f2f8", pf:"#3d6b8a", pd:"#2a4a62" },
+    teal:   { pb:"#e2f2ec", pf:"#3d6b5a", pd:"#2a4a3e" },
+    brown:  { pb:"#f2ede4", pf:"#6b5a3d", pd:"#4a3e2a" },
+    purple: { pb:"#ede4f2", pf:"#5a3d6b", pd:"#3e2a4a" },
+    green:  { pb:"#e8f2e2", pf:"#4e6b40", pd:"#354b2b" },
+    mauve:  { pb:"#f2e8f2", pf:"#6b4e6b", pd:"#4a344a" },
+  };
+  // Item type pill → matches badge colour exactly
   const TYPE_PILL_COLORS = {
-    "D":  { pb:"#dde6df", pf:"#365549", pd:"#243a31" }, // copper (Drawing)
-    "P":  PILL_PALETTE[0],
-    "PM": PILL_PALETTE[1],
-    "E":  PILL_PALETTE[2],
-    "R":  PILL_PALETTE[3],
-    "LS": PILL_PALETTE[4],
-    "EN": PILL_PALETTE[5],
+    "D": PC.copper, "P": PC.blue,   "PM": PC.green,
+    "E": PC.mauve,  "R": PC.brown,  "LS": PC.teal, "EN": PC.purple,
+  };
+  // Drawing type → intentional fixed colour (4 groups + default)
+  const DRAW_TYPE_COLORS = {
+    "plan": PC.copper, "site plan": PC.copper, "floor plan": PC.copper,
+    "foundation plan": PC.copper, "floor framing plan": PC.copper,
+    "roof framing plan": PC.copper, "framing plan": PC.copper,
+    "ceiling plan": PC.copper, "electrical plan": PC.copper,
+    "elevation": PC.blue,
+    "section": PC.teal,
+    "detail": PC.brown,
+    "land survey": PC.teal,
   };
   function pillStyle(c) {
     return `--pb:${c.pb};--pf:${c.pf};--pd:${c.pd}`;
   }
-  function hashPillColor(str) {
-    let h = 5381;
-    for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
-    return PILL_PALETTE[Math.abs(h) % PILL_PALETTE.length];
+  function drawTypePillColor(dt) {
+    return DRAW_TYPE_COLORS[dt.toLowerCase()] || PC.copper;
   }
 
   function renderList() {
@@ -1017,7 +1023,7 @@ WHERE {
     $("#meta-source").textContent = item.sourceCollection || "—";
 
     const areasHtml = (item.areas || []).map(a =>
-      `<button class="pill area-pill${state.filterArea === a ? " active" : ""}" style="${pillStyle(hashPillColor(a))}" data-area="${escapeHTML(a)}">${escapeHTML(a)}</button>`
+      `<button class="pill area-pill${state.filterArea === a ? " active" : ""}" style="${pillStyle(PC.copper)}" data-area="${escapeHTML(a)}">${escapeHTML(a)}</button>`
     ).join("");
 
     const descRows = [];
@@ -1037,7 +1043,7 @@ WHERE {
     }
     if (item.drawTypes?.length) {
       const drawHtml = sortDrawTypes(item.drawTypes).map(dt =>
-        `<button class="pill drawtype-pill${state.filterDrawType === dt ? " active" : ""}" style="${pillStyle(hashPillColor(dt))}" data-drawtype="${escapeHTML(dt)}">${escapeHTML(dt)}</button>`
+        `<button class="pill drawtype-pill${state.filterDrawType === dt ? " active" : ""}" style="${pillStyle(drawTypePillColor(dt))}" data-drawtype="${escapeHTML(dt)}">${escapeHTML(dt)}</button>`
       ).join("");
       descRows.push(["Drawing type", drawHtml]);
     }
