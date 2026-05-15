@@ -291,9 +291,9 @@
 
   /* browse-local pill/archid (smaller than verso.css defaults) */
   .pill{display:inline-flex;align-items:center;height:18px;padding:0 7px;background:var(--copper-pale);color:var(--copper-deep);font-size:10.5px;margin:0 3px 3px 0;white-space:nowrap}
-  button.area-pill,button.type-pill{border:none;cursor:pointer;font-family:inherit}
-  button.area-pill:hover,button.type-pill:hover{background:var(--copper-deep);color:var(--bg)}
-  button.area-pill.active,button.type-pill.active{background:var(--copper-deep);color:var(--bg)}
+  button.area-pill,button.type-pill,button.drawtype-pill{border:none;cursor:pointer;font-family:inherit}
+  button.area-pill:hover,button.type-pill:hover,button.drawtype-pill:hover{background:var(--copper-deep);color:var(--bg)}
+  button.area-pill.active,button.type-pill.active,button.drawtype-pill.active{background:var(--copper-deep);color:var(--bg)}
   button.type-pill{height:auto;padding:3px 8px;align-items:center;gap:0}
   .archid-mono{font-family:var(--mono);font-size:11px;color:var(--red);background:var(--red-pale);padding:1.5px 7px;letter-spacing:0.04em;white-space:nowrap}
 
@@ -515,6 +515,7 @@
     filterCollection: "",
     filterArea: "",
     filterType: "",
+    filterDrawType: "",
   };
 
   const BADGE_LEGEND = [
@@ -668,6 +669,7 @@ WHERE {
     state.filtered = state.items.filter(it => {
       if (state.filterArea && !(it.areas||[]).includes(state.filterArea)) return false;
       if (state.filterType && it.itemType !== state.filterType) return false;
+      if (state.filterDrawType && !(it.drawTypes||[]).includes(state.filterDrawType)) return false;
       if (q) {
         const hay = [it.id, it.title, it.phase, (it.drawTypes||[]).join(" "), (it.areas||[]).join(" "), it.creator, it.notes||""].join(" ").toLowerCase();
         if (!hay.includes(q)) return false;
@@ -736,6 +738,13 @@ WHERE {
       d.innerHTML = `<span>${mark ? `<span class="tmark" data-type="${escapeHTML(mark)}" style="margin-right:6px">${escapeHTML(mark)}</span>` : ""}${escapeHTML(state.filterType)} <span style="color:var(--muted);font-weight:400">${n} items</span></span><span class="r" style="cursor:pointer" id="type-filter-clear" title="Clear filter">✕ clear</span>`;
       frag.appendChild(d);
     }
+    if (state.filterDrawType) {
+      const d = document.createElement("div");
+      d.className = "phase-divider";
+      const n = String(state.filtered.length).padStart(2,"0");
+      d.innerHTML = `<span>Drawing type: ${escapeHTML(state.filterDrawType)} <span style="color:var(--muted);font-weight:400">${n} items</span></span><span class="r" style="cursor:pointer" id="drawtype-filter-clear" title="Clear filter">✕ clear</span>`;
+      frag.appendChild(d);
+    }
 
     state.filtered.forEach(it => {
       if (grouped && it.phase !== lastPhase) {
@@ -775,6 +784,14 @@ WHERE {
       clearTypeBtn.addEventListener("click", e => {
         e.stopPropagation();
         state.filterType = "";
+        applyFilters(); renderList();
+      });
+    }
+    const clearDrawTypeBtn = document.getElementById("drawtype-filter-clear");
+    if (clearDrawTypeBtn) {
+      clearDrawTypeBtn.addEventListener("click", e => {
+        e.stopPropagation();
+        state.filterDrawType = "";
         applyFilters(); renderList();
       });
     }
@@ -955,7 +972,12 @@ WHERE {
         `<button class="pill type-pill${isActive ? " active" : ""}" data-itype="${escapeHTML(item.itemType)}">${escapeHTML(item.itemType)}</button>`
       ]);
     }
-    if (item.drawTypes?.length) descRows.push(["Drawing type", escapeHTML(sortDrawTypes(item.drawTypes).join(", "))]);
+    if (item.drawTypes?.length) {
+      const drawHtml = sortDrawTypes(item.drawTypes).map(dt =>
+        `<button class="pill drawtype-pill${state.filterDrawType === dt ? " active" : ""}" data-drawtype="${escapeHTML(dt)}">${escapeHTML(dt)}</button>`
+      ).join("");
+      descRows.push(["Drawing type", drawHtml]);
+    }
     if (item.builtStatus) descRows.push(["Built",   escapeHTML(item.builtStatus)]);
     if (item.creator)     descRows.push(["Creator", escapeHTML(item.creator)]);
 
@@ -1218,6 +1240,15 @@ WHERE {
       if (typePill) {
         const itype = typePill.dataset.itype;
         state.filterType = state.filterType === itype ? "" : itype;
+        applyFilters(); renderList();
+        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
+          selectItem(state.filtered[0].id, { scrollIntoView: false });
+        return;
+      }
+      const drawTypePill = e.target.closest(".drawtype-pill");
+      if (drawTypePill) {
+        const dt = drawTypePill.dataset.drawtype;
+        state.filterDrawType = state.filterDrawType === dt ? "" : dt;
         applyFilters(); renderList();
         if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
           selectItem(state.filtered[0].id, { scrollIntoView: false });
