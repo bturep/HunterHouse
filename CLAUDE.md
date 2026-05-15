@@ -885,3 +885,29 @@ Google Fonts `<link rel="stylesheet">` is render-blocking: the browser will not 
 - Both files bumped to v1.1.1. Tagged and pushed.
 
 **Version:** v1.1.1
+
+---
+
+### 2026-05-15 — Preview regen + progressive image loading (v1.2.0)
+
+**Image quality — full regen**
+- All 145 HHC + CAA preview images regenerated from TIF masters at 2000px longest side, 82% JPEG quality.
+- Previous previews were undersized; new avg is 755KB (range 127KB–1358KB).
+- Script: `scripts/regen_previews.py` (no flags = full preview pass).
+
+**Thumbnail generation**
+- Added `--thumb` flag to `regen_previews.py`: 600px, 75% JPEG, `_thumb.jpg` suffix, uploaded to `thumbs/` folder on R2.
+- All 145 items processed: avg 346KB (range 17KB–505KB). Line art compresses poorly so savings aren't pixel-proportional, but thumbs load ~2x faster than full previews.
+- CAA colour drawings (CAA-0029–0035) compress well: 26–41KB.
+
+**browse.html — progressive image loading**
+- `renderImage()` now starts both `_thumb.jpg` and `_prev.jpg` loading simultaneously on item select.
+- Thumb shown first when ready; full fades in (300ms ease-in-out) on top; thumb removed from DOM after transition.
+- Generation counter (`renderGen`) prevents stale-load race condition when navigating quickly between items.
+- CACHE_KEY bumped v20 → v21.
+
+**R2 folder structure**
+- `hunter-house-collection/thumbs/` — new folder, 110 HHC thumbs
+- `canadian-architecture-archive/thumbs/` — new folder, 35 CAA thumbs
+
+**Version:** v1.2.0
