@@ -474,6 +474,64 @@ SELECT ?item ?id WHERE {
 
 ---
 
+## CCA Digital Archives Processing Manual — reference notes
+
+Source: https://github.com/CCA-Public/digital-archives-manual
+Surveyed: 2026-05-15. Linked from the about panel in browse.html as a methodological reference.
+
+The Hunter House archive is not built on the CCA stack (Archivematica, SCOPE, ArchivesSpace), but CCA's intellectual framework directly informs how we organise and describe the collection. Key points to carry forward:
+
+### Hierarchy and arrangement
+CCA uses the standard ISAD(G) five-level hierarchy: **fonds → series → sub-series → file → item**. Our Wikibase maps onto this:
+- Fonds = the Richard Hunter fonds (Q-level item)
+- Series = collections (HHC, CAA, FUL, GES, FRH, IVH) via P79
+- File/group = project phases via P62
+- Item = individual archive items (drawings, photographs, documents)
+
+CCA's core rule: **arrange directories, not individual files.** Their equivalent of our project phases. Do not over-describe at item level; invest in the file/group level instead. Our P100 notes and phase descriptions are the right level of effort.
+
+### Description philosophy
+"Let machines do what machines excel at; focus human effort on content analysis and context." Their automated tools (Brunnhilde) extract technical metadata; archivists write scope notes and assign subjects. Our equivalent: SPARQL scripts and batch patches handle properties like P82/P96; Brandon writes P100 notes.
+
+Required ISAD(G) fields CCA uses that we should keep aligned with:
+- Identifier (our P2)
+- Title (Wikibase label)
+- Date expression (P82/P64/P118)
+- Level of description (our P1 instance-of)
+- Extent (not yet in our data — worth adding)
+- Scope and content (P100)
+- Accession number (P81, currently unused)
+
+### Architectural and design records
+CCA's CAD format guidance is relevant if Hunter House ever acquires digital design files from Hunter's office:
+- AutoCAD (.dwg/.dxf): open with DWG TrueView or Bentley View
+- Revit (.rvt): Revit 2014 or export as IFC
+- Preservation formats: **STEP** (general CAD) and **IFC** (BIM) — vendor-neutral, long-term safe
+- 3D: Rhino, 3ds Max, Navisworks for multi-format viewing
+
+Hunter's practice (1970–2020) predates parametric BIM, so most digital files would be AutoCAD .dwg if they exist. Physical drawings on vellum and tracing paper are the primary medium and are already catalogued.
+
+### Access model
+CCA delivers researcher access through SCOPE (their custom interface) with controlled Study Room workstations. Our equivalent is browse.html — a public web interface with SPARQL-queryable data. Our model is more open (no gated access) which aligns with the CC0 metadata position.
+
+### What CCA does NOT cover that is relevant to us
+- Wikibase or linked open data (CCA uses ArchivesSpace + Archivematica)
+- AtoM (their manual doesn't address it — the CAA's use of AtoM at searcharchives.ucalgary.ca is separate from CCA's stack)
+- Small-foundation workflows (CCA is a large institution with dedicated digital archivists)
+
+### Key vocabulary from CCA to use consistently
+| CCA term | Our equivalent |
+|---|---|
+| Fonds | Richard Hunter fonds |
+| Accession | Donation batch (P81) |
+| Series | Collection (HHC, CAA, etc.) |
+| File-level group | Project phase (P62) |
+| Scope and content | P100 notes |
+| Extent | Not yet recorded |
+| Finding aid | browse.html + AtoM links (P99) |
+
+---
+
 ## Session log
 
 Append an entry after every major task. Format: `### YYYY-MM-DD — brief title`. Never delete entries.
@@ -650,3 +708,29 @@ Append an entry after every major task. Format: `### YYYY-MM-DD — brief title`
 - Contains full property mapping table: our Wikibase PID → Wikidata PID.
 - **Not yet submitted** — requires review before going live on Wikidata.
 - Once submitted: add resulting Q-numbers to P139 on Q201 (Hunter) and Q116 (CAA) in our Wikibase.
+
+---
+
+### 2026-05-15 — Splash→browse transition, browse.html UI fixes, CCA manual survey
+
+**Splash→browse transition**
+- Removed `@view-transition{navigation:auto}` from `index.html` — the browser's cross-document View Transitions API was competing with the JS exit animation and causing a flash.
+- Replaced two-bar exit animation (paper header + dark body) with a single full-page `#f3f1ec` overlay.
+- `browse.html`: set `html{background:#f3f1ec;height:100%}` and `body{height:100%}` — html background prevents colour flash during navigation; height:100% fills viewport so shell has no gap at bottom.
+- `body{animation:body-in 450ms ease-out}` fades the whole page in against the matching paper background.
+
+**browse.html — UI fixes**
+- Removed data loading overlay (`#data-overlay`, `feedLog()` system) — body-in fade handles entry gracefully.
+- About panel: moved out of `.site-topright`, now replaces `.controls` bar when open. Dark background (`#1e1c1a`), single line, all key terms linked in standard blue (`#5b9df7`): Wikibase, Wikidata, SPARQL, CC0, GLAM, CCA Digital Archives Manual. Controls and panel both locked at `height:42px`.
+- Image foot: added `border-bottom:1px solid var(--ink)` — foot now reads as a closed box.
+- Zoom/rotate controls moved from `position:absolute` overlay on the image stage into the centre column of `.image-foot` (3-column grid: date | controls | download).
+- Header icon alignment fixed: `#topright` span now `display:inline-flex;align-items:center;line-height:1`; gap increased to 20px.
+- `v1.0` click opens about panel; double-click still refreshes Wikibase cache.
+
+**CCA Digital Archives Manual survey**
+- Fetched and read https://github.com/CCA-Public/digital-archives-manual in full.
+- Summary written into CLAUDE.md as a standing reference section.
+- Key takeaway: CCA's hierarchy (fonds→series→file→item) and description philosophy ("machines for metadata, humans for context") directly validate our Wikibase approach. CAD format guidance (STEP/IFC) relevant if born-digital Hunter files are acquired. CCA does not cover Wikibase or AtoM.
+
+**Files changed**
+`index.html`, `browse.html`, `CLAUDE.md`
