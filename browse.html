@@ -555,7 +555,7 @@
     return (await res.json()).results.bindings;
   }
 
-  const CACHE_KEY = "hhf_catalogue_v11";
+  const CACHE_KEY = "hhf_catalogue_v12";
   const CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours
 
   function clearCache() {
@@ -629,7 +629,7 @@ WHERE {
           phase:            r.phaseLabel?.value || r.phase2Label?.value || null,
           phaseQID:         r.phase?.value?.split("/").pop() || r.phase2?.value?.split("/").pop() || null,
           areas:            [],
-          type:             r.drawTypeLabel?.value || null,
+          drawTypes:        [],
           itemType:         r.itypeLabel?.value || null,
           sourceCollection: r.srcLabel?.value || null,
           creator:          r.creatorLabel?.value || null,
@@ -640,9 +640,10 @@ WHERE {
         });
       }
       const it = map.get(qid);
-      if (r.areaLabel?.value && !it.areas.includes(r.areaLabel.value)) {
+      if (r.areaLabel?.value && !it.areas.includes(r.areaLabel.value))
         it.areas.push(r.areaLabel.value);
-      }
+      if (r.drawTypeLabel?.value && !it.drawTypes.includes(r.drawTypeLabel.value))
+        it.drawTypes.push(r.drawTypeLabel.value);
     }
 
     const items = [...map.values()].sort((a, b) => (a.id || "").localeCompare(b.id || ""));
@@ -655,13 +656,20 @@ WHERE {
   // ── Filter + sort ─────────────────────────────────────────────────────────
   const idNum = it => parseInt((it.id || "").replace(/[^0-9]+/g, ""), 10) || 0;
 
+  const DRAW_TYPE_PRIORITY = { "plan":1,"site plan":1,"floor plan":1,"foundation plan":1,
+    "floor framing plan":1,"roof framing plan":1,"framing plan":1,"ceiling plan":1,
+    "electrical plan":1,"land survey":1,"elevation":2,"section":3,"detail":4 };
+  const drawTypePriority = t => DRAW_TYPE_PRIORITY[t.toLowerCase()] || 5;
+  const sortDrawTypes = types => [...types].sort((a,b) =>
+    drawTypePriority(a) - drawTypePriority(b) || a.localeCompare(b));
+
   function applyFilters() {
     const q = state.search.trim().toLowerCase();
     state.filtered = state.items.filter(it => {
       if (state.filterArea && !(it.areas||[]).includes(state.filterArea)) return false;
       if (state.filterType && it.itemType !== state.filterType) return false;
       if (q) {
-        const hay = [it.id, it.title, it.phase, it.type, it.use, (it.areas||[]).join(" "), it.creator, it.notes||""].join(" ").toLowerCase();
+        const hay = [it.id, it.title, it.phase, (it.drawTypes||[]).join(" "), (it.areas||[]).join(" "), it.creator, it.notes||""].join(" ").toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
@@ -947,7 +955,7 @@ WHERE {
         `<button class="pill type-pill${isActive ? " active" : ""}" data-itype="${escapeHTML(item.itemType)}">${mark ? `<span class="tmark" data-type="${escapeHTML(mark)}" style="margin-right:5px;font-size:7.5px">${escapeHTML(mark)}</span>` : ""}${escapeHTML(item.itemType)}</button>`
       ]);
     }
-    if (item.type)        descRows.push(["Drawing type", escapeHTML(item.type)]);
+    if (item.drawTypes?.length) descRows.push(["Drawing type", escapeHTML(sortDrawTypes(item.drawTypes).join(", "))]);
     if (item.builtStatus) descRows.push(["Built",   escapeHTML(item.builtStatus)]);
     if (item.creator)     descRows.push(["Creator", escapeHTML(item.creator)]);
 
@@ -1265,9 +1273,10 @@ WHERE {
 
       addLegendButton($(".list-head .id-col"), BADGE_LEGEND);
 
+      const defaultItem = state.filtered.find(i => i.qid === "Q331") || state.filtered[0];
       const target = urlId && state.filtered.find(i => i.id === urlId)
         ? urlId
-        : state.filtered[0]?.id;
+        : defaultItem?.id;
       if (target) selectItem(target, { scrollIntoView: !!urlId });
 
     } catch (err) {
