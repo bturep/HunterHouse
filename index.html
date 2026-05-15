@@ -132,10 +132,10 @@
   const film   = document.getElementById('film');
   const video  = document.getElementById('film-video');
 
-  // Serve 1080p on detected slow connections, 4K otherwise
+  // Default to 1080p; only serve 4K when a fast connection is confirmed
   const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-  const slow = conn && (conn.saveData || ['slow-2g','2g','3g'].includes(conn.effectiveType));
-  video.src = slow ? 'assets/HH-Splash1080.mp4' : 'assets/HH-Splash4k.mp4';
+  const fast = conn && !conn.saveData && conn.effectiveType === '4g' && (conn.downlink || 10) >= 5;
+  video.src = fast ? 'assets/HH-Splash4k.mp4' : 'assets/HH-Splash1080.mp4';
 
   // Show video once it can play, 2s fallback for slow connections
   const showFilm = () => film.classList.add('ready');
