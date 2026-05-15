@@ -24,17 +24,18 @@
   html{background:#f3f1ec;height:100%}
   html,body{overflow:hidden}
   body{height:100%;display:flex;flex-direction:column;animation:body-in 450ms ease-out both}
-  .site-top{padding:14px 28px;flex-shrink:0;grid-template-columns:1fr auto}
-  .controls{flex-shrink:0}
-  .site-nav a{padding:5px 16px}
+  .site-top{padding:0 28px;flex-shrink:0;grid-template-columns:auto 1fr auto;gap:24px}
   .site-topright .theme-btn{border:none;border-radius:0;padding:0;font-size:19px;line-height:1}
   .site-topright .theme-btn:hover{border:none}
   .site-topright{gap:20px;align-items:center}
   a.markid{text-decoration:none;color:inherit}
+  .header-search{display:flex;align-items:center;border-left:1px solid var(--rule);border-right:1px solid var(--rule);padding:0 20px}
+  .header-search input{font:inherit;font-size:13px;background:none;border:0;outline:0;color:var(--ink);width:100%;letter-spacing:-0.005em}
+  .header-search input::placeholder{color:var(--hint)}
   #topright{cursor:pointer;line-height:1;display:inline-flex;align-items:center}
 
-  /* ── about panel (replaces controls bar when open) ── */
-  .controls,#about-panel{box-sizing:border-box;height:42px;overflow:hidden;flex-shrink:0}
+  /* ── about panel (replaces header when open) ── */
+  #about-panel{box-sizing:border-box;height:50px;overflow:hidden;flex-shrink:0}
   #about-panel{
     display:none;
     padding:0 28px;border-bottom:1px solid #2e2c29;background:#1e1c1a;
@@ -48,20 +49,6 @@
   #about-panel a{color:#5b9df7;text-decoration:none}
   #about-panel a:hover{text-decoration:underline;text-underline-offset:2px}
 
-  /* ── controls bar ── */
-  .controls{
-    display:flex;align-items:stretch;
-    padding:0 28px;border-bottom:1px solid var(--ink);background:var(--bg);
-  }
-  .search{
-    flex:1;display:flex;align-items:center;
-    padding:10px 0;
-  }
-  .search input{
-    font:inherit;font-size:13px;background:none;border:0;outline:0;
-    color:var(--ink);width:100%;letter-spacing:-0.005em;
-  }
-  .search input::placeholder{color:var(--hint)}
   .fbtn{
     display:flex;flex-direction:column;justify-content:center;gap:2px;
     padding:0 18px;border-right:1px solid var(--rule);cursor:pointer;user-select:none;
@@ -419,8 +406,8 @@
   .mobile-tabs{display:none}
 
   @media (max-width:767px){
-    /* controls */
-    .controls{padding:0 12px}
+    .site-top{padding:0 16px;gap:12px}
+    .header-search{padding:0 12px}
     .fbtn{padding:0 14px}
 
     /* shell: vertical flex */
@@ -474,10 +461,13 @@
 </head>
 <body>
 
-<header class="site-top">
+<header class="site-top" id="site-header">
   <a class="markid" href="index.html">
     <span class="name">Hunter House <span class="dim">Foundation</span></span>
   </a>
+  <div class="header-search">
+    <input id="search-input" placeholder="Search by keyword…" autocomplete="off">
+  </div>
   <div class="site-topright">
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen">⤢</button>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode">◑</button>
@@ -487,12 +477,6 @@
 
 <div id="about-panel" role="dialog" aria-label="About this archive">
   <span class="about-line">Open data archive on <a href="https://wikiba.se/" target="_blank" rel="noopener">Wikibase</a> — knowledge graph underlying <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a>. Items individually addressable; catalogue <a href="https://www.w3.org/TR/sparql11-query/" target="_blank" rel="noopener">SPARQL</a>-queryable. Metadata: <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0</a>. Archival description informed by <a href="https://www.wikidata.org/wiki/Wikidata:GLAM" target="_blank" rel="noopener">GLAM</a> standards · <a href="https://github.com/CCA-Public/digital-archives-manual" target="_blank" rel="noopener">CCA Digital Archives Manual</a>.</span>
-</div>
-
-<div class="controls">
-  <div class="search">
-    <input id="search-input" placeholder="Search by keyword…" autocomplete="off">
-  </div>
 </div>
 
 <div class="shell">
@@ -1546,10 +1530,10 @@ WHERE {
   // ── Main (async load) ─────────────────────────────────────────────────────
   (async function main() {
     const aboutPanel = document.getElementById("about-panel");
-    const controlsBar = document.querySelector(".controls");
+    const siteHeader = document.getElementById("site-header");
     const toprightEl = document.getElementById("topright");
-    function openAbout()  { aboutPanel.classList.add("open");    controlsBar.style.display = "none"; }
-    function closeAbout() { aboutPanel.classList.remove("open"); controlsBar.style.display = ""; }
+    function openAbout()  { aboutPanel.classList.add("open");    siteHeader.style.display = "none"; }
+    function closeAbout() { aboutPanel.classList.remove("open"); siteHeader.style.display = ""; }
     toprightEl.addEventListener("click", (e) => {
       e.stopPropagation();
       aboutPanel.classList.contains("open") ? closeAbout() : openAbout();
