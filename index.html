@@ -135,7 +135,8 @@
   // Default to 1080p; only serve 4K when a fast connection is confirmed
   const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
   const fast = conn && !conn.saveData && conn.effectiveType === '4g' && (conn.downlink || 10) >= 5;
-  video.src = fast ? 'assets/HH-Splash4k.mp4' : 'assets/HH-Splash1080.mp4';
+  const R2 = 'https://archive.hunterhousefoundation.com/web/media';
+  video.src = fast ? `${R2}/HH-Splash4k.mp4` : `${R2}/HH-Splash1080.mp4`;
 
   // Show video on first decoded frame; 500ms fallback so background
   // appears quickly even on slow connections (dark bg already visible).
