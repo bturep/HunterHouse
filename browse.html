@@ -29,6 +29,7 @@
   .site-topright{display:flex;align-items:stretch;gap:20px;height:41px;color:var(--ink)}
   .site-topright .theme-btn{display:flex;align-items:center;border:none;border-radius:0;padding:0;font-size:19px;line-height:1;color:var(--ink)}
   .site-topright .theme-btn:hover{opacity:0.5}
+  #topright{cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;display:flex;align-items:center;color:var(--ink)}
   a.markid{text-decoration:none;color:inherit}
   .markid .name{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
   .markid .name .dim{font-size:9px;letter-spacing:0.14em;font-weight:400}
@@ -108,15 +109,16 @@
 
   /* ── list pane ── */
   .list-head{
-    display:flex;align-items:center;
-    height:41px;box-sizing:border-box;padding:0 20px 0 28px;
+    display:grid;grid-template-columns:1fr auto 50px;align-items:center;
+    height:41px;box-sizing:border-box;padding:0 20px;
     border-bottom:1px solid var(--ink);flex-shrink:0;
   }
-  .list-head .l{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;letter-spacing:0.18em;text-transform:uppercase;display:flex;align-items:center;gap:6px;background:none;border:0;padding:0;cursor:pointer;flex-shrink:0}
+  .list-head .l{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;letter-spacing:0.18em;text-transform:uppercase;display:flex;align-items:center;gap:6px;background:none;border:0;padding:0;cursor:pointer}
   .list-head .l .filter-chevron{font-size:13px;color:var(--muted);letter-spacing:0;font-weight:400;line-height:1}
   .list-head .l:hover .filter-chevron,.list-head .l.fp-open .filter-chevron{color:var(--ink)}
-  .sort-mini{flex:1;display:flex;gap:14px;align-items:center;padding:0 14px}
+  .sort-mini{display:flex;gap:14px;align-items:center}
   .sort-mini .sort-hd{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
+  .sort-year{justify-content:flex-end;height:100%;display:inline-flex;align-items:center;width:100%}
   .rows{flex:1;overflow-y:auto;display:flex;flex-direction:column;scrollbar-width:none}
   .rows::-webkit-scrollbar{display:none}
   .meta-body{scrollbar-width:none}
@@ -455,6 +457,7 @@
     .site-top{padding:0 16px;gap:12px}
     .header-search{padding:0 12px;border-left:0;border-right:0}
     .fbtn{padding:0 14px}
+    #fs-toggle,#topright{display:none}
 
     /* shell: vertical flex */
     .shell{display:flex;flex-direction:column}
@@ -515,7 +518,9 @@
     <input id="search-input" placeholder="search" autocomplete="off">
   </div>
   <div class="site-topright">
+    <button class="theme-btn" id="fs-toggle" title="Enter fullscreen">⤢</button>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode">◑</button>
+    <span id="topright" title="About this archive">v1.0</span>
   </div>
 </header>
 
@@ -939,7 +944,9 @@ WHERE {
     requestAnimationFrame(() => updatePip("rows", "list-pip"));
   }
 
-  function updateCount() {}
+  function updateCount() {
+    if (state.items.length > 0) $("#topright").textContent = "v1.0";
+  }
 
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
   let currentImg = null;
@@ -1608,12 +1615,34 @@ WHERE {
   (async function main() {
     const aboutPanel = document.getElementById("about-panel");
     const siteHeader = document.getElementById("site-header");
-    function openAbout()  { if(aboutPanel){ aboutPanel.classList.add("open");    siteHeader.style.display = "none"; } }
-    function closeAbout() { if(aboutPanel){ aboutPanel.classList.remove("open"); siteHeader.style.display = ""; } }
+    const toprightEl = document.getElementById("topright");
+    function openAbout()  { aboutPanel.classList.add("open");    siteHeader.style.display = "none"; }
+    function closeAbout() { aboutPanel.classList.remove("open"); siteHeader.style.display = ""; }
+    toprightEl.addEventListener("click", (e) => {
+      e.stopPropagation();
+      aboutPanel.classList.contains("open") ? closeAbout() : openAbout();
+    });
     document.addEventListener("click", closeAbout);
-    if(aboutPanel) aboutPanel.addEventListener("click", (e) => e.stopPropagation());
+    aboutPanel.addEventListener("click", (e) => e.stopPropagation());
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeAbout(); });
-    document.getElementById("about-close")?.addEventListener("click", closeAbout);
+    toprightEl.addEventListener("dblclick", () => { clearCache(); location.reload(); });
+    document.getElementById("about-close").addEventListener("click", closeAbout);
+
+    // Fullscreen toggle
+    const fsBtn = document.getElementById("fs-toggle");
+    if (fsBtn && document.fullscreenEnabled) {
+      fsBtn.addEventListener("click", () => {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else document.exitFullscreen();
+      });
+      document.addEventListener("fullscreenchange", () => {
+        const inFs = !!document.fullscreenElement;
+        fsBtn.textContent = inFs ? "⤡" : "⤢";
+        fsBtn.title = inFs ? "Exit fullscreen" : "Enter fullscreen";
+      });
+    } else if (fsBtn) {
+      fsBtn.style.display = "none";
+    }
 
     // ── Scroll pips ───────────────────────────────────────────────────────────
     document.getElementById("rows").addEventListener("scroll",
