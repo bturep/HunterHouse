@@ -32,7 +32,7 @@
   .header-search{display:flex;align-items:center;border-left:1px solid var(--rule);border-right:1px solid var(--rule);padding:0 20px}
   .header-search input{font:inherit;font-size:13px;background:none;border:0;outline:0;color:var(--ink);width:100%;letter-spacing:-0.005em}
   .header-search input::placeholder{color:var(--hint)}
-  #topright{cursor:pointer;line-height:1;display:inline-flex;align-items:center}
+  #topright{cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;line-height:1;display:flex;align-items:center}
 
   /* ── about panel (replaces header when open) ── */
   #about-panel{box-sizing:border-box;height:41px;overflow:hidden;flex-shrink:0}
@@ -49,10 +49,10 @@
   #about-panel a{color:#5b9df7;text-decoration:none}
   #about-panel a:hover{text-decoration:underline;text-underline-offset:2px}
   #about-close{
-    margin-left:auto;flex-shrink:0;padding:0 0 0 28px;
+    margin-left:auto;flex-shrink:0;padding:0;
     background:none;border:0;cursor:pointer;
-    font-family:var(--mono);font-size:13px;color:rgba(243,241,236,0.6);
-    line-height:1;display:flex;align-items:center;
+    font-size:18px;color:rgba(243,241,236,0.55);
+    line-height:1;display:flex;align-items:center;width:28px;justify-content:center;
   }
   #about-close:hover{color:#f3f1ec}
 
@@ -109,7 +109,21 @@
   .list-head .l:hover .filter-chevron,.list-head .l.fp-open .filter-chevron{color:var(--ink)}
   .sort-mini{display:flex;gap:14px;align-items:center}
   .sort-mini .sort-hd{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
-  .rows{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+  .rows{flex:1;overflow-y:auto;display:flex;flex-direction:column;scrollbar-width:none}
+  .rows::-webkit-scrollbar{display:none}
+  .meta-body{scrollbar-width:none}
+  .meta-body::-webkit-scrollbar{display:none}
+
+  /* ── scroll pips ── */
+  .scroll-pip{
+    position:absolute;right:0;top:41px;z-index:5;pointer-events:none;
+    width:9px;height:22px;
+    background:var(--muted);
+    border-radius:11px 0 0 11px;
+    opacity:0;transition:opacity 0.15s;
+  }
+  .scroll-pip.active{opacity:1}
+  .scroll-pip-r{right:auto;left:0;border-radius:0 11px 11px 0}
 
   /* ── phase dividers ── */
   .phase-divider{
@@ -495,6 +509,7 @@
   </div>
 
   <section class="pane-list mobile-active">
+    <div class="scroll-pip" id="list-pip"></div>
     <div class="list-head">
       <button class="l" id="filter-toggle" title="Filter">Browse<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">›</span></button>
       <div class="sort-mini">
@@ -537,6 +552,7 @@
   </section>
 
   <section class="pane-meta">
+    <div class="scroll-pip scroll-pip-r" id="meta-pip"></div>
     <div class="meta-head">
       <span class="l">Record</span>
       <span class="r" id="meta-source">—</span>
@@ -637,6 +653,17 @@
       const el = document.querySelector(`.pane-${p}`);
       if (el) el.classList.toggle("mobile-active", p === pane);
     });
+  }
+
+  function updatePip(scrollId, pipId) {
+    const scrollEl = document.getElementById(scrollId);
+    const pip = document.getElementById(pipId);
+    if (!scrollEl || !pip) return;
+    const { scrollTop, scrollHeight, clientHeight } = scrollEl;
+    if (scrollHeight <= clientHeight + 1) { pip.classList.remove("active"); return; }
+    pip.classList.add("active");
+    const ratio = scrollTop / (scrollHeight - clientHeight);
+    pip.style.top = (41 + ratio * (clientHeight - 22)) + "px";
   }
 
   // ── Wikibase fetch layer ──────────────────────────────────────────────────
@@ -901,6 +928,7 @@ WHERE {
     container.appendChild(fleuron);
 
     updateCount();
+    requestAnimationFrame(() => updatePip("rows", "list-pip"));
   }
 
   function updateCount() {
@@ -1211,6 +1239,7 @@ WHERE {
     body.querySelectorAll(".sib[data-sib-id]").forEach(el => {
       el.addEventListener("click", e => { e.preventDefault(); selectItem(el.dataset.sibId); });
     });
+    requestAnimationFrame(() => updatePip("meta-body", "meta-pip"));
   }
 
   // ── Selection ─────────────────────────────────────────────────────────────
@@ -1546,6 +1575,12 @@ WHERE {
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeAbout(); });
     toprightEl.addEventListener("dblclick", () => { clearCache(); location.reload(); });
     document.getElementById("about-close").addEventListener("click", closeAbout);
+
+    // ── Scroll pips ───────────────────────────────────────────────────────────
+    document.getElementById("rows").addEventListener("scroll",
+      () => updatePip("rows", "list-pip"), { passive: true });
+    document.getElementById("meta-body").addEventListener("scroll",
+      () => updatePip("meta-body", "meta-pip"), { passive: true });
 
     try {
       const items = await loadFromWikibase();
