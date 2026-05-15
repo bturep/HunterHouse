@@ -32,7 +32,6 @@
     text-shadow:0 1px 28px rgba(0,0,0,0.7);
     z-index:5;pointer-events:none;
     opacity:0;animation:mark-in 700ms ease-out 450ms forwards;
-    view-transition-name:hh-mark;
   }
   .splash .mark .dim{font-size:21px;font-weight:400;letter-spacing:0.16em;color:rgba(243,241,236,0.5)}
   @keyframes mark-in{
@@ -40,26 +39,8 @@
     to  {opacity:1;transform:translate(-50%,-50%)}
   }
 
-  .splash.exiting{pointer-events:none;cursor:default}
-  .splash.exiting .film{transition:opacity 800ms cubic-bezier(.4,0,.2,1);opacity:0}
-  /* Single paper overlay covers the full screen — no dark body flash */
-  .splash.exiting::after{
-    content:"";position:absolute;inset:0;
-    background:#f3f1ec;
-    opacity:0;animation:paper-in 700ms cubic-bezier(.4,0,.2,1) 150ms forwards;
-    z-index:2;
-  }
-  @keyframes paper-in{to{opacity:1}}
-  .splash.exiting .imprint,
-  .splash.exiting .enter{transition:opacity 250ms ease-out;opacity:0}
-.splash.exiting .mark{
-    animation:mark-exit 900ms cubic-bezier(.4,0,.2,1) forwards;
-    z-index:10;
-  }
-  @keyframes mark-exit{
-    from{transform:translate(-50%,-50%);color:#f3f1ec;text-shadow:0 1px 28px rgba(0,0,0,0.7)}
-    to  {transform:translate(calc(28px - 50vw), calc(22px - 50vh)) scale(0.36);color:#1e1c1a;text-shadow:none}
-  }
+  .splash.exiting{pointer-events:none;cursor:default;animation:splash-out 550ms ease-in-out forwards}
+  @keyframes splash-out{to{opacity:0}}
 
   .splash .enter{
     position:absolute;right:36px;bottom:32px;z-index:5;
@@ -68,7 +49,7 @@
     display:flex;align-items:center;gap:14px;
     text-shadow:0 1px 8px rgba(0,0,0,0.6);
     pointer-events:none;
-    opacity:0;animation:fade-in 700ms ease-out 2200ms forwards;
+    opacity:0;animation:fade-in 700ms ease-out 1300ms forwards;
   }
   .splash .enter .arrow{color:#e4a47e;font-size:13px;letter-spacing:0;animation:enter-pulse 2.4s ease-in-out 3000ms infinite}
   @keyframes fade-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -79,7 +60,7 @@
     font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace;font-size:10.5px;color:rgba(243,241,236,0.45);
     letter-spacing:0.18em;text-transform:uppercase;
     pointer-events:none;
-    opacity:0;animation:fade-in 700ms ease-out 2400ms forwards;
+    opacity:0;animation:fade-in 700ms ease-out 1500ms forwards;
   }
   .splash .imprint b{color:rgba(243,241,236,0.85);font-weight:500;margin-right:8px}
 
@@ -100,7 +81,7 @@
   <div class="film" id="film">
     <video id="film-video" autoplay loop muted playsinline preload="auto"></video>
   </div>
-  <div class="imprint"><b>2026.05</b>v1.1.1</div>
+  <div class="imprint"><b>2026.05</b>v1.1.2</div>
   <div class="mark">
     <span class="name">Hunter House <span class="dim">Foundation</span></span>
   </div>
@@ -129,7 +110,7 @@
     e.preventDefault();
     if (splash.classList.contains('exiting')) return;
     splash.classList.add('exiting');
-    setTimeout(() => { window.location.href = 'browse.html'; }, 870);
+    setTimeout(() => { window.location.href = 'browse.html'; }, 570);
   });
 </script>
 </body>
