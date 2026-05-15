@@ -519,6 +519,7 @@
   // ── Utilities ─────────────────────────────────────────────────────────────
   const $ = sel => document.querySelector(sel);
   const escapeHTML = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const displayId = id => escapeHTML((id || "").replace(/^HH-/, ""));
   const yearOf = d => d ? d.slice(0, 4) : "—";
   const imageUrl = it => it.image || null;
   const uniqueSorted = arr => Array.from(new Set(arr)).filter(Boolean).sort();
@@ -712,7 +713,7 @@ WHERE {
       row.dataset.id = it.id;
       const tmark = typeMark(it.itemType);
       row.innerHTML = `
-        <span class="archid">${tmark ? `<span class="tmark" title="${escapeHTML(it.itemType)}">${tmark}</span>` : ""}${escapeHTML(it.id)}</span>
+        <span class="archid">${tmark ? `<span class="tmark" title="${escapeHTML(it.itemType)}">${tmark}</span>` : ""}${displayId(it.id)}</span>
         <div class="title-wrap">
           <div class="title">${escapeHTML(it.title)}</div>
           <div class="ph">${escapeHTML(it.phase || "")}</div>
@@ -777,13 +778,13 @@ WHERE {
         canvas.classList.remove("no-zoom");
       };
       img.onerror = () => {
-        canvas.innerHTML = `<div class="placeholder">Preview failed<b>${escapeHTML(item.id)}</b></div>`;
+        canvas.innerHTML = `<div class="placeholder">Preview failed<b>${displayId(item.id)}</b></div>`;
         currentImg = null;
         canvas.classList.add("no-zoom");
       };
       img.src = url;
     } else {
-      canvas.innerHTML = `<div class="placeholder">No image yet<b>${escapeHTML(item.id)}</b></div>`;
+      canvas.innerHTML = `<div class="placeholder">No image yet<b>${displayId(item.id)}</b></div>`;
       $("#if-full").style.visibility = "hidden";
       currentImg = null;
       canvas.classList.add("no-zoom");
@@ -896,7 +897,7 @@ WHERE {
     if (item.creator)     descRows.push(["Creator", escapeHTML(item.creator)]);
 
     const archRows = [];
-    archRows.push(["Archive ID", `<span class="archid-mono">${escapeHTML(item.id)}</span>`]);
+    archRows.push(["Archive ID", `<span class="archid-mono">${displayId(item.id)}</span>`]);
     if (item.itemType)         archRows.push(["Item type", escapeHTML(item.itemType)]);
     if (item.sourceCollection) archRows.push(["Source",    escapeHTML(item.sourceCollection)]);
     if (item.rights)           archRows.push(["Rights",    escapeHTML(item.rights)]);
@@ -953,7 +954,7 @@ WHERE {
         const isCurrent = s.id === item.id;
         const pos = s.setPosition ? s.setPosition.split(" of ")[0] : "—";
         return `<a class="sib${isCurrent ? " current" : ""}" ${isCurrent ? "" : `data-sib-id="${escapeHTML(s.id)}"`}>
-          <span class="id">${escapeHTML(s.id)}</span>
+          <span class="id">${displayId(s.id)}</span>
           <span class="t">${escapeHTML(s.title)}</span>
           <span class="pos">${escapeHTML(pos)}</span>
         </a>`;
