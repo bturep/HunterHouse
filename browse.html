@@ -586,6 +586,14 @@
     return Object.entries(ARCHIVE_ABBREV).find(([k]) => hb.includes(k))?.[1] || null;
   }
   // Label for the notes row: reflects archive and whether it's a fonds location or a free note
+  function creatorLabel(itemType) {
+    const t = (itemType || "").toLowerCase();
+    if (t === "photograph") return "Photographed by";
+    if (["drawing", "engineering document", "permit set", "land survey", "sketch", "ephemera"].includes(t)) return "Drawn by";
+    if (t === "furniture" || t === "designed object") return "Designed by";
+    return "Creator";
+  }
+
   function notesLabel(item) {
     const abbrev = archiveAbbrev(item.heldBy);
     const hasFondsPath = (item.notes || "").includes(" — ");
@@ -625,7 +633,7 @@
     return (await res.json()).results.bindings;
   }
 
-  const CACHE_KEY = "hhf_catalogue_v16";
+  const CACHE_KEY = "hhf_catalogue_v17";
 
   function clearCache() {
     try { localStorage.removeItem(CACHE_KEY); } catch {}
@@ -651,6 +659,8 @@ SELECT ?item ?archId ?label ?img ?master
        ?itype ?itypeLabel
        ?src ?srcLabel
        ?creator ?creatorLabel
+       ?builtBy ?builtByLabel
+       ?designedBy ?designedByLabel
        ?use
        ?builtStatus ?builtStatusLabel
        ?setPos ?notes ?medium
@@ -672,6 +682,8 @@ WHERE {
   OPTIONAL { ?item wdt:P1 ?itype . ?itype rdfs:label ?itypeLabel . FILTER(LANG(?itypeLabel)="en") }
   OPTIONAL { ?item wdt:P79 ?src . ?src rdfs:label ?srcLabel . FILTER(LANG(?srcLabel)="en") }
   OPTIONAL { ?item wdt:P80 ?creator . ?creator rdfs:label ?creatorLabel . FILTER(LANG(?creatorLabel)="en") }
+  OPTIONAL { ?item wdt:P140 ?builtBy . ?builtBy rdfs:label ?builtByLabel . FILTER(LANG(?builtByLabel)="en") }
+  OPTIONAL { ?item wdt:P141 ?designedBy . ?designedBy rdfs:label ?designedByLabel . FILTER(LANG(?designedByLabel)="en") }
   OPTIONAL { ?item wdt:P89 ?use }
   OPTIONAL { ?item wdt:P92 ?builtStatus . ?builtStatus rdfs:label ?builtStatusLabel . FILTER(LANG(?builtStatusLabel)="en") }
   OPTIONAL { ?item wdt:P86 ?setPos }
@@ -703,6 +715,8 @@ WHERE {
           itemType:         r.itypeLabel?.value || null,
           sourceCollection: r.srcLabel?.value || null,
           creator:          r.creatorLabel?.value || null,
+          builtBy:          r.builtByLabel?.value || null,
+          designedBy:       r.designedByLabel?.value || null,
           use:              r.use?.value || null,
           builtStatus:      r.builtStatusLabel?.value || null,
           setPosition:      r.setPos?.value || null,
@@ -744,7 +758,7 @@ WHERE {
       if (state.filterType.size && !state.filterType.has(it.itemType)) return false;
       if (state.filterDrawType.size && !(it.drawTypes||[]).some(dt => state.filterDrawType.has(dt))) return false;
       if (q) {
-        const hay = [it.id, it.title, it.phase, (it.drawTypes||[]).join(" "), (it.areas||[]).join(" "), it.creator, it.medium||"", it.notes||""].join(" ").toLowerCase();
+        const hay = [it.id, it.title, it.phase, (it.drawTypes||[]).join(" "), (it.areas||[]).join(" "), it.creator, it.designedBy||"", it.builtBy||"", it.medium||"", it.notes||""].join(" ").toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
@@ -1049,7 +1063,9 @@ WHERE {
     }
     if (item.medium)       descRows.push(["Medium",  escapeHTML(item.medium)]);
     if (item.builtStatus) descRows.push(["Built",   escapeHTML(item.builtStatus)]);
-    if (item.creator)     descRows.push(["Creator", escapeHTML(item.creator)]);
+    if (item.creator)     descRows.push([creatorLabel(item.itemType), escapeHTML(item.creator)]);
+    if (item.designedBy)  descRows.push(["Designed by", escapeHTML(item.designedBy)]);
+    if (item.builtBy)     descRows.push(["Built by", escapeHTML(item.builtBy)]);
     if (item.heldBy)      descRows.push(["Held by", escapeHTML(item.heldBy)]);
 
     const archRows = [];
