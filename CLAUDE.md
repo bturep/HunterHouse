@@ -411,13 +411,13 @@ All scripts load bot credentials from `~/Documents/hh-wikibase-migration/.env` a
 | Collection | Catalogued | Images | Notes |
 |---|---|---|---|
 | HHC | ~110 items | partial | Primary working collection |
-| CAA | 18 items | partial | Early drawings, donated 2019/21 |
+| CAA | 35 items | partial | Drawings + photographs, donated 2019/21. All 35 have P142. |
 | FUL | 9 items | partial | Fulker photographs |
 | GES | 0 | none | Furniture drawings; pending |
 | FRH | 0 | none | Frances Hunter materials; pending |
 | IVH | 0 | none | Ivan Hunter photographs; pending |
 
-**browse.html shows ~147 items** (those with P2 + P96).
+**browse.html shows ~150 items** (those with P2 + P96).
 
 **Known gaps:**
 - Items missing P82 date: run the SPARQL query in WIKIBASE.md §"Items missing a date"
