@@ -759,3 +759,24 @@ Append an entry after every major task. Format: `### YYYY-MM-DD — brief title`
 
 **Files changed**
 `browse.html`, `CLAUDE.md`, `scripts/migrate_p142_location.py` (new)
+
+---
+
+### 2026-05-15 — Fill missing P142 for all 35 CAA items
+
+**Problem:** 15 CAA items had no P142. The original migration only extracted paths from items
+that already had P100 notes containing the fonds path string. Items without P100 were silently skipped.
+
+**Source:** Cross-referenced `Richard_Hunter_fonds.xlsx` (AtoM export) against SPARQL query
+for missing P142. Built path hierarchy from `identifier`/`parentId` columns.
+
+**Missing items and assigned paths:**
+- CAA-0007, 0008, 0009 → `S0004, SS0001, SSS0018, FL0005` (Folder 18 — Cottage for Ric and Frances Hunter)
+- CAA-0010–0019 (photos) → `S0004, SS0003, SSS0001` (stopped at sub-subseries — FL not determinable without box access)
+- CAA-0026 → `S0004, SS0001, SSS0018, FL0006` (Folder 19 — Hunter House Scheme II)
+- CAA-0028 → `S0004, SS0001, SSS0018, FL0007` (Folder 20 — Hunter House Addition Scheme I)
+
+**Also fixed:** CAA-0025 and CAA-0027 had prose text mixed into P142 from the original
+migration (`. Ref:` wasn't caught as a prose separator). Fixed via `scripts/fix_p142_prose.py`.
+
+**Script:** `scripts/fill_p142_missing.py`
