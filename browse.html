@@ -86,14 +86,13 @@
 
   /* ── list pane ── */
   .list-head{
-    display:grid;grid-template-columns:104px 1fr 50px;gap:12px;align-items:center;
+    display:flex;justify-content:space-between;align-items:center;
     height:41px;box-sizing:border-box;padding:0 20px;
-    font-family:var(--mono);font-size:9.5px;color:var(--muted);
-    letter-spacing:0.18em;text-transform:uppercase;
-    border-bottom:1px solid var(--ink);flex-shrink:0;position:relative;
+    border-bottom:1px solid var(--ink);flex-shrink:0;
   }
-  .list-head .id-col{display:flex;align-items:center;gap:5px;position:relative}
-  .list-head .r{text-align:right}
+  .list-head .l{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
+  .sort-mini{display:flex;gap:14px;align-items:center}
+  .sort-mini .sort-hd{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
   .rows{flex:1;overflow-y:auto}
 
   /* ── phase dividers ── */
@@ -118,24 +117,6 @@
   .sort-arrow{font-size:7px;line-height:1;font-family:var(--sans);letter-spacing:0}
   .sort-hd:not(.active):hover .sort-arrow::after{content:"↕";color:var(--rule)}
 
-  /* ── legend button + popover ── */
-  .legend-btn{
-    font-family:var(--mono);font-size:8.5px;color:var(--muted);
-    border:1px solid var(--rule);background:none;border-radius:1px;
-    padding:0 4px;line-height:1.35;display:inline-flex;align-items:center;justify-content:center;
-    cursor:pointer;flex-shrink:0;letter-spacing:0.04em;
-  }
-  .legend-btn:hover{color:var(--ink);border-color:var(--muted)}
-  .legend-pop{
-    position:absolute;top:calc(100% + 4px);left:0;z-index:300;
-    background:var(--bg);border:1px solid var(--ink);padding:4px 0;min-width:160px;
-  }
-  .leg-row{
-    display:grid;grid-template-columns:32px 1fr;gap:10px;
-    padding:5px 12px;font-family:var(--mono);font-size:10px;
-  }
-  .leg-code{color:var(--copper-deep);font-weight:500}
-  .leg-label{color:var(--muted)}
 
   .row{
     display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
@@ -189,8 +170,8 @@
     height:41px;box-sizing:border-box;padding:0 24px;
     border-bottom:1px solid var(--ink);background:var(--bg);flex-shrink:0;
   }
-  .image-head .l{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;letter-spacing:0.02em;white-space:nowrap}
-  .image-head .l .pos{color:var(--muted);font-weight:400;margin-left:12px}
+  .image-head .l{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;letter-spacing:0.18em;text-transform:uppercase;white-space:nowrap;display:flex;align-items:baseline;gap:10px}
+  .image-head .l .ih-val{letter-spacing:0.04em;text-transform:none;font-weight:400;color:var(--muted);font-size:10.5px}
   .image-head .r{display:flex;gap:14px;align-items:baseline}
   .image-head .r a{font-family:var(--mono);font-size:10.5px;color:var(--muted);text-decoration:none;letter-spacing:0.04em;white-space:nowrap}
   .image-head .r a:hover{color:var(--ink)}
@@ -480,11 +461,12 @@
 
   <section class="pane-list mobile-active">
     <div class="list-head">
-      <span class="id-col">
+      <span class="l">Browse</span>
+      <div class="sort-mini">
         <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>
-      </span>
-      <button class="sort-hd" data-sort-col="phase">Title · Phase<span class="sort-arrow" id="sa-phase"></span></button>
-      <button class="sort-hd r" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>
+        <button class="sort-hd" data-sort-col="phase">Title<span class="sort-arrow" id="sa-phase"></span></button>
+        <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>
+      </div>
     </div>
     <div class="rows" id="rows">
       <div class="load-msg">Loading catalogue from Wikibase…</div>
@@ -493,7 +475,7 @@
 
   <section class="pane-image">
     <div class="image-head">
-      <span class="l"><span id="ih-id">—</span></span>
+      <span class="l">Item<span class="ih-val" id="ih-id">—</span></span>
       <span class="r">
         <a href="#" id="nav-prev">← prev</a>
         <a href="#" id="nav-next">next →</a>
@@ -1235,35 +1217,9 @@ WHERE {
     if (next >= 0 && next < state.filtered.length) selectItem(state.filtered[next].id);
   }
 
-  // ── Legend button helper ──────────────────────────────────────────────────
-  function addLegendButton(targetEl, legendData) {
-    const btn = document.createElement("button");
-    btn.className = "legend-btn";
-    btn.type = "button";
-    btn.textContent = "?";
-
-    const pop = document.createElement("div");
-    pop.className = "legend-pop";
-    pop.hidden = true;
-    pop.innerHTML = legendData.map(([code, label]) =>
-      `<div class="leg-row"><span class="leg-code">${escapeHTML(code)}</span><span class="leg-label">${escapeHTML(label)}</span></div>`
-    ).join("");
-
-    btn.addEventListener("click", e => {
-      e.stopPropagation();
-      const isHidden = pop.hidden;
-      document.querySelectorAll(".legend-pop").forEach(p => { p.hidden = true; });
-      pop.hidden = !isHidden;
-    });
-
-    targetEl.prepend(pop);
-    targetEl.prepend(btn);
-  }
-
   // ── Controls ──────────────────────────────────────────────────────────────
   function closeAllDropdowns() {
     document.querySelectorAll(".fbtn.open").forEach(b => b.classList.remove("open"));
-    document.querySelectorAll(".legend-pop").forEach(p => { p.hidden = true; });
   }
 
   function wireDropdown(btnId, dropId, valId, getOptions, getActive, onChange) {
@@ -1411,8 +1367,6 @@ WHERE {
       wireControls();
       renderListHead();
       initPanZoom();
-
-      addLegendButton($(".list-head .id-col"), BADGE_LEGEND);
 
       const defaultItem = state.filtered.find(i => i.qid === "Q331") || state.filtered[0];
       const target = urlId && state.filtered.find(i => i.id === urlId)
