@@ -507,12 +507,12 @@
 
   const BADGE_LEGEND = [
     ["D",  "Drawing"],
-    ["Ph", "Photograph"],
+    ["P",  "Photograph"],
     ["L",  "Letter / Correspondence"],
-    ["En", "Engineering document"],
+    ["EN", "Engineering document"],
     ["N",  "Notebook / Sketch"],
     ["E",  "Ephemera"],
-    ["Pm", "Permit"],
+    ["PM", "Permit"],
     ["R",  "Report"],
   ];
 
@@ -541,7 +541,7 @@
     return (await res.json()).results.bindings;
   }
 
-  const CACHE_KEY = "hhf_catalogue_v7";
+  const CACHE_KEY = "hhf_catalogue_v8";
   const CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours
 
   function clearCache() {
@@ -675,9 +675,9 @@ WHERE {
 
   // ── Render list ───────────────────────────────────────────────────────────
   const TYPE_MARKS = {
-    "drawing":"D","photograph":"Ph","letter":"L","correspondence":"L",
-    "engineering":"En","engineering document":"En","notebook":"N","sketch":"N",
-    "ephemera":"E","permit":"Pm","report":"R",
+    "drawing":"D","photograph":"P","letter":"L","correspondence":"L",
+    "engineering":"EN","engineering document":"EN","notebook":"N","sketch":"N",
+    "ephemera":"E","permit":"PM","report":"R",
   };
   function typeMark(itemType) {
     if (!itemType) return "";
@@ -739,7 +739,7 @@ WHERE {
     if (!el) return;
     el.textContent = String(showing).padStart(2, "0");
     lb.textContent = showing === total ? "items" : `of ${total}`;
-    if (total > 0) $("#topright").textContent = `v0.5`;
+    if (total > 0) $("#topright").textContent = `v0.6`;
   }
 
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
