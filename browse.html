@@ -597,7 +597,7 @@
     return (await res.json()).results.bindings;
   }
 
-  const CACHE_KEY = "hhf_catalogue_v13";
+  const CACHE_KEY = "hhf_catalogue_v14";
   const CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours
 
   function clearCache() {
@@ -1034,8 +1034,8 @@ WHERE {
     if (item.rights) {
       const src = (item.sourceCollection || "").toLowerCase();
       const contact = src.includes("canadian architectural") || src.includes("caa")
-        ? "Contact the Canadian Architectural Archives for use."
-        : "Contact the Hunter House Foundation for reproduction or commercial use.";
+        ? "Contact for permissions."
+        : "Contact the Hunter House Foundation.";
       archRows.push(["Rights", `${escapeHTML(item.rights)}<span class="rights-note">${escapeHTML(contact)}</span>`]);
     }
     if (item.archiveLink)  archRows.push(["Archive record", `<a href="${escapeHTML(item.archiveLink)}" target="_blank" rel="noopener">↗ External record</a>`]);
