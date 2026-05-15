@@ -29,8 +29,11 @@
   .site-topright .theme-btn{display:flex;align-items:center;border:none;border-radius:0;padding:0;font-size:19px;line-height:1;color:var(--ink)}
   .site-topright .theme-btn:hover{opacity:0.5}
   a.markid{text-decoration:none;color:inherit}
-  .header-search{display:flex;align-items:center;border-left:1px solid var(--rule);border-right:1px solid var(--rule);padding:0 20px}
-  .header-search input{font:inherit;font-size:13px;background:none;border:0;outline:0;color:var(--ink);width:100%;letter-spacing:-0.005em}
+  .markid .name{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
+  .markid .name .dim{font-size:9px;letter-spacing:0.14em;font-weight:400}
+  .header-search{display:flex;align-items:center;gap:8px;border-left:1px solid var(--rule);border-right:1px solid var(--rule);padding:0 20px}
+  .search-prefix{font-family:var(--mono);font-size:11px;color:var(--muted);flex-shrink:0;line-height:1}
+  .header-search input{font-family:var(--mono);font-size:11px;background:none;border:0;outline:0;color:var(--ink);width:100%;letter-spacing:0.02em}
   .header-search input::placeholder{color:var(--hint)}
   #topright{cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;display:flex;align-items:center;color:var(--ink)}
 
@@ -504,7 +507,8 @@
     <span class="name">Hunter House <span class="dim">Foundation</span></span>
   </a>
   <div class="header-search">
-    <input id="search-input" placeholder="Search by keyword…" autocomplete="off">
+    <span class="search-prefix">/</span>
+    <input id="search-input" placeholder="keyword search…" autocomplete="off">
   </div>
   <div class="site-topright">
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen">⤢</button>
