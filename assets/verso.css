@@ -23,6 +23,24 @@
   --mono:"JetBrains Mono","SF Mono",Menlo,monospace;
 }
 
+html.dark{
+  --ink:#f0ede6;
+  --muted:rgba(240,237,230,0.52);
+  --hint:rgba(240,237,230,0.32);
+  --rule:rgba(240,237,230,0.13);
+  --rule-soft:rgba(240,237,230,0.08);
+  --soft:#26231e;
+  --paper:#201e1a;
+  --bg:#1a1816;
+  --red:#c4826e;
+  --red-deep:#d49a86;
+  --red-pale:rgba(196,130,110,0.18);
+  --red-tint:rgba(196,130,110,0.09);
+  --copper:#7aaa98;
+  --copper-deep:#9dc2b2;
+  --copper-pale:rgba(122,170,152,0.2);
+}
+
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{
@@ -51,7 +69,9 @@ a{color:inherit}
 .site-nav a:first-child{border-left:0}
 .site-nav a:hover{color:var(--ink)}
 .site-nav a.on{color:var(--ink);background:var(--soft)}
-.site-topright{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:0.04em;white-space:nowrap;justify-self:end}
+.site-topright{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:0.04em;white-space:nowrap;justify-self:end;display:flex;align-items:center;gap:8px}
+.theme-btn{background:none;border:1px solid var(--rule);border-radius:1px;color:var(--muted);cursor:pointer;font-family:var(--mono);font-size:9px;padding:2px 5px;line-height:1;display:flex;align-items:center}
+.theme-btn:hover{color:var(--ink);border-color:var(--muted)}
 
 /* ────────── crumbs ────────── */
 .crumbs{
