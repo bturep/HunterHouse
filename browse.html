@@ -39,23 +39,22 @@
   .site-nav a{padding:5px 16px}
   .site-topright .theme-btn{border:none;border-radius:0;padding:0;font-size:19px;line-height:1}
   .site-topright .theme-btn:hover{border:none}
-  .site-topright{gap:20px;align-items:center;position:relative}
+  .site-topright{gap:20px;align-items:center}
   #topright{cursor:pointer;line-height:1;display:inline-flex;align-items:center}
 
-  /* ── about panel ── */
+  /* ── about panel (replaces controls bar when open) ── */
   #about-panel{
-    display:none;position:absolute;top:calc(100% + 10px);right:0;
-    width:320px;z-index:500;
-    background:var(--bg);border:1px solid var(--ink);
-    padding:18px 20px;
+    display:none;flex-shrink:0;
+    padding:13px 28px;border-bottom:1px solid var(--ink);background:var(--bg);
+    gap:48px;align-items:baseline;
   }
-  #about-panel.open{display:block}
+  #about-panel.open{display:flex}
   #about-panel p{
-    font-size:11px;line-height:1.65;color:var(--ink);
-    margin:0 0 10px;font-family:var(--sans);
+    font-size:11px;line-height:1.6;color:var(--muted);
+    margin:0;font-family:var(--sans);
   }
-  #about-panel p:last-child{margin-bottom:0;color:var(--muted)}
-  #about-panel a{color:var(--ink);text-underline-offset:2px}
+  #about-panel p:first-child{color:var(--ink);white-space:nowrap;flex-shrink:0}
+  #about-panel a{color:inherit;text-underline-offset:2px}
   #about-panel a:hover{color:var(--red)}
 
   /* ── controls bar ── */
@@ -283,7 +282,7 @@
   .zoom-ctl .pct{padding:6px 12px;color:var(--muted);border-right:1px solid var(--rule);font-variant-numeric:tabular-nums;min-width:54px;text-align:center}
 
   .image-foot{
-    padding:10px 24px;border-top:1px solid var(--ink);background:var(--bg);
+    padding:10px 24px;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);background:var(--bg);
     display:flex;justify-content:space-between;align-items:baseline;
     font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em;flex-shrink:0;
   }
@@ -500,12 +499,13 @@
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen">⤢</button>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode">◑</button>
     <span id="topright" title="About this archive">v1.0</span>
-    <div id="about-panel" role="dialog" aria-label="About this archive">
-      <p>Built by <a href="https://brandonpoole.net/" target="_blank" rel="noopener">Brandon Poole</a> for Floyd Marinescu and Olivia Jol, Hunter House Foundation.</p>
-      <p>Open data archive on Wikibase — the open-source knowledge graph underlying Wikidata. Items individually addressable; catalogue queryable via SPARQL. Metadata: CC0 linked open data. Archival description informed by GLAM standards and the <a href="https://github.com/CCA-Public/digital-archives-manual" target="_blank" rel="noopener">CCA Digital Archives Manual</a>.</p>
-    </div>
   </div>
 </header>
+
+<div id="about-panel" role="dialog" aria-label="About this archive">
+  <p>Built by <a href="https://brandonpoole.net/" target="_blank" rel="noopener">Brandon Poole</a> for Floyd Marinescu and Olivia Jol, Hunter House Foundation.</p>
+  <p>Open data archive on Wikibase — the open-source knowledge graph underlying Wikidata. Items individually addressable; catalogue queryable via SPARQL. Metadata: CC0 linked open data. Archival description informed by GLAM standards and the <a href="https://github.com/CCA-Public/digital-archives-manual" target="_blank" rel="noopener">CCA Digital Archives Manual</a>.</p>
+</div>
 
 <div class="controls">
   <div class="search">
@@ -1562,14 +1562,17 @@ WHERE {
   // ── Main (async load) ─────────────────────────────────────────────────────
   (async function main() {
     const aboutPanel = document.getElementById("about-panel");
+    const controlsBar = document.querySelector(".controls");
     const toprightEl = document.getElementById("topright");
+    function openAbout()  { aboutPanel.classList.add("open");    controlsBar.style.display = "none"; }
+    function closeAbout() { aboutPanel.classList.remove("open"); controlsBar.style.display = ""; }
     toprightEl.addEventListener("click", (e) => {
       e.stopPropagation();
-      aboutPanel.classList.toggle("open");
+      aboutPanel.classList.contains("open") ? closeAbout() : openAbout();
     });
+    document.addEventListener("click", closeAbout);
     aboutPanel.addEventListener("click", (e) => e.stopPropagation());
-    document.addEventListener("click", () => aboutPanel.classList.remove("open"));
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape") aboutPanel.classList.remove("open"); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeAbout(); });
     toprightEl.addEventListener("dblclick", () => { clearCache(); location.reload(); });
 
     try {
