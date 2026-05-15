@@ -9,6 +9,28 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/verso.css">
 <style>
+  /* View transition: markid morphs from splash centre to browse corner */
+  @view-transition{navigation:auto}
+  .markid{view-transition-name:hh-mark}
+  ::view-transition-old(root),
+  ::view-transition-new(root){animation-duration:600ms;animation-timing-function:cubic-bezier(.4,0,.2,1)}
+  ::view-transition-group(hh-mark){animation-duration:900ms;animation-timing-function:cubic-bezier(.4,0,.2,1)}
+
+  /* Fade the shell in on arrival */
+  .shell,.controls{animation:page-in 350ms ease-out both}
+  @keyframes page-in{from{opacity:0}to{opacity:1}}
+
+  /* In-progress toast */
+  #wip-toast{
+    position:fixed;bottom:28px;right:32px;z-index:200;
+    font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--muted);background:var(--bg);
+    border:1px solid var(--rule);padding:6px 14px;
+    pointer-events:none;
+    opacity:0;transition:opacity 200ms ease;
+  }
+  #wip-toast.visible{opacity:1}
+
   /* browse-surface overrides */
   html,body{overflow:hidden}
   body{display:flex;flex-direction:column}
@@ -452,10 +474,10 @@
     <span class="name">Hunter House <span class="dim">Foundation</span></span>
   </div>
   <nav class="site-nav">
-    <a href="richard-hunter.html" target="_blank">Hunter</a>
-    <a href="the-house.html" target="_blank">House</a>
-    <a href="archive.html" target="_blank">Archive</a>
-    <a href="about.html" target="_blank">About</a>
+    <a href="#" class="wip-link">Hunter</a>
+    <a href="#" class="wip-link">House</a>
+    <a href="#" class="wip-link">Archive</a>
+    <a href="#" class="wip-link">About</a>
   </nav>
   <div class="site-topright">
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen">⤢</button>
@@ -1540,7 +1562,21 @@ WHERE {
       $("#rows").innerHTML = `<div class="error-msg">Error loading: ${escapeHTML(err.message)}</div>`;
     }
   })();
+
+  // In-progress toast for nav links
+  const wipToast = document.getElementById('wip-toast');
+  let wipTimer;
+  document.querySelectorAll('.wip-link').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      clearTimeout(wipTimer);
+      wipToast.classList.add('visible');
+      wipTimer = setTimeout(() => wipToast.classList.remove('visible'), 2000);
+    });
+  });
 </script>
+
+<div id="wip-toast" aria-live="polite">In progress</div>
 
 </body>
 </html>
