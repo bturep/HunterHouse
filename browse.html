@@ -86,13 +86,14 @@
 
   /* ── list pane ── */
   .list-head{
-    display:grid;grid-template-columns:104px 1fr 50px;gap:12px;align-items:center;
+    display:grid;grid-template-columns:24px 80px 1fr 44px;gap:12px 8px;align-items:center;
     height:41px;box-sizing:border-box;padding:0 20px;
     font-family:var(--mono);font-size:9.5px;color:var(--muted);
     letter-spacing:0.18em;text-transform:uppercase;
     border-bottom:1px solid var(--ink);flex-shrink:0;position:relative;
   }
-  .list-head .id-col{display:flex;align-items:center;gap:5px;position:relative}
+  .list-head .badge-hd{display:flex;justify-content:flex-end;align-items:center;position:relative}
+  .list-head .id-col{display:flex;align-items:center;gap:5px}
   .list-head .r{text-align:right}
   .rows{flex:1;overflow-y:auto}
 
@@ -138,14 +139,14 @@
   .leg-label{color:var(--muted)}
 
   .row{
-    display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
+    display:grid;grid-template-columns:24px 80px 1fr 44px;gap:12px 8px;
     padding:11px 20px;align-items:start;cursor:pointer;
     border-bottom:1px dashed var(--rule);position:relative;
   }
+  .row .badge-col{display:flex;justify-content:flex-end;align-items:baseline;padding-top:2px}
   .row .archid{
     font-family:var(--mono);font-size:11px;color:var(--ink);
     letter-spacing:0.02em;font-weight:500;white-space:nowrap;padding-top:2px;
-    display:flex;align-items:baseline;gap:6px;
   }
   .row .archid .tmark{
     font-family:var(--mono);font-size:8.5px;
@@ -486,6 +487,7 @@
 
   <section class="pane-list mobile-active">
     <div class="list-head">
+      <span class="badge-hd"></span>
       <span class="id-col">
         <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>
       </span>
@@ -810,7 +812,8 @@ WHERE {
       row.dataset.id = it.id;
       const tmark = typeMark(it.itemType);
       row.innerHTML = `
-        <span class="archid">${tmark ? `<span class="tmark" data-type="${escapeHTML(tmark)}" title="${escapeHTML(it.itemType)}">${tmark}</span>` : ""}${displayId(it.id)}</span>
+        <span class="badge-col">${tmark ? `<span class="tmark" data-type="${escapeHTML(tmark)}" title="${escapeHTML(it.itemType)}">${tmark}</span>` : ""}</span>
+        <span class="archid">${displayId(it.id)}</span>
         <div class="title-wrap">
           <div class="title">${escapeHTML(it.title)}</div>
           <div class="ph">${escapeHTML(it.phase || "")}</div>
@@ -1357,7 +1360,7 @@ WHERE {
       renderListHead();
       initPanZoom();
 
-      addLegendButton($(".list-head .id-col"), BADGE_LEGEND);
+      addLegendButton($(".list-head .badge-hd"), BADGE_LEGEND);
 
       const defaultItem = state.filtered.find(i => i.qid === "Q331") || state.filtered[0];
       const target = urlId && state.filtered.find(i => i.id === urlId)
