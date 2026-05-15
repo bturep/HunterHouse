@@ -16,9 +16,8 @@
   ::view-transition-new(root){animation-duration:600ms;animation-timing-function:cubic-bezier(.4,0,.2,1)}
   ::view-transition-group(hh-mark){animation-duration:900ms;animation-timing-function:cubic-bezier(.4,0,.2,1)}
 
-  /* Fade the shell in on arrival */
-  .shell,.controls{animation:page-in 350ms ease-out both}
-  @keyframes page-in{from{opacity:0}to{opacity:1}}
+  /* Fade the whole page in on arrival */
+  @keyframes body-in{from{opacity:0}to{opacity:1}}
 
   /* In-progress toast */
   #wip-toast{
@@ -32,8 +31,9 @@
   #wip-toast.visible{opacity:1}
 
   /* browse-surface overrides */
+  html{background:#f3f1ec}
   html,body{overflow:hidden}
-  body{display:flex;flex-direction:column}
+  body{display:flex;flex-direction:column;animation:body-in 450ms ease-out both}
   .site-top{padding:14px 28px;flex-shrink:0}
   .controls{flex-shrink:0}
   .site-nav a{padding:5px 16px}
