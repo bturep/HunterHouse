@@ -842,3 +842,46 @@ Google Fonts `<link rel="stylesheet">` is render-blocking: the browser will not 
 
 **Files changed**
 `browse.html`, `CLAUDE.md`
+
+---
+
+### 2026-05-15 — End of session wrap-up (v1.1.0)
+
+**Session summary — full day of work.**
+
+**Site — index.html (splash)**
+- Redesigned mark to system monospace uppercase (`'SF Mono','JetBrains Mono',ui-monospace`) matching browse header DNA: `HUNTER HOUSE` 30px + `FOUNDATION` 21px dim.
+- Removed Google Fonts link entirely — was render-blocking, preventing video and page from loading.
+- Removed verso.css from splash — its body/background rules cascaded onto the dark splash.
+- Removed "Victoria, British Columbia" subtitle.
+- All CSS variables replaced with hardcoded values; splash is now fully self-contained.
+
+**Site — browse.html**
+- P142 Physical location fetched in SPARQL, rendered as breadcrumb (`S0004 › SS0001 › SSS0018 › FL0003`) in Archival section.
+- P100 curator notes moved from Archival rows to a `.curator-note` italic block at the bottom of the record pane.
+- Removed `body-in` opacity animation (was causing black flash); added `<meta name="color-scheme" content="light">`.
+- Cache key bumped v19 → v20.
+
+**Wikibase — P142 Physical location (complete)**
+- New property P142 created.
+- `migrate_p142_location.py`: moved paths from P100 → P142 for 20 drawing items.
+- `fix_p142_prose.py`: fixed CAA-0025 and CAA-0027 where prose (`. Ref:`) was mixed into the path.
+- `fill_p142_missing.py`: filled P142 for remaining 15 items (0007–0009 from fonds Excel; 0010–0019 photos stopped at SSS0001; 0026, 0028 from FL codes).
+- All 35 CAA items now have P142.
+
+**Infrastructure**
+- Three-level versioning `vMAJOR.SESSION.PATCH` adopted. Rules documented in global CLAUDE.md.
+- Session log headings now include version number as a work marker.
+- Pre-authorisation block added to global CLAUDE.md — no confirmation needed for git, Wikibase writes, scripts, file edits.
+
+**Version:** v1.1.0
+
+---
+
+### 2026-05-15 — Animation sync: splash text + browse fade-in (v1.1.1)
+
+- `index.html`: mark-in animation changed from `1400ms cubic-bezier(.2,.7,.2,1) 300ms` to `700ms ease-out 450ms` — text and video now complete their fade at the same moment (~1150ms after page load).
+- `browse.html`: restored body fade-in (`@keyframes page-in`, `750ms ease-out`) — safe now that `color-scheme:light` and `html{background:#f3f1ec}` prevent any dark flash during opacity transition.
+- Both files bumped to v1.1.1. Tagged and pushed.
+
+**Version:** v1.1.1
