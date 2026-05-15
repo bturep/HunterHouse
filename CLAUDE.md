@@ -547,3 +547,43 @@ Append an entry after every major task. Format: `### YYYY-MM-DD — brief title`
 **Remaining pending**
 - R2 cleanup: delete stale `HH-A-XXXX` and `HH-HHC-003X` files once browse.html verified.
 - WIKIBASE.md identifier schema section still shows old HH-A-#### format — needs updating.
+
+---
+
+### 2026-05-14 — browse.html UI overhaul (continued session)
+
+**Wikibase audit — unfetched properties found**
+- Ran SPARQL audit to compare all Wikibase properties against what browse.html fetches.
+- Six properties found on items but not fetched: P78 (item type), P81 (accession batch), P93 (rights), P94 (held by), P98 (unique identifier), P99 (archive link).
+- Decision: add P93, P94, P99. Skip P78, P81, P98.
+- P94 (held by) → now shown in 01 Description as "Held by" after Creator.
+- P93 (rights) → shown in 02 Archival as "Rights" (label of rights item).
+- P99 (archive link) → shown in 02 Archival as "↗ External record" clickable link (CAA items only).
+- Cache key bumped v12 → v13.
+
+**browse.html — record pane cleanup**
+- Removed Archive ID row from 02 Archival section (already shown in image pane header).
+- Removed Source row from 02 Archival section (already shown in meta-head).
+- 02 Archival section now hidden entirely when no rows to show; section numbers stay sequential (01→02 or 01→03).
+- "Siblings in this phase" renamed to "In this set" — phase language was wrong for surveys and land survey items.
+
+**browse.html — pill colour differentiation**
+- Three pill types now have distinct muted colours:
+  - Areas → copper/sage green (existing `--copper-pale / --copper-deep`)
+  - Item type → slate blue (`#e4ecf4 / #3a5470`)
+  - Drawing type → warm stone (`#ede8e0 / #6b5540`)
+- All three follow same hover/active pattern: dark fill, white text.
+
+**browse.html — title bracket split**
+- Titles with `[bracketed annotation]` now render the bracketed portion on a new line.
+- New `.meta-title-sub` style: 13px, muted, `display:block`, 4px top margin.
+- Helper function `formatTitle()` splits on the first `[` group at end of string; falls back to plain text if no brackets.
+- Example: `"Hunter House - Scheme II [Plan + Elevation; Colored with Legend]"` renders as two lines.
+
+**browse.html — default sort**
+- Default `sortCol` changed from `"year"` to `"id"`.
+- ID sort uses `localeCompare` on full ID string — CAA-XXXX sorts before HHC-XXXX alphabetically.
+- Year sort was causing HHC to appear first because: (a) year sort is collection-agnostic, (b) undated items get key `"9999-99-99"` and sink to bottom, pushing any undated CAA items down.
+
+**Files changed**
+`browse.html`, `CLAUDE.md`
