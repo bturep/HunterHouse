@@ -73,7 +73,7 @@
   /* ── list fleuron ── */
   .list-fleuron{display:flex;justify-content:center;align-items:center;height:25vh;margin-top:20px;padding-bottom:32px}
   .list-fleuron img{width:120px;height:120px;object-fit:contain;image-rendering:crisp-edges}
-  .pane-list{border-right:1px solid var(--ink);display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
+  .pane-list{border-right:1px solid var(--ink);display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg);position:relative}
   .pane-image{background:var(--paper);display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative}
   .pane-meta{border-left:1px solid var(--ink);display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
 
@@ -110,6 +110,41 @@
   .sort-arrow{font-size:7px;line-height:1;font-family:var(--sans);letter-spacing:0}
   .sort-hd:not(.active):hover .sort-arrow::after{content:"↕";color:var(--rule)}
 
+  /* ── filter badge on Browse label ── */
+  .filter-badge{
+    display:none;font-family:var(--mono);font-size:8px;font-weight:600;
+    background:var(--ink);color:var(--bg);border-radius:10px;
+    padding:1px 5px;margin-left:8px;letter-spacing:0;vertical-align:middle;
+  }
+  .filter-badge.visible{display:inline-block}
+
+  /* ── filter toggle button ── */
+  #filter-toggle{font-size:13px;letter-spacing:0;padding:0 2px;line-height:1}
+  #filter-toggle.fp-open{color:var(--ink)}
+
+  /* ── filter panel ── */
+  .filter-panel{
+    position:absolute;top:41px;left:0;right:0;z-index:50;
+    background:var(--bg);border-bottom:1px solid var(--ink);
+    padding:16px 20px 14px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.08);
+  }
+  .fp-group{margin-bottom:14px}
+  .fp-group:last-child{margin-bottom:0}
+  .fp-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.16em;text-transform:uppercase;margin-bottom:8px}
+  .fp-chips{display:flex;flex-wrap:wrap;gap:5px}
+  .fp-chip{
+    font-family:var(--mono);font-size:10px;letter-spacing:0.03em;
+    border:1px solid var(--rule);background:var(--soft);color:var(--muted);
+    padding:3px 9px;border-radius:2px;cursor:pointer;
+    transition:background 0.1s,color 0.1s,border-color 0.1s;
+    line-height:1.5;
+  }
+  .fp-chip:hover{background:var(--paper);color:var(--ink);border-color:var(--muted)}
+  .fp-chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .fp-footer{display:flex;justify-content:flex-end;padding-top:12px;margin-top:12px;border-top:1px solid var(--rule)}
+  .fp-clear{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;background:none;border:0;padding:0}
+  .fp-clear:hover{color:var(--ink)}
 
   .row{
     display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
@@ -451,13 +486,15 @@
 
   <section class="pane-list mobile-active">
     <div class="list-head">
-      <span class="l">Browse</span>
+      <span class="l">Browse<span class="filter-badge" id="filter-badge"></span></span>
       <div class="sort-mini">
+        <button class="sort-hd" id="filter-toggle" title="Filter">›</button>
         <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>
         <button class="sort-hd" data-sort-col="phase">Phase<span class="sort-arrow" id="sa-phase"></span></button>
         <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>
       </div>
     </div>
+    <div class="filter-panel" id="filter-panel" hidden></div>
     <div class="rows" id="rows">
       <div class="load-msg">Loading catalogue from Wikibase…</div>
     </div>
@@ -515,9 +552,9 @@
     sortDir: "asc",
     search: "",
     filterCollection: "",
-    filterArea: "",
-    filterType: "",
-    filterDrawType: "",
+    filterArea: new Set(),
+    filterType: new Set(),
+    filterDrawType: new Set(),
   };
 
   const BADGE_LEGEND = [
@@ -708,9 +745,9 @@ WHERE {
   function applyFilters() {
     const q = state.search.trim().toLowerCase();
     state.filtered = state.items.filter(it => {
-      if (state.filterArea && !(it.areas||[]).includes(state.filterArea)) return false;
-      if (state.filterType && it.itemType !== state.filterType) return false;
-      if (state.filterDrawType && !(it.drawTypes||[]).includes(state.filterDrawType)) return false;
+      if (state.filterArea.size && !(it.areas||[]).some(a => state.filterArea.has(a))) return false;
+      if (state.filterType.size && !state.filterType.has(it.itemType)) return false;
+      if (state.filterDrawType.size && !(it.drawTypes||[]).some(dt => state.filterDrawType.has(dt))) return false;
       if (q) {
         const hay = [it.id, it.title, it.phase, (it.drawTypes||[]).join(" "), (it.areas||[]).join(" "), it.creator, it.medium||"", it.notes||""].join(" ").toLowerCase();
         if (!hay.includes(q)) return false;
@@ -798,26 +835,12 @@ WHERE {
     const frag = document.createDocumentFragment();
     let lastPhase = null;
 
-    if (state.filterArea) {
+    const anyFilter = state.filterArea.size || state.filterType.size || state.filterDrawType.size;
+    if (anyFilter) {
       const d = document.createElement("div");
       d.className = "phase-divider";
       const n = String(state.filtered.length).padStart(2,"0");
-      d.innerHTML = `<span>Area: ${escapeHTML(state.filterArea)} <span style="color:var(--muted);font-weight:400">${n} items</span></span><span class="r" style="cursor:pointer" id="area-filter-clear" title="Clear filter">✕ clear</span>`;
-      frag.appendChild(d);
-    }
-    if (state.filterType) {
-      const d = document.createElement("div");
-      d.className = "phase-divider";
-      const n = String(state.filtered.length).padStart(2,"0");
-      const mark = typeMark(state.filterType);
-      d.innerHTML = `<span>${mark ? `<span class="tmark" data-type="${escapeHTML(mark)}" style="margin-right:6px">${escapeHTML(mark)}</span>` : ""}${escapeHTML(state.filterType)} <span style="color:var(--muted);font-weight:400">${n} items</span></span><span class="r" style="cursor:pointer" id="type-filter-clear" title="Clear filter">✕ clear</span>`;
-      frag.appendChild(d);
-    }
-    if (state.filterDrawType) {
-      const d = document.createElement("div");
-      d.className = "phase-divider";
-      const n = String(state.filtered.length).padStart(2,"0");
-      d.innerHTML = `<span>Drawing type: ${escapeHTML(state.filterDrawType)} <span style="color:var(--muted);font-weight:400">${n} items</span></span><span class="r" style="cursor:pointer" id="drawtype-filter-clear" title="Clear filter">✕ clear</span>`;
+      d.innerHTML = `<span>Filtered <span style="color:var(--muted);font-weight:400">${n} items</span></span><span class="r" style="cursor:pointer" id="filter-clear-all">✕ clear all</span>`;
       frag.appendChild(d);
     }
 
@@ -846,28 +869,12 @@ WHERE {
     });
     container.appendChild(frag);
 
-    const clearBtn = document.getElementById("area-filter-clear");
-    if (clearBtn) {
-      clearBtn.addEventListener("click", e => {
+    const clearAllBtn = document.getElementById("filter-clear-all");
+    if (clearAllBtn) {
+      clearAllBtn.addEventListener("click", e => {
         e.stopPropagation();
-        state.filterArea = "";
-        applyFilters(); renderList();
-      });
-    }
-    const clearTypeBtn = document.getElementById("type-filter-clear");
-    if (clearTypeBtn) {
-      clearTypeBtn.addEventListener("click", e => {
-        e.stopPropagation();
-        state.filterType = "";
-        applyFilters(); renderList();
-      });
-    }
-    const clearDrawTypeBtn = document.getElementById("drawtype-filter-clear");
-    if (clearDrawTypeBtn) {
-      clearDrawTypeBtn.addEventListener("click", e => {
-        e.stopPropagation();
-        state.filterDrawType = "";
-        applyFilters(); renderList();
+        clearAllFilters();
+        applyFilters(); renderList(); updateFilterBadge();
       });
     }
 
@@ -1021,7 +1028,7 @@ WHERE {
     $("#meta-source").textContent = item.sourceCollection || "—";
 
     const areasHtml = (item.areas || []).map(a =>
-      `<button class="pill area-pill${state.filterArea === a ? " active" : ""}" style="${pillStyle(PC.copper)}" data-area="${escapeHTML(a)}">${escapeHTML(a)}</button>`
+      `<button class="pill area-pill${state.filterArea.has(a) ? " active" : ""}" style="${pillStyle(PC.copper)}" data-area="${escapeHTML(a)}">${escapeHTML(a)}</button>`
     ).join("");
 
     const descRows = [];
@@ -1033,7 +1040,7 @@ WHERE {
     if (areasHtml)        descRows.push(["Areas",   areasHtml]);
     if (item.itemType) {
       const mark = typeMark(item.itemType);
-      const isActive = state.filterType === item.itemType;
+      const isActive = state.filterType.has(item.itemType);
       const tc = TYPE_PILL_COLORS[mark] || TYPE_PILL_COLORS["D"];
       descRows.push(["Item type",
         `<button class="pill type-pill${isActive ? " active" : ""}" style="${pillStyle(tc)}" data-itype="${escapeHTML(item.itemType)}">${escapeHTML(item.itemType)}</button>`
@@ -1041,7 +1048,7 @@ WHERE {
     }
     if (item.drawTypes?.length) {
       const drawHtml = sortDrawTypes(item.drawTypes).map(dt =>
-        `<button class="pill drawtype-pill${state.filterDrawType === dt ? " active" : ""}" style="${pillStyle(drawTypePillColor(dt))}" data-drawtype="${escapeHTML(dt)}">${escapeHTML(dt)}</button>`
+        `<button class="pill drawtype-pill${state.filterDrawType.has(dt) ? " active" : ""}" style="${pillStyle(drawTypePillColor(dt))}" data-drawtype="${escapeHTML(dt)}">${escapeHTML(dt)}</button>`
       ).join("");
       descRows.push(["Drawing type", drawHtml]);
     }
@@ -1200,9 +1207,92 @@ WHERE {
     if (next >= 0 && next < state.filtered.length) selectItem(state.filtered[next].id);
   }
 
+  // ── Filter helpers ────────────────────────────────────────────────────────
+  function toggleSet(set, val) {
+    if (set.has(val)) set.delete(val); else set.add(val);
+  }
+
+  function clearAllFilters() {
+    state.filterArea.clear();
+    state.filterType.clear();
+    state.filterDrawType.clear();
+  }
+
+  function updateFilterBadge() {
+    const total = state.filterArea.size + state.filterType.size + state.filterDrawType.size;
+    const badge = $("#filter-badge");
+    if (!badge) return;
+    badge.textContent = total || "";
+    badge.classList.toggle("visible", total > 0);
+  }
+
+  function renderFilterPanel() {
+    const panel = $("#filter-panel");
+    if (!panel) return;
+
+    const uniqueAreas     = uniqueSorted(state.items.flatMap(i => i.areas || []));
+    const uniqueTypes     = uniqueSorted(state.items.map(i => i.itemType).filter(Boolean));
+    const uniqueDrawTypes = uniqueSorted(state.items.flatMap(i => i.drawTypes || []));
+
+    const group = (label, vals, activeSet, cls, attr) => {
+      if (!vals.length) return "";
+      const chips = vals.map(v =>
+        `<button class="fp-chip${activeSet.has(v) ? " on" : ""}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}</button>`
+      ).join("");
+      return `<div class="fp-group fp-grp-${cls}"><div class="fp-lbl">${label}</div><div class="fp-chips">${chips}</div></div>`;
+    };
+
+    panel.innerHTML =
+      group("Areas",        uniqueAreas,     state.filterArea,     "area",     "area")  +
+      group("Item type",    uniqueTypes,     state.filterType,     "itype",    "itype") +
+      group("Drawing type", uniqueDrawTypes, state.filterDrawType, "drawtype", "drawtype") +
+      `<div class="fp-footer"><button class="fp-clear" id="fp-clear-btn">Clear all ×</button></div>`;
+
+    panel.querySelector("#fp-clear-btn")?.addEventListener("click", e => {
+      e.stopPropagation();
+      clearAllFilters();
+      applyFilters(); renderList(); updateFilterBadge();
+      renderFilterPanel();
+    });
+
+    panel.querySelectorAll(".fp-chip[data-area]").forEach(chip => {
+      chip.addEventListener("click", e => {
+        e.stopPropagation();
+        toggleSet(state.filterArea, chip.dataset.area);
+        applyFilters(); renderList(); updateFilterBadge(); renderFilterPanel();
+        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
+          selectItem(state.filtered[0].id, { scrollIntoView: false });
+      });
+    });
+    panel.querySelectorAll(".fp-chip[data-itype]").forEach(chip => {
+      chip.addEventListener("click", e => {
+        e.stopPropagation();
+        toggleSet(state.filterType, chip.dataset.itype);
+        applyFilters(); renderList(); updateFilterBadge(); renderFilterPanel();
+        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
+          selectItem(state.filtered[0].id, { scrollIntoView: false });
+      });
+    });
+    panel.querySelectorAll(".fp-chip[data-drawtype]").forEach(chip => {
+      chip.addEventListener("click", e => {
+        e.stopPropagation();
+        toggleSet(state.filterDrawType, chip.dataset.drawtype);
+        applyFilters(); renderList(); updateFilterBadge(); renderFilterPanel();
+        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
+          selectItem(state.filtered[0].id, { scrollIntoView: false });
+      });
+    });
+  }
+
   // ── Controls ──────────────────────────────────────────────────────────────
   function closeAllDropdowns() {
     document.querySelectorAll(".fbtn.open").forEach(b => b.classList.remove("open"));
+    const fp = $("#filter-panel");
+    if (fp && !fp.hidden) {
+      fp.hidden = true;
+      $("#filter-toggle").classList.remove("fp-open");
+      $("#filter-toggle").textContent = "›";
+    }
   }
 
   function wireDropdown(btnId, dropId, valId, getOptions, getActive, onChange) {
@@ -1244,6 +1334,22 @@ WHERE {
 
     document.addEventListener("click", closeAllDropdowns);
 
+    $("#filter-toggle").addEventListener("click", e => {
+      e.stopPropagation();
+      const panel = $("#filter-panel");
+      const btn   = $("#filter-toggle");
+      const opening = panel.hidden;
+      closeAllDropdowns();
+      if (opening) {
+        renderFilterPanel();
+        panel.hidden = false;
+        btn.classList.add("fp-open");
+        btn.textContent = "×";
+      }
+    });
+
+    $("#filter-panel").addEventListener("click", e => e.stopPropagation());
+
     // Column-header sort
     document.querySelectorAll(".sort-hd[data-sort-col]").forEach(btn => {
       btn.addEventListener("click", () => {
@@ -1278,29 +1384,29 @@ WHERE {
     document.getElementById("meta-body").addEventListener("click", e => {
       const areaPill = e.target.closest(".area-pill");
       if (areaPill) {
-        const area = areaPill.dataset.area;
-        state.filterArea = state.filterArea === area ? "" : area;
-        applyFilters(); renderList();
+        toggleSet(state.filterArea, areaPill.dataset.area);
+        applyFilters(); renderList(); updateFilterBadge();
         if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
           selectItem(state.filtered[0].id, { scrollIntoView: false });
+        renderMeta(state.items.find(i => i.id === state.selectedId));
         return;
       }
       const typePill = e.target.closest(".type-pill");
       if (typePill) {
-        const itype = typePill.dataset.itype;
-        state.filterType = state.filterType === itype ? "" : itype;
-        applyFilters(); renderList();
+        toggleSet(state.filterType, typePill.dataset.itype);
+        applyFilters(); renderList(); updateFilterBadge();
         if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
           selectItem(state.filtered[0].id, { scrollIntoView: false });
+        renderMeta(state.items.find(i => i.id === state.selectedId));
         return;
       }
       const drawTypePill = e.target.closest(".drawtype-pill");
       if (drawTypePill) {
-        const dt = drawTypePill.dataset.drawtype;
-        state.filterDrawType = state.filterDrawType === dt ? "" : dt;
-        applyFilters(); renderList();
+        toggleSet(state.filterDrawType, drawTypePill.dataset.drawtype);
+        applyFilters(); renderList(); updateFilterBadge();
         if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
           selectItem(state.filtered[0].id, { scrollIntoView: false });
+        renderMeta(state.items.find(i => i.id === state.selectedId));
       }
     });
 
@@ -1349,6 +1455,7 @@ WHERE {
       renderList();
       wireControls();
       renderListHead();
+      updateFilterBadge();
       initPanZoom();
 
       const defaultItem = state.filtered.find(i => i.qid === "Q331") || state.filtered[0];
