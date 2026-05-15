@@ -815,3 +815,30 @@ Google Fonts `<link rel="stylesheet">` is render-blocking: the browser will not 
 
 **Files changed**
 `index.html`, `browse.html`, `CLAUDE.md`, `scripts/migrate_p142_location.py`, `scripts/fix_p142_prose.py`, `scripts/fill_p142_missing.py`
+
+---
+
+### 2026-05-15 — browse.html mobile polish + year column alignment
+
+**Mobile UI changes**
+- Fullscreen (⤢) and version (v1.0) buttons hidden on mobile only via `#fs-toggle,#topright{display:none}` in `@media(max-width:767px)`. Both remain on desktop.
+- Search input placeholder changed from "keyword search…" to "search".
+- Mobile header: removed `border-left` and `border-right` from `.header-search`; the `/` prefix is kept.
+- Rotate button (↻) moved out of `.zoom-ctl` to the left side of `.image-foot` as a standalone `.foot-rotate` button — always visible on mobile and desktop.
+- Image foot restructured: rotate left | zoom controls centred (desktop only) | download right.
+- Touch pan + pinch zoom + double-tap-to-fit wired on the image canvas in `initPanZoom()`. Uses `passive:false` on touchstart/touchmove to block page scroll during image interaction.
+
+**Year column alignment**
+- Problem: year values were `text-align:right` in a 50px grid column; the "Year" sort button was left-aligned — visually offset.
+- Fix: left-align both. The sort button and the row column are both 50px wide with 20px right padding, so their left edges are at the same position (`pane_width − 70px`). Left-aligning both achieves true alignment.
+- Note: several failed intermediate attempts restructured list-head as a CSS grid and moved Year outside `.sort-mini`. These broke HHF logo alignment (wrong left padding) and Year font (lost `.sort-mini .sort-hd` styles). Final fix is two CSS property changes only.
+
+**CSS rules changed**
+- `.foot-rotate` — new standalone rotate button style
+- `.zoom-ctl` — `flex:1;justify-content:center` so zoom controls stay centred
+- `.sort-mini .sort-hd[data-sort-col="year"]` — `width:50px` (left-aligned, no flex-end)
+- `.row .year` — removed `text-align:right`
+- Mobile media query — `#fs-toggle,#topright{display:none}`, `.header-search` border removal
+
+**Files changed**
+`browse.html`, `CLAUDE.md`
