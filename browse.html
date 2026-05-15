@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Browse the catalogue — Hunter House Foundation</title>
+<title>Browse Archive — Hunter House Foundation</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,27 +19,18 @@
   /* Fade the whole page in on arrival */
   @keyframes body-in{from{opacity:0}to{opacity:1}}
 
-  /* In-progress toast */
-  #wip-toast{
-    position:fixed;bottom:28px;right:32px;z-index:200;
-    font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;
-    color:var(--muted);background:var(--bg);
-    border:1px solid var(--rule);padding:6px 14px;
-    pointer-events:none;
-    opacity:0;transition:opacity 200ms ease;
-  }
-  #wip-toast.visible{opacity:1}
 
   /* browse-surface overrides */
   html{background:#f3f1ec;height:100%}
   html,body{overflow:hidden}
   body{height:100%;display:flex;flex-direction:column;animation:body-in 450ms ease-out both}
-  .site-top{padding:14px 28px;flex-shrink:0}
+  .site-top{padding:14px 28px;flex-shrink:0;grid-template-columns:1fr auto}
   .controls{flex-shrink:0}
   .site-nav a{padding:5px 16px}
   .site-topright .theme-btn{border:none;border-radius:0;padding:0;font-size:19px;line-height:1}
   .site-topright .theme-btn:hover{border:none}
   .site-topright{gap:20px;align-items:center}
+  a.markid{text-decoration:none;color:inherit}
   #topright{cursor:pointer;line-height:1;display:inline-flex;align-items:center}
 
   /* ── about panel (replaces controls bar when open) ── */
@@ -484,15 +475,9 @@
 <body>
 
 <header class="site-top">
-  <div class="markid">
+  <a class="markid" href="index.html">
     <span class="name">Hunter House <span class="dim">Foundation</span></span>
-  </div>
-  <nav class="site-nav">
-    <a href="#" class="wip-link">Hunter</a>
-    <a href="#" class="wip-link">House</a>
-    <a href="#" class="wip-link">Archive</a>
-    <a href="#" class="wip-link">About</a>
-  </nav>
+  </a>
   <div class="site-topright">
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen">⤢</button>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode">◑</button>
@@ -1610,20 +1595,9 @@ WHERE {
     }
   })();
 
-  // In-progress toast for nav links
-  const wipToast = document.getElementById('wip-toast');
-  let wipTimer;
-  document.querySelectorAll('.wip-link').forEach(a => {
-    a.addEventListener('click', e => {
-      e.preventDefault();
-      clearTimeout(wipTimer);
-      wipToast.classList.add('visible');
-      wipTimer = setTimeout(() => wipToast.classList.remove('visible'), 2000);
-    });
-  });
+
 </script>
 
-<div id="wip-toast" aria-live="polite">In progress</div>
 
 </body>
 </html>
