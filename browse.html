@@ -37,9 +37,26 @@
   .site-top{padding:14px 28px;flex-shrink:0}
   .controls{flex-shrink:0}
   .site-nav a{padding:5px 16px}
-  .site-topright .theme-btn{border:none;border-radius:0;padding:0;font-size:19px;line-height:1;gap:14px}
+  .site-topright .theme-btn{border:none;border-radius:0;padding:0;font-size:19px;line-height:1}
   .site-topright .theme-btn:hover{border:none}
-  .site-topright{gap:14px}
+  .site-topright{gap:20px;align-items:center;position:relative}
+  #topright{cursor:pointer;line-height:1;display:inline-flex;align-items:center}
+
+  /* ── about panel ── */
+  #about-panel{
+    display:none;position:absolute;top:calc(100% + 10px);right:0;
+    width:320px;z-index:500;
+    background:var(--bg);border:1px solid var(--ink);
+    padding:18px 20px;
+  }
+  #about-panel.open{display:block}
+  #about-panel p{
+    font-size:11px;line-height:1.65;color:var(--ink);
+    margin:0 0 10px;font-family:var(--sans);
+  }
+  #about-panel p:last-child{margin-bottom:0;color:var(--muted)}
+  #about-panel a{color:var(--ink);text-underline-offset:2px}
+  #about-panel a:hover{color:var(--red)}
 
   /* ── controls bar ── */
   .controls{
@@ -482,7 +499,11 @@
   <div class="site-topright">
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen">⤢</button>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode">◑</button>
-    <span id="topright" title="Double-click to refresh catalogue from Wikibase" style="cursor:default">v1.0</span>
+    <span id="topright" title="About this archive">v1.0</span>
+    <div id="about-panel" role="dialog" aria-label="About this archive">
+      <p>Built by <a href="https://brandonpoole.net/" target="_blank" rel="noopener">Brandon Poole</a> for Floyd Marinescu and Olivia Jol, Hunter House Foundation.</p>
+      <p>Open data archive on Wikibase — the open-source knowledge graph underlying Wikidata. Items individually addressable; catalogue queryable via SPARQL. Metadata: CC0 linked open data. Archival description informed by GLAM standards and the <a href="https://github.com/CCA-Public/digital-archives-manual" target="_blank" rel="noopener">CCA Digital Archives Manual</a>.</p>
+    </div>
   </div>
 </header>
 
@@ -1540,10 +1561,16 @@ WHERE {
 
   // ── Main (async load) ─────────────────────────────────────────────────────
   (async function main() {
-    document.getElementById("topright").addEventListener("dblclick", () => {
-      clearCache();
-      location.reload();
+    const aboutPanel = document.getElementById("about-panel");
+    const toprightEl = document.getElementById("topright");
+    toprightEl.addEventListener("click", (e) => {
+      e.stopPropagation();
+      aboutPanel.classList.toggle("open");
     });
+    aboutPanel.addEventListener("click", (e) => e.stopPropagation());
+    document.addEventListener("click", () => aboutPanel.classList.remove("open"));
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") aboutPanel.classList.remove("open"); });
+    toprightEl.addEventListener("dblclick", () => { clearCache(); location.reload(); });
 
     try {
       const items = await loadFromWikibase();
