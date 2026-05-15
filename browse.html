@@ -133,13 +133,13 @@
   .fp-chips{display:flex;flex-wrap:wrap;gap:5px}
   .fp-chip{
     font-family:var(--mono);font-size:10px;letter-spacing:0.03em;
-    border:1px solid var(--rule);background:var(--soft);color:var(--muted);
+    border:1px solid var(--pb,var(--rule));background:var(--pb,var(--soft));color:var(--pf,var(--muted));
     padding:3px 9px;border-radius:2px;cursor:pointer;
     transition:background 0.1s,color 0.1s,border-color 0.1s;
     line-height:1.5;
   }
-  .fp-chip:hover{background:var(--paper);color:var(--ink);border-color:var(--muted)}
-  .fp-chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .fp-chip:hover{filter:brightness(0.94)}
+  .fp-chip.on{background:var(--pd,var(--ink));color:var(--bg);border-color:var(--pd,var(--ink))}
   .fp-footer{display:flex;justify-content:flex-end;padding-top:12px;margin-top:12px;border-top:1px solid var(--rule)}
   .fp-clear{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;background:none;border:0;padding:0}
   .fp-clear:hover{color:var(--ink)}
@@ -460,7 +460,7 @@
   <div class="site-topright">
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen">⤢</button>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode">◑</button>
-    <span id="topright" title="Double-click to refresh catalogue from Wikibase" style="cursor:default">v0.6</span>
+    <span id="topright" title="Double-click to refresh catalogue from Wikibase" style="cursor:default">v1.0</span>
   </div>
 </header>
 
@@ -801,35 +801,19 @@ WHERE {
   // Pill colour palette — 6 muted tones matching the badge colours
   // Pill colour tokens — drawn from the badge palette
   const PC = {
-    copper: { pb:"#dde6df", pf:"#365549", pd:"#243a31" },
-    blue:   { pb:"#e8f2f8", pf:"#3d6b8a", pd:"#2a4a62" },
-    teal:   { pb:"#e2f2ec", pf:"#3d6b5a", pd:"#2a4a3e" },
-    brown:  { pb:"#f2ede4", pf:"#6b5a3d", pd:"#4a3e2a" },
-    purple: { pb:"#ede4f2", pf:"#5a3d6b", pd:"#3e2a4a" },
-    green:  { pb:"#e8f2e2", pf:"#4e6b40", pd:"#354b2b" },
-    mauve:  { pb:"#f2e8f2", pf:"#6b4e6b", pd:"#4a344a" },
+    // Built from the two established poles: red #8b3a2a and sage #4f7a6b
+    sage:  { pb:"#dde6df", pf:"#365549", pd:"#243a31" },  // Areas — existing
+    stone: { pb:"#e8e2d6", pf:"#5a4830", pd:"#3c3020" },  // Item type — warm amber-tan (red hue shifted +25°, heavily desaturated)
+    slate: { pb:"#d8e2e8", pf:"#365264", pd:"#223548" },  // Drawing type — cool blue-grey (architectural)
+    clay:  { pb:"#ecddd3", pf:"#6b2a1e", pd:"#4a1c10" },  // Creator — uses --red-pale / --red-deep directly
+    moss:  { pb:"#e0e8d0", pf:"#485430", pd:"#303c20" },  // Built status — olive (midpoint between sage and stone)
   };
-  // Item type pill → matches badge colour exactly
-  const TYPE_PILL_COLORS = {
-    "D": PC.copper, "P": PC.blue,   "PM": PC.green,
-    "E": PC.mauve,  "R": PC.brown,  "LS": PC.teal, "EN": PC.purple,
-  };
-  // Drawing type → intentional fixed colour (4 groups + default)
-  const DRAW_TYPE_COLORS = {
-    "plan": PC.copper, "site plan": PC.copper, "floor plan": PC.copper,
-    "foundation plan": PC.copper, "floor framing plan": PC.copper,
-    "roof framing plan": PC.copper, "framing plan": PC.copper,
-    "ceiling plan": PC.copper, "electrical plan": PC.copper,
-    "elevation": PC.blue,
-    "section": PC.teal,
-    "detail": PC.brown,
-    "land survey": PC.teal,
-  };
+  // All item type pills use stone — category colour, not per-value colour
+  function itemTypePillColor() { return PC.stone; }
+  // All drawing type pills use slate — unified per category
+  function drawTypePillColor() { return PC.slate; }
   function pillStyle(c) {
     return `--pb:${c.pb};--pf:${c.pf};--pd:${c.pd}`;
-  }
-  function drawTypePillColor(dt) {
-    return DRAW_TYPE_COLORS[dt.toLowerCase()] || PC.copper;
   }
 
   function renderList() {
@@ -898,7 +882,7 @@ WHERE {
   }
 
   function updateCount() {
-    if (state.items.length > 0) $("#topright").textContent = "v0.6";
+    if (state.items.length > 0) $("#topright").textContent = "v1.0";
   }
 
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
@@ -1039,7 +1023,7 @@ WHERE {
     $("#meta-source").textContent = item.sourceCollection || "—";
 
     const areasHtml = (item.areas || []).map(a =>
-      `<button class="pill area-pill${state.filterArea.has(a) ? " active" : ""}" style="${pillStyle(PC.copper)}" data-area="${escapeHTML(a)}">${escapeHTML(a)}</button>`
+      `<button class="pill area-pill${state.filterArea.has(a) ? " active" : ""}" style="${pillStyle(PC.sage)}" data-area="${escapeHTML(a)}">${escapeHTML(a)}</button>`
     ).join("");
 
     const descRows = [];
@@ -1050,11 +1034,9 @@ WHERE {
     }
     if (areasHtml)        descRows.push(["Areas",   areasHtml]);
     if (item.itemType) {
-      const mark = typeMark(item.itemType);
       const isActive = state.filterType.has(item.itemType);
-      const tc = TYPE_PILL_COLORS[mark] || TYPE_PILL_COLORS["D"];
       descRows.push(["Item type",
-        `<button class="pill type-pill${isActive ? " active" : ""}" style="${pillStyle(tc)}" data-itype="${escapeHTML(item.itemType)}">${escapeHTML(item.itemType)}</button>`
+        `<button class="pill type-pill${isActive ? " active" : ""}" style="${pillStyle(itemTypePillColor())}" data-itype="${escapeHTML(item.itemType)}">${escapeHTML(item.itemType)}</button>`
       ]);
     }
     if (item.drawTypes?.length) {
@@ -1066,19 +1048,19 @@ WHERE {
     if (item.medium)      descRows.push(["Medium", escapeHTML(item.medium)]);
     if (item.builtStatus) {
       const bsActive = state.filterBuiltStatus.has(item.builtStatus) ? " active" : "";
-      descRows.push(["Built", `<button class="pill builtstatus-pill${bsActive}" style="${pillStyle(PC.teal)}" data-builtstatus="${escapeHTML(item.builtStatus)}">${escapeHTML(item.builtStatus)}</button>`]);
+      descRows.push(["Built", `<button class="pill builtstatus-pill${bsActive}" style="${pillStyle(PC.moss)}" data-builtstatus="${escapeHTML(item.builtStatus)}">${escapeHTML(item.builtStatus)}</button>`]);
     }
     if (item.creator) {
       const cActive = state.filterCreator.has(item.creator) ? " active" : "";
-      descRows.push([creatorLabel(item.itemType), `<button class="pill creator-pill${cActive}" style="${pillStyle(PC.mauve)}" data-creator="${escapeHTML(item.creator)}">${escapeHTML(item.creator)}</button>`]);
+      descRows.push([creatorLabel(item.itemType), `<button class="pill creator-pill${cActive}" style="${pillStyle(PC.clay)}" data-creator="${escapeHTML(item.creator)}">${escapeHTML(item.creator)}</button>`]);
     }
     if (item.designedBy) {
       const cActive = state.filterCreator.has(item.designedBy) ? " active" : "";
-      descRows.push(["Designed by", `<button class="pill creator-pill${cActive}" style="${pillStyle(PC.mauve)}" data-creator="${escapeHTML(item.designedBy)}">${escapeHTML(item.designedBy)}</button>`]);
+      descRows.push(["Designed by", `<button class="pill creator-pill${cActive}" style="${pillStyle(PC.clay)}" data-creator="${escapeHTML(item.designedBy)}">${escapeHTML(item.designedBy)}</button>`]);
     }
     if (item.builtBy) {
       const cActive = state.filterCreator.has(item.builtBy) ? " active" : "";
-      descRows.push(["Built by", `<button class="pill creator-pill${cActive}" style="${pillStyle(PC.mauve)}" data-creator="${escapeHTML(item.builtBy)}">${escapeHTML(item.builtBy)}</button>`]);
+      descRows.push(["Built by", `<button class="pill creator-pill${cActive}" style="${pillStyle(PC.clay)}" data-creator="${escapeHTML(item.builtBy)}">${escapeHTML(item.builtBy)}</button>`]);
     }
     if (item.heldBy)      descRows.push(["Held by", escapeHTML(item.heldBy)]);
 
@@ -1265,20 +1247,21 @@ WHERE {
       [i.creator, i.designedBy, i.builtBy].filter(Boolean)));
     const uniqueBuiltStatus = uniqueSorted(state.items.map(i => i.builtStatus).filter(Boolean));
 
-    const group = (label, vals, activeSet, cls, attr) => {
+    const group = (label, vals, activeSet, cls, attr, color) => {
       if (!vals.length) return "";
+      const s = color ? ` style="${pillStyle(color)}"` : "";
       const chips = vals.map(v =>
-        `<button class="fp-chip${activeSet.has(v) ? " on" : ""}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}</button>`
+        `<button class="fp-chip${activeSet.has(v) ? " on" : ""}"${s} data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}</button>`
       ).join("");
       return `<div class="fp-group fp-grp-${cls}"><div class="fp-lbl">${label}</div><div class="fp-chips">${chips}</div></div>`;
     };
 
     panel.innerHTML =
-      group("Areas",        uniqueAreas,       state.filterArea,        "area",        "area")  +
-      group("Item type",    uniqueTypes,       state.filterType,        "itype",       "itype") +
-      group("Drawing type", uniqueDrawTypes,   state.filterDrawType,    "drawtype",    "drawtype") +
-      group("Made by",      uniqueCreators,    state.filterCreator,     "creator",     "creator") +
-      group("Built status", uniqueBuiltStatus, state.filterBuiltStatus, "builtstatus", "builtstatus") +
+      group("Areas",        uniqueAreas,       state.filterArea,        "area",        "area",        PC.sage)  +
+      group("Item type",    uniqueTypes,       state.filterType,        "itype",       "itype",       PC.stone) +
+      group("Drawing type", uniqueDrawTypes,   state.filterDrawType,    "drawtype",    "drawtype",    PC.slate) +
+      group("Made by",      uniqueCreators,    state.filterCreator,     "creator",     "creator",     PC.clay)  +
+      group("Built status", uniqueBuiltStatus, state.filterBuiltStatus, "builtstatus", "builtstatus", PC.moss)  +
       `<div class="fp-footer"><button class="fp-clear" id="fp-clear-btn">Clear all ×</button></div>`;
 
     panel.querySelector("#fp-clear-btn")?.addEventListener("click", e => {
