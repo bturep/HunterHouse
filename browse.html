@@ -237,7 +237,7 @@
   .zoom-ctl .pct{padding:6px 12px;color:var(--muted);border-right:1px solid var(--rule);font-variant-numeric:tabular-nums;min-width:54px;text-align:center}
 
   .image-foot{
-    padding:10px 24px;border-top:1px solid var(--rule);background:var(--bg);
+    padding:10px 24px;border-top:1px solid var(--ink);background:var(--bg);
     display:flex;justify-content:space-between;align-items:baseline;
     font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em;flex-shrink:0;
   }
@@ -279,15 +279,15 @@
 
   .kv{margin:0}
   .kv > .row{
-    display:grid;grid-template-columns:84px 1fr;gap:14px;
+    display:grid;grid-template-columns:84px 1fr;gap:20px;
     padding:7px 0;border-bottom:1px solid var(--rule-soft);
     align-items:baseline;cursor:default;border-left:0;
   }
   .kv > .row::before{display:none}
   .kv > .row:last-child{border-bottom:0}
   .kv > .row:hover{background:transparent}
-  .kv dt{font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap}
-  .kv dd{font-size:12.5px;color:var(--ink);letter-spacing:-0.005em;line-height:1.5}
+  .kv dt{font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap;margin:0;padding:0}
+  .kv dd{font-size:12.5px;color:var(--ink);letter-spacing:-0.005em;line-height:1.5;margin:0;padding:0}
   .kv dd a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
   .kv dd a:hover{border-bottom-color:var(--copper-deep)}
 
@@ -301,6 +301,10 @@
   .archid-mono{font-family:var(--mono);font-size:11px;color:var(--red);background:var(--red-pale);padding:1.5px 7px;letter-spacing:0.04em;white-space:nowrap}
   .rights-note{display:block;font-size:10.5px;color:var(--muted);margin-top:3px;font-style:italic}
   .fonds-path{display:block;font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:0.01em}
+  .cite-box{background:var(--soft);padding:12px 14px;margin-top:6px}
+  .cite-box p{font-size:11.5px;line-height:1.75;color:var(--ink);margin:0 0 10px;letter-spacing:-0.002em}
+  .cite-copy{font-family:var(--mono);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);background:none;border:1px solid var(--rule);padding:3px 9px;cursor:pointer}
+  .cite-copy:hover{color:var(--ink);border-color:var(--muted)}
   /* dark mode overrides for hardcoded colours */
   html.dark .row .archid .tmark[data-type="P"]{color:#7aafc4;border-color:rgba(122,175,196,0.3);background:rgba(122,175,196,0.12)}
   html.dark .row .archid .tmark[data-type="PM"]{color:#85aa70;border-color:rgba(133,170,112,0.3);background:rgba(133,170,112,0.12)}
@@ -594,6 +598,26 @@
     if (sep === -1) return escapeHTML(notes);
     return `${escapeHTML(notes.slice(0, sep))}<span class="fonds-path">${escapeHTML(notes.slice(sep + 3))}</span>`;
   }
+  // Chicago-style citation for an archive item
+  function buildCitation(item) {
+    const plainTitle = (item.title || "Untitled").replace(/\s*\[.*\]\s*$/, "").trim() || "Untitled";
+    const year = item.date ? item.date.slice(0, 4) : "n.d.";
+    const medStr = item.medium ? `. ${item.medium}` : "";
+    const isCAA = archiveAbbrev(item.heldBy) === "CAA";
+    let repoStr;
+    if (isCAA && item.notes && item.notes.includes(" — ")) {
+      const sep = item.notes.indexOf(" — ");
+      const fondsName = item.notes.slice(0, sep);
+      const pathPart = item.notes.slice(sep + 3).split(/\s*\./)[0].trim();
+      repoStr = `${pathPart}, ${fondsName}, Canadian Architectural Archives, University of Calgary, Calgary, Alberta`;
+    } else if (isCAA) {
+      repoStr = "Richard Hunter fonds (2019.61), Canadian Architectural Archives, University of Calgary, Calgary, Alberta";
+    } else {
+      repoStr = "Hunter House Foundation Collection, Victoria, British Columbia";
+    }
+    return `Hunter, Richard. “${plainTitle}.” ${year}${medStr}. ${repoStr}. ${item.id}.`;
+  }
+
   // Archive link label derived from held-by institution
   function archiveLinkLabel(heldBy) {
     const hb = (heldBy || "").toLowerCase();
@@ -1177,7 +1201,8 @@ WHERE {
         </a>
       </div>`;
 
-    const graphN = archRows.length > 0 ? "03" : "02";
+    const cite   = buildCitation(item);
+    const graphN = archRows.length > 0 ? "04" : "03";
     body.innerHTML = `
       <h1 class="meta-title">${formatTitle(item.title)}</h1>
 
@@ -1185,8 +1210,17 @@ WHERE {
         <h3><span><span class="n">01</span>Description</span><span class="ct">${descRows.length} fields</span></h3>
         <dl class="kv">${descHTML}</dl>
       </section>
+
+      <section class="meta-section">
+        <h3><span><span class="n">02</span>Citation</span></h3>
+        <div class="cite-box">
+          <p>${escapeHTML(cite)}</p>
+          <button class="cite-copy" data-cite="${escapeHTML(cite)}" onclick="navigator.clipboard.writeText(this.dataset.cite).then(()=>{this.textContent='Copied';setTimeout(()=>this.textContent='Copy',1500)})">Copy</button>
+        </div>
+      </section>
+
       ${archRows.length > 0 ? `<section class="meta-section">
-        <h3><span><span class="n">02</span>Archival</span><span class="ct">${archRows.length} fields</span></h3>
+        <h3><span><span class="n">03</span>Archival</span><span class="ct">${archRows.length} fields</span></h3>
         <dl class="kv">${archHTML}</dl>
       </section>` : ""}
       <section class="graph-section">
