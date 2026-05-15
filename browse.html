@@ -18,26 +18,23 @@
 
   /* ── controls bar ── */
   .controls{
-    display:flex;align-items:stretch;
-    padding:0 28px;border-bottom:1px solid var(--ink);background:var(--bg);
+    display:grid;grid-template-columns:1fr 28%;
+    border-bottom:1px solid var(--ink);background:var(--bg);
   }
   .search{
-    flex:1;display:flex;align-items:center;gap:10px;
-    padding:10px 24px 10px 0;
+    display:flex;align-items:center;
+    padding:10px 28px;
   }
   .search input{
     font-family:var(--mono);font-size:10px;background:none;border:0;outline:0;
     color:var(--ink);width:100%;letter-spacing:0.06em;text-align:right;
   }
   .search input::placeholder{color:var(--hint);letter-spacing:0.06em}
-  .search kbd{
-    font-family:var(--mono);font-size:10px;color:var(--hint);
-    border:1px solid var(--rule);padding:2px 6px;background:var(--paper);
-    border-radius:2px;flex-shrink:0;
-  }
   .ctrl-ver{
     font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em;
-    white-space:nowrap;display:flex;align-items:center;padding-left:16px;flex-shrink:0;
+    white-space:nowrap;display:flex;align-items:center;justify-content:flex-end;
+    padding:0 22px;
+    border-left:1px solid var(--ink);border-right:1px solid var(--ink);
   }
   .site-topright .theme-btn{font-size:15px;padding:5px 8px}
   .fbtn{
@@ -403,13 +400,9 @@
 
   @media (max-width:767px){
     /* controls */
-    .controls{padding:0 12px;flex-wrap:wrap}
-    .search{
-      width:100%;flex:none;border-right:0;
-      border-bottom:1px solid var(--rule);
-      padding:8px 0;margin-right:0;
-    }
-    .search kbd{display:none}
+    .controls{grid-template-columns:1fr}
+    .search{padding:8px 16px}
+    .ctrl-ver{display:none}
     .fbtn{padding:0 14px}
 
     /* shell: vertical flex */
@@ -480,7 +473,6 @@
 <div class="controls">
   <div class="search">
     <input id="search-input" placeholder="Search by title, ID, type, or phase…" autocomplete="off">
-    <kbd>/</kbd>
   </div>
   <span class="ctrl-ver" id="topright" title="Double-click to refresh catalogue from Wikibase" style="cursor:default">v0.6</span>
 </div>
