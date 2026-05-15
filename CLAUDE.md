@@ -4,6 +4,23 @@ Load this file at the start of any Claude Code session. It covers the full proje
 
 ---
 
+## ⚑ Pending at next session start — prompt Brandon immediately
+
+**Wikidata items are ready to create.** Three items are drafted in `WIKIDATA_DRAFT.md`:
+1. Richard Hunter (person)
+2. Canadian Architectural Archives (institution)
+3. Richard Hunter fonds
+
+Brandon needs a free Wikimedia account to submit them — takes 2 minutes at
+`wikidata.org/wiki/Special:CreateAccount`. Once logged in, it's a QuickStatements
+copy-paste. After creation, add the resulting Q-numbers to P139 on Q201 and Q116
+in our Wikibase to close the loop.
+
+**Prompt at session start:** "Last time we finished the Wikidata draft. Ready to create
+your Wikimedia account and submit the three items? It's a 5-minute job."
+
+---
+
 ## Memory protocol — instructions for Claude
 
 This file is the persistent memory for this project. Follow these rules every session:
