@@ -1568,6 +1568,11 @@ WHERE {
         : defaultItem?.id;
       if (target) selectItem(target, { scrollIntoView: !!urlId });
 
+      // Signal splash preloader that the catalogue is rendered
+      if (window.parent !== window) {
+        try { window.parent.postMessage('hh-ready', '*'); } catch (_) {}
+      }
+
     } catch (err) {
       console.error(err);
       $("#rows").innerHTML = `<div class="error-msg">Error loading: ${escapeHTML(err.message)}</div>`;
