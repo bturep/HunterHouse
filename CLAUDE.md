@@ -587,3 +587,19 @@ Append an entry after every major task. Format: `### YYYY-MM-DD — brief title`
 
 **Files changed**
 `browse.html`, `CLAUDE.md`
+
+---
+
+### 2026-05-14 — CAA description cleanup + P91 medium (continued session)
+
+**Wikibase — CAA P91 (medium) + P100 cleanup**
+- New script `scripts/cleanup_caa_descriptions.py` runs against all 35 CAA items via SPARQL.
+- Writes P91 (medium) for 18 drawing items: "Pencil on tracing paper" (CAA-0001/0002), "Pencil on vellum" (CAA-0003–0006, 0020–0024), "Hand-coloured" (CAA-0029–0035).
+- Updates P100 to cleaned version (fonds hierarchy path + unique notes only) for 24 items. Removes info already held in other properties: source institution, date year, set position, title repetition.
+- Preserves "OG Scheme" note on CAA-0007/0008/0009 — unique curatorial note, intentionally kept.
+- Skips photographs (CAA-0010–0019) and CAA-0028 — no P100 to update.
+
+**browse.html — P91 medium display**
+- SPARQL extended with `OPTIONAL { ?item wdt:P91 ?medium }`.
+- Medium added to item object, search haystack, and record pane as "Medium" row (after Drawing type, before Built).
+- Pushed and live.
