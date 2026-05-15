@@ -246,24 +246,24 @@
     display:flex;align-items:center;gap:2px;user-select:none;
   }
   .zoom-ctl button{
-    background:none;border:0;font:inherit;color:var(--muted);
+    background:none;border:0;font:inherit;color:var(--ink);
     padding:0 5px;cursor:pointer;
     display:flex;align-items:center;justify-content:center;
   }
-  .zoom-ctl button:hover{color:var(--ink)}
+  .zoom-ctl button:hover{opacity:0.6}
   .zoom-ctl button:disabled{color:var(--hint);cursor:not-allowed}
-  .zoom-ctl .pct{color:var(--muted);font-variant-numeric:tabular-nums;min-width:38px;text-align:center;padding:0 4px}
+  .zoom-ctl .pct{color:var(--ink);font-variant-numeric:tabular-nums;min-width:38px;text-align:center;padding:0 4px}
 
   .image-foot{
     padding:0 24px;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);background:var(--bg);
     display:flex;justify-content:space-between;align-items:center;
     font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em;flex-shrink:0;
-    height:42px;box-sizing:border-box;
+    height:41px;box-sizing:border-box;
   }
   .foot-right{display:flex;align-items:center;gap:0}
   .foot-dl{padding-left:14px;border-left:1px solid var(--rule)}
-  .foot-dl a{color:var(--muted);text-decoration:none}
-  .foot-dl a:hover{color:var(--ink)}
+  .foot-dl a{color:var(--ink);text-decoration:none}
+  .foot-dl a:hover{opacity:0.6}
 
   /* ── meta pane ── */
   .meta-head{
@@ -525,7 +525,7 @@
           <button id="zoom-in" type="button" title="Zoom in">+</button>
           <button id="zoom-fit" type="button" title="Fit to frame">fit</button>
         </div>
-        <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">⤓ Download full size</a></span>
+        <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">Download full size</a></span>
       </div>
     </div>
   </section>
@@ -968,7 +968,7 @@ WHERE {
     if (!currentImg) return;
     const z = zoomState;
     currentImg.style.transform =
-      `translate(${-z.naturalW*z.scale/2 + z.tx}px, ${-z.naturalH*z.scale/2 + z.ty}px) scale(${z.scale}) rotate(${z.rotation}deg)`;
+      `translate(${-z.naturalW*z.scale/2 + z.tx}px, ${-z.naturalH*z.scale/2 + z.ty}px) scale(${z.scale}) translate(${z.naturalW/2}px,${z.naturalH/2}px) rotate(${z.rotation}deg) translate(${-z.naturalW/2}px,${-z.naturalH/2}px)`;
   }
 
   function updateZoomUI() {
@@ -1053,6 +1053,7 @@ WHERE {
     ).join("");
 
     const descRows = [];
+    if (item.id)          descRows.push(["Item",    `<span class="archid-mono">${escapeHTML(item.id)}</span>`]);
     if (item.date)        descRows.push(["Date",    escapeHTML(item.date)]);
     if (item.phase) {
       const pos = item.setPosition ? ` <span style="color:var(--muted);font-family:var(--mono);font-size:10px;margin-left:4px">${escapeHTML(item.setPosition)}</span>` : "";
