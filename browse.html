@@ -90,24 +90,6 @@
     flex:1;min-height:0;position:relative;
   }
 
-  /* ── data loading overlay ── */
-  #data-overlay{
-    position:absolute;inset:0;z-index:100;
-    background:var(--bg);
-    display:flex;align-items:center;justify-content:center;
-    transition:opacity 500ms ease;
-  }
-  #data-overlay.done{opacity:0;pointer-events:none}
-  .data-feed{
-    font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;
-    color:var(--muted);text-align:left;min-width:220px;
-  }
-  .feed-line{
-    padding:3px 0;opacity:0;
-    animation:feed-in 250ms ease forwards;
-  }
-  @keyframes feed-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-
   /* ── list fleuron ── */
   .list-fleuron{display:flex;justify-content:center;align-items:center;height:25vh;margin-top:20px;padding-bottom:32px}
   .list-fleuron img{width:120px;height:120px;object-fit:contain;image-rendering:crisp-edges}
@@ -518,10 +500,6 @@
     <button class="mtab" data-pane="meta">Record</button>
   </div>
 
-  <div id="data-overlay">
-    <div class="data-feed" id="data-feed"></div>
-  </div>
-
   <section class="pane-list mobile-active">
     <div class="list-head">
       <button class="l" id="filter-toggle" title="Filter">Browse<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">›</span></button>
@@ -630,16 +608,6 @@
     const hb = (heldBy || "").toLowerCase();
     return Object.entries(ARCHIVE_ABBREV).find(([k]) => hb.includes(k))?.[1] || null;
   }
-  // Label for the notes row: reflects archive and whether it's a fonds location or a free note
-  function feedLog(msg) {
-    const feed = document.getElementById("data-feed");
-    if (!feed) return;
-    const line = document.createElement("div");
-    line.className = "feed-line";
-    line.textContent = "— " + msg;
-    feed.appendChild(line);
-  }
-
   function creatorLabel(itemType) {
     const t = (itemType || "").toLowerCase();
     if (t === "photograph") return "Photographed by";
@@ -700,7 +668,6 @@
       if (raw) {
         const { ts, items } = JSON.parse(raw);
         if (Date.now() - ts < 7200000) {
-          feedLog("Reading local cache…");
           return items;
         }
       }
@@ -757,9 +724,7 @@ WHERE {
   OPTIONAL { ?item wdt:P99 ?archiveLink }
 }`;
 
-    feedLog("Querying Wikibase…");
     const rows = await sparqlQuery(Q);
-    feedLog(`${rows.length} rows returned`);
     const dateStr = v => v ? v.replace(/^\+/, "").split("T")[0] : null;
     const map = new Map();
 
@@ -1609,15 +1574,6 @@ WHERE {
         ? urlId
         : defaultItem?.id;
       if (target) selectItem(target, { scrollIntoView: !!urlId });
-
-      feedLog(`${items.length} items ready`);
-      const overlay = document.getElementById("data-overlay");
-      if (overlay) {
-        setTimeout(() => {
-          overlay.classList.add("done");
-          overlay.addEventListener("transitionend", () => overlay.remove(), { once: true });
-        }, 320);
-      }
 
     } catch (err) {
       console.error(err);
