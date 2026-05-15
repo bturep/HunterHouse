@@ -18,25 +18,18 @@
 
   /* ── controls bar ── */
   .controls{
-    display:grid;grid-template-columns:1fr 28%;
-    border-bottom:1px solid var(--ink);background:var(--bg);
+    display:flex;align-items:stretch;
+    padding:0 28px;border-bottom:1px solid var(--ink);background:var(--bg);
   }
   .search{
-    display:flex;align-items:center;
-    padding:10px 28px;
+    flex:1;display:flex;align-items:center;
+    padding:10px 0;
   }
   .search input{
-    font-family:var(--mono);font-size:10px;background:none;border:0;outline:0;
-    color:var(--ink);width:100%;letter-spacing:0.06em;text-align:right;
+    font-family:var(--mono);font-size:12px;background:none;border:0;outline:0;
+    color:var(--ink);width:100%;letter-spacing:0.02em;
   }
-  .search input::placeholder{color:var(--hint);letter-spacing:0.06em}
-  .ctrl-ver{
-    font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em;
-    white-space:nowrap;display:flex;align-items:center;justify-content:flex-end;
-    padding:0 22px;
-    border-left:1px solid var(--ink);border-right:1px solid var(--ink);
-  }
-  .site-topright .theme-btn{font-size:15px;padding:5px 8px}
+  .search input::placeholder{color:var(--hint)}
   .fbtn{
     display:flex;flex-direction:column;justify-content:center;gap:2px;
     padding:0 18px;border-right:1px solid var(--rule);cursor:pointer;user-select:none;
@@ -400,9 +393,7 @@
 
   @media (max-width:767px){
     /* controls */
-    .controls{grid-template-columns:1fr}
-    .search{padding:8px 16px}
-    .ctrl-ver{display:none}
+    .controls{padding:0 12px}
     .fbtn{padding:0 14px}
 
     /* shell: vertical flex */
@@ -467,6 +458,7 @@
   </nav>
   <div class="site-topright">
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode">◑</button>
+    <span id="topright" title="Double-click to refresh catalogue from Wikibase" style="cursor:default">v0.6</span>
   </div>
 </header>
 
@@ -474,7 +466,6 @@
   <div class="search">
     <input id="search-input" placeholder="Search by title, ID, type, or phase…" autocomplete="off">
   </div>
-  <span class="ctrl-ver" id="topright" title="Double-click to refresh catalogue from Wikibase" style="cursor:default">v0.6</span>
 </div>
 
 <div class="shell">
