@@ -600,20 +600,13 @@
   }
 
   const CACHE_KEY = "hhf_catalogue_v16";
-  const CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours
 
   function clearCache() {
     try { localStorage.removeItem(CACHE_KEY); } catch {}
   }
 
   async function loadFromWikibase() {
-    // Serve from cache if fresh
     try {
-      const raw = localStorage.getItem(CACHE_KEY);
-      if (raw) {
-        const { ts, items } = JSON.parse(raw);
-        if (Date.now() - ts < CACHE_TTL) return items;
-      }
     } catch {}
 
     // Single SPARQL query — only items with P2 (archive ID) + P96 (preview image),
