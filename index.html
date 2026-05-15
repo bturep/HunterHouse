@@ -8,8 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/verso.css">
-<link rel="prefetch" href="browse.html">
-<link rel="prefetch" href="assets/verso.css">
 <style>
   html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#1a1816;color:#f3f1ec;font-family:var(--sans)}
 
@@ -56,21 +54,32 @@
     to  {opacity:1;transform:translate(-50%,-50%)}
   }
 
-  /* Loading state — logo replaces title, background iframe warms the cache */
-  .splash .logo-load{
-    position:absolute;left:50%;top:50%;
-    transform:translate(-50%,-50%);
-    z-index:20;pointer-events:none;
-    opacity:0;transition:opacity 500ms ease;
+  .splash.exiting{pointer-events:none;cursor:default}
+  .splash.exiting .film{transition:opacity 700ms cubic-bezier(.4,0,.2,1);opacity:0}
+  .splash.exiting::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:60px;
+    background:#f3f1ec;border-bottom:1px solid #1e1c1a;
+    opacity:0;animation:bar-in 600ms cubic-bezier(.4,0,.2,1) 250ms forwards;
+    z-index:3;
   }
-  .splash .logo-load img{width:80px;height:auto;display:block}
-  .splash.loading .logo-load{opacity:1}
-  .splash.loading .logo-load img{animation:logo-pulse 2.2s ease-in-out 500ms infinite}
-  @keyframes logo-pulse{0%,100%{opacity:0.45}50%{opacity:1}}
-  .splash.loading .mark{opacity:0;transition:opacity 350ms ease}
-  .splash.loading .enter{opacity:0;transition:opacity 250ms ease}
-  .splash.loading .imprint{opacity:0;transition:opacity 250ms ease}
-  .splash.loading .film{opacity:0;transition:opacity 700ms ease}
+  .splash.exiting::after{
+    content:"";position:absolute;top:60px;left:0;right:0;bottom:0;
+    background:#1e1c1a;
+    opacity:0;animation:bar-in 700ms cubic-bezier(.4,0,.2,1) 200ms forwards;
+    z-index:2;
+  }
+  @keyframes bar-in{to{opacity:1}}
+  .splash.exiting .imprint,
+  .splash.exiting .enter{transition:opacity 300ms ease-out;opacity:0}
+  .splash.exiting .mark .place{transition:opacity 250ms ease-out;opacity:0}
+  .splash.exiting .mark{
+    animation:mark-exit 900ms cubic-bezier(.4,0,.2,1) forwards;
+    z-index:10;
+  }
+  @keyframes mark-exit{
+    from{transform:translate(-50%,-50%);color:#f3f1ec;text-shadow:0 1px 32px rgba(0,0,0,0.55)}
+    to  {transform:translate(calc(28px - 50vw), calc(22px - 50vh)) scale(0.24);color:#1e1c1a;text-shadow:none}
+  }
 
   .splash .enter{
     position:absolute;right:36px;bottom:32px;z-index:5;
@@ -110,7 +119,6 @@
   <div class="film" id="film">
     <video id="film-video" autoplay loop muted playsinline preload="auto"></video>
   </div>
-  <div class="logo-load" id="logo-load"><img src="assets/hunter-mark.png" alt=""></div>
   <div class="imprint"><b>2026.05</b>v1.0</div>
   <div class="mark">
     Hunter House <span class="dim">Foundation</span>
@@ -134,27 +142,12 @@
   const fallback = setTimeout(showFilm, 2000);
   video.addEventListener('canplay', () => { clearTimeout(fallback); showFilm(); }, { once: true });
 
-  // Click → show logo, load browse.html in background iframe to warm localStorage cache,
-  // then navigate once data is ready (or after 15s timeout fallback).
-  // Minimum 1.4s display so the logo doesn't just flash on cache-hit.
+  // Click → animate out → navigate to browse
   splash.addEventListener('click', (e) => {
     e.preventDefault();
-    if (splash.classList.contains('loading')) return;
-    splash.classList.add('loading');
-
-    const frame = document.createElement('iframe');
-    frame.src = 'browse.html';
-    frame.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1';
-    document.body.appendChild(frame);
-
-    const minWait   = new Promise(r => setTimeout(r, 1400));
-    const dataReady = new Promise(r => {
-      window.addEventListener('message', e => { if (e.data === 'hh-ready') r(); }, { once: true });
-    });
-    const timeout = new Promise(r => setTimeout(r, 15000));
-
-    Promise.all([minWait, Promise.race([dataReady, timeout])])
-      .then(() => { window.location.href = 'browse.html'; });
+    if (splash.classList.contains('exiting')) return;
+    splash.classList.add('exiting');
+    setTimeout(() => { window.location.href = 'browse.html'; }, 870);
   });
 </script>
 </body>
