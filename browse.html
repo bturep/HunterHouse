@@ -291,9 +291,10 @@
 
   /* browse-local pill/archid (smaller than verso.css defaults) */
   .pill{display:inline-flex;align-items:center;height:18px;padding:0 7px;background:var(--copper-pale);color:var(--copper-deep);font-size:10.5px;margin:0 3px 3px 0;white-space:nowrap}
-  button.area-pill{border:none;cursor:pointer;font-family:inherit}
-  button.area-pill:hover{background:var(--copper-deep);color:var(--bg)}
-  button.area-pill.active{background:var(--copper-deep);color:var(--bg)}
+  button.area-pill,button.type-pill{border:none;cursor:pointer;font-family:inherit}
+  button.area-pill:hover,button.type-pill:hover{background:var(--copper-deep);color:var(--bg)}
+  button.area-pill.active,button.type-pill.active{background:var(--copper-deep);color:var(--bg)}
+  button.type-pill{height:auto;padding:3px 8px;align-items:center;gap:0}
   .archid-mono{font-family:var(--mono);font-size:11px;color:var(--red);background:var(--red-pale);padding:1.5px 7px;letter-spacing:0.04em;white-space:nowrap}
 
   .meta-actions{display:flex;align-items:stretch;gap:1px;background:var(--ink);width:fit-content;margin-bottom:20px}
@@ -513,6 +514,7 @@
     search: "",
     filterCollection: "",
     filterArea: "",
+    filterType: "",
   };
 
   const BADGE_LEGEND = [
@@ -657,6 +659,7 @@ WHERE {
     const q = state.search.trim().toLowerCase();
     state.filtered = state.items.filter(it => {
       if (state.filterArea && !(it.areas||[]).includes(state.filterArea)) return false;
+      if (state.filterType && it.itemType !== state.filterType) return false;
       if (q) {
         const hay = [it.id, it.title, it.phase, it.type, it.use, (it.areas||[]).join(" "), it.creator, it.notes||""].join(" ").toLowerCase();
         if (!hay.includes(q)) return false;
@@ -713,7 +716,16 @@ WHERE {
     if (state.filterArea) {
       const d = document.createElement("div");
       d.className = "phase-divider";
-      d.innerHTML = `<span>Area: ${escapeHTML(state.filterArea)}</span><span class="r" style="cursor:pointer" id="area-filter-clear" title="Clear filter">✕ clear</span>`;
+      const n = String(state.filtered.length).padStart(2,"0");
+      d.innerHTML = `<span>Area: ${escapeHTML(state.filterArea)} <span style="color:var(--muted);font-weight:400">${n} items</span></span><span class="r" style="cursor:pointer" id="area-filter-clear" title="Clear filter">✕ clear</span>`;
+      frag.appendChild(d);
+    }
+    if (state.filterType) {
+      const d = document.createElement("div");
+      d.className = "phase-divider";
+      const n = String(state.filtered.length).padStart(2,"0");
+      const mark = typeMark(state.filterType);
+      d.innerHTML = `<span>${mark ? `<span class="tmark" data-type="${escapeHTML(mark)}" style="margin-right:6px">${escapeHTML(mark)}</span>` : ""}${escapeHTML(state.filterType)} <span style="color:var(--muted);font-weight:400">${n} items</span></span><span class="r" style="cursor:pointer" id="type-filter-clear" title="Clear filter">✕ clear</span>`;
       frag.appendChild(d);
     }
 
@@ -747,6 +759,14 @@ WHERE {
       clearBtn.addEventListener("click", e => {
         e.stopPropagation();
         state.filterArea = "";
+        applyFilters(); renderList();
+      });
+    }
+    const clearTypeBtn = document.getElementById("type-filter-clear");
+    if (clearTypeBtn) {
+      clearTypeBtn.addEventListener("click", e => {
+        e.stopPropagation();
+        state.filterType = "";
         applyFilters(); renderList();
       });
     }
@@ -920,7 +940,14 @@ WHERE {
       descRows.push(["Phase", escapeHTML(item.phase) + pos]);
     }
     if (areasHtml)        descRows.push(["Areas",   areasHtml]);
-    if (item.type)        descRows.push(["Type",    escapeHTML(item.type)]);
+    if (item.itemType) {
+      const mark = typeMark(item.itemType);
+      const isActive = state.filterType === item.itemType;
+      descRows.push(["Item type",
+        `<button class="pill type-pill${isActive ? " active" : ""}" data-itype="${escapeHTML(item.itemType)}">${mark ? `<span class="tmark" data-type="${escapeHTML(mark)}" style="margin-right:5px;font-size:7.5px">${escapeHTML(mark)}</span>` : ""}${escapeHTML(item.itemType)}</button>`
+      ]);
+    }
+    if (item.type)        descRows.push(["Drawing type", escapeHTML(item.type)]);
     if (item.builtStatus) descRows.push(["Built",   escapeHTML(item.builtStatus)]);
     if (item.creator)     descRows.push(["Creator", escapeHTML(item.creator)]);
 
@@ -1170,13 +1197,22 @@ WHERE {
     });
 
     document.getElementById("meta-body").addEventListener("click", e => {
-      const pill = e.target.closest(".area-pill");
-      if (!pill) return;
-      const area = pill.dataset.area;
-      state.filterArea = state.filterArea === area ? "" : area;
-      applyFilters(); renderList();
-      if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId)) {
-        selectItem(state.filtered[0].id, { scrollIntoView: false });
+      const areaPill = e.target.closest(".area-pill");
+      if (areaPill) {
+        const area = areaPill.dataset.area;
+        state.filterArea = state.filterArea === area ? "" : area;
+        applyFilters(); renderList();
+        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
+          selectItem(state.filtered[0].id, { scrollIntoView: false });
+        return;
+      }
+      const typePill = e.target.closest(".type-pill");
+      if (typePill) {
+        const itype = typePill.dataset.itype;
+        state.filterType = state.filterType === itype ? "" : itype;
+        applyFilters(); renderList();
+        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
+          selectItem(state.filtered[0].id, { scrollIntoView: false });
       }
     });
 
