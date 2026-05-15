@@ -304,10 +304,12 @@
 
   /* browse-local pill/archid (smaller than verso.css defaults) */
   .pill{display:inline-flex;align-items:center;height:18px;padding:0 7px;font-size:10.5px;margin:0 3px 3px 0;white-space:nowrap}
-  button.area-pill,button.type-pill,button.drawtype-pill{border:none;cursor:pointer;font-family:inherit;background:var(--pb,var(--copper-pale));color:var(--pf,var(--copper-deep))}
+  button.area-pill,button.type-pill,button.drawtype-pill,button.creator-pill,button.builtstatus-pill{border:none;cursor:pointer;font-family:inherit;background:var(--pb,var(--copper-pale));color:var(--pf,var(--copper-deep))}
   button.area-pill:hover,button.area-pill.active,
   button.type-pill:hover,button.type-pill.active,
-  button.drawtype-pill:hover,button.drawtype-pill.active{background:var(--pd,var(--copper-deep));color:var(--bg)}
+  button.drawtype-pill:hover,button.drawtype-pill.active,
+  button.creator-pill:hover,button.creator-pill.active,
+  button.builtstatus-pill:hover,button.builtstatus-pill.active{background:var(--pd,var(--copper-deep));color:var(--bg)}
   button.type-pill{height:auto;padding:3px 8px;align-items:center;gap:0}
   .archid-mono{font-family:var(--mono);font-size:11px;color:var(--red);background:var(--red-pale);padding:1.5px 7px;letter-spacing:0.04em;white-space:nowrap}
   .rights-note{display:block;font-size:10.5px;color:var(--muted);margin-top:3px;font-style:italic}
@@ -550,6 +552,8 @@
     filterArea: new Set(),
     filterType: new Set(),
     filterDrawType: new Set(),
+    filterCreator: new Set(),
+    filterBuiltStatus: new Set(),
   };
 
   const BADGE_LEGEND = [
@@ -633,7 +637,7 @@
     return (await res.json()).results.bindings;
   }
 
-  const CACHE_KEY = "hhf_catalogue_v17";
+  const CACHE_KEY = "hhf_catalogue_v18";
 
   function clearCache() {
     try { localStorage.removeItem(CACHE_KEY); } catch {}
@@ -757,6 +761,8 @@ WHERE {
       if (state.filterArea.size && !(it.areas||[]).some(a => state.filterArea.has(a))) return false;
       if (state.filterType.size && !state.filterType.has(it.itemType)) return false;
       if (state.filterDrawType.size && !(it.drawTypes||[]).some(dt => state.filterDrawType.has(dt))) return false;
+      if (state.filterCreator.size && ![it.creator, it.designedBy, it.builtBy].some(c => c && state.filterCreator.has(c))) return false;
+      if (state.filterBuiltStatus.size && !state.filterBuiltStatus.has(it.builtStatus)) return false;
       if (q) {
         const hay = [it.id, it.title, it.phase, (it.drawTypes||[]).join(" "), (it.areas||[]).join(" "), it.creator, it.designedBy||"", it.builtBy||"", it.medium||"", it.notes||""].join(" ").toLowerCase();
         if (!hay.includes(q)) return false;
@@ -1061,11 +1067,23 @@ WHERE {
       ).join("");
       descRows.push(["Drawing type", drawHtml]);
     }
-    if (item.medium)       descRows.push(["Medium",  escapeHTML(item.medium)]);
-    if (item.builtStatus) descRows.push(["Built",   escapeHTML(item.builtStatus)]);
-    if (item.creator)     descRows.push([creatorLabel(item.itemType), escapeHTML(item.creator)]);
-    if (item.designedBy)  descRows.push(["Designed by", escapeHTML(item.designedBy)]);
-    if (item.builtBy)     descRows.push(["Built by", escapeHTML(item.builtBy)]);
+    if (item.medium)      descRows.push(["Medium", escapeHTML(item.medium)]);
+    if (item.builtStatus) {
+      const bsActive = state.filterBuiltStatus.has(item.builtStatus) ? " active" : "";
+      descRows.push(["Built", `<button class="pill builtstatus-pill${bsActive}" style="${pillStyle(PC.teal)}" data-builtstatus="${escapeHTML(item.builtStatus)}">${escapeHTML(item.builtStatus)}</button>`]);
+    }
+    if (item.creator) {
+      const cActive = state.filterCreator.has(item.creator) ? " active" : "";
+      descRows.push([creatorLabel(item.itemType), `<button class="pill creator-pill${cActive}" style="${pillStyle(PC.mauve)}" data-creator="${escapeHTML(item.creator)}">${escapeHTML(item.creator)}</button>`]);
+    }
+    if (item.designedBy) {
+      const cActive = state.filterCreator.has(item.designedBy) ? " active" : "";
+      descRows.push(["Designed by", `<button class="pill creator-pill${cActive}" style="${pillStyle(PC.mauve)}" data-creator="${escapeHTML(item.designedBy)}">${escapeHTML(item.designedBy)}</button>`]);
+    }
+    if (item.builtBy) {
+      const cActive = state.filterCreator.has(item.builtBy) ? " active" : "";
+      descRows.push(["Built by", `<button class="pill creator-pill${cActive}" style="${pillStyle(PC.mauve)}" data-creator="${escapeHTML(item.builtBy)}">${escapeHTML(item.builtBy)}</button>`]);
+    }
     if (item.heldBy)      descRows.push(["Held by", escapeHTML(item.heldBy)]);
 
     const archRows = [];
@@ -1227,10 +1245,13 @@ WHERE {
     state.filterArea.clear();
     state.filterType.clear();
     state.filterDrawType.clear();
+    state.filterCreator.clear();
+    state.filterBuiltStatus.clear();
   }
 
   function updateFilterBadge() {
-    const total = state.filterArea.size + state.filterType.size + state.filterDrawType.size;
+    const total = state.filterArea.size + state.filterType.size + state.filterDrawType.size +
+                  state.filterCreator.size + state.filterBuiltStatus.size;
     const badge = $("#filter-badge");
     if (!badge) return;
     badge.textContent = total || "";
@@ -1241,9 +1262,12 @@ WHERE {
     const panel = $("#filter-panel");
     if (!panel) return;
 
-    const uniqueAreas     = uniqueSorted(state.items.flatMap(i => i.areas || []));
-    const uniqueTypes     = uniqueSorted(state.items.map(i => i.itemType).filter(Boolean));
-    const uniqueDrawTypes = uniqueSorted(state.items.flatMap(i => i.drawTypes || []));
+    const uniqueAreas       = uniqueSorted(state.items.flatMap(i => i.areas || []));
+    const uniqueTypes       = uniqueSorted(state.items.map(i => i.itemType).filter(Boolean));
+    const uniqueDrawTypes   = uniqueSorted(state.items.flatMap(i => i.drawTypes || []));
+    const uniqueCreators    = uniqueSorted(state.items.flatMap(i =>
+      [i.creator, i.designedBy, i.builtBy].filter(Boolean)));
+    const uniqueBuiltStatus = uniqueSorted(state.items.map(i => i.builtStatus).filter(Boolean));
 
     const group = (label, vals, activeSet, cls, attr) => {
       if (!vals.length) return "";
@@ -1254,9 +1278,11 @@ WHERE {
     };
 
     panel.innerHTML =
-      group("Areas",        uniqueAreas,     state.filterArea,     "area",     "area")  +
-      group("Item type",    uniqueTypes,     state.filterType,     "itype",    "itype") +
-      group("Drawing type", uniqueDrawTypes, state.filterDrawType, "drawtype", "drawtype") +
+      group("Areas",        uniqueAreas,       state.filterArea,        "area",        "area")  +
+      group("Item type",    uniqueTypes,       state.filterType,        "itype",       "itype") +
+      group("Drawing type", uniqueDrawTypes,   state.filterDrawType,    "drawtype",    "drawtype") +
+      group("Made by",      uniqueCreators,    state.filterCreator,     "creator",     "creator") +
+      group("Built status", uniqueBuiltStatus, state.filterBuiltStatus, "builtstatus", "builtstatus") +
       `<div class="fp-footer"><button class="fp-clear" id="fp-clear-btn">Clear all ×</button></div>`;
 
     panel.querySelector("#fp-clear-btn")?.addEventListener("click", e => {
@@ -1288,6 +1314,24 @@ WHERE {
       chip.addEventListener("click", e => {
         e.stopPropagation();
         toggleSet(state.filterDrawType, chip.dataset.drawtype);
+        applyFilters(); renderList(); updateFilterBadge(); renderFilterPanel();
+        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
+          selectItem(state.filtered[0].id, { scrollIntoView: false });
+      });
+    });
+    panel.querySelectorAll(".fp-chip[data-creator]").forEach(chip => {
+      chip.addEventListener("click", e => {
+        e.stopPropagation();
+        toggleSet(state.filterCreator, chip.dataset.creator);
+        applyFilters(); renderList(); updateFilterBadge(); renderFilterPanel();
+        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
+          selectItem(state.filtered[0].id, { scrollIntoView: false });
+      });
+    });
+    panel.querySelectorAll(".fp-chip[data-builtstatus]").forEach(chip => {
+      chip.addEventListener("click", e => {
+        e.stopPropagation();
+        toggleSet(state.filterBuiltStatus, chip.dataset.builtstatus);
         applyFilters(); renderList(); updateFilterBadge(); renderFilterPanel();
         if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
           selectItem(state.filtered[0].id, { scrollIntoView: false });
@@ -1414,6 +1458,24 @@ WHERE {
       const drawTypePill = e.target.closest(".drawtype-pill");
       if (drawTypePill) {
         toggleSet(state.filterDrawType, drawTypePill.dataset.drawtype);
+        applyFilters(); renderList(); updateFilterBadge();
+        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
+          selectItem(state.filtered[0].id, { scrollIntoView: false });
+        renderMeta(state.items.find(i => i.id === state.selectedId));
+        return;
+      }
+      const creatorPill = e.target.closest(".creator-pill");
+      if (creatorPill) {
+        toggleSet(state.filterCreator, creatorPill.dataset.creator);
+        applyFilters(); renderList(); updateFilterBadge();
+        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
+          selectItem(state.filtered[0].id, { scrollIntoView: false });
+        renderMeta(state.items.find(i => i.id === state.selectedId));
+        return;
+      }
+      const builtStatusPill = e.target.closest(".builtstatus-pill");
+      if (builtStatusPill) {
+        toggleSet(state.filterBuiltStatus, builtStatusPill.dataset.builtstatus);
         applyFilters(); renderList(); updateFilterBadge();
         if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
           selectItem(state.filtered[0].id, { scrollIntoView: false });
