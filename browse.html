@@ -542,7 +542,7 @@
     return (await res.json()).results.bindings;
   }
 
-  const CACHE_KEY = "hhf_catalogue_v8";
+  const CACHE_KEY = "hhf_catalogue_v9";
   const CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours
 
   function clearCache() {
@@ -898,7 +898,6 @@ WHERE {
 
     const archRows = [];
     archRows.push(["Archive ID", `<span class="archid-mono">${displayId(item.id)}</span>`]);
-    if (item.itemType)         archRows.push(["Item type", escapeHTML(item.itemType)]);
     if (item.sourceCollection) archRows.push(["Source",    escapeHTML(item.sourceCollection)]);
     if (item.rights)           archRows.push(["Rights",    escapeHTML(item.rights)]);
 
