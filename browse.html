@@ -952,7 +952,7 @@ WHERE {
       const mark = typeMark(item.itemType);
       const isActive = state.filterType === item.itemType;
       descRows.push(["Item type",
-        `<button class="pill type-pill${isActive ? " active" : ""}" data-itype="${escapeHTML(item.itemType)}">${mark ? `<span class="tmark" data-type="${escapeHTML(mark)}" style="margin-right:5px;font-size:7.5px">${escapeHTML(mark)}</span>` : ""}${escapeHTML(item.itemType)}</button>`
+        `<button class="pill type-pill${isActive ? " active" : ""}" data-itype="${escapeHTML(item.itemType)}">${escapeHTML(item.itemType)}</button>`
       ]);
     }
     if (item.drawTypes?.length) descRows.push(["Drawing type", escapeHTML(sortDrawTypes(item.drawTypes).join(", "))]);
