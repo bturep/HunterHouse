@@ -300,6 +300,7 @@
   button.type-pill{height:auto;padding:3px 8px;align-items:center;gap:0}
   .archid-mono{font-family:var(--mono);font-size:11px;color:var(--red);background:var(--red-pale);padding:1.5px 7px;letter-spacing:0.04em;white-space:nowrap}
   .rights-note{display:block;font-size:10.5px;color:var(--muted);margin-top:3px;font-style:italic}
+  .fonds-path{display:block;font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:0.01em}
   /* dark mode overrides for hardcoded colours */
   html.dark .row .archid .tmark[data-type="P"]{color:#7aafc4;border-color:rgba(122,175,196,0.3);background:rgba(122,175,196,0.12)}
   html.dark .row .archid .tmark[data-type="PM"]{color:#85aa70;border-color:rgba(133,170,112,0.3);background:rgba(133,170,112,0.12)}
@@ -571,6 +572,36 @@
   const yearOf = d => d ? d.slice(0, 4) : "—";
   const imageUrl = it => it.image || null;
   const uniqueSorted = arr => Array.from(new Set(arr)).filter(Boolean).sort();
+
+  // Archive abbreviation map — extend when new collections are added
+  const ARCHIVE_ABBREV = {
+    "canadian architectural archives": "CAA",
+  };
+  function archiveAbbrev(heldBy) {
+    const hb = (heldBy || "").toLowerCase();
+    return Object.entries(ARCHIVE_ABBREV).find(([k]) => hb.includes(k))?.[1] || null;
+  }
+  // Label for the notes row: reflects archive and whether it's a fonds location or a free note
+  function notesLabel(item) {
+    const abbrev = archiveAbbrev(item.heldBy);
+    const hasFondsPath = (item.notes || "").includes(" — ");
+    if (hasFondsPath) return abbrev ? `${abbrev} fonds` : "Fonds";
+    return abbrev ? `${abbrev} note` : "Note";
+  }
+  // Render notes: split "Fonds name (accession) — S000, SS000, ..." onto two lines
+  function formatNotes(notes) {
+    const sep = notes.indexOf(" — ");
+    if (sep === -1) return escapeHTML(notes);
+    return `${escapeHTML(notes.slice(0, sep))}<span class="fonds-path">${escapeHTML(notes.slice(sep + 3))}</span>`;
+  }
+  // Archive link label derived from held-by institution
+  function archiveLinkLabel(heldBy) {
+    const hb = (heldBy || "").toLowerCase();
+    if (hb.includes("calgary") || hb.includes("canadian architectural"))
+      return "↗ University of Calgary Special Collections";
+    if (heldBy) return `↗ ${heldBy}`;
+    return "↗ Archive record";
+  }
 
   // ── Mobile tab switching ──────────────────────────────────────────────────
   function switchMobileTab(pane) {
@@ -1055,15 +1086,15 @@ WHERE {
     if (item.heldBy)      descRows.push(["Held by", escapeHTML(item.heldBy)]);
 
     const archRows = [];
-    if (item.notes)   archRows.push(["Notes",   escapeHTML(item.notes)]);
+    if (item.notes)    archRows.push([notesLabel(item), formatNotes(item.notes)]);
     if (item.rights) {
-      const src = (item.sourceCollection || "").toLowerCase();
-      const contact = src.includes("canadian architectural") || src.includes("caa")
+      const abbrev = archiveAbbrev(item.heldBy);
+      const contact = abbrev === "CAA"
         ? "Contact for permissions."
         : "Contact the Hunter House Foundation.";
       archRows.push(["Rights", `${escapeHTML(item.rights)}<span class="rights-note">${escapeHTML(contact)}</span>`]);
     }
-    if (item.archiveLink)  archRows.push(["Archive record", `<a href="${escapeHTML(item.archiveLink)}" target="_blank" rel="noopener">↗ University of Calgary Special Collections</a>`]);
+    if (item.archiveLink) archRows.push(["Finding aid", `<a href="${escapeHTML(item.archiveLink)}" target="_blank" rel="noopener">${archiveLinkLabel(item.heldBy)}</a>`]);
 
     const descHTML = descRows.map(([k,v]) => `<div class="row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
     const archHTML = archRows.map(([k,v]) => `<div class="row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
