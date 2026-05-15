@@ -269,9 +269,11 @@
     letter-spacing:0.18em;text-transform:uppercase;font-weight:500;
     padding-bottom:8px;border-bottom:1px solid var(--ink);margin-bottom:12px;
     display:flex;justify-content:space-between;align-items:baseline;
+    flex-wrap:nowrap;gap:12px;
   }
+  .meta-section h3 > span:first-child{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
   .meta-section h3 .n{color:var(--red);font-weight:400;margin-right:8px}
-  .meta-section h3 .ct{color:var(--muted);font-weight:400;letter-spacing:0.06em}
+  .meta-section h3 .ct{color:var(--muted);font-weight:400;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0}
 
   .kv{margin:0}
   .kv > .row{
@@ -312,9 +314,11 @@
     letter-spacing:0.18em;text-transform:uppercase;font-weight:500;
     padding-bottom:8px;border-bottom:1px solid var(--ink);margin-bottom:14px;
     display:flex;justify-content:space-between;align-items:baseline;
+    flex-wrap:nowrap;gap:12px;
   }
+  .graph-section h3 > span:first-child{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
   .graph-section h3 .n{color:var(--red);font-weight:400;margin-right:8px}
-  .graph-section h3 .ct{color:var(--muted);font-weight:400;letter-spacing:0.06em;font-size:9px}
+  .graph-section h3 .ct{color:var(--muted);font-weight:400;letter-spacing:0.06em;font-size:9px;white-space:nowrap;flex-shrink:0}
 
   .graph-path{margin-bottom:18px;font-family:var(--mono);font-size:10px;letter-spacing:0.04em;line-height:1.7}
   .graph-path .node{display:grid;grid-template-columns:18px 60px 1fr;gap:8px;align-items:baseline;padding:5px 0}
