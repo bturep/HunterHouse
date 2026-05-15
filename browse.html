@@ -25,14 +25,14 @@
   html,body{overflow:hidden}
   body{height:100%;display:flex;flex-direction:column;animation:body-in 450ms ease-out both}
   .site-top{padding:0 28px;flex-shrink:0;grid-template-columns:auto 1fr auto;gap:24px;height:41px;box-sizing:border-box}
-  .site-topright .theme-btn{border:none;border-radius:0;padding:0;font-size:19px;line-height:1}
-  .site-topright .theme-btn:hover{border:none}
-  .site-topright{gap:20px;align-items:center}
+  .site-topright{display:flex;align-items:stretch;gap:20px;height:41px;color:var(--ink)}
+  .site-topright .theme-btn{display:flex;align-items:center;border:none;border-radius:0;padding:0;font-size:19px;line-height:1;color:var(--ink)}
+  .site-topright .theme-btn:hover{opacity:0.5}
   a.markid{text-decoration:none;color:inherit}
   .header-search{display:flex;align-items:center;border-left:1px solid var(--rule);border-right:1px solid var(--rule);padding:0 20px}
   .header-search input{font:inherit;font-size:13px;background:none;border:0;outline:0;color:var(--ink);width:100%;letter-spacing:-0.005em}
   .header-search input::placeholder{color:var(--hint)}
-  #topright{cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;line-height:1;display:flex;align-items:center}
+  #topright{cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;display:flex;align-items:center;color:var(--ink)}
 
   /* ── about panel (replaces header when open) ── */
   #about-panel{box-sizing:border-box;height:41px;overflow:hidden;flex-shrink:0}
@@ -117,13 +117,13 @@
   /* ── scroll pips ── */
   .scroll-pip{
     position:absolute;right:0;top:41px;z-index:5;pointer-events:none;
-    width:6px;height:14px;
+    width:4px;height:10px;
     background:var(--ink);
-    border-radius:7px 0 0 7px;
+    border-radius:5px 0 0 5px;
     opacity:0;transition:opacity 0.15s;
   }
   .scroll-pip.active{opacity:1}
-  .scroll-pip-r{right:auto;left:0;border-radius:0 7px 7px 0}
+  .scroll-pip-r{right:auto;left:0;border-radius:0 5px 5px 0}
 
   /* ── phase dividers ── */
   .phase-divider{
@@ -663,7 +663,7 @@
     if (scrollHeight <= clientHeight + 1) { pip.classList.remove("active"); return; }
     pip.classList.add("active");
     const ratio = scrollTop / (scrollHeight - clientHeight);
-    pip.style.top = (41 + ratio * (clientHeight - 14)) + "px";
+    pip.style.top = (41 + ratio * (clientHeight - 10)) + "px";
   }
 
   // ── Wikibase fetch layer ──────────────────────────────────────────────────
