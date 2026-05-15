@@ -36,7 +36,6 @@
   .search-prefix{font-family:var(--mono);font-size:11px;color:var(--muted);flex-shrink:0;line-height:1}
   .header-search input{font-family:var(--mono);font-size:11px;background:none;border:0;outline:0;color:var(--ink);width:100%;letter-spacing:0.02em}
   .header-search input::placeholder{color:var(--hint)}
-  #topright{cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;display:flex;align-items:center;color:var(--ink)}
 
   /* ── about panel (replaces header when open) ── */
   #about-panel{box-sizing:border-box;height:41px;overflow:hidden;flex-shrink:0}
@@ -156,6 +155,7 @@
   .sort-hd.active{color:var(--ink)}
   .sort-arrow{font-size:7px;line-height:1;font-family:var(--sans);letter-spacing:0;display:inline-block;min-width:9px;text-align:center}
   .sort-hd:not(.active):hover .sort-arrow::after{content:"↕";color:var(--rule)}
+  .sort-hd[data-sort-col="year"]{justify-content:flex-end;min-width:50px}
 
   /* ── filter badge on Browse label ── */
   .filter-badge{
@@ -273,8 +273,10 @@
   }
   .image-stage .placeholder b{color:var(--muted);font-weight:500}
 
+  .foot-rotate{background:none;border:0;color:var(--muted);font-size:16px;padding:0;cursor:pointer;display:flex;align-items:center;line-height:1;flex-shrink:0}
+  .foot-rotate:hover{color:var(--ink)}
   .zoom-ctl{
-    display:flex;align-items:center;gap:0;user-select:none;
+    flex:1;display:flex;align-items:center;justify-content:center;gap:0;user-select:none;
   }
   .zoom-ctl button{
     background:none;border:0;font:inherit;color:var(--muted);
@@ -283,13 +285,12 @@
   }
   .zoom-ctl button:hover{color:var(--ink)}
   .zoom-ctl button:disabled{color:var(--hint);cursor:not-allowed}
-  #zoom-rotate{font-size:15px;padding:0 8px 0 0}
   .zoom-ctl .pct{color:var(--ink);font-variant-numeric:tabular-nums;min-width:38px;text-align:center;padding:0 4px}
   .zoom-sep{width:1px;height:12px;background:var(--rule);margin:0 4px;flex-shrink:0}
 
   .image-foot{
     padding:0 24px;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);background:var(--bg);
-    display:flex;justify-content:space-between;align-items:center;
+    display:flex;align-items:center;gap:0;
     font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em;flex-shrink:0;
     height:41px;box-sizing:border-box;
   }
@@ -452,7 +453,7 @@
 
   @media (max-width:767px){
     .site-top{padding:0 16px;gap:12px}
-    .header-search{padding:0 12px}
+    .header-search{padding:0 12px;border-left:0;border-right:0}
     .fbtn{padding:0 14px}
 
     /* shell: vertical flex */
@@ -480,9 +481,9 @@
       display:flex;flex:1;min-height:0;
     }
 
-    /* image pane: hide zoom controls (touch-scroll handles pan) */
+    /* image pane: hide zoom controls on mobile (pinch/touch handles it) */
     .zoom-ctl{display:none}
-    .image-foot{height:auto;padding:8px 16px}
+    .image-foot{height:44px;padding:0 16px}
 
     /* meta pane: graph-actions single column */
     .graph-actions{grid-template-columns:1fr}
@@ -511,12 +512,10 @@
   </a>
   <div class="header-search">
     <span class="search-prefix">/</span>
-    <input id="search-input" placeholder="keyword search…" autocomplete="off">
+    <input id="search-input" placeholder="search" autocomplete="off">
   </div>
   <div class="site-topright">
-    <button class="theme-btn" id="fs-toggle" title="Enter fullscreen">⤢</button>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode">◑</button>
-    <span id="topright" title="About this archive">v1.0</span>
   </div>
 </header>
 
@@ -563,9 +562,8 @@
       </div>
     </div>
     <div class="image-foot">
+      <button id="zoom-rotate" class="foot-rotate" type="button" title="Rotate 90°">↻</button>
       <div class="zoom-ctl">
-        <button id="zoom-rotate" type="button" title="Rotate 90°">↻</button>
-        <span class="zoom-sep"></span>
         <button id="zoom-out" type="button" title="Zoom out">−</button>
         <span class="pct" id="zoom-pct">100%</span>
         <button id="zoom-in" type="button" title="Zoom in">+</button>
@@ -941,9 +939,7 @@ WHERE {
     requestAnimationFrame(() => updatePip("rows", "list-pip"));
   }
 
-  function updateCount() {
-    if (state.items.length > 0) $("#topright").textContent = "v1.0";
-  }
+  function updateCount() {}
 
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
   let currentImg = null;
@@ -1073,6 +1069,60 @@ WHERE {
     }, { passive:false });
 
     canvas.addEventListener("dblclick", () => { if (currentImg) fitToFrame(); });
+
+    // ── Touch: pan + pinch zoom + double-tap ─────────────────────────────────
+    let tPan   = { active:false, startX:0, startY:0, startTx:0, startTy:0 };
+    let tPinch = { active:false, dist:0 };
+    let lastTap = 0;
+
+    function touchDist(e) {
+      const t = e.touches;
+      return Math.hypot(t[1].clientX - t[0].clientX, t[1].clientY - t[0].clientY);
+    }
+    function touchMid(e) {
+      const t = e.touches, r = stage.getBoundingClientRect();
+      return { x:(t[0].clientX+t[1].clientX)/2 - r.left, y:(t[0].clientY+t[1].clientY)/2 - r.top };
+    }
+
+    canvas.addEventListener("touchstart", e => {
+      if (!currentImg) return;
+      e.preventDefault();
+      if (e.touches.length === 1) {
+        tPinch.active = false;
+        tPan = { active:true, startX:e.touches[0].clientX, startY:e.touches[0].clientY, startTx:zoomState.tx, startTy:zoomState.ty };
+      } else if (e.touches.length === 2) {
+        tPan.active = false;
+        tPinch = { active:true, dist:touchDist(e) };
+      }
+    }, { passive:false });
+
+    canvas.addEventListener("touchmove", e => {
+      if (!currentImg) return;
+      e.preventDefault();
+      if (e.touches.length === 1 && tPan.active && !tPinch.active) {
+        zoomState.tx = tPan.startTx + (e.touches[0].clientX - tPan.startX);
+        zoomState.ty = tPan.startTy + (e.touches[0].clientY - tPan.startY);
+        constrainPan(); applyTransform();
+      } else if (e.touches.length === 2 && tPinch.active) {
+        const newDist = touchDist(e);
+        const mid = touchMid(e);
+        setZoom(zoomState.scale * (newDist / tPinch.dist), mid.x, mid.y);
+        tPinch.dist = newDist;
+      }
+    }, { passive:false });
+
+    canvas.addEventListener("touchend", e => {
+      if (e.touches.length < 2) tPinch.active = false;
+      if (e.touches.length === 0) {
+        tPan.active = false;
+        const now = Date.now();
+        if (now - lastTap < 300 && e.changedTouches.length === 1) fitToFrame();
+        lastTap = now;
+      } else if (e.touches.length === 1) {
+        tPan = { active:true, startX:e.touches[0].clientX, startY:e.touches[0].clientY, startTx:zoomState.tx, startTy:zoomState.ty };
+      }
+    }, { passive:true });
+
     $("#zoom-rotate").addEventListener("click", () => {
       if (!currentImg) return;
       zoomState.rotation = (zoomState.rotation + 90) % 360;
@@ -1540,25 +1590,6 @@ WHERE {
     $("#nav-prev").addEventListener("click", e => { e.preventDefault(); selectAdjacent(-1); });
     $("#nav-next").addEventListener("click", e => { e.preventDefault(); selectAdjacent(+1); });
 
-    // Fullscreen toggle
-    const fsBtn = $("#fs-toggle");
-    if (fsBtn && document.fullscreenEnabled) {
-      fsBtn.addEventListener("click", () => {
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen();
-        } else {
-          document.exitFullscreen();
-        }
-      });
-      document.addEventListener("fullscreenchange", () => {
-        const inFs = !!document.fullscreenElement;
-        fsBtn.textContent = inFs ? "⤡" : "⤢";
-        fsBtn.title = inFs ? "Exit fullscreen" : "Enter fullscreen";
-      });
-    } else if (fsBtn) {
-      fsBtn.style.display = "none"; // hide if API unavailable
-    }
-
     document.addEventListener("keydown", e => {
       const inInput = e.target.matches("input, select, textarea");
       if (e.key === "/" && !inInput) { e.preventDefault(); $("#search-input").focus(); return; }
@@ -1577,18 +1608,12 @@ WHERE {
   (async function main() {
     const aboutPanel = document.getElementById("about-panel");
     const siteHeader = document.getElementById("site-header");
-    const toprightEl = document.getElementById("topright");
-    function openAbout()  { aboutPanel.classList.add("open");    siteHeader.style.display = "none"; }
-    function closeAbout() { aboutPanel.classList.remove("open"); siteHeader.style.display = ""; }
-    toprightEl.addEventListener("click", (e) => {
-      e.stopPropagation();
-      aboutPanel.classList.contains("open") ? closeAbout() : openAbout();
-    });
+    function openAbout()  { if(aboutPanel){ aboutPanel.classList.add("open");    siteHeader.style.display = "none"; } }
+    function closeAbout() { if(aboutPanel){ aboutPanel.classList.remove("open"); siteHeader.style.display = ""; } }
     document.addEventListener("click", closeAbout);
-    aboutPanel.addEventListener("click", (e) => e.stopPropagation());
+    if(aboutPanel) aboutPanel.addEventListener("click", (e) => e.stopPropagation());
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeAbout(); });
-    toprightEl.addEventListener("dblclick", () => { clearCache(); location.reload(); });
-    document.getElementById("about-close").addEventListener("click", closeAbout);
+    document.getElementById("about-close")?.addEventListener("click", closeAbout);
 
     // ── Scroll pips ───────────────────────────────────────────────────────────
     document.getElementById("rows").addEventListener("scroll",
