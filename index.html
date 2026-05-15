@@ -117,7 +117,7 @@
 
 <a href="browse.html" class="splash" id="splash" aria-label="Enter the Hunter House Foundation archive">
   <div class="film" id="film">
-    <video id="film-video" autoplay loop muted playsinline preload="auto" src="assets/HH-Splash4k.mp4"></video>
+    <video id="film-video" autoplay loop muted playsinline preload="auto"></video>
   </div>
   <div class="imprint"><b>2026</b>v1.0</div>
   <div class="mark">
@@ -131,6 +131,11 @@
   const splash = document.getElementById('splash');
   const film   = document.getElementById('film');
   const video  = document.getElementById('film-video');
+
+  // Serve 1080p on detected slow connections, 4K otherwise
+  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  const slow = conn && (conn.saveData || ['slow-2g','2g','3g'].includes(conn.effectiveType));
+  video.src = slow ? 'assets/HH-Splash1080.mp4' : 'assets/HH-Splash4k.mp4';
 
   // Show video once it can play, 2s fallback for slow connections
   const showFilm = () => film.classList.add('ready');
