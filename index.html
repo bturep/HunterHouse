@@ -137,10 +137,11 @@
   const fast = conn && !conn.saveData && conn.effectiveType === '4g' && (conn.downlink || 10) >= 5;
   video.src = fast ? 'assets/HH-Splash4k.mp4' : 'assets/HH-Splash1080.mp4';
 
-  // Show video once it can play, 2s fallback for slow connections
+  // Show video on first decoded frame; 500ms fallback so background
+  // appears quickly even on slow connections (dark bg already visible).
   const showFilm = () => film.classList.add('ready');
-  const fallback = setTimeout(showFilm, 2000);
-  video.addEventListener('canplay', () => { clearTimeout(fallback); showFilm(); }, { once: true });
+  const fallback = setTimeout(showFilm, 500);
+  video.addEventListener('loadeddata', () => { clearTimeout(fallback); showFilm(); }, { once: true });
 
   // Click → animate out → navigate to browse
   splash.addEventListener('click', (e) => {
