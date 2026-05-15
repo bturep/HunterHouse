@@ -255,6 +255,7 @@
   .meta-body{flex:1;overflow-y:auto;padding:22px 22px 32px}
 
   .meta-title{font-size:21px;font-weight:500;color:var(--ink);letter-spacing:-0.015em;line-height:1.2;margin-bottom:8px}
+  .meta-title-sub{display:block;font-size:13px;font-weight:400;color:var(--muted);letter-spacing:0;margin-top:4px}
   .meta-orig{
     font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;
     padding:6px 0;margin-bottom:18px;border-bottom:1px dotted var(--rule);
@@ -290,11 +291,17 @@
   .kv dd a:hover{border-bottom-color:var(--copper-deep)}
 
   /* browse-local pill/archid (smaller than verso.css defaults) */
-  .pill{display:inline-flex;align-items:center;height:18px;padding:0 7px;background:var(--copper-pale);color:var(--copper-deep);font-size:10.5px;margin:0 3px 3px 0;white-space:nowrap}
+  .pill{display:inline-flex;align-items:center;height:18px;padding:0 7px;font-size:10.5px;margin:0 3px 3px 0;white-space:nowrap;background:var(--copper-pale);color:var(--copper-deep)}
   button.area-pill,button.type-pill,button.drawtype-pill{border:none;cursor:pointer;font-family:inherit}
-  button.area-pill:hover,button.type-pill:hover,button.drawtype-pill:hover{background:var(--copper-deep);color:var(--bg)}
-  button.area-pill.active,button.type-pill.active,button.drawtype-pill.active{background:var(--copper-deep);color:var(--bg)}
-  button.type-pill{height:auto;padding:3px 8px;align-items:center;gap:0}
+  /* area — copper/sage (default) */
+  button.area-pill{background:var(--copper-pale);color:var(--copper-deep)}
+  button.area-pill:hover,button.area-pill.active{background:var(--copper-deep);color:var(--bg)}
+  /* item type — slate blue */
+  button.type-pill{height:auto;padding:3px 8px;align-items:center;gap:0;background:#e4ecf4;color:#3a5470}
+  button.type-pill:hover,button.type-pill.active{background:#3a5470;color:var(--bg)}
+  /* drawing type — warm stone */
+  button.drawtype-pill{background:#ede8e0;color:#6b5540}
+  button.drawtype-pill:hover,button.drawtype-pill.active{background:#6b5540;color:var(--bg)}
   .archid-mono{font-family:var(--mono);font-size:11px;color:var(--red);background:var(--red-pale);padding:1.5px 7px;letter-spacing:0.04em;white-space:nowrap}
 
   .meta-actions{display:flex;align-items:stretch;gap:1px;background:var(--ink);width:fit-content;margin-bottom:20px}
@@ -509,7 +516,7 @@
     items: [],
     filtered: [],
     selectedId: null,
-    sortCol: "year",
+    sortCol: "id",
     sortDir: "asc",
     search: "",
     filterCollection: "",
@@ -534,6 +541,11 @@
   const $ = sel => document.querySelector(sel);
   const escapeHTML = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const displayId = id => escapeHTML((id || "").replace(/^HH-/, ""));
+  const formatTitle = title => {
+    const m = String(title || "").match(/^(.*?)\s*(\[.*\])\s*$/s);
+    if (!m) return escapeHTML(title);
+    return `${escapeHTML(m[1])}<span class="meta-title-sub">${escapeHTML(m[2])}</span>`;
+  };
   const yearOf = d => d ? d.slice(0, 4) : "—";
   const imageUrl = it => it.image || null;
   const uniqueSorted = arr => Array.from(new Set(arr)).filter(Boolean).sort();
@@ -556,7 +568,7 @@
     return (await res.json()).results.bindings;
   }
 
-  const CACHE_KEY = "hhf_catalogue_v12";
+  const CACHE_KEY = "hhf_catalogue_v13";
   const CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours
 
   function clearCache() {
@@ -592,6 +604,9 @@ SELECT ?item ?archId ?label ?img ?master
        ?use
        ?builtStatus ?builtStatusLabel
        ?setPos ?notes
+       ?rights ?rightsLabel
+       ?heldBy ?heldByLabel
+       ?archiveLink
 WHERE {
   ?item wdt:P2 ?archId .
   ?item wdt:P96 ?img .
@@ -611,6 +626,9 @@ WHERE {
   OPTIONAL { ?item wdt:P92 ?builtStatus . ?builtStatus rdfs:label ?builtStatusLabel . FILTER(LANG(?builtStatusLabel)="en") }
   OPTIONAL { ?item wdt:P86 ?setPos }
   OPTIONAL { ?item wdt:P100 ?notes }
+  OPTIONAL { ?item wdt:P93 ?rights . ?rights rdfs:label ?rightsLabel . FILTER(LANG(?rightsLabel)="en") }
+  OPTIONAL { ?item wdt:P94 ?heldBy . ?heldBy rdfs:label ?heldByLabel . FILTER(LANG(?heldByLabel)="en") }
+  OPTIONAL { ?item wdt:P99 ?archiveLink }
 }`;
 
     const rows = await sparqlQuery(Q);
@@ -638,6 +656,9 @@ WHERE {
           builtStatus:      r.builtStatusLabel?.value || null,
           setPosition:      r.setPos?.value || null,
           notes:            r.notes?.value || null,
+          rights:           r.rightsLabel?.value || null,
+          heldBy:           r.heldByLabel?.value || null,
+          archiveLink:      r.archiveLink?.value || null,
         });
       }
       const it = map.get(qid);
@@ -980,11 +1001,11 @@ WHERE {
     }
     if (item.builtStatus) descRows.push(["Built",   escapeHTML(item.builtStatus)]);
     if (item.creator)     descRows.push(["Creator", escapeHTML(item.creator)]);
+    if (item.heldBy)      descRows.push(["Held by", escapeHTML(item.heldBy)]);
 
     const archRows = [];
-    archRows.push(["Archive ID", `<span class="archid-mono">${displayId(item.id)}</span>`]);
-    if (item.sourceCollection) archRows.push(["Source",    escapeHTML(item.sourceCollection)]);
-    if (item.rights)           archRows.push(["Rights",    escapeHTML(item.rights)]);
+    if (item.rights)       archRows.push(["Rights", escapeHTML(item.rights)]);
+    if (item.archiveLink)  archRows.push(["Archive record", `<a href="${escapeHTML(item.archiveLink)}" target="_blank" rel="noopener">↗ External record</a>`]);
 
     const descHTML = descRows.map(([k,v]) => `<div class="row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
     const archHTML = archRows.map(([k,v]) => `<div class="row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
@@ -1045,7 +1066,7 @@ WHERE {
       }).join("");
       siblingsHTML = `
         <div class="graph-siblings">
-          <div class="lbl-row"><span>Siblings in this phase</span><span class="ct">${siblings.length} total</span></div>
+          <div class="lbl-row"><span>In this set</span><span class="ct">${siblings.length} total</span></div>
           ${rows}
         </div>`;
     }
@@ -1067,20 +1088,21 @@ WHERE {
         </a>
       </div>`;
 
+    const graphN = archRows.length > 0 ? "03" : "02";
     body.innerHTML = `
-      <h1 class="meta-title">${escapeHTML(item.title)}</h1>
+      <h1 class="meta-title">${formatTitle(item.title)}</h1>
       ${item.notes ? `<p class="meta-lede">${escapeHTML(item.notes)}</p>` : ""}
 
       <section class="meta-section">
         <h3><span><span class="n">01</span>Description</span><span class="ct">${descRows.length} fields</span></h3>
         <dl class="kv">${descHTML}</dl>
       </section>
-      <section class="meta-section">
+      ${archRows.length > 0 ? `<section class="meta-section">
         <h3><span><span class="n">02</span>Archival</span><span class="ct">${archRows.length} fields</span></h3>
         <dl class="kv">${archHTML}</dl>
-      </section>
+      </section>` : ""}
       <section class="graph-section">
-        <h3><span><span class="n">03</span>In the graph</span><span class="ct">Wikibase context</span></h3>
+        <h3><span><span class="n">${graphN}</span>In the graph</span><span class="ct">Wikibase context</span></h3>
         <div class="graph-path">${graphPathHTML}</div>
         ${siblingsHTML}
         ${graphActionsHTML}
