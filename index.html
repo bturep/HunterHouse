@@ -6,10 +6,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/verso.css">
 <style>
-  html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#1a1816;color:#f3f1ec;font-family:var(--sans)}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#1a1816;color:#f3f1ec;font-family:var(--mono)}
 
   .splash{
     position:fixed;inset:0;cursor:pointer;
@@ -30,19 +30,20 @@
   .splash .mark{
     position:absolute;left:50%;top:50%;
     transform:translate(-50%,-50%);
-    font-size:56px;font-weight:300;letter-spacing:-0.022em;color:#f3f1ec;
-    white-space:nowrap;text-align:center;line-height:1.15;
-    text-shadow:0 1px 32px rgba(0,0,0,0.55);
+    font-family:var(--mono);font-size:30px;font-weight:500;
+    letter-spacing:0.10em;text-transform:uppercase;
+    color:#f3f1ec;white-space:nowrap;text-align:center;line-height:1.5;
+    text-shadow:0 1px 28px rgba(0,0,0,0.7);
     z-index:5;pointer-events:none;
     opacity:0;animation:mark-in 1400ms cubic-bezier(.2,.7,.2,1) 300ms forwards;
     view-transition-name:hh-mark;
   }
-  .splash .mark .dim{color:rgba(243,241,236,0.55);font-weight:300}
+  .splash .mark .dim{font-size:21px;font-weight:400;letter-spacing:0.16em;color:rgba(243,241,236,0.5)}
   .splash .mark .place{
-    display:block;margin-top:18px;
-    font-family:var(--mono);font-size:11px;color:rgba(243,241,236,0.65);
-    letter-spacing:0.28em;text-transform:uppercase;font-weight:500;
-    text-shadow:0 1px 12px rgba(0,0,0,0.7);
+    display:block;margin-top:20px;
+    font-size:9.5px;color:rgba(243,241,236,0.45);
+    letter-spacing:0.32em;font-weight:500;
+    text-shadow:0 1px 8px rgba(0,0,0,0.7);
   }
   @keyframes mark-in{
     from{opacity:0;transform:translate(-50%,-46%)}
@@ -67,8 +68,8 @@
     z-index:10;
   }
   @keyframes mark-exit{
-    from{transform:translate(-50%,-50%);color:#f3f1ec;text-shadow:0 1px 32px rgba(0,0,0,0.55)}
-    to  {transform:translate(calc(28px - 50vw), calc(22px - 50vh)) scale(0.24);color:#1e1c1a;text-shadow:none}
+    from{transform:translate(-50%,-50%);color:#f3f1ec;text-shadow:0 1px 28px rgba(0,0,0,0.7)}
+    to  {transform:translate(calc(28px - 50vw), calc(22px - 50vh)) scale(0.36);color:#1e1c1a;text-shadow:none}
   }
 
   .splash .enter{
@@ -97,7 +98,8 @@
   .splash:active{transform:scale(0.998)}
 
   @media (max-width:767px){
-    .splash .mark{font-size:34px}
+    .splash .mark{font-size:20px}
+    .splash .mark .dim{font-size:14px}
     .splash .enter{right:20px;bottom:24px}
     .splash .imprint{left:20px}
   }
@@ -111,7 +113,7 @@
   </div>
   <div class="imprint"><b>2026.05</b>v1.0</div>
   <div class="mark">
-    Hunter House <span class="dim">Foundation</span>
+    <span class="name">Hunter House <span class="dim">Foundation</span></span>
     <span class="place">Victoria, British Columbia</span>
   </div>
   <div class="enter"><span>Enter to Archive</span><span class="arrow">→</span></div>

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <title>Browse Archive — Hunter House Foundation</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -17,13 +18,13 @@
   ::view-transition-group(hh-mark){animation-duration:900ms;animation-timing-function:cubic-bezier(.4,0,.2,1)}
 
   /* Fade the whole page in on arrival */
-  @keyframes body-in{from{opacity:0}to{opacity:1}}
+
 
 
   /* browse-surface overrides */
   html{background:#f3f1ec;height:100%}
   html,body{overflow:hidden}
-  body{height:100%;display:flex;flex-direction:column;animation:body-in 450ms ease-out both}
+  body{height:100%;display:flex;flex-direction:column}
   .site-top{padding:0 28px;flex-shrink:0;grid-template-columns:auto 1fr auto;gap:24px;height:41px;box-sizing:border-box}
   .site-topright{display:flex;align-items:stretch;gap:20px;height:41px;color:var(--ink)}
   .site-topright .theme-btn{display:flex;align-items:center;border:none;border-radius:0;padding:0;font-size:19px;line-height:1;color:var(--ink)}
