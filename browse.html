@@ -23,7 +23,7 @@
   }
   .search{
     flex:1;display:flex;align-items:center;gap:10px;
-    padding:10px 24px 10px 0;border-right:1px solid var(--rule);margin-right:24px;
+    padding:10px 24px 10px 0;
   }
   .search input{
     font:inherit;font-size:14px;background:none;border:0;outline:0;
@@ -48,14 +48,7 @@
   .fbtn.active .lbl{color:var(--copper-deep)}
   .fbtn.active .val{color:var(--copper-deep)}
   .fbtn.active:hover{background:var(--copper-pale)}
-  .ctrl-count{
-    display:flex;align-items:center;padding:0 22px;
-    font-family:var(--mono);font-size:11px;color:var(--muted);
-    letter-spacing:0.04em;font-variant-numeric:tabular-nums;white-space:nowrap;
-  }
-  .ctrl-count b{color:var(--ink);font-weight:500;margin-right:4px}
-
-  /* ── dropdowns ── */
+/* ── dropdowns ── */
   .fdrop{
     display:none;position:absolute;top:100%;left:0;z-index:200;
     background:var(--bg);border:1px solid var(--ink);border-top:0;
@@ -446,9 +439,6 @@
     <input id="search-input" placeholder="Search by title, ID, type, or phase…" autocomplete="off">
     <kbd>/</kbd>
   </div>
-  <div class="ctrl-count">
-    <b id="count-display">—</b> <span id="count-label">items</span>
-  </div>
 </div>
 
 <div class="shell">
@@ -464,7 +454,7 @@
       <span class="l">Browse</span>
       <div class="sort-mini">
         <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>
-        <button class="sort-hd" data-sort-col="phase">Title<span class="sort-arrow" id="sa-phase"></span></button>
+        <button class="sort-hd" data-sort-col="phase">Phase<span class="sort-arrow" id="sa-phase"></span></button>
         <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>
       </div>
     </div>
@@ -890,14 +880,7 @@ WHERE {
   }
 
   function updateCount() {
-    const total   = state.items.length;
-    const showing = state.filtered.length;
-    const el = $("#count-display");
-    const lb = $("#count-label");
-    if (!el) return;
-    el.textContent = String(showing).padStart(2, "0");
-    lb.textContent = showing === total ? "items" : `of ${total}`;
-    if (total > 0) $("#topright").textContent = `v0.6`;
+    if (state.items.length > 0) $("#topright").textContent = "v0.6";
   }
 
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
