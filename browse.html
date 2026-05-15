@@ -619,9 +619,6 @@
   }
   // Archive link label derived from held-by institution
   function archiveLinkLabel(heldBy) {
-    const hb = (heldBy || "").toLowerCase();
-    if (hb.includes("calgary") || hb.includes("canadian architectural"))
-      return "↗ University of Calgary Special Collections";
     if (heldBy) return `↗ ${heldBy}`;
     return "↗ Archive record";
   }
@@ -644,7 +641,7 @@
     return (await res.json()).results.bindings;
   }
 
-  const CACHE_KEY = "hhf_catalogue_v18";
+  const CACHE_KEY = "hhf_catalogue_v19";
 
   function clearCache() {
     try { localStorage.removeItem(CACHE_KEY); } catch {}
