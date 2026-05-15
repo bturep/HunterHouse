@@ -265,30 +265,27 @@
   .image-stage .placeholder b{color:var(--muted);font-weight:500}
 
   .zoom-ctl{
-    display:flex;align-items:stretch;
-    background:var(--bg);border:1px solid var(--ink);
-    font-family:var(--mono);font-size:11px;user-select:none;
+    display:flex;align-items:center;gap:2px;user-select:none;
   }
   .zoom-ctl button{
-    background:none;border:0;font:inherit;color:var(--ink);
-    padding:6px 12px;cursor:pointer;border-right:1px solid var(--rule);
-    display:flex;align-items:center;justify-content:center;min-width:30px;
+    background:none;border:0;font:inherit;color:var(--muted);
+    padding:0 5px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
   }
-  .zoom-ctl button:last-child{border-right:0}
-  .zoom-ctl button:hover{background:var(--soft)}
+  .zoom-ctl button:hover{color:var(--ink)}
   .zoom-ctl button:disabled{color:var(--hint);cursor:not-allowed}
-  .zoom-ctl button:disabled:hover{background:var(--bg)}
-  .zoom-ctl .pct{padding:6px 12px;color:var(--muted);border-right:1px solid var(--rule);font-variant-numeric:tabular-nums;min-width:54px;text-align:center}
+  .zoom-ctl .pct{color:var(--muted);font-variant-numeric:tabular-nums;min-width:38px;text-align:center;padding:0 4px}
 
   .image-foot{
     padding:0 24px;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);background:var(--bg);
-    display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+    display:flex;justify-content:space-between;align-items:center;
     font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em;flex-shrink:0;
     height:42px;box-sizing:border-box;
   }
-  .image-foot .m{color:var(--muted);letter-spacing:0.04em;justify-self:start}
-  .image-foot .r{justify-self:end}
-  .image-foot .r a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
+  .foot-right{display:flex;align-items:center;gap:0}
+  .foot-dl{padding-left:14px;border-left:1px solid var(--rule)}
+  .foot-dl a{color:var(--muted);text-decoration:none}
+  .foot-dl a:hover{color:var(--ink)}
 
   /* ── meta pane ── */
   .meta-head{
@@ -462,7 +459,8 @@
 
     /* image pane: hide zoom controls (touch-scroll handles pan) */
     .zoom-ctl{display:none}
-    .image-foot{grid-template-columns:1fr 1fr;height:auto;padding:8px 16px}
+    .foot-right{gap:0}
+    .image-foot{height:auto;padding:8px 16px}
 
     /* meta pane: graph-actions single column */
     .graph-actions{grid-template-columns:1fr}
@@ -549,15 +547,17 @@
       </div>
     </div>
     <div class="image-foot">
-      <span class="m" id="if-date">—</span>
-      <div class="zoom-ctl">
-        <button id="zoom-rotate" type="button" title="Rotate 90°">↻</button>
-        <button id="zoom-out" type="button" title="Zoom out">−</button>
-        <span class="pct" id="zoom-pct">100%</span>
-        <button id="zoom-in" type="button" title="Zoom in">+</button>
-        <button id="zoom-fit" type="button" title="Fit to frame">fit</button>
+      <span id="if-date">—</span>
+      <div class="foot-right">
+        <div class="zoom-ctl">
+          <button id="zoom-rotate" type="button" title="Rotate 90°">↻</button>
+          <button id="zoom-out" type="button" title="Zoom out">−</button>
+          <span class="pct" id="zoom-pct">100%</span>
+          <button id="zoom-in" type="button" title="Zoom in">+</button>
+          <button id="zoom-fit" type="button" title="Fit to frame">fit</button>
+        </div>
+        <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">⤓ Download full size</a></span>
       </div>
-      <span class="r"><a href="#" id="if-full" target="_blank" rel="noopener">⤓ Download full size</a></span>
     </div>
   </section>
 
