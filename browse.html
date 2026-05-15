@@ -352,7 +352,9 @@
   button.type-pill{height:auto;padding:3px 8px;align-items:center;gap:0}
   .archid-mono{font-family:var(--mono);font-size:11px;color:var(--red);background:var(--red-pale);padding:1.5px 7px;letter-spacing:0.04em;white-space:nowrap}
   .rights-note{display:block;font-size:10.5px;color:var(--muted);margin-top:3px;font-style:italic}
-  .fonds-path{display:block;font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:0.01em}
+  .location-path{font-family:var(--mono);font-size:11px;letter-spacing:0.02em;color:var(--ink)}
+  .curator-note{margin:24px 0 0;padding:16px 20px;border-top:1px solid var(--rule);font-size:12px;line-height:1.65;color:var(--muted);font-style:italic;white-space:pre-wrap}
+
   /* ── pill colour themes (replaces inline pillStyle) ── */
   .pc-sage  {--pb:#dde6df;--pf:#365549;--pd:#243a31}
   .pc-stone {--pb:#e8e2d6;--pf:#5a4830;--pd:#3c3020}
@@ -649,18 +651,6 @@
     return "Creator";
   }
 
-  function notesLabel(item) {
-    const abbrev = archiveAbbrev(item.heldBy);
-    const hasFondsPath = (item.notes || "").includes(" — ");
-    if (hasFondsPath) return abbrev ? `${abbrev} fonds` : "Fonds";
-    return abbrev ? `${abbrev} note` : "Note";
-  }
-  // Render notes: split "Fonds name (accession) — S000, SS000, ..." onto two lines
-  function formatNotes(notes) {
-    const sep = notes.indexOf(" — ");
-    if (sep === -1) return escapeHTML(notes);
-    return `${escapeHTML(notes.slice(0, sep))}<span class="fonds-path">${escapeHTML(notes.slice(sep + 3))}</span>`;
-  }
   // Archive link label derived from held-by institution
   function archiveLinkLabel(heldBy) {
     if (heldBy) return `${heldBy} ↗`;
@@ -696,7 +686,7 @@
     return (await res.json()).results.bindings;
   }
 
-  const CACHE_KEY = "hhf_catalogue_v19";
+  const CACHE_KEY = "hhf_catalogue_v20";
 
   function clearCache() {
     try { localStorage.removeItem(CACHE_KEY); } catch {}
@@ -737,7 +727,7 @@ SELECT ?item ?archId ?label ?img ?master
        ?setPos ?notes ?medium
        ?rights ?rightsLabel
        ?heldBy ?heldByLabel
-       ?archiveLink
+       ?archiveLink ?location
 WHERE {
   ?item wdt:P2 ?archId .
   ?item wdt:P96 ?img .
@@ -763,6 +753,7 @@ WHERE {
   OPTIONAL { ?item wdt:P93 ?rights . ?rights rdfs:label ?rightsLabel . FILTER(LANG(?rightsLabel)="en") }
   OPTIONAL { ?item wdt:P94 ?heldBy . ?heldBy rdfs:label ?heldByLabel . FILTER(LANG(?heldByLabel)="en") }
   OPTIONAL { ?item wdt:P99 ?archiveLink }
+  OPTIONAL { ?item wdt:P142 ?location }
 }`;
 
     const rows = await sparqlQuery(Q);
@@ -796,6 +787,7 @@ WHERE {
           rights:           r.rightsLabel?.value || null,
           heldBy:           r.heldByLabel?.value || null,
           archiveLink:      r.archiveLink?.value || null,
+          location:         r.location?.value || null,
         });
       }
       const it = map.get(qid);
@@ -831,7 +823,7 @@ WHERE {
       if (state.filterCreator.size && ![it.creator, it.designedBy, it.builtBy].some(c => c && state.filterCreator.has(c))) return false;
       if (state.filterBuiltStatus.size && !state.filterBuiltStatus.has(it.builtStatus)) return false;
       if (q) {
-        const hay = [it.id, it.title, it.phase, (it.drawTypes||[]).join(" "), (it.areas||[]).join(" "), it.creator, it.designedBy||"", it.builtBy||"", it.medium||"", it.notes||""].join(" ").toLowerCase();
+        const hay = [it.id, it.title, it.phase, (it.drawTypes||[]).join(" "), (it.areas||[]).join(" "), it.creator, it.designedBy||"", it.builtBy||"", it.medium||"", it.notes||"", it.location||""].join(" ").toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
@@ -1142,7 +1134,10 @@ WHERE {
     if (item.heldBy)      descRows.push(["Held by", escapeHTML(item.heldBy)]);
 
     const archRows = [];
-    if (item.notes)    archRows.push([notesLabel(item), formatNotes(item.notes)]);
+    if (item.location) {
+      const crumbs = item.location.split(/,\s*/).map(escapeHTML).join(" › ");
+      archRows.push(["Location", `<span class="location-path">${crumbs}</span>`]);
+    }
     if (item.rights) {
       const abbrev = archiveAbbrev(item.heldBy);
       const contact = abbrev === "CAA"
@@ -1251,6 +1246,7 @@ WHERE {
         ${siblingsHTML}
         ${graphActionsHTML}
       </section>
+      ${item.notes ? `<p class="curator-note">${escapeHTML(item.notes)}</p>` : ""}
     `;
 
     body.querySelectorAll(".sib[data-sib-id]").forEach(el => {
