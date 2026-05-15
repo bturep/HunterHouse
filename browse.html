@@ -117,13 +117,14 @@
   /* ── scroll pips ── */
   .scroll-pip{
     position:absolute;right:0;top:41px;z-index:5;pointer-events:none;
-    width:4px;height:10px;
-    background:var(--ink);
-    border-radius:5px 0 0 5px;
+    width:5px;height:12px;
+    background:transparent;
+    border:1px solid var(--ink);border-right:none;
+    border-radius:6px 0 0 6px;
     opacity:0;transition:opacity 0.15s;
   }
   .scroll-pip.active{opacity:1}
-  .scroll-pip-r{right:auto;left:0;border-radius:0 5px 5px 0}
+  .scroll-pip-r{right:auto;left:0;border-radius:0 6px 6px 0;border-right:1px solid var(--ink);border-left:none}
 
   /* ── phase dividers ── */
   .phase-divider{
@@ -663,7 +664,7 @@
     if (scrollHeight <= clientHeight + 1) { pip.classList.remove("active"); return; }
     pip.classList.add("active");
     const ratio = scrollTop / (scrollHeight - clientHeight);
-    pip.style.top = (41 + ratio * (clientHeight - 10)) + "px";
+    pip.style.top = (41 + ratio * (clientHeight - 12)) + "px";
   }
 
   // ── Wikibase fetch layer ──────────────────────────────────────────────────
