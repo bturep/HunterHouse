@@ -1055,6 +1055,7 @@ WHERE {
     if (item.heldBy)      descRows.push(["Held by", escapeHTML(item.heldBy)]);
 
     const archRows = [];
+    if (item.notes)   archRows.push(["Notes",   escapeHTML(item.notes)]);
     if (item.rights) {
       const src = (item.sourceCollection || "").toLowerCase();
       const contact = src.includes("canadian architectural") || src.includes("caa")
@@ -1148,7 +1149,6 @@ WHERE {
     const graphN = archRows.length > 0 ? "03" : "02";
     body.innerHTML = `
       <h1 class="meta-title">${formatTitle(item.title)}</h1>
-      ${item.notes ? `<p class="meta-lede">${escapeHTML(item.notes)}</p>` : ""}
 
       <section class="meta-section">
         <h3><span><span class="n">01</span>Description</span><span class="ct">${descRows.length} fields</span></h3>
