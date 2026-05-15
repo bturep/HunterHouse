@@ -715,7 +715,7 @@ Append an entry after every major task. Format: `### YYYY-MM-DD — brief title`
 
 ---
 
-### 2026-05-15 — Splash→browse transition, browse.html UI fixes, CCA manual survey
+### 2026-05-15 — Splash→browse transition, browse.html UI fixes, CCA manual survey (v1.0.0 era)
 
 **Splash→browse transition**
 - Removed `@view-transition{navigation:auto}` from `index.html` — the browser's cross-document View Transitions API was competing with the JS exit animation and causing a flash.
@@ -741,7 +741,7 @@ Append an entry after every major task. Format: `### YYYY-MM-DD — brief title`
 
 ---
 
-### 2026-05-15 — P142 Physical location + browse.html record pane overhaul (continued session)
+### 2026-05-15 — P142 Physical location + browse.html record pane overhaul (v1.0.0 era)
 
 **Wikibase — P142 "Physical location" property**
 - New property P142 created (datatype: string) — stores the archival hierarchy path for CAA items.
@@ -765,7 +765,7 @@ Append an entry after every major task. Format: `### YYYY-MM-DD — brief title`
 
 ---
 
-### 2026-05-15 — Fill missing P142 for all 35 CAA items
+### 2026-05-15 — Fill missing P142 for all 35 CAA items (v1.0.0 era)
 
 **Problem:** 15 CAA items had no P142. The original migration only extracted paths from items
 that already had P100 notes containing the fonds path string. Items without P100 were silently skipped.
@@ -786,7 +786,7 @@ migration (`. Ref:` wasn't caught as a prose separator). Fixed via `scripts/fix_
 
 ---
 
-### 2026-05-15 — Splash redesign, black flash fix, P142 completion
+### 2026-05-15 — Splash redesign, black flash fix, P142 completion (v1.0.1)
 
 **index.html — splash redesign**
 - Removed Inter Tight; splash now uses system monospace stack: `'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace`. No external font dependency — renders instantly.
