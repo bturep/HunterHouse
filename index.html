@@ -17,10 +17,6 @@
   .film{
     position:absolute;inset:0;overflow:hidden;
     transform:translateZ(0);
-    background:
-      radial-gradient(ellipse 70% 90% at 35% 45%, #2a2520 0%, transparent 60%),
-      radial-gradient(ellipse 80% 70% at 70% 60%, #1f1b16 0%, transparent 65%),
-      #1a1816;
   }
   .film video{opacity:0;animation:film-in 900ms ease-in-out 200ms forwards;position:absolute;top:50%;left:50%;width:max(100vw,calc(100vh*16/9));height:max(100vh,calc(100vw*9/16));transform:translate(-50%,-50%);object-fit:cover}
   @keyframes film-in{to{opacity:1}}
@@ -54,7 +50,7 @@
     opacity:0;animation:fade-in 700ms ease-out 1300ms forwards;
   }
   .splash .enter .arrow{color:#e4a47e;font-size:13px;letter-spacing:0;animation:enter-pulse 2.4s ease-in-out 3000ms infinite}
-  @keyframes fade-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fade-in{from{opacity:0}to{opacity:1}}
   @keyframes enter-pulse{0%,100%{transform:translateX(0)}50%{transform:translateX(4px)}}
 
   .splash .imprint{
@@ -83,7 +79,7 @@
   <div class="film" id="film">
     <video id="film-video" autoplay loop muted playsinline preload="auto"></video>
   </div>
-  <div class="imprint"><b>2026.05</b>v1.1.6</div>
+  <div class="imprint"><b>2026.05</b>v1.1.7</div>
   <div class="mark">
     <span class="name">Hunter House <span class="dim">Foundation</span></span>
   </div>
