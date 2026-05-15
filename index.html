@@ -5,6 +5,7 @@
 <title>Hunter House Foundation</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="dark">
+<link rel="preload" as="image" href="https://archive.hunterhousefoundation.com/web/media/HH-Splash-poster.jpg">
 <style>
   html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#1a1816;color:#f3f1ec;font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace}
 
@@ -18,8 +19,8 @@
     position:absolute;inset:0;overflow:hidden;
     transform:translateZ(0);
   }
-  .film video{opacity:0;animation:film-in 900ms ease-in-out 200ms forwards;position:absolute;top:50%;left:50%;width:max(100vw,calc(100vh*16/9));height:max(100vh,calc(100vw*9/16));transform:translate(-50%,-50%);object-fit:cover}
-  @keyframes film-in{to{opacity:1}}
+  .film video{opacity:0;transition:opacity 900ms ease-in-out;position:absolute;top:50%;left:50%;width:max(100vw,calc(100vh*16/9));height:max(100vh,calc(100vw*9/16));transform:translate(-50%,-50%);object-fit:cover}
+  .film video.show{opacity:1}
 
   .splash .mark{
     position:absolute;left:50%;top:50%;
@@ -77,9 +78,9 @@
 
 <a href="browse.html" class="splash" id="splash" aria-label="Enter the Hunter House Foundation archive">
   <div class="film" id="film">
-    <video id="film-video" autoplay loop muted playsinline preload="auto"></video>
+    <video id="film-video" autoplay loop muted playsinline preload="auto" poster="https://archive.hunterhousefoundation.com/web/media/HH-Splash-poster.jpg"></video>
   </div>
-  <div class="imprint"><b>2026.05</b>v1.1.7</div>
+  <div class="imprint"><b>2026.05</b>v1.1.8</div>
   <div class="mark">
     <span class="name">Hunter House <span class="dim">Foundation</span></span>
   </div>
@@ -93,8 +94,15 @@
   const R2 = 'https://archive.hunterhousefoundation.com/web/media';
   const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
   const fast = conn && !conn.saveData && conn.effectiveType === '4g' && (conn.downlink || 10) >= 5;
-  video.poster = `${R2}/HH-Splash-poster.jpg`;
-  video.src    = fast ? `${R2}/HH-Splash4k.mp4` : `${R2}/HH-Splash1080.mp4`;
+  video.src = fast ? `${R2}/HH-Splash4k.mp4` : `${R2}/HH-Splash1080.mp4`;
+
+  // Start fade only when poster is decoded and ready to paint — eliminates
+  // the variable-timing jitter of fixed-delay CSS animation vs network load.
+  const go = () => requestAnimationFrame(() => video.classList.add('show'));
+  const img = new Image();
+  img.src = `${R2}/HH-Splash-poster.jpg`;
+  img.decode ? img.decode().then(go, go) : (img.onload = img.onerror = go);
+  setTimeout(go, 1500);
 
   // Click → animate out → navigate to browse
   splash.addEventListener('click', (e) => {
