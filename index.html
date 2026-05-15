@@ -29,8 +29,8 @@
       radial-gradient(ellipse 80% 70% at 70% 60%, #1f1b16 0%, transparent 65%),
       #0f0d0a;
   }
-  .film iframe{opacity:0;transition:opacity 700ms ease-out}
-  .film.ready iframe{opacity:1}
+  .film video{opacity:0;transition:opacity 700ms ease-out;position:absolute;top:50%;left:50%;width:max(100vw,calc(100vh*16/9));height:max(100vh,calc(100vw*9/16));transform:translate(-50%,-50%);object-fit:cover}
+  .film.ready video{opacity:1}
 
   .splash .mark{
     position:absolute;left:50%;top:50%;
@@ -115,17 +115,9 @@
 </head>
 <body>
 
-<a href="archive.html" class="splash" id="splash" aria-label="Enter the Hunter House Foundation site">
+<a href="browse.html" class="splash" id="splash" aria-label="Enter the Hunter House Foundation archive">
   <div class="film" id="film">
-    <iframe
-      id="vimeo"
-      src="https://player.vimeo.com/video/1184581518?h=55333bb0b2&autoplay=1&loop=1&muted=1&background=1&dnt=1&api=1#t=440s"
-      frameborder="0"
-      allow="autoplay; fullscreen; picture-in-picture"
-      title="Hunter House"
-      loading="eager"
-      style="position:absolute;top:50%;left:50%;width:max(100vw, calc(100vh * 16 / 9));height:max(100vh, calc(100vw * 9 / 16));transform:translate(-50%,-50%);border:0;pointer-events:none"
-    ></iframe>
+    <video id="film-video" autoplay loop muted playsinline preload="auto" src="assets/HH-Splash4k.mp4"></video>
   </div>
   <div class="imprint"><b>2026</b>v1.0</div>
   <div class="mark">
@@ -138,35 +130,19 @@
 <script>
   const splash = document.getElementById('splash');
   const film   = document.getElementById('film');
-  const iframe = document.getElementById('vimeo');
+  const video  = document.getElementById('film-video');
 
-  // Show video when Vimeo signals play, or after 2s fallback
+  // Show video once it can play, 2s fallback for slow connections
   const showFilm = () => film.classList.add('ready');
   const fallback = setTimeout(showFilm, 2000);
+  video.addEventListener('canplay', () => { clearTimeout(fallback); showFilm(); }, { once: true });
 
-  window.addEventListener('message', (e) => {
-    if (!e.origin.includes('vimeo.com')) return;
-    try {
-      const d = JSON.parse(e.data);
-      if (d.event === 'play' || d.event === 'playing') { clearTimeout(fallback); showFilm(); }
-    } catch {}
-  });
-
-  iframe.addEventListener('load', () => {
-    try {
-      iframe.contentWindow.postMessage(
-        JSON.stringify({ method: 'addEventListener', value: 'play' }),
-        'https://player.vimeo.com'
-      );
-    } catch {}
-  });
-
-  // Click → animate out → navigate
+  // Click → animate out → navigate to browse
   splash.addEventListener('click', (e) => {
     e.preventDefault();
     if (splash.classList.contains('exiting')) return;
     splash.classList.add('exiting');
-    setTimeout(() => { window.location.href = 'archive.html'; }, 870);
+    setTimeout(() => { window.location.href = 'browse.html'; }, 870);
   });
 </script>
 </body>
