@@ -43,19 +43,19 @@
   #topright{cursor:pointer;line-height:1;display:inline-flex;align-items:center}
 
   /* ── about panel (replaces controls bar when open) ── */
+  .controls,#about-panel{box-sizing:border-box;height:42px;overflow:hidden;flex-shrink:0}
   #about-panel{
-    display:none;flex-shrink:0;
-    padding:13px 28px;border-bottom:1px solid var(--ink);background:var(--bg);
-    gap:48px;align-items:baseline;
+    display:none;
+    padding:0 28px;border-bottom:1px solid #2e2c29;background:#1e1c1a;
+    align-items:center;white-space:nowrap;
   }
   #about-panel.open{display:flex}
-  #about-panel p{
-    font-size:11px;line-height:1.6;color:var(--muted);
-    margin:0;font-family:var(--sans);
+  #about-panel .about-line{
+    font-family:var(--mono);font-size:10.5px;color:rgba(240,237,230,0.5);
+    letter-spacing:0.02em;
   }
-  #about-panel p:first-child{color:var(--ink);white-space:nowrap;flex-shrink:0}
-  #about-panel a{color:inherit;text-underline-offset:2px}
-  #about-panel a:hover{color:var(--red)}
+  #about-panel a{color:#5b9df7;text-decoration:none}
+  #about-panel a:hover{text-decoration:underline;text-underline-offset:2px}
 
   /* ── controls bar ── */
   .controls{
@@ -503,8 +503,7 @@
 </header>
 
 <div id="about-panel" role="dialog" aria-label="About this archive">
-  <p>Built by <a href="https://brandonpoole.net/" target="_blank" rel="noopener">Brandon Poole</a> for Floyd Marinescu and Olivia Jol, Hunter House Foundation.</p>
-  <p>Open data archive on Wikibase — the open-source knowledge graph underlying Wikidata. Items individually addressable; catalogue queryable via SPARQL. Metadata: CC0 linked open data. Archival description informed by GLAM standards and the <a href="https://github.com/CCA-Public/digital-archives-manual" target="_blank" rel="noopener">CCA Digital Archives Manual</a>.</p>
+  <span class="about-line">Open data archive on <a href="https://wikiba.se/" target="_blank" rel="noopener">Wikibase</a> — knowledge graph underlying <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a>. Items individually addressable; catalogue <a href="https://www.w3.org/TR/sparql11-query/" target="_blank" rel="noopener">SPARQL</a>-queryable. Metadata: <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0</a>. Archival description informed by <a href="https://www.wikidata.org/wiki/Wikidata:GLAM" target="_blank" rel="noopener">GLAM</a> standards · <a href="https://github.com/CCA-Public/digital-archives-manual" target="_blank" rel="noopener">CCA Digital Archives Manual</a>.</span>
 </div>
 
 <div class="controls">
