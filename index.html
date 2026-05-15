@@ -4,11 +4,8 @@
 <meta charset="utf-8">
 <title>Hunter House Foundation</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#1a1816;color:#f3f1ec;font-family:'JetBrains Mono',monospace}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#1a1816;color:#f3f1ec;font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace}
 
   .splash{
     position:fixed;inset:0;cursor:pointer;
@@ -29,7 +26,7 @@
   .splash .mark{
     position:absolute;left:50%;top:50%;
     transform:translate(-50%,-50%);
-    font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:500;
+    font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace;font-size:30px;font-weight:500;
     letter-spacing:0.10em;text-transform:uppercase;
     color:#f3f1ec;white-space:nowrap;text-align:center;line-height:1.5;
     text-shadow:0 1px 28px rgba(0,0,0,0.7);
@@ -38,12 +35,6 @@
     view-transition-name:hh-mark;
   }
   .splash .mark .dim{font-size:21px;font-weight:400;letter-spacing:0.16em;color:rgba(243,241,236,0.5)}
-  .splash .mark .place{
-    display:block;margin-top:20px;
-    font-size:9.5px;color:rgba(243,241,236,0.45);
-    letter-spacing:0.32em;font-weight:500;
-    text-shadow:0 1px 8px rgba(0,0,0,0.7);
-  }
   @keyframes mark-in{
     from{opacity:0;transform:translate(-50%,-46%)}
     to  {opacity:1;transform:translate(-50%,-50%)}
@@ -61,8 +52,7 @@
   @keyframes paper-in{to{opacity:1}}
   .splash.exiting .imprint,
   .splash.exiting .enter{transition:opacity 250ms ease-out;opacity:0}
-  .splash.exiting .mark .place{transition:opacity 200ms ease-out;opacity:0}
-  .splash.exiting .mark{
+.splash.exiting .mark{
     animation:mark-exit 900ms cubic-bezier(.4,0,.2,1) forwards;
     z-index:10;
   }
@@ -73,7 +63,7 @@
 
   .splash .enter{
     position:absolute;right:36px;bottom:32px;z-index:5;
-    font-family:'JetBrains Mono',monospace;font-size:13px;color:rgba(243,241,236,0.7);
+    font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace;font-size:13px;color:rgba(243,241,236,0.7);
     letter-spacing:0.28em;text-transform:uppercase;
     display:flex;align-items:center;gap:14px;
     text-shadow:0 1px 8px rgba(0,0,0,0.6);
@@ -86,7 +76,7 @@
 
   .splash .imprint{
     position:absolute;left:36px;top:28px;z-index:5;
-    font-family:'JetBrains Mono',monospace;font-size:10.5px;color:rgba(243,241,236,0.45);
+    font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace;font-size:10.5px;color:rgba(243,241,236,0.45);
     letter-spacing:0.18em;text-transform:uppercase;
     pointer-events:none;
     opacity:0;animation:fade-in 700ms ease-out 2400ms forwards;
@@ -113,7 +103,6 @@
   <div class="imprint"><b>2026.05</b>v1.0</div>
   <div class="mark">
     <span class="name">Hunter House <span class="dim">Foundation</span></span>
-    <span class="place">Victoria, British Columbia</span>
   </div>
   <div class="enter"><span>Enter to Archive</span><span class="arrow">→</span></div>
 </a>
