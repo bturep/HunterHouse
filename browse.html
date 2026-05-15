@@ -48,6 +48,13 @@
   }
   #about-panel a{color:#5b9df7;text-decoration:none}
   #about-panel a:hover{text-decoration:underline;text-underline-offset:2px}
+  #about-close{
+    margin-left:auto;flex-shrink:0;padding:0 0 0 28px;
+    background:none;border:0;cursor:pointer;
+    font-family:var(--mono);font-size:13px;color:rgba(243,241,236,0.6);
+    line-height:1;display:flex;align-items:center;
+  }
+  #about-close:hover{color:#f3f1ec}
 
   .fbtn{
     display:flex;flex-direction:column;justify-content:center;gap:2px;
@@ -138,10 +145,10 @@
 
   /* ── filter panel ── */
   .filter-panel{
-    position:absolute;top:41px;left:0;right:0;z-index:50;
+    position:absolute;top:41px;left:0;right:0;bottom:0;z-index:50;
     background:var(--bg);border-bottom:1px solid var(--ink);
     padding:16px 20px 14px;
-    box-shadow:0 6px 18px rgba(0,0,0,0.08);
+    overflow-y:auto;
   }
   .fp-group{margin-bottom:14px}
   .fp-group:last-child{margin-bottom:0}
@@ -477,6 +484,7 @@
 
 <div id="about-panel" role="dialog" aria-label="About this archive">
   <span class="about-line">Open data archive on <a href="https://wikiba.se/" target="_blank" rel="noopener">Wikibase</a> — knowledge graph underlying <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a>. Items individually addressable; catalogue <a href="https://www.w3.org/TR/sparql11-query/" target="_blank" rel="noopener">SPARQL</a>-queryable. Metadata: <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0</a>. Archival description informed by <a href="https://www.wikidata.org/wiki/Wikidata:GLAM" target="_blank" rel="noopener">GLAM</a> standards · <a href="https://github.com/CCA-Public/digital-archives-manual" target="_blank" rel="noopener">CCA Digital Archives Manual</a>.</span>
+  <button id="about-close" title="Close">×</button>
 </div>
 
 <div class="shell">
@@ -1540,6 +1548,7 @@ WHERE {
     aboutPanel.addEventListener("click", (e) => e.stopPropagation());
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeAbout(); });
     toprightEl.addEventListener("dblclick", () => { clearCache(); location.reload(); });
+    document.getElementById("about-close").addEventListener("click", closeAbout);
 
     try {
       const items = await loadFromWikibase();
