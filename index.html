@@ -119,5 +119,84 @@
     setTimeout(() => { window.location.href = 'browse.html'; }, 570);
   });
 </script>
+
+<script>
+  // Fire SPARQL prefetch so browse.html loads instantly from sessionStorage.
+  // Runs fire-and-forget — any error is silently swallowed.
+  (function () {
+    try {
+      const existing = sessionStorage.getItem("hhf_prefetch");
+      if (existing) {
+        const { ts } = JSON.parse(existing);
+        if (Date.now() - ts < 300000) return; // fresh prefetch already in place
+      }
+    } catch {}
+
+    const SPARQL = "https://hunterhouse.wikibase.cloud/query/sparql";
+    // Must stay in sync with CATALOGUE_QUERY in browse.html
+    const QUERY = `
+PREFIX wdt: <https://hunterhouse.wikibase.cloud/prop/direct/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX wikibase: <http://wikiba.se/ontology#>
+PREFIX bd: <http://www.bigdata.com/rdf#>
+SELECT ?item ?archId ?label ?img ?master
+       ?d1 ?d2 ?d3
+       ?phase ?phaseLabel ?phase2 ?phase2Label
+       ?drawType ?drawTypeLabel
+       ?area ?areaLabel
+       ?itype ?itypeLabel
+       ?src ?srcLabel
+       ?creator ?creatorLabel
+       ?builtBy ?builtByLabel
+       ?designedBy ?designedByLabel
+       ?use
+       ?builtStatus ?builtStatusLabel
+       ?setPos ?notes ?medium
+       ?rights ?rightsLabel
+       ?heldBy ?heldByLabel
+       ?archiveLink ?location
+WHERE {
+  ?item wdt:P2 ?archId .
+  ?item wdt:P96 ?img .
+  ?item rdfs:label ?label . FILTER(LANG(?label)="en")
+  OPTIONAL { ?item wdt:P95 ?master }
+  OPTIONAL { ?item wdt:P82 ?d1 }
+  OPTIONAL { ?item wdt:P64 ?d2 }
+  OPTIONAL { ?item wdt:P118 ?d3 }
+  OPTIONAL { ?item wdt:P62 ?phase . ?phase rdfs:label ?phaseLabel . FILTER(LANG(?phaseLabel)="en") }
+  OPTIONAL { ?item wdt:P84 ?phase2 . ?phase2 rdfs:label ?phase2Label . FILTER(LANG(?phase2Label)="en") }
+  OPTIONAL { ?item wdt:P88 ?drawType . ?drawType rdfs:label ?drawTypeLabel . FILTER(LANG(?drawTypeLabel)="en") }
+  OPTIONAL { ?item wdt:P87 ?area . ?area rdfs:label ?areaLabel . FILTER(LANG(?areaLabel)="en") }
+  OPTIONAL { ?item wdt:P1 ?itype . ?itype rdfs:label ?itypeLabel . FILTER(LANG(?itypeLabel)="en") }
+  OPTIONAL { ?item wdt:P79 ?src . ?src rdfs:label ?srcLabel . FILTER(LANG(?srcLabel)="en") }
+  OPTIONAL { ?item wdt:P80 ?creator . ?creator rdfs:label ?creatorLabel . FILTER(LANG(?creatorLabel)="en") }
+  OPTIONAL { ?item wdt:P140 ?builtBy . ?builtBy rdfs:label ?builtByLabel . FILTER(LANG(?builtByLabel)="en") }
+  OPTIONAL { ?item wdt:P141 ?designedBy . ?designedBy rdfs:label ?designedByLabel . FILTER(LANG(?designedByLabel)="en") }
+  OPTIONAL { ?item wdt:P89 ?use }
+  OPTIONAL { ?item wdt:P92 ?builtStatus . ?builtStatus rdfs:label ?builtStatusLabel . FILTER(LANG(?builtStatusLabel)="en") }
+  OPTIONAL { ?item wdt:P86 ?setPos }
+  OPTIONAL { ?item wdt:P100 ?notes }
+  OPTIONAL { ?item wdt:P91 ?medium }
+  OPTIONAL { ?item wdt:P93 ?rights . ?rights rdfs:label ?rightsLabel . FILTER(LANG(?rightsLabel)="en") }
+  OPTIONAL { ?item wdt:P94 ?heldBy . ?heldBy rdfs:label ?heldByLabel . FILTER(LANG(?heldByLabel)="en") }
+  OPTIONAL { ?item wdt:P99 ?archiveLink }
+  OPTIONAL { ?item wdt:P142 ?location }
+}`;
+
+    fetch(SPARQL, {
+      method: "POST",
+      headers: { "Content-Type": "application/sparql-query", "Accept": "application/sparql-results+json" },
+      body: QUERY
+    })
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(data => {
+      sessionStorage.setItem("hhf_prefetch", JSON.stringify({
+        ts: Date.now(),
+        rows: data.results.bindings
+      }));
+    })
+    .catch(() => {});
+  })();
+</script>
 </body>
 </html>
