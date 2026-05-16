@@ -452,6 +452,31 @@
   /* ── mobile tabs (hidden on desktop) ── */
   .mobile-tabs{display:none}
 
+  /* ── loading state ── */
+  body.loading .list-head,
+  body.loading .rows,
+  body.loading .meta-head,
+  body.loading .meta-body,
+  body.loading .image-head,
+  body.loading .image-foot { visibility:hidden }
+
+  #load-screen{
+    display:none;position:absolute;inset:0;z-index:10;
+    align-items:center;justify-content:center;
+  }
+  body.loading #load-screen{display:flex}
+  .load-text{
+    font-family:var(--mono);font-size:12px;color:var(--muted);
+    letter-spacing:0.14em;text-transform:uppercase;
+  }
+  @keyframes ld-dots{
+    0%  {content:""}
+    33% {content:"."}
+    66% {content:".."}
+    100%{content:"..."}
+  }
+  .load-dots::after{content:"";animation:ld-dots 1.4s steps(1,end) infinite}
+
   @media (max-width:767px){
     .site-top{padding:0 16px;gap:12px}
     .header-search{padding:0 12px;border-left:0;border-right:0}
@@ -506,7 +531,7 @@
   })();
 </script>
 </head>
-<body>
+<body class="loading">
 
 <header class="site-top" id="site-header">
   <a class="markid" href="index.html">
@@ -563,6 +588,9 @@
       </span>
     </div>
     <div class="image-stage" id="stage">
+      <div id="load-screen">
+        <span class="load-text">Loading Archive Data from Wikibase<span class="load-dots"></span></span>
+      </div>
       <div class="canvas" id="canvas">
         <div class="placeholder">Select an item<b id="ph-name"></b></div>
       </div>
@@ -1701,6 +1729,7 @@ WHERE {
       }
 
       state.items = items;
+      document.body.classList.remove("loading");
 
       const params  = new URLSearchParams(location.search);
       const urlSort = params.get("sort");
@@ -1725,6 +1754,7 @@ WHERE {
 
     } catch (err) {
       console.error(err);
+      document.body.classList.remove("loading");
       $("#rows").innerHTML = `<div class="error-msg">Error loading: ${escapeHTML(err.message)}</div>`;
     }
   })();
