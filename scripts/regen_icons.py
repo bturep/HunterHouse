@@ -10,7 +10,7 @@ import os
 ASSETS = os.path.join(os.path.dirname(__file__), "..", "assets")
 SRC = "/tmp/icon-512-dark.png"   # original dark-bg version from git history
 
-BG      = (26, 24, 22)           # #1A1816 — site dark background
+BG      = (6, 5, 4)              # #060504 — near-black
 MARK    = (184, 180, 172)        # #B8B4AC — dim warm cream, ~72% brightness
 
 def make_icon(size):
