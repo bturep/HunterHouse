@@ -118,11 +118,14 @@
   .panel-content{flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;position:relative}
   .panel-tab{
     width:41px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
-    background:none;border:0;cursor:pointer;
-    color:var(--muted);font-size:14px;line-height:1;font-family:var(--mono);
-    transition:color 0.15s;
+    background:var(--bg);border:0;cursor:pointer;
+    color:var(--muted);
+    font-family:var(--mono);font-size:9px;letter-spacing:0.18em;text-transform:uppercase;
+    writing-mode:vertical-rl;
+    transition:color 0.15s,background 0.15s;
   }
-  .panel-tab:hover{color:var(--ink)}
+  .panel-tab:hover{color:var(--ink);background:var(--soft)}
+  .panel-left .panel-tab{transform:rotate(180deg)}
   .panel-left .panel-tab{border-left:1px solid var(--rule)}
   .panel-right .panel-tab{border-right:1px solid var(--rule)}
   .panel-left.out .panel-tab{border-left:0}
@@ -621,11 +624,10 @@
 
   /* ── Graph path ── */
   .pane-meta .graph-path{font-family:var(--mono);font-size:11px;line-height:1.55}
-  .pane-meta .graph-path .node{display:block;padding:3px 0}
-  .pane-meta .graph-path .node .tick{display:inline}
-  .pane-meta .graph-path .node .rel{display:inline;font-family:var(--mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)}
-  .pane-meta .graph-path .node .lbl{display:block;margin-top:2px;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.02em;color:var(--ink)}
-  .pane-meta .graph-path .connector{height:4px;margin-left:9px}
+  .pane-meta .graph-path .node{padding:2px 0;grid-template-columns:14px 60px 1fr}
+  .pane-meta .graph-path .node .rel{font-family:var(--mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)}
+  .pane-meta .graph-path .node .lbl{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.02em;color:var(--ink)}
+  .pane-meta .graph-path .connector{height:4px}
 
   /* ── Graph siblings ── */
   .pane-meta .graph-siblings{margin-bottom:14px}
@@ -801,7 +803,7 @@
         <div class="load-msg">Loading catalogue from Wikibase…</div>
       </div>
     </div>
-    <button class="panel-tab" id="left-tab" title="Toggle browse panel">‹</button>
+    <button class="panel-tab" id="left-tab" title="Toggle browse panel">Browse</button>
   </div>
 
   <section class="pane-image">
@@ -831,7 +833,7 @@
   </section>
 
   <div class="panel-right pane-meta" id="panel-right">
-    <button class="panel-tab" id="right-tab" title="Toggle record panel">›</button>
+    <button class="panel-tab" id="right-tab" title="Toggle record panel">Record</button>
     <div class="panel-content">
       <div class="scroll-pip scroll-pip-r" id="meta-pip"></div>
       <div class="meta-head">
@@ -1087,10 +1089,7 @@
 
   // ── Collapsible panel toggle ──────────────────────────────────────────────
   function togglePanel(side) {
-    const panel = document.getElementById("panel-" + side);
-    const tab   = document.getElementById(side + "-tab");
-    const isOut = panel.classList.toggle("out");
-    tab.textContent = side === "left" ? (isOut ? "›" : "‹") : (isOut ? "‹" : "›");
+    document.getElementById("panel-" + side).classList.toggle("out");
   }
 
   function updatePip(scrollId, pipId) {
