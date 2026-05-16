@@ -641,6 +641,17 @@
   /* ── Wordmark ── */
   .markid .name{font-weight:700}
 
+  /* ── Mobile header: gradient top bar + larger wordmark ── */
+  @media (max-width:767px){
+    .site-top{
+      background:linear-gradient(to bottom, #000 0%, #1a1816 100%);
+      border-bottom-color:transparent;
+      height:52px;
+    }
+    .markid .name{font-size:14px;letter-spacing:0.20em}
+    .markid .name .dim{font-size:11px}
+  }
+
   /* ── Record pane head ── */
   .pane-meta .meta-head .l{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
   .pane-meta .meta-head .r{font-family:var(--mono);font-size:11px;letter-spacing:0.04em;color:var(--muted);text-transform:none}
