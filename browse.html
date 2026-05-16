@@ -7,7 +7,7 @@
 <meta name="color-scheme" content="light">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/verso.css">
 <style>
   /* View transition: markid morphs from splash centre to browse corner */
@@ -519,11 +519,138 @@
     /* meta pane: graph-actions single column */
     .graph-actions{grid-template-columns:1fr}
   }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     TYPOGRAPHY CONSOLIDATION — RECORD PANE + FILTER PANEL + WORDMARK
+     The list pane is the model. This block aligns the rest to its vocabulary:
+       • RECORD pane: mono throughout (the work's title is the only sans element);
+         pills lose chip chrome and carry their palette as text colour; section
+         headers quiet down; the 01/02 numbering, [3 of 3] subtitle, and the
+         original-archid strip are all dropped.
+       • FILTER PANEL: chips become outline tags with palette text; selected
+         state goes red (mirrors the row-selection accent).
+       • WORDMARK: bumps to 700 so it stops twinning with BROWSE at 500.
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  /* ── Shared cleanup ── */
+  .meta-section h3 .n,
+  .graph-section h3 .n{display:none}                  /* drop 01 / 02 prefixes */
+  .meta-title-sub{display:none}                       /* drop [3 of 3] subtitle */
+  .meta-orig{display:none}                            /* drop original-archid strip */
+  .rights-note{font-style:normal;font-size:11px;color:var(--muted);margin-top:4px;display:block}
+
+  /* ── Wordmark ── */
+  .markid .name{font-weight:700}
+  .markid .name .dim{font-weight:400}
+
+  /* ── Record pane head ── */
+  .pane-meta .meta-head .l{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
+  .pane-meta .meta-head .r{font-family:var(--mono);font-size:11px;letter-spacing:0.04em;color:var(--muted);text-transform:none}
+
+  /* ── Title — the only sans element on the right pane ── */
+  .pane-meta .meta-title{font-family:var(--sans);font-size:21px;font-weight:500;letter-spacing:-0.015em;line-height:1.2;margin-bottom:14px;color:var(--ink)}
+  .pane-meta .meta-lede{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:0.02em;line-height:1.65;color:var(--ink);margin-bottom:18px}
+
+  /* ── Section headers ── */
+  .pane-meta .meta-section h3,
+  .pane-meta .graph-section h3{
+    font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.18em;
+    text-transform:uppercase;color:var(--muted);
+    padding-bottom:0;border-bottom:0;margin-bottom:6px;
+  }
+  .pane-meta .meta-section h3 .ct,
+  .pane-meta .graph-section h3 .ct{font-family:var(--mono);font-size:9px;color:var(--hint);font-weight:400}
+  .pane-meta .meta-section{margin-bottom:18px}
+  .pane-meta .graph-section{margin-top:18px}
+
+  /* ── Key/value list ── */
+  .pane-meta .kv{font-family:var(--mono);font-size:11px;line-height:1.55}
+  .pane-meta .kv > .row{
+    display:grid;grid-template-columns:96px 1fr;gap:8px;
+    padding:2px 0;border-bottom:0;align-items:baseline;
+  }
+  .pane-meta .kv dt{
+    font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:0.04em;
+    text-transform:lowercase;color:var(--muted);text-align:right;
+  }
+  .pane-meta .kv dt::after{content:":";color:var(--hint);margin-left:2px}
+  .pane-meta .kv dd{
+    font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:0.02em;
+    line-height:1.55;color:var(--ink);
+  }
+
+  /* ── Pills (palette as text colour, no chip background, bracket-tag form) ── */
+  .pane-meta .pill{
+    height:auto;padding:0;background:transparent;
+    font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:0.02em;
+    text-transform:none;border-radius:0;border:0;
+    margin:0 6px 0 0;
+    color:var(--pf,var(--ink));
+  }
+  .pane-meta .pill::before{content:"["}
+  .pane-meta .pill::after{content:"]"}
+  .pane-meta .pill:hover{background:transparent;filter:none;opacity:0.7}
+  .pane-meta .pill.active{color:var(--red-deep);font-weight:500}
+  .pane-meta button.type-pill:not([class*="pc-"]){color:var(--ink)}
+
+  /* ── Inline identifiers ── */
+  .pane-meta .archid-mono{font-family:var(--mono);font-size:11px;letter-spacing:0.04em;background:transparent;padding:0;color:var(--red)}
+  .pane-meta .location-path{font-family:var(--mono);font-size:11px;letter-spacing:0.02em}
+
+  /* ── Graph path ── */
+  .pane-meta .graph-path{font-family:var(--mono);font-size:11px;line-height:1.55}
+  .pane-meta .graph-path .node{padding:2px 0;grid-template-columns:14px 60px 1fr}
+  .pane-meta .graph-path .node .rel{font-family:var(--mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)}
+  .pane-meta .graph-path .node .lbl{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.02em;color:var(--ink)}
+  .pane-meta .graph-path .connector{height:4px}
+
+  /* ── Graph siblings ── */
+  .pane-meta .graph-siblings{margin-bottom:14px}
+  .pane-meta .graph-siblings .lbl-row{font-family:var(--mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)}
+  .pane-meta .graph-siblings .sib{padding:2px 0;font-size:11px}
+  .pane-meta .graph-siblings .sib .id,
+  .pane-meta .graph-siblings .sib .t,
+  .pane-meta .graph-siblings .sib .pos{font-family:var(--mono);font-size:11px;letter-spacing:0.02em;font-weight:400}
+  .pane-meta .graph-siblings .sib .pos{color:var(--muted)}
+
+  /* ── Graph actions (Wikibase / SPARQL / JSON) ── */
+  .pane-meta .graph-actions{margin-top:10px;background:transparent;border:0;gap:14px}
+  .pane-meta .graph-actions a{background:transparent;padding:0}
+  .pane-meta .graph-actions a:hover{background:transparent}
+  .pane-meta .graph-actions a .top{display:none}
+  .pane-meta .graph-actions a .bot{font-family:var(--mono);font-size:11px;letter-spacing:0.02em;text-transform:lowercase;color:var(--copper-deep)}
+  .pane-meta .graph-actions a .bot .ar{color:var(--copper-deep)}
+
+  /* ── Curator note ── */
+  .pane-meta .curator-note{
+    font-family:var(--mono);font-size:11px;font-style:normal;
+    letter-spacing:0.02em;line-height:1.65;
+    padding:10px 0 0;margin-top:14px;
+    border-top:1px dashed var(--rule);color:var(--muted);
+  }
+
+  /* ── Filter panel (browse menu) — outline tag chips, red active state ── */
+  .filter-panel{padding:16px 20px 14px}
+  .fp-group{margin-bottom:14px}
+  .fp-lbl{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .fp-chips{gap:5px}
+  .fp-chip{
+    font-family:var(--mono);font-size:9.5px;font-weight:500;
+    letter-spacing:0.08em;text-transform:uppercase;
+    padding:2.5px 8px;border-radius:1px;line-height:1.55;
+    background:transparent;color:var(--pf,var(--muted));
+    border:1px solid var(--pb,var(--rule));
+    transition:background 0.1s,color 0.1s,border-color 0.1s;
+  }
+  .fp-chip:hover{background:var(--pb,var(--soft));filter:none}
+  .fp-chip.on{background:var(--red-pale);color:var(--red-deep);border-color:var(--red);font-weight:500}
+  .fp-footer{padding-top:12px;margin-top:12px;border-top:1px dashed var(--rule)}
+  .fp-clear{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
 </style>
 <script>
   /* theme toggle — runs before render to avoid flash */
   (function(){
-    if(localStorage.getItem('hhf_theme')==='dark') document.documentElement.classList.add('dark');
+    if(localStorage.getItem('hhf_theme')!=='light') document.documentElement.classList.add('dark');
     document.addEventListener('DOMContentLoaded',function(){
       var btn=document.getElementById('theme-toggle');
       if(!btn)return;
