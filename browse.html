@@ -616,7 +616,7 @@
     .mob-sheet.mob-sheet-open{transform:translateY(0)}
     .mob-sheet.mob-sheet-img-expanded{height:100%}
     .mob-sheet.mob-sheet-img-expanded .mob-sheet-img-wrap{flex-grow:1;max-height:100vh}
-    .mob-sheet.mob-sheet-img-expanded .mob-sheet-scroll{flex-grow:0;overflow:hidden}
+    .mob-sheet.mob-sheet-img-expanded .mob-sheet-scroll{flex-grow:0;overflow:hidden;padding:0}
     /* Pills: same treatment as desktop record pane — colored text, no chip */
     .mob-sheet-body .pill{
       height:auto;padding:0;background:transparent;
@@ -1176,11 +1176,11 @@
     <div class="mob-sheet-img-wrap">
       <img id="mob-sheet-img" class="mob-sheet-img" alt="">
     </div>
-    <div class="mob-sheet-scroll" id="mob-sheet-scroll">
-      <div class="mob-sheet-body" id="mob-sheet-body"></div>
-    </div>
     <div class="mob-sheet-foot" id="mob-sheet-foot">
       <span class="mob-sheet-title" id="mob-sheet-title"></span>
+    </div>
+    <div class="mob-sheet-scroll" id="mob-sheet-scroll">
+      <div class="mob-sheet-body" id="mob-sheet-body"></div>
     </div>
   </div>
 
