@@ -32,7 +32,7 @@
   a.markid{text-decoration:none;color:inherit}
   .markid .name{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
   .markid .name .dim{font-size:9px;letter-spacing:0.14em;font-weight:400}
-  .header-search{display:flex;align-items:center;gap:8px;border-left:1px solid var(--rule);border-right:1px solid var(--rule);padding:0 20px}
+  .header-search{display:flex;align-items:center;padding:0 20px}
   .search-prefix{font-family:var(--mono);font-size:11px;color:var(--muted);flex-shrink:0;line-height:1}
   .header-search input{font-family:var(--mono);font-size:11px;background:none;border:0;outline:0;color:var(--ink);width:100%;letter-spacing:0.02em}
   .header-search input::placeholder{color:var(--hint)}
@@ -485,7 +485,7 @@
     .site-top{padding:0 16px;gap:12px}
     .header-search{padding:0 12px;border-left:0;border-right:0}
     .fbtn{padding:0 14px}
-    #fs-toggle,#topright{display:none}
+    #search-toggle,#fs-toggle,#topright{display:none}
 
     /* shell: vertical flex */
     .shell{display:flex;flex-direction:column}
@@ -717,10 +717,11 @@
     <span class="name">Hunter House Foundation Archive</span>
   </a>
   <div class="header-search">
-    <span class="search-prefix"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="4.8" cy="4.8" r="3.3"/><line x1="7.2" y1="7.2" x2="11" y2="11"/></svg></span>
-    <input id="search-input" placeholder="search" autocomplete="off">
+    <input id="search-input" placeholder="" autocomplete="off">
   </div>
   <div class="site-topright">
+    <button class="theme-btn" id="search-toggle" title="Search"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="5.2" cy="5.2" r="3.5"/><line x1="7.8" y1="7.8" x2="12" y2="12"/></svg></button>
+    <span class="tr-sep"></span>
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
     <span class="tr-sep"></span>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1.5 A6 6 0 0 0 7.5 13.5 Z"/><circle cx="7.5" cy="7.5" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
@@ -2045,6 +2046,10 @@ $("#foot-dims").textContent = "";
     document.getElementById("about-refresh").addEventListener("click", (e) => { e.preventDefault(); clearCache(); location.reload(); });
 
     // Fullscreen toggle
+    document.getElementById("search-toggle").addEventListener("click", () => {
+      $("#search-input").focus();
+    });
+
     const fsBtn = document.getElementById("fs-toggle");
     if (fsBtn && document.fullscreenEnabled) {
       fsBtn.addEventListener("click", () => {
