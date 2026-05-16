@@ -51,8 +51,9 @@
   }
   #about-panel a{color:#5b9df7;text-decoration:none}
   #about-panel a:hover{text-decoration:underline;text-underline-offset:2px}
+  #about-refresh{margin-left:auto;flex-shrink:0;font-family:var(--mono);font-size:10.5px;letter-spacing:0.02em;white-space:nowrap}
   #about-close{
-    margin-left:auto;flex-shrink:0;padding:0;
+    margin-left:16px;flex-shrink:0;padding:0;
     background:none;border:0;cursor:pointer;
     font-size:18px;color:rgba(243,241,236,0.55);
     line-height:1;display:flex;align-items:center;width:28px;justify-content:center;
@@ -558,7 +559,8 @@
 </header>
 
 <div id="about-panel" role="dialog" aria-label="About this archive">
-  <span class="about-line">Open data archive on <a href="https://wikiba.se/" target="_blank" rel="noopener">Wikibase</a> — knowledge graph underlying <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a>. Items individually addressable; catalogue <a href="https://www.w3.org/TR/sparql11-query/" target="_blank" rel="noopener">SPARQL</a>-queryable. Metadata: <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0</a>. Archival description informed by <a href="https://www.wikidata.org/wiki/Wikidata:GLAM" target="_blank" rel="noopener">GLAM</a> standards · <a href="https://github.com/CCA-Public/digital-archives-manual" target="_blank" rel="noopener">CCA Digital Archives Manual</a>. · <a href="#" id="about-refresh">Refresh data</a></span>
+  <span class="about-line">Open data archive on <a href="https://wikiba.se/" target="_blank" rel="noopener">Wikibase</a> — knowledge graph underlying <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a>. Items individually addressable; catalogue <a href="https://www.w3.org/TR/sparql11-query/" target="_blank" rel="noopener">SPARQL</a>-queryable. Metadata: <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0</a>. Archival description informed by <a href="https://www.wikidata.org/wiki/Wikidata:GLAM" target="_blank" rel="noopener">GLAM</a> standards · <a href="https://github.com/CCA-Public/digital-archives-manual" target="_blank" rel="noopener">CCA DAM</a>.</span>
+  <a href="#" id="about-refresh">Refresh data</a>
   <button id="about-close" title="Close">×</button>
 </div>
 
