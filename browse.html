@@ -513,7 +513,7 @@
   #mob-about.open{display:flex;flex-direction:column;padding:0 28px 36px}
   #mob-about-toprow{
     display:flex;justify-content:space-between;align-items:center;
-    flex-shrink:0;margin:14px -4px 0;
+    flex-shrink:0;margin:6px -4px 0;
   }
   #mob-reload,#mob-about-close{
     background:none;border:none;padding:4px 8px;line-height:1;color:var(--hint);cursor:pointer;
@@ -524,7 +524,7 @@
   .mob-about-title{
     font-family:var(--mono);font-size:15px;font-weight:700;
     letter-spacing:0.14em;text-transform:uppercase;color:var(--ink);line-height:1.3;
-    margin:40px 0 6px;
+    margin:18px 0 6px;
   }
   .mob-about-ver{
     font-family:var(--mono);font-size:11px;color:var(--muted);
@@ -609,10 +609,16 @@
       box-shadow:0 -2px 20px rgba(0,0,0,0.18);
       z-index:10;
       transform:translateY(100%);
-      transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);
+      transition:transform 0.35s cubic-bezier(0.4,0,0.2,1),
+                 height 0.35s cubic-bezier(0.4,0,0.2,1),
+                 border-radius 0.2s;
       display:flex!important;flex-direction:column;overflow:hidden;
     }
     .mob-sheet.mob-sheet-open{transform:translateY(0)}
+    .mob-sheet.mob-sheet-img-expanded{height:100%;border-radius:0}
+    .mob-sheet.mob-sheet-img-expanded .mob-sheet-img-wrap{flex:1;height:auto;max-height:none}
+    .mob-sheet.mob-sheet-img-expanded .mob-sheet-scroll,
+    .mob-sheet.mob-sheet-img-expanded .mob-img-bar{display:none}
     /* Pills: same treatment as desktop record pane — colored text, no chip */
     .mob-sheet-body .pill{
       height:auto;padding:0;background:transparent;
@@ -654,16 +660,21 @@
       background:#111;overflow:hidden;
       display:flex;align-items:center;justify-content:center;
     }
-    .mob-sheet-img{width:100%;height:100%;object-fit:contain;display:block}
-    .mob-sheet-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 40px}
-    .mob-sheet-id{
-      font-family:var(--mono);font-size:10px;color:var(--muted);
-      letter-spacing:0.1em;margin-bottom:6px;
+    .mob-sheet-img{width:100%;height:100%;object-fit:contain;display:block;cursor:pointer}
+    .mob-img-bar{
+      flex-shrink:0;height:20px;
+      display:flex;align-items:center;justify-content:center;
+      border-top:1px solid var(--rule-soft);
+      cursor:pointer;
     }
+    .mob-img-bar-pip{width:32px;height:3px;background:var(--rule);border-radius:2px}
+    .mob-sheet-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 40px}
+    /* Title in bar — small, mono, truncated */
     .mob-sheet-title{
-      font-family:var(--sans);font-size:19px;font-weight:500;
-      letter-spacing:-0.015em;line-height:1.2;
-      color:var(--ink);margin-bottom:14px;
+      flex:1;font-family:var(--mono);font-size:11px;font-weight:400;
+      letter-spacing:0.03em;color:var(--muted);
+      text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      padding:0 4px;
     }
     /* KV — exact match to desktop .pane-meta .kv */
     .mob-sheet-body .kv{font-family:var(--mono);font-size:11px;line-height:1.55;margin-bottom:0}
@@ -1158,14 +1169,16 @@
         <button id="mob-snav-prev" class="mob-snav-btn" aria-label="Previous item">‹</button>
         <button id="mob-snav-next" class="mob-snav-btn" aria-label="Next item">›</button>
       </div>
-      <span class="mob-sheet-grip"></span>
+      <span class="mob-sheet-title" id="mob-sheet-title"></span>
       <button class="mob-sheet-close" id="mob-sheet-close" aria-label="Close">×</button>
     </div>
     <div class="mob-sheet-img-wrap">
       <img id="mob-sheet-img" class="mob-sheet-img" alt="">
     </div>
+    <div class="mob-img-bar" id="mob-img-bar">
+      <span class="mob-img-bar-pip"></span>
+    </div>
     <div class="mob-sheet-scroll" id="mob-sheet-scroll">
-      <div class="mob-sheet-title" id="mob-sheet-title"></div>
       <div class="mob-sheet-body" id="mob-sheet-body"></div>
     </div>
   </div>
@@ -1454,7 +1467,7 @@
   }
 
   function mobHideSheet() {
-    document.getElementById("mob-sheet").classList.remove("mob-sheet-open");
+    document.getElementById("mob-sheet").classList.remove("mob-sheet-open", "mob-sheet-img-expanded");
     const scroll = document.getElementById("mob-sheet-scroll");
     if (scroll) scroll.scrollTop = 0;
   }
@@ -2632,12 +2645,24 @@ $("#foot-dims").textContent = "";
       tab.addEventListener("click", () => switchMobileTab(tab.dataset.pane));
     });
 
-    // Mobile sheet bar: grip closes, prev/next navigate
+    // Mobile sheet bar: collapses expanded→partial, or partial→close
     document.getElementById("mob-sheet-bar")?.addEventListener("click", e => {
       if (e.target.closest(".mob-sheet-close, .mob-sheet-nav")) return;
-      mobHideSheet();
+      const sheet = document.getElementById("mob-sheet");
+      if (sheet.classList.contains("mob-sheet-img-expanded")) {
+        sheet.classList.remove("mob-sheet-img-expanded");
+      } else {
+        mobHideSheet();
+      }
     });
     document.getElementById("mob-sheet-close")?.addEventListener("click", mobHideSheet);
+
+    // Image tap + img-bar tap → toggle expanded state
+    const toggleImgExpand = () => {
+      document.getElementById("mob-sheet").classList.toggle("mob-sheet-img-expanded");
+    };
+    document.getElementById("mob-sheet-img")?.addEventListener("click", toggleImgExpand);
+    document.getElementById("mob-img-bar")?.addEventListener("click", toggleImgExpand);
 
     // Swipe-down-to-dismiss the sheet
     {
@@ -2672,12 +2697,6 @@ $("#foot-dims").textContent = "";
     }
     document.getElementById("mob-snav-prev")?.addEventListener("click", () => selectAdjacent(-1));
     document.getElementById("mob-snav-next")?.addEventListener("click", () => selectAdjacent(+1));
-
-    // Tap sheet image → open lightbox
-    document.getElementById("mob-sheet-img")?.addEventListener("click", () => {
-      const item = state.items.find(i => i.id === state.selectedId);
-      if (item?.image) openLightbox(item.image, item.title);
-    });
 
     // Lightbox close button
     document.getElementById("mob-lb-close")?.addEventListener("click", closeLightbox);
