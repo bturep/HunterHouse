@@ -1693,6 +1693,7 @@ WHERE {
       () => updatePip("meta-body", "meta-pip"), { passive: true });
 
     try {
+      await new Promise(() => {}); // DEV: blocks load indefinitely for loading-state design
       const items = await loadFromWikibase();
       if (!items.length) {
         $("#rows").innerHTML = `<div class="load-msg">No items with images found in Wikibase.</div>`;
