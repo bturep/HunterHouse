@@ -23,18 +23,23 @@
   @keyframes page-in{from{opacity:0}to{opacity:1}}
   body{height:100%;display:flex;flex-direction:column;animation:page-in 400ms ease-out both}
   .site-top{padding:0 28px;flex-shrink:0;grid-template-columns:28% 1fr 28%;gap:0;height:41px;box-sizing:border-box;border-bottom-color:var(--rule)}
-  .site-topright{display:flex;align-items:center;gap:14px;height:41px;color:var(--ink);border-left:1px solid var(--rule)}
+  .site-topright{display:flex;align-items:center;gap:14px;height:41px;color:var(--ink)}
   .site-topright .theme-btn{display:flex;align-items:center;background:none;border:none;border-radius:0;padding:0;color:var(--ink)}
   .site-topright .theme-btn svg{display:block}
   .site-topright .tr-sep{width:1px;height:16px;background:var(--rule);flex-shrink:0}
   #topright{cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;display:flex;align-items:center;color:var(--ink)}
   .site-topright .theme-btn:hover{opacity:0.5}
-  a.markid{text-decoration:none;color:inherit;display:flex;align-items:center;border-right:1px solid var(--rule)}
+  a.markid{text-decoration:none;color:inherit;display:flex;align-items:center}
   .markid .name{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
   .markid .name .dim{font-size:9px;letter-spacing:0.14em;font-weight:400}
-  .header-search{display:flex;align-items:center;padding:0 20px}
-  .search-prefix{font-family:var(--mono);font-size:11px;color:var(--muted);flex-shrink:0;line-height:1}
-  .header-search input{font-family:var(--mono);font-size:11px;background:none;border:0;outline:0;color:var(--ink);width:100%;letter-spacing:0.02em}
+  .header-search{display:flex;align-items:center}
+  .tr-search-input{
+    max-width:0;overflow:hidden;flex:1;
+    font-family:var(--mono);font-size:11px;background:none;border:0;outline:0;
+    color:var(--ink);text-align:right;letter-spacing:0.02em;padding:0;
+    transition:max-width 220ms ease;
+  }
+  .tr-search-input.open{max-width:260px}
   .header-search input::placeholder{color:var(--hint)}
 
   /* ── about panel (replaces header when open) ── */
@@ -730,10 +735,9 @@
   <a class="markid" href="index.html">
     <span class="name">Hunter House Foundation Archive</span>
   </a>
-  <div class="header-search">
-    <input id="search-input" placeholder="" autocomplete="off">
-  </div>
+  <div class="header-search"></div>
   <div class="site-topright">
+    <input id="search-input" class="tr-search-input" placeholder="" autocomplete="off">
     <button class="theme-btn" id="search-toggle" title="Search"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="5.2" cy="5.2" r="3.5"/><line x1="7.8" y1="7.8" x2="12" y2="12"/></svg></button>
     <span class="tr-sep"></span>
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
@@ -2027,7 +2031,7 @@ $("#foot-dims").textContent = "";
 
     document.addEventListener("keydown", e => {
       const inInput = e.target.matches("input, select, textarea");
-      if (e.key === "/" && !inInput) { e.preventDefault(); $("#search-input").focus(); return; }
+      if (e.key === "/" && !inInput) { e.preventDefault(); openSearch(); return; }
       if (e.key === "Escape" && inInput) { e.target.blur(); return; }
       if (e.key === "Escape") { closeAllDropdowns(); closeAbout(); return; }
       if (e.key === "1"         && !inInput) { setZoom(1); return; }
@@ -2064,9 +2068,14 @@ $("#foot-dims").textContent = "";
     document.getElementById("about-refresh").addEventListener("click", (e) => { e.preventDefault(); clearCache(); location.reload(); });
 
     // Fullscreen toggle
+    const searchInput = document.getElementById("search-input");
+    function openSearch() { searchInput.classList.add("open"); searchInput.focus(); }
+    function closeSearch() { searchInput.classList.remove("open"); searchInput.value = ""; searchInput.dispatchEvent(new Event("input")); }
     document.getElementById("search-toggle").addEventListener("click", () => {
-      $("#search-input").focus();
+      searchInput.classList.contains("open") ? closeSearch() : openSearch();
     });
+    searchInput.addEventListener("blur", () => { if (!searchInput.value) closeSearch(); });
+    searchInput.addEventListener("keydown", e => { if (e.key === "Escape") { closeSearch(); e.preventDefault(); } });
 
     const fsBtn = document.getElementById("fs-toggle");
     if (fsBtn && document.fullscreenEnabled) {
