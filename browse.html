@@ -429,7 +429,7 @@
   .graph-siblings .sib.current:hover{background:var(--red-tint)}
   .graph-siblings .sib .id{font-family:var(--mono);font-size:9.5px;color:var(--ink);letter-spacing:0.04em;font-weight:500}
   .graph-siblings .sib.current .id{color:var(--red-deep)}
-  .graph-siblings .sib .t{color:var(--ink);letter-spacing:-0.005em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .graph-siblings .sib .t{color:var(--ink);letter-spacing:-0.005em}
   .graph-siblings .sib .pos{font-family:var(--mono);font-size:9px;color:var(--muted);text-align:right}
   .graph-siblings .sib.current .pos{color:var(--red)}
 
@@ -889,6 +889,10 @@
   const $ = sel => document.querySelector(sel);
   const escapeHTML = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const displayId = id => escapeHTML((id || "").replace(/^HH-/, ""));
+  const midTrunc  = (str, head, tail) =>
+    str.length <= head + tail + 1
+      ? escapeHTML(str)
+      : escapeHTML(str.slice(0, head)) + "…" + escapeHTML(str.slice(-tail));
   const formatTitle = title => {
     const m = String(title || "").match(/^(.*?)\s*(\[.*\])\s*$/s);
     if (!m) return escapeHTML(title);
@@ -1619,7 +1623,7 @@ $("#foot-dims").textContent = "";
         const pos = s.setPosition ? s.setPosition.split(" of ")[0] : "—";
         return `<a class="sib${isCurrent ? " current" : ""}" ${isCurrent ? "" : `data-sib-id="${escapeHTML(s.id)}"`}>
           <span class="id">${displayId(s.id)}</span>
-          <span class="t">${escapeHTML(s.title)}</span>
+          <span class="t" title="${escapeHTML(s.title)}">${midTrunc(s.title, 22, 14)}</span>
           <span class="pos">${escapeHTML(pos)}</span>
         </a>`;
       }).join("");
