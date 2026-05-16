@@ -22,7 +22,7 @@
   html,body{overflow:hidden}
   @keyframes page-in{from{opacity:0}to{opacity:1}}
   body{height:100%;display:flex;flex-direction:column;animation:page-in 400ms ease-out both}
-  .site-top{padding:0 28px;flex-shrink:0;grid-template-columns:auto 1fr auto;gap:24px;height:41px;box-sizing:border-box}
+  .site-top{padding:0 28px;flex-shrink:0;grid-template-columns:auto 1fr auto;gap:24px;height:41px;box-sizing:border-box;border-bottom-color:var(--muted)}
   .site-topright{display:flex;align-items:center;gap:14px;height:41px;color:var(--ink)}
   .site-topright .theme-btn{display:flex;align-items:center;background:none;border:none;border-radius:0;padding:0;color:var(--ink)}
   .site-topright .theme-btn svg{display:block}
@@ -98,14 +98,15 @@
   .shell{
     display:grid;grid-template-columns:28% 1fr 28%;
     flex:1;min-height:0;position:relative;
+    border-left:1px solid var(--muted);border-right:1px solid var(--muted);border-bottom:1px solid var(--muted);
   }
 
   /* ── list fleuron ── */
   .list-fleuron{display:flex;justify-content:center;align-items:center;height:25vh;margin-top:20px;padding-bottom:32px}
   .list-fleuron img{width:120px;height:120px;object-fit:contain;image-rendering:crisp-edges}
-  .pane-list{border-right:1px solid var(--ink);display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg);position:relative}
+  .pane-list{border-right:1px solid var(--muted);display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg);position:relative}
   .pane-image{background:#000;display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative}
-  .pane-meta{border-left:1px solid var(--ink);display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg);position:relative}
+  .pane-meta{border-left:1px solid var(--muted);display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg);position:relative}
 
   /* ── list pane ── */
   .list-head{
@@ -286,7 +287,7 @@
   .zoom-sep{width:1px;height:12px;background:var(--rule);margin:0 4px;flex-shrink:0}
 
   .image-foot{
-    padding:0 24px;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);background:var(--bg);
+    padding:0 24px;border-top:1px solid var(--muted);border-bottom:1px solid var(--muted);background:var(--bg);
     display:flex;align-items:center;gap:0;
     font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em;flex-shrink:0;
     height:41px;box-sizing:border-box;
@@ -638,7 +639,7 @@
     border-top:1px dashed var(--rule);color:var(--muted);
   }
 
-  /* ── Inline curator note editor ── */
+  /* ── Inline researcher note editor ── */
   .note-editor{margin-top:14px;border-top:1px dashed var(--rule);padding-top:10px}
   .note-editor-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
   .note-editor-lbl{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)}
@@ -1666,7 +1667,7 @@ $("#foot-dims").textContent = "";
       ${item.qid ? `
       <div class="note-editor" id="note-editor" data-qid="${escapeHTML(item.qid)}">
         <div class="note-editor-head">
-          <span class="note-editor-lbl">curator note</span>
+          <span class="note-editor-lbl">researcher note</span>
           <button class="note-edit-btn" id="note-edit-btn">edit</button>
         </div>
         <p class="note-display" id="note-display">${item.notes
