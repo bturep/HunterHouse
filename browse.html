@@ -128,9 +128,6 @@
   .panel-left.out .panel-tab{border-left:0}
   .panel-right.out .panel-tab{border-right:0}
 
-  /* ── list fleuron ── */
-  .list-fleuron{display:flex;justify-content:center;align-items:center;height:25vh;margin-top:20px;padding-bottom:32px}
-  .list-fleuron img{width:120px;height:120px;object-fit:contain;image-rendering:crisp-edges}
   .pane-list{display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative}
   .pane-image{flex:1;background:var(--soft);display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative}
   .pane-meta{display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative}
@@ -394,7 +391,6 @@
   html.dark .row .archid .tmark[data-type="R"]{color:#b0966a;border-color:rgba(176,150,106,0.3);background:rgba(176,150,106,0.12)}
   html.dark .row .archid .tmark[data-type="LS"]{color:#70aaa0;border-color:rgba(112,170,160,0.3);background:rgba(112,170,160,0.12)}
   html.dark .row .archid .tmark[data-type="EN"]{color:#9a7ac4;border-color:rgba(154,122,196,0.3);background:rgba(154,122,196,0.12)}
-  html.dark .list-fleuron img{filter:invert(0.14)}
 
   /* dark mode: image pane goes black, structural borders go black */
   html.dark .pane-image,
@@ -625,10 +621,11 @@
 
   /* ── Graph path ── */
   .pane-meta .graph-path{font-family:var(--mono);font-size:11px;line-height:1.55}
-  .pane-meta .graph-path .node{padding:2px 0;grid-template-columns:14px 60px 1fr}
-  .pane-meta .graph-path .node .rel{font-family:var(--mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)}
-  .pane-meta .graph-path .node .lbl{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.02em;color:var(--ink)}
-  .pane-meta .graph-path .connector{height:4px}
+  .pane-meta .graph-path .node{display:block;padding:3px 0}
+  .pane-meta .graph-path .node .tick{display:inline}
+  .pane-meta .graph-path .node .rel{display:inline;font-family:var(--mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)}
+  .pane-meta .graph-path .node .lbl{display:block;margin-top:2px;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.02em;color:var(--ink)}
+  .pane-meta .graph-path .connector{height:4px;margin-left:9px}
 
   /* ── Graph siblings ── */
   .pane-meta .graph-siblings{margin-bottom:14px}
@@ -770,7 +767,7 @@
     <span class="tr-sep"></span>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1.5 A6 6 0 0 0 7.5 13.5 Z"/><circle cx="7.5" cy="7.5" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
     <span class="tr-sep"></span>
-    <span id="topright" title="About this archive">v1.02.19</span>
+    <span id="topright" title="About this archive">v1.02.20</span>
   </div>
 </header>
 
@@ -852,7 +849,7 @@
 
 <script>
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.02.19";
+  const VERSION      = "v1.02.20";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -1380,10 +1377,6 @@ WHERE {
       });
     }
 
-    const fleuron = document.createElement("div");
-    fleuron.className = "list-fleuron";
-    fleuron.innerHTML = `<img src="assets/hunter-mark.png" alt="" width="60" height="60">`;
-    container.appendChild(fleuron);
 
     requestAnimationFrame(() => updatePip("rows", "list-pip"));
   }
