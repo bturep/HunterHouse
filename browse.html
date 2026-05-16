@@ -327,6 +327,7 @@
   .foot-dl{flex:1;text-align:right}
   .foot-dl a{color:var(--muted);text-decoration:none;letter-spacing:0.04em}
   .foot-dl a:hover{color:var(--ink)}
+  .mobile-img-nav{display:none}
   /* ── meta pane ── */
   .meta-head{
     height:41px;box-sizing:border-box;padding:0 22px;
@@ -559,6 +560,21 @@
     .zoom-ctl{display:none}
     .image-foot{display:none}
 
+    /* mobile image navigation bar */
+    .mobile-img-nav{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:0 56px;height:44px;flex-shrink:0;
+      background:var(--bg);border-top:1px solid var(--rule);
+    }
+    .mob-nav-btn{
+      background:none;border:none;padding:0 8px;height:44px;
+      font-size:24px;line-height:1;color:var(--muted);cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .mob-nav-btn:active{color:var(--ink)}
+    .mob-nav-btn:disabled{opacity:0.25;pointer-events:none}
+    /* hide record pane subheader — tab bar already labels the pane */
+    .pane-meta .meta-head{display:none}
     /* meta pane: graph-actions single column */
     .graph-actions{grid-template-columns:1fr}
   }
@@ -848,6 +864,10 @@
         <button id="zoom-rotate" type="button" title="Rotate 90°">↻</button>
       </div>
       <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">↓ Original</a></span>
+    </div>
+    <div class="mobile-img-nav" id="mobile-img-nav">
+      <button id="mob-prev" class="mob-nav-btn" aria-label="Previous item">←</button>
+      <button id="mob-next" class="mob-nav-btn" aria-label="Next item">→</button>
     </div>
   </section>
 
@@ -1876,12 +1896,22 @@ $("#foot-dims").textContent = "";
     const url = new URL(location.href);
     url.searchParams.set("id", id);
     history.replaceState({}, "", url);
+    updateMobileNav();
   }
 
   function selectAdjacent(delta) {
     const idx = state.filtered.findIndex(i => i.id === state.selectedId);
     const next = idx + delta;
     if (next >= 0 && next < state.filtered.length) selectItem(state.filtered[next].id);
+  }
+
+  function updateMobileNav() {
+    const prevBtn = document.getElementById("mob-prev");
+    const nextBtn = document.getElementById("mob-next");
+    if (!prevBtn) return;
+    const idx = state.filtered.findIndex(i => i.id === state.selectedId);
+    prevBtn.disabled = idx <= 0;
+    nextBtn.disabled = idx < 0 || idx >= state.filtered.length - 1;
   }
 
   function toggleMark(id) {
@@ -2056,6 +2086,34 @@ $("#foot-dims").textContent = "";
     document.querySelectorAll(".mtab").forEach(tab => {
       tab.addEventListener("click", () => switchMobileTab(tab.dataset.pane));
     });
+
+    // Mobile prev/next item buttons
+    document.getElementById("mob-prev")?.addEventListener("click", () => selectAdjacent(-1));
+    document.getElementById("mob-next")?.addEventListener("click", () => selectAdjacent(+1));
+
+    // Swipe left/right to switch tabs on mobile (skip swipes originating on the image canvas)
+    {
+      let sx = 0, sy = 0, sTarget = null;
+      const cvs = document.getElementById("canvas");
+      const shell = document.querySelector(".shell");
+      shell.addEventListener("touchstart", e => {
+        sx = e.touches[0].clientX;
+        sy = e.touches[0].clientY;
+        sTarget = e.target;
+      }, { passive: true });
+      shell.addEventListener("touchend", e => {
+        if (!window.matchMedia("(max-width:767px)").matches) return;
+        if (cvs.contains(sTarget)) return;
+        const dx = e.changedTouches[0].clientX - sx;
+        const dy = e.changedTouches[0].clientY - sy;
+        if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+        const tabs = ["list","image","meta"];
+        const cur = tabs.findIndex(t => document.querySelector(`.pane-${t}`)?.classList.contains("mobile-active"));
+        if (cur === -1) return;
+        const nxt = dx < 0 ? cur + 1 : cur - 1;
+        if (nxt >= 0 && nxt < tabs.length) switchMobileTab(tabs[nxt]);
+      }, { passive: true });
+    }
 
     $("#rows").addEventListener("click", e => {
       const row = e.target.closest(".row");
