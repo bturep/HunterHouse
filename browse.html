@@ -962,7 +962,7 @@
   @media (max-width:767px){
     .site-top{display:none}
 
-    #mobile-chrome{
+    html.pwa #mobile-chrome{
       display:flex;align-items:center;justify-content:flex-end;
       background:#000;color:rgba(243,241,236,0.55);
       padding:0 24px;
@@ -970,13 +970,13 @@
       height:calc(32px + env(safe-area-inset-top,0px));
       flex-shrink:0;
     }
-    #mobile-version{
+    html.pwa #mobile-version{
       background:transparent;border:0;padding:0;cursor:pointer;
       font-family:var(--mono);font-size:10.5px;font-weight:500;
       letter-spacing:0.18em;text-transform:uppercase;
       color:rgba(243,241,236,0.55);
     }
-    #mobile-version:hover{color:#f0ede6}
+    html.pwa #mobile-version:hover{color:#f0ede6}
 
     #about-panel{background:#000;border-bottom-color:rgba(243,241,236,0.13)}
     html.dark #about-panel{background:#000}
@@ -997,8 +997,9 @@
     }
     .fp-search-input::placeholder{color:var(--hint)}
 
-    /* Browse bar: match sheet-bar colour + round top corners */
-    .list-head{background:var(--bg);border-radius:14px 14px 0 0}
+    /* Browse bar: always match sheet-bar colour; round corners only in PWA */
+    .list-head{background:var(--bg)}
+    html.pwa .list-head{border-radius:14px 14px 0 0}
 
     /* Filter chips → manifest [pill] style on mobile */
     .fp-chip{
@@ -1019,6 +1020,7 @@
   /* theme toggle — runs before render to avoid flash */
   (function(){
     if(localStorage.getItem('hhf_theme_v2')!=='light') document.documentElement.classList.add('dark');
+    if(navigator.standalone||matchMedia('(display-mode:standalone)').matches) document.documentElement.classList.add('pwa');
     document.addEventListener('DOMContentLoaded',function(){
       var btn=document.getElementById('theme-toggle');
       if(!btn)return;
