@@ -99,19 +99,41 @@
   .fdrop li.all{color:var(--muted)}
   .fdrop li.sel{font-weight:500}
 
-  /* ── three-column shell ── */
+  /* ── shell: flex row, panels collapse ── */
   .shell{
-    display:grid;grid-template-columns:28% 1fr 28%;
+    display:flex;flex-direction:row;
     flex:1;min-height:0;position:relative;
-    border-left:1px solid var(--rule);border-right:1px solid var(--rule);
   }
+
+  /* ── collapsible panels ── */
+  .panel-left,.panel-right{
+    width:320px;flex-shrink:0;
+    display:flex;flex-direction:row;overflow:hidden;
+    background:var(--bg);position:relative;
+    transition:width 260ms cubic-bezier(0.4,0,0.2,1);
+  }
+  .panel-left{border-right:1px solid var(--rule)}
+  .panel-right{border-left:1px solid var(--rule)}
+  .panel-left.out,.panel-right.out{width:41px}
+  .panel-content{flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;position:relative}
+  .panel-tab{
+    width:41px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    background:none;border:0;cursor:pointer;
+    color:var(--muted);font-size:14px;line-height:1;font-family:var(--mono);
+    transition:color 0.15s;
+  }
+  .panel-tab:hover{color:var(--ink)}
+  .panel-left .panel-tab{border-left:1px solid var(--rule)}
+  .panel-right .panel-tab{border-right:1px solid var(--rule)}
+  .panel-left.out .panel-tab{border-left:0}
+  .panel-right.out .panel-tab{border-right:0}
 
   /* ── list fleuron ── */
   .list-fleuron{display:flex;justify-content:center;align-items:center;height:25vh;margin-top:20px;padding-bottom:32px}
   .list-fleuron img{width:120px;height:120px;object-fit:contain;image-rendering:crisp-edges}
-  .pane-list{border-right:1px solid var(--rule);display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg);position:relative}
-  .pane-image{background:var(--soft);display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative}
-  .pane-meta{border-left:1px solid var(--rule);display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg);position:relative}
+  .pane-list{display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative}
+  .pane-image{flex:1;background:var(--soft);display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative}
+  .pane-meta{display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative}
 
   /* ── list pane ── */
   .list-head{
@@ -489,7 +511,11 @@
     #search-toggle,#fs-toggle,#topright{display:none}
 
     /* shell: vertical flex */
-    .shell{display:flex;flex-direction:column}
+    .shell{flex-direction:column}
+
+    /* panels: full-width vertical on mobile */
+    .panel-left,.panel-right{width:100%!important;flex-direction:column!important;border:0!important;transition:none!important}
+    .panel-tab{display:none!important}
 
     /* mobile tabs */
     .mobile-tabs{
@@ -762,21 +788,24 @@
     <button class="mtab" data-pane="meta">Record</button>
   </div>
 
-  <section class="pane-list mobile-active">
-    <div class="scroll-pip" id="list-pip"></div>
-    <div class="list-head">
-      <button class="l" id="filter-toggle" title="Filter">Browse<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">›</span></button>
-      <div class="sort-mini">
-        <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>
-        <button class="sort-hd" data-sort-col="phase">Phase<span class="sort-arrow" id="sa-phase"></span></button>
-        <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>
+  <div class="panel-left pane-list mobile-active" id="panel-left">
+    <div class="panel-content">
+      <div class="scroll-pip" id="list-pip"></div>
+      <div class="list-head">
+        <button class="l" id="filter-toggle" title="Filter">Browse<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">›</span></button>
+        <div class="sort-mini">
+          <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>
+          <button class="sort-hd" data-sort-col="phase">Phase<span class="sort-arrow" id="sa-phase"></span></button>
+          <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>
+        </div>
+      </div>
+      <div class="filter-panel" id="filter-panel" hidden></div>
+      <div class="rows" id="rows">
+        <div class="load-msg">Loading catalogue from Wikibase…</div>
       </div>
     </div>
-    <div class="filter-panel" id="filter-panel" hidden></div>
-    <div class="rows" id="rows">
-      <div class="load-msg">Loading catalogue from Wikibase…</div>
-    </div>
-  </section>
+    <button class="panel-tab" id="left-tab" title="Toggle browse panel">‹</button>
+  </div>
 
   <section class="pane-image">
     <div class="image-stage" id="stage">
@@ -787,34 +816,38 @@
         <div class="placeholder">Select an item<b id="ph-name"></b></div>
       </div>
     </div>
-    <div class="image-foot">
-      <span class="foot-left"><span id="foot-dims"></span></span>
-      <div class="zoom-ctl">
-        <button id="zoom-out" type="button" title="Zoom out">−</button>
-        <span class="pct" id="zoom-pct">100%</span>
-        <button id="zoom-in" type="button" title="Zoom in">+</button>
-        <span class="zoom-sep"></span>
-        <button id="zoom-fit" type="button" title="Fit to frame">FIT</button>
-        <span class="zoom-sep"></span>
-        <button id="zoom-1to1" type="button" title="1:1 — one screen pixel per image pixel">1:1</button>
-        <span class="zoom-sep"></span>
-        <button id="zoom-rotate" type="button" title="Rotate 90°">↻</button>
+  </section>
+
+  <div class="panel-right pane-meta" id="panel-right">
+    <button class="panel-tab" id="right-tab" title="Toggle record panel">›</button>
+    <div class="panel-content">
+      <div class="scroll-pip scroll-pip-r" id="meta-pip"></div>
+      <div class="meta-head">
+        <span class="l">Record</span>
+        <span class="r" id="meta-source">—</span>
       </div>
-      <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">↓ Original</a></span>
+      <div class="meta-body" id="meta-body">
+        <div class="empty">Select an item from the list</div>
+      </div>
     </div>
-  </section>
+  </div>
 
-  <section class="pane-meta">
-    <div class="scroll-pip scroll-pip-r" id="meta-pip"></div>
-    <div class="meta-head">
-      <span class="l">Record</span>
-      <span class="r" id="meta-source">—</span>
-    </div>
-    <div class="meta-body" id="meta-body">
-      <div class="empty">Select an item from the list</div>
-    </div>
-  </section>
+</div>
 
+<div class="image-foot">
+  <span class="foot-left"><span id="foot-dims"></span></span>
+  <div class="zoom-ctl">
+    <button id="zoom-out" type="button" title="Zoom out">−</button>
+    <span class="pct" id="zoom-pct">100%</span>
+    <button id="zoom-in" type="button" title="Zoom in">+</button>
+    <span class="zoom-sep"></span>
+    <button id="zoom-fit" type="button" title="Fit to frame">FIT</button>
+    <span class="zoom-sep"></span>
+    <button id="zoom-1to1" type="button" title="1:1 — one screen pixel per image pixel">1:1</button>
+    <span class="zoom-sep"></span>
+    <button id="zoom-rotate" type="button" title="Rotate 90°">↻</button>
+  </div>
+  <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">↓ Original</a></span>
 </div>
 
 <script>
@@ -1054,6 +1087,14 @@
       const el = document.querySelector(`.pane-${p}`);
       if (el) el.classList.toggle("mobile-active", p === pane);
     });
+  }
+
+  // ── Collapsible panel toggle ──────────────────────────────────────────────
+  function togglePanel(side) {
+    const panel = document.getElementById(side + "-panel");
+    const tab   = document.getElementById(side + "-tab");
+    const isOut = panel.classList.toggle("out");
+    tab.textContent = side === "left" ? (isOut ? "›" : "‹") : (isOut ? "‹" : "›");
   }
 
   function updatePip(scrollId, pipId) {
@@ -2066,6 +2107,10 @@ $("#foot-dims").textContent = "";
     aboutPanel.addEventListener("click", (e) => e.stopPropagation());
     document.getElementById("about-close").addEventListener("click", closeAbout);
     document.getElementById("about-refresh").addEventListener("click", (e) => { e.preventDefault(); clearCache(); location.reload(); });
+
+    // Panel toggles
+    document.getElementById("left-tab").addEventListener("click",  () => togglePanel("left"));
+    document.getElementById("right-tab").addEventListener("click", () => togglePanel("right"));
 
     // Fullscreen toggle
     const searchInput = document.getElementById("search-input");
