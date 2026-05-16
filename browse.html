@@ -760,6 +760,8 @@
   .rn-list:not(.rn-list-locked) .rn-row:hover .rn-by,
   .rn-list:not(.rn-list-locked) .rn-row:hover .rn-text,
   .rn-list:not(.rn-list-locked) .rn-row:hover .rn-date{color:var(--red-deep);opacity:1}
+  .rn-list:not(.rn-list-locked) .rn-text{cursor:pointer}
+  .rn-row.editing .rn-text{text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px}
   /* hold animation: × grows over 3 s */
   .rn-del.holding{animation:rn-charge 2s linear forwards}
   @keyframes rn-charge{0%{transform:scale(1);opacity:0.5}85%{transform:scale(1.5);opacity:0.9}100%{transform:scale(2);opacity:1}}
@@ -1059,20 +1061,47 @@
       panel.querySelector("#rn-lock-btn").addEventListener("click", () => { rnLockOut(); renderRN(archId); });
       const textarea = panel.querySelector("#rn-textarea");
       const addBtn   = panel.querySelector("#rn-add-btn");
+      let editIdx = null;
+
+      function setEditMode(idx) {
+        editIdx = idx;
+        const current = rnLoad(archId);
+        textarea.value = current[idx].text;
+        addBtn.textContent = "save";
+        panel.querySelectorAll(".rn-row").forEach((r, i) => r.classList.toggle("editing", i === idx));
+        textarea.focus();
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+      }
+      function clearEditMode() {
+        editIdx = null;
+        textarea.value = "";
+        addBtn.textContent = "add";
+        panel.querySelectorAll(".rn-row").forEach(r => r.classList.remove("editing"));
+      }
       function doAdd() {
         const text = textarea.value.trim();
-        if (!text) return;
+        if (!text) { if (editIdx !== null) clearEditMode(); return; }
         const updated = rnLoad(archId);
-        updated.unshift({ by: researcher.initials, date: rnDate(), text });
+        if (editIdx !== null) {
+          updated[editIdx].text = text;
+        } else {
+          updated.unshift({ by: researcher.initials, date: rnDate(), text });
+        }
         rnSave(archId, updated);
         textarea.value = "";
         renderRN(archId);
       }
       addBtn.addEventListener("click", doAdd);
-      textarea.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); doAdd(); } });
+      textarea.addEventListener("keydown", e => {
+        if (e.key === "Escape") { clearEditMode(); return; }
+        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); doAdd(); }
+      });
 
-      // Hold-to-delete: 3 s press on × removes the note
+      // Click note text to edit; hold × to delete
       panel.querySelectorAll(".rn-row").forEach(row => {
+        row.querySelector(".rn-text").addEventListener("click", () => {
+          setEditMode(parseInt(row.dataset.idx));
+        });
         const del = row.querySelector(".rn-del");
         if (!del) return;
         let timer = null;
