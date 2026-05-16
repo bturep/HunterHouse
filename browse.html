@@ -171,7 +171,7 @@
   /* ── phase dividers ── */
   .phase-divider{
     display:grid;grid-template-columns:1fr auto;gap:14px;
-    padding:16px 20px 6px;border-bottom:1px solid var(--ink);
+    padding:16px 20px 6px;
     font-family:var(--mono);font-size:10px;color:var(--copper-deep);
     letter-spacing:0.18em;text-transform:uppercase;background:var(--bg);
   }
@@ -193,8 +193,8 @@
   /* ── filter badge on Browse label ── */
   .filter-badge{
     display:none;font-family:var(--mono);font-size:8px;font-weight:500;
-    background:var(--ink);color:var(--bg);border-radius:10px;
-    padding:0px 4px;letter-spacing:0;border:0;
+    background:transparent;color:var(--ink);border:1px solid var(--ink);border-radius:10px;
+    padding:0px 4px;letter-spacing:0;
   }
   .filter-badge.visible{display:flex;align-items:center}
 
@@ -314,7 +314,7 @@
   .zoom-sep{width:1px;height:12px;background:var(--rule);margin:0 4px;flex-shrink:0}
 
   .image-foot{
-    padding:0 24px;border-top:1px solid var(--rule);
+    padding:0 24px;border-top:1px solid var(--rule);background:var(--bg);
     display:flex;align-items:center;gap:0;
     font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em;flex-shrink:0;
     height:41px;box-sizing:border-box;
@@ -776,7 +776,7 @@
     <span class="tr-sep"></span>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1.5 A6 6 0 0 0 7.5 13.5 Z"/><circle cx="7.5" cy="7.5" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
     <span class="tr-sep"></span>
-    <span id="topright" title="About this archive">v1.02.30</span>
+    <span id="topright" title="About this archive">v1.02.29</span>
   </div>
 </header>
 
@@ -861,7 +861,7 @@
 
 <script>
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.02.30";
+  const VERSION      = "v1.02.29";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -1874,13 +1874,6 @@ $("#foot-dims").textContent = "";
     if (next >= 0 && next < state.filtered.length) selectItem(state.filtered[next].id);
   }
 
-  function toggleMark(id) {
-    if (!id) return;
-    if (marked.has(id)) marked.delete(id); else marked.add(id);
-    const row = document.querySelector(`.row[data-id="${CSS.escape(id)}"]`);
-    if (row) row.classList.toggle("marked", marked.has(id));
-  }
-
   // ── Filter helpers ────────────────────────────────────────────────────────
   function toggleSet(set, val) {
     if (set.has(val)) set.delete(val); else set.add(val);
@@ -2080,7 +2073,6 @@ $("#foot-dims").textContent = "";
       if (e.key === "Escape" && inInput) { e.target.blur(); return; }
       if (e.key === "Escape") { closeAllDropdowns(); closeAbout(); return; }
       if (e.key === "1"         && !inInput) { setZoom(1); return; }
-      if ((e.key === "m" || e.key === "M") && !inInput && state.selectedId) { toggleMark(state.selectedId); return; }
       if (e.key === "ArrowDown" && !inInput) { e.preventDefault(); selectAdjacent(+1); }
       if (e.key === "ArrowUp"   && !inInput) { e.preventDefault(); selectAdjacent(-1); }
       if (e.key === "Enter"     && !inInput && state.selectedId) {
