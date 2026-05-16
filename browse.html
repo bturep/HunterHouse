@@ -617,8 +617,7 @@
     .mob-sheet.mob-sheet-open{transform:translateY(0)}
     .mob-sheet.mob-sheet-img-expanded{height:100%;border-radius:0}
     .mob-sheet.mob-sheet-img-expanded .mob-sheet-img-wrap{flex:1;height:auto;max-height:none}
-    .mob-sheet.mob-sheet-img-expanded .mob-sheet-scroll,
-    .mob-sheet.mob-sheet-img-expanded .mob-img-bar{display:none}
+    .mob-sheet.mob-sheet-img-expanded .mob-sheet-scroll{display:none}
     /* Pills: same treatment as desktop record pane — colored text, no chip */
     .mob-sheet-body .pill{
       height:auto;padding:0;background:transparent;
@@ -661,15 +660,14 @@
       display:flex;align-items:center;justify-content:center;
     }
     .mob-sheet-img{width:100%;height:100%;object-fit:contain;display:block;cursor:pointer}
-    .mob-img-bar{
-      flex-shrink:0;height:20px;
+    .mob-sheet-foot{
+      height:48px;flex-shrink:0;
       display:flex;align-items:center;justify-content:center;
-      border-top:1px solid var(--rule-soft);
-      cursor:pointer;
+      border-top:1px solid var(--rule);
+      padding:0 16px;
     }
-    .mob-img-bar-pip{width:32px;height:3px;background:var(--rule);border-radius:2px}
     .mob-sheet-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 40px}
-    /* Title in bar — small, mono, truncated */
+    /* Title in foot bar — small, mono, truncated */
     .mob-sheet-title{
       flex:1;font-family:var(--mono);font-size:11px;font-weight:400;
       letter-spacing:0.03em;color:var(--muted);
@@ -1169,14 +1167,14 @@
         <button id="mob-snav-prev" class="mob-snav-btn" aria-label="Previous item">‹</button>
         <button id="mob-snav-next" class="mob-snav-btn" aria-label="Next item">›</button>
       </div>
-      <span class="mob-sheet-title" id="mob-sheet-title"></span>
+      <span class="mob-sheet-grip"></span>
       <button class="mob-sheet-close" id="mob-sheet-close" aria-label="Close">×</button>
     </div>
     <div class="mob-sheet-img-wrap">
       <img id="mob-sheet-img" class="mob-sheet-img" alt="">
     </div>
-    <div class="mob-img-bar" id="mob-img-bar">
-      <span class="mob-img-bar-pip"></span>
+    <div class="mob-sheet-foot" id="mob-sheet-foot">
+      <span class="mob-sheet-title" id="mob-sheet-title"></span>
     </div>
     <div class="mob-sheet-scroll" id="mob-sheet-scroll">
       <div class="mob-sheet-body" id="mob-sheet-body"></div>
@@ -2662,7 +2660,7 @@ $("#foot-dims").textContent = "";
       document.getElementById("mob-sheet").classList.toggle("mob-sheet-img-expanded");
     };
     document.getElementById("mob-sheet-img")?.addEventListener("click", toggleImgExpand);
-    document.getElementById("mob-img-bar")?.addEventListener("click", toggleImgExpand);
+    document.getElementById("mob-sheet-foot")?.addEventListener("click", toggleImgExpand);
 
     // Swipe-down-to-dismiss the sheet
     {
