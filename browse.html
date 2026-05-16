@@ -501,7 +501,8 @@
   body.loading #canvas{ visibility:hidden }
 
   /* ── Mobile about overlay ── */
-  #mob-about{display:none;position:fixed;inset:0;z-index:300;background:var(--bg);overflow-y:auto}
+  #mob-about{display:none;position:fixed;inset:0;z-index:300;background:var(--bg);overflow-y:auto;
+    top:calc(32px + env(safe-area-inset-top,0px));border-radius:14px 14px 0 0}
   #mob-about.open{display:flex;flex-direction:column;padding:0 28px 52px}
   #mob-about-toprow{
     display:flex;justify-content:space-between;align-items:center;
@@ -585,7 +586,7 @@
     .panel-left{
       position:absolute!important;inset:0;
       width:100%!important;border:0!important;
-      z-index:1;background:var(--bg);
+      z-index:1;background:#000;
       display:flex!important;flex-direction:column;
     }
     .rows{background:var(--soft)}
