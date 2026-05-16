@@ -299,6 +299,47 @@
   }
   .foot-dl a{color:var(--muted);text-decoration:none;letter-spacing:0.04em}
   .foot-dl a:hover{color:var(--ink)}
+  .foot-inspect{background:none;border:0;color:var(--muted);font-size:15px;padding:0 0 0 16px;cursor:pointer;display:flex;align-items:center;line-height:1;flex-shrink:0}
+  .foot-inspect:hover{color:var(--ink)}
+
+  /* ── inspect overlay ── */
+  #inspect-overlay{
+    display:none;position:fixed;inset:0;z-index:9999;
+    background:#1a1816;flex-direction:column;
+  }
+  #inspect-overlay.open{display:flex}
+  #inspect-stage{
+    flex:1;position:relative;overflow:hidden;cursor:grab;
+  }
+  #inspect-stage.grabbing{cursor:grabbing}
+  #inspect-stage img{
+    position:absolute;top:50%;left:50%;transform-origin:0 0;
+    user-select:none;-webkit-user-drag:none;pointer-events:none;
+    max-width:none;max-height:none;display:block;
+  }
+  #inspect-bar{
+    height:44px;flex-shrink:0;
+    background:#252220;border-top:1px solid #3a3633;
+    display:flex;align-items:center;justify-content:center;
+    gap:0;font-family:var(--mono);font-size:10px;color:#a09890;
+    letter-spacing:0.06em;
+  }
+  #inspect-bar button{
+    background:none;border:0;font:inherit;color:#a09890;
+    padding:0 10px;cursor:pointer;display:flex;align-items:center;
+    justify-content:center;height:44px;
+  }
+  #inspect-bar button:hover{color:#f3f1ec}
+  #inspect-bar .pct{color:#f3f1ec;font-variant-numeric:tabular-nums;min-width:40px;text-align:center;padding:0 4px}
+  #inspect-bar .sep{width:1px;height:14px;background:#3a3633;margin:0 6px;flex-shrink:0}
+  #inspect-bar .ib-dl{color:#a09890;text-decoration:none;padding:0 10px;display:flex;align-items:center;height:44px}
+  #inspect-bar .ib-dl:hover{color:#f3f1ec}
+  #inspect-title{
+    position:absolute;top:0;left:0;right:0;
+    padding:12px 20px;pointer-events:none;
+    font-family:var(--mono);font-size:10px;color:rgba(243,241,236,0.4);
+    letter-spacing:0.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
 
   /* ── meta pane ── */
   .meta-head{
@@ -521,7 +562,7 @@
   <div class="site-topright">
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen">⤢</button>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode">◑</button>
-    <span id="topright" title="About this archive">v1.02.05</span>
+    <span id="topright" title="About this archive">v1.02.06</span>
   </div>
 </header>
 
@@ -577,8 +618,26 @@
         <button id="zoom-fit" type="button" title="Fit to frame">fit</button>
       </div>
       <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">Download full size</a></span>
+      <button id="btn-inspect" class="foot-inspect" type="button" title="Inspect image fullscreen">⤢</button>
     </div>
   </section>
+
+  <div id="inspect-overlay" role="dialog" aria-modal="true">
+    <div id="inspect-title"></div>
+    <div id="inspect-stage"></div>
+    <div id="inspect-bar">
+      <button id="ib-rotate" title="Rotate 90°">↻</button>
+      <div class="sep"></div>
+      <button id="ib-out" title="Zoom out">−</button>
+      <span class="pct" id="ib-pct">100%</span>
+      <button id="ib-in" title="Zoom in">+</button>
+      <button id="ib-fit" title="Fit to frame">fit</button>
+      <div class="sep"></div>
+      <a href="#" id="ib-dl" class="ib-dl" target="_blank" rel="noopener">↓ download</a>
+      <div class="sep"></div>
+      <button id="ib-close" title="Close (ESC)">✕</button>
+    </div>
+  </div>
 
   <section class="pane-meta">
     <div class="scroll-pip scroll-pip-r" id="meta-pip"></div>
@@ -946,7 +1005,7 @@ WHERE {
   }
 
   function updateCount() {
-    if (state.items.length > 0) $("#topright").textContent = "v1.02.05";
+    if (state.items.length > 0) $("#topright").textContent = "v1.02.06";
   }
 
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
@@ -1225,6 +1284,150 @@ WHERE {
     $("#zoom-in").addEventListener("click",  () => setZoom(zoomState.scale * 1.4));
     $("#zoom-out").addEventListener("click", () => setZoom(zoomState.scale * 0.71));
     $("#zoom-fit").addEventListener("click", fitToFrame);
+
+    // ── Inspect overlay ──────────────────────────────────────────────────────
+    {
+      const overlay  = $("#inspect-overlay");
+      const stage    = $("#inspect-stage");
+      const pctEl    = $("#ib-pct");
+      let   ovImg    = null;
+      let   ovZ      = { scale:1, fitScale:1, tx:0, ty:0, naturalW:0, naturalH:0, rotation:0 };
+      let   ovItem   = null;
+
+      function ovApply() {
+        if (!ovImg) return;
+        const z = ovZ;
+        ovImg.style.transform =
+          `translate(${-z.naturalW*z.scale/2 + z.tx}px,${-z.naturalH*z.scale/2 + z.ty}px) scale(${z.scale}) translate(${z.naturalW/2}px,${z.naturalH/2}px) rotate(${z.rotation}deg) translate(${-z.naturalW/2}px,${-z.naturalH/2}px)`;
+        pctEl.textContent = Math.round(z.scale * 100) + "%";
+        $("#ib-out").disabled = z.scale <= z.fitScale * 0.5;
+        $("#ib-in").disabled  = z.scale >= z.fitScale * 8;
+      }
+
+      function ovFit() {
+        if (!ovImg) return;
+        const sw = stage.clientWidth, sh = stage.clientHeight;
+        const pad = 48;
+        const transposed = ovZ.rotation % 180 !== 0;
+        const iw = transposed ? ovZ.naturalH : ovZ.naturalW;
+        const ih = transposed ? ovZ.naturalW : ovZ.naturalH;
+        const fit = Math.min((sw - pad*2) / iw, (sh - pad*2) / ih);
+        ovZ.fitScale = fit; ovZ.scale = fit; ovZ.tx = 0; ovZ.ty = 0;
+        ovApply();
+      }
+
+      function ovZoomTo(s) {
+        const sw = stage.clientWidth, sh = stage.clientHeight;
+        const min = ovZ.fitScale * 0.5, max = ovZ.fitScale * 8;
+        ovZ.scale = Math.max(min, Math.min(max, s));
+        ovZ.tx = Math.max(-(sw/2), Math.min(sw/2, ovZ.tx));
+        ovZ.ty = Math.max(-(sh/2), Math.min(sh/2, ovZ.ty));
+        ovApply();
+      }
+
+      function openInspect() {
+        if (!currentImg || !state.selected) return;
+        ovItem = state.selected;
+        const url = imageUrl(ovItem);
+        if (!url) return;
+
+        stage.innerHTML = "";
+        ovImg = new Image();
+        ovImg.draggable = false;
+        ovZ = { scale:1, fitScale:1, tx:0, ty:0, naturalW:0, naturalH:0, rotation:0 };
+
+        ovImg.onload = () => {
+          ovZ.naturalW = ovImg.naturalWidth;
+          ovZ.naturalH = ovImg.naturalHeight;
+          stage.appendChild(ovImg);
+          ovFit();
+        };
+        ovImg.src = url;
+
+        $("#inspect-title").textContent = ovItem.title || ovItem.id;
+        $("#ib-dl").href = ovItem.master || url;
+        overlay.classList.add("open");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeInspect() {
+        overlay.classList.remove("open");
+        document.body.style.overflow = "";
+        stage.innerHTML = "";
+        ovImg = null;
+      }
+
+      $("#btn-inspect").addEventListener("click", openInspect);
+      $("#ib-close").addEventListener("click", closeInspect);
+      $("#ib-fit").addEventListener("click", ovFit);
+      $("#ib-in").addEventListener("click",  () => ovZoomTo(ovZ.scale * 1.4));
+      $("#ib-out").addEventListener("click", () => ovZoomTo(ovZ.scale * 0.71));
+      $("#ib-rotate").addEventListener("click", () => { ovZ.rotation = (ovZ.rotation + 90) % 360; ovFit(); });
+
+      // Keyboard
+      document.addEventListener("keydown", e => {
+        if (!overlay.classList.contains("open")) return;
+        if (e.key === "Escape") { closeInspect(); e.stopPropagation(); }
+        if (e.key === "+" || e.key === "=") ovZoomTo(ovZ.scale * 1.4);
+        if (e.key === "-")                   ovZoomTo(ovZ.scale * 0.71);
+        if (e.key === "0")                   ovFit();
+      });
+
+      // Mouse wheel zoom
+      stage.addEventListener("wheel", e => {
+        e.preventDefault();
+        const rect = stage.getBoundingClientRect();
+        const cx = e.clientX - rect.left - rect.width/2;
+        const cy = e.clientY - rect.top  - rect.height/2;
+        const factor = e.deltaY < 0 ? 1.15 : 1/1.15;
+        const newScale = Math.max(ovZ.fitScale * 0.5, Math.min(ovZ.fitScale * 8, ovZ.scale * factor));
+        const ratio = newScale / ovZ.scale;
+        ovZ.tx = cx + (ovZ.tx - cx) * ratio;
+        ovZ.ty = cy + (ovZ.ty - cy) * ratio;
+        ovZ.scale = newScale;
+        ovApply();
+      }, { passive: false });
+
+      // Pan
+      let ovDrag = null;
+      stage.addEventListener("mousedown", e => {
+        if (e.button !== 0) return;
+        ovDrag = { sx: e.clientX - ovZ.tx, sy: e.clientY - ovZ.ty };
+        stage.classList.add("grabbing");
+      });
+      window.addEventListener("mousemove", e => {
+        if (!ovDrag) return;
+        ovZ.tx = e.clientX - ovDrag.sx;
+        ovZ.ty = e.clientY - ovDrag.sy;
+        ovApply();
+      });
+      window.addEventListener("mouseup", () => { ovDrag = null; stage.classList.remove("grabbing"); });
+
+      // Touch pan + pinch
+      let ovTouches = [];
+      stage.addEventListener("touchstart", e => {
+        ovTouches = Array.from(e.touches);
+        e.preventDefault();
+      }, { passive: false });
+      stage.addEventListener("touchmove", e => {
+        e.preventDefault();
+        const t = Array.from(e.touches);
+        if (t.length === 1 && ovTouches.length === 1) {
+          ovZ.tx += t[0].clientX - ovTouches[0].clientX;
+          ovZ.ty += t[0].clientY - ovTouches[0].clientY;
+          ovApply();
+        } else if (t.length === 2 && ovTouches.length === 2) {
+          const d0 = Math.hypot(ovTouches[1].clientX-ovTouches[0].clientX, ovTouches[1].clientY-ovTouches[0].clientY);
+          const d1 = Math.hypot(t[1].clientX-t[0].clientX, t[1].clientY-t[0].clientY);
+          if (d0 > 0) ovZoomTo(ovZ.scale * (d1/d0));
+        }
+        ovTouches = t;
+      }, { passive: false });
+      stage.addEventListener("touchend", e => { ovTouches = Array.from(e.touches); });
+
+      // Refit on resize
+      window.addEventListener("resize", () => { if (overlay.classList.contains("open")) ovFit(); });
+    }
 
     let resizeT;
     window.addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(fitToFrame, 120); });
