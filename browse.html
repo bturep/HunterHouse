@@ -610,12 +610,11 @@
       z-index:10;
       transform:translateY(100%);
       transition:transform 0.35s cubic-bezier(0.4,0,0.2,1),
-                 height 0.35s cubic-bezier(0.4,0,0.2,1),
-                 border-radius 0.2s;
+                 height 0.28s ease-out;
       display:flex!important;flex-direction:column;overflow:hidden;
     }
     .mob-sheet.mob-sheet-open{transform:translateY(0)}
-    .mob-sheet.mob-sheet-img-expanded{height:100%;border-radius:0}
+    .mob-sheet.mob-sheet-img-expanded{height:100%}
     .mob-sheet.mob-sheet-img-expanded .mob-sheet-img-wrap{flex:1;height:auto;max-height:none}
     .mob-sheet.mob-sheet-img-expanded .mob-sheet-scroll{display:none}
     /* Pills: same treatment as desktop record pane — colored text, no chip */
