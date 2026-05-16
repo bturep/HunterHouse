@@ -729,11 +729,11 @@
   /* ── Researcher notes panel ── */
   .rn-panel{margin-top:14px;border-top:1px dashed var(--rule);padding-top:10px}
   .rn-head{display:flex;align-items:center;gap:6px;margin-bottom:7px}
-  .rn-lock-btn{background:none;border:none;padding:0;cursor:pointer;color:var(--muted);display:flex;align-items:center;line-height:1;flex-shrink:0}
+  .rn-lock-btn{background:none;border:none;padding:0;cursor:pointer;color:var(--muted);display:flex;align-items:center;line-height:1;flex-shrink:0;margin-left:auto}
   .rn-lock-btn:hover{color:var(--ink)}
   .rn-label{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)}
-  .rn-who{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;color:var(--copper-deep);margin-left:auto}
-  .rn-count{font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:auto;opacity:0.6}
+  .rn-who{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;color:var(--copper-deep)}
+  .rn-count{font-family:var(--mono);font-size:9px;color:var(--muted);opacity:0.6}
   /* auth row — two-step: name then pin */
   .rn-auth{display:block;margin-bottom:7px}
   .rn-auth-step{display:flex;align-items:center;gap:6px}
@@ -844,13 +844,13 @@
   <button id="mob-about-close" aria-label="Close">×</button>
   <p class="mob-about-title">Hunter House<br>Foundation Archive</p>
   <p class="mob-about-ver" id="mob-about-ver"></p>
-  <p class="mob-about-body">A foundation dedicated to the stewardship of the residence and architectural archive of architect Richard Morrow Hunter, 1970–2020. 203 Goward Road, Saanich, British Columbia.</p>
+  <p class="mob-about-body">A foundation dedicated to the stewardship of the residence and architectural archive of architect Richard Morrow Hunter (1930–2023). 203 Goward Road, Saanich, British Columbia.</p>
   <p class="mob-about-body">Open data archive on Wikibase — items individually addressable and SPARQL-queryable. Metadata CC0. Archival description informed by GLAM standards.</p>
   <hr class="mob-about-rule">
   <dl class="mob-about-credits">
     <dt>Stewards</dt>
     <dd>Floyd Marinescu<br>Olivia Jol</dd>
-    <dt>Archive Project Director</dt>
+    <dt>Project Lead</dt>
     <dd>Brandon Poole</dd>
   </dl>
 </div>
@@ -988,13 +988,13 @@
     if (!researcher) {
       panel.innerHTML = `
         <div class="rn-head">
-          <button class="rn-lock-btn" id="rn-lock-btn" title="Unlock to add notes">${LOCK_SVG}</button>
           <span class="rn-label">researcher notes</span>
           ${notes.length ? `<span class="rn-count">${notes.length}</span>` : ""}
+          <button class="rn-lock-btn" id="rn-lock-btn" title="Unlock to add notes">${LOCK_SVG}</button>
         </div>
         <div class="rn-auth" id="rn-auth" style="display:none">
           <div class="rn-auth-step" id="rn-step-name">
-            <input class="rn-pin-input" type="text" id="rn-name-input" placeholder="full name" autocomplete="name" spellcheck="false">
+            <input class="rn-pin-input" type="text" id="rn-name-input" placeholder="full name" autocomplete="off" spellcheck="false">
             <button class="rn-pin-btn" id="rn-name-btn">→</button>
             <span class="rn-pin-err" id="rn-name-err"></span>
           </div>
@@ -1046,9 +1046,9 @@
     } else {
       panel.innerHTML = `
         <div class="rn-head">
-          <button class="rn-lock-btn" id="rn-lock-btn" title="Lock">${UNLOCK_SVG}</button>
           <span class="rn-label">researcher notes</span>
           <span class="rn-who">${escapeHTML(researcher.name)}</span>
+          <button class="rn-lock-btn" id="rn-lock-btn" title="Lock">${UNLOCK_SVG}</button>
         </div>
         ${noteRows ? `<div class="rn-list">${noteRows}</div>` : ""}
         <div class="rn-add">
