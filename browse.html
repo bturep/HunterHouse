@@ -267,6 +267,7 @@
     max-width:none;max-height:none;display:block;
     border:1px solid var(--rule);box-shadow:0 8px 24px -10px rgba(30,28,26,0.22);
   }
+  .image-stage img.hh-thumb{border:none;box-shadow:none;}
   .image-stage .placeholder{
     font-family:var(--mono);font-size:10.5px;color:var(--hint);
     letter-spacing:0.12em;text-transform:uppercase;text-align:center;
@@ -520,7 +521,7 @@
   <div class="site-topright">
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen">⤢</button>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode">◑</button>
-    <span id="topright" title="About this archive">v1.2.3</span>
+    <span id="topright" title="About this archive">v1.2.4</span>
   </div>
 </header>
 
@@ -945,7 +946,7 @@ WHERE {
   }
 
   function updateCount() {
-    if (state.items.length > 0) $("#topright").textContent = "v1.2.3";
+    if (state.items.length > 0) $("#topright").textContent = "v1.2.4";
   }
 
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
