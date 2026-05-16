@@ -2726,10 +2726,19 @@ $("#foot-dims").textContent = "";
         if (dy > 40) {
           // One stage down
           if (expanded) {
-            // Full → record view
-            sheet.style.transition = "";
-            sheet.style.transform  = "";
-            sheet.classList.remove("mob-sheet-img-expanded");
+            if (dy > swipeStartH / 2) {
+              // Past midpoint → close fully to list
+              sheet.style.transition = "";
+              sheet.classList.remove("mob-sheet-open", "mob-sheet-img-expanded");
+              const sc2 = document.getElementById("mob-sheet-scroll");
+              if (sc2) sc2.scrollTop = 0;
+              requestAnimationFrame(() => { sheet.style.transform = ""; });
+            } else {
+              // Short drag → collapse to record view
+              sheet.style.transition = "";
+              sheet.style.transform  = "";
+              sheet.classList.remove("mob-sheet-img-expanded");
+            }
           } else {
             // Record → list (dismiss; sheet slides off from drag position)
             sheet.style.transition = "";
