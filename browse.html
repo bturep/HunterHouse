@@ -490,6 +490,7 @@
   body.loading .rows,
   body.loading .meta-head,
   body.loading .meta-body,
+  body.loading .data-footer,
   body.loading .image-foot { visibility:hidden }
 
   body.loading .image-foot { background:var(--soft); border-top-color:transparent }
@@ -673,22 +674,21 @@
 
   /* ── Data footer (Wikibase / SPARQL / JSON) ── */
   .data-footer{
-    margin-top:auto;padding:12px 0 0;
-    border-top:1px solid var(--rule);
-    display:flex;align-items:baseline;gap:0;flex-wrap:wrap;
+    height:41px;box-sizing:border-box;flex-shrink:0;
+    padding:0 22px;border-top:1px solid var(--rule);background:var(--bg);
+    display:grid;grid-template-columns:96px 1fr;gap:8px;align-items:center;
   }
   .data-footer .df-label{
-    font-family:var(--mono);font-size:9px;color:var(--hint);
-    letter-spacing:0.12em;text-transform:uppercase;margin-right:12px;
+    font-family:var(--mono);font-size:11px;color:var(--muted);
+    letter-spacing:0.04em;text-transform:lowercase;text-align:right;
   }
+  .data-footer .df-label::after{content:":";color:var(--hint);margin-left:2px}
+  .data-footer .df-links{display:flex;gap:14px}
   .data-footer a{
-    font-family:var(--mono);font-size:9px;color:var(--muted);
-    letter-spacing:0.08em;text-transform:lowercase;
-    text-decoration:none;margin-right:14px;
-    transition:color 0.12s;
+    font-family:var(--mono);font-size:11px;color:var(--muted);
+    letter-spacing:0.02em;text-decoration:none;transition:color 0.12s;
   }
   .data-footer a:hover{color:var(--ink)}
-  .data-footer a[style*="opacity"]{pointer-events:none}
 
   /* ── Curator note (P100, read-only) ── */
   .pane-meta .curator-note{
@@ -883,6 +883,14 @@
       </div>
       <div class="meta-body" id="meta-body">
         <div class="empty">Select an item from the list</div>
+      </div>
+      <div class="data-footer" id="data-footer">
+        <span class="df-label">data</span>
+        <span class="df-links">
+          <a id="df-wikibase" href="#" onclick="return false" style="opacity:0.4">Wikibase ↗</a>
+          <a id="df-sparql"   href="#" onclick="return false" style="opacity:0.4">SPARQL ↗</a>
+          <a id="df-json"     href="#" onclick="return false" style="opacity:0.4">JSON ↗</a>
+        </span>
       </div>
     </div>
   </div>
@@ -1832,14 +1840,18 @@ $("#foot-dims").textContent = "";
     }
 
     const hasQID = !!item.qid;
-    const dis = `onclick="return false" style="opacity:0.4"`;
-    const dataFooterHTML = `
-      <div class="data-footer">
-        <span class="df-label">data</span>
-        <a href="${escapeHTML(wikibaseUrl)}" ${hasQID ? `target="_blank" rel="noopener"` : dis}>Wikibase ↗</a>
-        <a href="${escapeHTML(sparqlUrl)}" ${hasQID ? `target="_blank" rel="noopener"` : dis}>SPARQL ↗</a>
-        <a href="${escapeHTML(jsonUrl)}" ${hasQID ? `target="_blank" rel="noopener"` : dis}>JSON ↗</a>
-      </div>`;
+    const setLink = (id, href, active) => {
+      const a = document.getElementById(id);
+      if (!a) return;
+      a.href = href;
+      a.style.opacity = active ? "" : "0.4";
+      a.style.pointerEvents = active ? "" : "none";
+      if (active) { a.setAttribute("target","_blank"); a.setAttribute("rel","noopener"); }
+      else { a.removeAttribute("target"); a.removeAttribute("rel"); }
+    };
+    setLink("df-wikibase", wikibaseUrl, hasQID);
+    setLink("df-sparql",   sparqlUrl,   hasQID);
+    setLink("df-json",     jsonUrl,     hasQID);
 
     const graphN = archRows.length > 0 ? "03" : "02";
     body.innerHTML = `
@@ -1860,7 +1872,6 @@ $("#foot-dims").textContent = "";
       </section>
       ${item.notes ? `<p class="curator-note">${escapeHTML(item.notes)}</p>` : ""}
       <div class="rn-panel" id="rn-panel"></div>
-      ${dataFooterHTML}
     `;
 
     body.querySelectorAll(".sib[data-sib-id]").forEach(el => {
