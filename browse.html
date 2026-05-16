@@ -561,7 +561,7 @@
   <div class="site-topright">
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode">◑</button>
-    <span id="topright" title="About this archive">v1.02.08</span>
+    <span id="topright" title="About this archive">v1.02.09</span>
   </div>
 </header>
 
@@ -1005,7 +1005,7 @@ WHERE {
   }
 
   function updateCount() {
-    if (state.items.length > 0) $("#topright").textContent = "v1.02.08";
+    if (state.items.length > 0) $("#topright").textContent = "v1.02.09";
   }
 
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
@@ -1292,7 +1292,8 @@ WHERE {
       const pctEl    = $("#ib-pct");
       let   ovImg    = null;
       let   ovZ      = { scale:1, fitScale:1, tx:0, ty:0, naturalW:0, naturalH:0, rotation:0 };
-      let   ovItem   = null;
+      let   ovItem          = null;
+      let   ovWasFullscreen = false;
 
       function ovApply() {
         if (!ovImg) return;
@@ -1347,6 +1348,7 @@ WHERE {
 
         $("#inspect-title").textContent = ovItem.title || ovItem.id;
         $("#ib-dl").href = ovItem.master || url;
+        ovWasFullscreen = !!document.fullscreenElement;
         overlay.classList.add("open");
         document.body.style.overflow = "hidden";
       }
@@ -1356,6 +1358,7 @@ WHERE {
         document.body.style.overflow = "";
         stage.innerHTML = "";
         ovImg = null;
+        ovWasFullscreen = false;
       }
 
       $("#btn-inspect").addEventListener("click", openInspect);
@@ -1368,10 +1371,26 @@ WHERE {
       // Keyboard
       document.addEventListener("keydown", e => {
         if (!overlay.classList.contains("open")) return;
-        if (e.key === "Escape") { closeInspect(); e.stopPropagation(); }
+        if (e.key === "Escape") {
+          // If in browser fullscreen, ESC will exit fullscreen — the fullscreenchange
+          // handler below will close the overlay and re-enter fullscreen.
+          // If NOT in fullscreen, close directly.
+          if (!document.fullscreenElement) { closeInspect(); }
+          e.stopPropagation();
+          return;
+        }
         if (e.key === "+" || e.key === "=") ovZoomTo(ovZ.scale * 1.4);
         if (e.key === "-")                   ovZoomTo(ovZ.scale * 0.71);
         if (e.key === "0")                   ovFit();
+      });
+
+      // When browser fullscreen exits while inspect overlay is open (user pressed ESC),
+      // close the overlay and immediately re-enter fullscreen so page stays fullscreen.
+      document.addEventListener("fullscreenchange", () => {
+        if (overlay.classList.contains("open") && !document.fullscreenElement && ovWasFullscreen) {
+          closeInspect();
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
       });
 
       // Mouse wheel zoom
