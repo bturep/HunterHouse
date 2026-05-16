@@ -945,3 +945,23 @@ Google Fonts `<link rel="stylesheet">` is render-blocking: the browser will not 
 - Net: 1799 → 1734 lines (−65).
 
 **Version:** v1.02.18
+
+---
+
+### 2026-05-15 — Versioning protocol: snapshot rule + retroactive tags
+
+**Retroactive tags applied:**
+| Tag | Commit | Meaning |
+|---|---|---|
+| `v1.01.00` | `fc98905` | First commit of session 01 — three-level versioning adopted |
+| `v1.02.00` | `2059cb7` | First commit of session 02 — later zero-padded to 1.02.xx |
+| `v1.02.18` | `82065e6` | Bump commit for v1.02.18 (large previews, image foot overhaul) |
+
+**New snapshot rule (added to global CLAUDE.md):**
+At every **MAJOR** version bump:
+1. `git tag vX.00.00 && git push --tags`
+2. `gh release create vX.00.00 --title "vX.00.00 — description" --notes "Snapshot."`
+
+At session end: git tag alone is sufficient — always push tags immediately so the snapshot exists on the remote.
+
+This session's work (typography consolidation, inline researcher note editor, image pane black/white responsive, shell border frame, search icon to topright, scroll pip upgrade, wordmark update, middle-truncate siblings) is not yet version-bumped — waiting for user instruction.
