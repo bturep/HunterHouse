@@ -1,12 +1,12 @@
 {
-  "name": "Hunter House Foundation",
-  "short_name": "Hunter House",
+  "name": "Hunter House Archive",
+  "short_name": "Hunter House Archive",
   "description": "Architectural archive of Richard Morrow Hunter, 1970–2020",
-  "start_url": "/HunterHouse/",
+  "start_url": "/HunterHouse/browse.html",
   "scope": "/HunterHouse/",
   "display": "standalone",
-  "background_color": "#1a1816",
-  "theme_color": "#1a1816",
+  "background_color": "#6b6866",
+  "theme_color": "#6b6866",
   "icons": [
     {
       "src": "assets/icon-192.png",
