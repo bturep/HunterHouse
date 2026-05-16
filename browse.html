@@ -596,15 +596,15 @@
 
     /* mobile image navigation bar */
     .mobile-img-nav{
-      display:flex;justify-content:space-between;align-items:center;
-      padding:0 56px;height:44px;flex-shrink:0;
+      display:flex;height:56px;flex-shrink:0;
       background:var(--bg);border-top:1px solid var(--rule);
     }
     .mob-nav-btn{
-      background:none;border:none;padding:0 8px;height:44px;
-      font-size:24px;line-height:1;color:var(--muted);cursor:pointer;
+      flex:1;height:100%;background:none;border:none;padding:0;
+      font-size:22px;line-height:1;color:var(--muted);cursor:pointer;
       display:flex;align-items:center;justify-content:center;
     }
+    #mob-next{border-left:1px solid var(--rule)}
     .mob-nav-btn:active{color:var(--ink)}
     .mob-nav-btn:disabled{opacity:0.25;pointer-events:none}
     /* hide record pane subheader — tab bar already labels the pane */
@@ -2161,6 +2161,25 @@ $("#foot-dims").textContent = "";
         if (cur === -1) return;
         const nxt = dx < 0 ? cur + 1 : cur - 1;
         if (nxt >= 0 && nxt < tabs.length) switchMobileTab(tabs[nxt]);
+      }, { passive: true });
+    }
+
+    // Pull-to-refresh: downward pull on list tab while list is at top
+    {
+      let pty = 0, ptx = 0, pullEligible = false;
+      const rowsEl = document.getElementById("rows");
+      document.addEventListener("touchstart", e => {
+        pullEligible = window.matchMedia("(max-width:767px)").matches &&
+          rowsEl.scrollTop === 0 &&
+          document.querySelector(".pane-list")?.classList.contains("mobile-active");
+        pty = e.touches[0].clientY;
+        ptx = e.touches[0].clientX;
+      }, { passive: true });
+      document.addEventListener("touchend", e => {
+        if (!pullEligible) return;
+        const dy = e.changedTouches[0].clientY - pty;
+        const dx = Math.abs(e.changedTouches[0].clientX - ptx);
+        if (dy > 80 && dx < 40) { clearCache(); location.reload(); }
       }, { passive: true });
     }
 
