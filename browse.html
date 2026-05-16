@@ -558,7 +558,7 @@
 </header>
 
 <div id="about-panel" role="dialog" aria-label="About this archive">
-  <span class="about-line">Open data archive on <a href="https://wikiba.se/" target="_blank" rel="noopener">Wikibase</a> — knowledge graph underlying <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a>. Items individually addressable; catalogue <a href="https://www.w3.org/TR/sparql11-query/" target="_blank" rel="noopener">SPARQL</a>-queryable. Metadata: <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0</a>. Archival description informed by <a href="https://www.wikidata.org/wiki/Wikidata:GLAM" target="_blank" rel="noopener">GLAM</a> standards · <a href="https://github.com/CCA-Public/digital-archives-manual" target="_blank" rel="noopener">CCA Digital Archives Manual</a>.</span>
+  <span class="about-line">Open data archive on <a href="https://wikiba.se/" target="_blank" rel="noopener">Wikibase</a> — knowledge graph underlying <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a>. Items individually addressable; catalogue <a href="https://www.w3.org/TR/sparql11-query/" target="_blank" rel="noopener">SPARQL</a>-queryable. Metadata: <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0</a>. Archival description informed by <a href="https://www.wikidata.org/wiki/Wikidata:GLAM" target="_blank" rel="noopener">GLAM</a> standards · <a href="https://github.com/CCA-Public/digital-archives-manual" target="_blank" rel="noopener">CCA Digital Archives Manual</a>. · <a href="#" id="about-refresh">Refresh data</a></span>
   <button id="about-close" title="Close">×</button>
 </div>
 
@@ -1715,6 +1715,7 @@ WHERE {
     document.addEventListener("click", closeAbout);
     aboutPanel.addEventListener("click", (e) => e.stopPropagation());
     document.getElementById("about-close").addEventListener("click", closeAbout);
+    document.getElementById("about-refresh").addEventListener("click", (e) => { e.preventDefault(); clearCache(); location.reload(); });
 
     // Fullscreen toggle
     const fsBtn = document.getElementById("fs-toggle");
