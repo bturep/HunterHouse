@@ -610,13 +610,13 @@
       z-index:10;
       transform:translateY(100%);
       transition:transform 0.35s cubic-bezier(0.4,0,0.2,1),
-                 height 0.28s ease-out;
+                 height 0.38s cubic-bezier(0.4,0,0.2,1);
       display:flex!important;flex-direction:column;overflow:hidden;
     }
     .mob-sheet.mob-sheet-open{transform:translateY(0)}
     .mob-sheet.mob-sheet-img-expanded{height:100%}
-    .mob-sheet.mob-sheet-img-expanded .mob-sheet-img-wrap{flex:1;height:auto;max-height:none}
-    .mob-sheet.mob-sheet-img-expanded .mob-sheet-scroll{display:none}
+    .mob-sheet.mob-sheet-img-expanded .mob-sheet-img-wrap{flex-grow:1;max-height:100vh}
+    .mob-sheet.mob-sheet-img-expanded .mob-sheet-scroll{flex-grow:0;overflow:hidden}
     /* Pills: same treatment as desktop record pane — colored text, no chip */
     .mob-sheet-body .pill{
       height:auto;padding:0;background:transparent;
@@ -654,9 +654,11 @@
     .mob-snav-btn:disabled{opacity:0.25;pointer-events:none}
 
     .mob-sheet-img-wrap{
-      flex-shrink:0;height:52vw;max-height:40vh;
+      flex-shrink:0;flex-grow:0;height:52vw;max-height:40vh;
       background:#111;overflow:hidden;
       display:flex;align-items:center;justify-content:center;
+      transition:flex-grow 0.38s cubic-bezier(0.4,0,0.2,1),
+                 max-height 0.38s cubic-bezier(0.4,0,0.2,1);
     }
     .mob-sheet-img{width:100%;height:100%;object-fit:contain;display:block;cursor:pointer}
     .mob-sheet-foot{
@@ -665,7 +667,7 @@
       border-top:1px solid var(--rule);
       padding:0 16px;
     }
-    .mob-sheet-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 40px}
+    .mob-sheet-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 40px;transition:flex-grow 0.38s cubic-bezier(0.4,0,0.2,1)}
     /* Title in foot bar — small, mono, truncated */
     .mob-sheet-title{
       flex:1;font-family:var(--mono);font-size:11px;font-weight:400;
@@ -1172,11 +1174,11 @@
     <div class="mob-sheet-img-wrap">
       <img id="mob-sheet-img" class="mob-sheet-img" alt="">
     </div>
-    <div class="mob-sheet-foot" id="mob-sheet-foot">
-      <span class="mob-sheet-title" id="mob-sheet-title"></span>
-    </div>
     <div class="mob-sheet-scroll" id="mob-sheet-scroll">
       <div class="mob-sheet-body" id="mob-sheet-body"></div>
+    </div>
+    <div class="mob-sheet-foot" id="mob-sheet-foot">
+      <span class="mob-sheet-title" id="mob-sheet-title"></span>
     </div>
   </div>
 
