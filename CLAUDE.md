@@ -296,8 +296,9 @@ CCA's ISAD(G) hierarchy maps directly to our Wikibase: fonds = Richard Hunter fo
 | v1.02.00 | 2026-05-15 | Full session 02: splash redesign, P142, progressive loading, 3840px tiers, researcher notes, dim border system, typography consolidation |
 | v1.02.18 | 2026-05-15 | Image foot overhaul, large previews, browse.html refactor (−65 lines) |
 | v1.03.00 | 2026-05-15 | Collapsible panels, mark feature, filter badge fix, loading-phase foot colour |
+| v1.03.01 | 2026-05-16 | Mobile bottom sheet: Google Maps layout, full record sections, lightbox |
 
-Tags pushed: `v1.01.00` (fc98905), `v1.02.00` (2059cb7), `v1.02.18` (82065e6), `v1.03.00` (this session).
+Tags pushed: `v1.01.00` (fc98905), `v1.02.00` (2059cb7), `v1.02.18` (82065e6), `v1.03.00` (prior session), `v1.03.01` (this session).
 
 ---
 
@@ -349,3 +350,35 @@ Full log in `CLAUDE_archive_v1.02.md`. Summary of all work through v1.02.18:
 - Mark feature JS (`toggleMark` + M handler) was lost in intervening commits and restored.
 
 **Version: v1.03.00**
+
+---
+
+### 2026-05-16 — Mobile bottom sheet overhaul (v1.03.01)
+
+**Context / starting point**
+Continued from prior session (v1.03.00). Mobile UI was mid-iteration: a contracted-list / bottom-sheet pattern had been built but had two unfixed bugs (images not displaying, scroll not working) and the contracted single-row strip felt awkward.
+
+**browse.html — mobile bottom sheet, final layout**
+- Sheet is now a fixed `72vh` panel, `position:absolute; bottom:0`, that floats over the list rather than covering it. Opens at `translateY(0)` (was `translateY(52px)` above a contracted 52px list strip).
+- The contracted list strip (`mob-row-strip`, `panel-left.mob-contracted`) has been removed entirely. The full list remains visible and scrollable above the open sheet.
+- Tapping the grip bar closes the sheet (was: toggle expanded/collapsed). No "full" state — full-screen image is handled by the lightbox.
+- `mobToggleSheetFull` and `mob-sheet-full` CSS class removed.
+
+**browse.html — image display fix**
+- `renderMobSheet` was reading `item.img` (undefined) instead of `item.image` (the correct field from the SPARQL data mapping). Images now display correctly.
+- Same bug existed in the lightbox click handler (`item?.img`) — fixed to `item?.image`. Tapping the image in the sheet now opens the full-screen lightbox.
+
+**browse.html — scroll fix**
+- `.mob-sheet-scroll` lacked `min-height:0`. Without it, iOS flex items refuse to shrink below content height and `overflow-y:auto` never engages. Added `min-height:0` and `-webkit-overflow-scrolling:touch`.
+
+**browse.html — full record in mobile sheet**
+- Removed researcher notes panel (`#mob-rn-panel`, `renderRN` call) from the sheet.
+- Added three sections matching desktop record pane: `01 Description`, `02 Archival` (Location / Rights / Finding aid, conditional), `03 In the graph` (phase hierarchy path + sibling list).
+- Siblings in the sheet are tappable (call `selectItem`) — same as desktop.
+- Section header CSS (`.mob-sheet-scroll .meta-section h3`, `.graph-section h3`) added to mobile block; `.graph-path` and `.graph-siblings` styles work without parent scoping so they apply directly.
+
+**browse.html — PWA icons (prior sub-session)**
+- `scripts/regen_icons.py` updated: `BG=(6,5,4)` (#060504 near-black), `MARK=(184,180,172)` (#B8B4AC dim warm cream). Source pulled from git history (`git show 4a13a68:assets/icon-512.png`).
+- manifest.json `short_name` changed to `"HH Archive"`. All `apple-mobile-web-app-title` tags updated to match.
+
+**Version: v1.03.01**
