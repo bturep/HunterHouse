@@ -562,7 +562,7 @@
   .load-dots::after{content:"";animation:ld-dots 1.4s steps(1,end) infinite}
 
   @media (max-width:767px){
-    .site-top{padding:0 16px 0 0;gap:12px}
+    .site-top{gap:12px}
     .header-search{padding:0 12px;border-left:0;border-right:0}
     .fbtn{padding:0 14px}
     .site-topright{display:none}
@@ -641,15 +641,21 @@
   /* ── Wordmark ── */
   .markid .name{font-weight:700}
 
-  /* ── Mobile header: gradient top bar + larger wordmark ── */
+  /* ── Mobile header: gradient top bar + full-width wordmark ── */
   @media (max-width:767px){
     .site-top{
       background:linear-gradient(to bottom, #000 0%, #1a1816 100%);
       border-bottom-color:transparent;
       height:52px;
+      padding:0;
     }
-    .markid .name{font-size:14px;letter-spacing:0.20em}
-    .markid .name .dim{font-size:11px}
+    .markid{grid-column:1/-1;display:flex;align-items:center}
+    .markid .name{
+      display:block;white-space:nowrap;
+      font-size:4.6vw;letter-spacing:0.10em;
+      color:#1a1816;
+      -webkit-text-stroke:1px #000;
+    }
   }
 
   /* ── Record pane head ── */
