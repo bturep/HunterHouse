@@ -652,8 +652,11 @@
   .rn-label{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)}
   .rn-who{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;color:var(--copper-deep);margin-left:auto}
   .rn-count{font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:auto;opacity:0.6}
-  /* auth row */
-  .rn-auth{display:flex;align-items:center;gap:6px;margin-top:0;margin-bottom:7px}
+  /* auth row — two-step: name then pin */
+  .rn-auth{display:block;margin-bottom:7px}
+  .rn-auth-step{display:flex;align-items:center;gap:6px}
+  .rn-auth-who{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.06em;white-space:nowrap;flex-shrink:0}
+  .rn-pin-sm{flex:none;width:64px}
   .rn-pin-input{
     width:80px;font-family:var(--mono);font-size:10px;letter-spacing:0.1em;
     background:var(--soft);border:1px solid var(--rule);color:var(--ink);
@@ -819,16 +822,23 @@
   const API_URL      = WIKIBASE_URL + "/w/api.php";
 
   // ── Researcher notes — PIN auth + localStorage ───────────────────────────
-  // PIN → researcher initials. Add foundation-supplied pins here.
-  const RPINS = { "203BTP": "BP" };
+  // Registry: pin → { name, initials, qid }
+  // qid is null until the researcher has a Wikibase Person item.
+  const RPINS = {
+    "203BTP": { name: "Brandon Poole", initials: "BP", qid: null },
+  };
+  // Reverse lookup by lowercase name → entry (with pin attached)
+  const RNAMES = Object.fromEntries(
+    Object.entries(RPINS).map(([pin, r]) => [r.name.toLowerCase(), { pin, ...r }])
+  );
 
   function rnDate() {
     const d = new Date();
     return `${String(d.getFullYear()).slice(2)}.${d.getMonth() + 1}.${d.getDate()}`;
   }
-  function rnSession()             { return sessionStorage.getItem("hhf_researcher") || null; }
-  function rnUnlock(initials)      { sessionStorage.setItem("hhf_researcher", initials); }
-  function rnLockOut()             { sessionStorage.removeItem("hhf_researcher"); }
+  function rnSession()        { try { return JSON.parse(sessionStorage.getItem("hhf_researcher")); } catch { return null; } }
+  function rnUnlock(entry)    { sessionStorage.setItem("hhf_researcher", JSON.stringify(entry)); }
+  function rnLockOut()        { sessionStorage.removeItem("hhf_researcher"); }
   function rnLoad(archId) {
     try { return JSON.parse(localStorage.getItem("hhf_rn") || "{}")[archId] || []; }
     catch { return []; }
@@ -861,26 +871,54 @@
           ${notes.length ? `<span class="rn-count">${notes.length}</span>` : ""}
         </div>
         <div class="rn-auth" id="rn-auth" style="display:none">
-          <input class="rn-pin-input" type="password" id="rn-pin" placeholder="r-pin" maxlength="12" autocomplete="off">
-          <button class="rn-pin-btn" id="rn-pin-btn">→</button>
-          <span class="rn-pin-err" id="rn-pin-err"></span>
+          <div class="rn-auth-step" id="rn-step-name">
+            <input class="rn-pin-input" type="text" id="rn-name-input" placeholder="full name" autocomplete="name" spellcheck="false">
+            <button class="rn-pin-btn" id="rn-name-btn">→</button>
+            <span class="rn-pin-err" id="rn-name-err"></span>
+          </div>
+          <div class="rn-auth-step" id="rn-step-pin" style="display:none">
+            <span class="rn-auth-who" id="rn-auth-who"></span>
+            <input class="rn-pin-input rn-pin-sm" type="password" id="rn-pin-input" placeholder="r-pin" maxlength="12" autocomplete="off">
+            <button class="rn-pin-btn" id="rn-pin-btn">→</button>
+            <span class="rn-pin-err" id="rn-pin-err"></span>
+          </div>
         </div>
         ${noteRows ? `<div class="rn-list rn-list-locked">${noteRows}</div>` : ""}
       `;
-      const authRow = panel.querySelector("#rn-auth");
+      const authRow   = panel.querySelector("#rn-auth");
+      const stepName  = panel.querySelector("#rn-step-name");
+      const stepPin   = panel.querySelector("#rn-step-pin");
+      const nameInput = panel.querySelector("#rn-name-input");
+      const nameBtn   = panel.querySelector("#rn-name-btn");
+      const nameErr   = panel.querySelector("#rn-name-err");
+      const authWho   = panel.querySelector("#rn-auth-who");
+      const pinInput  = panel.querySelector("#rn-pin-input");
+      const pinBtn    = panel.querySelector("#rn-pin-btn");
+      const pinErr    = panel.querySelector("#rn-pin-err");
+      let pending     = null;
+
       panel.querySelector("#rn-lock-btn").addEventListener("click", () => {
-        authRow.style.display = "flex";
-        panel.querySelector("#rn-pin").focus();
+        authRow.style.display = "block";
+        nameInput.focus();
       });
-      const pinInput = panel.querySelector("#rn-pin");
-      const pinBtn   = panel.querySelector("#rn-pin-btn");
-      const pinErr   = panel.querySelector("#rn-pin-err");
+      function tryName() {
+        const entry = RNAMES[nameInput.value.trim().toLowerCase()];
+        if (!entry) { nameErr.textContent = "name not found"; setTimeout(() => { nameErr.textContent = ""; }, 1800); nameInput.select(); return; }
+        pending = entry;
+        authWho.textContent = entry.name + " · ";
+        stepName.style.display = "none";
+        stepPin.style.display  = "flex";
+        pinInput.focus();
+      }
       function tryPin() {
-        const initials = RPINS[pinInput.value.trim()];
-        if (!initials) { pinErr.textContent = "invalid pin"; setTimeout(() => { pinErr.textContent = ""; }, 1800); pinInput.select(); return; }
-        rnUnlock(initials);
+        if (!pending || pinInput.value.trim() !== pending.pin) {
+          pinErr.textContent = "invalid pin"; setTimeout(() => { pinErr.textContent = ""; }, 1800); pinInput.select(); return;
+        }
+        rnUnlock(pending);
         renderRN(archId);
       }
+      nameBtn.addEventListener("click", tryName);
+      nameInput.addEventListener("keydown", e => { if (e.key === "Enter") tryName(); });
       pinBtn.addEventListener("click", tryPin);
       pinInput.addEventListener("keydown", e => { if (e.key === "Enter") tryPin(); });
     } else {
@@ -888,7 +926,7 @@
         <div class="rn-head">
           <button class="rn-lock-btn" id="rn-lock-btn" title="Lock">${UNLOCK_SVG}</button>
           <span class="rn-label">researcher notes</span>
-          <span class="rn-who">${escapeHTML(researcher)}</span>
+          <span class="rn-who">${escapeHTML(researcher.name)}</span>
         </div>
         ${noteRows ? `<div class="rn-list">${noteRows}</div>` : ""}
         <div class="rn-add">
@@ -903,7 +941,7 @@
         const text = textarea.value.trim();
         if (!text) return;
         const updated = rnLoad(archId);
-        updated.unshift({ by: researcher, date: rnDate(), text });
+        updated.unshift({ by: researcher.initials, date: rnDate(), text });
         rnSave(archId, updated);
         textarea.value = "";
         renderRN(archId);
