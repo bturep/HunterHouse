@@ -675,7 +675,7 @@
   .rn-list:not(.rn-list-locked) .rn-row:hover .rn-text,
   .rn-list:not(.rn-list-locked) .rn-row:hover .rn-date{color:var(--red-deep);opacity:1}
   /* hold animation: × grows over 3 s */
-  .rn-del.holding{animation:rn-charge 3s linear forwards}
+  .rn-del.holding{animation:rn-charge 2s linear forwards}
   @keyframes rn-charge{0%{transform:scale(1);opacity:0.5}85%{transform:scale(1.5);opacity:0.9}100%{transform:scale(2);opacity:1}}
   .rn-text{font-size:11px;line-height:1.55;color:var(--ink);word-break:break-word}
   html.dark .rn-text{color:var(--inv-fg)}
@@ -966,7 +966,7 @@
             updated.splice(idx, 1);
             rnSave(archId, updated);
             renderRN(archId);
-          }, 3000);
+          }, 2000);
         };
         const cancel = () => { clearTimeout(timer); timer = null; del.classList.remove("holding"); };
         del.addEventListener("mousedown",   start);
