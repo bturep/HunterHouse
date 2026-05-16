@@ -103,7 +103,7 @@
   .shell{
     display:grid;grid-template-columns:28% 1fr 28%;
     flex:1;min-height:0;position:relative;
-    border-left:1px solid var(--rule);border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);
+    border-left:1px solid var(--rule);border-right:1px solid var(--rule);
   }
 
   /* ── list fleuron ── */
@@ -372,7 +372,7 @@
   html.dark .row .archid .tmark[data-type="R"]{color:#b0966a;border-color:rgba(176,150,106,0.3);background:rgba(176,150,106,0.12)}
   html.dark .row .archid .tmark[data-type="LS"]{color:#70aaa0;border-color:rgba(112,170,160,0.3);background:rgba(112,170,160,0.12)}
   html.dark .row .archid .tmark[data-type="EN"]{color:#9a7ac4;border-color:rgba(154,122,196,0.3);background:rgba(154,122,196,0.12)}
-  html.dark .list-fleuron img{filter:invert(1)}
+  html.dark .list-fleuron img{filter:invert(0.14)}
 
   /* dark mode: image pane goes black, structural borders go black */
   html.dark .pane-image,
@@ -744,7 +744,7 @@
     <span class="tr-sep"></span>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1.5 A6 6 0 0 0 7.5 13.5 Z"/><circle cx="7.5" cy="7.5" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
     <span class="tr-sep"></span>
-    <span id="topright" title="About this archive">v1.02.18</span>
+    <span id="topright" title="About this archive">v1.02.19</span>
   </div>
 </header>
 
@@ -819,7 +819,7 @@
 
 <script>
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.02.18";
+  const VERSION      = "v1.02.19";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
