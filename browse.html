@@ -636,7 +636,7 @@
   }
   .pane-meta .graph-actions a .bot .ar{color:var(--copper-deep);font-size:9px;line-height:1}
 
-  /* ── Curator note ── */
+  /* ── Curator note (P100, read-only) ── */
   .pane-meta .curator-note{
     font-family:var(--mono);font-size:11px;font-style:normal;
     letter-spacing:0.02em;line-height:1.65;
@@ -644,43 +644,48 @@
     border-top:1px dashed var(--rule);color:var(--muted);
   }
 
-  /* ── Inline researcher note editor ── */
-  .note-editor{margin-top:14px;border-top:1px dashed var(--rule);padding-top:10px}
-  .note-editor-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-  .note-editor-lbl{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)}
-  .note-edit-btn{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;background:none;border:none;padding:0;cursor:pointer;color:var(--copper-deep)}
-  .note-edit-btn:hover{opacity:0.7}
-  .note-display{font-family:var(--mono);font-size:11px;letter-spacing:0.02em;line-height:1.65;color:var(--muted);white-space:pre-wrap}
-  .note-textarea{
-    width:100%;box-sizing:border-box;
-    font-family:var(--mono);font-size:11px;letter-spacing:0.02em;line-height:1.65;
-    color:var(--ink);background:var(--soft);
-    border:1px solid var(--rule);border-radius:2px;
-    padding:8px 10px;resize:vertical;min-height:72px;
-    outline:none;display:none;
-  }
-  html.dark .note-textarea{background:#2a2826;border-color:#3a3834;color:var(--inv-fg)}
-  .note-textarea:focus{border-color:var(--muted)}
-  .note-save-row{display:none;align-items:center;gap:10px;margin-top:7px}
-  .note-save-btn{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;background:var(--ink);color:var(--bg);border:none;padding:4px 10px;border-radius:1px;cursor:pointer}
-  html.dark .note-save-btn{background:var(--inv-fg);color:#1e1c1a}
-  .note-save-btn:hover{opacity:0.8}
-  .note-save-btn:disabled{opacity:0.35;cursor:not-allowed}
-  .note-cancel-btn{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;background:none;border:none;padding:0;cursor:pointer;color:var(--muted)}
-  .note-cancel-btn:hover{color:var(--ink)}
-  .note-status{font-family:var(--mono);font-size:9px;letter-spacing:0.04em;color:var(--muted);margin-left:auto}
-  .note-status.ok{color:#3a7a4a}
-  .note-status.err{color:var(--red-deep)}
-  .note-auth-row{display:none;align-items:center;gap:6px;margin-top:7px}
-  .note-auth-pass{
-    flex:1;font-family:var(--mono);font-size:10px;letter-spacing:0.02em;
+  /* ── Researcher notes panel ── */
+  .rn-panel{margin-top:14px;border-top:1px dashed var(--rule);padding-top:10px}
+  .rn-head{display:flex;align-items:center;gap:6px;margin-bottom:7px}
+  .rn-lock-btn{background:none;border:none;padding:0;cursor:pointer;color:var(--muted);display:flex;align-items:center;line-height:1;flex-shrink:0}
+  .rn-lock-btn:hover{color:var(--ink)}
+  .rn-label{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)}
+  .rn-who{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;color:var(--copper-deep);margin-left:auto}
+  .rn-count{font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:auto;opacity:0.6}
+  /* auth row */
+  .rn-auth{display:flex;align-items:center;gap:6px;margin-top:0;margin-bottom:7px}
+  .rn-pin-input{
+    width:80px;font-family:var(--mono);font-size:10px;letter-spacing:0.1em;
     background:var(--soft);border:1px solid var(--rule);color:var(--ink);
     padding:3px 7px;border-radius:1px;outline:none;
   }
-  html.dark .note-auth-pass{background:#2a2826;border-color:#3a3834;color:var(--inv-fg)}
-  .note-auth-pass:focus{border-color:var(--muted)}
-  .note-auth-btn{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;background:none;border:1px solid var(--rule);padding:3px 8px;border-radius:1px;cursor:pointer;color:var(--muted);white-space:nowrap}
-  .note-auth-btn:hover{border-color:var(--muted);color:var(--ink)}
+  html.dark .rn-pin-input{background:#2a2826;border-color:#3a3834;color:var(--inv-fg)}
+  .rn-pin-input:focus{border-color:var(--muted)}
+  .rn-pin-btn{font-family:var(--mono);font-size:13px;background:none;border:none;padding:0 2px;cursor:pointer;color:var(--muted);line-height:1}
+  .rn-pin-btn:hover{color:var(--ink)}
+  .rn-pin-err{font-family:var(--mono);font-size:9px;color:var(--red-deep);letter-spacing:0.04em}
+  /* notes list */
+  .rn-list{display:flex;flex-direction:column;gap:6px;margin-bottom:9px}
+  .rn-row{display:grid;grid-template-columns:18px 1fr auto;gap:7px;align-items:baseline}
+  .rn-by{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.1em;color:var(--muted)}
+  .rn-text{font-size:11px;line-height:1.55;color:var(--ink);word-break:break-word}
+  html.dark .rn-text{color:var(--inv-fg)}
+  .rn-date{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.03em;white-space:nowrap;opacity:0.7}
+  .rn-list-locked .rn-text{color:var(--muted)}
+  /* add note form */
+  .rn-textarea{
+    width:100%;box-sizing:border-box;
+    font-size:11px;line-height:1.55;
+    color:var(--ink);background:var(--soft);
+    border:1px solid var(--rule);border-radius:1px;
+    padding:6px 8px;resize:none;outline:none;
+  }
+  html.dark .rn-textarea{background:#2a2826;border-color:#3a3834;color:var(--inv-fg)}
+  .rn-textarea:focus{border-color:var(--muted)}
+  .rn-add-foot{display:flex;justify-content:flex-end;margin-top:5px}
+  .rn-add-btn{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;background:var(--ink);color:var(--bg);border:none;padding:3px 10px;border-radius:1px;cursor:pointer}
+  html.dark .rn-add-btn{background:var(--inv-fg);color:#1e1c1a}
+  .rn-add-btn:hover{opacity:0.8}
 
   /* ── Filter panel (browse menu) — outline tag chips, red active state ── */
   .filter-panel{padding:16px 20px 14px}
@@ -813,52 +818,98 @@
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
 
-  // ── Wikibase write auth (per-session, never persisted) ────────────────────
-  let wbCsrf = null;
+  // ── Researcher notes — PIN auth + localStorage ───────────────────────────
+  // PIN → researcher initials. Add foundation-supplied pins here.
+  const RPINS = { "203BTP": "BP" };
 
-  async function wbPost(params) {
-    params.format  = "json";
-    params.origin  = location.origin;
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      credentials: "include",
-      body: new URLSearchParams(params)
-    });
-    return res.json();
+  function rnDate() {
+    const d = new Date();
+    return `${String(d.getFullYear()).slice(2)}.${d.getMonth() + 1}.${d.getDate()}`;
+  }
+  function rnSession()             { return sessionStorage.getItem("hhf_researcher") || null; }
+  function rnUnlock(initials)      { sessionStorage.setItem("hhf_researcher", initials); }
+  function rnLockOut()             { sessionStorage.removeItem("hhf_researcher"); }
+  function rnLoad(archId) {
+    try { return JSON.parse(localStorage.getItem("hhf_rn") || "{}")[archId] || []; }
+    catch { return []; }
+  }
+  function rnSave(archId, notes) {
+    try {
+      const all = JSON.parse(localStorage.getItem("hhf_rn") || "{}");
+      all[archId] = notes;
+      localStorage.setItem("hhf_rn", JSON.stringify(all));
+    } catch {}
   }
 
-  async function wbGet(params) {
-    params.format = "json";
-    params.origin = location.origin;
-    const res = await fetch(API_URL + "?" + new URLSearchParams(params), {
-      credentials: "include"
-    });
-    return res.json();
-  }
+  const LOCK_SVG = `<svg width="10" height="12" viewBox="0 0 10 12" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="5.5" width="8" height="6" rx="1"/><path d="M3 5.5V3.8a2 2 0 0 1 4 0v1.7"/></svg>`;
+  const UNLOCK_SVG = `<svg width="10" height="12" viewBox="0 0 10 12" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="5.5" width="8" height="6" rx="1"/><path d="M3 5.5V3.8a2 2 0 0 1 4 0V1.5"/></svg>`;
 
-  async function wbAuthenticate(password) {
-    const lt  = await wbGet({ action: "query", meta: "tokens", type: "login" });
-    const tok = lt.query.tokens.logintoken;
-    const lr  = await wbPost({ action: "login", lgname: "MyBot@my-bot", lgpassword: password, lgtoken: tok });
-    if (lr.login?.result !== "Success") throw new Error(lr.login?.reason || "Login failed");
-    const cr  = await wbGet({ action: "query", meta: "tokens" });
-    wbCsrf    = cr.query.tokens.csrftoken;
-  }
+  function renderRN(archId) {
+    const panel = document.getElementById("rn-panel");
+    if (!panel) return;
+    const researcher = rnSession();
+    const notes      = rnLoad(archId);
+    const noteRows   = notes.map(n =>
+      `<div class="rn-row"><span class="rn-by">${escapeHTML(n.by)}</span><span class="rn-text">${escapeHTML(n.text)}</span><span class="rn-date">${escapeHTML(n.date)}</span></div>`
+    ).join("");
 
-  async function wbSaveP100(qid, noteText) {
-    const er     = await wbGet({ action: "wbgetentities", ids: qid, props: "claims" });
-    const claims = er.entities?.[qid]?.claims?.P100 || [];
-    if (noteText === "") {
-      if (claims.length > 0) {
-        await wbPost({ action: "wbremoveclaims", claim: claims[0].id, token: wbCsrf });
+    if (!researcher) {
+      panel.innerHTML = `
+        <div class="rn-head">
+          <button class="rn-lock-btn" id="rn-lock-btn" title="Unlock to add notes">${LOCK_SVG}</button>
+          <span class="rn-label">researcher notes</span>
+          ${notes.length ? `<span class="rn-count">${notes.length}</span>` : ""}
+        </div>
+        <div class="rn-auth" id="rn-auth" style="display:none">
+          <input class="rn-pin-input" type="password" id="rn-pin" placeholder="r-pin" maxlength="12" autocomplete="off">
+          <button class="rn-pin-btn" id="rn-pin-btn">→</button>
+          <span class="rn-pin-err" id="rn-pin-err"></span>
+        </div>
+        ${noteRows ? `<div class="rn-list rn-list-locked">${noteRows}</div>` : ""}
+      `;
+      const authRow = panel.querySelector("#rn-auth");
+      panel.querySelector("#rn-lock-btn").addEventListener("click", () => {
+        authRow.style.display = "flex";
+        panel.querySelector("#rn-pin").focus();
+      });
+      const pinInput = panel.querySelector("#rn-pin");
+      const pinBtn   = panel.querySelector("#rn-pin-btn");
+      const pinErr   = panel.querySelector("#rn-pin-err");
+      function tryPin() {
+        const initials = RPINS[pinInput.value.trim()];
+        if (!initials) { pinErr.textContent = "invalid pin"; setTimeout(() => { pinErr.textContent = ""; }, 1800); pinInput.select(); return; }
+        rnUnlock(initials);
+        renderRN(archId);
       }
-      return;
-    }
-    if (claims.length > 0) {
-      await wbPost({ action: "wbsetclaimvalue", claim: claims[0].id, snaktype: "value", value: JSON.stringify(noteText), token: wbCsrf });
+      pinBtn.addEventListener("click", tryPin);
+      pinInput.addEventListener("keydown", e => { if (e.key === "Enter") tryPin(); });
     } else {
-      await wbPost({ action: "wbcreateclaim", entity: qid, property: "P100", snaktype: "value", value: JSON.stringify(noteText), token: wbCsrf });
+      panel.innerHTML = `
+        <div class="rn-head">
+          <button class="rn-lock-btn" id="rn-lock-btn" title="Lock">${UNLOCK_SVG}</button>
+          <span class="rn-label">researcher notes</span>
+          <span class="rn-who">${escapeHTML(researcher)}</span>
+        </div>
+        ${noteRows ? `<div class="rn-list">${noteRows}</div>` : ""}
+        <div class="rn-add">
+          <textarea class="rn-textarea" id="rn-textarea" placeholder="add a note…" rows="2"></textarea>
+          <div class="rn-add-foot"><button class="rn-add-btn" id="rn-add-btn">add</button></div>
+        </div>
+      `;
+      panel.querySelector("#rn-lock-btn").addEventListener("click", () => { rnLockOut(); renderRN(archId); });
+      const textarea = panel.querySelector("#rn-textarea");
+      const addBtn   = panel.querySelector("#rn-add-btn");
+      function doAdd() {
+        const text = textarea.value.trim();
+        if (!text) return;
+        const updated = rnLoad(archId);
+        updated.unshift({ by: researcher, date: rnDate(), text });
+        rnSave(archId, updated);
+        textarea.value = "";
+        renderRN(archId);
+      }
+      addBtn.addEventListener("click", doAdd);
+      textarea.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); doAdd(); } });
     }
   }
 
@@ -1674,119 +1725,15 @@ $("#foot-dims").textContent = "";
         ${siblingsHTML}
         ${graphActionsHTML}
       </section>
-      ${item.qid ? `
-      <div class="note-editor" id="note-editor" data-qid="${escapeHTML(item.qid)}">
-        <div class="note-editor-head">
-          <span class="note-editor-lbl">researcher note</span>
-          <button class="note-edit-btn" id="note-edit-btn">edit</button>
-        </div>
-        <p class="note-display" id="note-display">${item.notes
-          ? escapeHTML(item.notes)
-          : `<span style="color:var(--hint);font-style:italic">no note</span>`}</p>
-        <textarea class="note-textarea" id="note-textarea">${item.notes ? escapeHTML(item.notes) : ""}</textarea>
-        <div class="note-save-row" id="note-save-row">
-          <button class="note-save-btn" id="note-save-btn">Save</button>
-          <button class="note-cancel-btn" id="note-cancel-btn">cancel</button>
-          <span class="note-status" id="note-status"></span>
-        </div>
-        <div class="note-auth-row" id="note-auth-row">
-          <input class="note-auth-pass" type="password" id="note-auth-pass" placeholder="bot password" autocomplete="off">
-          <button class="note-auth-btn" id="note-auth-btn">authenticate →</button>
-        </div>
-      </div>` : (item.notes ? `<p class="curator-note">${escapeHTML(item.notes)}</p>` : "")}
+      ${item.notes ? `<p class="curator-note">${escapeHTML(item.notes)}</p>` : ""}
+      <div class="rn-panel" id="rn-panel"></div>
     `;
 
     body.querySelectorAll(".sib[data-sib-id]").forEach(el => {
       el.addEventListener("click", e => { e.preventDefault(); selectItem(el.dataset.sibId); });
     });
 
-    // ── Curator note editor wiring ────────────────────────────────────────
-    (function() {
-      const editor   = document.getElementById("note-editor");
-      if (!editor) return;
-      const qid      = editor.dataset.qid;
-      const editBtn  = document.getElementById("note-edit-btn");
-      const display  = document.getElementById("note-display");
-      const textarea = document.getElementById("note-textarea");
-      const saveRow  = document.getElementById("note-save-row");
-      const saveBtn  = document.getElementById("note-save-btn");
-      const cancelBtn= document.getElementById("note-cancel-btn");
-      const status   = document.getElementById("note-status");
-      const authRow  = document.getElementById("note-auth-row");
-      const authPass = document.getElementById("note-auth-pass");
-      const authBtn  = document.getElementById("note-auth-btn");
-
-      editBtn.addEventListener("click", () => {
-        display.style.display  = "none";
-        textarea.style.display = "block";
-        saveRow.style.display  = "flex";
-        editBtn.style.display  = "none";
-        textarea.focus();
-      });
-
-      cancelBtn.addEventListener("click", () => {
-        textarea.style.display = "none";
-        saveRow.style.display  = "none";
-        authRow.style.display  = "none";
-        display.style.display  = "block";
-        editBtn.style.display  = "";
-        status.textContent = "";
-        status.className   = "note-status";
-      });
-
-      async function doSave() {
-        const newNote = textarea.value.trim();
-        saveBtn.disabled   = true;
-        status.className   = "note-status";
-        status.textContent = "saving…";
-        try {
-          await wbSaveP100(qid, newNote);
-          const it = state.items.find(i => i.qid === qid);
-          if (it) it.notes = newNote || null;
-          display.innerHTML = newNote
-            ? escapeHTML(newNote)
-            : `<span style="color:var(--hint);font-style:italic">no note</span>`;
-          textarea.style.display = "none";
-          saveRow.style.display  = "none";
-          authRow.style.display  = "none";
-          display.style.display  = "block";
-          editBtn.style.display  = "";
-          status.textContent = "";
-        } catch(e) {
-          status.className   = "note-status err";
-          status.textContent = "error: " + e.message;
-        } finally {
-          saveBtn.disabled = false;
-        }
-      }
-
-      saveBtn.addEventListener("click", async () => {
-        if (!wbCsrf) { authRow.style.display = "flex"; authPass.focus(); return; }
-        await doSave();
-      });
-
-      authBtn.addEventListener("click", async () => {
-        const pass = authPass.value.trim();
-        if (!pass) return;
-        authBtn.disabled   = true;
-        status.className   = "note-status";
-        status.textContent = "authenticating…";
-        try {
-          await wbAuthenticate(pass);
-          authPass.value = "";
-          authRow.style.display = "none";
-          await doSave();
-        } catch(e) {
-          status.className   = "note-status err";
-          status.textContent = e.message;
-        } finally {
-          authBtn.disabled = false;
-        }
-      });
-
-      authPass.addEventListener("keydown", e => { if (e.key === "Enter") authBtn.click(); });
-    })();
-
+    renderRN(item.id);
     requestAnimationFrame(() => updatePip("meta-body", "meta-pip"));
   }
 
