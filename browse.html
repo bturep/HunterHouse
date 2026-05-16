@@ -624,8 +624,16 @@
     }
     .mob-sheet.mob-sheet-open{transform:translateY(52px)}
     .mob-sheet.mob-sheet-full{transform:translateY(0);border-radius:0}
-    /* Pills in the sheet are display-only — no filter interaction */
-    .mob-sheet-body .pill{pointer-events:none;cursor:default}
+    /* Pills: same treatment as desktop record pane — colored text, no chip */
+    .mob-sheet-body .pill{
+      height:auto;padding:0;background:transparent;
+      font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:0.02em;
+      text-transform:none;border-radius:0;border:0;
+      margin:0 6px 0 0;color:var(--pf,var(--ink));
+      pointer-events:none;cursor:default;
+    }
+    .mob-sheet-body .pill::before{content:"["}
+    .mob-sheet-body .pill::after{content:"]"}
     .mob-sheet-img{cursor:pointer;touch-action:manipulation}
 
     .mob-sheet-bar{
@@ -738,7 +746,7 @@
   /* ── Wordmark ── */
   .markid .name{font-weight:700}
 
-  /* ── Mobile header: rounded card ── */
+  /* ── Mobile header: rounded card + centred wordmark ── */
   @media (max-width:767px){
     .site-top{
       background:#1a1816;
@@ -747,6 +755,7 @@
       box-shadow:0 4px 16px rgba(0,0,0,0.35);
       position:relative;z-index:20;
     }
+    .markid{position:absolute;left:50%;transform:translateX(-50%)}
   }
 
   /* ── Record pane head ── */
@@ -1413,33 +1422,50 @@
       imgEl.src = ""; imgEl.alt = "";
     }
 
-    // KV rows — pills rendered as <span> (display-only, not interactive)
+    // KV rows — same fields as desktop, pills as colored text (not chips)
     const pill = (cls, text) => `<span class="pill ${cls}">${escapeHTML(text)}</span>`;
-    const rows = [];
-    if (item.date)              rows.push(["Date",     escapeHTML(item.date)]);
-    if (item.phase)             rows.push(["Phase",    escapeHTML(item.phase)]);
+    const descRows = [];
+    if (item.id)                descRows.push(["Item",    displayId(item.id)]);
+    if (item.date)              descRows.push(["Date",    escapeHTML(item.date)]);
+    if (item.phase) {
+      const pos = item.setPosition ? ` <span style="color:var(--muted);font-family:var(--mono);font-size:10px;margin-left:4px">${escapeHTML(item.setPosition)}</span>` : "";
+      descRows.push(["Phase", escapeHTML(item.phase) + pos]);
+    }
     if (item.areas?.length) {
-      rows.push(["Areas", item.areas.map(a => pill(`area-pill ${pillCls(PC.sage)}`, a)).join(" ")]);
+      descRows.push(["Areas", item.areas.map(a => pill(`area-pill ${pillCls(PC.sage)}`, a)).join("")]);
     }
     if (item.itemType) {
-      rows.push(["Type", pill(`type-pill ${pillCls(itemTypePillColor())}`, item.itemType)]);
+      descRows.push(["Item type", pill(`type-pill ${pillCls(itemTypePillColor())}`, item.itemType)]);
     }
     if (item.drawTypes?.length) {
-      rows.push(["Drawing", sortDrawTypes(item.drawTypes).map(dt => pill(`drawtype-pill ${pillCls(drawTypePillColor())}`, dt)).join(" ")]);
+      descRows.push(["Drawing type", sortDrawTypes(item.drawTypes).map(dt => pill(`drawtype-pill ${pillCls(drawTypePillColor())}`, dt)).join("")]);
     }
-    if (item.medium)            rows.push(["Medium",   escapeHTML(item.medium)]);
-    if (item.builtStatus) {
-      rows.push(["Built", pill(`builtstatus-pill ${pillCls(PC.moss)}`, item.builtStatus)]);
-    }
-    if (item.creator) {
-      rows.push([creatorLabel(item.itemType), pill(`creator-pill ${pillCls(PC.clay)}`, item.creator)]);
-    }
-    if (item.heldBy)            rows.push(["Held by",  escapeHTML(item.heldBy)]);
+    if (item.medium)            descRows.push(["Medium",    escapeHTML(item.medium)]);
+    if (item.builtStatus)       descRows.push(["Built",     pill(`builtstatus-pill ${pillCls(PC.moss)}`, item.builtStatus)]);
+    if (item.creator)           descRows.push([creatorLabel(item.itemType), pill(`creator-pill ${pillCls(PC.clay)}`, item.creator)]);
+    if (item.designedBy)        descRows.push(["Designed by", pill(`creator-pill ${pillCls(PC.clay)}`, item.designedBy)]);
+    if (item.builtBy)           descRows.push(["Built by",  pill(`creator-pill ${pillCls(PC.clay)}`, item.builtBy)]);
+    if (item.heldBy)            descRows.push(["Held by",   escapeHTML(item.heldBy)]);
+
+    const archRows = [];
     if (item.location) {
-      rows.push(["Location", item.location.split(/,\s*/).map(escapeHTML).join(" › ")]);
+      archRows.push(["Location", item.location.split(/,\s*/).map(escapeHTML).join(" › ")]);
     }
-    const kvHTML = rows.map(([k,v]) => `<div class="row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
-    document.getElementById("mob-sheet-body").innerHTML = `<dl class="kv">${kvHTML}</dl>`;
+    if (item.rights) {
+      const contact = archiveAbbrev(item.heldBy) === "CAA"
+        ? "Contact for permissions." : "Contact the Hunter House Foundation.";
+      archRows.push(["Rights", `${escapeHTML(item.rights)}<span class="rights-note">${escapeHTML(contact)}</span>`]);
+    }
+    if (item.archiveLink) {
+      archRows.push(["Finding aid", `<a href="${escapeHTML(item.archiveLink)}" target="_blank" rel="noopener">${archiveLinkLabel(item.heldBy)}</a>`]);
+    }
+
+    const kvRow = ([k,v]) => `<div class="row"><dt>${k}</dt><dd>${v}</dd></div>`;
+    const descHTML = descRows.map(kvRow).join("");
+    const archHTML = archRows.map(kvRow).join("");
+    document.getElementById("mob-sheet-body").innerHTML =
+      `<dl class="kv">${descHTML}</dl>` +
+      (archHTML ? `<dl class="kv" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--rule-soft)">${archHTML}</dl>` : "");
     updateMobSheetNav();
   }
 
