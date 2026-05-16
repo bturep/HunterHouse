@@ -737,22 +737,52 @@
     try { localStorage.removeItem(CACHE_KEY); } catch {}
   }
 
-  async function loadFromWikibase() {
-    // Return cached data if less than 2 hours old
-    try {
-      const raw = localStorage.getItem(CACHE_KEY);
-      if (raw) {
-        const { ts, items } = JSON.parse(raw);
-        if (Date.now() - ts < 7200000) {
-          return items;
-        }
+  // Converts raw SPARQL bindings to the items array. Used by both the
+  // normal fetch path and the splash-page prefetch path.
+  function processRows(rows) {
+    const dateStr = v => v ? v.replace(/^\+/, "").split("T")[0] : null;
+    const map = new Map();
+    for (const r of rows) {
+      const qid = r.item.value.split("/").pop();
+      if (!map.has(qid)) {
+        map.set(qid, {
+          qid,
+          id:               r.archId.value,
+          title:            r.label.value,
+          image:            r.img.value,
+          master:           r.master?.value || null,
+          date:             dateStr(r.d1?.value) || dateStr(r.d2?.value) || dateStr(r.d3?.value),
+          phase:            r.phaseLabel?.value || r.phase2Label?.value || null,
+          phaseQID:         r.phase?.value?.split("/").pop() || r.phase2?.value?.split("/").pop() || null,
+          areas:            [],
+          drawTypes:        [],
+          itemType:         r.itypeLabel?.value || null,
+          sourceCollection: r.srcLabel?.value || null,
+          creator:          r.creatorLabel?.value || null,
+          builtBy:          r.builtByLabel?.value || null,
+          designedBy:       r.designedByLabel?.value || null,
+          use:              r.use?.value || null,
+          builtStatus:      r.builtStatusLabel?.value || null,
+          setPosition:      r.setPos?.value || null,
+          notes:            r.notes?.value || null,
+          medium:           r.medium?.value || null,
+          rights:           r.rightsLabel?.value || null,
+          heldBy:           r.heldByLabel?.value || null,
+          archiveLink:      r.archiveLink?.value || null,
+          location:         r.location?.value || null,
+        });
       }
-    } catch {}
+      const it = map.get(qid);
+      if (r.areaLabel?.value && !it.areas.includes(r.areaLabel.value))
+        it.areas.push(r.areaLabel.value);
+      if (r.drawTypeLabel?.value && !it.drawTypes.includes(r.drawTypeLabel.value))
+        it.drawTypes.push(r.drawTypeLabel.value);
+    }
+    return [...map.values()].sort((a, b) => (a.id || "").localeCompare(b.id || ""));
+  }
 
-    // Single SPARQL query — only items with P2 (archive ID) + P96 (preview image),
-    // with all labels resolved inline. Multi-valued P87 (areas) creates duplicate rows;
-    // we collapse them in the loop below.
-    const Q = `
+  // SPARQL query — must stay in sync with the prefetch copy in index.html
+  const CATALOGUE_QUERY = `
 PREFIX wdt: <https://hunterhouse.wikibase.cloud/prop/direct/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX wikibase: <http://wikiba.se/ontology#>
@@ -801,51 +831,34 @@ WHERE {
   OPTIONAL { ?item wdt:P142 ?location }
 }`;
 
-    const rows = await sparqlQuery(Q);
-    const dateStr = v => v ? v.replace(/^\+/, "").split("T")[0] : null;
-    const map = new Map();
-
-    for (const r of rows) {
-      const qid = r.item.value.split("/").pop();
-      if (!map.has(qid)) {
-        map.set(qid, {
-          qid,
-          id:               r.archId.value,
-          title:            r.label.value,
-          image:            r.img.value,
-          master:           r.master?.value || null,
-          date:             dateStr(r.d1?.value) || dateStr(r.d2?.value) || dateStr(r.d3?.value),
-          phase:            r.phaseLabel?.value || r.phase2Label?.value || null,
-          phaseQID:         r.phase?.value?.split("/").pop() || r.phase2?.value?.split("/").pop() || null,
-          areas:            [],
-          drawTypes:        [],
-          itemType:         r.itypeLabel?.value || null,
-          sourceCollection: r.srcLabel?.value || null,
-          creator:          r.creatorLabel?.value || null,
-          builtBy:          r.builtByLabel?.value || null,
-          designedBy:       r.designedByLabel?.value || null,
-          use:              r.use?.value || null,
-          builtStatus:      r.builtStatusLabel?.value || null,
-          setPosition:      r.setPos?.value || null,
-          notes:            r.notes?.value || null,
-          medium:           r.medium?.value || null,
-          rights:           r.rightsLabel?.value || null,
-          heldBy:           r.heldByLabel?.value || null,
-          archiveLink:      r.archiveLink?.value || null,
-          location:         r.location?.value || null,
-        });
+  async function loadFromWikibase() {
+    // 1. Check for splash-page prefetch (sessionStorage, 5 min TTL)
+    try {
+      const pre = sessionStorage.getItem("hhf_prefetch");
+      if (pre) {
+        sessionStorage.removeItem("hhf_prefetch");
+        const { ts, rows } = JSON.parse(pre);
+        if (Date.now() - ts < 300000) {
+          const items = processRows(rows);
+          try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts, items })); } catch {}
+          return items;
+        }
       }
-      const it = map.get(qid);
-      if (r.areaLabel?.value && !it.areas.includes(r.areaLabel.value))
-        it.areas.push(r.areaLabel.value);
-      if (r.drawTypeLabel?.value && !it.drawTypes.includes(r.drawTypeLabel.value))
-        it.drawTypes.push(r.drawTypeLabel.value);
-    }
+    } catch {}
 
-    const items = [...map.values()].sort((a, b) => (a.id || "").localeCompare(b.id || ""));
+    // 2. Return localStorage cache if less than 2 hours old
+    try {
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (raw) {
+        const { ts, items } = JSON.parse(raw);
+        if (Date.now() - ts < 7200000) return items;
+      }
+    } catch {}
 
+    // 3. Full fetch from Wikibase
+    const rows = await sparqlQuery(CATALOGUE_QUERY);
+    const items = processRows(rows);
     try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), items })); } catch {}
-
     return items;
   }
 
@@ -1728,7 +1741,6 @@ WHERE {
       () => updatePip("meta-body", "meta-pip"), { passive: true });
 
     try {
-      await new Promise(() => {}); // DEV: blocks load indefinitely for loading-state design
       const items = await loadFromWikibase();
       if (!items.length) {
         $("#rows").innerHTML = `<div class="load-msg">No items with images found in Wikibase.</div>`;
