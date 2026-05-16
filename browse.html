@@ -675,15 +675,10 @@
   /* ── Data footer (Wikibase / SPARQL / JSON) ── */
   .data-footer{
     height:41px;box-sizing:border-box;flex-shrink:0;
-    padding:0 22px;border-top:1px solid var(--rule);background:var(--bg);
-    display:grid;grid-template-columns:96px 1fr;gap:8px;align-items:center;
+    padding:0 22px 0 calc(22px + 96px + 8px);
+    border-top:1px solid var(--rule);background:var(--bg);
+    display:flex;align-items:center;gap:14px;
   }
-  .data-footer .df-label{
-    font-family:var(--mono);font-size:11px;color:var(--muted);
-    letter-spacing:0.04em;text-transform:lowercase;text-align:right;
-  }
-  .data-footer .df-label::after{content:":";color:var(--hint);margin-left:2px}
-  .data-footer .df-links{display:flex;gap:14px}
   .data-footer a{
     font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:0.02em;text-decoration:none;transition:color 0.12s;
@@ -885,12 +880,9 @@
         <div class="empty">Select an item from the list</div>
       </div>
       <div class="data-footer" id="data-footer">
-        <span class="df-label">data</span>
-        <span class="df-links">
-          <a id="df-wikibase" href="#" onclick="return false" style="opacity:0.4">Wikibase ↗</a>
-          <a id="df-sparql"   href="#" onclick="return false" style="opacity:0.4">SPARQL ↗</a>
-          <a id="df-json"     href="#" onclick="return false" style="opacity:0.4">JSON ↗</a>
-        </span>
+        <a id="df-wikibase" href="#" onclick="return false" style="opacity:0.4">Wikibase ↗</a>
+        <a id="df-sparql"   href="#" onclick="return false" style="opacity:0.4">SPARQL ↗</a>
+        <a id="df-json"     href="#" onclick="return false" style="opacity:0.4">JSON ↗</a>
       </div>
     </div>
   </div>
