@@ -498,6 +498,41 @@
 
   body.loading #canvas{ visibility:hidden }
 
+  /* ── Mobile about overlay ── */
+  #mob-about{display:none;position:fixed;inset:0;z-index:300;background:var(--bg);overflow-y:auto}
+  #mob-about.open{display:flex;flex-direction:column;padding:0 28px 52px}
+  #mob-about-close{
+    align-self:flex-end;flex-shrink:0;margin:14px -4px 0;
+    background:none;border:none;padding:4px 8px;
+    font-family:var(--mono);font-size:20px;line-height:1;color:var(--muted);cursor:pointer;
+  }
+  #mob-about-close:active{color:var(--ink)}
+  .mob-about-title{
+    font-family:var(--mono);font-size:15px;font-weight:700;
+    letter-spacing:0.14em;text-transform:uppercase;color:var(--ink);line-height:1.3;
+    margin:40px 0 6px;
+  }
+  .mob-about-ver{
+    font-family:var(--mono);font-size:11px;color:var(--hint);
+    letter-spacing:0.06em;margin:0 0 36px;
+  }
+  .mob-about-body{
+    font-size:14px;line-height:1.7;color:var(--ink);font-weight:300;
+    letter-spacing:-0.005em;margin:0 0 14px;
+  }
+  .mob-about-rule{border:0;border-top:1px solid var(--rule);margin:28px 0}
+  .mob-about-credits{
+    display:grid;grid-template-columns:auto 1fr;gap:8px 16px;align-items:baseline;
+  }
+  .mob-about-credits dt{
+    font-family:var(--mono);font-size:10px;color:var(--muted);
+    letter-spacing:0.10em;text-transform:uppercase;white-space:nowrap;
+  }
+  .mob-about-credits dd{
+    font-family:var(--mono);font-size:11px;color:var(--ink);
+    letter-spacing:0.02em;line-height:1.6;margin:0;
+  }
+
   #load-screen{
     display:none;position:absolute;inset:0;z-index:10;
     align-items:center;justify-content:center;
@@ -524,9 +559,7 @@
     .site-top{padding:0 16px;gap:12px}
     .header-search{padding:0 12px;border-left:0;border-right:0}
     .fbtn{padding:0 14px}
-    #search-toggle,#fs-toggle,#topright,#search-input{display:none}
-    .site-topright{justify-content:flex-end;gap:0}
-    .site-topright .tr-sep{display:none}
+    .site-topright{display:none}
 
     /* shell: vertical flex */
     .shell{flex-direction:column}
@@ -807,6 +840,21 @@
   <button id="about-close" title="Close">×</button>
 </div>
 
+<div id="mob-about" role="dialog" aria-modal="true" aria-label="About Hunter House Foundation Archive">
+  <button id="mob-about-close" aria-label="Close">×</button>
+  <p class="mob-about-title">Hunter House<br>Foundation Archive</p>
+  <p class="mob-about-ver" id="mob-about-ver"></p>
+  <p class="mob-about-body">A foundation dedicated to the stewardship of the residence and architectural archive of architect Richard Morrow Hunter, 1970–2020. 203 Goward Road, Saanich, British Columbia.</p>
+  <p class="mob-about-body">Open data archive on Wikibase — items individually addressable and SPARQL-queryable. Metadata CC0. Archival description informed by GLAM standards.</p>
+  <hr class="mob-about-rule">
+  <dl class="mob-about-credits">
+    <dt>Stewards</dt>
+    <dd>Floyd Marinescu<br>Olivia Jol</dd>
+    <dt>Archive Project Director</dt>
+    <dd>Brandon Poole</dd>
+  </dl>
+</div>
+
 <div class="shell">
 
   <div class="mobile-tabs">
@@ -874,7 +922,6 @@
       <div class="scroll-pip scroll-pip-r" id="meta-pip"></div>
       <div class="meta-head">
         <span class="l">Record</span>
-        <span class="r" id="meta-source">—</span>
       </div>
       <div class="meta-body" id="meta-body">
         <div class="empty">Select an item from the list</div>
@@ -1708,7 +1755,6 @@ $("#foot-dims").textContent = "";
   // ── Meta pane ─────────────────────────────────────────────────────────────
   function renderMeta(item) {
     const body = $("#meta-body");
-    $("#meta-source").textContent = item.sourceCollection || "—";
 
     const areasHtml = (item.areas || []).map(a =>
       `<button class="pill area-pill ${pillCls(PC.sage)}${state.filterArea.has(a) ? " active" : ""}" data-area="${escapeHTML(a)}">${escapeHTML(a)}</button>`
@@ -2094,28 +2140,42 @@ $("#foot-dims").textContent = "";
     document.getElementById("mob-prev")?.addEventListener("click", () => selectAdjacent(-1));
     document.getElementById("mob-next")?.addEventListener("click", () => selectAdjacent(+1));
 
-    // Swipe left/right to switch tabs on mobile (skip swipes originating on the image canvas)
+    // Swipe left/right to switch tabs on mobile
+    // Attach to document (not .shell) so events from scrollable children are caught reliably
     {
       let sx = 0, sy = 0, sTarget = null;
       const cvs = document.getElementById("canvas");
-      const shell = document.querySelector(".shell");
-      shell.addEventListener("touchstart", e => {
+      document.addEventListener("touchstart", e => {
         sx = e.touches[0].clientX;
         sy = e.touches[0].clientY;
         sTarget = e.target;
       }, { passive: true });
-      shell.addEventListener("touchend", e => {
+      document.addEventListener("touchend", e => {
         if (!window.matchMedia("(max-width:767px)").matches) return;
         if (cvs.contains(sTarget)) return;
         const dx = e.changedTouches[0].clientX - sx;
         const dy = e.changedTouches[0].clientY - sy;
-        if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+        if (Math.abs(dx) < 40 || Math.abs(dy) > 60) return;
         const tabs = ["list","image","meta"];
         const cur = tabs.findIndex(t => document.querySelector(`.pane-${t}`)?.classList.contains("mobile-active"));
         if (cur === -1) return;
         const nxt = dx < 0 ? cur + 1 : cur - 1;
         if (nxt >= 0 && nxt < tabs.length) switchMobileTab(tabs[nxt]);
       }, { passive: true });
+    }
+
+    // Mobile about overlay — markid tap opens it instead of navigating to splash
+    {
+      const overlay = document.getElementById("mob-about");
+      document.getElementById("mob-about-ver").textContent = VERSION;
+      document.querySelector(".markid").addEventListener("click", e => {
+        if (!window.matchMedia("(max-width:767px)").matches) return;
+        e.preventDefault();
+        overlay.classList.add("open");
+      });
+      document.getElementById("mob-about-close").addEventListener("click", () => {
+        overlay.classList.remove("open");
+      });
     }
 
     $("#rows").addEventListener("click", e => {
