@@ -997,8 +997,7 @@ WHERE {
     const canvas = $("#canvas");
     const idx = state.filtered.findIndex(i => i.id === item.id);
 
-    $("#ih-id").textContent = (item.id || "").replace(/^HH-/, "");
-    $("#foot-dims").textContent = "";
+$("#foot-dims").textContent = "";
 
     const url = imageUrl(item);
     canvas.innerHTML = "";
