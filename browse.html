@@ -518,9 +518,16 @@
     letter-spacing:0.06em;margin:0 0 36px;
   }
   .mob-about-body{
-    font-size:14px;line-height:1.7;color:var(--ink);font-weight:300;
-    letter-spacing:-0.005em;margin:0 0 14px;
+    font-family:var(--mono);font-size:11px;line-height:1.7;color:var(--ink);
+    letter-spacing:0.02em;margin:0 0 14px;
   }
+  #mob-reload{
+    align-self:flex-start;margin-top:28px;
+    background:none;border:1px solid var(--rule);padding:6px 14px;
+    font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--muted);cursor:pointer;
+  }
+  #mob-reload:active{color:var(--ink);border-color:var(--muted)}
   .mob-about-rule{border:0;border-top:1px solid var(--rule);margin:28px 0}
   .mob-about-credits{
     display:grid;grid-template-columns:auto 1fr;gap:8px 16px;align-items:baseline;
@@ -856,6 +863,7 @@
     <dt>Project Lead</dt>
     <dd>Brandon Poole</dd>
   </dl>
+  <button id="mob-reload">Reload archive</button>
 </div>
 
 <div class="shell">
@@ -2169,49 +2177,6 @@ $("#foot-dims").textContent = "";
     document.getElementById("mob-prev")?.addEventListener("click", () => selectAdjacent(-1));
     document.getElementById("mob-next")?.addEventListener("click", () => selectAdjacent(+1));
 
-    // Swipe left/right to switch tabs on mobile
-    // Attach to document (not .shell) so events from scrollable children are caught reliably
-    {
-      let sx = 0, sy = 0, sTarget = null;
-      const cvs = document.getElementById("canvas");
-      document.addEventListener("touchstart", e => {
-        sx = e.touches[0].clientX;
-        sy = e.touches[0].clientY;
-        sTarget = e.target;
-      }, { passive: true });
-      document.addEventListener("touchend", e => {
-        if (!window.matchMedia("(max-width:767px)").matches) return;
-        if (cvs.contains(sTarget)) return;
-        const dx = e.changedTouches[0].clientX - sx;
-        const dy = e.changedTouches[0].clientY - sy;
-        if (Math.abs(dx) < 40 || Math.abs(dy) > 60) return;
-        const tabs = ["list","image","meta"];
-        const cur = tabs.findIndex(t => document.querySelector(`.pane-${t}`)?.classList.contains("mobile-active"));
-        if (cur === -1) return;
-        const nxt = dx < 0 ? cur + 1 : cur - 1;
-        if (nxt >= 0 && nxt < tabs.length) switchMobileTab(tabs[nxt]);
-      }, { passive: true });
-    }
-
-    // Pull-to-refresh: downward pull on list tab while list is at top
-    {
-      let pty = 0, ptx = 0, pullEligible = false;
-      const rowsEl = document.getElementById("rows");
-      document.addEventListener("touchstart", e => {
-        pullEligible = window.matchMedia("(max-width:767px)").matches &&
-          rowsEl.scrollTop === 0 &&
-          document.querySelector(".pane-list")?.classList.contains("mobile-active");
-        pty = e.touches[0].clientY;
-        ptx = e.touches[0].clientX;
-      }, { passive: true });
-      document.addEventListener("touchend", e => {
-        if (!pullEligible) return;
-        const dy = e.changedTouches[0].clientY - pty;
-        const dx = Math.abs(e.changedTouches[0].clientX - ptx);
-        if (dy > 80 && dx < 40) { clearCache(); location.reload(); }
-      }, { passive: true });
-    }
-
     // Mobile about overlay — markid tap opens it instead of navigating to splash
     {
       const overlay = document.getElementById("mob-about");
@@ -2223,6 +2188,9 @@ $("#foot-dims").textContent = "";
       });
       document.getElementById("mob-about-close").addEventListener("click", () => {
         overlay.classList.remove("open");
+      });
+      document.getElementById("mob-reload").addEventListener("click", () => {
+        clearCache(); location.reload();
       });
     }
 
