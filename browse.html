@@ -1742,13 +1742,13 @@ WHERE {
 
     try {
       const items = await loadFromWikibase();
+      document.body.classList.remove("loading");
       if (!items.length) {
         $("#rows").innerHTML = `<div class="load-msg">No items with images found in Wikibase.</div>`;
         return;
       }
 
       state.items = items;
-      document.body.classList.remove("loading");
 
       const params  = new URLSearchParams(location.search);
       const urlSort = params.get("sort");
