@@ -563,6 +563,7 @@
 
   .mob-sheet{display:none}
   .mob-row-strip{display:none}
+  .mob-lightbox{display:none}
 
   @media (max-width:767px){
     .site-top{gap:12px}
@@ -625,6 +626,7 @@
     .mob-sheet.mob-sheet-full{transform:translateY(0);border-radius:0}
     /* Pills in the sheet are display-only — no filter interaction */
     .mob-sheet-body .pill{pointer-events:none;cursor:default}
+    .mob-sheet-img{cursor:pointer;touch-action:manipulation}
 
     .mob-sheet-bar{
       height:48px;flex-shrink:0;cursor:pointer;
@@ -678,6 +680,40 @@
     .mob-sheet-body .kv dd{
       font-family:var(--mono);font-size:11px;color:var(--ink);line-height:1.55;
     }
+
+    /* ── Full-screen lightbox ── */
+    .mob-lightbox{
+      position:fixed;inset:0;z-index:200;
+      background:#000;
+      display:flex!important;flex-direction:column;
+      transform:translateY(100%);
+      transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .mob-lightbox.mob-lb-open{transform:translateY(0)}
+    .mob-lb-close{
+      position:absolute;top:14px;right:14px;z-index:10;
+      background:rgba(0,0,0,0.55);border:none;border-radius:6px;
+      color:rgba(255,255,255,0.85);font-family:var(--mono);
+      font-size:20px;line-height:1;padding:4px 11px;cursor:pointer;
+    }
+    .mob-lb-close:active{color:#fff}
+    .mob-lb-stage{
+      flex:1;position:relative;overflow:hidden;
+      touch-action:none;
+    }
+    .mob-lb-img{
+      position:absolute;top:0;left:0;
+      transform-origin:0 0;
+      user-select:none;-webkit-user-drag:none;
+      max-width:none;max-height:none;
+    }
+    .mob-lb-hint{
+      text-align:center;padding:10px 0 14px;flex-shrink:0;
+      font-family:var(--mono);font-size:10px;
+      color:rgba(255,255,255,0.3);letter-spacing:0.08em;
+      transition:opacity 2s;
+    }
+    .mob-lb-hint.fade{opacity:0}
   }
 
   /* ═══════════════════════════════════════════════════════════════════════
@@ -1049,6 +1085,14 @@
 
 </div>
 
+<div id="mob-lightbox" class="mob-lightbox">
+  <button id="mob-lb-close" class="mob-lb-close" aria-label="Close">×</button>
+  <div id="mob-lb-stage" class="mob-lb-stage">
+    <img id="mob-lb-img" class="mob-lb-img" alt="" draggable="false">
+  </div>
+  <div class="mob-lb-hint" id="mob-lb-hint">Pinch to zoom · Double-tap to reset</div>
+</div>
+
 <script>
   // ── Config ────────────────────────────────────────────────────────────────
   const VERSION      = "v1.03.00";
@@ -1405,6 +1449,64 @@
     const n = document.getElementById("mob-snav-next");
     if (p) p.disabled = idx <= 0;
     if (n) n.disabled = idx < 0 || idx >= state.filtered.length - 1;
+  }
+
+  // ── Mobile lightbox (full-screen image, pinch-zoom + pan) ─────────────────
+  let lbOpen = false;
+  let lbFitScale = 1;
+  let lbScale = 1;
+  let lbX = 0, lbY = 0;
+  let lbLastDist = null;
+  let lbPanStartX = 0, lbPanStartY = 0;
+  let lbPanOriginX = 0, lbPanOriginY = 0;
+  let lbLastTap = 0;
+  let lbTouchMoveY = 0;
+
+  function lbApply() {
+    const img = document.getElementById("mob-lb-img");
+    if (img) img.style.transform = `translate(${lbX}px,${lbY}px) scale(${lbScale})`;
+  }
+
+  function lbClamp() {
+    const stage = document.getElementById("mob-lb-stage");
+    const img = document.getElementById("mob-lb-img");
+    if (!stage || !img) return;
+    const sw = stage.clientWidth, sh = stage.clientHeight;
+    const iw = img.naturalWidth * lbScale, ih = img.naturalHeight * lbScale;
+    lbX = iw <= sw ? (sw - iw) / 2 : Math.min(0, Math.max(sw - iw, lbX));
+    lbY = ih <= sh ? (sh - ih) / 2 : Math.min(0, Math.max(sh - ih, lbY));
+  }
+
+  function lbFit() {
+    const stage = document.getElementById("mob-lb-stage");
+    const img = document.getElementById("mob-lb-img");
+    if (!stage || !img || !img.naturalWidth) return;
+    const sw = stage.clientWidth, sh = stage.clientHeight;
+    lbFitScale = Math.min(sw / img.naturalWidth, sh / img.naturalHeight);
+    lbScale = lbFitScale;
+    lbX = (sw - img.naturalWidth * lbScale) / 2;
+    lbY = (sh - img.naturalHeight * lbScale) / 2;
+    lbApply();
+  }
+
+  function openLightbox(src, alt) {
+    lbOpen = true;
+    lbScale = 1; lbX = 0; lbY = 0; lbLastDist = null;
+    const lb = document.getElementById("mob-lightbox");
+    const img = document.getElementById("mob-lb-img");
+    lb.classList.add("mob-lb-open");
+    img.alt = alt || "";
+    img.onload = lbFit;
+    if (img.complete && img.src === src) { lbFit(); }
+    else { img.style.transform = ""; img.src = src; }
+    // Fade out hint after 2.5 s
+    const hint = document.getElementById("mob-lb-hint");
+    if (hint) { hint.classList.remove("fade"); clearTimeout(hint._t); hint._t = setTimeout(() => hint.classList.add("fade"), 2500); }
+  }
+
+  function closeLightbox() {
+    lbOpen = false;
+    document.getElementById("mob-lightbox").classList.remove("mob-lb-open");
   }
 
   // ── Collapsible panel toggle ──────────────────────────────────────────────
@@ -2381,6 +2483,86 @@ $("#foot-dims").textContent = "";
     document.getElementById("mob-sheet-close")?.addEventListener("click", mobHideSheet);
     document.getElementById("mob-snav-prev")?.addEventListener("click", () => selectAdjacent(-1));
     document.getElementById("mob-snav-next")?.addEventListener("click", () => selectAdjacent(+1));
+
+    // Tap sheet image → open lightbox
+    document.getElementById("mob-sheet-img")?.addEventListener("click", () => {
+      const item = state.items.find(i => i.id === state.selectedId);
+      if (item?.img) openLightbox(item.img, item.title);
+    });
+
+    // Lightbox close button
+    document.getElementById("mob-lb-close")?.addEventListener("click", closeLightbox);
+
+    // Lightbox touch: pinch-to-zoom + pan + double-tap reset
+    {
+      const stage = document.getElementById("mob-lb-stage");
+      if (stage) {
+        stage.addEventListener("touchstart", e => {
+          e.preventDefault();
+          if (e.touches.length === 2) {
+            const t1 = e.touches[0], t2 = e.touches[1];
+            lbLastDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+          } else if (e.touches.length === 1) {
+            lbPanStartX = e.touches[0].clientX;
+            lbPanStartY = e.touches[0].clientY;
+            lbTouchMoveY = lbPanStartY;
+            lbPanOriginX = lbX;
+            lbPanOriginY = lbY;
+            lbLastDist = null;
+          }
+        }, {passive: false});
+
+        stage.addEventListener("touchmove", e => {
+          e.preventDefault();
+          if (e.touches.length === 2) {
+            const t1 = e.touches[0], t2 = e.touches[1];
+            const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+            const midX = (t1.clientX + t2.clientX) / 2;
+            const midY = (t1.clientY + t2.clientY) / 2;
+            if (lbLastDist) {
+              const newScale = Math.min(10, Math.max(lbFitScale * 0.95, lbScale * (dist / lbLastDist)));
+              const imgX = (midX - lbX) / lbScale;
+              const imgY = (midY - lbY) / lbScale;
+              lbX = midX - imgX * newScale;
+              lbY = midY - imgY * newScale;
+              lbScale = newScale;
+              lbClamp();
+              lbApply();
+            }
+            lbLastDist = dist;
+          } else if (e.touches.length === 1) {
+            lbX = lbPanOriginX + (e.touches[0].clientX - lbPanStartX);
+            lbY = lbPanOriginY + (e.touches[0].clientY - lbPanStartY);
+            lbTouchMoveY = e.touches[0].clientY;
+            lbClamp();
+            lbApply();
+          }
+        }, {passive: false});
+
+        stage.addEventListener("touchend", e => {
+          if (e.touches.length === 1) {
+            lbPanStartX = e.touches[0].clientX;
+            lbPanStartY = e.touches[0].clientY;
+            lbPanOriginX = lbX;
+            lbPanOriginY = lbY;
+            lbLastDist = null;
+          } else if (e.touches.length === 0) {
+            // Double-tap to reset zoom
+            const now = Date.now();
+            if (now - lbLastTap < 300) {
+              lbFit();
+              lbLastTap = 0;
+            } else {
+              lbLastTap = now;
+            }
+            // Swipe down to close (only when at fit scale, not zoomed in)
+            const dy = lbTouchMoveY - lbPanStartY;
+            if (lbScale <= lbFitScale * 1.05 && dy > 80) closeLightbox();
+            lbLastDist = null;
+          }
+        }, {passive: false});
+      }
+    }
 
     // Mobile about overlay — markid tap opens it instead of navigating to splash
     {
