@@ -7,6 +7,10 @@ Load this file at the start of any Claude Code session.
 
 ## ⚑ Pending at next session start — prompt Brandon immediately
 
+**P100 needs reassignment.** The "notes" property (P100) is no longer rendered in the record pane — curator notes were migrated to researcher notes (localStorage, BP). The property label and purpose should be reassigned to something more useful. Decide what P100 should become before next cataloguing session.
+
+---
+
 **Wikidata items are ready to create.** Three items are drafted in `WIKIDATA_DRAFT.md`:
 1. Richard Hunter (person)
 2. Canadian Architectural Archives (institution)
