@@ -19,20 +19,26 @@
     position:absolute;inset:0;overflow:hidden;
     transform:translateZ(0);
   }
+  .film::after{
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:2;
+    background:radial-gradient(ellipse at center, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.45) 85%);
+  }
   .film video{opacity:0;transition:opacity 900ms ease-in-out;position:absolute;top:50%;left:50%;width:max(100vw,calc(100vh*16/9));height:max(100vh,calc(100vw*9/16));transform:translate(-50%,-50%);object-fit:cover}
   .film video.show{opacity:1}
 
   .splash .mark{
-    position:absolute;left:50%;top:50%;
-    transform:translate(-50%,-50%);
-    font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace;font-size:30px;font-weight:500;
-    letter-spacing:0.10em;text-transform:uppercase;
-    color:#f3f1ec;white-space:nowrap;text-align:center;line-height:1.5;
-    text-shadow:0 1px 28px rgba(0,0,0,0.7);
+    position:absolute;left:18%;top:50%;
+    transform:translateY(-50%);
+    padding:28px 36px;
+    display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px;
+    font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace;
+    font-size:2.6vw;font-weight:700;letter-spacing:0.18em;line-height:1.2;
+    text-transform:uppercase;color:#f3f1ec;
+    text-shadow:0 2px 12px rgba(0,0,0,0.45);
     z-index:5;pointer-events:none;
     opacity:0;animation:mark-in 700ms ease-out 450ms forwards;
   }
-  .splash .mark .dim{font-size:21px;font-weight:400;letter-spacing:0.16em;color:rgba(243,241,236,0.5)}
+  .splash .mark span{display:block}
   @keyframes mark-in{
     from{opacity:0}
     to  {opacity:1}
@@ -43,14 +49,14 @@
 
   .splash .enter{
     position:absolute;right:36px;bottom:32px;z-index:5;
-    font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace;font-size:13px;color:rgba(243,241,236,0.7);
+    font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace;font-size:13px;color:#9dc2b2;
     letter-spacing:0.28em;text-transform:uppercase;
     display:flex;align-items:center;gap:14px;
     text-shadow:0 1px 8px rgba(0,0,0,0.6);
     pointer-events:none;
     opacity:0;animation:fade-in 700ms ease-out 1300ms forwards;
   }
-  .splash .enter .arrow{color:#e4a47e;font-size:13px;letter-spacing:0;animation:enter-pulse 2.4s ease-in-out 3000ms infinite}
+  .splash .enter .arrow{color:#9dc2b2;font-size:13px;letter-spacing:0;animation:enter-pulse 2.4s ease-in-out 3000ms infinite}
   @keyframes fade-in{from{opacity:0}to{opacity:1}}
   @keyframes enter-pulse{0%,100%{transform:translateX(0)}50%{transform:translateX(4px)}}
 
@@ -61,14 +67,13 @@
     pointer-events:none;
     opacity:0;animation:fade-in 700ms ease-out 1500ms forwards;
   }
-  .splash .imprint b{color:rgba(243,241,236,0.85);font-weight:500;margin-right:8px}
+  .splash .imprint b{color:#d49a86;font-weight:500;margin-right:8px}
 
   .splash:hover .enter{color:#f3f1ec}
   .splash:active{transform:scale(0.998)}
 
   @media (max-width:767px){
-    .splash .mark{font-size:20px}
-    .splash .mark .dim{font-size:14px}
+    .splash .mark{font-size:6vw;left:8%;padding:18px 22px}
     .splash .enter{right:20px;bottom:24px}
     .splash .imprint{left:20px}
   }
@@ -82,7 +87,10 @@
   </div>
   <div class="imprint"><b>2026.05</b>v1.03.00</div>
   <div class="mark">
-    <span class="name">Hunter House <span class="dim">Foundation</span></span>
+    <span>Hunter</span>
+    <span>House</span>
+    <span>Foundation</span>
+    <span>Archive</span>
   </div>
   <div class="enter"><span>Enter to Archive</span><span class="arrow">→</span></div>
 </a>
