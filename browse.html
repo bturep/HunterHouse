@@ -978,8 +978,8 @@ WHERE {
     dlBtn.href = item.master || url;
     dlBtn.style.visibility = item.master ? "" : "hidden";
 
-    // Derive thumb URL; falls back gracefully if no _prev.jpg suffix
-    const thumbUrl = url.replace(/_prev\.jpg$/, "_thumb.jpg");
+    // Derive thumb URL: swap previews/ → thumbs/ and _prev.jpg → _thumb.jpg
+    const thumbUrl = url.replace(/\/previews\//, "/thumbs/").replace(/_prev\.jpg$/, "_thumb.jpg");
     const hasThumb = thumbUrl !== url;
 
     const fullImg  = new Image();
