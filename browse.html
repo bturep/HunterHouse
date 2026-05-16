@@ -238,16 +238,11 @@
 
   /* ── image pane ── */
   .image-head{
-    display:flex;justify-content:space-between;align-items:center;
+    display:flex;justify-content:center;align-items:center;
     height:41px;box-sizing:border-box;padding:0 24px;
     border-bottom:1px solid var(--ink);background:var(--bg);flex-shrink:0;
   }
-  .image-head .l{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;letter-spacing:0.18em;text-transform:uppercase;white-space:nowrap;display:flex;align-items:baseline;gap:10px}
-  .image-head .l .ih-val{letter-spacing:0.04em;text-transform:none;font-weight:400;color:var(--muted);font-size:10.5px}
-  .image-head .r{display:flex;gap:14px;align-items:baseline}
-  .image-head .r a{font-family:var(--mono);font-size:10.5px;color:var(--muted);text-decoration:none;letter-spacing:0.04em;white-space:nowrap}
-  .image-head .r a:hover{color:var(--ink)}
-  .image-head .r a.disabled{color:var(--hint);pointer-events:none}
+  .image-head .l{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;letter-spacing:0.18em;text-transform:uppercase;white-space:nowrap}
 
   .image-stage{
     flex:1;position:relative;overflow:hidden;
@@ -590,11 +585,7 @@
 
   <section class="pane-image">
     <div class="image-head">
-      <span class="l">Item<span class="ih-val" id="ih-id">—</span></span>
-      <span class="r">
-        <a href="#" id="nav-prev">← prev</a>
-        <a href="#" id="nav-next">next →</a>
-      </span>
+      <span class="l">Item</span>
     </div>
     <div class="image-stage" id="stage">
       <div id="load-screen">
@@ -1007,8 +998,6 @@ WHERE {
     const idx = state.filtered.findIndex(i => i.id === item.id);
 
     $("#ih-id").textContent = (item.id || "").replace(/^HH-/, "");
-    $("#nav-prev").classList.toggle("disabled", idx <= 0);
-    $("#nav-next").classList.toggle("disabled", idx < 0 || idx >= state.filtered.length - 1);
     $("#foot-dims").textContent = "";
 
     const url = imageUrl(item);
@@ -1678,8 +1667,6 @@ WHERE {
       }
     });
 
-    $("#nav-prev").addEventListener("click", e => { e.preventDefault(); selectAdjacent(-1); });
-    $("#nav-next").addEventListener("click", e => { e.preventDefault(); selectAdjacent(+1); });
 
     document.addEventListener("keydown", e => {
       const inInput = e.target.matches("input, select, textarea");
