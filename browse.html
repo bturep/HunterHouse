@@ -299,8 +299,7 @@
   }
   .foot-dl a{color:var(--muted);text-decoration:none;letter-spacing:0.04em}
   .foot-dl a:hover{color:var(--ink)}
-  .foot-inspect{background:none;border:0;color:var(--muted);font-size:15px;padding:0 0 0 16px;cursor:pointer;display:flex;align-items:center;line-height:1;flex-shrink:0}
-  .foot-inspect:hover{color:var(--ink)}
+  #btn-inspect{padding:0 6px}
 
   /* ── inspect overlay ── */
   #inspect-overlay{
@@ -562,7 +561,7 @@
   <div class="site-topright">
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen">⤢</button>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode">◑</button>
-    <span id="topright" title="About this archive">v1.02.06</span>
+    <span id="topright" title="About this archive">v1.02.07</span>
   </div>
 </header>
 
@@ -616,9 +615,17 @@
         <button id="zoom-in" type="button" title="Zoom in">+</button>
         <span class="zoom-sep"></span>
         <button id="zoom-fit" type="button" title="Fit to frame">fit</button>
+        <span class="zoom-sep"></span>
+        <button id="btn-inspect" type="button" title="Inspect fullscreen">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1,4.5 1,1 4.5,1"/><line x1="1" y1="1" x2="4.5" y2="4.5"/>
+            <polyline points="12,4.5 12,1 8.5,1"/><line x1="12" y1="1" x2="8.5" y2="4.5"/>
+            <polyline points="1,8.5 1,12 4.5,12"/><line x1="1" y1="12" x2="4.5" y2="8.5"/>
+            <polyline points="12,8.5 12,12 8.5,12"/><line x1="12" y1="12" x2="8.5" y2="8.5"/>
+          </svg>
+        </button>
       </div>
       <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">Download full size</a></span>
-      <button id="btn-inspect" class="foot-inspect" type="button" title="Inspect image fullscreen">⤢</button>
     </div>
   </section>
 
@@ -1005,7 +1012,7 @@ WHERE {
   }
 
   function updateCount() {
-    if (state.items.length > 0) $("#topright").textContent = "v1.02.06";
+    if (state.items.length > 0) $("#topright").textContent = "v1.02.07";
   }
 
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
@@ -1326,8 +1333,9 @@ WHERE {
       }
 
       function openInspect() {
-        if (!currentImg || !state.selected) return;
-        ovItem = state.selected;
+        if (!currentImg || !state.selectedId) return;
+        ovItem = state.items.find(i => i.id === state.selectedId);
+        if (!ovItem) return;
         const url = imageUrl(ovItem);
         if (!url) return;
 
