@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <title>Browse Archive — Hunter House Foundation</title>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#1a1816">
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/HunterHouse/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Hunter House Archive">
 <link rel="apple-touch-icon" href="/HunterHouse/assets/icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,7 +28,7 @@
   html,body{overflow:hidden}
   @keyframes page-in{from{opacity:0}to{opacity:1}}
   body{height:100%;display:flex;flex-direction:column;animation:page-in 400ms ease-out both}
-  .site-top{padding:env(safe-area-inset-top) 28px 0;flex-shrink:0;grid-template-columns:28% 1fr 28%;gap:0;height:calc(41px + env(safe-area-inset-top));box-sizing:border-box;border-bottom-color:var(--rule)}
+  .site-top{padding:0 28px;flex-shrink:0;grid-template-columns:28% 1fr 28%;gap:0;height:41px;box-sizing:border-box;border-bottom-color:var(--rule)}
   .site-topright{display:flex;align-items:center;gap:14px;height:41px;color:var(--ink)}
   .site-topright .theme-btn{display:flex;align-items:center;background:none;border:none;border-radius:0;padding:0;color:var(--ink)}
   .site-topright .theme-btn svg{display:block}
@@ -503,12 +503,16 @@
   /* ── Mobile about overlay ── */
   #mob-about{display:none;position:fixed;inset:0;z-index:300;background:var(--bg);overflow-y:auto}
   #mob-about.open{display:flex;flex-direction:column;padding:0 28px 52px}
-  #mob-about-close{
-    align-self:flex-end;flex-shrink:0;margin:14px -4px 0;
-    background:none;border:none;padding:4px 8px;
-    font-family:var(--mono);font-size:20px;line-height:1;color:var(--muted);cursor:pointer;
+  #mob-about-toprow{
+    display:flex;justify-content:space-between;align-items:center;
+    flex-shrink:0;margin:14px -4px 0;
   }
-  #mob-about-close:active{color:var(--ink)}
+  #mob-reload,#mob-about-close{
+    background:none;border:none;padding:4px 8px;line-height:1;color:var(--hint);cursor:pointer;
+  }
+  #mob-reload{font-size:16px}
+  #mob-about-close{font-family:var(--mono);font-size:20px}
+  #mob-reload:active,#mob-about-close:active{color:var(--ink)}
   .mob-about-title{
     font-family:var(--mono);font-size:15px;font-weight:700;
     letter-spacing:0.14em;text-transform:uppercase;color:var(--ink);line-height:1.3;
@@ -522,13 +526,6 @@
     font-family:var(--mono);font-size:11px;line-height:1.7;color:var(--ink);
     letter-spacing:0.02em;margin:0 0 14px;
   }
-  #mob-reload{
-    align-self:flex-start;margin-top:28px;
-    background:none;border:1px solid var(--rule);padding:6px 14px;
-    font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;
-    color:var(--muted);cursor:pointer;
-  }
-  #mob-reload:active{color:var(--ink);border-color:var(--muted)}
   .mob-about-rule{border:0;border-top:1px solid var(--rule);margin:28px 0}
   .mob-about-credits{
     display:grid;grid-template-columns:auto 1fr;gap:8px 16px;align-items:baseline;
@@ -565,7 +562,7 @@
   .load-dots::after{content:"";animation:ld-dots 1.4s steps(1,end) infinite}
 
   @media (max-width:767px){
-    .site-top{padding:env(safe-area-inset-top) 16px 0;gap:12px}
+    .site-top{padding:0 16px;gap:12px}
     .header-search{padding:0 12px;border-left:0;border-right:0}
     .fbtn{padding:0 14px}
     .site-topright{display:none}
@@ -852,7 +849,10 @@
 </div>
 
 <div id="mob-about" role="dialog" aria-modal="true" aria-label="About Hunter House Foundation Archive">
-  <button id="mob-about-close" aria-label="Close">×</button>
+  <div id="mob-about-toprow">
+    <button id="mob-reload" aria-label="Reload archive">↺</button>
+    <button id="mob-about-close" aria-label="Close">×</button>
+  </div>
   <p class="mob-about-title">Hunter House<br>Foundation Archive</p>
   <p class="mob-about-ver" id="mob-about-ver"></p>
   <p class="mob-about-body">A foundation dedicated to the stewardship of the residence and architectural archive of architect Richard Morrow Hunter (1930–2023). 203 Goward Road, Saanich, British Columbia.</p>
@@ -864,7 +864,6 @@
     <dt>Project Lead</dt>
     <dd>Brandon Poole</dd>
   </dl>
-  <button id="mob-reload">Reload archive</button>
 </div>
 
 <div class="shell">
