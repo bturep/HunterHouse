@@ -159,9 +159,9 @@
 
   /* ── scroll pips ── */
   .scroll-pip{
-    position:absolute;right:2px;top:41px;z-index:5;pointer-events:none;
-    width:1px;
-    background:var(--rule);border:0;border-radius:1px;
+    position:absolute;right:5px;top:41px;z-index:5;pointer-events:none;
+    width:3px;
+    background:var(--red);border:0;border-radius:2px;
     opacity:0;transition:opacity 0.15s;
     /* height is set by JS — proportional to viewport / content ratio */
   }
@@ -629,7 +629,7 @@
 
   /* ── Graph path ── */
   .pane-meta .graph-path{font-family:var(--mono);font-size:11px;line-height:1.55}
-  .pane-meta .graph-path .node{padding:2px 0;grid-template-columns:14px 60px 1fr}
+  .pane-meta .graph-path .node{padding:2px 0;grid-template-columns:14px 74px 1fr}
   .pane-meta .graph-path .node .rel{font-family:var(--mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)}
   .pane-meta .graph-path .node .lbl{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.02em;color:var(--ink)}
   .pane-meta .graph-path .connector{height:4px}
@@ -774,7 +774,7 @@
     <span class="tr-sep"></span>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1.5 A6 6 0 0 0 7.5 13.5 Z"/><circle cx="7.5" cy="7.5" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
     <span class="tr-sep"></span>
-    <span id="topright" title="About this archive">v1.02.23</span>
+    <span id="topright" title="About this archive">v1.02.24</span>
   </div>
 </header>
 
@@ -859,7 +859,7 @@
 
 <script>
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.02.23";
+  const VERSION      = "v1.02.24";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
