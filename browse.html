@@ -614,12 +614,23 @@
   .pane-meta .graph-siblings .sib .pos{color:var(--muted)}
 
   /* ── Graph actions (Wikibase / SPARQL / JSON) ── */
-  .pane-meta .graph-actions{margin-top:10px;background:transparent;border:0;gap:14px}
-  .pane-meta .graph-actions a{background:transparent;padding:0}
-  .pane-meta .graph-actions a:hover{background:transparent}
+  .pane-meta .graph-actions{
+    display:flex;flex-direction:row;align-items:center;flex-wrap:wrap;
+    gap:0;margin-top:10px;background:transparent;border:0;
+  }
+  .pane-meta .graph-actions a{
+    background:transparent;padding:0;margin-right:18px;
+    display:inline-flex;align-items:baseline;gap:2px;
+  }
+  .pane-meta .graph-actions a:hover{background:transparent;opacity:0.7}
   .pane-meta .graph-actions a .top{display:none}
-  .pane-meta .graph-actions a .bot{font-family:var(--mono);font-size:11px;letter-spacing:0.02em;text-transform:lowercase;color:var(--copper-deep)}
-  .pane-meta .graph-actions a .bot .ar{color:var(--copper-deep)}
+  .pane-meta .graph-actions a .bot{
+    font-family:var(--mono);font-size:11px;letter-spacing:0.02em;
+    text-transform:lowercase;color:var(--copper-deep);
+    display:inline-flex;align-items:baseline;gap:2px;
+    justify-content:flex-start;
+  }
+  .pane-meta .graph-actions a .bot .ar{color:var(--copper-deep);font-size:9px;line-height:1}
 
   /* ── Curator note ── */
   .pane-meta .curator-note{
