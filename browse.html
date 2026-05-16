@@ -566,43 +566,55 @@
     .header-search{padding:0 12px;border-left:0;border-right:0}
     .fbtn{padding:0 14px}
     .site-topright{display:none}
-
-    /* shell: vertical flex */
-    .shell{flex-direction:column}
-
-    /* panels: full-width vertical on mobile */
-    .panel-left,.panel-right{width:100%!important;flex-direction:column!important;border:0!important;transition:none!important}
+    .mobile-tabs{display:none}
     .panel-handle{display:none!important}
-
-    /* mobile tabs */
-    .mobile-tabs{
-      display:flex;flex-shrink:0;
-      border-bottom:1px solid var(--rule);background:var(--bg);
-    }
-    .mtab{
-      flex:1;padding:10px 0;
-      font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;
-      color:var(--muted);background:none;border:0;
-      border-right:1px solid var(--rule);cursor:pointer;
-    }
-    .mtab:last-child{border-right:0}
-    .mtab.active{color:var(--ink);background:var(--soft)}
-
-    /* panes: hide all, show active */
-    .pane-list,.pane-image,.pane-meta{
-      display:none;flex-direction:column;border:0;
-    }
-    .pane-list.mobile-active,.pane-image.mobile-active,.pane-meta.mobile-active{
-      display:flex;flex:1;min-height:0;
-    }
-
-    /* image pane: hide zoom controls on mobile (pinch/touch handles it) */
     .zoom-ctl{display:none}
     .image-foot{display:none}
+    .graph-actions{grid-template-columns:1fr}
+    .pane-meta .meta-head{display:none}
 
-    /* mobile image navigation bar */
+    /* ── Stack navigation ── */
+    .shell{position:relative;overflow:hidden;flex-direction:row}
+
+    /* Screen 1: List (default, full screen) */
+    .panel-left{
+      position:absolute!important;inset:0;
+      width:100%!important;border:0!important;
+      transition:transform 0.3s cubic-bezier(0.4,0,0.2,1)!important;
+      transform:translateX(0);z-index:2;background:var(--bg);
+      display:flex!important;flex-direction:column;
+    }
+    .panel-left.mob-pushed{transform:translateX(-30%);z-index:1}
+
+    /* Screen 2: Image (slides in from right) */
+    .pane-image{
+      position:absolute!important;inset:0;
+      width:100%!important;
+      transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      transform:translateX(100%);z-index:1;
+      display:flex!important;flex-direction:column;
+    }
+    .pane-image.mob-item-active{transform:translateX(0);z-index:2}
+
+    /* Floating top bar over image */
+    .mob-img-topbar{
+      position:absolute;top:0;left:0;right:0;z-index:10;
+      height:52px;display:flex;align-items:center;justify-content:space-between;
+      padding:0 8px;pointer-events:none;
+      background:linear-gradient(to bottom,rgba(0,0,0,0.5) 0%,transparent 100%);
+    }
+    .mob-back-btn{
+      pointer-events:all;background:none;border:none;
+      padding:6px 10px;font-size:20px;line-height:1;
+      color:rgba(255,255,255,0.75);cursor:pointer;
+    }
+    .mob-back-btn:active{color:#fff}
+    .mob-img-id-label{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:0.1em}
+
+    /* Prev/next navigation — sits above the sheet peek */
     .mobile-img-nav{
-      display:flex;height:56px;flex-shrink:0;
+      display:flex;position:absolute;left:0;right:0;bottom:64px;
+      height:52px;z-index:4;
       background:var(--bg);border-top:1px solid var(--rule);
     }
     .mob-nav-btn{
@@ -613,10 +625,31 @@
     #mob-next{border-left:1px solid var(--rule)}
     .mob-nav-btn:active{color:var(--ink)}
     .mob-nav-btn:disabled{opacity:0.25;pointer-events:none}
-    /* hide record pane subheader — tab bar already labels the pane */
-    .pane-meta .meta-head{display:none}
-    /* meta pane: graph-actions single column */
-    .graph-actions{grid-template-columns:1fr}
+
+    /* Record — bottom sheet */
+    .panel-right{
+      position:absolute!important;left:0;right:0;bottom:0;
+      width:100%!important;height:64px;
+      border:0!important;border-top:1px solid var(--rule)!important;
+      transition:transform 0.3s cubic-bezier(0.4,0,0.2,1),height 0.3s cubic-bezier(0.4,0,0.2,1)!important;
+      transform:translateY(100%);z-index:5;background:var(--bg);
+      display:flex!important;flex-direction:column;
+    }
+    .panel-right.mob-sheet-visible{transform:translateY(0)}
+    .panel-right.mob-sheet-expanded{height:70vh}
+
+    /* Sheet grip */
+    .mob-sheet-handle{
+      height:32px;flex-shrink:0;cursor:pointer;
+      display:flex;align-items:center;gap:10px;padding:0 16px;
+    }
+    .mob-sheet-grip{width:32px;height:3px;background:var(--rule);border-radius:2px;flex-shrink:0}
+    .mob-sheet-peek{
+      font-family:var(--mono);font-size:10px;color:var(--muted);
+      letter-spacing:0.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    /* Collapsed: hide everything in panel-content except the handle */
+    .panel-right:not(.mob-sheet-expanded) .panel-content > *:not(.mob-sheet-handle){display:none!important}
   }
 
   /* ═══════════════════════════════════════════════════════════════════════
@@ -913,6 +946,11 @@
   </div>
 
   <section class="pane-image">
+    <div class="mob-img-topbar" id="mob-img-topbar">
+      <button class="mob-back-btn" id="mob-back-btn" aria-label="Back to list">←</button>
+      <span class="mob-img-id-label" id="mob-img-id-label"></span>
+      <div style="width:36px"></div>
+    </div>
     <div class="image-stage" id="stage">
       <div id="load-screen">
         <span class="load-text">Loading Archive Data from Wikibase<span class="load-dots"></span></span>
@@ -952,6 +990,10 @@
       <svg class="handle-chevron" width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,1 5,5 2,9"/></svg>
     </button>
     <div class="panel-content">
+      <div class="mob-sheet-handle" id="mob-sheet-handle">
+        <span class="mob-sheet-grip"></span>
+        <span class="mob-sheet-peek" id="mob-sheet-peek"></span>
+      </div>
       <div class="scroll-pip scroll-pip-r" id="meta-pip"></div>
       <div class="meta-head">
         <span class="l">Record</span>
@@ -1235,6 +1277,28 @@
       const el = document.querySelector(`.pane-${p}`);
       if (el) el.classList.toggle("mobile-active", p === pane);
     });
+  }
+
+  // ── Mobile stack navigation ───────────────────────────────────────────────
+  let mobSheetExpanded = false;
+
+  function mobPushItem() {
+    document.getElementById("panel-left").classList.add("mob-pushed");
+    document.querySelector(".pane-image").classList.add("mob-item-active");
+    document.getElementById("panel-right").classList.add("mob-sheet-visible");
+  }
+
+  function mobPopList() {
+    document.getElementById("panel-left").classList.remove("mob-pushed");
+    document.querySelector(".pane-image").classList.remove("mob-item-active");
+    const sheet = document.getElementById("panel-right");
+    sheet.classList.remove("mob-sheet-visible", "mob-sheet-expanded");
+    mobSheetExpanded = false;
+  }
+
+  function mobToggleSheet() {
+    mobSheetExpanded = !mobSheetExpanded;
+    document.getElementById("panel-right").classList.toggle("mob-sheet-expanded", mobSheetExpanded);
   }
 
   // ── Collapsible panel toggle ──────────────────────────────────────────────
@@ -1982,7 +2046,7 @@ $("#foot-dims").textContent = "";
   // ── Selection ─────────────────────────────────────────────────────────────
   function selectItem(id, opts = {}) {
     if (!id) return;
-    if (window.matchMedia("(max-width:767px)").matches) switchMobileTab("image");
+    if (window.matchMedia("(max-width:767px)").matches) mobPushItem();
     state.selectedId = id;
     const item = state.items.find(i => i.id === id);
     if (!item) return;
@@ -2020,6 +2084,11 @@ $("#foot-dims").textContent = "";
     const idx = state.filtered.findIndex(i => i.id === state.selectedId);
     prevBtn.disabled = idx <= 0;
     nextBtn.disabled = idx < 0 || idx >= state.filtered.length - 1;
+    const label = state.selectedId || "";
+    const peekEl = document.getElementById("mob-sheet-peek");
+    const idLabel = document.getElementById("mob-img-id-label");
+    if (peekEl) peekEl.textContent = label;
+    if (idLabel) idLabel.textContent = label;
   }
 
   function toggleMark(id) {
@@ -2198,6 +2267,8 @@ $("#foot-dims").textContent = "";
     // Mobile prev/next item buttons
     document.getElementById("mob-prev")?.addEventListener("click", () => selectAdjacent(-1));
     document.getElementById("mob-next")?.addEventListener("click", () => selectAdjacent(+1));
+    document.getElementById("mob-back-btn")?.addEventListener("click", mobPopList);
+    document.getElementById("mob-sheet-handle")?.addEventListener("click", mobToggleSheet);
 
     // Mobile about overlay — markid tap opens it instead of navigating to splash
     {
