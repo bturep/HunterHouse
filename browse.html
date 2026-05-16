@@ -278,8 +278,7 @@
   }
   .image-stage .placeholder b{color:var(--muted);font-weight:500}
 
-  .foot-left{flex:1;display:flex;align-items:center;gap:8px;color:var(--muted)}
-  .foot-dim-sep{color:var(--rule)}
+  .foot-left{flex:1}
   #foot-dims{color:var(--hint)}
   .zoom-ctl{
     display:flex;align-items:center;justify-content:center;gap:0;user-select:none;flex-shrink:0;
@@ -528,7 +527,7 @@
     <span class="tr-sep"></span>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1.5 A6 6 0 0 0 7.5 13.5 Z"/><circle cx="7.5" cy="7.5" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
     <span class="tr-sep"></span>
-    <span id="topright" title="About this archive">v1.02.16</span>
+    <span id="topright" title="About this archive">v1.02.17</span>
   </div>
 </header>
 
@@ -575,7 +574,7 @@
       </div>
     </div>
     <div class="image-foot">
-      <span class="foot-left"><span id="foot-counter"></span><span class="foot-dim-sep" id="foot-dim-sep">·</span><span id="foot-dims"></span></span>
+      <span class="foot-left"><span id="foot-dims"></span></span>
       <div class="zoom-ctl">
         <button id="zoom-out" type="button" title="Zoom out">−</button>
         <span class="pct" id="zoom-pct">100%</span>
@@ -957,7 +956,7 @@ WHERE {
   }
 
   function updateCount() {
-    if (state.items.length > 0) $("#topright").textContent = "v1.02.16";
+    if (state.items.length > 0) $("#topright").textContent = "v1.02.17";
   }
 
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
@@ -972,9 +971,7 @@ WHERE {
     $("#ih-id").textContent = (item.id || "").replace(/^HH-/, "");
     $("#nav-prev").classList.toggle("disabled", idx <= 0);
     $("#nav-next").classList.toggle("disabled", idx < 0 || idx >= state.filtered.length - 1);
-    $("#foot-counter").textContent = idx >= 0 ? `${idx + 1} / ${state.filtered.length}` : "";
     $("#foot-dims").textContent = "";
-    $("#foot-dim-sep").style.display = "none";
 
     const url = imageUrl(item);
     canvas.innerHTML = "";
@@ -1008,7 +1005,6 @@ WHERE {
       zoomState.naturalW = fullImg.naturalWidth;
       zoomState.naturalH = fullImg.naturalHeight;
       $("#foot-dims").textContent = `${fullImg.naturalWidth} × ${fullImg.naturalHeight} px`;
-      $("#foot-dim-sep").style.display = "";
 
       if (thumbActive) {
         // Append full on top of thumb, already invisible
