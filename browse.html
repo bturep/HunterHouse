@@ -520,7 +520,7 @@
   <div class="site-topright">
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen">⤢</button>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode">◑</button>
-    <span id="topright" title="About this archive">v1.2.2</span>
+    <span id="topright" title="About this archive">v1.2.3</span>
   </div>
 </header>
 
@@ -945,7 +945,7 @@ WHERE {
   }
 
   function updateCount() {
-    if (state.items.length > 0) $("#topright").textContent = "v1.2.2";
+    if (state.items.length > 0) $("#topright").textContent = "v1.2.3";
   }
 
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
@@ -1058,7 +1058,17 @@ WHERE {
         zoomState.rotation = 0;
         currentImg = thumbImg;
         canvas.appendChild(thumbImg);
-        fitToFrame();
+        // Fit thumb to frame without upscale cap — thumb must fill the same
+        // visual area the full preview will occupy (thumb is 600px, stage is wider)
+        const _st = $("#stage");
+        const _pad = 40;
+        const _fit = Math.min(
+          (_st.clientWidth  - _pad*2) / thumbImg.naturalWidth,
+          (_st.clientHeight - _pad*2) / thumbImg.naturalHeight
+        );
+        zoomState.fitScale = _fit; zoomState.scale = _fit;
+        zoomState.tx = 0; zoomState.ty = 0;
+        applyTransform(); updateZoomUI();
         canvas.classList.remove("no-zoom");
         thumbActive = true;
       };
