@@ -501,9 +501,16 @@
   body.loading #canvas{ visibility:hidden }
 
   /* ── Mobile about overlay ── */
-  #mob-about{display:none;position:fixed;inset:0;z-index:300;background:var(--bg);overflow-y:auto;
-    top:calc(32px + env(safe-area-inset-top,0px));border-radius:14px 14px 0 0}
-  #mob-about.open{display:flex;flex-direction:column;padding:0 28px 52px}
+  #mob-about-backdrop{display:none;position:fixed;inset:0;z-index:299;background:rgba(0,0,0,0.55)}
+  #mob-about-backdrop.open{display:block}
+  #mob-about{
+    display:none;position:fixed;
+    top:calc(32px + env(safe-area-inset-top,0px));left:0;right:0;
+    z-index:300;background:var(--bg);overflow-y:auto;
+    border-radius:14px;
+    max-height:calc(92vh - 32px - env(safe-area-inset-top,0px));
+  }
+  #mob-about.open{display:flex;flex-direction:column;padding:0 28px 36px}
   #mob-about-toprow{
     display:flex;justify-content:space-between;align-items:center;
     flex-shrink:0;margin:14px -4px 0;
@@ -1042,6 +1049,7 @@
   <button id="about-close" title="Close">×</button>
 </div>
 
+<div id="mob-about-backdrop"></div>
 <div id="mob-about" role="dialog" aria-modal="true" aria-label="About Hunter House Foundation Archive">
   <div id="mob-about-toprow">
     <button id="mob-reload" aria-label="Reload archive">↺</button>
@@ -2746,23 +2754,19 @@ $("#foot-dims").textContent = "";
     }
 
     // Mobile about overlay — markid tap opens it instead of navigating to splash
-    {
-      const overlay = document.getElementById("mob-about");
-      document.getElementById("mob-about-ver").textContent = VERSION;
-      const mvBtn = document.getElementById("mobile-version");
-      if (mvBtn) mvBtn.textContent = VERSION;
-      document.querySelector(".markid").addEventListener("click", e => {
-        if (!window.matchMedia("(max-width:767px)").matches) return;
-        e.preventDefault();
-        overlay.classList.add("open");
-      });
-      document.getElementById("mob-about-close").addEventListener("click", () => {
-        overlay.classList.remove("open");
-      });
-      document.getElementById("mob-reload").addEventListener("click", () => {
-        clearCache(); location.reload();
-      });
-    }
+    document.getElementById("mob-about-ver").textContent = VERSION;
+    const mvBtn = document.getElementById("mobile-version");
+    if (mvBtn) mvBtn.textContent = VERSION;
+    document.querySelector(".markid").addEventListener("click", e => {
+      if (!window.matchMedia("(max-width:767px)").matches) return;
+      e.preventDefault();
+      openMobAbout();
+    });
+    document.getElementById("mob-about-close").addEventListener("click", closeMobAbout);
+    document.getElementById("mob-about-backdrop").addEventListener("click", closeMobAbout);
+    document.getElementById("mob-reload").addEventListener("click", () => {
+      clearCache(); location.reload();
+    });
 
     $("#rows").addEventListener("click", e => {
       const row = e.target.closest(".row");
@@ -2807,6 +2811,16 @@ $("#foot-dims").textContent = "";
     });
   }
 
+  // ── Mobile info overlay ───────────────────────────────────────────────────
+  function openMobAbout() {
+    document.getElementById("mob-about").classList.add("open");
+    document.getElementById("mob-about-backdrop").classList.add("open");
+  }
+  function closeMobAbout() {
+    document.getElementById("mob-about").classList.remove("open");
+    document.getElementById("mob-about-backdrop").classList.remove("open");
+  }
+
   // ── About panel ───────────────────────────────────────────────────────────
   const aboutPanel = document.getElementById("about-panel");
   function openAbout()  {
@@ -2831,7 +2845,7 @@ $("#foot-dims").textContent = "";
     if (mobileVersionBtn) {
       mobileVersionBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        document.getElementById("mob-about").classList.add("open");
+        openMobAbout();
       });
     }
     document.addEventListener("click", closeAbout);
