@@ -561,7 +561,7 @@
   }
   .load-dots::after{content:"";animation:ld-dots 1.4s steps(1,end) infinite}
 
-  .mob-detail{display:none}
+  .mob-sheet{display:none}
 
   @media (max-width:767px){
     .site-top{gap:12px}
@@ -575,76 +575,80 @@
     .graph-actions{grid-template-columns:1fr}
     .pane-meta .meta-head{display:none}
 
-    /* ── Master-detail navigation ── */
-    .shell{position:relative;overflow:hidden;flex-direction:row}
-
-    /* Screen 1: List (default, full screen) */
+    /* ── Bottom sheet (Google Maps style) ── */
+    .shell{position:relative;overflow:hidden}
     .panel-left{
       position:absolute!important;inset:0;
       width:100%!important;border:0!important;
-      transition:transform 0.3s cubic-bezier(0.4,0,0.2,1)!important;
-      transform:translateX(0);z-index:2;background:var(--bg);
+      z-index:1;background:var(--bg);
       display:flex!important;flex-direction:column;
     }
-    .panel-left.mob-pushed{transform:translateX(-30%);z-index:1}
-
-    /* Desktop-only panes — hidden on mobile */
     .pane-image{display:none!important}
     .panel-right{display:none!important}
 
-    /* Screen 2: Detail (slides in from right) */
-    .mob-detail{
-      position:absolute!important;inset:0;
-      background:var(--bg);z-index:1;
-      transform:translateX(100%);
-      transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    .mob-sheet{
+      position:absolute!important;left:0;right:0;bottom:0;
+      height:100%;background:var(--bg);
+      border-radius:14px 14px 0 0;
+      box-shadow:0 -2px 20px rgba(0,0,0,0.18);
+      z-index:10;
+      transform:translateY(100%);
+      transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);
       display:flex!important;flex-direction:column;overflow:hidden;
     }
-    .mob-detail.mob-detail-active{transform:translateX(0);z-index:2}
-    .mob-detail-bar{
-      height:52px;flex-shrink:0;
-      display:flex;align-items:center;
-      border-bottom:1px solid var(--rule);
+    .mob-sheet.mob-sheet-open{transform:translateY(35%)}
+    .mob-sheet.mob-sheet-full{transform:translateY(0);border-radius:0}
+
+    .mob-sheet-bar{
+      height:48px;flex-shrink:0;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      position:relative;border-bottom:1px solid var(--rule);
     }
-    .mob-detail-back-btn{
-      background:none;border:none;padding:0 14px;height:52px;
-      font-size:13px;font-family:var(--mono);letter-spacing:0.04em;
-      color:var(--muted);cursor:pointer;white-space:nowrap;
+    .mob-sheet-grip{width:36px;height:4px;background:var(--rule);border-radius:2px}
+    .mob-sheet-close{
+      position:absolute;right:8px;top:50%;transform:translateY(-50%);
+      background:none;border:none;padding:4px 10px;
+      font-family:var(--mono);font-size:18px;line-height:1;
+      color:var(--hint);cursor:pointer;
     }
-    .mob-detail-back-btn:active{color:var(--ink)}
-    .mob-detail-id-lbl{
-      flex:1;font-family:var(--mono);font-size:10px;color:var(--muted);
-      letter-spacing:0.1em;text-align:center;
+    .mob-sheet-close:active{color:var(--ink)}
+    .mob-sheet-nav{
+      position:absolute;left:4px;top:50%;transform:translateY(-50%);
+      display:flex;
     }
-    .mob-dnav{display:flex}
-    .mob-dnav-btn{
-      background:none;border:none;padding:0 16px;height:52px;
-      font-size:22px;color:var(--muted);cursor:pointer;line-height:1;
+    .mob-snav-btn{
+      background:none;border:none;padding:4px 10px;height:40px;
+      font-size:20px;color:var(--muted);cursor:pointer;line-height:1;
     }
-    .mob-dnav-btn:active{color:var(--ink)}
-    .mob-dnav-btn:disabled{opacity:0.25;pointer-events:none}
-    .mob-detail-img-wrap{
-      flex-shrink:0;height:55vw;max-height:42vh;
+    .mob-snav-btn:active{color:var(--ink)}
+    .mob-snav-btn:disabled{opacity:0.25;pointer-events:none}
+
+    .mob-sheet-img-wrap{
+      flex-shrink:0;height:52vw;max-height:40vh;
       background:#111;overflow:hidden;
       display:flex;align-items:center;justify-content:center;
     }
-    .mob-detail-img{max-width:100%;max-height:100%;object-fit:contain;display:block}
-    .mob-detail-scroll{flex:1;overflow-y:auto;padding:16px 16px 40px}
-    .mob-detail-title{
+    .mob-sheet-img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+    .mob-sheet-scroll{flex:1;overflow-y:auto;padding:16px 16px 40px}
+    .mob-sheet-id{
+      font-family:var(--mono);font-size:10px;color:var(--muted);
+      letter-spacing:0.1em;margin-bottom:6px;
+    }
+    .mob-sheet-title{
       font-family:var(--sans);font-size:19px;font-weight:500;
       letter-spacing:-0.015em;line-height:1.2;
       color:var(--ink);margin-bottom:14px;
     }
-    .mob-detail-body .kv{font-family:var(--mono);font-size:11px;line-height:1.55}
-    .mob-detail-body .kv .row{
+    .mob-sheet-body .kv{font-family:var(--mono);font-size:11px;line-height:1.55}
+    .mob-sheet-body .kv .row{
       display:grid;grid-template-columns:80px 1fr;gap:8px;
       padding:2px 0;align-items:baseline;
     }
-    .mob-detail-body .kv dt{
+    .mob-sheet-body .kv dt{
       font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right;
     }
-    .mob-detail-body .kv dt::after{content:":";color:var(--hint);margin-left:2px}
-    .mob-detail-body .kv dd{
+    .mob-sheet-body .kv dt::after{content:":";color:var(--hint);margin-left:2px}
+    .mob-sheet-body .kv dd{
       font-family:var(--mono);font-size:11px;color:var(--ink);line-height:1.55;
     }
   }
@@ -997,21 +1001,22 @@
     </div>
   </div>
 
-  <div id="mob-detail" class="mob-detail">
-    <div class="mob-detail-bar">
-      <button class="mob-detail-back-btn" id="mob-detail-back">← List</button>
-      <span class="mob-detail-id-lbl" id="mob-detail-id"></span>
-      <div class="mob-dnav">
-        <button id="mob-detail-prev" class="mob-dnav-btn" aria-label="Previous item">‹</button>
-        <button id="mob-detail-next" class="mob-dnav-btn" aria-label="Next item">›</button>
+  <div id="mob-sheet" class="mob-sheet">
+    <div class="mob-sheet-bar" id="mob-sheet-bar">
+      <div class="mob-sheet-nav">
+        <button id="mob-snav-prev" class="mob-snav-btn" aria-label="Previous item">‹</button>
+        <button id="mob-snav-next" class="mob-snav-btn" aria-label="Next item">›</button>
       </div>
+      <span class="mob-sheet-grip"></span>
+      <button class="mob-sheet-close" id="mob-sheet-close" aria-label="Close">×</button>
     </div>
-    <div class="mob-detail-img-wrap">
-      <img id="mob-detail-img" class="mob-detail-img" alt="">
+    <div class="mob-sheet-img-wrap">
+      <img id="mob-sheet-img" class="mob-sheet-img" alt="">
     </div>
-    <div class="mob-detail-scroll" id="mob-detail-scroll">
-      <div class="mob-detail-title" id="mob-detail-title"></div>
-      <div class="mob-detail-body" id="mob-detail-body"></div>
+    <div class="mob-sheet-scroll" id="mob-sheet-scroll">
+      <div class="mob-sheet-id" id="mob-sheet-id"></div>
+      <div class="mob-sheet-title" id="mob-sheet-title"></div>
+      <div class="mob-sheet-body" id="mob-sheet-body"></div>
     </div>
   </div>
 
@@ -1285,26 +1290,38 @@
     });
   }
 
-  // ── Mobile master-detail navigation ──────────────────────────────────────
-  function mobPushDetail() {
-    document.getElementById("panel-left").classList.add("mob-pushed");
-    document.getElementById("mob-detail").classList.add("mob-detail-active");
+  // ── Mobile bottom sheet (Google Maps style) ──────────────────────────────
+  let mobSheetFull = false;
+
+  function mobShowSheet() {
+    mobSheetFull = false;
+    const sheet = document.getElementById("mob-sheet");
+    sheet.classList.add("mob-sheet-open");
+    sheet.classList.remove("mob-sheet-full");
   }
 
-  function mobPopDetail() {
-    document.getElementById("panel-left").classList.remove("mob-pushed");
-    document.getElementById("mob-detail").classList.remove("mob-detail-active");
-    const scroll = document.getElementById("mob-detail-scroll");
+  function mobHideSheet() {
+    mobSheetFull = false;
+    const sheet = document.getElementById("mob-sheet");
+    sheet.classList.remove("mob-sheet-open", "mob-sheet-full");
+    const scroll = document.getElementById("mob-sheet-scroll");
     if (scroll) scroll.scrollTop = 0;
   }
 
-  function renderMobDetail(id) {
+  function mobToggleSheetFull() {
+    mobSheetFull = !mobSheetFull;
+    const sheet = document.getElementById("mob-sheet");
+    sheet.classList.toggle("mob-sheet-full", mobSheetFull);
+    sheet.classList.toggle("mob-sheet-open", !mobSheetFull);
+  }
+
+  function renderMobSheet(id) {
     const item = state.items.find(i => i.id === id);
     if (!item) return;
-    document.getElementById("mob-detail-id").textContent = id;
-    document.getElementById("mob-detail-title").innerHTML = formatTitle(item.title);
-    // Image: load thumb first, then upgrade to preview
-    const imgEl = document.getElementById("mob-detail-img");
+    document.getElementById("mob-sheet-id").textContent = id;
+    document.getElementById("mob-sheet-title").innerHTML = formatTitle(item.title);
+    // Image: load thumb first, upgrade to preview
+    const imgEl = document.getElementById("mob-sheet-img");
     if (item.img) {
       imgEl.src = item.img.replace(/_prev\.jpg$/, "_thumb.jpg");
       imgEl.alt = item.title;
@@ -1314,7 +1331,7 @@
     } else {
       imgEl.src = ""; imgEl.alt = "";
     }
-    // Key/value metadata
+    // KV metadata
     const rows = [];
     if (item.date)              rows.push(["Date",     escapeHTML(item.date)]);
     if (item.phase)             rows.push(["Phase",    escapeHTML(item.phase)]);
@@ -1329,14 +1346,14 @@
       rows.push(["Location", item.location.split(/,\s*/).map(escapeHTML).join(" › ")]);
     }
     const kvHTML = rows.map(([k,v]) => `<div class="row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
-    document.getElementById("mob-detail-body").innerHTML = `<dl class="kv">${kvHTML}</dl>`;
-    updateMobDetailNav();
+    document.getElementById("mob-sheet-body").innerHTML = `<dl class="kv">${kvHTML}</dl>`;
+    updateMobSheetNav();
   }
 
-  function updateMobDetailNav() {
+  function updateMobSheetNav() {
     const idx = state.filtered.findIndex(i => i.id === state.selectedId);
-    const p = document.getElementById("mob-detail-prev");
-    const n = document.getElementById("mob-detail-next");
+    const p = document.getElementById("mob-snav-prev");
+    const n = document.getElementById("mob-snav-next");
     if (p) p.disabled = idx <= 0;
     if (n) n.disabled = idx < 0 || idx >= state.filtered.length - 1;
   }
@@ -2087,8 +2104,8 @@ $("#foot-dims").textContent = "";
   function selectItem(id, opts = {}) {
     if (!id) return;
     if (window.matchMedia("(max-width:767px)").matches) {
-      renderMobDetail(id);
-      mobPushDetail();
+      renderMobSheet(id);
+      mobShowSheet();
     }
     state.selectedId = id;
     const item = state.items.find(i => i.id === id);
@@ -2308,9 +2325,13 @@ $("#foot-dims").textContent = "";
     });
 
     // Mobile prev/next item buttons
-    document.getElementById("mob-detail-back")?.addEventListener("click", mobPopDetail);
-    document.getElementById("mob-detail-prev")?.addEventListener("click", () => selectAdjacent(-1));
-    document.getElementById("mob-detail-next")?.addEventListener("click", () => selectAdjacent(+1));
+    document.getElementById("mob-sheet-bar")?.addEventListener("click", e => {
+      if (e.target.closest(".mob-sheet-close, .mob-sheet-nav")) return;
+      mobToggleSheetFull();
+    });
+    document.getElementById("mob-sheet-close")?.addEventListener("click", mobHideSheet);
+    document.getElementById("mob-snav-prev")?.addEventListener("click", () => selectAdjacent(-1));
+    document.getElementById("mob-snav-next")?.addEventListener("click", () => selectAdjacent(+1));
 
     // Mobile about overlay — markid tap opens it instead of navigating to splash
     {
