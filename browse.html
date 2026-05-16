@@ -665,7 +665,7 @@
       background:#111;overflow:hidden;
       display:flex;align-items:center;justify-content:center;
     }
-    .mob-sheet-img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+    .mob-sheet-img{width:100%;height:100%;object-fit:contain;display:block}
     .mob-sheet-scroll{flex:1;overflow-y:auto;padding:16px 16px 40px}
     .mob-sheet-id{
       font-family:var(--mono);font-size:10px;color:var(--muted);
@@ -676,17 +676,21 @@
       letter-spacing:-0.015em;line-height:1.2;
       color:var(--ink);margin-bottom:14px;
     }
-    .mob-sheet-body .kv{font-family:var(--mono);font-size:11px;line-height:1.55}
+    /* KV — exact match to desktop .pane-meta .kv */
+    .mob-sheet-body .kv{font-family:var(--mono);font-size:11px;line-height:1.55;margin-bottom:0}
     .mob-sheet-body .kv .row{
-      display:grid;grid-template-columns:80px 1fr;gap:8px;
+      display:grid;grid-template-columns:96px 1fr;gap:8px;
       padding:2px 0;align-items:baseline;
     }
     .mob-sheet-body .kv dt{
-      font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right;
+      font-family:var(--mono);font-size:11px;font-weight:400;
+      letter-spacing:0.04em;text-transform:lowercase;
+      color:var(--muted);text-align:right;
     }
     .mob-sheet-body .kv dt::after{content:":";color:var(--hint);margin-left:2px}
     .mob-sheet-body .kv dd{
-      font-family:var(--mono);font-size:11px;color:var(--ink);line-height:1.55;
+      font-family:var(--mono);font-size:11px;font-weight:400;
+      letter-spacing:0.02em;line-height:1.55;color:var(--ink);
     }
 
     /* ── Full-screen lightbox ── */
@@ -751,7 +755,7 @@
     .site-top{
       background:#1a1816;
       border-bottom:none;
-      border-radius:0 0 14px 14px;
+      border-radius:14px;
       box-shadow:0 4px 16px rgba(0,0,0,0.35);
       position:relative;z-index:20;
     }
@@ -1089,6 +1093,7 @@
       <div class="mob-sheet-id" id="mob-sheet-id"></div>
       <div class="mob-sheet-title" id="mob-sheet-title"></div>
       <div class="mob-sheet-body" id="mob-sheet-body"></div>
+      <div class="rn-panel" id="mob-rn-panel"></div>
     </div>
   </div>
 
@@ -1142,8 +1147,8 @@
   const LOCK_SVG = `<svg width="10" height="12" viewBox="0 0 10 12" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="5.5" width="8" height="6" rx="1"/><path d="M3 5.5V3.8a2 2 0 0 1 4 0v1.7"/></svg>`;
   const UNLOCK_SVG = `<svg width="10" height="12" viewBox="0 0 10 12" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="5.5" width="8" height="6" rx="1"/><path d="M3 5.5V3.8a2 2 0 0 1 4 0V1.5"/></svg>`;
 
-  function renderRN(archId) {
-    const panel = document.getElementById("rn-panel");
+  function renderRN(archId, panelId = "rn-panel") {
+    const panel = document.getElementById(panelId);
     if (!panel) return;
     const researcher = rnSession();
     const notes      = rnLoad(archId);
@@ -1467,6 +1472,7 @@
       `<dl class="kv">${descHTML}</dl>` +
       (archHTML ? `<dl class="kv" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--rule-soft)">${archHTML}</dl>` : "");
     updateMobSheetNav();
+    renderRN(item.id, "mob-rn-panel");
   }
 
   function updateMobSheetNav() {
