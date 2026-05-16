@@ -813,6 +813,21 @@
         <div class="placeholder">Select an item<b id="ph-name"></b></div>
       </div>
     </div>
+    <div class="image-foot">
+      <span class="foot-left"><span id="foot-dims"></span></span>
+      <div class="zoom-ctl">
+        <button id="zoom-out" type="button" title="Zoom out">−</button>
+        <span class="pct" id="zoom-pct">100%</span>
+        <button id="zoom-in" type="button" title="Zoom in">+</button>
+        <span class="zoom-sep"></span>
+        <button id="zoom-fit" type="button" title="Fit to frame">FIT</button>
+        <span class="zoom-sep"></span>
+        <button id="zoom-1to1" type="button" title="1:1 — one screen pixel per image pixel">1:1</button>
+        <span class="zoom-sep"></span>
+        <button id="zoom-rotate" type="button" title="Rotate 90°">↻</button>
+      </div>
+      <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">↓ Original</a></span>
+    </div>
   </section>
 
   <div class="panel-right pane-meta" id="panel-right">
@@ -829,22 +844,6 @@
     </div>
   </div>
 
-</div>
-
-<div class="image-foot">
-  <span class="foot-left"><span id="foot-dims"></span></span>
-  <div class="zoom-ctl">
-    <button id="zoom-out" type="button" title="Zoom out">−</button>
-    <span class="pct" id="zoom-pct">100%</span>
-    <button id="zoom-in" type="button" title="Zoom in">+</button>
-    <span class="zoom-sep"></span>
-    <button id="zoom-fit" type="button" title="Fit to frame">FIT</button>
-    <span class="zoom-sep"></span>
-    <button id="zoom-1to1" type="button" title="1:1 — one screen pixel per image pixel">1:1</button>
-    <span class="zoom-sep"></span>
-    <button id="zoom-rotate" type="button" title="Rotate 90°">↻</button>
-  </div>
-  <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">↓ Original</a></span>
 </div>
 
 <script>
@@ -1088,7 +1087,7 @@
 
   // ── Collapsible panel toggle ──────────────────────────────────────────────
   function togglePanel(side) {
-    const panel = document.getElementById(side + "-panel");
+    const panel = document.getElementById("panel-" + side);
     const tab   = document.getElementById(side + "-tab");
     const isOut = panel.classList.toggle("out");
     tab.textContent = side === "left" ? (isOut ? "›" : "‹") : (isOut ? "‹" : "›");
