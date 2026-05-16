@@ -559,9 +559,9 @@
     <input id="search-input" placeholder="search" autocomplete="off">
   </div>
   <div class="site-topright">
-    <button class="theme-btn" id="fs-toggle" title="Enter fullscreen">⤢</button>
+    <button class="theme-btn" id="fs-toggle" title="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode">◑</button>
-    <span id="topright" title="About this archive">v1.02.07</span>
+    <span id="topright" title="About this archive">v1.02.08</span>
   </div>
 </header>
 
@@ -616,14 +616,7 @@
         <span class="zoom-sep"></span>
         <button id="zoom-fit" type="button" title="Fit to frame">fit</button>
         <span class="zoom-sep"></span>
-        <button id="btn-inspect" type="button" title="Inspect fullscreen">
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="1,4.5 1,1 4.5,1"/><line x1="1" y1="1" x2="4.5" y2="4.5"/>
-            <polyline points="12,4.5 12,1 8.5,1"/><line x1="12" y1="1" x2="8.5" y2="4.5"/>
-            <polyline points="1,8.5 1,12 4.5,12"/><line x1="1" y1="12" x2="4.5" y2="8.5"/>
-            <polyline points="12,8.5 12,12 8.5,12"/><line x1="12" y1="12" x2="8.5" y2="8.5"/>
-          </svg>
-        </button>
+        <button id="btn-inspect" type="button" title="Inspect fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
       </div>
       <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">Download full size</a></span>
     </div>
@@ -1012,7 +1005,7 @@ WHERE {
   }
 
   function updateCount() {
-    if (state.items.length > 0) $("#topright").textContent = "v1.02.07";
+    if (state.items.length > 0) $("#topright").textContent = "v1.02.08";
   }
 
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
@@ -1935,7 +1928,9 @@ WHERE {
       });
       document.addEventListener("fullscreenchange", () => {
         const inFs = !!document.fullscreenElement;
-        fsBtn.textContent = inFs ? "⤡" : "⤢";
+        fsBtn.innerHTML = inFs
+          ? `<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4.5 1v3.5H1M8.5 1v3.5H12M4.5 12V8.5H1M8.5 12V8.5H12"/></svg>`
+          : `<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg>`;
         fsBtn.title = inFs ? "Exit fullscreen" : "Enter fullscreen";
       });
     } else if (fsBtn) {
