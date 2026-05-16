@@ -538,6 +538,7 @@
     font-family:var(--mono);font-size:11px;color:var(--ink);
     letter-spacing:0.02em;line-height:1.6;margin:0;
   }
+  #mob-about [class*="pc-"]{color:var(--pf)}
 
   #load-screen{
     display:none;position:absolute;inset:0;z-index:10;
@@ -978,16 +979,16 @@
     <button id="mob-reload" aria-label="Reload archive">↺</button>
     <button id="mob-about-close" aria-label="Close">×</button>
   </div>
-  <p class="mob-about-title">Hunter House<br>Foundation Archive</p>
-  <p class="mob-about-ver" id="mob-about-ver"></p>
-  <p class="mob-about-body">A foundation dedicated to the stewardship of the residence and architectural archive of architect Richard Morrow Hunter (1930–2023). 203 Goward Road, Saanich, British Columbia.</p>
+  <p class="mob-about-title"><span class="pc-stone">Hunter House</span><br><span class="pc-slate">Foundation Archive</span></p>
+  <p class="mob-about-ver pc-moss" id="mob-about-ver"></p>
+  <p class="mob-about-body">A foundation dedicated to the stewardship of the residence and architectural archive of architect <span class="pc-stone">Richard Morrow Hunter</span> (1930–2023). 203 Goward Road, Saanich, British Columbia.</p>
   <p class="mob-about-body">Open data archive on Wikibase — items individually addressable and SPARQL-queryable. Metadata CC0. Archival description informed by GLAM standards.</p>
   <hr class="mob-about-rule">
   <dl class="mob-about-credits">
     <dt>Stewards</dt>
-    <dd>Floyd Marinescu<br>Olivia Jol</dd>
+    <dd><span class="pc-sage">Floyd Marinescu</span><br><span class="pc-slate">Olivia Jol</span></dd>
     <dt>Project Lead</dt>
-    <dd>Brandon Poole</dd>
+    <dd><span class="pc-clay">Brandon Poole</span></dd>
   </dl>
 </div>
 
