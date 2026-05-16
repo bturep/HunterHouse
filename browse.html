@@ -278,10 +278,9 @@
   }
   .image-stage .placeholder b{color:var(--muted);font-weight:500}
 
-  .foot-rotate{background:none;border:0;color:var(--muted);font-size:16px;padding:0;cursor:pointer;display:flex;align-items:center;line-height:1;flex-shrink:0}
-  .foot-rotate:hover{color:var(--ink)}
+  .foot-spacer{flex:1}
   .zoom-ctl{
-    flex:1;display:flex;align-items:center;justify-content:center;gap:0;user-select:none;
+    display:flex;align-items:center;justify-content:center;gap:0;user-select:none;flex-shrink:0;
   }
   .zoom-ctl button{
     background:none;border:0;font:inherit;color:var(--muted);
@@ -299,6 +298,7 @@
     font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em;flex-shrink:0;
     height:41px;box-sizing:border-box;
   }
+  .foot-dl{flex:1;text-align:right}
   .foot-dl a{color:var(--muted);text-decoration:none;letter-spacing:0.04em}
   .foot-dl a:hover{color:var(--ink)}
   /* ── meta pane ── */
@@ -524,7 +524,7 @@
     <span class="tr-sep"></span>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1.5 A6 6 0 0 0 7.5 13.5 Z"/><circle cx="7.5" cy="7.5" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
     <span class="tr-sep"></span>
-    <span id="topright" title="About this archive">v1.02.13</span>
+    <span id="topright" title="About this archive">v1.02.14</span>
   </div>
 </header>
 
@@ -571,7 +571,7 @@
       </div>
     </div>
     <div class="image-foot">
-      <button id="zoom-rotate" class="foot-rotate" type="button" title="Rotate 90°">↻</button>
+      <span class="foot-spacer"></span>
       <div class="zoom-ctl">
         <button id="zoom-out" type="button" title="Zoom out">−</button>
         <span class="pct" id="zoom-pct">100%</span>
@@ -580,8 +580,10 @@
         <button id="zoom-fit" type="button" title="Fit to frame">fit</button>
         <span class="zoom-sep"></span>
         <button id="zoom-1to1" type="button" title="1:1 — one screen pixel per image pixel">1:1</button>
+        <span class="zoom-sep"></span>
+        <button id="zoom-rotate" type="button" title="Rotate 90°">↻</button>
       </div>
-      <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">Download full size</a></span>
+      <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">↓ Original</a></span>
     </div>
   </section>
 
@@ -951,7 +953,7 @@ WHERE {
   }
 
   function updateCount() {
-    if (state.items.length > 0) $("#topright").textContent = "v1.02.13";
+    if (state.items.length > 0) $("#topright").textContent = "v1.02.14";
   }
 
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
