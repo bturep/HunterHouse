@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Import researcher notes</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body{font-family:monospace;font-size:13px;background:#1a1816;color:#c8c4bc;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
+  .box{max-width:480px;padding:32px;line-height:1.7}
+  .ok{color:#7aad8f;font-size:15px;margin-bottom:12px}
+  .err{color:#c0614a;font-size:15px;margin-bottom:12px}
+  a{color:#c8c4bc;text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="box" id="box">Running import…</div>
+<script>
+(function() {
+  var notes = {
+    "HH-CAA-0001": "Star Form",
+    "HH-CAA-0002": "Star Form",
+    "HH-CAA-0003": "Note on drawing: 'Kitchen entirely on rock outcropping. Skywalk/Veranda inception as Eyrie. Program generally prescribed.' — Tilted Form",
+    "HH-CAA-0004": "Tilted Form",
+    "HH-CAA-0005": "Tilted Form",
+    "HH-CAA-0006": "Tilted Form",
+    "HH-CAA-0007": "OG Scheme",
+    "HH-CAA-0008": "OG Scheme",
+    "HH-CAA-0009": "OG Scheme",
+    "HH-CAA-0020": "East Wing Renovation",
+    "HH-CAA-0023": "Note: 1981 (with [1988?] notation on drawing) — East Wing Roof Alteration",
+    "HH-CAA-0025": "Ref: folder-19_01. c. 1985, pre-1990",
+    "HH-CAA-0026": "c. 1985, pre-1990.",
+    "HH-E-4": "September 14, 2017. Second of three interviews. Source: Leach essay footnotes.",
+    "HH-E-5": "October 31, 2017. Third of three interviews. Source: Leach essay footnotes.",
+    "HH-E-6": "Hunter included in Maison d'Etre exhibition: The Architect's Dwelling: A Self-Portrait, Montreal, 1995. Source: Hunter Chronology.",
+    "HH-E-7": "Included in From the Ground, Into the Light: Organic Architecture of the Islands, 1950-2000; Victoria, 2024. Source: Hunter Chronology.",
+    "HH-E-8": "John Fulker photographs the Hunter Residence, 1974. Photographs held in the John Fulker Collection at the West Vancouver Museum. Source: House Chronology.",
+    "HH-HHC-0003": "OG Scheme. Verb Plan Construction: Sleeping; Weaving (Frances); Drawing (Ric). Atrium Garden Area with Kotatsu. Entry a Genkan. Original Exterior Corner Scupper (2026 - one remains).",
+    "HH-HHC-0036": "RH Note: \"Tree Root Area\"",
+    "HH-HHC-0039": "Circular Counter Extension",
+    "HH-HHC-0040": "Dining Room Scheme I [Bell]",
+    "HH-HHC-0041": "Dining Room Scheme II [Cube I - Passthrough]. RH Notes: Occupancy chart for alternate circular table sizes. \"Ok for 10 but 6'.33 better (Squeeze in 12!)\"",
+    "HH-HHC-0042": "Dining Room Scheme III [Cube II - Sunroom]",
+    "HH-HHC-0043": "Dining Room Scheme IV [SE Sunroom]",
+    "HH-HHC-0044": "Dining Room Scheme V [Cube III - Tree Cutout]",
+    "HH-HHC-0045": "Dining Room Scheme VI [Cube IV - Circle Window]",
+    "HH-HHC-0046": "Dining Room Scheme VII [undeveloped]",
+    "HH-HHC-0047": "Dining Room Scheme VIII [undeveloped]",
+    "HH-HHC-0048": "Sunroom Roof Detail Scheme",
+    "HH-HHC-0052": "Dining Room Scheme IV with full addition",
+    "HH-HHC-0054": "Skywalk Plan Details + radiating steps",
+    "HH-HHC-0060": "Driveway Bollard Layout",
+    "HH-HHC-0076": "1/8 was reused for resubmitted drawings on 2018-07-31",
+    "HH-HHC-0111": "Compiled PDF. Contains permit submissions 2018-06-22 and 2018-07-31, engineering correspondence, invoices, and related documents. Date range 2018-2022.",
+    "HH-HHC-0112": "Portfolio made as a gift. Physical item from Hunter House Collection.",
+    "HH-HHC-0113": "Postcard. Date unknown.",
+    "HH-HHC-0114": "Compiled PDF. Various stationery, envelopes, and business card. Date unknown."
+  };
+
+  try {
+    var existing = JSON.parse(localStorage.getItem('hhf_rn') || '{}');
+    var count = 0;
+    Object.entries(notes).forEach(function(entry) {
+      var id = entry[0], text = entry[1];
+      if (!existing[id]) existing[id] = [];
+      existing[id].push({ by: 'BP', date: '26.5.16', text: text });
+      count++;
+    });
+    localStorage.setItem('hhf_rn', JSON.stringify(existing));
+    document.getElementById('box').innerHTML =
+      '<p class="ok">Done — ' + count + ' notes imported as BP · 26.5.16</p>' +
+      '<p><a href="browse.html">Open archive →</a></p>';
+  } catch(e) {
+    document.getElementById('box').innerHTML =
+      '<p class="err">Error: ' + e.message + '</p>';
+  }
+})();
+</script>
+</body>
+</html>
