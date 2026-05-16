@@ -562,7 +562,6 @@
   .load-dots::after{content:"";animation:ld-dots 1.4s steps(1,end) infinite}
 
   .mob-sheet{display:none}
-  .mob-row-strip{display:none}
   .mob-lightbox{display:none}
 
   @media (max-width:767px){
@@ -585,36 +584,13 @@
       z-index:1;background:var(--bg);
       display:flex!important;flex-direction:column;
     }
-    /* Contracted: show only the selected-item strip */
-    .panel-left.mob-contracted{height:52px!important;overflow:hidden!important;}
-    .panel-left.mob-contracted .mob-row-strip{
-      display:flex;align-items:center;height:52px;
-      padding:0 14px;gap:9px;flex-shrink:0;
-      background:var(--bg);border-bottom:1px solid var(--rule);
-    }
-    .mob-strip-tmark{
-      font-family:var(--mono);font-size:9px;letter-spacing:0.06em;
-      color:var(--muted);background:var(--soft);
-      padding:2px 5px;border-radius:3px;flex-shrink:0;
-    }
-    .mob-strip-id{
-      font-family:var(--mono);font-size:10px;color:var(--muted);
-      letter-spacing:0.06em;flex-shrink:0;
-    }
-    .mob-strip-title{
-      font-family:var(--sans);font-size:13px;color:var(--ink);
-      flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-    }
-    .mob-strip-yr{
-      font-family:var(--mono);font-size:10px;color:var(--muted);flex-shrink:0;
-    }
 
     .pane-image{display:none!important}
     .panel-right{display:none!important}
 
     .mob-sheet{
       position:absolute!important;left:0;right:0;bottom:0;
-      height:100%;background:var(--bg);
+      height:72vh;background:var(--bg);
       border-radius:14px 14px 0 0;
       box-shadow:0 -2px 20px rgba(0,0,0,0.18);
       z-index:10;
@@ -622,8 +598,7 @@
       transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);
       display:flex!important;flex-direction:column;overflow:hidden;
     }
-    .mob-sheet.mob-sheet-open{transform:translateY(52px)}
-    .mob-sheet.mob-sheet-full{transform:translateY(0);border-radius:0}
+    .mob-sheet.mob-sheet-open{transform:translateY(0)}
     /* Pills: same treatment as desktop record pane — colored text, no chip */
     .mob-sheet-body .pill{
       height:auto;padding:0;background:transparent;
@@ -692,6 +667,34 @@
       font-family:var(--mono);font-size:11px;font-weight:400;
       letter-spacing:0.02em;line-height:1.55;color:var(--ink);
     }
+
+    /* ── Mobile section headers + graph ── */
+    .mob-sheet-scroll .meta-section,
+    .mob-sheet-scroll .graph-section{margin-bottom:18px}
+    .mob-sheet-scroll .meta-section h3,
+    .mob-sheet-scroll .graph-section h3{
+      font-family:var(--mono);font-size:9.5px;font-weight:500;
+      letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);
+      display:flex;justify-content:space-between;align-items:baseline;
+      border-bottom:1px solid var(--rule-soft);padding-bottom:5px;margin-bottom:8px;
+    }
+    .mob-sheet-scroll .meta-section h3 .n,
+    .mob-sheet-scroll .graph-section h3 .n{color:var(--hint);margin-right:5px}
+    .mob-sheet-scroll .meta-section h3 .ct,
+    .mob-sheet-scroll .graph-section h3 .ct{font-size:9px;color:var(--hint);font-weight:400;text-transform:none;letter-spacing:0}
+    .mob-sheet-scroll .graph-path{font-family:var(--mono);font-size:11px;line-height:1.55}
+    .mob-sheet-scroll .graph-path .node{
+      display:grid;grid-template-columns:14px 74px 1fr;gap:4px;
+      padding:2px 0;align-items:baseline;
+    }
+    .mob-sheet-scroll .graph-path .tick{color:var(--hint);font-size:10px}
+    .mob-sheet-scroll .graph-path .rel{color:var(--muted);font-size:9px;letter-spacing:0.04em}
+    .mob-sheet-scroll .graph-path .lbl{color:var(--ink);font-size:11px}
+    .mob-sheet-scroll .graph-path .node.this .lbl{color:var(--red);font-weight:500}
+    .mob-sheet-scroll .graph-path .connector{
+      width:1px;height:6px;background:var(--rule);margin-left:6px;
+    }
+    .mob-sheet-scroll .graph-path .graph-empty{color:var(--hint);font-family:var(--mono);font-size:10px}
 
     /* ── Full-screen lightbox ── */
     .mob-lightbox{
@@ -996,12 +999,6 @@
   </div>
 
   <div class="panel-left pane-list mobile-active" id="panel-left">
-    <div class="mob-row-strip" id="mob-row-strip">
-      <span class="mob-strip-tmark" id="mob-strip-tmark"></span>
-      <span class="mob-strip-id" id="mob-strip-id"></span>
-      <span class="mob-strip-title" id="mob-strip-title"></span>
-      <span class="mob-strip-yr" id="mob-strip-yr"></span>
-    </div>
     <div class="panel-content">
       <div class="scroll-pip" id="list-pip"></div>
       <div class="list-head">
@@ -1093,7 +1090,6 @@
       <div class="mob-sheet-id" id="mob-sheet-id"></div>
       <div class="mob-sheet-title" id="mob-sheet-title"></div>
       <div class="mob-sheet-body" id="mob-sheet-body"></div>
-      <div class="rn-panel" id="mob-rn-panel"></div>
     </div>
   </div>
 
@@ -1376,42 +1372,19 @@
   }
 
   // ── Mobile bottom sheet (Google Maps style) ──────────────────────────────
-  let mobSheetFull = false;
-
   function mobShowSheet() {
-    mobSheetFull = false;
-    document.getElementById("panel-left").classList.add("mob-contracted");
-    const sheet = document.getElementById("mob-sheet");
-    sheet.classList.add("mob-sheet-open");
-    sheet.classList.remove("mob-sheet-full");
+    document.getElementById("mob-sheet").classList.add("mob-sheet-open");
   }
 
   function mobHideSheet() {
-    mobSheetFull = false;
-    document.getElementById("panel-left").classList.remove("mob-contracted");
-    const sheet = document.getElementById("mob-sheet");
-    sheet.classList.remove("mob-sheet-open", "mob-sheet-full");
+    document.getElementById("mob-sheet").classList.remove("mob-sheet-open");
     const scroll = document.getElementById("mob-sheet-scroll");
     if (scroll) scroll.scrollTop = 0;
-  }
-
-  function mobToggleSheetFull() {
-    mobSheetFull = !mobSheetFull;
-    const sheet = document.getElementById("mob-sheet");
-    sheet.classList.toggle("mob-sheet-full", mobSheetFull);
-    sheet.classList.toggle("mob-sheet-open", !mobSheetFull);
   }
 
   function renderMobSheet(id) {
     const item = state.items.find(i => i.id === id);
     if (!item) return;
-
-    // Populate the contracted list strip
-    const tmark = typeMark(item.itemType);
-    document.getElementById("mob-strip-tmark").textContent = tmark || "";
-    document.getElementById("mob-strip-id").textContent = displayId(id);
-    document.getElementById("mob-strip-title").textContent = item.title || "";
-    document.getElementById("mob-strip-yr").textContent = yearOf(item.date);
 
     // Sheet header + image
     document.getElementById("mob-sheet-id").textContent = id;
@@ -1465,14 +1438,69 @@
       archRows.push(["Finding aid", `<a href="${escapeHTML(item.archiveLink)}" target="_blank" rel="noopener">${archiveLinkLabel(item.heldBy)}</a>`]);
     }
 
+    // Graph: path + siblings
+    const phaseLabel = item.phase || null;
+    const siblings = phaseLabel
+      ? state.items
+          .filter(i => i.phase === phaseLabel)
+          .sort((a, b) => {
+            const ap = parseInt(a.setPosition) || 999;
+            const bp = parseInt(b.setPosition) || 999;
+            return ap !== bp ? ap - bp : (a.date||"").localeCompare(b.date||"");
+          })
+      : [];
+
+    const graphPathHTML = phaseLabel
+      ? `<div class="node this"><span class="tick">●</span><span class="rel">This</span><span class="lbl">${escapeHTML(item.title)}</span></div>
+         <div class="connector"></div>
+         <div class="node"><span class="tick">↑</span><span class="rel">part of</span><span class="lbl">${escapeHTML(phaseLabel)}</span></div>
+         <div class="connector"></div>
+         <div class="node"><span class="tick">↑</span><span class="rel">part of</span><span class="lbl" style="color:var(--muted);font-weight:400">Hunter Residence</span></div>`
+      : `<div class="graph-empty">No phase assigned.</div>`;
+
+    let siblingsHTML = "";
+    if (siblings.length > 1) {
+      const sibRows = siblings.map(s => {
+        const isCurrent = s.id === item.id;
+        const pos = s.setPosition ? s.setPosition.split(" of ")[0] : "—";
+        return `<a class="sib${isCurrent ? " current" : ""}" ${isCurrent ? "" : `data-sib-id="${escapeHTML(s.id)}"`}>
+          <span class="id">${displayId(s.id)}</span>
+          <span class="t" title="${escapeHTML(s.title)}">${midTrunc(s.title, 22, 14)}</span>
+          <span class="pos">${escapeHTML(pos)}</span>
+        </a>`;
+      }).join("");
+      siblingsHTML = `<div class="graph-siblings">
+        <div class="lbl-row"><span>In this set</span><span class="ct">${siblings.length} total</span></div>
+        ${sibRows}
+      </div>`;
+    }
+
     const kvRow = ([k,v]) => `<div class="row"><dt>${k}</dt><dd>${v}</dd></div>`;
     const descHTML = descRows.map(kvRow).join("");
     const archHTML = archRows.map(kvRow).join("");
-    document.getElementById("mob-sheet-body").innerHTML =
-      `<dl class="kv">${descHTML}</dl>` +
-      (archHTML ? `<dl class="kv" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--rule-soft)">${archHTML}</dl>` : "");
+    const graphN = archRows.length > 0 ? "03" : "02";
+
+    const body = document.getElementById("mob-sheet-body");
+    body.innerHTML =
+      `<section class="meta-section">
+        <h3><span><span class="n">01</span>Description</span><span class="ct">${descRows.length} fields</span></h3>
+        <dl class="kv">${descHTML}</dl>
+      </section>` +
+      (archHTML ? `<section class="meta-section">
+        <h3><span><span class="n">02</span>Archival</span><span class="ct">${archRows.length} fields</span></h3>
+        <dl class="kv">${archHTML}</dl>
+      </section>` : "") +
+      `<section class="graph-section">
+        <h3><span><span class="n">${graphN}</span>In the graph</span><span class="ct">Wikibase context</span></h3>
+        <div class="graph-path">${graphPathHTML}</div>
+        ${siblingsHTML}
+      </section>`;
+
+    body.querySelectorAll(".sib[data-sib-id]").forEach(el => {
+      el.addEventListener("click", e => { e.preventDefault(); selectItem(el.dataset.sibId); });
+    });
+
     updateMobSheetNav();
-    renderRN(item.id, "mob-rn-panel");
   }
 
   function updateMobSheetNav() {
@@ -2507,10 +2535,10 @@ $("#foot-dims").textContent = "";
       tab.addEventListener("click", () => switchMobileTab(tab.dataset.pane));
     });
 
-    // Mobile prev/next item buttons
+    // Mobile sheet bar: grip closes, prev/next navigate
     document.getElementById("mob-sheet-bar")?.addEventListener("click", e => {
       if (e.target.closest(".mob-sheet-close, .mob-sheet-nav")) return;
-      mobToggleSheetFull();
+      mobHideSheet();
     });
     document.getElementById("mob-sheet-close")?.addEventListener("click", mobHideSheet);
     document.getElementById("mob-snav-prev")?.addEventListener("click", () => selectAdjacent(-1));
@@ -2519,7 +2547,7 @@ $("#foot-dims").textContent = "";
     // Tap sheet image → open lightbox
     document.getElementById("mob-sheet-img")?.addEventListener("click", () => {
       const item = state.items.find(i => i.id === state.selectedId);
-      if (item?.img) openLightbox(item.img, item.title);
+      if (item?.image) openLightbox(item.image, item.title);
     });
 
     // Lightbox close button
