@@ -2797,7 +2797,7 @@ $("#foot-dims").textContent = "";
     if (mobileVersionBtn) {
       mobileVersionBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        aboutPanel.classList.contains("open") ? closeAbout() : openAbout();
+        document.getElementById("mob-about").classList.add("open");
       });
     }
     document.addEventListener("click", closeAbout);
