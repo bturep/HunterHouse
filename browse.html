@@ -104,7 +104,7 @@
   .list-fleuron{display:flex;justify-content:center;align-items:center;height:25vh;margin-top:20px;padding-bottom:32px}
   .list-fleuron img{width:120px;height:120px;object-fit:contain;image-rendering:crisp-edges}
   .pane-list{border-right:1px solid var(--ink);display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg);position:relative}
-  .pane-image{background:var(--paper);display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative}
+  .pane-image{background:#000;display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative}
   .pane-meta{border-left:1px solid var(--ink);display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg);position:relative}
 
   /* ── list pane ── */
@@ -127,8 +127,8 @@
   /* ── scroll pips ── */
   .scroll-pip{
     position:absolute;right:2px;top:41px;z-index:5;pointer-events:none;
-    width:3px;
-    background:var(--ink);border:0;border-radius:2px;
+    width:1px;
+    background:var(--ink);border:0;border-radius:1px;
     opacity:0;transition:opacity 0.15s;
     /* height is set by JS — proportional to viewport / content ratio */
   }
@@ -239,13 +239,13 @@
   .image-head{
     display:flex;justify-content:center;align-items:center;
     height:41px;box-sizing:border-box;padding:0 24px;
-    background:var(--bg);flex-shrink:0;
+    background:#000;flex-shrink:0;
   }
 
 
   .image-stage{
     flex:1;position:relative;overflow:hidden;
-    background:var(--paper);display:flex;align-items:center;justify-content:center;
+    background:#000;display:flex;align-items:center;justify-content:center;
   }
   .image-stage .canvas{
     width:100%;height:100%;position:relative;overflow:hidden;cursor:grab;
@@ -540,7 +540,6 @@
 
   /* ── Wordmark ── */
   .markid .name{font-weight:700}
-  .markid .name .dim{font-weight:400}
 
   /* ── Record pane head ── */
   .pane-meta .meta-head .l{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
@@ -639,6 +638,44 @@
     border-top:1px dashed var(--rule);color:var(--muted);
   }
 
+  /* ── Inline curator note editor ── */
+  .note-editor{margin-top:14px;border-top:1px dashed var(--rule);padding-top:10px}
+  .note-editor-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .note-editor-lbl{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)}
+  .note-edit-btn{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;background:none;border:none;padding:0;cursor:pointer;color:var(--copper-deep)}
+  .note-edit-btn:hover{opacity:0.7}
+  .note-display{font-family:var(--mono);font-size:11px;letter-spacing:0.02em;line-height:1.65;color:var(--muted);white-space:pre-wrap}
+  .note-textarea{
+    width:100%;box-sizing:border-box;
+    font-family:var(--mono);font-size:11px;letter-spacing:0.02em;line-height:1.65;
+    color:var(--ink);background:var(--soft);
+    border:1px solid var(--rule);border-radius:2px;
+    padding:8px 10px;resize:vertical;min-height:72px;
+    outline:none;display:none;
+  }
+  html.dark .note-textarea{background:#2a2826;border-color:#3a3834;color:var(--inv-fg)}
+  .note-textarea:focus{border-color:var(--muted)}
+  .note-save-row{display:none;align-items:center;gap:10px;margin-top:7px}
+  .note-save-btn{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;background:var(--ink);color:var(--bg);border:none;padding:4px 10px;border-radius:1px;cursor:pointer}
+  html.dark .note-save-btn{background:var(--inv-fg);color:#1e1c1a}
+  .note-save-btn:hover{opacity:0.8}
+  .note-save-btn:disabled{opacity:0.35;cursor:not-allowed}
+  .note-cancel-btn{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;background:none;border:none;padding:0;cursor:pointer;color:var(--muted)}
+  .note-cancel-btn:hover{color:var(--ink)}
+  .note-status{font-family:var(--mono);font-size:9px;letter-spacing:0.04em;color:var(--muted);margin-left:auto}
+  .note-status.ok{color:#3a7a4a}
+  .note-status.err{color:var(--red-deep)}
+  .note-auth-row{display:none;align-items:center;gap:6px;margin-top:7px}
+  .note-auth-pass{
+    flex:1;font-family:var(--mono);font-size:10px;letter-spacing:0.02em;
+    background:var(--soft);border:1px solid var(--rule);color:var(--ink);
+    padding:3px 7px;border-radius:1px;outline:none;
+  }
+  html.dark .note-auth-pass{background:#2a2826;border-color:#3a3834;color:var(--inv-fg)}
+  .note-auth-pass:focus{border-color:var(--muted)}
+  .note-auth-btn{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;background:none;border:1px solid var(--rule);padding:3px 8px;border-radius:1px;cursor:pointer;color:var(--muted);white-space:nowrap}
+  .note-auth-btn:hover{border-color:var(--muted);color:var(--ink)}
+
   /* ── Filter panel (browse menu) — outline tag chips, red active state ── */
   .filter-panel{padding:16px 20px 14px}
   .fp-group{margin-bottom:14px}
@@ -676,14 +713,13 @@
 
 <header class="site-top" id="site-header">
   <a class="markid" href="index.html">
-    <span class="name">Hunter House <span class="dim">Foundation</span></span>
+    <span class="name">Hunter House Foundation Archive</span>
   </a>
   <div class="header-search">
-    <span class="search-prefix">/</span>
+    <span class="search-prefix"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="4.8" cy="4.8" r="3.3"/><line x1="7.2" y1="7.2" x2="11" y2="11"/></svg></span>
     <input id="search-input" placeholder="search" autocomplete="off">
   </div>
   <div class="site-topright">
-    <span class="tr-sep"></span>
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
     <span class="tr-sep"></span>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1.5 A6 6 0 0 0 7.5 13.5 Z"/><circle cx="7.5" cy="7.5" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
@@ -769,6 +805,55 @@
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
+
+  // ── Wikibase write auth (per-session, never persisted) ────────────────────
+  let wbCsrf = null;
+
+  async function wbPost(params) {
+    params.format  = "json";
+    params.origin  = location.origin;
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      credentials: "include",
+      body: new URLSearchParams(params)
+    });
+    return res.json();
+  }
+
+  async function wbGet(params) {
+    params.format = "json";
+    params.origin = location.origin;
+    const res = await fetch(API_URL + "?" + new URLSearchParams(params), {
+      credentials: "include"
+    });
+    return res.json();
+  }
+
+  async function wbAuthenticate(password) {
+    const lt  = await wbGet({ action: "query", meta: "tokens", type: "login" });
+    const tok = lt.query.tokens.logintoken;
+    const lr  = await wbPost({ action: "login", lgname: "MyBot@my-bot", lgpassword: password, lgtoken: tok });
+    if (lr.login?.result !== "Success") throw new Error(lr.login?.reason || "Login failed");
+    const cr  = await wbGet({ action: "query", meta: "tokens" });
+    wbCsrf    = cr.query.tokens.csrftoken;
+  }
+
+  async function wbSaveP100(qid, noteText) {
+    const er     = await wbGet({ action: "wbgetentities", ids: qid, props: "claims" });
+    const claims = er.entities?.[qid]?.claims?.P100 || [];
+    if (noteText === "") {
+      if (claims.length > 0) {
+        await wbPost({ action: "wbremoveclaims", claim: claims[0].id, token: wbCsrf });
+      }
+      return;
+    }
+    if (claims.length > 0) {
+      await wbPost({ action: "wbsetclaimvalue", claim: claims[0].id, snaktype: "value", value: JSON.stringify(noteText), token: wbCsrf });
+    } else {
+      await wbPost({ action: "wbcreateclaim", entity: qid, property: "P100", snaktype: "value", value: JSON.stringify(noteText), token: wbCsrf });
+    }
+  }
 
   // ── State ─────────────────────────────────────────────────────────────────
   const state = {
@@ -1578,12 +1663,119 @@ $("#foot-dims").textContent = "";
         ${siblingsHTML}
         ${graphActionsHTML}
       </section>
-      ${item.notes ? `<p class="curator-note">${escapeHTML(item.notes)}</p>` : ""}
+      ${item.qid ? `
+      <div class="note-editor" id="note-editor" data-qid="${escapeHTML(item.qid)}">
+        <div class="note-editor-head">
+          <span class="note-editor-lbl">curator note</span>
+          <button class="note-edit-btn" id="note-edit-btn">edit</button>
+        </div>
+        <p class="note-display" id="note-display">${item.notes
+          ? escapeHTML(item.notes)
+          : `<span style="color:var(--hint);font-style:italic">no note</span>`}</p>
+        <textarea class="note-textarea" id="note-textarea">${item.notes ? escapeHTML(item.notes) : ""}</textarea>
+        <div class="note-save-row" id="note-save-row">
+          <button class="note-save-btn" id="note-save-btn">Save</button>
+          <button class="note-cancel-btn" id="note-cancel-btn">cancel</button>
+          <span class="note-status" id="note-status"></span>
+        </div>
+        <div class="note-auth-row" id="note-auth-row">
+          <input class="note-auth-pass" type="password" id="note-auth-pass" placeholder="bot password" autocomplete="off">
+          <button class="note-auth-btn" id="note-auth-btn">authenticate →</button>
+        </div>
+      </div>` : (item.notes ? `<p class="curator-note">${escapeHTML(item.notes)}</p>` : "")}
     `;
 
     body.querySelectorAll(".sib[data-sib-id]").forEach(el => {
       el.addEventListener("click", e => { e.preventDefault(); selectItem(el.dataset.sibId); });
     });
+
+    // ── Curator note editor wiring ────────────────────────────────────────
+    (function() {
+      const editor   = document.getElementById("note-editor");
+      if (!editor) return;
+      const qid      = editor.dataset.qid;
+      const editBtn  = document.getElementById("note-edit-btn");
+      const display  = document.getElementById("note-display");
+      const textarea = document.getElementById("note-textarea");
+      const saveRow  = document.getElementById("note-save-row");
+      const saveBtn  = document.getElementById("note-save-btn");
+      const cancelBtn= document.getElementById("note-cancel-btn");
+      const status   = document.getElementById("note-status");
+      const authRow  = document.getElementById("note-auth-row");
+      const authPass = document.getElementById("note-auth-pass");
+      const authBtn  = document.getElementById("note-auth-btn");
+
+      editBtn.addEventListener("click", () => {
+        display.style.display  = "none";
+        textarea.style.display = "block";
+        saveRow.style.display  = "flex";
+        editBtn.style.display  = "none";
+        textarea.focus();
+      });
+
+      cancelBtn.addEventListener("click", () => {
+        textarea.style.display = "none";
+        saveRow.style.display  = "none";
+        authRow.style.display  = "none";
+        display.style.display  = "block";
+        editBtn.style.display  = "";
+        status.textContent = "";
+        status.className   = "note-status";
+      });
+
+      async function doSave() {
+        const newNote = textarea.value.trim();
+        saveBtn.disabled   = true;
+        status.className   = "note-status";
+        status.textContent = "saving…";
+        try {
+          await wbSaveP100(qid, newNote);
+          const it = state.items.find(i => i.qid === qid);
+          if (it) it.notes = newNote || null;
+          display.innerHTML = newNote
+            ? escapeHTML(newNote)
+            : `<span style="color:var(--hint);font-style:italic">no note</span>`;
+          textarea.style.display = "none";
+          saveRow.style.display  = "none";
+          authRow.style.display  = "none";
+          display.style.display  = "block";
+          editBtn.style.display  = "";
+          status.textContent = "";
+        } catch(e) {
+          status.className   = "note-status err";
+          status.textContent = "error: " + e.message;
+        } finally {
+          saveBtn.disabled = false;
+        }
+      }
+
+      saveBtn.addEventListener("click", async () => {
+        if (!wbCsrf) { authRow.style.display = "flex"; authPass.focus(); return; }
+        await doSave();
+      });
+
+      authBtn.addEventListener("click", async () => {
+        const pass = authPass.value.trim();
+        if (!pass) return;
+        authBtn.disabled   = true;
+        status.className   = "note-status";
+        status.textContent = "authenticating…";
+        try {
+          await wbAuthenticate(pass);
+          authPass.value = "";
+          authRow.style.display = "none";
+          await doSave();
+        } catch(e) {
+          status.className   = "note-status err";
+          status.textContent = e.message;
+        } finally {
+          authBtn.disabled = false;
+        }
+      });
+
+      authPass.addEventListener("keydown", e => { if (e.key === "Enter") authBtn.click(); });
+    })();
+
     requestAnimationFrame(() => updatePip("meta-body", "meta-pip"));
   }
 
