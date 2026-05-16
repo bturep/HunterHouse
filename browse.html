@@ -990,9 +990,11 @@ WHERE {
     dlBtn.href = item.master || url;
     dlBtn.style.visibility = item.master ? "" : "hidden";
 
-    // Derive thumb URL: swap previews/ → thumbs/ and _prev.jpg → _thumb.jpg
+    // Derive thumb and large URLs from the _prev.jpg P96 URL
     const thumbUrl = url.replace(/\/previews\//, "/thumbs/").replace(/_prev\.jpg$/, "_thumb.jpg");
+    const largeUrl = url.replace(/\/previews\//, "/large/").replace(/_prev\.jpg$/, "_large.jpg");
     const hasThumb = thumbUrl !== url;
+    const fullSrc  = largeUrl !== url ? largeUrl : url; // use large if derivable, else prev
 
     const fullImg  = new Image();
     fullImg.alt      = item.title;
@@ -1090,7 +1092,7 @@ WHERE {
       thumbImg.src = thumbUrl;
     }
 
-    fullImg.src = url; // start loading full immediately (parallel with thumb)
+    fullImg.src = fullSrc; // start loading full immediately (parallel with thumb)
   }
 
   function fitToFrame() {

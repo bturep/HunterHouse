@@ -19,6 +19,7 @@ import subprocess, os, sys, tempfile, shutil
 
 DRY_RUN    = "--dry-run" in sys.argv
 THUMB_MODE = "--thumb" in sys.argv
+LARGE_MODE = "--large" in sys.argv
 COLLECTION = next((a for a in sys.argv[1:] if a in ("hhc", "caa")), None)
 
 R2 = "hh-r2:hunter-house-archive"
@@ -27,15 +28,22 @@ COLLECTIONS = {
         "masters":  f"{R2}/hunter-house-collection/masters",
         "previews": f"{R2}/hunter-house-collection/previews",
         "thumbs":   f"{R2}/hunter-house-collection/thumbs",
+        "large":    f"{R2}/hunter-house-collection/large",
     },
     "caa": {
         "masters":  f"{R2}/canadian-architecture-archive/masters",
         "previews": f"{R2}/canadian-architecture-archive/previews",
         "thumbs":   f"{R2}/canadian-architecture-archive/thumbs",
+        "large":    f"{R2}/canadian-architecture-archive/large",
     },
 }
 
-if THUMB_MODE:
+if LARGE_MODE:
+    SIZE    = 3840  # px on longest side
+    QUALITY = 85    # JPEG quality
+    SUFFIX  = "_large.jpg"
+    DEST_KEY = "large"
+elif THUMB_MODE:
     SIZE    = 600  # px on longest side
     QUALITY = 75   # JPEG quality
     SUFFIX  = "_thumb.jpg"
@@ -107,7 +115,7 @@ def main():
     targets = {COLLECTION: COLLECTIONS[COLLECTION]} if COLLECTION else COLLECTIONS
     tmpdir  = tempfile.mkdtemp(prefix="hh_prev_")
 
-    mode = "THUMB (600px/75%)" if THUMB_MODE else "PREVIEW (2000px/82%)"
+    mode = "LARGE (3840px/85%)" if LARGE_MODE else "THUMB (600px/75%)" if THUMB_MODE else "PREVIEW (2000px/82%)"
     print(f"Mode: {mode}")
     print(f"Target: {SIZE}px longest side, {QUALITY}% JPEG quality → {SUFFIX}")
     print(f"Collections: {', '.join(targets).upper()}")
