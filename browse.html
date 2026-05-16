@@ -17,10 +17,6 @@
   ::view-transition-new(root){animation-duration:600ms;animation-timing-function:cubic-bezier(.4,0,.2,1)}
   ::view-transition-group(hh-mark){animation-duration:900ms;animation-timing-function:cubic-bezier(.4,0,.2,1)}
 
-  /* Fade the whole page in on arrival */
-
-
-
   /* browse-surface overrides */
   html{background:#f3f1ec;height:100%}
   html,body{overflow:hidden}
@@ -168,8 +164,6 @@
     padding:0px 4px;letter-spacing:0;
   }
   .filter-badge.visible{display:flex;align-items:center}
-
-  /* ── filter toggle button ── */
 
   /* ── filter panel ── */
   .filter-panel{
@@ -605,6 +599,7 @@
 
 <script>
   // ── Config ────────────────────────────────────────────────────────────────
+  const VERSION      = "v1.02.18";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -701,7 +696,7 @@
     return (await res.json()).results.bindings;
   }
 
-  const CACHE_KEY = "hhf_catalogue_v22";
+  const CACHE_KEY = "hhf_" + VERSION;
 
   function clearCache() {
     try { localStorage.removeItem(CACHE_KEY); } catch {}
@@ -876,8 +871,7 @@ WHERE {
     return TYPE_MARKS[itemType.toLowerCase()] || itemType.slice(0,1).toUpperCase();
   }
 
-  // Pill colour palette — 6 muted tones matching the badge colours
-  // Pill colour tokens — drawn from the badge palette
+  // Pill colour tokens
   const PC = {
     sage:  { cls:"pc-sage"  },
     stone: { cls:"pc-stone" },
@@ -885,8 +879,8 @@ WHERE {
     clay:  { cls:"pc-clay"  },
     moss:  { cls:"pc-moss"  },
   };
-  function itemTypePillColor() { return PC.stone; }
-  function drawTypePillColor() { return PC.slate; }
+  const itemTypePillColor = () => PC.stone;
+  const drawTypePillColor = () => PC.slate;
   function pillCls(c) { return c ? c.cls : ""; }
 
   function renderList() {
@@ -895,7 +889,6 @@ WHERE {
 
     if (state.filtered.length === 0) {
       container.innerHTML = `<div class="empty">No items match</div>`;
-      updateCount();
       return;
     }
 
@@ -951,12 +944,7 @@ WHERE {
     fleuron.innerHTML = `<img src="assets/hunter-mark.png" alt="" width="60" height="60">`;
     container.appendChild(fleuron);
 
-    updateCount();
     requestAnimationFrame(() => updatePip("rows", "list-pip"));
-  }
-
-  function updateCount() {
-    if (state.items.length > 0) $("#topright").textContent = "v1.02.18";
   }
 
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
@@ -1270,7 +1258,7 @@ WHERE {
     }
     if (item.drawTypes?.length) {
       const drawHtml = sortDrawTypes(item.drawTypes).map(dt =>
-        `<button class="pill drawtype-pill ${pillCls(drawTypePillColor(dt))}${state.filterDrawType.has(dt) ? " active" : ""}" data-drawtype="${escapeHTML(dt)}">${escapeHTML(dt)}</button>`
+        `<button class="pill drawtype-pill ${pillCls(drawTypePillColor())}${state.filterDrawType.has(dt) ? " active" : ""}" data-drawtype="${escapeHTML(dt)}">${escapeHTML(dt)}</button>`
       ).join("");
       descRows.push(["Drawing type", drawHtml]);
     }
@@ -1505,49 +1493,21 @@ WHERE {
       renderFilterPanel();
     });
 
-    panel.querySelectorAll(".fp-chip[data-area]").forEach(chip => {
-      chip.addEventListener("click", e => {
-        e.stopPropagation();
-        toggleSet(state.filterArea, chip.dataset.area);
-        applyFilters(); renderList(); updateFilterBadge(); renderFilterPanel();
-        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
-          selectItem(state.filtered[0].id, { scrollIntoView: false });
-      });
-    });
-    panel.querySelectorAll(".fp-chip[data-itype]").forEach(chip => {
-      chip.addEventListener("click", e => {
-        e.stopPropagation();
-        toggleSet(state.filterType, chip.dataset.itype);
-        applyFilters(); renderList(); updateFilterBadge(); renderFilterPanel();
-        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
-          selectItem(state.filtered[0].id, { scrollIntoView: false });
-      });
-    });
-    panel.querySelectorAll(".fp-chip[data-drawtype]").forEach(chip => {
-      chip.addEventListener("click", e => {
-        e.stopPropagation();
-        toggleSet(state.filterDrawType, chip.dataset.drawtype);
-        applyFilters(); renderList(); updateFilterBadge(); renderFilterPanel();
-        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
-          selectItem(state.filtered[0].id, { scrollIntoView: false });
-      });
-    });
-    panel.querySelectorAll(".fp-chip[data-creator]").forEach(chip => {
-      chip.addEventListener("click", e => {
-        e.stopPropagation();
-        toggleSet(state.filterCreator, chip.dataset.creator);
-        applyFilters(); renderList(); updateFilterBadge(); renderFilterPanel();
-        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
-          selectItem(state.filtered[0].id, { scrollIntoView: false });
-      });
-    });
-    panel.querySelectorAll(".fp-chip[data-builtstatus]").forEach(chip => {
-      chip.addEventListener("click", e => {
-        e.stopPropagation();
-        toggleSet(state.filterBuiltStatus, chip.dataset.builtstatus);
-        applyFilters(); renderList(); updateFilterBadge(); renderFilterPanel();
-        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
-          selectItem(state.filtered[0].id, { scrollIntoView: false });
+    [
+      ["area",        state.filterArea        ],
+      ["itype",       state.filterType        ],
+      ["drawtype",    state.filterDrawType    ],
+      ["creator",     state.filterCreator     ],
+      ["builtstatus", state.filterBuiltStatus ],
+    ].forEach(([attr, set]) => {
+      panel.querySelectorAll(`.fp-chip[data-${attr}]`).forEach(chip => {
+        chip.addEventListener("click", e => {
+          e.stopPropagation();
+          toggleSet(set, chip.dataset[attr]);
+          applyFilters(); renderList(); updateFilterBadge(); renderFilterPanel();
+          if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
+            selectItem(state.filtered[0].id, { scrollIntoView: false });
+        });
       });
     });
   }
@@ -1638,11 +1598,9 @@ WHERE {
       });
     });
 
-    // Mobile tabs
     document.querySelectorAll(".mtab").forEach(tab => {
       tab.addEventListener("click", () => switchMobileTab(tab.dataset.pane));
     });
-
 
     $("#rows").addEventListener("click", e => {
       const row = e.target.closest(".row");
@@ -1650,49 +1608,23 @@ WHERE {
     });
 
     document.getElementById("meta-body").addEventListener("click", e => {
-      const areaPill = e.target.closest(".area-pill");
-      if (areaPill) {
-        toggleSet(state.filterArea, areaPill.dataset.area);
-        applyFilters(); renderList(); updateFilterBadge();
-        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
-          selectItem(state.filtered[0].id, { scrollIntoView: false });
-        renderMeta(state.items.find(i => i.id === state.selectedId));
-        return;
-      }
-      const typePill = e.target.closest(".type-pill");
-      if (typePill) {
-        toggleSet(state.filterType, typePill.dataset.itype);
-        applyFilters(); renderList(); updateFilterBadge();
-        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
-          selectItem(state.filtered[0].id, { scrollIntoView: false });
-        renderMeta(state.items.find(i => i.id === state.selectedId));
-        return;
-      }
-      const drawTypePill = e.target.closest(".drawtype-pill");
-      if (drawTypePill) {
-        toggleSet(state.filterDrawType, drawTypePill.dataset.drawtype);
-        applyFilters(); renderList(); updateFilterBadge();
-        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
-          selectItem(state.filtered[0].id, { scrollIntoView: false });
-        renderMeta(state.items.find(i => i.id === state.selectedId));
-        return;
-      }
-      const creatorPill = e.target.closest(".creator-pill");
-      if (creatorPill) {
-        toggleSet(state.filterCreator, creatorPill.dataset.creator);
-        applyFilters(); renderList(); updateFilterBadge();
-        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
-          selectItem(state.filtered[0].id, { scrollIntoView: false });
-        renderMeta(state.items.find(i => i.id === state.selectedId));
-        return;
-      }
-      const builtStatusPill = e.target.closest(".builtstatus-pill");
-      if (builtStatusPill) {
-        toggleSet(state.filterBuiltStatus, builtStatusPill.dataset.builtstatus);
-        applyFilters(); renderList(); updateFilterBadge();
-        if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
-          selectItem(state.filtered[0].id, { scrollIntoView: false });
-        renderMeta(state.items.find(i => i.id === state.selectedId));
+      const pillDefs = [
+        [".area-pill",        "area",        state.filterArea        ],
+        [".type-pill",        "itype",       state.filterType        ],
+        [".drawtype-pill",    "drawtype",    state.filterDrawType    ],
+        [".creator-pill",     "creator",     state.filterCreator     ],
+        [".builtstatus-pill", "builtstatus", state.filterBuiltStatus ],
+      ];
+      for (const [sel, attr, set] of pillDefs) {
+        const pill = e.target.closest(sel);
+        if (pill) {
+          toggleSet(set, pill.dataset[attr]);
+          applyFilters(); renderList(); updateFilterBadge();
+          if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
+            selectItem(state.filtered[0].id, { scrollIntoView: false });
+          renderMeta(state.items.find(i => i.id === state.selectedId));
+          return;
+        }
       }
     });
 
@@ -1703,7 +1635,7 @@ WHERE {
       const inInput = e.target.matches("input, select, textarea");
       if (e.key === "/" && !inInput) { e.preventDefault(); $("#search-input").focus(); return; }
       if (e.key === "Escape" && inInput) { e.target.blur(); return; }
-      if (e.key === "Escape") { closeAllDropdowns(); return; }
+      if (e.key === "Escape") { closeAllDropdowns(); closeAbout(); return; }
       if (e.key === "1"         && !inInput) { setZoom(1); return; }
       if (e.key === "ArrowDown" && !inInput) { e.preventDefault(); selectAdjacent(+1); }
       if (e.key === "ArrowUp"   && !inInput) { e.preventDefault(); selectAdjacent(-1); }
@@ -1714,20 +1646,25 @@ WHERE {
     });
   }
 
+  // ── About panel ───────────────────────────────────────────────────────────
+  function openAbout()  {
+    document.getElementById("about-panel").classList.add("open");
+    document.getElementById("site-header").style.display = "none";
+  }
+  function closeAbout() {
+    document.getElementById("about-panel").classList.remove("open");
+    document.getElementById("site-header").style.display = "";
+  }
+
   // ── Main (async load) ─────────────────────────────────────────────────────
   (async function main() {
-    const aboutPanel = document.getElementById("about-panel");
-    const siteHeader = document.getElementById("site-header");
     const toprightEl = document.getElementById("topright");
-    function openAbout()  { aboutPanel.classList.add("open");    siteHeader.style.display = "none"; }
-    function closeAbout() { aboutPanel.classList.remove("open"); siteHeader.style.display = ""; }
     toprightEl.addEventListener("click", (e) => {
       e.stopPropagation();
       aboutPanel.classList.contains("open") ? closeAbout() : openAbout();
     });
     document.addEventListener("click", closeAbout);
-    aboutPanel.addEventListener("click", (e) => e.stopPropagation());
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeAbout(); });
+    document.getElementById("about-panel").addEventListener("click", (e) => e.stopPropagation());
     toprightEl.addEventListener("dblclick", () => { clearCache(); location.reload(); });
     document.getElementById("about-close").addEventListener("click", closeAbout);
 
@@ -1790,8 +1727,6 @@ WHERE {
       $("#rows").innerHTML = `<div class="error-msg">Error loading: ${escapeHTML(err.message)}</div>`;
     }
   })();
-
-
 </script>
 
 
