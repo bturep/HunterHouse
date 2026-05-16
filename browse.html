@@ -27,10 +27,12 @@
   @keyframes page-in{from{opacity:0}to{opacity:1}}
   body{height:100%;display:flex;flex-direction:column;animation:page-in 400ms ease-out both}
   .site-top{padding:0 28px;flex-shrink:0;grid-template-columns:auto 1fr auto;gap:24px;height:41px;box-sizing:border-box}
-  .site-topright{display:flex;align-items:stretch;gap:20px;height:41px;color:var(--ink)}
-  .site-topright .theme-btn{display:flex;align-items:center;border:none;border-radius:0;padding:0;font-size:19px;line-height:1;color:var(--ink)}
+  .site-topright{display:flex;align-items:center;gap:0;height:41px;color:var(--ink)}
+  .site-topright .theme-btn{display:flex;align-items:center;background:none;border:none;border-radius:0;padding:0 20px;font-size:19px;line-height:1;color:var(--ink)}
+  .site-topright .theme-btn svg{display:block}
+  .site-topright .tr-sep{width:1px;height:16px;background:var(--rule);flex-shrink:0}
+  #topright{cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;display:flex;align-items:center;color:var(--ink);padding-left:20px}
   .site-topright .theme-btn:hover{opacity:0.5}
-  #topright{cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;display:flex;align-items:center;color:var(--ink)}
   a.markid{text-decoration:none;color:inherit}
   .markid .name{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
   .markid .name .dim{font-size:9px;letter-spacing:0.14em;font-weight:400}
@@ -560,8 +562,10 @@
   </div>
   <div class="site-topright">
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
+    <span class="tr-sep"></span>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode">◑</button>
-    <span id="topright" title="About this archive">v1.02.09</span>
+    <span class="tr-sep"></span>
+    <span id="topright" title="About this archive">v1.02.10</span>
   </div>
 </header>
 
@@ -1005,7 +1009,7 @@ WHERE {
   }
 
   function updateCount() {
-    if (state.items.length > 0) $("#topright").textContent = "v1.02.09";
+    if (state.items.length > 0) $("#topright").textContent = "v1.02.10";
   }
 
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
