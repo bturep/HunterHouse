@@ -108,28 +108,32 @@
   /* ── collapsible panels ── */
   .panel-left,.panel-right{
     width:28%;flex-shrink:0;
-    display:flex;flex-direction:row;overflow:hidden;
-    background:var(--bg);position:relative;
+    display:flex;flex-direction:row;
+    background:var(--bg);position:relative;z-index:1;
     transition:width 260ms cubic-bezier(0.4,0,0.2,1);
   }
   .panel-left{border-right:1px solid var(--rule)}
   .panel-right{border-left:1px solid var(--rule)}
   .panel-left.out,.panel-right.out{width:41px}
   .panel-content{flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;position:relative}
-  .panel-tab{
-    width:41px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
-    background:var(--bg);border:0;cursor:pointer;
-    color:var(--muted);
-    font-family:var(--mono);font-size:9px;letter-spacing:0.18em;text-transform:uppercase;
-    writing-mode:vertical-rl;
-    transition:color 0.15s,background 0.15s;
+
+  /* ── panel edge handle ── */
+  .panel-handle{
+    position:absolute;top:50%;transform:translateY(-50%);
+    width:10px;height:40px;
+    background:var(--rule);border:0;padding:0;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    z-index:10;transition:background 0.15s;
   }
-  .panel-tab:hover{color:var(--ink);background:var(--soft)}
-  .panel-left .panel-tab{transform:rotate(180deg)}
-  .panel-left .panel-tab{border-left:1px solid var(--rule)}
-  .panel-right .panel-tab{border-right:1px solid var(--rule)}
-  .panel-left.out .panel-tab{border-left:0}
-  .panel-right.out .panel-tab{border-right:0}
+  .panel-left .panel-handle{right:-5px;border-radius:0 3px 3px 0}
+  .panel-right .panel-handle{left:-5px;border-radius:3px 0 0 3px}
+  .panel-handle:hover{background:var(--ink)}
+  .handle-chevron{opacity:0;transition:opacity 0.12s,transform 0.2s;color:var(--bg)}
+  .panel-handle:hover .handle-chevron{opacity:1}
+  .panel-left .handle-chevron{transform:rotate(180deg)}
+  .panel-left.out .handle-chevron{transform:rotate(0deg)}
+  .panel-right .handle-chevron{transform:rotate(0deg)}
+  .panel-right.out .handle-chevron{transform:rotate(180deg)}
 
   .pane-list{display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative}
   .pane-image{flex:1;background:var(--soft);display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative}
@@ -514,7 +518,7 @@
 
     /* panels: full-width vertical on mobile */
     .panel-left,.panel-right{width:100%!important;flex-direction:column!important;border:0!important;transition:none!important}
-    .panel-tab{display:none!important}
+    .panel-handle{display:none!important}
 
     /* mobile tabs */
     .mobile-tabs{
@@ -803,7 +807,9 @@
         <div class="load-msg">Loading catalogue from Wikibase…</div>
       </div>
     </div>
-    <button class="panel-tab" id="left-tab" title="Toggle browse panel">Browse</button>
+    <button class="panel-handle" id="left-handle" aria-label="Toggle browse panel">
+      <svg class="handle-chevron" width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,1 5,5 2,9"/></svg>
+    </button>
   </div>
 
   <section class="pane-image">
@@ -833,7 +839,9 @@
   </section>
 
   <div class="panel-right pane-meta" id="panel-right">
-    <button class="panel-tab" id="right-tab" title="Toggle record panel">Record</button>
+    <button class="panel-handle" id="right-handle" aria-label="Toggle record panel">
+      <svg class="handle-chevron" width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,1 5,5 2,9"/></svg>
+    </button>
     <div class="panel-content">
       <div class="scroll-pip scroll-pip-r" id="meta-pip"></div>
       <div class="meta-head">
@@ -2100,8 +2108,8 @@ $("#foot-dims").textContent = "";
     document.getElementById("about-refresh").addEventListener("click", (e) => { e.preventDefault(); clearCache(); location.reload(); });
 
     // Panel toggles
-    document.getElementById("left-tab").addEventListener("click",  () => togglePanel("left"));
-    document.getElementById("right-tab").addEventListener("click", () => togglePanel("right"));
+    document.getElementById("left-handle").addEventListener("click",  () => togglePanel("left"));
+    document.getElementById("right-handle").addEventListener("click", () => togglePanel("right"));
 
     // Fullscreen toggle
     const searchInput = document.getElementById("search-input");
