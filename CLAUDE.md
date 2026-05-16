@@ -965,3 +965,30 @@ At every **MAJOR** version bump:
 At session end: git tag alone is sufficient — always push tags immediately so the snapshot exists on the remote.
 
 This session's work (typography consolidation, inline researcher note editor, image pane black/white responsive, shell border frame, search icon to topright, scroll pip upgrade, wordmark update, middle-truncate siblings) is not yet version-bumped — waiting for user instruction.
+
+---
+
+### 2026-05-15 — Dim border system, researcher notes panel, Wikibase P100 fix (unbumped)
+
+**browse.html — dim border system (commit eac2d8b)**
+- All structural borders unified to `var(--rule)`: shell left/right/bottom, pane-list right, pane-meta left, image-foot top, scroll pip, site-top bottom.
+- Header grid changed from `auto 1fr auto` to `28% 1fr 28%` with `gap:0` so vertical lines run continuously from header into shell panes.
+- `a.markid` gets `border-right:1px solid var(--rule)`; `.site-topright` gets `border-left:1px solid var(--rule)`.
+- Removed dark-mode black border override block entirely — rule colour holds in both themes.
+
+**browse.html — researcher notes panel (commits 1aab62d, ba7d0c8)**
+- Removed entire Wikibase write system (`wbCsrf`, `wbPost`, `wbGet`, `wbAuthenticate`, `wbSaveP100`) — no bot credentials needed in browser.
+- New local annotation layer: notes stored in `localStorage["hhf_rn"]` keyed by archive ID. Session state in `sessionStorage["hhf_researcher"]`.
+- **Auth flow (two-step):** Click lock icon → enter full name (case-insensitive) → name validates against `RNAMES` registry → enter r-pin → unlocked.
+- Registry structure: `RPINS = { "203BTP": { name: "Brandon Poole", initials: "BP", qid: null } }`. `qid` is null until researcher has a Wikibase Person item.
+- Unlocked state: shows full name in panel header, textarea for new notes, `add` button (Enter without Shift also submits).
+- Note rows: `initials | note text | YY.M.D date`, newest-first.
+- Locked state: notes are visible read-only (greyed); lock icon toggles to auth UI.
+- P100 curator note (Wikibase) stays as a separate read-only display above the researcher panel.
+- **Future path:** when a researcher becomes a Wikibase Person item, fill `qid` in the registry. Notes can then be exported to Wikibase as structured claims via a batch script.
+
+**Wikibase — HH-CAA-0027 P100 cleared**
+- Removed `"Ref: folder-19_03. c. 1985, pre-1990 — Colored with Legend"` from P100 on Q331.
+- P100 on CAA-0027 is now empty.
+
+**Version:** still showing v1.02.18 in UI — not yet bumped this session.
