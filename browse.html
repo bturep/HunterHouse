@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Browse Archive — Hunter House Foundation</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta name="theme-color" content="#1a1816">
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/HunterHouse/manifest.json">
@@ -963,7 +963,7 @@
     .site-top{display:none}
 
     html.pwa #mobile-chrome{
-      display:flex;align-items:center;justify-content:flex-end;
+      display:flex;align-items:center;justify-content:space-between;
       background:#000;color:rgba(243,241,236,0.55);
       padding:0 24px;
       padding-top:env(safe-area-inset-top,0px);
@@ -977,6 +977,12 @@
       color:rgba(243,241,236,0.55);
     }
     html.pwa #mobile-version:hover{color:#f0ede6}
+    html.pwa #mob-count{
+      font-family:var(--mono);font-size:10.5px;font-weight:500;
+      letter-spacing:0.10em;color:rgba(243,241,236,0.55);
+    }
+    /* Prevent row tap-highlight flash while swiping the sheet bar */
+    body.swiping #rows{pointer-events:none}
 
     #about-panel{background:#000;border-bottom-color:rgba(243,241,236,0.13)}
     html.dark #about-panel{background:#000}
@@ -1035,6 +1041,7 @@
 <body class="loading">
 
 <div id="mobile-chrome" role="banner">
+  <span id="mob-count"></span>
   <button id="mobile-version" type="button" aria-label="About this archive">v1.03.01</button>
 </div>
 
@@ -1891,6 +1898,13 @@ WHERE {
   const drawTypePillColor = () => PC.slate;
   function pillCls(c) { return c ? c.cls : ""; }
 
+  function updateMobCount() {
+    const el = document.getElementById("mob-count");
+    if (!el) return;
+    const f = state.filtered.length, t = state.items.length;
+    el.textContent = (f < t) ? `${f} / ${t}` : `${t}`;
+  }
+
   function renderList() {
     const container = $("#rows");
     container.innerHTML = "";
@@ -1949,6 +1963,7 @@ WHERE {
 
 
     requestAnimationFrame(() => updatePip("rows", "list-pip"));
+    updateMobCount();
   }
 
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
@@ -2405,8 +2420,12 @@ $("#foot-dims").textContent = "";
   function selectItem(id, opts = {}) {
     if (!id) return;
     if (window.matchMedia("(max-width:767px)").matches) {
-      renderMobSheet(id);
-      mobShowSheet();
+      const sheetEl = document.getElementById("mob-sheet");
+      const alreadyOpen = sheetEl.classList.contains("mob-sheet-open");
+      if (opts.tap || alreadyOpen) {
+        renderMobSheet(id);
+        mobShowSheet();
+      }
     }
     state.selectedId = id;
     const item = state.items.find(i => i.id === id);
@@ -2665,42 +2684,72 @@ $("#foot-dims").textContent = "";
     document.getElementById("mob-sheet-img")?.addEventListener("click", toggleImgExpand);
     document.getElementById("mob-sheet-foot")?.addEventListener("click", toggleImgExpand);
 
-    // Swipe on top bar: down-to-dismiss or collapse-from-fullscreen; up-to-expand
+    // Swipe on top bar: staged navigation with follow-finger animation
     {
       const sheet = document.getElementById("mob-sheet");
       const bar   = document.getElementById("mob-sheet-bar");
-      let swipeStartY = 0, swiping = false;
+      let swipeStartY = 0, swipeStartH = 0, swiping = false;
 
       bar.addEventListener("touchstart", e => {
         if (e.target.closest(".mob-sheet-close, .mob-sheet-nav")) return;
-        swipeStartY = e.touches[0].clientY;
+        swipeStartY  = e.touches[0].clientY;
+        swipeStartH  = sheet.getBoundingClientRect().height;
         swiping = true;
         sheet.style.transition = "none";
+        document.body.classList.add("swiping");
       }, { passive: true });
 
       document.addEventListener("touchmove", e => {
         if (!swiping) return;
         e.preventDefault();
-        const dy = e.touches[0].clientY - swipeStartY;
-        if (dy > 0) sheet.style.transform = `translateY(${dy}px)`;
-        // upward drag: no visual follow; commit on touchend
+        const dy       = e.touches[0].clientY - swipeStartY;
+        const expanded = sheet.classList.contains("mob-sheet-img-expanded");
+        if (dy > 0) {
+          // Down: sheet follows finger via translateY
+          sheet.style.transform = `translateY(${dy}px)`;
+          sheet.style.height    = "";
+        } else if (!expanded) {
+          // Up (record view only): grow sheet height to follow finger
+          const newH = Math.min(window.innerHeight, swipeStartH - dy);
+          sheet.style.height    = newH + "px";
+          sheet.style.transform = "";
+        }
       }, { passive: false });
 
       document.addEventListener("touchend", e => {
         if (!swiping) return;
         swiping = false;
-        const dy = e.changedTouches[0].clientY - swipeStartY;
+        document.body.classList.remove("swiping");
+        const dy       = e.changedTouches[0].clientY - swipeStartY;
         const expanded = sheet.classList.contains("mob-sheet-img-expanded");
-        sheet.style.transition = "";
-        sheet.style.transform = "";
-        if (expanded) {
-          if (dy > 180)      mobHideSheet();                                    // long drag → close
-          else if (dy > 50)  sheet.classList.remove("mob-sheet-img-expanded");  // short drag → 72vh
-          // else snap back
+
+        if (dy > 40) {
+          // One stage down
+          if (expanded) {
+            // Full → record view
+            sheet.style.transition = "";
+            sheet.style.transform  = "";
+            sheet.classList.remove("mob-sheet-img-expanded");
+          } else {
+            // Record → list (dismiss; sheet slides off from drag position)
+            sheet.style.transition = "";
+            sheet.classList.remove("mob-sheet-open", "mob-sheet-img-expanded");
+            const sc = document.getElementById("mob-sheet-scroll");
+            if (sc) sc.scrollTop = 0;
+            requestAnimationFrame(() => { sheet.style.transform = ""; });
+          }
+        } else if (dy < -40 && !expanded) {
+          // Up past threshold: expand to full screen
+          // Inline height is at drag position; animate it to 100% then hand off to CSS
+          sheet.style.transition = "";
+          sheet.style.height     = "100%";
+          sheet.classList.add("mob-sheet-img-expanded");
+          requestAnimationFrame(() => { sheet.style.height = ""; });
         } else {
-          if (dy > 100)      mobHideSheet();                                    // drag down → close
-          else if (dy < -60) sheet.classList.add("mob-sheet-img-expanded");     // drag up → expand
-          // else snap back
+          // Snap back to current state
+          sheet.style.transition = "";
+          sheet.style.transform  = "";
+          sheet.style.height     = "";
         }
       }, { passive: true });
     }
@@ -2798,7 +2847,7 @@ $("#foot-dims").textContent = "";
 
     $("#rows").addEventListener("click", e => {
       const row = e.target.closest(".row");
-      if (row && row.dataset.id) selectItem(row.dataset.id);
+      if (row && row.dataset.id) selectItem(row.dataset.id, { tap: true });
     });
 
     document.getElementById("meta-body").addEventListener("click", e => {
@@ -2978,7 +3027,7 @@ $("#foot-dims").textContent = "";
       const target = urlId && state.filtered.find(i => i.id === urlId)
         ? urlId
         : defaultItem?.id;
-      if (target) selectItem(target, { scrollIntoView: !!urlId });
+      if (target) selectItem(target, { scrollIntoView: !!urlId, tap: !!urlId });
 
     } catch (err) {
       console.error(err);
