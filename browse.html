@@ -562,6 +562,7 @@
   .load-dots::after{content:"";animation:ld-dots 1.4s steps(1,end) infinite}
 
   .mob-sheet{display:none}
+  .mob-row-strip{display:none}
 
   @media (max-width:767px){
     .site-top{gap:12px}
@@ -583,6 +584,30 @@
       z-index:1;background:var(--bg);
       display:flex!important;flex-direction:column;
     }
+    /* Contracted: show only the selected-item strip */
+    .panel-left.mob-contracted{height:52px!important;overflow:hidden!important;}
+    .panel-left.mob-contracted .mob-row-strip{
+      display:flex;align-items:center;height:52px;
+      padding:0 14px;gap:9px;flex-shrink:0;
+      background:var(--bg);border-bottom:1px solid var(--rule);
+    }
+    .mob-strip-tmark{
+      font-family:var(--mono);font-size:9px;letter-spacing:0.06em;
+      color:var(--muted);background:var(--soft);
+      padding:2px 5px;border-radius:3px;flex-shrink:0;
+    }
+    .mob-strip-id{
+      font-family:var(--mono);font-size:10px;color:var(--muted);
+      letter-spacing:0.06em;flex-shrink:0;
+    }
+    .mob-strip-title{
+      font-family:var(--sans);font-size:13px;color:var(--ink);
+      flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    }
+    .mob-strip-yr{
+      font-family:var(--mono);font-size:10px;color:var(--muted);flex-shrink:0;
+    }
+
     .pane-image{display:none!important}
     .panel-right{display:none!important}
 
@@ -596,8 +621,10 @@
       transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);
       display:flex!important;flex-direction:column;overflow:hidden;
     }
-    .mob-sheet.mob-sheet-open{transform:translateY(35%)}
+    .mob-sheet.mob-sheet-open{transform:translateY(52px)}
     .mob-sheet.mob-sheet-full{transform:translateY(0);border-radius:0}
+    /* Pills in the sheet are display-only — no filter interaction */
+    .mob-sheet-body .pill{pointer-events:none;cursor:default}
 
     .mob-sheet-bar{
       height:48px;flex-shrink:0;cursor:pointer;
@@ -675,20 +702,14 @@
   /* ── Wordmark ── */
   .markid .name{font-weight:700}
 
-  /* ── Mobile header: gradient top bar + full-width wordmark ── */
+  /* ── Mobile header: rounded card ── */
   @media (max-width:767px){
     .site-top{
-      background:linear-gradient(to bottom, #000 0%, #1a1816 100%);
-      border-bottom-color:transparent;
-      height:52px;
-      padding:0;
-    }
-    .markid{grid-column:1/-1;display:flex;align-items:center}
-    .markid .name{
-      display:block;white-space:nowrap;
-      font-size:4.6vw;letter-spacing:0.10em;
-      color:#1a1816;
-      -webkit-text-stroke:1px #000;
+      background:#1a1816;
+      border-bottom:none;
+      border-radius:0 0 14px 14px;
+      box-shadow:0 4px 16px rgba(0,0,0,0.35);
+      position:relative;z-index:20;
     }
   }
 
@@ -926,6 +947,12 @@
   </div>
 
   <div class="panel-left pane-list mobile-active" id="panel-left">
+    <div class="mob-row-strip" id="mob-row-strip">
+      <span class="mob-strip-tmark" id="mob-strip-tmark"></span>
+      <span class="mob-strip-id" id="mob-strip-id"></span>
+      <span class="mob-strip-title" id="mob-strip-title"></span>
+      <span class="mob-strip-yr" id="mob-strip-yr"></span>
+    </div>
     <div class="panel-content">
       <div class="scroll-pip" id="list-pip"></div>
       <div class="list-head">
@@ -1295,6 +1322,7 @@
 
   function mobShowSheet() {
     mobSheetFull = false;
+    document.getElementById("panel-left").classList.add("mob-contracted");
     const sheet = document.getElementById("mob-sheet");
     sheet.classList.add("mob-sheet-open");
     sheet.classList.remove("mob-sheet-full");
@@ -1302,6 +1330,7 @@
 
   function mobHideSheet() {
     mobSheetFull = false;
+    document.getElementById("panel-left").classList.remove("mob-contracted");
     const sheet = document.getElementById("mob-sheet");
     sheet.classList.remove("mob-sheet-open", "mob-sheet-full");
     const scroll = document.getElementById("mob-sheet-scroll");
@@ -1318,9 +1347,17 @@
   function renderMobSheet(id) {
     const item = state.items.find(i => i.id === id);
     if (!item) return;
+
+    // Populate the contracted list strip
+    const tmark = typeMark(item.itemType);
+    document.getElementById("mob-strip-tmark").textContent = tmark || "";
+    document.getElementById("mob-strip-id").textContent = displayId(id);
+    document.getElementById("mob-strip-title").textContent = item.title || "";
+    document.getElementById("mob-strip-yr").textContent = yearOf(item.date);
+
+    // Sheet header + image
     document.getElementById("mob-sheet-id").textContent = id;
     document.getElementById("mob-sheet-title").innerHTML = formatTitle(item.title);
-    // Image: load thumb first, upgrade to preview
     const imgEl = document.getElementById("mob-sheet-img");
     if (item.img) {
       imgEl.src = item.img.replace(/_prev\.jpg$/, "_thumb.jpg");
@@ -1331,16 +1368,28 @@
     } else {
       imgEl.src = ""; imgEl.alt = "";
     }
-    // KV metadata
+
+    // KV rows — pills rendered as <span> (display-only, not interactive)
+    const pill = (cls, text) => `<span class="pill ${cls}">${escapeHTML(text)}</span>`;
     const rows = [];
     if (item.date)              rows.push(["Date",     escapeHTML(item.date)]);
     if (item.phase)             rows.push(["Phase",    escapeHTML(item.phase)]);
-    if (item.areas?.length)     rows.push(["Areas",    item.areas.map(escapeHTML).join(", ")]);
-    if (item.itemType)          rows.push(["Type",     escapeHTML(item.itemType)]);
-    if (item.drawTypes?.length) rows.push(["Drawing",  sortDrawTypes(item.drawTypes).map(escapeHTML).join(", ")]);
+    if (item.areas?.length) {
+      rows.push(["Areas", item.areas.map(a => pill(`area-pill ${pillCls(PC.sage)}`, a)).join(" ")]);
+    }
+    if (item.itemType) {
+      rows.push(["Type", pill(`type-pill ${pillCls(itemTypePillColor())}`, item.itemType)]);
+    }
+    if (item.drawTypes?.length) {
+      rows.push(["Drawing", sortDrawTypes(item.drawTypes).map(dt => pill(`drawtype-pill ${pillCls(drawTypePillColor())}`, dt)).join(" ")]);
+    }
     if (item.medium)            rows.push(["Medium",   escapeHTML(item.medium)]);
-    if (item.builtStatus)       rows.push(["Built",    escapeHTML(item.builtStatus)]);
-    if (item.creator)           rows.push([creatorLabel(item.itemType), escapeHTML(item.creator)]);
+    if (item.builtStatus) {
+      rows.push(["Built", pill(`builtstatus-pill ${pillCls(PC.moss)}`, item.builtStatus)]);
+    }
+    if (item.creator) {
+      rows.push([creatorLabel(item.itemType), pill(`creator-pill ${pillCls(PC.clay)}`, item.creator)]);
+    }
     if (item.heldBy)            rows.push(["Held by",  escapeHTML(item.heldBy)]);
     if (item.location) {
       rows.push(["Location", item.location.split(/,\s*/).map(escapeHTML).join(" › ")]);
