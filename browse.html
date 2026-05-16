@@ -314,6 +314,7 @@
   .zoom-ctl button#zoom-fit,
   .zoom-ctl button#zoom-1to1{letter-spacing:0.1em}
   .zoom-ctl button#zoom-rotate{font-size:15px}
+  .zoom-ctl button#zoom-fs.fs-active{color:var(--ink)}
   .zoom-ctl button:hover{color:var(--ink)}
   .zoom-ctl button:disabled{color:var(--hint);cursor:not-allowed}
   .zoom-ctl .pct{color:var(--ink);font-variant-numeric:tabular-nums;min-width:38px;text-align:center;padding:0 4px}
@@ -916,6 +917,11 @@
         <button id="zoom-1to1" type="button" title="1:1 — one screen pixel per image pixel">1:1</button>
         <span class="zoom-sep"></span>
         <button id="zoom-rotate" type="button" title="Rotate 90°">↻</button>
+        <span class="zoom-sep"></span>
+        <button id="zoom-fs" type="button" title="Fullscreen — hide panels">
+          <svg id="fs-icon-expand" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8"/></svg>
+          <svg id="fs-icon-collapse" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M4 1v3H1M8 1v3h3M8 11V8h3M4 11V8H1"/></svg>
+        </button>
       </div>
       <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">↓ Original</a></span>
     </div>
@@ -2263,6 +2269,37 @@ $("#foot-dims").textContent = "";
     // Panel toggles
     document.getElementById("left-handle").addEventListener("click",  () => togglePanel("left"));
     document.getElementById("right-handle").addEventListener("click", () => togglePanel("right"));
+
+    // Fullscreen: collapse both panels, restore on second press
+    {
+      const fsBtn     = document.getElementById("zoom-fs");
+      const fsExpand  = document.getElementById("fs-icon-expand");
+      const fsCollapse= document.getElementById("fs-icon-collapse");
+      let fsActive = false, fsLeftWasOut = false, fsRightWasOut = false;
+      fsBtn.addEventListener("click", () => {
+        const left  = document.getElementById("panel-left");
+        const right = document.getElementById("panel-right");
+        if (!fsActive) {
+          fsLeftWasOut  = left.classList.contains("out");
+          fsRightWasOut = right.classList.contains("out");
+          left.classList.add("out");
+          right.classList.add("out");
+          fsBtn.classList.add("fs-active");
+          fsBtn.title = "Exit fullscreen";
+          fsExpand.style.display  = "none";
+          fsCollapse.style.display = "";
+          fsActive = true;
+        } else {
+          if (!fsLeftWasOut)  left.classList.remove("out");
+          if (!fsRightWasOut) right.classList.remove("out");
+          fsBtn.classList.remove("fs-active");
+          fsBtn.title = "Fullscreen — hide panels";
+          fsExpand.style.display  = "";
+          fsCollapse.style.display = "none";
+          fsActive = false;
+        }
+      });
+    }
 
     // Fullscreen toggle
     const searchInput = document.getElementById("search-input");
