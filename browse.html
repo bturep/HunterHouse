@@ -8,7 +8,7 @@
 <link rel="manifest" href="/HunterHouse/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Hunter House">
+<meta name="apple-mobile-web-app-title" content="Hunter House Archive">
 <link rel="apple-touch-icon" href="/HunterHouse/assets/icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -522,7 +522,9 @@
     .site-top{padding:0 16px;gap:12px}
     .header-search{padding:0 12px;border-left:0;border-right:0}
     .fbtn{padding:0 14px}
-    #search-toggle,#fs-toggle,#topright{display:none}
+    #search-toggle,#fs-toggle,#topright,#search-input{display:none}
+    .site-topright{justify-content:flex-end;gap:0}
+    .site-topright .tr-sep{display:none}
 
     /* shell: vertical flex */
     .shell{flex-direction:column}
@@ -534,7 +536,7 @@
     /* mobile tabs */
     .mobile-tabs{
       display:flex;flex-shrink:0;
-      border-bottom:1px solid var(--ink);background:var(--bg);
+      border-bottom:1px solid var(--rule);background:var(--bg);
     }
     .mtab{
       flex:1;padding:10px 0;
@@ -555,7 +557,7 @@
 
     /* image pane: hide zoom controls on mobile (pinch/touch handles it) */
     .zoom-ctl{display:none}
-    .image-foot{height:44px;padding:0 16px}
+    .image-foot{display:none}
 
     /* meta pane: graph-actions single column */
     .graph-actions{grid-template-columns:1fr}
