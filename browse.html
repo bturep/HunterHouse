@@ -978,6 +978,20 @@
       letter-spacing:0.02em;width:100%;
     }
     .fp-search-input::placeholder{color:var(--hint)}
+
+    /* Filter chips → manifest [pill] style on mobile */
+    .fp-chip{
+      background:transparent;border:0;padding:0;border-radius:0;
+      font-size:11px;font-weight:400;letter-spacing:0.02em;text-transform:none;
+      color:var(--pf,var(--ink));line-height:1.55;
+    }
+    .fp-chip::before{content:"["}
+    .fp-chip::after{content:"]"}
+    .fp-chip:hover{filter:none;opacity:0.7;background:transparent}
+    .fp-chip.on{background:transparent;border:0;color:var(--red-deep);font-weight:500}
+    .fp-chips{gap:6px 10px}
+    /* Search input: same mono size as the chips */
+    .fp-search-input{font-size:11px;letter-spacing:0.02em}
   }
 </style>
 <script>
