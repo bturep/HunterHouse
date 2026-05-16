@@ -936,6 +936,49 @@
   .fp-chip.on{background:var(--red-pale);color:var(--red-deep);border-color:var(--red);font-weight:500}
   .fp-footer{padding-top:12px;margin-top:12px;border-top:1px dashed var(--rule)}
   .fp-clear{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
+
+  /* ── Mobile chrome strip ────────────────────────────────────────────────── */
+  #mobile-chrome{display:none}
+
+  @media (max-width:767px){
+    .site-top{display:none}
+
+    #mobile-chrome{
+      display:flex;align-items:center;justify-content:flex-end;
+      background:#000;color:rgba(243,241,236,0.55);
+      padding:0 24px;
+      padding-top:env(safe-area-inset-top,0px);
+      height:calc(32px + env(safe-area-inset-top,0px));
+      border-bottom:1px solid rgba(243,241,236,0.10);
+      flex-shrink:0;
+    }
+    #mobile-version{
+      background:transparent;border:0;padding:0;cursor:pointer;
+      font-family:var(--mono);font-size:10.5px;font-weight:500;
+      letter-spacing:0.18em;text-transform:uppercase;
+      color:rgba(243,241,236,0.55);
+    }
+    #mobile-version:hover{color:#f0ede6}
+
+    #about-panel{background:#000;border-bottom-color:rgba(243,241,236,0.13)}
+    html.dark #about-panel{background:#000}
+
+    .fp-search-row{
+      display:flex;align-items:center;gap:10px;
+      padding-bottom:14px;margin-bottom:14px;
+      border-bottom:1px dashed var(--rule);
+    }
+    .fp-search-prefix{
+      font-family:var(--mono);font-size:11px;color:var(--muted);
+      flex-shrink:0;line-height:1;
+    }
+    .fp-search-input{
+      flex:1;font-family:var(--mono);font-size:13px;
+      border:0;outline:0;background:transparent;color:var(--ink);
+      letter-spacing:0.02em;width:100%;
+    }
+    .fp-search-input::placeholder{color:var(--hint)}
+  }
 </style>
 <script>
   /* theme toggle — runs before render to avoid flash */
@@ -953,6 +996,10 @@
 </script>
 </head>
 <body class="loading">
+
+<div id="mobile-chrome" role="banner">
+  <button id="mobile-version" type="button" aria-label="About this archive">v1.03.01</button>
+</div>
 
 <header class="site-top" id="site-header">
   <a class="markid" href="index.html">
@@ -2448,6 +2495,27 @@ $("#foot-dims").textContent = "";
         });
       });
     });
+
+    if (window.matchMedia("(max-width:767px)").matches) {
+      const searchEl = document.getElementById("search-input");
+      const row = document.createElement("div");
+      row.className = "fp-search-row";
+      row.innerHTML = `
+        <span class="fp-search-prefix">/</span>
+        <input type="text" class="fp-search-input" placeholder="search archive"
+               autocomplete="off" autocorrect="off" spellcheck="false">
+      `;
+      panel.prepend(row);
+      const input = row.querySelector("input");
+      input.value = searchEl ? searchEl.value : "";
+      input.addEventListener("input", (e) => {
+        if (searchEl) {
+          searchEl.value = e.target.value;
+          searchEl.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+      });
+      setTimeout(() => input.focus(), 50);
+    }
   }
 
   // ── Controls ──────────────────────────────────────────────────────────────
@@ -2633,6 +2701,8 @@ $("#foot-dims").textContent = "";
     {
       const overlay = document.getElementById("mob-about");
       document.getElementById("mob-about-ver").textContent = VERSION;
+      const mvBtn = document.getElementById("mobile-version");
+      if (mvBtn) mvBtn.textContent = VERSION;
       document.querySelector(".markid").addEventListener("click", e => {
         if (!window.matchMedia("(max-width:767px)").matches) return;
         e.preventDefault();
@@ -2693,11 +2763,13 @@ $("#foot-dims").textContent = "";
   const aboutPanel = document.getElementById("about-panel");
   function openAbout()  {
     aboutPanel.classList.add("open");
-    document.getElementById("site-header").style.display = "none";
+    if (!window.matchMedia("(max-width:767px)").matches)
+      document.getElementById("site-header").style.display = "none";
   }
   function closeAbout() {
     aboutPanel.classList.remove("open");
-    document.getElementById("site-header").style.display = "";
+    if (!window.matchMedia("(max-width:767px)").matches)
+      document.getElementById("site-header").style.display = "";
   }
 
   // ── Main (async load) ─────────────────────────────────────────────────────
@@ -2707,6 +2779,13 @@ $("#foot-dims").textContent = "";
       e.stopPropagation();
       aboutPanel.classList.contains("open") ? closeAbout() : openAbout();
     });
+    const mobileVersionBtn = document.getElementById("mobile-version");
+    if (mobileVersionBtn) {
+      mobileVersionBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        aboutPanel.classList.contains("open") ? closeAbout() : openAbout();
+      });
+    }
     document.addEventListener("click", closeAbout);
     aboutPanel.addEventListener("click", (e) => e.stopPropagation());
     document.getElementById("about-close").addEventListener("click", closeAbout);
