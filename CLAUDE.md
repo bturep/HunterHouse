@@ -911,3 +911,37 @@ Google Fonts `<link rel="stylesheet">` is render-blocking: the browser will not 
 - `canadian-architecture-archive/thumbs/` — new folder, 35 CAA thumbs
 
 **Version:** v1.2.0
+
+---
+
+### 2026-05-15 — Image foot overhaul, 3840px large previews, browse.html refactor (v1.02.18)
+
+**browse.html — image foot**
+- Rotate button moved from standalone left position into the zoom control group (after 1:1, separated by a rule).
+- Left side of foot balanced with right (`↓ Original`) using `flex:1` spacers — zoom group now geometrically centred.
+- Download label shortened from "Download full size" to "↓ Original".
+- `−`, `+`, `↻` glyph buttons bumped to 16px (were inheriting the foot's 10px); word labels (`fit`, `1:1`) stay at 11px.
+- Image dimensions (`2000 × 1414 px`) added to left side of foot; appear once full image loads.
+- Item counter added then removed at user request — pixel dimensions only.
+
+**browse.html — zoom controls**
+- 1:1 zoom button added (snaps to `scale=1`, one CSS pixel per image pixel). Keyboard shortcut: `1`.
+- `updateZoomUI()` shows percentage relative to fit (100% = fit view).
+
+**3840px large previews**
+- `--large` flag added to `regen_previews.py`: 3840px longest side, 85% JPEG quality, `_large.jpg` suffix, uploaded to `large/` folder on R2.
+- All 145 items processed (110 HHC + 35 CAA). OK: 145, Errors: 0.
+- `browse.html renderImage()` updated to load `_large.jpg` as full-quality tier (thumb 600px → large 3840px). Falls back to `_prev.jpg` if no large available.
+- R2 now has three tiers per item: `thumbs/` (600px), `previews/` (2000px), `large/` (3840px).
+
+**browse.html — refactor (no behaviour changes)**
+- `VERSION` constant added as single source of truth; `CACHE_KEY` derived from it automatically.
+- `updateCount()` removed — was redundantly overwriting version text in DOM after load.
+- CSS: removed dangling blank lines and empty `/* filter toggle button */` section comment.
+- `drawTypePillColor()` unused parameter removed.
+- `renderFilterPanel` chip handlers: 5 × 7-line identical blocks replaced with one dispatch-table loop.
+- Meta-body pill handlers: 5 × 8-line identical blocks replaced with one dispatch-table loop.
+- `openAbout`/`closeAbout` moved from inside `main()` to module scope; second `keydown` listener merged into first.
+- Net: 1799 → 1734 lines (−65).
+
+**Version:** v1.02.18
