@@ -643,24 +643,24 @@
   .pane-meta .graph-siblings .sib .pos{font-family:var(--mono);font-size:11px;letter-spacing:0.02em;font-weight:400}
   .pane-meta .graph-siblings .sib .pos{color:var(--muted)}
 
-  /* ── Graph actions (Wikibase / SPARQL / JSON) ── */
-  .pane-meta .graph-actions{
-    display:flex;flex-direction:row;align-items:center;flex-wrap:wrap;
-    gap:0;margin-top:10px;background:transparent;border:0;
+  /* ── Data footer (Wikibase / SPARQL / JSON) ── */
+  .data-footer{
+    margin-top:auto;padding:12px 0 0;
+    border-top:1px solid var(--rule);
+    display:flex;align-items:baseline;gap:0;flex-wrap:wrap;
   }
-  .pane-meta .graph-actions a{
-    background:transparent;padding:0;margin-right:18px;
-    display:inline-flex;align-items:baseline;gap:2px;
+  .data-footer .df-label{
+    font-family:var(--mono);font-size:9px;color:var(--hint);
+    letter-spacing:0.12em;text-transform:uppercase;margin-right:12px;
   }
-  .pane-meta .graph-actions a:hover{background:transparent;opacity:0.7}
-  .pane-meta .graph-actions a .top{display:none}
-  .pane-meta .graph-actions a .bot{
-    font-family:var(--mono);font-size:11px;letter-spacing:0.02em;
-    text-transform:lowercase;color:var(--copper-deep);
-    display:inline-flex;align-items:baseline;gap:2px;
-    justify-content:flex-start;
+  .data-footer a{
+    font-family:var(--mono);font-size:9px;color:var(--muted);
+    letter-spacing:0.08em;text-transform:lowercase;
+    text-decoration:none;margin-right:14px;
+    transition:color 0.12s;
   }
-  .pane-meta .graph-actions a .bot .ar{color:var(--copper-deep);font-size:9px;line-height:1}
+  .data-footer a:hover{color:var(--ink)}
+  .data-footer a[style*="opacity"]{pointer-events:none}
 
   /* ── Curator note (P100, read-only) ── */
   .pane-meta .curator-note{
@@ -1798,20 +1798,13 @@ $("#foot-dims").textContent = "";
     }
 
     const hasQID = !!item.qid;
-    const graphActionsHTML = `
-      <div class="graph-actions">
-        <a href="${escapeHTML(wikibaseUrl)}" ${hasQID ? `target="_blank" rel="noopener"` : `onclick="return false" style="opacity:0.55"`}>
-          <span class="top">Structured</span>
-          <span class="bot">Wikibase <span class="ar">↗</span></span>
-        </a>
-        <a href="${escapeHTML(sparqlUrl)}" ${hasQID ? `target="_blank" rel="noopener"` : `onclick="return false" style="opacity:0.55"`}>
-          <span class="top">Graph query</span>
-          <span class="bot">SPARQL <span class="ar">↗</span></span>
-        </a>
-        <a href="${escapeHTML(jsonUrl)}" ${hasQID ? `target="_blank" rel="noopener"` : `onclick="return false" style="opacity:0.55"`}>
-          <span class="top">Raw</span>
-          <span class="bot">JSON <span class="ar">↗</span></span>
-        </a>
+    const dis = `onclick="return false" style="opacity:0.4"`;
+    const dataFooterHTML = `
+      <div class="data-footer">
+        <span class="df-label">data</span>
+        <a href="${escapeHTML(wikibaseUrl)}" ${hasQID ? `target="_blank" rel="noopener"` : dis}>Wikibase ↗</a>
+        <a href="${escapeHTML(sparqlUrl)}" ${hasQID ? `target="_blank" rel="noopener"` : dis}>SPARQL ↗</a>
+        <a href="${escapeHTML(jsonUrl)}" ${hasQID ? `target="_blank" rel="noopener"` : dis}>JSON ↗</a>
       </div>`;
 
     const graphN = archRows.length > 0 ? "03" : "02";
@@ -1830,10 +1823,10 @@ $("#foot-dims").textContent = "";
         <h3><span><span class="n">${graphN}</span>In the graph</span><span class="ct">Wikibase context</span></h3>
         <div class="graph-path">${graphPathHTML}</div>
         ${siblingsHTML}
-        ${graphActionsHTML}
       </section>
       ${item.notes ? `<p class="curator-note">${escapeHTML(item.notes)}</p>` : ""}
       <div class="rn-panel" id="rn-panel"></div>
+      ${dataFooterHTML}
     `;
 
     body.querySelectorAll(".sib[data-sib-id]").forEach(el => {
