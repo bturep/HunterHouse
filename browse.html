@@ -1695,12 +1695,13 @@ WHERE {
   }
 
   // ── About panel ───────────────────────────────────────────────────────────
+  const aboutPanel = document.getElementById("about-panel");
   function openAbout()  {
-    document.getElementById("about-panel").classList.add("open");
+    aboutPanel.classList.add("open");
     document.getElementById("site-header").style.display = "none";
   }
   function closeAbout() {
-    document.getElementById("about-panel").classList.remove("open");
+    aboutPanel.classList.remove("open");
     document.getElementById("site-header").style.display = "";
   }
 
@@ -1712,7 +1713,7 @@ WHERE {
       aboutPanel.classList.contains("open") ? closeAbout() : openAbout();
     });
     document.addEventListener("click", closeAbout);
-    document.getElementById("about-panel").addEventListener("click", (e) => e.stopPropagation());
+    aboutPanel.addEventListener("click", (e) => e.stopPropagation());
     toprightEl.addEventListener("dblclick", () => { clearCache(); location.reload(); });
     document.getElementById("about-close").addEventListener("click", closeAbout);
 
