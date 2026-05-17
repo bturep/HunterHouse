@@ -224,9 +224,11 @@
   }
   .fp-chip:hover{filter:brightness(0.94)}
   .fp-chip.on{background:var(--pd,var(--ink));color:#f0ede6;border-color:var(--pd,var(--ink))}
-  .fp-footer{display:flex;justify-content:flex-end;padding-top:12px;margin-top:12px;border-top:1px solid var(--rule)}
+  .fp-footer{display:flex;justify-content:space-between;align-items:center;padding-top:12px;margin-top:12px;border-top:1px solid var(--rule)}
   .fp-clear{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;background:none;border:0;padding:0}
   .fp-clear:hover{color:var(--ink)}
+  .fp-show{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;background:var(--ink);color:var(--bg);border:0;padding:4px 10px;border-radius:2px}
+  .fp-show:hover{opacity:0.85}
 
   .row{
     display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
@@ -964,8 +966,9 @@
   }
   .fp-chip:hover{background:var(--pb,var(--soft));filter:none}
   .fp-chip.on{background:var(--red-pale);color:var(--red-deep);border-color:var(--red);font-weight:500}
-  .fp-footer{padding-top:12px;margin-top:12px;border-top:1px dashed var(--rule)}
+  .fp-footer{display:flex;justify-content:space-between;align-items:center;padding-top:12px;margin-top:12px;border-top:1px dashed var(--rule)}
   .fp-clear{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
+  .fp-show{font-size:9px;font-weight:500;letter-spacing:0.18em;padding:5px 12px}
 
   /* ── Mobile chrome strip ────────────────────────────────────────────────── */
   #mobile-chrome{display:none}
@@ -1053,7 +1056,7 @@
 
 <div id="mobile-chrome" role="banner">
   <span id="mob-count"></span>
-  <button id="mobile-version" type="button" aria-label="About this archive">v1.03.13</button>
+  <button id="mobile-version" type="button" aria-label="About this archive">v1.03.14</button>
 </div>
 
 <header class="site-top" id="site-header">
@@ -1069,7 +1072,7 @@
     <span class="tr-sep"></span>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1.5 A6 6 0 0 0 7.5 13.5 Z"/><circle cx="7.5" cy="7.5" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
     <span class="tr-sep"></span>
-    <span id="topright" title="About this archive">v1.03.13</span>
+    <span id="topright" title="About this archive">v1.03.14</span>
   </div>
 </header>
 
@@ -1214,7 +1217,7 @@
 
 <script>
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.13";
+  const VERSION      = "v1.03.14";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -2531,19 +2534,28 @@ $("#foot-dims").textContent = "";
       return `<div class="fp-group fp-grp-${cls}"><div class="fp-lbl">${label}</div><div class="fp-chips">${chips}</div></div>`;
     };
 
+    const hasActive = [state.filterArea, state.filterType, state.filterDrawType,
+                        state.filterCreator, state.filterBuiltStatus].some(s => s.size > 0);
     panel.innerHTML =
       group("Areas",        uniqueAreas,       state.filterArea,        "area",        "area",        PC.sage)  +
       group("Item type",    uniqueTypes,       state.filterType,        "itype",       "itype",       PC.stone) +
       group("Drawing type", uniqueDrawTypes,   state.filterDrawType,    "drawtype",    "drawtype",    PC.slate) +
       group("Made by",      uniqueCreators,    state.filterCreator,     "creator",     "creator",     PC.clay)  +
       group("Built status", uniqueBuiltStatus, state.filterBuiltStatus, "builtstatus", "builtstatus", PC.moss)  +
-      `<div class="fp-footer"><button class="fp-clear" id="fp-clear-btn">Clear all ×</button></div>`;
+      `<div class="fp-footer">
+        ${hasActive ? `<button class="fp-clear" id="fp-clear-btn">Clear all</button>` : `<span></span>`}
+        <button class="fp-show" id="fp-show-btn">Show ${state.filtered.length} →</button>
+      </div>`;
 
     panel.querySelector("#fp-clear-btn")?.addEventListener("click", e => {
       e.stopPropagation();
       clearAllFilters();
       applyFilters(); renderList(); updateFilterBadge();
       renderFilterPanel();
+    });
+    panel.querySelector("#fp-show-btn")?.addEventListener("click", e => {
+      e.stopPropagation();
+      closeAllDropdowns();
     });
 
     [
