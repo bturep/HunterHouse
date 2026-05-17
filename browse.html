@@ -620,15 +620,7 @@
     .mob-sheet.mob-sheet-img-expanded{height:100%}
     html.pwa .mob-sheet.mob-sheet-img-expanded{height:100%}
     .mob-sheet.mob-sheet-img-expanded .mob-sheet-img-wrap{
-      flex-grow:1;max-height:100vh;
-      position:relative;touch-action:none;display:block;
-    }
-    .mob-sheet.mob-sheet-img-expanded .mob-sheet-img{
-      position:absolute!important;top:0;left:0;
-      transform-origin:0 0;
-      width:auto!important;height:auto!important;
-      max-width:none;max-height:none;
-      cursor:default;object-fit:none;
+      flex-grow:1;max-height:100vh;touch-action:none;
     }
     .mob-sheet.mob-sheet-img-expanded .mob-sheet-scroll{flex-grow:0;height:0;overflow:hidden;padding:0}
     /* Pills: same treatment as desktop record pane — colored text, no chip */
@@ -1061,7 +1053,7 @@
 
 <div id="mobile-chrome" role="banner">
   <span id="mob-count"></span>
-  <button id="mobile-version" type="button" aria-label="About this archive">v1.03.12</button>
+  <button id="mobile-version" type="button" aria-label="About this archive">v1.03.13</button>
 </div>
 
 <header class="site-top" id="site-header">
@@ -1077,7 +1069,7 @@
     <span class="tr-sep"></span>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1.5 A6 6 0 0 0 7.5 13.5 Z"/><circle cx="7.5" cy="7.5" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
     <span class="tr-sep"></span>
-    <span id="topright" title="About this archive">v1.03.12</span>
+    <span id="topright" title="About this archive">v1.03.13</span>
   </div>
 </header>
 
@@ -1222,7 +1214,7 @@
 
 <script>
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.12";
+  const VERSION      = "v1.03.13";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -2706,39 +2698,32 @@ $("#foot-dims").textContent = "";
       if (img) img.style.transform = `translate(${pzX}px,${pzY}px) scale(${pzScale})`;
     }
     function pzReset() {
-      pzScale = 1; pzX = 0; pzY = 0;
+      pzScale = 1; pzFitScale = 1; pzX = 0; pzY = 0;
       const img = document.getElementById("mob-sheet-img");
       if (img) img.style.transform = "";
     }
     function pzClamp() {
+      // image stays object-fit:contain; transform-origin is 50% 50% (default)
+      // at scale s the element overflows by sw*(s-1)/2 on each side
+      if (pzScale <= 1) { pzX = 0; pzY = 0; return; }
       const wrap = document.getElementById("mob-sheet-img-wrap");
-      const img  = document.getElementById("mob-sheet-img");
-      if (!wrap || !img || !img.naturalWidth) return;
-      const sw = wrap.clientWidth, sh = wrap.clientHeight;
-      const iw = img.naturalWidth * pzScale, ih = img.naturalHeight * pzScale;
-      pzX = iw <= sw ? (sw - iw) / 2 : Math.min(0, Math.max(sw - iw, pzX));
-      pzY = ih <= sh ? (sh - ih) / 2 : Math.min(0, Math.max(sh - ih, pzY));
+      if (!wrap) return;
+      const maxX = wrap.clientWidth  * (pzScale - 1) / 2;
+      const maxY = wrap.clientHeight * (pzScale - 1) / 2;
+      pzX = Math.max(-maxX, Math.min(maxX, pzX));
+      pzY = Math.max(-maxY, Math.min(maxY, pzY));
     }
     function pzFit() {
-      const wrap = document.getElementById("mob-sheet-img-wrap");
-      const img  = document.getElementById("mob-sheet-img");
-      if (!wrap || !img || !img.naturalWidth) return;
-      const sw = wrap.clientWidth, sh = wrap.clientHeight;
-      pzFitScale = Math.min(sw / img.naturalWidth, sh / img.naturalHeight);
-      pzScale = pzFitScale;
-      pzX = (sw - img.naturalWidth * pzScale) / 2;
-      pzY = (sh - img.naturalHeight * pzScale) / 2;
-      pzApply();
+      // object-fit:contain already centres the image — just reset transform
+      pzScale = 1; pzFitScale = 1; pzX = 0; pzY = 0;
+      const img = document.getElementById("mob-sheet-img");
+      if (img) img.style.transform = "";
     }
 
     const toggleImgExpand = () => {
       const sheet = document.getElementById("mob-sheet");
       const expanded = sheet.classList.toggle("mob-sheet-img-expanded");
-      if (expanded) {
-        requestAnimationFrame(pzFit);
-      } else {
-        pzReset();
-      }
+      if (!expanded) pzReset();
     };
     document.getElementById("mob-sheet-img")?.addEventListener("click", toggleImgExpand);
     document.getElementById("mob-sheet-foot")?.addEventListener("click", toggleImgExpand);
@@ -2773,16 +2758,15 @@ $("#foot-dims").textContent = "";
             const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
             const midX = (t1.clientX + t2.clientX) / 2;
             const midY = (t1.clientY + t2.clientY) / 2;
-            const img  = document.getElementById("mob-sheet-img");
-            if (img) {
-              const newScale = Math.min(10, Math.max(pzFitScale * 0.95, pzScale * (dist / pzLastDist)));
-              const imgX = (midX - pzX) / pzScale;
-              const imgY = (midY - pzY) / pzScale;
-              pzX = midX - imgX * newScale;
-              pzY = midY - imgY * newScale;
-              pzScale = newScale;
-              pzClamp(); pzApply();
-            }
+            const rect = wrap.getBoundingClientRect();
+            // anchor point relative to element centre (transform-origin:50% 50%)
+            const cx = midX - rect.left - rect.width  / 2;
+            const cy = midY - rect.top  - rect.height / 2;
+            const newScale = Math.min(10, Math.max(1, pzScale * (dist / pzLastDist)));
+            pzX = cx - (cx - pzX) * (newScale / pzScale);
+            pzY = cy - (cy - pzY) * (newScale / pzScale);
+            pzScale = newScale;
+            pzClamp(); pzApply();
             pzLastDist = dist;
           } else if (e.touches.length === 1) {
             pzX = pzOriginX + (e.touches[0].clientX - pzPanStartX);
