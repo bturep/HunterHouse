@@ -1030,9 +1030,10 @@
     .list-head{background:var(--bg);padding-left:20px;padding-right:24px}
     html.pwa .list-head{border-radius:14px 14px 0 0}
     .row{padding-right:24px}
-    /* Sort-mini must grow to fill list-head so YEAR can margin-left:auto to far right */
-    .sort-mini{flex-grow:1}
-    .sort-mini .sort-hd[data-sort-col="year"]{margin-left:auto}
+    /* Sort-mini fills list-head; flex-end packs ID/PHASE/YEAR to right so YEAR is flush */
+    .sort-mini{flex-grow:1;justify-content:flex-end}
+    .sort-mini .sort-hd[data-sort-col="phase"]{margin-left:0}
+    .sort-mini .sort-hd[data-sort-col="year"]{margin-left:0}
 
     /* Filter chips → manifest [pill] style on mobile */
     .fp-chip{
@@ -1086,7 +1087,7 @@
 
 <div id="mobile-chrome" role="banner">
   <span id="mob-count"></span>
-  <button id="mobile-version" type="button" aria-label="About this archive">HHFA v1.03.22</button>
+  <button id="mobile-version" type="button" aria-label="About this archive">HHFA v1.03.23</button>
 </div>
 
 <header class="site-top" id="site-header">
@@ -1258,7 +1259,7 @@
   }
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.22";
+  const VERSION      = "v1.03.23";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
