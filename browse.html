@@ -1055,6 +1055,64 @@
     .fp-search-input{font-size:11px;letter-spacing:0.02em}
   }
 
+  /* ── Splash overlay (replaces index.html navigation) ── */
+  #splash-overlay{
+    position:fixed;inset:0;z-index:9000;cursor:pointer;
+    background:#1a1816;color:#f3f1ec;
+    display:flex;flex-direction:column;
+    font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace;
+  }
+  #splash-overlay.so-exiting{pointer-events:none;cursor:default;animation:so-out 550ms ease-in-out forwards}
+  @keyframes so-out{to{opacity:0}}
+  #splash-overlay .so-film{position:absolute;inset:0;overflow:hidden;transform:translateZ(0)}
+  #splash-overlay .so-film::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(ellipse at center,rgba(0,0,0,.10) 0%,rgba(0,0,0,.45) 85%);
+  }
+  #splash-overlay .so-film video{
+    opacity:0;transition:opacity 900ms ease-in-out;
+    position:absolute;top:50%;left:50%;
+    width:max(100vw,calc(100vh*16/9));height:max(100vh,calc(100vw*9/16));
+    transform:translate(-50%,-50%);object-fit:cover;
+  }
+  #splash-overlay .so-film video.show{opacity:1}
+  #splash-overlay .so-mark{
+    position:absolute;left:18%;top:50%;transform:translateY(-50%);
+    padding:28px 36px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;
+    font-size:2.6vw;font-weight:700;letter-spacing:0.18em;line-height:1.2;
+    text-transform:uppercase;color:#f3f1ec;
+    text-shadow:0 2px 12px rgba(0,0,0,.45);z-index:5;pointer-events:none;
+    opacity:0;animation:so-mark-in 700ms ease-out 450ms forwards;
+  }
+  #splash-overlay .so-mark span{display:block}
+  @keyframes so-mark-in{from{opacity:0}to{opacity:1}}
+  #splash-overlay .so-enter{
+    position:absolute;right:36px;bottom:32px;z-index:5;
+    font-size:13px;color:#9dc2b2;letter-spacing:0.28em;text-transform:uppercase;
+    display:flex;align-items:center;gap:14px;
+    text-shadow:0 1px 8px rgba(0,0,0,.6);pointer-events:none;
+    opacity:0;animation:so-fade-in 700ms ease-out 1300ms forwards;
+  }
+  #splash-overlay .so-enter .so-arrow{
+    color:#9dc2b2;font-size:13px;letter-spacing:0;
+    animation:so-pulse 2.4s ease-in-out 3000ms infinite;
+  }
+  @keyframes so-fade-in{from{opacity:0}to{opacity:1}}
+  @keyframes so-pulse{0%,100%{transform:translateX(0)}50%{transform:translateX(4px)}}
+  #splash-overlay .so-imprint{
+    position:absolute;left:36px;top:28px;z-index:5;
+    font-size:10.5px;color:rgba(243,241,236,.45);
+    letter-spacing:0.18em;text-transform:uppercase;pointer-events:none;
+    opacity:0;animation:so-fade-in 700ms ease-out 1500ms forwards;
+  }
+  #splash-overlay .so-imprint b{color:#d49a86;font-weight:500;margin-right:8px}
+  #splash-overlay:hover .so-enter{color:#f3f1ec}
+  @media(max-width:767px){
+    #splash-overlay .so-mark{font-size:6vw;left:8%;padding:18px 22px}
+    #splash-overlay .so-enter{right:20px;bottom:24px}
+    #splash-overlay .so-imprint{left:20px}
+  }
+
   /* Portrait lock: show rotate prompt on landscape phones */
   #rotate-msg{
     display:none;position:fixed;inset:0;z-index:99999;
@@ -1085,6 +1143,20 @@
 </script>
 </head>
 <body class="loading">
+
+<!-- Splash overlay — hides via inline script if already seen this session -->
+<div id="splash-overlay">
+  <div class="so-film">
+    <video id="splash-video" autoplay loop muted playsinline preload="auto"></video>
+  </div>
+  <div class="so-imprint"><b>2026.05</b>v1.03.27</div>
+  <div class="so-mark">
+    <span>Hunter</span><span>House</span><span>Foundation</span><span>Archive</span>
+  </div>
+  <div class="so-enter"><span>Enter to Archive</span><span class="so-arrow">→</span></div>
+</div>
+<script>if(sessionStorage.getItem('hhf_splash'))document.getElementById('splash-overlay').style.display='none';</script>
+
 <div id="rotate-msg">
   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
   <span>Rotate to portrait</span>
@@ -1092,7 +1164,7 @@
 
 <div id="mobile-chrome" role="banner">
   <span id="mob-count"></span>
-  <button id="mobile-version" type="button" aria-label="About this archive">HHFA v1.03.26</button>
+  <button id="mobile-version" type="button" aria-label="About this archive">HHFA v1.03.27</button>
 </div>
 
 <header class="site-top" id="site-header">
@@ -1254,17 +1326,38 @@
 </div>
 
 <script>
-  // ── PWA splash gate ───────────────────────────────────────────────────────
-  // iOS ignores manifest start_url on re-open and restores the last page.
-  // If we land here without passing through the splash this session, send
-  // the user back. sessionStorage clears when the PWA process is killed.
-  if ((navigator.standalone || window.matchMedia('(display-mode:standalone)').matches) &&
-      !sessionStorage.getItem('hhf_splash')) {
-    location.replace('/HunterHouse/index.html');
-  }
+  // ── Splash overlay ────────────────────────────────────────────────────────
+  // Runs in-page — no navigation, no white flash.
+  // The overlay HTML is shown by default; the inline script right after it
+  // hides it instantly if the session flag is already set.
+  (function(){
+    const overlay = document.getElementById('splash-overlay');
+    if (!overlay || overlay.style.display === 'none') return; // already hidden
+
+    const R2 = 'https://archive.hunterhousefoundation.com/web/media';
+    const video = document.getElementById('splash-video');
+    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    const fast = conn && !conn.saveData && conn.effectiveType === '4g' && (conn.downlink || 10) >= 5;
+    video.src = fast ? `${R2}/HH-Splash4k.mp4` : `${R2}/HH-Splash1080.mp4`;
+
+    const posterSrc = `${R2}/HH-Splash-poster.jpg`;
+    const go = () => requestAnimationFrame(() => requestAnimationFrame(() => video.classList.add('show')));
+    const img = new Image();
+    img.src = posterSrc;
+    img.decode ? img.decode().then(() => { video.poster = posterSrc; go(); }, go)
+               : (img.onload = () => { video.poster = posterSrc; go(); }, img.onerror = go);
+    setTimeout(go, 1500);
+
+    overlay.addEventListener('click', () => {
+      if (overlay.classList.contains('so-exiting')) return;
+      overlay.classList.add('so-exiting');
+      sessionStorage.setItem('hhf_splash', '1');
+      setTimeout(() => overlay.remove(), 570);
+    });
+  })();
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.26";
+  const VERSION      = "v1.03.27";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
