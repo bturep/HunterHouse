@@ -1034,6 +1034,9 @@
     .sort-mini{flex-grow:1;justify-content:flex-end}
     .sort-mini .sort-hd[data-sort-col="phase"]{margin-left:0}
     .sort-mini .sort-hd[data-sort-col="year"]{margin-left:0}
+    /* Hide sort arrows — they shift text left of button edge, breaking YEAR alignment.
+       Active sort is still shown by ink colour on the active button. */
+    .sort-mini .sort-arrow{display:none}
 
     /* Filter chips → manifest [pill] style on mobile */
     .fp-chip{
@@ -1087,7 +1090,7 @@
 
 <div id="mobile-chrome" role="banner">
   <span id="mob-count"></span>
-  <button id="mobile-version" type="button" aria-label="About this archive">HHFA v1.03.23</button>
+  <button id="mobile-version" type="button" aria-label="About this archive">HHFA v1.03.24</button>
 </div>
 
 <header class="site-top" id="site-header">
@@ -1259,7 +1262,7 @@
   }
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.23";
+  const VERSION      = "v1.03.24";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
