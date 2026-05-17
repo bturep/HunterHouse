@@ -50,33 +50,49 @@
   .tr-search-input.open{max-width:260px}
   .header-search input::placeholder{color:var(--hint)}
 
-  /* ── about panel (replaces header when open) ── */
-  #about-panel{box-sizing:border-box;height:41px;overflow:hidden;flex-shrink:0}
-  #about-panel{
-    display:none;
-    padding:0 28px;border-bottom:1px solid #2e2c29;background:#1e1c1a;
-    align-items:center;white-space:nowrap;
+  /* ── about pane (image area overlay) ── */
+  #about-pane{
+    display:none;position:absolute;inset:0;z-index:15;overflow-y:auto;
+    flex-direction:column;align-items:center;
+    background:var(--bg);padding:48px 40px 64px;
   }
-  #about-panel.open{display:flex}
-  #about-panel .about-line{
-    font-family:var(--mono);font-size:10.5px;color:rgba(240,237,230,0.5);
-    letter-spacing:0.02em;
-  }
-  #about-panel a{color:#5b9df7;text-decoration:none}
-  #about-panel a:hover{text-decoration:underline;text-underline-offset:2px}
-  #about-refresh{margin-left:auto;flex-shrink:0;font-family:var(--mono);font-size:10.5px;letter-spacing:0.02em;white-space:nowrap}
-  #about-close{
-    margin-left:16px;flex-shrink:0;padding:0;
+  #about-pane.open{display:flex}
+  .ap-inner{width:100%;max-width:520px;position:relative}
+  #about-pane-close{
+    position:absolute;top:-8px;right:0;
     background:none;border:0;cursor:pointer;
-    font-size:18px;color:rgba(243,241,236,0.55);
-    line-height:1;display:flex;align-items:center;width:28px;justify-content:center;
+    font-size:18px;color:var(--hint);line-height:1;padding:4px 6px;
   }
-  #about-close:hover{color:#f3f1ec}
-  html.dark #about-panel{background:#f3f1ec;border-bottom-color:#d0ccc4}
-  html.dark #about-panel .about-line{color:rgba(26,24,22,0.5)}
-  html.dark #about-panel a{color:#2a6aa8}
-  html.dark #about-close{color:rgba(26,24,22,0.4)}
-  html.dark #about-close:hover{color:#1a1816}
+  #about-pane-close:hover{color:var(--ink)}
+  .ap-title{
+    font-family:var(--mono);font-size:12px;letter-spacing:0.18em;
+    text-transform:uppercase;color:var(--ink);font-weight:500;
+    margin-bottom:4px;
+  }
+  .ap-ver{font-family:var(--mono);font-size:10px;color:var(--hint);letter-spacing:0.06em;margin-bottom:32px}
+  .ap-section{margin-bottom:24px}
+  .ap-section-head{
+    font-family:var(--mono);font-size:9px;letter-spacing:0.22em;text-transform:uppercase;
+    color:var(--muted);padding-bottom:8px;border-bottom:1px solid var(--rule);margin-bottom:14px;
+  }
+  .ap-body{
+    font-family:var(--mono);font-size:11.5px;line-height:1.75;color:var(--ink);margin-bottom:10px;
+  }
+  .ap-body a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
+  .ap-body a:hover{border-bottom-color:var(--copper-deep)}
+  .ap-rule{border:0;border-top:1px solid var(--rule);margin:28px 0}
+  .ap-credits{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;
+    display:grid;grid-template-columns:90px 1fr;gap:8px 16px;align-items:baseline;
+    margin-bottom:28px;
+  }
+  .ap-credits dt{color:var(--muted);text-transform:uppercase;letter-spacing:0.14em;font-size:9px}
+  .ap-credits dd{color:var(--ink);margin:0}
+  #about-pane-refresh{
+    font-family:var(--mono);font-size:9.5px;color:var(--hint);letter-spacing:0.1em;
+    text-transform:uppercase;background:none;border:0;cursor:pointer;padding:0;
+  }
+  #about-pane-refresh:hover{color:var(--ink)}
 
   .fbtn{
     display:flex;flex-direction:column;justify-content:center;gap:2px;
@@ -1012,10 +1028,7 @@
     /* Prevent row tap-highlight flash while swiping the sheet bar */
     body.swiping #rows{pointer-events:none}
 
-    #about-panel{background:#000;border-bottom-color:rgba(243,241,236,0.13)}
-    html.dark #about-panel{background:#000}
-
-    .fp-search-row{
+.fp-search-row{
       display:flex;align-items:center;gap:10px;
       padding-bottom:14px;margin-bottom:14px;
       border-bottom:1px dashed var(--rule);
@@ -1116,11 +1129,6 @@
   </div>
 </header>
 
-<div id="about-panel" role="dialog" aria-label="About this archive">
-  <span class="about-line">Open data archive on <a href="https://wikiba.se/" target="_blank" rel="noopener">Wikibase</a> — knowledge graph underlying <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a>. Items individually addressable; catalogue <a href="https://www.w3.org/TR/sparql11-query/" target="_blank" rel="noopener">SPARQL</a>-queryable. Metadata: <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0</a>. Archival description informed by <a href="https://www.wikidata.org/wiki/Wikidata:GLAM" target="_blank" rel="noopener">GLAM</a> standards · <a href="https://github.com/CCA-Public/digital-archives-manual" target="_blank" rel="noopener">CCA DAM</a>.</span>
-  <a href="#" id="about-refresh">Refresh data</a>
-  <button id="about-close" title="Close">×</button>
-</div>
 
 <div id="mob-about-backdrop"></div>
 <div id="mob-about" role="dialog" aria-modal="true" aria-label="About Hunter House Foundation Archive">
@@ -1174,6 +1182,36 @@
   </div>
 
   <section class="pane-image">
+    <div id="about-pane" role="dialog" aria-modal="true" aria-label="About Hunter House Foundation Archive">
+      <div class="ap-inner">
+        <button id="about-pane-close" aria-label="Close">×</button>
+        <p class="ap-title">Hunter House<br>Foundation Archive</p>
+        <p class="ap-ver" id="ap-ver"></p>
+        <div class="ap-section">
+          <p class="ap-body">A foundation dedicated to the stewardship of the residence and architectural archive of architect <span class="c-red">Richard Morrow Hunter</span> (1930–2023). 203 Goward Road, Saanich, British Columbia.</p>
+        </div>
+        <div class="ap-section">
+          <p class="ap-section-head">Archive</p>
+          <p class="ap-body">Open data archive on <a href="https://wikiba.se/" target="_blank" rel="noopener">Wikibase</a> — the knowledge graph software underlying <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a>. Items persistent and individually addressable by URI; statements are typed <a href="https://www.w3.org/TR/rdf11-concepts/" target="_blank" rel="noopener">RDF triples</a> carrying qualifiers, references, and ranks; the catalogue is <a href="https://www.w3.org/TR/sparql11-query/" target="_blank" rel="noopener">SPARQL</a>-queryable and federable against external <a href="https://www.w3.org/wiki/LinkedData" target="_blank" rel="noopener">Linked Open Data</a> endpoints. Archival description follows <a href="https://www.wikidata.org/wiki/Wikidata:GLAM" target="_blank" rel="noopener">GLAM</a> conventions and the <a href="https://github.com/CCA-Public/digital-archives-manual" target="_blank" rel="noopener">CCA Digital Archives Manual</a> — multi-level arrangement at fonds, series, file, and item. Items aligned to external identifiers (Q-IDs) for cross-catalogue reconciliation.</p>
+        </div>
+        <div class="ap-section">
+          <p class="ap-section-head">Rights</p>
+          <p class="ap-body">Structured metadata: <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0</a>, per Wikibase/Wikidata convention. Content — drawings, documents, photographs: <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" rel="noopener">CC BY-NC-ND 4.0</a>, rights granted by Frances Hunter. Material held by the <a href="https://asc.ucalgary.ca/" target="_blank" rel="noopener">Canadian Architectural Archives — University of Calgary</a> remains under separate stewardship; contact the CAA for use.</p>
+        </div>
+        <div class="ap-section">
+          <p class="ap-section-head">Endpoints</p>
+          <p class="ap-body"><a href="https://hunterhouse.wikibase.cloud" target="_blank" rel="noopener">Wikibase instance</a> · <a href="https://hunterhouse.wikibase.cloud/query" target="_blank" rel="noopener">SPARQL endpoint</a> · <a href="https://github.com/bturep/HunterHouse" target="_blank" rel="noopener">GitHub</a></p>
+        </div>
+        <hr class="ap-rule">
+        <dl class="ap-credits">
+          <dt>Stewards</dt>
+          <dd><span class="pc-sage">Floyd Marinescu</span><br><span class="pc-slate">Olivia Jol</span></dd>
+          <dt>Project Lead</dt>
+          <dd><span class="c-yellow">Brandon Poole</span></dd>
+        </dl>
+        <button id="about-pane-refresh">↺ Refresh archive data</button>
+      </div>
+    </div>
     <div class="image-stage" id="stage">
       <div id="load-screen">
         <img class="load-mark" src="assets/hunter-mark.png" alt="">
@@ -3002,15 +3040,20 @@ $("#foot-dims").textContent = "";
       }
     }
 
-    // Mobile about overlay — markid tap opens it instead of navigating to splash
+    // Version displays
     document.getElementById("mob-about-ver").textContent = VERSION;
     document.getElementById("topright").textContent = VERSION;
+    document.getElementById("ap-ver").textContent = VERSION;
     const mvBtn = document.getElementById("mobile-version");
     if (mvBtn) mvBtn.textContent = "HHFA " + VERSION;
+    // markid: desktop → about pane, mobile → mob-about
     document.querySelector(".markid").addEventListener("click", e => {
-      if (!window.matchMedia("(max-width:767px)").matches) return;
       e.preventDefault();
-      openMobAbout();
+      if (window.matchMedia("(max-width:767px)").matches) {
+        openMobAbout();
+      } else {
+        toggleAboutPane();
+      }
     });
     document.getElementById("mob-about-close").addEventListener("click", closeMobAbout);
     document.getElementById("mob-about-backdrop").addEventListener("click", closeMobAbout);
@@ -3049,7 +3092,7 @@ $("#foot-dims").textContent = "";
       const inInput = e.target.matches("input, select, textarea");
       if (e.key === "/" && !inInput) { e.preventDefault(); openSearch(); return; }
       if (e.key === "Escape" && inInput) { e.target.blur(); return; }
-      if (e.key === "Escape") { closeAllDropdowns(); closeAbout(); return; }
+      if (e.key === "Escape") { closeAllDropdowns(); closeAboutPane(); return; }
       if (e.key === "1"         && !inInput) { setZoom(1); return; }
       if ((e.key === "m" || e.key === "M") && !inInput && state.selectedId) { toggleMark(state.selectedId); return; }
       if (e.key === "ArrowDown" && !inInput) { e.preventDefault(); selectAdjacent(+1); }
@@ -3071,26 +3114,14 @@ $("#foot-dims").textContent = "";
     document.getElementById("mob-about-backdrop").classList.remove("open");
   }
 
-  // ── About panel ───────────────────────────────────────────────────────────
-  const aboutPanel = document.getElementById("about-panel");
-  function openAbout()  {
-    aboutPanel.classList.add("open");
-    if (!window.matchMedia("(max-width:767px)").matches)
-      document.getElementById("site-header").style.display = "none";
-  }
-  function closeAbout() {
-    aboutPanel.classList.remove("open");
-    if (!window.matchMedia("(max-width:767px)").matches)
-      document.getElementById("site-header").style.display = "";
-  }
+  // ── About pane ────────────────────────────────────────────────────────────
+  const aboutPane = document.getElementById("about-pane");
+  function openAboutPane()  { aboutPane.classList.add("open"); }
+  function closeAboutPane() { aboutPane.classList.remove("open"); }
+  function toggleAboutPane(){ aboutPane.classList.toggle("open"); }
 
   // ── Main (async load) ─────────────────────────────────────────────────────
   (async function main() {
-    const toprightEl = document.getElementById("topright");
-    toprightEl.addEventListener("click", (e) => {
-      e.stopPropagation();
-      aboutPanel.classList.contains("open") ? closeAbout() : openAbout();
-    });
     const mobileVersionBtn = document.getElementById("mobile-version");
     if (mobileVersionBtn) {
       mobileVersionBtn.addEventListener("click", (e) => {
@@ -3098,10 +3129,8 @@ $("#foot-dims").textContent = "";
         openMobAbout();
       });
     }
-    document.addEventListener("click", closeAbout);
-    aboutPanel.addEventListener("click", (e) => e.stopPropagation());
-    document.getElementById("about-close").addEventListener("click", closeAbout);
-    document.getElementById("about-refresh").addEventListener("click", (e) => { e.preventDefault(); clearCache(); location.reload(); });
+    document.getElementById("about-pane-close").addEventListener("click", closeAboutPane);
+    document.getElementById("about-pane-refresh").addEventListener("click", () => { clearCache(); location.reload(); });
 
     // Panel toggles
     document.getElementById("left-handle").addEventListener("click",  () => togglePanel("left"));
