@@ -1298,7 +1298,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.46";
+  const VERSION      = "v1.03.47";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -1614,7 +1614,6 @@
     if (item.drawTypes?.length) {
       descRows.push(["Drawing type", sortDrawTypes(item.drawTypes).map(dt => pill(`drawtype-pill ${pillCls(drawTypePillColor())}`, dt)).join("")]);
     }
-    if (item.medium)            descRows.push(["Medium",    escapeHTML(item.medium)]);
     if (item.builtStatus)       descRows.push(["Built",     pill(`builtstatus-pill ${pillCls(PC.moss)}`, item.builtStatus)]);
     if (item.creator)           descRows.push([creatorLabel(item.itemType), pill(`creator-pill ${pillCls(PC.clay)}`, item.creator)]);
     if (item.designedBy)        descRows.push(["Designed by", pill(`creator-pill ${pillCls(PC.clay)}`, item.designedBy)]);
@@ -1832,7 +1831,6 @@
           builtStatus:      r.builtStatusLabel?.value || null,
           setPosition:      r.setPos?.value || null,
           notes:            r.notes?.value || null,
-          medium:           r.medium?.value || null,
           rights:           r.rightsLabel?.value || null,
           heldBy:           r.heldByLabel?.value || null,
           archiveLink:      r.archiveLink?.value || null,
@@ -1866,7 +1864,7 @@ SELECT ?item ?archId ?label ?img ?master
        ?designedBy ?designedByLabel
        ?use
        ?builtStatus ?builtStatusLabel
-       ?setPos ?notes ?medium
+       ?setPos ?notes
        ?rights ?rightsLabel
        ?heldBy ?heldByLabel
        ?archiveLink ?location
@@ -1891,7 +1889,6 @@ WHERE {
   OPTIONAL { ?item wdt:P92 ?builtStatus . ?builtStatus rdfs:label ?builtStatusLabel . FILTER(LANG(?builtStatusLabel)="en") }
   OPTIONAL { ?item wdt:P86 ?setPos }
   OPTIONAL { ?item wdt:P100 ?notes }
-  OPTIONAL { ?item wdt:P91 ?medium }
   OPTIONAL { ?item wdt:P93 ?rights . ?rights rdfs:label ?rightsLabel . FILTER(LANG(?rightsLabel)="en") }
   OPTIONAL { ?item wdt:P94 ?heldBy . ?heldBy rdfs:label ?heldByLabel . FILTER(LANG(?heldByLabel)="en") }
   OPTIONAL { ?item wdt:P99 ?archiveLink }
@@ -1949,7 +1946,7 @@ WHERE {
       if (state.filterCreator.size && ![it.creator, it.designedBy, it.builtBy].some(c => c && state.filterCreator.has(c))) return false;
       if (state.filterBuiltStatus.size && !state.filterBuiltStatus.has(it.builtStatus)) return false;
       if (q) {
-        const hay = [it.id, it.title, it.phase, (it.drawTypes||[]).join(" "), (it.areas||[]).join(" "), it.creator, it.designedBy||"", it.builtBy||"", it.medium||"", it.notes||"", it.location||""].join(" ").toLowerCase();
+        const hay = [it.id, it.title, it.phase, (it.drawTypes||[]).join(" "), (it.areas||[]).join(" "), it.creator, it.designedBy||"", it.builtBy||"", it.notes||"", it.location||""].join(" ").toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
@@ -2380,7 +2377,6 @@ $("#foot-dims").textContent = "";
       ).join("");
       descRows.push(["Drawing type", drawHtml]);
     }
-    if (item.medium)      descRows.push(["Medium", escapeHTML(item.medium)]);
     if (item.builtStatus) {
       const bsActive = state.filterBuiltStatus.has(item.builtStatus) ? " active" : "";
       descRows.push(["Built", `<button class="pill builtstatus-pill ${pillCls(PC.moss)}${bsActive}" data-builtstatus="${escapeHTML(item.builtStatus)}">${escapeHTML(item.builtStatus)}</button>`]);
