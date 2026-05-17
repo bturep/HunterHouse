@@ -618,8 +618,18 @@
     html.pwa .mob-sheet{height:72vh}
     .mob-sheet.mob-sheet-img-expanded{height:100%}
     html.pwa .mob-sheet.mob-sheet-img-expanded{height:100%}
-    .mob-sheet.mob-sheet-img-expanded .mob-sheet-img-wrap{flex-grow:1;max-height:100vh}
-    .mob-sheet.mob-sheet-img-expanded .mob-sheet-scroll{flex-grow:0;overflow:hidden;padding:0}
+    .mob-sheet.mob-sheet-img-expanded .mob-sheet-img-wrap{
+      flex-grow:1;max-height:100vh;
+      position:relative;touch-action:none;display:block;
+    }
+    .mob-sheet.mob-sheet-img-expanded .mob-sheet-img{
+      position:absolute!important;top:0;left:0;
+      transform-origin:0 0;
+      width:auto!important;height:auto!important;
+      max-width:none;max-height:none;
+      cursor:default;object-fit:none;
+    }
+    .mob-sheet.mob-sheet-img-expanded .mob-sheet-scroll{flex-grow:0;height:0;overflow:hidden;padding:0}
     /* Pills: same treatment as desktop record pane — colored text, no chip */
     .mob-sheet-body .pill{
       height:auto;padding:0;background:transparent;
@@ -639,19 +649,23 @@
     }
     .mob-sheet-grip{width:36px;height:4px;background:var(--rule);border-radius:2px}
     .mob-sheet-close{
-      position:absolute;right:8px;top:50%;transform:translateY(-50%);
-      background:none;border:none;padding:4px 10px;
-      font-family:var(--mono);font-size:18px;line-height:1;
+      position:absolute;right:4px;top:50%;transform:translateY(-50%);
+      background:none;border:none;
+      width:44px;height:44px;
+      display:flex;align-items:center;justify-content:center;
+      font-family:var(--mono);font-size:22px;line-height:1;
       color:var(--hint);cursor:pointer;
     }
     .mob-sheet-close:active{color:var(--ink)}
     .mob-sheet-nav{
       position:absolute;left:4px;top:50%;transform:translateY(-50%);
-      display:flex;
+      display:flex;gap:4px;
     }
     .mob-snav-btn{
-      background:none;border:none;padding:4px 10px;height:40px;
-      font-size:20px;color:var(--muted);cursor:pointer;line-height:1;
+      background:none;border:none;
+      width:44px;height:44px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:26px;color:var(--muted);cursor:pointer;line-height:1;
     }
     .mob-snav-btn:active{color:var(--ink)}
     .mob-snav-btn:disabled{opacity:0.25;pointer-events:none}
@@ -665,10 +679,11 @@
     }
     .mob-sheet-img{width:100%;height:100%;object-fit:contain;display:block;cursor:pointer}
     .mob-sheet-foot{
-      height:48px;flex-shrink:0;
+      flex-shrink:0;
       display:flex;align-items:center;justify-content:center;
       border-top:1px solid var(--rule);
-      padding:0 16px;
+      padding:0 16px env(safe-area-inset-bottom,0px);
+      min-height:48px;
     }
     .mob-sheet-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 40px;transition:flex-grow 0.38s cubic-bezier(0.4,0,0.2,1)}
     /* Title in foot bar — small, mono, truncated */
@@ -1045,7 +1060,7 @@
 
 <div id="mobile-chrome" role="banner">
   <span id="mob-count"></span>
-  <button id="mobile-version" type="button" aria-label="About this archive">v1.03.08</button>
+  <button id="mobile-version" type="button" aria-label="About this archive">v1.03.09</button>
 </div>
 
 <header class="site-top" id="site-header">
@@ -1061,7 +1076,7 @@
     <span class="tr-sep"></span>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1.5 A6 6 0 0 0 7.5 13.5 Z"/><circle cx="7.5" cy="7.5" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
     <span class="tr-sep"></span>
-    <span id="topright" title="About this archive">v1.03.08</span>
+    <span id="topright" title="About this archive">v1.03.09</span>
   </div>
 </header>
 
@@ -1183,7 +1198,7 @@
       <span class="mob-sheet-grip"></span>
       <button class="mob-sheet-close" id="mob-sheet-close" aria-label="Close">×</button>
     </div>
-    <div class="mob-sheet-img-wrap">
+    <div class="mob-sheet-img-wrap" id="mob-sheet-img-wrap">
       <img id="mob-sheet-img" class="mob-sheet-img" alt="">
     </div>
     <div class="mob-sheet-foot" id="mob-sheet-foot">
@@ -1206,7 +1221,7 @@
 
 <script>
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.08";
+  const VERSION      = "v1.03.09";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -1488,7 +1503,7 @@
     if (!item) return;
 
     // Sheet header + image
-    document.getElementById("mob-sheet-title").innerHTML = formatTitle(item.title);
+    document.getElementById("mob-sheet-title").textContent = item.id;
     const imgEl = document.getElementById("mob-sheet-img");
     if (item.image) {
       imgEl.src = item.image.replace(/_prev\.jpg$/, "_thumb.jpg");
@@ -2680,12 +2695,114 @@ $("#foot-dims").textContent = "";
     });
     document.getElementById("mob-sheet-close")?.addEventListener("click", mobHideSheet);
 
-    // Image tap + img-bar tap → toggle expanded state
+    // Image tap + foot tap → toggle expanded state + zoom state
+    let pzScale = 1, pzX = 0, pzY = 0, pzFitScale = 1;
+    let pzLastDist = null, pzLastTap = 0;
+    let pzPanStartX = 0, pzPanStartY = 0, pzOriginX = 0, pzOriginY = 0;
+
+    function pzApply() {
+      const img = document.getElementById("mob-sheet-img");
+      if (img) img.style.transform = `translate(${pzX}px,${pzY}px) scale(${pzScale})`;
+    }
+    function pzReset() {
+      pzScale = 1; pzX = 0; pzY = 0;
+      const img = document.getElementById("mob-sheet-img");
+      if (img) img.style.transform = "";
+    }
+    function pzClamp() {
+      const wrap = document.getElementById("mob-sheet-img-wrap");
+      const img  = document.getElementById("mob-sheet-img");
+      if (!wrap || !img || !img.naturalWidth) return;
+      const sw = wrap.clientWidth, sh = wrap.clientHeight;
+      const iw = img.naturalWidth * pzScale, ih = img.naturalHeight * pzScale;
+      pzX = iw <= sw ? (sw - iw) / 2 : Math.min(0, Math.max(sw - iw, pzX));
+      pzY = ih <= sh ? (sh - ih) / 2 : Math.min(0, Math.max(sh - ih, pzY));
+    }
+    function pzFit() {
+      const wrap = document.getElementById("mob-sheet-img-wrap");
+      const img  = document.getElementById("mob-sheet-img");
+      if (!wrap || !img || !img.naturalWidth) return;
+      const sw = wrap.clientWidth, sh = wrap.clientHeight;
+      pzFitScale = Math.min(sw / img.naturalWidth, sh / img.naturalHeight);
+      pzScale = pzFitScale;
+      pzX = (sw - img.naturalWidth * pzScale) / 2;
+      pzY = (sh - img.naturalHeight * pzScale) / 2;
+      pzApply();
+    }
+
     const toggleImgExpand = () => {
-      document.getElementById("mob-sheet").classList.toggle("mob-sheet-img-expanded");
+      const sheet = document.getElementById("mob-sheet");
+      const expanded = sheet.classList.toggle("mob-sheet-img-expanded");
+      if (expanded) {
+        requestAnimationFrame(pzFit);
+      } else {
+        pzReset();
+      }
     };
     document.getElementById("mob-sheet-img")?.addEventListener("click", toggleImgExpand);
     document.getElementById("mob-sheet-foot")?.addEventListener("click", toggleImgExpand);
+
+    // Pinch-zoom + pan on expanded image
+    {
+      const wrap = document.getElementById("mob-sheet-img-wrap");
+      if (wrap) {
+        wrap.addEventListener("touchstart", e => {
+          const sheet = document.getElementById("mob-sheet");
+          if (!sheet.classList.contains("mob-sheet-img-expanded")) return;
+          const now = Date.now();
+          if (e.touches.length === 1) {
+            if (now - pzLastTap < 300) { pzFit(); e.preventDefault(); pzLastTap = 0; return; }
+            pzLastTap = now;
+            pzPanStartX = e.touches[0].clientX; pzPanStartY = e.touches[0].clientY;
+            pzOriginX = pzX; pzOriginY = pzY;
+            pzLastDist = null;
+          } else if (e.touches.length === 2) {
+            pzLastTap = 0;
+            const t1 = e.touches[0], t2 = e.touches[1];
+            pzLastDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+          }
+        }, { passive: false });
+
+        wrap.addEventListener("touchmove", e => {
+          const sheet = document.getElementById("mob-sheet");
+          if (!sheet.classList.contains("mob-sheet-img-expanded")) return;
+          e.preventDefault();
+          if (e.touches.length === 2 && pzLastDist) {
+            const t1 = e.touches[0], t2 = e.touches[1];
+            const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+            const midX = (t1.clientX + t2.clientX) / 2;
+            const midY = (t1.clientY + t2.clientY) / 2;
+            const img  = document.getElementById("mob-sheet-img");
+            if (img) {
+              const newScale = Math.min(10, Math.max(pzFitScale * 0.95, pzScale * (dist / pzLastDist)));
+              const imgX = (midX - pzX) / pzScale;
+              const imgY = (midY - pzY) / pzScale;
+              pzX = midX - imgX * newScale;
+              pzY = midY - imgY * newScale;
+              pzScale = newScale;
+              pzClamp(); pzApply();
+            }
+            pzLastDist = dist;
+          } else if (e.touches.length === 1) {
+            pzX = pzOriginX + (e.touches[0].clientX - pzPanStartX);
+            pzY = pzOriginY + (e.touches[0].clientY - pzPanStartY);
+            pzClamp(); pzApply();
+          }
+        }, { passive: false });
+
+        wrap.addEventListener("touchend", e => {
+          const sheet = document.getElementById("mob-sheet");
+          if (!sheet.classList.contains("mob-sheet-img-expanded")) return;
+          if (e.touches.length === 1) {
+            pzPanStartX = e.touches[0].clientX; pzPanStartY = e.touches[0].clientY;
+            pzOriginX = pzX; pzOriginY = pzY;
+            pzLastDist = null;
+          } else if (e.touches.length === 0) {
+            pzLastDist = null;
+          }
+        }, { passive: true });
+      }
+    }
 
     // Swipe on top bar: staged navigation with follow-finger animation
     {
