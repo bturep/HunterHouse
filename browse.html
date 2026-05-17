@@ -2827,7 +2827,11 @@ $("#foot-dims").textContent = "";
       if (img) img.style.transform = "";
     }
 
+    // Set true by a finished swipe so the trailing synthetic click doesn't
+    // also toggle full-screen. Self-clears on consume + safety timeout.
+    let swipeConsumedClick = false;
     const toggleImgExpand = () => {
+      if (swipeConsumedClick) { swipeConsumedClick = false; return; }
       const sheet = document.getElementById("mob-sheet");
       const expanded = sheet.classList.toggle("mob-sheet-img-expanded");
       if (!expanded) pzReset();
@@ -2896,63 +2900,134 @@ $("#foot-dims").textContent = "";
       }
     }
 
-    // Swipe on top bar: staged navigation with follow-finger animation
+    // ── Mobile sheet gestures ────────────────────────────────────────────────
+    // One pipeline. Bar + foot: vertical only (down = close/collapse, up =
+    // expand). Image (preview open, NOT full-screen): first finger move locks
+    // an axis — horizontal = prev/next item, vertical = same as the bar. The
+    // record area is never touched here (native scroll, no side gesture).
     {
       const sheet = document.getElementById("mob-sheet");
       const bar   = document.getElementById("mob-sheet-bar");
-      let swipeStartY = 0, swipeStartH = 0, swiping = false;
+      const foot  = document.getElementById("mob-sheet-foot");
+      const wrap  = document.getElementById("mob-sheet-img-wrap");
+      const img   = document.getElementById("mob-sheet-img");
 
-      bar.addEventListener("touchstart", e => {
-        if (e.target.closest(".mob-sheet-close, .mob-sheet-nav")) return;
-        swipeStartY  = e.touches[0].clientY;
-        swipeStartH  = sheet.getBoundingClientRect().height;
-        swiping = true;
+      let mode = null;            // null | 'pending' | 'v' | 'h'
+      let startX = 0, startY = 0, startH = 0, moved = false, animating = false;
+
+      const isExpanded = () => sheet.classList.contains("mob-sheet-img-expanded");
+      const isOpen     = () => sheet.classList.contains("mob-sheet-open");
+
+      function beginVertical() {
+        mode = "v";
         sheet.style.transition = "none";
         document.body.classList.add("swiping");
-      }, { passive: true });
+      }
+
+      function onStart(e, region) {
+        if (animating || e.touches.length !== 1) return;
+        if (e.target.closest(".mob-sheet-close, .mob-sheet-nav")) return;
+        if (!isOpen() || lbOpen) return;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        startH = sheet.getBoundingClientRect().height;
+        moved  = false;
+        if (region === "img") {
+          mode = isExpanded() ? null : "pending";   // expanded → pinch/pan owns it
+        } else {
+          beginVertical();                           // bar / foot → vertical now
+        }
+      }
+
+      bar .addEventListener("touchstart", e => onStart(e, "bar"),  { passive: true });
+      foot.addEventListener("touchstart", e => onStart(e, "foot"), { passive: true });
+      wrap.addEventListener("touchstart", e => onStart(e, "img"),  { passive: true });
 
       document.addEventListener("touchmove", e => {
-        if (!swiping) return;
-        e.preventDefault();
-        const dy       = e.touches[0].clientY - swipeStartY;
-        const expanded = sheet.classList.contains("mob-sheet-img-expanded");
-        if (dy > 0) {
-          // Down: sheet follows finger via translateY
-          sheet.style.transform = `translateY(${dy}px)`;
-          sheet.style.height    = "";
-        } else if (!expanded) {
-          // Up (record view only): grow sheet height to follow finger
-          const newH = Math.min(window.innerHeight, swipeStartH - dy);
-          sheet.style.height    = newH + "px";
-          sheet.style.transform = "";
+        if (!mode) return;
+        const dx = e.touches[0].clientX - startX;
+        const dy = e.touches[0].clientY - startY;
+
+        if (mode === "pending") {
+          if (Math.max(Math.abs(dx), Math.abs(dy)) < 10) return;
+          if (Math.abs(dx) > Math.abs(dy)) { mode = "h"; img.style.transition = "none"; }
+          else beginVertical();
+        }
+
+        if (mode === "h") {
+          e.preventDefault();
+          moved = true;
+          img.style.transform = `translateX(${dx}px)`;
+        } else if (mode === "v") {
+          e.preventDefault();
+          moved = true;
+          if (dy > 0) {
+            sheet.style.transform = `translateY(${dy}px)`;
+            sheet.style.height    = "";
+          } else if (!isExpanded()) {
+            sheet.style.height    = Math.min(window.innerHeight, startH - dy) + "px";
+            sheet.style.transform = "";
+          }
         }
       }, { passive: false });
 
       document.addEventListener("touchend", e => {
-        if (!swiping) return;
-        swiping = false;
-        document.body.classList.remove("swiping");
-        const dy       = e.changedTouches[0].clientY - swipeStartY;
-        const expanded = sheet.classList.contains("mob-sheet-img-expanded");
+        if (!mode) return;
+        const m = mode; mode = null;
+        const ce = e.changedTouches[0];
+        const dx = ce.clientX - startX;
+        const dy = ce.clientY - startY;
+        if (moved) {                       // suppress the trailing tap→full-screen
+          swipeConsumedClick = true;
+          setTimeout(() => { swipeConsumedClick = false; }, 500);
+        }
 
+        if (m === "h") {
+          const W   = wrap.clientWidth || window.innerWidth;
+          const idx = state.filtered.findIndex(i => i.id === state.selectedId);
+          const dir = dx < 0 ? +1 : -1;    // swipe left → next, right → previous
+          const target = idx + dir;
+          const canGo  = Math.abs(dx) > 50 && idx >= 0 && target >= 0 && target < state.filtered.length;
+          if (canGo) {
+            animating = true;
+            img.style.transition = "transform 0.18s ease";
+            img.style.transform  = `translateX(${dir < 0 ? W : -W}px)`;
+            const finish = () => {
+              img.removeEventListener("transitionend", finish);
+              if (!animating) return;
+              animating = false;
+              selectAdjacent(dir);                       // re-renders the sheet
+              img.style.transition = "none";
+              img.style.transform  = "";                 // new image, centred
+              requestAnimationFrame(() => { img.style.transition = ""; });
+            };
+            img.addEventListener("transitionend", finish);
+            setTimeout(finish, 260);                      // safety if no transitionend
+          } else {
+            img.style.transition = "transform 0.18s ease";
+            img.style.transform  = "";
+            setTimeout(() => { img.style.transition = ""; }, 200);
+          }
+          return;
+        }
+
+        // m === "v" — original bar behaviour, preserved exactly
+        document.body.classList.remove("swiping");
+        const expanded = isExpanded();
         if (dy > 40) {
-          // One stage down
           if (expanded) {
-            if (dy > swipeStartH / 2) {
-              // Past midpoint → close fully to list
+            if (dy > startH / 2) {
               sheet.style.transition = "";
               sheet.classList.remove("mob-sheet-open", "mob-sheet-img-expanded");
               const sc2 = document.getElementById("mob-sheet-scroll");
               if (sc2) sc2.scrollTop = 0;
               requestAnimationFrame(() => { sheet.style.transform = ""; });
             } else {
-              // Short drag → collapse to record view
               sheet.style.transition = "";
               sheet.style.transform  = "";
               sheet.classList.remove("mob-sheet-img-expanded");
             }
           } else {
-            // Record → list (dismiss; sheet slides off from drag position)
             sheet.style.transition = "";
             sheet.classList.remove("mob-sheet-open", "mob-sheet-img-expanded");
             const sc = document.getElementById("mob-sheet-scroll");
@@ -2960,14 +3035,11 @@ $("#foot-dims").textContent = "";
             requestAnimationFrame(() => { sheet.style.transform = ""; });
           }
         } else if (dy < -40 && !expanded) {
-          // Up past threshold: expand to full screen
-          // Inline height is at drag position; animate it to 100% then hand off to CSS
           sheet.style.transition = "";
           sheet.style.height     = "100%";
           sheet.classList.add("mob-sheet-img-expanded");
           requestAnimationFrame(() => { sheet.style.height = ""; });
         } else {
-          // Snap back to current state
           sheet.style.transition = "";
           sheet.style.transform  = "";
           sheet.style.height     = "";
