@@ -129,6 +129,7 @@
     e.preventDefault();
     if (splash.classList.contains('exiting')) return;
     splash.classList.add('exiting');
+    sessionStorage.setItem('hhf_splash', '1');
     setTimeout(() => { window.location.href = 'browse.html'; }, 570);
   });
 </script>
