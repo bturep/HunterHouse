@@ -54,8 +54,9 @@
   #about-pane{
     display:none;position:absolute;inset:0;z-index:15;overflow-y:auto;
     flex-direction:column;align-items:center;
-    background:var(--bg);padding:48px 40px 64px;
+    background:var(--soft);padding:48px 40px 64px;
   }
+  html.dark #about-pane{background:#242220}
   #about-pane.open{display:flex}
   .ap-inner{width:100%;max-width:520px;position:relative}
   #about-pane-close{
