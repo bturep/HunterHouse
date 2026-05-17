@@ -3144,39 +3144,40 @@ $("#foot-dims").textContent = "";
     document.getElementById("about-pane-close").addEventListener("click", closeAboutPane);
     document.getElementById("about-pane-refresh").addEventListener("click", () => { clearCache(); location.reload(); });
 
-    // Panel toggles
-    document.getElementById("left-handle").addEventListener("click",  () => togglePanel("left"));
-    document.getElementById("right-handle").addEventListener("click", () => togglePanel("right"));
-
-    // Fullscreen: collapse both panels, restore on second press
+    // Panels + bottom-bar "hide panels" button.
+    // Single source of truth = the .out classes on the panels themselves, so the
+    // edge handles and the bottom-bar button can never fall out of sync.
     {
-      const fsBtn     = document.getElementById("zoom-fs");
-      const fsExpand  = document.getElementById("fs-icon-expand");
-      const fsCollapse= document.getElementById("fs-icon-collapse");
-      let fsActive = false, fsLeftWasOut = false, fsRightWasOut = false;
-      fsBtn.addEventListener("click", () => {
-        const left  = document.getElementById("panel-left");
-        const right = document.getElementById("panel-right");
-        if (!fsActive) {
-          fsLeftWasOut  = left.classList.contains("out");
-          fsRightWasOut = right.classList.contains("out");
-          left.classList.add("out");
-          right.classList.add("out");
-          fsBtn.classList.add("fs-active");
-          fsBtn.title = "Exit fullscreen";
-          fsExpand.style.display  = "none";
-          fsCollapse.style.display = "";
-          fsActive = true;
-        } else {
-          if (!fsLeftWasOut)  left.classList.remove("out");
-          if (!fsRightWasOut) right.classList.remove("out");
-          fsBtn.classList.remove("fs-active");
-          fsBtn.title = "Fullscreen — hide panels";
-          fsExpand.style.display  = "";
-          fsCollapse.style.display = "none";
-          fsActive = false;
-        }
+      const leftP  = document.getElementById("panel-left");
+      const rightP = document.getElementById("panel-right");
+      const pfsBtn = document.getElementById("zoom-fs");
+      const pfsExp = document.getElementById("fs-icon-expand");
+      const pfsCol = document.getElementById("fs-icon-collapse");
+
+      const allHidden = () => leftP.classList.contains("out") && rightP.classList.contains("out");
+
+      function syncFsBtn() {
+        const hidden = allHidden();
+        pfsBtn.classList.toggle("fs-active", hidden);
+        pfsBtn.title = hidden ? "Show panels" : "Fullscreen — hide panels";
+        pfsExp.style.display = hidden ? "none" : "";
+        pfsCol.style.display = hidden ? ""     : "none";
+      }
+
+      // Edge handles: toggle one panel, then refresh the button so its icon
+      // always reflects the real panel state.
+      document.getElementById("left-handle").addEventListener("click",  () => { togglePanel("left");  syncFsBtn(); });
+      document.getElementById("right-handle").addEventListener("click", () => { togglePanel("right"); syncFsBtn(); });
+
+      // Bottom-bar button: both hidden → reveal both; otherwise hide both.
+      pfsBtn.addEventListener("click", () => {
+        const reveal = allHidden();
+        leftP.classList.toggle("out",  !reveal);
+        rightP.classList.toggle("out", !reveal);
+        syncFsBtn();
       });
+
+      syncFsBtn();   // start with the icon/title matching the DOM
     }
 
     // Fullscreen toggle

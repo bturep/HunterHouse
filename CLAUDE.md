@@ -508,3 +508,18 @@ Continued from v1.03.28. Session covered deep design and data work: the entire p
 - Same pattern for `.sib.current .pos` — added `.pane-meta .graph-siblings .sib.current .pos{color:var(--red)}`.
 
 **Version: v1.04.00**
+
+---
+
+### 2026-05-17 — Wikibase Main Page reframe + panel/fullscreen interlink fix (v1.04.01)
+
+**Wikibase Main Page** (https://hunterhouse.wikibase.cloud/wiki/Main_Page)
+- Reframed from biography → technical data-model entry point. Removed the "character of the record" and "design arcs" narrative and the Hunter biography (that content belongs on the Foundation public site). Added Arrangement (fonds→series→file→item), Rights, and Endpoints sections; resolved all `Q?` placeholder links; corrected the ID-prefix claims and counts against the live Wikibase; dropped the ID-prefix column (only archive-item IDs `HH-HHC-####`/`HH-CAA-####` are a real curated scheme). Live revisions 4438→4439.
+- Full continuity record committed as **`WIKIBASE_MAINPAGE.md`** (current wikitext, resolved QID map, decisions, publish workflow, revision history). Read that file before resuming Main Page edits. Key decisions: org steward = Q187 "Hunter House Stewardship Project" (no "Hunter House Foundation" item exists); CAA repository = Q178 (not Q116, a same-label rights item).
+
+**browse.html — panel ↔ bottom-bar fullscreen button interlink (v1.04.01)**
+- Bug: the bottom-bar "hide panels" button (`#zoom-fs`) kept a private `fsActive` flag + snapshot of panel states; the edge handles (`togglePanel`) only flipped the `.out` class and never updated it, so the two drifted apart. Closing both panels by hand then pressing the button did nothing (it snapshotted "already hidden" and "restored" to hidden).
+- Fix: removed the flag/snapshot. The panels' `.out` classes are now the single source of truth. Button rule: both hidden → reveal both; otherwise hide both. Edge handles now also call `syncFsBtn()` so the button icon/title always reflects real state. Initialised on load.
+- Tradeoff accepted: the old (broken) "remember exactly which panel was open and restore it" behaviour is replaced by a clean hide-all/show-all toggle.
+
+**Version: v1.04.01**
