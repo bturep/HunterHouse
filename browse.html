@@ -5,12 +5,14 @@
 <title>Browse Archive — Hunter House Foundation</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta name="theme-color" content="#1a1816">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="dark light">
 <link rel="manifest" href="/HunterHouse/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="HH Archive">
 <link rel="apple-touch-icon" href="/HunterHouse/assets/icon-180.png">
+<!-- Paint holdout: sets dark bg before render-blocking external CSS resolves -->
+<style>html{background:#1a1816}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -1090,7 +1092,7 @@
 
 <div id="mobile-chrome" role="banner">
   <span id="mob-count"></span>
-  <button id="mobile-version" type="button" aria-label="About this archive">HHFA v1.03.25</button>
+  <button id="mobile-version" type="button" aria-label="About this archive">HHFA v1.03.26</button>
 </div>
 
 <header class="site-top" id="site-header">
@@ -1262,7 +1264,7 @@
   }
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.25";
+  const VERSION      = "v1.03.26";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
