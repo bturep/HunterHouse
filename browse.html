@@ -157,6 +157,7 @@
   .list-head .l:hover .filter-chevron,.list-head .l.fp-open .filter-chevron{color:var(--ink)}
   .sort-mini{display:flex;gap:14px;align-items:center}
   .sort-mini .sort-hd{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
+  .sort-mini .sort-hd[data-sort-col="phase"]{margin-left:8px}
   .sort-mini .sort-hd[data-sort-col="year"]{width:50px;justify-content:flex-end}
   .rows{flex:1;overflow-y:auto;display:flex;flex-direction:column;scrollbar-width:none}
   .rows::-webkit-scrollbar{display:none}
@@ -255,7 +256,7 @@
   .row .archid .tmark[data-type="LS"]{color:#3d6b5a;border-color:#bed9ce;background:#e2f2ec}
   .row .archid .tmark[data-type="EN"]{color:#5a3d6b;border-color:#cdb8d9;background:#ede4f2}
   .row.sel .archid .tmark{color:var(--red-deep)!important;border-color:var(--red-pale)!important;background:var(--red-pale)!important}
-  .row .title-wrap{min-width:0;overflow:hidden;padding-left:8px}
+  .row .title-wrap{min-width:0;overflow:hidden}
   .row .title{
     font-size:13px;letter-spacing:-0.005em;color:var(--ink);
     line-height:1.35;overflow:hidden;text-overflow:ellipsis;
@@ -530,7 +531,7 @@
   }
   #mob-reload{
     background:none;border:none;line-height:1;color:var(--hint);cursor:pointer;
-    font-size:22px;
+    font-size:17px;
     width:44px;height:44px;display:flex;align-items:center;justify-content:center;
   }
   #mob-reload:active{color:var(--ink)}
@@ -1065,7 +1066,7 @@
 
 <div id="mobile-chrome" role="banner">
   <span id="mob-count"></span>
-  <button id="mobile-version" type="button" aria-label="About this archive">v1.03.20</button>
+  <button id="mobile-version" type="button" aria-label="About this archive">HHFA v1.03.21</button>
 </div>
 
 <header class="site-top" id="site-header">
@@ -1237,7 +1238,7 @@
   }
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.20";
+  const VERSION      = "v1.03.21";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -2980,7 +2981,7 @@ $("#foot-dims").textContent = "";
     // Mobile about overlay — markid tap opens it instead of navigating to splash
     document.getElementById("mob-about-ver").textContent = VERSION;
     const mvBtn = document.getElementById("mobile-version");
-    if (mvBtn) mvBtn.textContent = "HHFA " + VERSION;
+    if (mvBtn) mvBtn.textContent = "HHFA " + VERSION; // also set in HTML to prevent flash
     document.querySelector(".markid").addEventListener("click", e => {
       if (!window.matchMedia("(max-width:767px)").matches) return;
       e.preventDefault();
