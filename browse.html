@@ -1298,7 +1298,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.45";
+  const VERSION      = "v1.03.46";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -1534,12 +1534,16 @@
 
   // Archive abbreviation map — extend when new collections are added
   const ARCHIVE_ABBREV = {
-    "canadian architectural archives": "CAA",
+    "hunter house":               "HHC",
+    "canadian architectural":     "CAA",
+    "fulker":                     "FUL",
   };
-  function archiveAbbrev(heldBy) {
-    const hb = (heldBy || "").toLowerCase();
-    return Object.entries(ARCHIVE_ABBREV).find(([k]) => hb.includes(k))?.[1] || null;
+  function archiveAbbrev(label) {
+    const lb = (label || "").toLowerCase();
+    return Object.entries(ARCHIVE_ABBREV).find(([k]) => lb.includes(k))?.[1] || null;
   }
+  // P94 (heldBy) is only set on CAA/FUL items; HHC items carry collection via P79 (sourceCollection)
+  const collectionOf = item => item.heldBy || item.sourceCollection;
   function creatorLabel(itemType) {
     const t = (itemType || "").toLowerCase();
     if (t === "photograph") return "Photographed by";
@@ -1615,19 +1619,20 @@
     if (item.creator)           descRows.push([creatorLabel(item.itemType), pill(`creator-pill ${pillCls(PC.clay)}`, item.creator)]);
     if (item.designedBy)        descRows.push(["Designed by", pill(`creator-pill ${pillCls(PC.clay)}`, item.designedBy)]);
     if (item.builtBy)           descRows.push(["Built by",  pill(`creator-pill ${pillCls(PC.clay)}`, item.builtBy)]);
-    if (item.heldBy)            descRows.push(["Held by",   pill(`collection-pill ${pillCls(PC.denim)}`, archiveAbbrev(item.heldBy))]);
+    const coll = collectionOf(item);
+    if (coll)                   descRows.push(["Held by",   pill(`collection-pill ${pillCls(PC.denim)}`, archiveAbbrev(coll))]);
 
     const archRows = [];
     if (item.location) {
       archRows.push(["Location", item.location.split(/,\s*/).map(escapeHTML).join(" › ")]);
     }
     if (item.rights) {
-      const contact = archiveAbbrev(item.heldBy) === "CAA"
+      const contact = archiveAbbrev(coll) === "CAA"
         ? "Contact for permissions." : "Contact the Hunter House Foundation.";
       archRows.push(["Rights", `${escapeHTML(item.rights)}<span class="rights-note">${escapeHTML(contact)}</span>`]);
     }
     if (item.archiveLink) {
-      archRows.push(["Finding aid", `<a href="${escapeHTML(item.archiveLink)}" target="_blank" rel="noopener">${archiveLinkLabel(item.heldBy)}</a>`]);
+      archRows.push(["Finding aid", `<a href="${escapeHTML(item.archiveLink)}" target="_blank" rel="noopener">${archiveLinkLabel(coll)}</a>`]);
     }
 
     // Graph: path + siblings
@@ -1937,7 +1942,7 @@ WHERE {
   function applyFilters() {
     const q = state.search.trim().toLowerCase();
     state.filtered = state.items.filter(it => {
-      if (state.filterCollection.size && !state.filterCollection.has(archiveAbbrev(it.heldBy))) return false;
+      if (state.filterCollection.size && !state.filterCollection.has(archiveAbbrev(collectionOf(it)))) return false;
       if (state.filterArea.size && !(it.areas||[]).some(a => state.filterArea.has(a))) return false;
       if (state.filterType.size && !state.filterType.has(it.itemType)) return false;
       if (state.filterDrawType.size && !(it.drawTypes||[]).some(dt => state.filterDrawType.has(dt))) return false;
@@ -2392,7 +2397,8 @@ $("#foot-dims").textContent = "";
       const cActive = state.filterCreator.has(item.builtBy) ? " active" : "";
       descRows.push(["Built by", `<button class="pill creator-pill ${pillCls(PC.clay)}${cActive}" data-creator="${escapeHTML(item.builtBy)}">${escapeHTML(item.builtBy)}</button>`]);
     }
-    if (item.heldBy)      descRows.push(["Held by", `<span class="pill collection-pill ${pillCls(PC.denim)}">${escapeHTML(archiveAbbrev(item.heldBy))}</span>`]);
+    const coll = collectionOf(item);
+    if (coll)             descRows.push(["Held by", `<span class="pill collection-pill ${pillCls(PC.denim)}">${escapeHTML(archiveAbbrev(coll))}</span>`]);
 
     const archRows = [];
     if (item.location) {
@@ -2400,13 +2406,13 @@ $("#foot-dims").textContent = "";
       archRows.push(["Location", `<span class="location-path">${crumbs}</span>`]);
     }
     if (item.rights) {
-      const abbrev = archiveAbbrev(item.heldBy);
+      const abbrev = archiveAbbrev(coll);
       const contact = abbrev === "CAA"
         ? "Contact for permissions."
         : "Contact the Hunter House Foundation.";
       archRows.push(["Rights", `${escapeHTML(item.rights)}<span class="rights-note">${escapeHTML(contact)}</span>`]);
     }
-    if (item.archiveLink) archRows.push(["Finding aid", `<a href="${escapeHTML(item.archiveLink)}" target="_blank" rel="noopener">${archiveLinkLabel(item.heldBy)}</a>`]);
+    if (item.archiveLink) archRows.push(["Finding aid", `<a href="${escapeHTML(item.archiveLink)}" target="_blank" rel="noopener">${archiveLinkLabel(coll)}</a>`]);
 
     const descHTML = descRows.map(([k,v]) => `<div class="row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
     const archHTML = archRows.map(([k,v]) => `<div class="row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
@@ -2604,7 +2610,7 @@ $("#foot-dims").textContent = "";
     const panel = $("#filter-panel");
     if (!panel) return;
 
-    const uniqueCollections = uniqueSorted(state.items.map(i => archiveAbbrev(i.heldBy)).filter(Boolean));
+    const uniqueCollections = uniqueSorted(state.items.map(i => archiveAbbrev(collectionOf(i))).filter(Boolean));
     const uniqueAreas       = uniqueSorted(state.items.flatMap(i => i.areas || []));
     const uniqueTypes       = uniqueSorted(state.items.map(i => i.itemType).filter(Boolean));
     const uniqueDrawTypes   = uniqueSorted(state.items.flatMap(i => i.drawTypes || []));
