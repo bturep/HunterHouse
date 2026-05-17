@@ -891,6 +891,7 @@
   .pane-meta .graph-path .node{padding:2px 0;grid-template-columns:14px 74px 1fr}
   .pane-meta .graph-path .node .rel{font-family:var(--mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)}
   .pane-meta .graph-path .node .lbl{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.02em;color:var(--ink)}
+  .pane-meta .graph-path .node.this .lbl{color:var(--red-deep)}
   .pane-meta .graph-path .connector{height:4px}
 
   /* ── Graph siblings ── */
@@ -901,6 +902,7 @@
   .pane-meta .graph-siblings .sib .t,
   .pane-meta .graph-siblings .sib .pos{font-family:var(--mono);font-size:11px;letter-spacing:0.02em;font-weight:400}
   .pane-meta .graph-siblings .sib .pos{color:var(--muted)}
+  .pane-meta .graph-siblings .sib.current .pos{color:var(--red)}
 
   /* ── Data footer (Wikibase / SPARQL / JSON) ── */
   .data-footer{
@@ -1298,7 +1300,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.47";
+  const VERSION      = "v1.03.48";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
