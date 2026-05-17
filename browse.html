@@ -602,8 +602,9 @@
   #load-screen{
     display:none;position:absolute;inset:0;z-index:10;
     flex-direction:column;align-items:center;justify-content:center;
-    background:var(--bg);
+    background:var(--soft);
   }
+  html.dark #load-screen{background:#242220}
   body.loading #load-screen{display:flex}
   .load-mark{
     width:60px;height:60px;opacity:0.15;margin-bottom:22px;
@@ -1314,7 +1315,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.39";
+  const VERSION      = "v1.03.40";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -2407,7 +2408,7 @@ $("#foot-dims").textContent = "";
       const cActive = state.filterCreator.has(item.builtBy) ? " active" : "";
       descRows.push(["Built by", `<button class="pill creator-pill ${pillCls(PC.clay)}${cActive}" data-creator="${escapeHTML(item.builtBy)}">${escapeHTML(item.builtBy)}</button>`]);
     }
-    if (item.heldBy)      descRows.push(["Held by", pill(`collection-pill ${pillCls(PC.denim)}`, archiveAbbrev(item.heldBy))]);
+    if (item.heldBy)      descRows.push(["Held by", `<span class="pill collection-pill ${pillCls(PC.denim)}">${escapeHTML(archiveAbbrev(item.heldBy))}</span>`]);
 
     const archRows = [];
     if (item.location) {
