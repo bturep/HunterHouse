@@ -522,28 +522,28 @@
   #mob-about-close{font-family:var(--mono);font-size:20px}
   #mob-reload:active,#mob-about-close:active{color:var(--ink)}
   .mob-about-title{
-    font-family:var(--mono);font-size:15px;font-weight:700;
-    letter-spacing:0.14em;text-transform:uppercase;color:var(--ink);line-height:1.3;
-    margin:18px 0 6px;
+    font-family:var(--mono);font-size:11px;font-weight:500;
+    letter-spacing:0.12em;text-transform:uppercase;color:var(--ink);line-height:1.3;
+    margin:14px 0 4px;
   }
   .mob-about-ver{
-    font-family:var(--mono);font-size:11px;color:var(--muted);
-    letter-spacing:0.06em;margin:0 0 36px;
+    font-family:var(--mono);font-size:10px;color:var(--muted);
+    letter-spacing:0.06em;margin:0 0 24px;
   }
   .mob-about-body{
-    font-family:var(--mono);font-size:11px;line-height:1.7;color:var(--ink);
-    letter-spacing:0.02em;margin:0 0 14px;
+    font-family:var(--mono);font-size:10px;line-height:1.7;color:var(--ink);
+    letter-spacing:0.02em;margin:0 0 10px;
   }
-  .mob-about-rule{border:0;border-top:1px solid var(--rule);margin:28px 0}
+  .mob-about-rule{border:0;border-top:1px solid var(--rule);margin:20px 0}
   .mob-about-credits{
-    display:grid;grid-template-columns:auto 1fr;gap:8px 16px;align-items:baseline;
+    display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:baseline;
   }
   .mob-about-credits dt{
-    font-family:var(--mono);font-size:10px;color:var(--muted);
+    font-family:var(--mono);font-size:9px;color:var(--muted);
     letter-spacing:0.10em;text-transform:uppercase;white-space:nowrap;
   }
   .mob-about-credits dd{
-    font-family:var(--mono);font-size:11px;color:var(--ink);
+    font-family:var(--mono);font-size:10px;color:var(--ink);
     letter-spacing:0.02em;line-height:1.6;margin:0;
   }
   #mob-about [class*="pc-"]{color:var(--pf)}
@@ -590,7 +590,6 @@
 
     /* ── Bottom sheet (Google Maps style) ── */
     .shell{position:relative;overflow:hidden}
-    html.pwa body{box-sizing:border-box;padding-bottom:env(safe-area-inset-bottom,0px)}
     .panel-left{
       position:absolute!important;inset:0;
       width:100%!important;border:0!important;
@@ -618,7 +617,6 @@
     .mob-sheet.mob-sheet-open{transform:translateY(0)}
     html.pwa .mob-sheet{height:72vh}
     .mob-sheet.mob-sheet-img-expanded{height:100%}
-    html.pwa .mob-sheet.mob-sheet-img-expanded{position:fixed!important;top:0;left:0;right:0;bottom:0;height:auto!important}
     .mob-sheet.mob-sheet-img-expanded .mob-sheet-img-wrap{flex-grow:1;max-height:100vh}
     .mob-sheet.mob-sheet-img-expanded .mob-sheet-scroll{flex-grow:0;overflow:hidden;padding:0}
     /* Pills: same treatment as desktop record pane — colored text, no chip */
@@ -1046,7 +1044,7 @@
 
 <div id="mobile-chrome" role="banner">
   <span id="mob-count"></span>
-  <button id="mobile-version" type="button" aria-label="About this archive">v1.03.06</button>
+  <button id="mobile-version" type="button" aria-label="About this archive">v1.03.07</button>
 </div>
 
 <header class="site-top" id="site-header">
@@ -1062,7 +1060,7 @@
     <span class="tr-sep"></span>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1.5 A6 6 0 0 0 7.5 13.5 Z"/><circle cx="7.5" cy="7.5" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
     <span class="tr-sep"></span>
-    <span id="topright" title="About this archive">v1.03.06</span>
+    <span id="topright" title="About this archive">v1.03.07</span>
   </div>
 </header>
 
@@ -1207,7 +1205,7 @@
 
 <script>
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.06";
+  const VERSION      = "v1.03.07";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -1622,7 +1620,6 @@
   let lbPanOriginX = 0, lbPanOriginY = 0;
   let lbLastTap = 0;
   let lbTouchMoveY = 0;
-  let lbOriginRect = null;
 
   function lbApply() {
     const img = document.getElementById("mob-lb-img");
@@ -1651,68 +1648,24 @@
     lbApply();
   }
 
-  function openLightbox(src, alt, fromEl) {
+  function openLightbox(src, alt) {
     lbOpen = true;
     lbScale = 1; lbX = 0; lbY = 0; lbLastDist = null;
-    const lb  = document.getElementById("mob-lightbox");
+    const lb = document.getElementById("mob-lightbox");
     const img = document.getElementById("mob-lb-img");
+    lb.classList.add("mob-lb-open");
     img.alt = alt || "";
-
-    // Show preview immediately (already cached by sheet), then swap to large
-    const prevSrc = src.replace(/_large\.jpg$/, "_prev.jpg");
-    img.onload = () => {
-      lbFit();
-      if (img.src !== src) {
-        const hi = new Image();
-        hi.onload = () => { img.src = src; requestAnimationFrame(lbFit); };
-        hi.src = src;
-      }
-    };
-    if (img.complete && img.src === prevSrc) { lbFit(); }
-    else { img.style.transform = ""; img.src = prevSrc; }
-
+    img.onload = lbFit;
+    if (img.complete && img.src === src) { lbFit(); }
+    else { img.style.transform = ""; img.src = src; }
+    // Fade out hint after 2.5 s
     const hint = document.getElementById("mob-lb-hint");
     if (hint) { hint.classList.remove("fade"); clearTimeout(hint._t); hint._t = setTimeout(() => hint.classList.add("fade"), 2500); }
-
-    if (fromEl) {
-      // Expand from the source element's rect (clip-path iris animation)
-      lbOriginRect = fromEl.getBoundingClientRect();
-      const {top:t, left:l, width:w, height:h} = lbOriginRect;
-      const vw = window.innerWidth, vh = window.innerHeight;
-      const startClip = `inset(${t}px ${vw-l-w}px ${vh-t-h}px ${l}px round 6px)`;
-      lb.style.transition = "none";
-      lb.style.transform  = "translateY(0)";   // override CSS translateY(100%)
-      lb.style.clipPath   = startClip;
-      lb.classList.add("mob-lb-open");
-      void lb.offsetHeight;                     // force reflow
-      lb.style.transition = "clip-path 0.32s cubic-bezier(0.4,0,0.2,1)";
-      lb.style.clipPath   = "inset(0px 0px 0px 0px round 0px)";
-      setTimeout(() => { lb.style.transition = ""; lb.style.clipPath = ""; lb.style.transform = ""; }, 340);
-    } else {
-      lbOriginRect = null;
-      lb.classList.add("mob-lb-open");
-    }
   }
 
   function closeLightbox() {
     lbOpen = false;
-    const lb = document.getElementById("mob-lightbox");
-    if (lbOriginRect) {
-      const {top:t, left:l, width:w, height:h} = lbOriginRect;
-      const vw = window.innerWidth, vh = window.innerHeight;
-      lb.style.transform  = "translateY(0)";   // pin in place during close animation
-      lb.style.transition = "clip-path 0.26s cubic-bezier(0.4,0,0.2,1)";
-      lb.style.clipPath   = `inset(${t}px ${vw-l-w}px ${vh-t-h}px ${l}px round 6px)`;
-      setTimeout(() => {
-        lb.style.transition = "none";
-        lb.classList.remove("mob-lb-open");
-        lb.style.transform = "";
-        lb.style.clipPath  = "";
-        lb.style.transition = "";
-      }, 270);
-    } else {
-      lb.classList.remove("mob-lb-open");
-    }
+    document.getElementById("mob-lightbox").classList.remove("mob-lb-open");
   }
 
   // ── Collapsible panel toggle ──────────────────────────────────────────────
@@ -2726,25 +2679,23 @@ $("#foot-dims").textContent = "";
     });
     document.getElementById("mob-sheet-close")?.addEventListener("click", mobHideSheet);
 
-    // Image tap + foot tap → lightbox expanding from image position
-    const openSheetLightbox = () => {
-      const item = state.items.find(i => i.id === state.selectedId);
-      if (!item?.image) return;
-      const fromEl = document.getElementById("mob-sheet-img");
-      openLightbox(item.image.replace(/_prev\.jpg$/, "_large.jpg"), item.title, fromEl);
+    // Image tap + img-bar tap → toggle expanded state
+    const toggleImgExpand = () => {
+      document.getElementById("mob-sheet").classList.toggle("mob-sheet-img-expanded");
     };
-    document.getElementById("mob-sheet-img")?.addEventListener("click", openSheetLightbox);
-    document.getElementById("mob-sheet-foot")?.addEventListener("click", openSheetLightbox);
+    document.getElementById("mob-sheet-img")?.addEventListener("click", toggleImgExpand);
+    document.getElementById("mob-sheet-foot")?.addEventListener("click", toggleImgExpand);
 
-    // Swipe on bar: down → dismiss sheet; up → open lightbox
+    // Swipe on top bar: staged navigation with follow-finger animation
     {
       const sheet = document.getElementById("mob-sheet");
       const bar   = document.getElementById("mob-sheet-bar");
-      let swipeStartY = 0, swiping = false;
+      let swipeStartY = 0, swipeStartH = 0, swiping = false;
 
       bar.addEventListener("touchstart", e => {
         if (e.target.closest(".mob-sheet-close, .mob-sheet-nav")) return;
-        swipeStartY = e.touches[0].clientY;
+        swipeStartY  = e.touches[0].clientY;
+        swipeStartH  = sheet.getBoundingClientRect().height;
         swiping = true;
         sheet.style.transition = "none";
         document.body.classList.add("swiping");
@@ -2753,9 +2704,17 @@ $("#foot-dims").textContent = "";
       document.addEventListener("touchmove", e => {
         if (!swiping) return;
         e.preventDefault();
-        const dy = e.touches[0].clientY - swipeStartY;
+        const dy       = e.touches[0].clientY - swipeStartY;
+        const expanded = sheet.classList.contains("mob-sheet-img-expanded");
         if (dy > 0) {
+          // Down: sheet follows finger via translateY
           sheet.style.transform = `translateY(${dy}px)`;
+          sheet.style.height    = "";
+        } else if (!expanded) {
+          // Up (record view only): grow sheet height to follow finger
+          const newH = Math.min(window.innerHeight, swipeStartH - dy);
+          sheet.style.height    = newH + "px";
+          sheet.style.transform = "";
         }
       }, { passive: false });
 
@@ -2763,24 +2722,45 @@ $("#foot-dims").textContent = "";
         if (!swiping) return;
         swiping = false;
         document.body.classList.remove("swiping");
-        const dy = e.changedTouches[0].clientY - swipeStartY;
+        const dy       = e.changedTouches[0].clientY - swipeStartY;
+        const expanded = sheet.classList.contains("mob-sheet-img-expanded");
 
         if (dy > 40) {
-          // Swipe down → dismiss to list
+          // One stage down
+          if (expanded) {
+            if (dy > swipeStartH / 2) {
+              // Past midpoint → close fully to list
+              sheet.style.transition = "";
+              sheet.classList.remove("mob-sheet-open", "mob-sheet-img-expanded");
+              const sc2 = document.getElementById("mob-sheet-scroll");
+              if (sc2) sc2.scrollTop = 0;
+              requestAnimationFrame(() => { sheet.style.transform = ""; });
+            } else {
+              // Short drag → collapse to record view
+              sheet.style.transition = "";
+              sheet.style.transform  = "";
+              sheet.classList.remove("mob-sheet-img-expanded");
+            }
+          } else {
+            // Record → list (dismiss; sheet slides off from drag position)
+            sheet.style.transition = "";
+            sheet.classList.remove("mob-sheet-open", "mob-sheet-img-expanded");
+            const sc = document.getElementById("mob-sheet-scroll");
+            if (sc) sc.scrollTop = 0;
+            requestAnimationFrame(() => { sheet.style.transform = ""; });
+          }
+        } else if (dy < -40 && !expanded) {
+          // Up past threshold: expand to full screen
+          // Inline height is at drag position; animate it to 100% then hand off to CSS
           sheet.style.transition = "";
-          sheet.classList.remove("mob-sheet-open", "mob-sheet-img-expanded");
-          const sc = document.getElementById("mob-sheet-scroll");
-          if (sc) sc.scrollTop = 0;
-          requestAnimationFrame(() => { sheet.style.transform = ""; });
-        } else if (dy < -40) {
-          // Swipe up → open lightbox
-          sheet.style.transition = "";
-          sheet.style.transform  = "";
-          openSheetLightbox();
+          sheet.style.height     = "100%";
+          sheet.classList.add("mob-sheet-img-expanded");
+          requestAnimationFrame(() => { sheet.style.height = ""; });
         } else {
-          // Snap back
+          // Snap back to current state
           sheet.style.transition = "";
           sheet.style.transform  = "";
+          sheet.style.height     = "";
         }
       }, { passive: true });
     }
@@ -2789,30 +2769,6 @@ $("#foot-dims").textContent = "";
 
     // Lightbox close button
     document.getElementById("mob-lb-close")?.addEventListener("click", closeLightbox);
-
-    // Horizontal swipe on image wrap → next / prev item
-    {
-      const imgWrap = document.querySelector(".mob-sheet-img-wrap");
-      if (imgWrap) {
-        let hx0 = 0, hy0 = 0, hActive = false;
-        imgWrap.addEventListener("touchstart", e => {
-          if (e.touches.length !== 1) return;
-          hx0 = e.touches[0].clientX;
-          hy0 = e.touches[0].clientY;
-          hActive = true;
-        }, { passive: true });
-        imgWrap.addEventListener("touchend", e => {
-          if (!hActive) return;
-          hActive = false;
-          const dx = e.changedTouches[0].clientX - hx0;
-          const dy = e.changedTouches[0].clientY - hy0;
-          if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-            if (dx < 0) selectAdjacent(1);   // swipe left → next
-            else         selectAdjacent(-1);  // swipe right → prev
-          }
-        }, { passive: true });
-      }
-    }
 
     // Lightbox touch: pinch-to-zoom + pan + double-tap reset
     {
