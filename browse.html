@@ -1093,7 +1093,7 @@
 
 <div id="mobile-chrome" role="banner">
   <span id="mob-count"></span>
-  <button id="mobile-version" type="button" aria-label="About this archive">HHFA v1.03.28</button>
+  <button id="mobile-version" type="button" aria-label="About this archive">HHFA</button>
 </div>
 
 <header class="site-top" id="site-header">
@@ -1109,7 +1109,7 @@
     <span class="tr-sep"></span>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1.5 A6 6 0 0 0 7.5 13.5 Z"/><circle cx="7.5" cy="7.5" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
     <span class="tr-sep"></span>
-    <span id="topright" title="About this archive">v1.03.28</span>
+    <span id="topright" title="About this archive"></span>
   </div>
 </header>
 
@@ -3000,8 +3000,9 @@ $("#foot-dims").textContent = "";
 
     // Mobile about overlay — markid tap opens it instead of navigating to splash
     document.getElementById("mob-about-ver").textContent = VERSION;
+    document.getElementById("topright").textContent = VERSION;
     const mvBtn = document.getElementById("mobile-version");
-    if (mvBtn) mvBtn.textContent = "HHFA " + VERSION; // also set in HTML to prevent flash
+    if (mvBtn) mvBtn.textContent = "HHFA " + VERSION;
     document.querySelector(".markid").addEventListener("click", e => {
       if (!window.matchMedia("(max-width:767px)").matches) return;
       e.preventDefault();
