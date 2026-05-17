@@ -82,15 +82,32 @@
     .splash .enter{right:20px;bottom:24px}
     .splash .imprint{left:20px}
   }
+
+  /* Portrait lock */
+  #rotate-msg{
+    display:none;position:fixed;inset:0;z-index:99999;
+    background:#000;color:rgba(243,241,236,0.7);
+    flex-direction:column;align-items:center;justify-content:center;
+    gap:16px;font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace;
+    font-size:11px;letter-spacing:0.18em;text-transform:uppercase;pointer-events:none;
+  }
+  #rotate-msg svg{opacity:0.45}
+  @media screen and (orientation:landscape) and (max-height:500px){
+    #rotate-msg{display:flex}
+  }
 </style>
 </head>
 <body>
+<div id="rotate-msg">
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+  <span>Rotate to portrait</span>
+</div>
 
 <a href="browse.html" class="splash" id="splash" aria-label="Enter the Hunter House Foundation archive">
   <div class="film" id="film">
     <video id="film-video" autoplay loop muted playsinline preload="auto"></video>
   </div>
-  <div class="imprint"><b>2026.05</b>v1.03.21</div>
+  <div class="imprint"><b>2026.05</b>v1.03.22</div>
   <div class="mark">
     <span>Hunter</span>
     <span>House</span>

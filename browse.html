@@ -1027,9 +1027,12 @@
     .fp-search-input::placeholder{color:var(--hint)}
 
     /* Browse bar: always match sheet-bar colour; round corners only in PWA */
-    .list-head{background:var(--bg);padding-right:24px}
+    .list-head{background:var(--bg);padding-left:20px;padding-right:24px}
     html.pwa .list-head{border-radius:14px 14px 0 0}
     .row{padding-right:24px}
+    /* Sort-mini must grow to fill list-head so YEAR can margin-left:auto to far right */
+    .sort-mini{flex-grow:1}
+    .sort-mini .sort-hd[data-sort-col="year"]{margin-left:auto}
 
     /* Filter chips → manifest [pill] style on mobile */
     .fp-chip{
@@ -1044,6 +1047,19 @@
     .fp-chips{gap:6px 10px}
     /* Search input: same mono size as the chips */
     .fp-search-input{font-size:11px;letter-spacing:0.02em}
+  }
+
+  /* Portrait lock: show rotate prompt on landscape phones */
+  #rotate-msg{
+    display:none;position:fixed;inset:0;z-index:99999;
+    background:#000;color:rgba(243,241,236,0.7);
+    flex-direction:column;align-items:center;justify-content:center;
+    gap:16px;font-family:var(--mono);font-size:11px;letter-spacing:0.18em;
+    text-transform:uppercase;text-align:center;pointer-events:none;
+  }
+  #rotate-msg svg{opacity:0.45}
+  @media screen and (orientation:landscape) and (max-height:500px){
+    #rotate-msg{display:flex}
   }
 </style>
 <script>
@@ -1063,10 +1079,14 @@
 </script>
 </head>
 <body class="loading">
+<div id="rotate-msg">
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+  <span>Rotate to portrait</span>
+</div>
 
 <div id="mobile-chrome" role="banner">
   <span id="mob-count"></span>
-  <button id="mobile-version" type="button" aria-label="About this archive">HHFA v1.03.21</button>
+  <button id="mobile-version" type="button" aria-label="About this archive">HHFA v1.03.22</button>
 </div>
 
 <header class="site-top" id="site-header">
@@ -1238,7 +1258,7 @@
   }
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.21";
+  const VERSION      = "v1.03.22";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -3184,7 +3204,12 @@ $("#foot-dims").textContent = "";
     }
   })();
 </script>
-<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/HunterHouse/sw.js');</script>
+<script>
+  if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock('portrait').catch(() => {});
+  }
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('/HunterHouse/sw.js');
+</script>
 
 </body>
 </html>
