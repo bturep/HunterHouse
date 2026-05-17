@@ -1227,11 +1227,11 @@
         <button id="about-pane-refresh">↺ Refresh archive data</button>
       </div>
     </div>
+    <div id="load-screen">
+      <img class="load-mark" src="assets/hunter-mark.png" alt="">
+      <span class="load-text">Loading Archive Data from Wikibase<span class="load-dots"></span></span>
+    </div>
     <div class="image-stage" id="stage">
-      <div id="load-screen">
-        <img class="load-mark" src="assets/hunter-mark.png" alt="">
-        <span class="load-text">Loading Archive Data from Wikibase<span class="load-dots"></span></span>
-      </div>
       <div class="canvas" id="canvas">
         <div class="placeholder">Select an item<b id="ph-name"></b></div>
       </div>
@@ -1315,7 +1315,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.40";
+  const VERSION      = "v1.03.41";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
