@@ -282,13 +282,12 @@
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
   }
   .row .ph{
-    font-family:var(--mono);font-size:9.5px;color:#484878;
+    font-family:var(--mono);font-size:9.5px;color:var(--copper-deep);
     letter-spacing:0.04em;margin-top:4px;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
   .row .ph::before{content:"["}
   .row .ph::after{content:"]"}
-  html.dark .row .ph{color:#7878a8}
   .row .year{
     font-family:var(--mono);font-size:11px;color:var(--muted);
     font-variant-numeric:tabular-nums;
@@ -405,12 +404,14 @@
   .pill{display:inline-flex;align-items:center;height:auto;padding:0;font-size:10.5px;margin:0 5px 3px 0;white-space:nowrap;background:none}
   .pill::before{content:"["}
   .pill::after{content:"]"}
-  button.area-pill,button.type-pill,button.drawtype-pill,button.creator-pill,button.builtstatus-pill,button.collection-pill{border:none;cursor:pointer;font-family:inherit;background:none;color:var(--pf,var(--copper-deep))}
+  button.area-pill,button.type-pill,button.drawtype-pill,button.creator-pill,button.builtstatus-pill,button.collection-pill,button.phase-pill{border:none;cursor:pointer;font-family:inherit;background:none;color:var(--pf,var(--copper-deep))}
   button.area-pill:hover,button.area-pill.active,
   button.type-pill:hover,button.type-pill.active,
   button.drawtype-pill:hover,button.drawtype-pill.active,
   button.creator-pill:hover,button.creator-pill.active,
-  button.builtstatus-pill:hover,button.builtstatus-pill.active{background:none;opacity:0.6}
+  button.builtstatus-pill:hover,button.builtstatus-pill.active,
+  button.phase-pill:hover,button.phase-pill.active,
+  button.collection-pill:hover,button.collection-pill.active{background:none;opacity:0.6}
   button.type-pill{height:auto;padding:0;align-items:center;gap:0}
   .archid-mono{font-family:var(--mono);font-size:11px;color:var(--red);background:var(--red-pale);padding:1.5px 7px;letter-spacing:0.04em;white-space:nowrap}
   .rights-note{display:block;font-size:10.5px;color:var(--muted);margin-top:3px;font-style:italic}
@@ -421,20 +422,19 @@
   :root{--copper-deep:#1a6b50;--copper-pale:rgba(26,107,80,0.12)}
   html.dark{--copper-deep:#9dc2b2;--copper-pale:rgba(157,194,178,0.15)}
 
-  /* ── pill colour themes (muted — shade over hue) ── */
+  /* ── pill colour themes (muted — shade over hue; phase uses copper) ── */
   .pc-sage  {--pf:#4a6848}
   .pc-stone {--pf:#6a5040}
   .pc-slate {--pf:#3a5070}
   .pc-clay  {--pf:#5a4060}
   .pc-moss  {--pf:#486040}
-  .pc-indigo{--pf:#484878}
-  .pc-denim {--pf:#384870}
+  .pc-indigo{--pf:var(--copper-deep)}
+  .pc-denim {--pf:#485868}
   html.dark .pc-sage  {--pf:#88a880}
   html.dark .pc-stone {--pf:#b09870}
   html.dark .pc-slate {--pf:#7898b8}
   html.dark .pc-clay  {--pf:#a07898}
   html.dark .pc-moss  {--pf:#88a070}
-  html.dark .pc-indigo{--pf:#7878a8}
   html.dark .pc-denim {--pf:#6890a8}
 
   /* dark mode overrides for hardcoded colours */
@@ -1315,7 +1315,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.42";
+  const VERSION      = "v1.03.43";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -1512,7 +1512,8 @@
     sortCol: "id",
     sortDir: "asc",
     search: "",
-    filterCollection: "",
+    filterPhase: new Set(),
+    filterCollection: new Set(),
     filterArea: new Set(),
     filterType: new Set(),
     filterDrawType: new Set(),
@@ -1954,6 +1955,8 @@ WHERE {
   function applyFilters() {
     const q = state.search.trim().toLowerCase();
     state.filtered = state.items.filter(it => {
+      if (state.filterPhase.size && !state.filterPhase.has(it.phase)) return false;
+      if (state.filterCollection.size && !state.filterCollection.has(archiveAbbrev(it.heldBy))) return false;
       if (state.filterArea.size && !(it.areas||[]).some(a => state.filterArea.has(a))) return false;
       if (state.filterType.size && !state.filterType.has(it.itemType)) return false;
       if (state.filterDrawType.size && !(it.drawTypes||[]).some(dt => state.filterDrawType.has(dt))) return false;
@@ -2376,7 +2379,8 @@ $("#foot-dims").textContent = "";
     if (item.date)        descRows.push(["Date",    escapeHTML(item.date)]);
     if (item.phase) {
       const pos = item.setPosition ? ` <span style="color:var(--muted);font-family:var(--mono);font-size:10px;margin-left:4px">${escapeHTML(item.setPosition)}</span>` : "";
-      descRows.push(["Phase", escapeHTML(item.phase) + pos]);
+      const phActive = state.filterPhase.has(item.phase) ? " active" : "";
+      descRows.push(["Phase", `<button class="pill phase-pill ${pillCls(PC.indigo)}${phActive}" data-phase="${escapeHTML(item.phase)}">${escapeHTML(item.phase)}</button>` + pos]);
     }
     if (areasHtml)        descRows.push(["Areas",   areasHtml]);
     if (item.itemType) {
@@ -2598,6 +2602,8 @@ $("#foot-dims").textContent = "";
   }
 
   function clearAllFilters() {
+    state.filterPhase.clear();
+    state.filterCollection.clear();
     state.filterArea.clear();
     state.filterType.clear();
     state.filterDrawType.clear();
@@ -2606,7 +2612,8 @@ $("#foot-dims").textContent = "";
   }
 
   function updateFilterBadge() {
-    const total = state.filterArea.size + state.filterType.size + state.filterDrawType.size +
+    const total = state.filterPhase.size + state.filterCollection.size +
+                  state.filterArea.size + state.filterType.size + state.filterDrawType.size +
                   state.filterCreator.size + state.filterBuiltStatus.size;
     const badge = $("#filter-badge");
     if (!badge) return;
@@ -2618,6 +2625,8 @@ $("#foot-dims").textContent = "";
     const panel = $("#filter-panel");
     if (!panel) return;
 
+    const uniquePhases      = uniqueSorted(state.items.map(i => i.phase).filter(Boolean));
+    const uniqueCollections = uniqueSorted(state.items.map(i => archiveAbbrev(i.heldBy)).filter(Boolean));
     const uniqueAreas       = uniqueSorted(state.items.flatMap(i => i.areas || []));
     const uniqueTypes       = uniqueSorted(state.items.map(i => i.itemType).filter(Boolean));
     const uniqueDrawTypes   = uniqueSorted(state.items.flatMap(i => i.drawTypes || []));
@@ -2634,9 +2643,12 @@ $("#foot-dims").textContent = "";
       return `<div class="fp-group fp-grp-${cls}"><div class="fp-lbl">${label}</div><div class="fp-chips">${chips}</div></div>`;
     };
 
-    const hasActive = [state.filterArea, state.filterType, state.filterDrawType,
+    const hasActive = [state.filterPhase, state.filterCollection, state.filterArea,
+                        state.filterType, state.filterDrawType,
                         state.filterCreator, state.filterBuiltStatus].some(s => s.size > 0);
     panel.innerHTML =
+      group("Phase",        uniquePhases,      state.filterPhase,       "phase",       "phase",       PC.indigo)+
+      group("Collection",   uniqueCollections, state.filterCollection,  "coll",        "collection",  PC.denim) +
       group("Areas",        uniqueAreas,       state.filterArea,        "area",        "area",        PC.sage)  +
       group("Item type",    uniqueTypes,       state.filterType,        "itype",       "itype",       PC.stone) +
       group("Drawing type", uniqueDrawTypes,   state.filterDrawType,    "drawtype",    "drawtype",    PC.slate) +
@@ -2659,6 +2671,8 @@ $("#foot-dims").textContent = "";
     });
 
     [
+      ["phase",       state.filterPhase       ],
+      ["collection",  state.filterCollection  ],
       ["area",        state.filterArea        ],
       ["itype",       state.filterType        ],
       ["drawtype",    state.filterDrawType    ],
@@ -3085,6 +3099,8 @@ $("#foot-dims").textContent = "";
 
     document.getElementById("meta-body").addEventListener("click", e => {
       const pillDefs = [
+        [".phase-pill",       "phase",       state.filterPhase       ],
+        [".collection-pill",  "collection",  state.filterCollection  ],
         [".area-pill",        "area",        state.filterArea        ],
         [".type-pill",        "itype",       state.filterType        ],
         [".drawtype-pill",    "drawtype",    state.filterDrawType    ],
