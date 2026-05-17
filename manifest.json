@@ -5,6 +5,7 @@
   "start_url": "/HunterHouse/index.html",
   "scope": "/HunterHouse/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#1a1816",
   "theme_color": "#1a1816",
   "icons": [
