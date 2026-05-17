@@ -262,19 +262,12 @@
   }
   .row .archid .tmark{
     font-family:var(--mono);font-size:8.5px;
-    letter-spacing:0.08em;text-transform:uppercase;font-weight:500;
-    padding:0 4px;border-radius:1px;line-height:1.35;flex-shrink:0;
-    min-width:24px;text-align:center;
-    /* defaults (drawing) */
-    color:var(--copper-deep);border:1px solid var(--copper-pale);background:var(--copper-pale);
+    letter-spacing:0.06em;text-transform:uppercase;font-weight:500;
+    flex-shrink:0;color:var(--pf,var(--muted));
   }
-  .row .archid .tmark[data-type="P"]{color:#3d6b8a;border-color:#c8dde9;background:#e8f2f8}
-  .row .archid .tmark[data-type="PM"]{color:#4e6b40;border-color:#c8d9be;background:#e8f2e2}
-  .row .archid .tmark[data-type="E"]{color:#6b4e6b;border-color:#d9bed9;background:#f2e8f2}
-  .row .archid .tmark[data-type="R"]{color:#6b5a3d;border-color:#d9cdb8;background:#f2ede4}
-  .row .archid .tmark[data-type="LS"]{color:#3d6b5a;border-color:#bed9ce;background:#e2f2ec}
-  .row .archid .tmark[data-type="EN"]{color:#5a3d6b;border-color:#cdb8d9;background:#ede4f2}
-  .row.sel .archid .tmark{color:var(--red-deep)!important;border-color:var(--red-pale)!important;background:var(--red-pale)!important}
+  .row .archid .tmark::before{content:"["}
+  .row .archid .tmark::after{content:"]"}
+  .row.sel .archid .tmark{color:var(--red-deep)!important}
   .row .title-wrap{min-width:0;overflow:hidden}
   .row .title{
     font-size:13px;letter-spacing:-0.005em;color:var(--ink);
@@ -438,13 +431,6 @@
   html.dark .pc-denim {--pf:#6890a8}
 
   /* dark mode overrides for hardcoded colours */
-  html.dark .row .archid .tmark[data-type="P"]{color:#7aafc4;border-color:rgba(122,175,196,0.3);background:rgba(122,175,196,0.12)}
-  html.dark .row .archid .tmark[data-type="PM"]{color:#85aa70;border-color:rgba(133,170,112,0.3);background:rgba(133,170,112,0.12)}
-  html.dark .row .archid .tmark[data-type="E"]{color:#b08ab0;border-color:rgba(176,138,176,0.3);background:rgba(176,138,176,0.12)}
-  html.dark .row .archid .tmark[data-type="R"]{color:#b0966a;border-color:rgba(176,150,106,0.3);background:rgba(176,150,106,0.12)}
-  html.dark .row .archid .tmark[data-type="LS"]{color:#70aaa0;border-color:rgba(112,170,160,0.3);background:rgba(112,170,160,0.12)}
-  html.dark .row .archid .tmark[data-type="EN"]{color:#9a7ac4;border-color:rgba(154,122,196,0.3);background:rgba(154,122,196,0.12)}
-
   /* dark mode: image pane goes black, structural borders go black */
   html.dark .pane-image,
   html.dark .image-stage{background:#242220}
@@ -1315,7 +1301,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.43";
+  const VERSION      = "v1.03.44";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -2058,7 +2044,7 @@ WHERE {
       row.dataset.id = it.id;
       const tmark = typeMark(it.itemType);
       row.innerHTML = `
-        <span class="archid">${tmark ? `<span class="tmark" data-type="${escapeHTML(tmark)}" title="${escapeHTML(it.itemType)}">${tmark}</span>` : ""}${displayId(it.id)}</span>
+        <span class="archid">${tmark ? `<span class="tmark pc-stone" data-type="${escapeHTML(tmark)}" title="${escapeHTML(it.itemType)}">${tmark}</span>` : ""}${displayId(it.id)}</span>
         <div class="title-wrap">
           <div class="title">${escapeHTML(it.title)}</div>
           <div class="ph">${escapeHTML(it.phase || "")}</div>
