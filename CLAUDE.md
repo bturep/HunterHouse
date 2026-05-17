@@ -26,6 +26,10 @@ Brandon needs a free Wikimedia account — takes 2 minutes at `wikidata.org/wiki
 
 ---
 
+**PWA splash page** — reinstall needed on iPhone. The manifest already has `start_url: browse.html` but the old install is cached with index.html. Remove HH Archive from home screen and re-add from `bturep.github.io/HunterHouse/browse.html`.
+
+---
+
 ## Memory protocol
 
 1. **On load** — read this file before doing anything else.
@@ -303,8 +307,9 @@ CCA's ISAD(G) hierarchy maps directly to our Wikibase: fonds = Richard Hunter fo
 | v1.03.01 | 2026-05-16 | Mobile bottom sheet: Google Maps layout, full record sections, lightbox |
 | v1.03.08 | 2026-05-16 | Image rotation batch job (17 items on R2); about card text size; PWA full-screen fix |
 | v1.03.28 | 2026-05-16 | Mobile list-head alignment; portrait lock; white flash fixes; splash removed from PWA |
+| v1.04.00 | 2026-05-16 | UI colour overhaul; about pane redesign; filter system; data fixes; CSS audit |
 
-Tags pushed: `v1.01.00` (fc98905), `v1.02.00` (2059cb7), `v1.02.18` (82065e6), `v1.03.00` (prior session), `v1.03.01` (prior session), `v1.03.08` (prior session).
+Tags pushed: `v1.01.00` (fc98905), `v1.02.00` (2059cb7), `v1.02.18` (82065e6), `v1.03.00` (prior session), `v1.03.01` (prior session), `v1.03.08` (prior session), `v1.04.00` (this session).
 
 ---
 
@@ -439,3 +444,67 @@ Continued from v1.03.08. Session focused entirely on mobile UI polish and PWA be
 - v1.03.28: User decided no splash on app open. Overlay CSS/HTML/JS removed from browse.html. PWA now opens directly to the browse list. index.html remains as web landing page only.
 
 **Version: v1.03.28**
+
+---
+
+### 2026-05-16 — UI colour overhaul, about pane redesign, filter system, data fixes (v1.04.00)
+
+**Context / starting point**
+Continued from v1.03.28. Session covered deep design and data work: the entire pill colour system was redesigned, the about pane was rebuilt, several data bugs were fixed, and the filter system was extended.
+
+**browse.html — about pane redesign (v1.03.29–v1.03.35)**
+- About pane moved from thin header overlay to full image-area takeover (same pattern as `#about-pane` with `position:absolute;inset:0`). Clicking "Hunter House Foundation Archive" in the header now opens the pane on desktop; on mobile it opens the existing `#mob-about` sheet.
+- About pane background: `var(--soft)` light / `#242220` dark — matches image-stage, distinct from panel colour.
+- Version number click removed from `#topright`; that role transferred to the markid link.
+- About text updated: CCA/CAA disambiguation fixed throughout (CCA = Canadian Centre for Architecture, Montreal; CAA = Canadian Architectural Archives, Calgary). Links added to all external references (Wikibase, RDF, SPARQL, GLAM, CCA Digital Archives Manual, CC0, CC BY-NC-ND, CAA site).
+- Credits: Floyd Marinescu (pc-sage), Olivia Jol (pc-slate), Brandon Poole (c-yellow).
+
+**verso.css — dead class removal**
+- Removed 6 unused classes: `.browse-cta`, `.colophon`, `.aside-block`, `.aside-toc`, `.page-title`, `.reading-layout` (and their responsive overrides). These had no callers in any page.
+
+**scripts/archived/ — migration script archive**
+- Moved 10 completed one-time migration scripts to `scripts/archived/`: rename_ids.py, renumber_hhc.py, revert_*.py, migrate_p142_location.py, fix_p142_prose.py, fill_p142_missing.py, cleanup_caa_descriptions.py, r2_cleanup.sh, renumber_hhc_r2.sh.
+
+**browse.html — loading screen (v1.03.40–v1.03.41)**
+- Fixed `pill is not defined` JS error: `renderMeta` called `pill()` which was only in scope inside `renderMobSheet`; replaced with inline template literal.
+- Loading screen background fixed: was `var(--bg)` (panel dark), now `var(--soft)` / `#242220` to match image-stage.
+- Loading screen centering fixed: moved `#load-screen` from inside `.image-stage` up to `.pane-image` level, so `position:absolute;inset:0` covers the full pane height including the 41px footer, giving true vertical centre.
+
+**browse.html — pill colour system overhaul (v1.03.42–v1.03.45)**
+- Removed all pill backgrounds. Pills are now bracket-style text: `[Area]`, `[Drawing type]` etc., using `::before{content:"["}` / `::after{content:"]"}` pseudo-elements.
+- Seven colour themes (`pc-sage`, `pc-stone`, `pc-slate`, `pc-clay`, `pc-moss`, `pc-indigo`, `pc-denim`) all desaturated to "shade over hue" — low saturation, legible in both modes.
+- Copper and red kept as the dominant brand colours; phase assigned to `var(--copper-deep)` (matching phase dividers), then stripped of interactive status entirely (see below).
+- Areas (pc-sage) shifted from olive-green to amber/ochre (`#7a5820` / `#c09858`) — distinct from moss-green, architecturally warm.
+- Light mode pill saturation punched up so categories are clearly distinguishable on light background. Dark mode unchanged.
+- Phase `.row .ph` changed to `var(--muted)` — warm grey, clearly non-interactive, no overlap with copper link colour.
+
+**browse.html — type badge cleanup (v1.03.44)**
+- `.tmark` (type badge in list rows) converted from coloured pill-with-background to bracket style `[D]`, `[P]`, `[LS]` etc. with `pc-stone` colour and no background.
+- Removed 12 per-type CSS colour override rules (both light and dark modes).
+- Selected row still turns the badge `var(--red-deep)`.
+
+**browse.html — phase stripped of interactive status (v1.03.45)**
+- Phase removed from filter panel (was briefly added as chips — too many items to be useful).
+- Phase in record pane reverted to plain text (not a clickable pill).
+- `filterPhase` state, `applyFilters` check, badge count, `clearAllFilters` all cleaned up.
+- Phase remains sortable via the left-pane column header.
+
+**browse.html — collection filter added (v1.03.43–v1.03.46)**
+- HHC / CAA / FUL collection chips added to Browse filter panel.
+- `filterCollection` upgraded from dead string to a working `Set`.
+- Wired into `applyFilters`, `updateFilterBadge`, `clearAllFilters`, and pill click handler.
+
+**browse.html — HHC "Held by" fix (v1.03.46)**
+- Root cause: HHC items carry collection via P79 (source collection) only; P94 (held by) is only set on CAA/FUL items. `item.heldBy` was null for HHC → no "Held by" row rendered.
+- Added `collectionOf(item) = item.heldBy || item.sourceCollection` helper. Applied in both record pane renderers, `applyFilters`, and `uniqueCollections` in filter panel.
+- Expanded `ARCHIVE_ABBREV`: added `"hunter house" → "HHC"` and `"fulker" → "FUL"` (previously only CAA was mapped).
+
+**browse.html — medium field removed (v1.03.47)**
+- P91 (medium) removed from SPARQL SELECT and OPTIONAL clause, data mapping, search haystack, mobile sheet, and desktop record pane. Six spots, clean removal.
+
+**browse.html — graph current-item colour fix (v1.03.48)**
+- `.pane-meta .graph-path .node .lbl{color:var(--ink)}` was overriding the base `.node.this .lbl{color:var(--red-deep)}` via equal-specificity + later-in-file cascade. Desktop showed plain text; mobile/PWA showed red (because `.mob-sheet-scroll` had re-stated the override explicitly).
+- Fixed by adding `.pane-meta .graph-path .node.this .lbl{color:var(--red-deep)}` after the offending rule.
+- Same pattern for `.sib.current .pos` — added `.pane-meta .graph-siblings .sib.current .pos{color:var(--red)}`.
+
+**Version: v1.04.00**
