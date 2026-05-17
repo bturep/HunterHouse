@@ -157,7 +157,7 @@
   .list-head .l:hover .filter-chevron,.list-head .l.fp-open .filter-chevron{color:var(--ink)}
   .sort-mini{display:flex;gap:14px;align-items:center}
   .sort-mini .sort-hd{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
-  .sort-mini .sort-hd[data-sort-col="year"]{width:50px}
+  .sort-mini .sort-hd[data-sort-col="year"]{width:50px;justify-content:flex-end}
   .rows{flex:1;overflow-y:auto;display:flex;flex-direction:column;scrollbar-width:none}
   .rows::-webkit-scrollbar{display:none}
   .meta-body{scrollbar-width:none}
@@ -1002,10 +1002,7 @@
       color:rgba(243,241,236,0.55);
     }
     html.pwa #mobile-version:hover{color:#f0ede6}
-    html.pwa #mob-count{
-      font-family:var(--mono);font-size:10.5px;font-weight:500;
-      letter-spacing:0.10em;color:rgba(243,241,236,0.55);
-    }
+    html.pwa #mob-count{display:none}
     /* Prevent row tap-highlight flash while swiping the sheet bar */
     body.swiping #rows{pointer-events:none}
 
@@ -1068,7 +1065,7 @@
 
 <div id="mobile-chrome" role="banner">
   <span id="mob-count"></span>
-  <button id="mobile-version" type="button" aria-label="About this archive">v1.03.17</button>
+  <button id="mobile-version" type="button" aria-label="About this archive">v1.03.18</button>
 </div>
 
 <header class="site-top" id="site-header">
@@ -1084,7 +1081,7 @@
     <span class="tr-sep"></span>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1.5 A6 6 0 0 0 7.5 13.5 Z"/><circle cx="7.5" cy="7.5" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
     <span class="tr-sep"></span>
-    <span id="topright" title="About this archive">v1.03.17</span>
+    <span id="topright" title="About this archive">v1.03.18</span>
   </div>
 </header>
 
@@ -1240,7 +1237,7 @@
   }
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.17";
+  const VERSION      = "v1.03.18";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
