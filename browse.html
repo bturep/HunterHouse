@@ -282,10 +282,13 @@
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
   }
   .row .ph{
-    font-family:var(--mono);font-size:9.5px;color:var(--copper-deep);
+    font-family:var(--mono);font-size:9.5px;color:#3a38a0;
     letter-spacing:0.04em;margin-top:4px;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
+  .row .ph::before{content:"["}
+  .row .ph::after{content:"]"}
+  html.dark .row .ph{color:#9090d8}
   .row .year{
     font-family:var(--mono);font-size:11px;color:var(--muted);
     font-variant-numeric:tabular-nums;
@@ -399,30 +402,40 @@
   .kv dd a:hover{border-bottom-color:var(--copper-deep)}
 
   /* browse-local pill/archid (smaller than verso.css defaults) */
-  .pill{display:inline-flex;align-items:center;height:18px;padding:0 7px;font-size:10.5px;margin:0 3px 3px 0;white-space:nowrap}
-  button.area-pill,button.type-pill,button.drawtype-pill,button.creator-pill,button.builtstatus-pill{border:none;cursor:pointer;font-family:inherit;background:var(--pb,var(--copper-pale));color:var(--pf,var(--copper-deep))}
+  .pill{display:inline-flex;align-items:center;height:auto;padding:0;font-size:10.5px;margin:0 5px 3px 0;white-space:nowrap;background:none}
+  .pill::before{content:"["}
+  .pill::after{content:"]"}
+  button.area-pill,button.type-pill,button.drawtype-pill,button.creator-pill,button.builtstatus-pill,button.collection-pill{border:none;cursor:pointer;font-family:inherit;background:none;color:var(--pf,var(--copper-deep))}
   button.area-pill:hover,button.area-pill.active,
   button.type-pill:hover,button.type-pill.active,
   button.drawtype-pill:hover,button.drawtype-pill.active,
   button.creator-pill:hover,button.creator-pill.active,
-  button.builtstatus-pill:hover,button.builtstatus-pill.active{background:var(--pd,var(--copper-deep));color:#f0ede6}
-  button.type-pill{height:auto;padding:3px 8px;align-items:center;gap:0}
+  button.builtstatus-pill:hover,button.builtstatus-pill.active{background:none;opacity:0.6}
+  button.type-pill{height:auto;padding:0;align-items:center;gap:0}
   .archid-mono{font-family:var(--mono);font-size:11px;color:var(--red);background:var(--red-pale);padding:1.5px 7px;letter-spacing:0.04em;white-space:nowrap}
   .rights-note{display:block;font-size:10.5px;color:var(--muted);margin-top:3px;font-style:italic}
   .location-path{font-family:var(--mono);font-size:11px;letter-spacing:0.02em;color:var(--ink)}
   .curator-note{margin:24px 0 0;padding:16px 20px;border-top:1px solid var(--rule);font-size:12px;line-height:1.65;color:var(--muted);font-style:italic;white-space:pre-wrap}
 
-  /* ── pill colour themes (replaces inline pillStyle) ── */
-  .pc-sage  {--pb:#dde6df;--pf:#365549;--pd:#243a31}
-  .pc-stone {--pb:#e8e2d6;--pf:#5a4830;--pd:#3c3020}
-  .pc-slate {--pb:#d8e2e8;--pf:#365264;--pd:#223548}
-  .pc-clay  {--pb:#ecddd3;--pf:#6b2a1e;--pd:#4a1c10}
-  .pc-moss  {--pb:#e0e8d0;--pf:#485430;--pd:#303c20}
-  html.dark .pc-sage  {--pb:rgba(54,85,73,0.18); --pf:#9cbfad;--pd:rgba(54,85,73,0.55)}
-  html.dark .pc-stone {--pb:rgba(90,72,48,0.18);  --pf:#c8a878;--pd:rgba(90,72,48,0.55)}
-  html.dark .pc-slate {--pb:rgba(54,82,100,0.18); --pf:#80a8c0;--pd:rgba(54,82,100,0.55)}
-  html.dark .pc-clay  {--pb:rgba(107,42,30,0.18); --pf:#c08878;--pd:rgba(107,42,30,0.55)}
-  html.dark .pc-moss  {--pb:rgba(72,84,48,0.18);  --pf:#98b068;--pd:rgba(72,84,48,0.55)}
+  /* ── link colour (copper/teal) ── */
+  :root{--copper-deep:#1a6b50;--copper-pale:rgba(26,107,80,0.12)}
+  html.dark{--copper-deep:#9dc2b2;--copper-pale:rgba(157,194,178,0.15)}
+
+  /* ── pill colour themes ── */
+  .pc-sage  {--pf:#286e14}
+  .pc-stone {--pf:#7a4e10}
+  .pc-slate {--pf:#2a4e88}
+  .pc-clay  {--pf:#782870}
+  .pc-moss  {--pf:#486014}
+  .pc-indigo{--pf:#3a38a0}
+  .pc-denim {--pf:#2a4a96}
+  html.dark .pc-sage  {--pf:#80c070}
+  html.dark .pc-stone {--pf:#c8a878}
+  html.dark .pc-slate {--pf:#80a8c0}
+  html.dark .pc-clay  {--pf:#c090b5}
+  html.dark .pc-moss  {--pf:#98b068}
+  html.dark .pc-indigo{--pf:#9090d8}
+  html.dark .pc-denim {--pf:#7a9aca}
 
   /* dark mode overrides for hardcoded colours */
   html.dark .row .archid .tmark[data-type="P"]{color:#7aafc4;border-color:rgba(122,175,196,0.3);background:rgba(122,175,196,0.12)}
@@ -580,7 +593,9 @@
     letter-spacing:0.02em;line-height:1.6;margin:0;
   }
   #mob-about [class*="pc-"]{color:var(--pf)}
-  #mob-about .c-red{color:var(--red)}
+  .c-red{color:#c43820}
+  html.dark .c-red{color:#e06845}
+  #mob-about .c-red{color:#c43820}
   #mob-about .c-yellow{color:#7a6010}
   html.dark #mob-about .c-yellow{color:#d4b840}
 
@@ -668,8 +683,6 @@
       margin:0 6px 0 0;color:var(--pf,var(--ink));
       pointer-events:none;cursor:default;
     }
-    .mob-sheet-body .pill::before{content:"["}
-    .mob-sheet-body .pill::after{content:"]"}
     .mob-sheet-img{cursor:pointer;touch-action:manipulation}
 
     .mob-sheet-bar{
@@ -881,9 +894,7 @@
     margin:0 6px 0 0;
     color:var(--pf,var(--ink));
   }
-  .pane-meta .pill::before{content:"["}
-  .pane-meta .pill::after{content:"]"}
-  .pane-meta .pill:hover{background:transparent;filter:none;opacity:0.7}
+.pane-meta .pill:hover{background:transparent;filter:none;opacity:0.7}
   .pane-meta .pill.active{color:var(--red-deep);font-weight:500}
   .pane-meta button.type-pill:not([class*="pc-"]){color:var(--ink)}
 
@@ -934,7 +945,8 @@
   .rn-lock-btn{background:none;border:none;padding:0;cursor:pointer;color:var(--muted);display:flex;align-items:center;line-height:1;flex-shrink:0;margin-left:auto}
   .rn-lock-btn:hover{color:var(--ink)}
   .rn-label{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)}
-  .rn-who{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;color:var(--copper-deep)}
+  .rn-who{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;color:#7a6010}
+  html.dark .rn-who{color:#d4b840}
   .rn-count{font-family:var(--mono);font-size:9px;color:var(--muted);opacity:0.6}
   /* auth row — two-step: name then pin */
   .rn-auth{display:block;margin-bottom:7px}
@@ -1302,7 +1314,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.37";
+  const VERSION      = "v1.03.39";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -1619,7 +1631,7 @@
     if (item.creator)           descRows.push([creatorLabel(item.itemType), pill(`creator-pill ${pillCls(PC.clay)}`, item.creator)]);
     if (item.designedBy)        descRows.push(["Designed by", pill(`creator-pill ${pillCls(PC.clay)}`, item.designedBy)]);
     if (item.builtBy)           descRows.push(["Built by",  pill(`creator-pill ${pillCls(PC.clay)}`, item.builtBy)]);
-    if (item.heldBy)            descRows.push(["Held by",   escapeHTML(item.heldBy)]);
+    if (item.heldBy)            descRows.push(["Held by",   pill(`collection-pill ${pillCls(PC.denim)}`, archiveAbbrev(item.heldBy))]);
 
     const archRows = [];
     if (item.location) {
@@ -1987,11 +1999,13 @@ WHERE {
 
   // Pill colour tokens
   const PC = {
-    sage:  { cls:"pc-sage"  },
-    stone: { cls:"pc-stone" },
-    slate: { cls:"pc-slate" },
-    clay:  { cls:"pc-clay"  },
-    moss:  { cls:"pc-moss"  },
+    sage:   { cls:"pc-sage"   },
+    stone:  { cls:"pc-stone"  },
+    slate:  { cls:"pc-slate"  },
+    clay:   { cls:"pc-clay"   },
+    moss:   { cls:"pc-moss"   },
+    indigo: { cls:"pc-indigo" },
+    denim:  { cls:"pc-denim"  },
   };
   const itemTypePillColor = () => PC.stone;
   const drawTypePillColor = () => PC.slate;
@@ -2393,7 +2407,7 @@ $("#foot-dims").textContent = "";
       const cActive = state.filterCreator.has(item.builtBy) ? " active" : "";
       descRows.push(["Built by", `<button class="pill creator-pill ${pillCls(PC.clay)}${cActive}" data-creator="${escapeHTML(item.builtBy)}">${escapeHTML(item.builtBy)}</button>`]);
     }
-    if (item.heldBy)      descRows.push(["Held by", escapeHTML(item.heldBy)]);
+    if (item.heldBy)      descRows.push(["Held by", pill(`collection-pill ${pillCls(PC.denim)}`, archiveAbbrev(item.heldBy))]);
 
     const archRows = [];
     if (item.location) {
