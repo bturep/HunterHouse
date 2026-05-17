@@ -282,13 +282,13 @@
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
   }
   .row .ph{
-    font-family:var(--mono);font-size:9.5px;color:#3a38a0;
+    font-family:var(--mono);font-size:9.5px;color:#484878;
     letter-spacing:0.04em;margin-top:4px;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
   .row .ph::before{content:"["}
   .row .ph::after{content:"]"}
-  html.dark .row .ph{color:#9090d8}
+  html.dark .row .ph{color:#7878a8}
   .row .year{
     font-family:var(--mono);font-size:11px;color:var(--muted);
     font-variant-numeric:tabular-nums;
@@ -421,21 +421,21 @@
   :root{--copper-deep:#1a6b50;--copper-pale:rgba(26,107,80,0.12)}
   html.dark{--copper-deep:#9dc2b2;--copper-pale:rgba(157,194,178,0.15)}
 
-  /* ── pill colour themes ── */
-  .pc-sage  {--pf:#286e14}
-  .pc-stone {--pf:#7a4e10}
-  .pc-slate {--pf:#2a4e88}
-  .pc-clay  {--pf:#782870}
-  .pc-moss  {--pf:#486014}
-  .pc-indigo{--pf:#3a38a0}
-  .pc-denim {--pf:#2a4a96}
-  html.dark .pc-sage  {--pf:#80c070}
-  html.dark .pc-stone {--pf:#c8a878}
-  html.dark .pc-slate {--pf:#80a8c0}
-  html.dark .pc-clay  {--pf:#c090b5}
-  html.dark .pc-moss  {--pf:#98b068}
-  html.dark .pc-indigo{--pf:#9090d8}
-  html.dark .pc-denim {--pf:#7a9aca}
+  /* ── pill colour themes (muted — shade over hue) ── */
+  .pc-sage  {--pf:#4a6848}
+  .pc-stone {--pf:#6a5040}
+  .pc-slate {--pf:#3a5070}
+  .pc-clay  {--pf:#5a4060}
+  .pc-moss  {--pf:#486040}
+  .pc-indigo{--pf:#484878}
+  .pc-denim {--pf:#384870}
+  html.dark .pc-sage  {--pf:#88a880}
+  html.dark .pc-stone {--pf:#b09870}
+  html.dark .pc-slate {--pf:#7898b8}
+  html.dark .pc-clay  {--pf:#a07898}
+  html.dark .pc-moss  {--pf:#88a070}
+  html.dark .pc-indigo{--pf:#7878a8}
+  html.dark .pc-denim {--pf:#6890a8}
 
   /* dark mode overrides for hardcoded colours */
   html.dark .row .archid .tmark[data-type="P"]{color:#7aafc4;border-color:rgba(122,175,196,0.3);background:rgba(122,175,196,0.12)}
@@ -1315,7 +1315,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.41";
+  const VERSION      = "v1.03.42";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
