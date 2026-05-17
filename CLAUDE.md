@@ -302,8 +302,9 @@ CCA's ISAD(G) hierarchy maps directly to our Wikibase: fonds = Richard Hunter fo
 | v1.03.00 | 2026-05-15 | Collapsible panels, mark feature, filter badge fix, loading-phase foot colour |
 | v1.03.01 | 2026-05-16 | Mobile bottom sheet: Google Maps layout, full record sections, lightbox |
 | v1.03.08 | 2026-05-16 | Image rotation batch job (17 items on R2); about card text size; PWA full-screen fix |
+| v1.03.28 | 2026-05-16 | Mobile list-head alignment; portrait lock; white flash fixes; splash removed from PWA |
 
-Tags pushed: `v1.01.00` (fc98905), `v1.02.00` (2059cb7), `v1.02.18` (82065e6), `v1.03.00` (prior session), `v1.03.01` (prior session), `v1.03.08` (this session).
+Tags pushed: `v1.01.00` (fc98905), `v1.02.00` (2059cb7), `v1.02.18` (82065e6), `v1.03.00` (prior session), `v1.03.01` (prior session), `v1.03.08` (prior session).
 
 ---
 
@@ -407,3 +408,34 @@ Continued from prior session (v1.03.00). Mobile UI was mid-iteration: a contract
 - Tapping the image in PWA now correctly expands the sheet to full height, pushing the top bar up to the browse bar position.
 
 **Version: v1.03.08**
+
+---
+
+### 2026-05-16 — Mobile list-head alignment, portrait lock, PWA flash fix (v1.03.28)
+
+**Context / starting point**
+Continued from v1.03.08. Session focused entirely on mobile UI polish and PWA behaviour.
+
+**browse.html — list compression revert + reload button (v1.03.21)**
+- Reverted `padding-left:8px` on `.row .title-wrap` (had compressed list entries rightward).
+- Reduced `#mob-reload` font-size 22px → 17px (overshot mark on prior session).
+- Hardcoded `HHFA v1.03.21` in mobile-version button HTML to eliminate JS-set flash.
+- Added `margin-left:8px` to Phase sort header for ID/Phase visual spacing.
+
+**browse.html — sort header alignment, BROWSE indent, portrait lock (v1.03.22–v1.03.25)**
+- Root cause of YEAR misalignment traced: sort-arrow span (`min-width:9px`) sits right of the "Year" label inside the button, pushing text 12px left of button edge — hidden on mobile (v1.03.24).
+- `sort-mini{flex-grow:1;justify-content:flex-end;gap:22px}` packs ID/PHASE/YEAR cluster to the right; YEAR right edge flush with year column and version text above.
+- List-head `padding-left` 28px → 20px on mobile: BROWSE left-aligns with type chip column.
+- Portrait lock: `"orientation":"portrait"` in manifest.json; CSS overlay (`#rotate-msg`) on landscape phones; `screen.orientation.lock('portrait')` JS call for PWA context.
+- Sort-mini gap increased 14px → 22px for consistent ID / PHASE / YEAR spacing.
+
+**browse.html + index.html — white flash reduction (v1.03.26)**
+- `index.html`: added `<meta name="theme-color" content="#1a1816">` (was missing); early `<style>html,body{background:#1a1816}</style>` before preload link.
+- `browse.html`: `<meta name="color-scheme" content="light">` → `dark light`; added `<style>html{background:#1a1816}</style>` as first `<head>` child, before render-blocking external CSS links.
+- These reduce but don't eliminate the iOS WebKit navigation-boundary flash.
+
+**Architecture change — splash folded in then removed (v1.03.27–v1.03.28)**
+- v1.03.27: Splash moved into browse.html as a `position:fixed` overlay to eliminate navigation entirely. manifest `start_url` changed from index.html → browse.html. Tiny inline script hides overlay immediately if `hhf_splash` sessionStorage flag is set.
+- v1.03.28: User decided no splash on app open. Overlay CSS/HTML/JS removed from browse.html. PWA now opens directly to the browse list. index.html remains as web landing page only.
+
+**Version: v1.03.28**
