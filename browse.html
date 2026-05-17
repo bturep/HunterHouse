@@ -1046,7 +1046,7 @@
 
 <div id="mobile-chrome" role="banner">
   <span id="mob-count"></span>
-  <button id="mobile-version" type="button" aria-label="About this archive">v1.03.05</button>
+  <button id="mobile-version" type="button" aria-label="About this archive">v1.03.06</button>
 </div>
 
 <header class="site-top" id="site-header">
@@ -1062,7 +1062,7 @@
     <span class="tr-sep"></span>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1.5 A6 6 0 0 0 7.5 13.5 Z"/><circle cx="7.5" cy="7.5" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
     <span class="tr-sep"></span>
-    <span id="topright" title="About this archive">v1.03.05</span>
+    <span id="topright" title="About this archive">v1.03.06</span>
   </div>
 </header>
 
@@ -1207,7 +1207,7 @@
 
 <script>
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.05";
+  const VERSION      = "v1.03.06";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -1622,6 +1622,7 @@
   let lbPanOriginX = 0, lbPanOriginY = 0;
   let lbLastTap = 0;
   let lbTouchMoveY = 0;
+  let lbOriginRect = null;
 
   function lbApply() {
     const img = document.getElementById("mob-lb-img");
@@ -1650,24 +1651,68 @@
     lbApply();
   }
 
-  function openLightbox(src, alt) {
+  function openLightbox(src, alt, fromEl) {
     lbOpen = true;
     lbScale = 1; lbX = 0; lbY = 0; lbLastDist = null;
-    const lb = document.getElementById("mob-lightbox");
+    const lb  = document.getElementById("mob-lightbox");
     const img = document.getElementById("mob-lb-img");
-    lb.classList.add("mob-lb-open");
     img.alt = alt || "";
-    img.onload = lbFit;
-    if (img.complete && img.src === src) { lbFit(); }
-    else { img.style.transform = ""; img.src = src; }
-    // Fade out hint after 2.5 s
+
+    // Show preview immediately (already cached by sheet), then swap to large
+    const prevSrc = src.replace(/_large\.jpg$/, "_prev.jpg");
+    img.onload = () => {
+      lbFit();
+      if (img.src !== src) {
+        const hi = new Image();
+        hi.onload = () => { img.src = src; requestAnimationFrame(lbFit); };
+        hi.src = src;
+      }
+    };
+    if (img.complete && img.src === prevSrc) { lbFit(); }
+    else { img.style.transform = ""; img.src = prevSrc; }
+
     const hint = document.getElementById("mob-lb-hint");
     if (hint) { hint.classList.remove("fade"); clearTimeout(hint._t); hint._t = setTimeout(() => hint.classList.add("fade"), 2500); }
+
+    if (fromEl) {
+      // Expand from the source element's rect (clip-path iris animation)
+      lbOriginRect = fromEl.getBoundingClientRect();
+      const {top:t, left:l, width:w, height:h} = lbOriginRect;
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const startClip = `inset(${t}px ${vw-l-w}px ${vh-t-h}px ${l}px round 6px)`;
+      lb.style.transition = "none";
+      lb.style.transform  = "translateY(0)";   // override CSS translateY(100%)
+      lb.style.clipPath   = startClip;
+      lb.classList.add("mob-lb-open");
+      void lb.offsetHeight;                     // force reflow
+      lb.style.transition = "clip-path 0.32s cubic-bezier(0.4,0,0.2,1)";
+      lb.style.clipPath   = "inset(0px 0px 0px 0px round 0px)";
+      setTimeout(() => { lb.style.transition = ""; lb.style.clipPath = ""; lb.style.transform = ""; }, 340);
+    } else {
+      lbOriginRect = null;
+      lb.classList.add("mob-lb-open");
+    }
   }
 
   function closeLightbox() {
     lbOpen = false;
-    document.getElementById("mob-lightbox").classList.remove("mob-lb-open");
+    const lb = document.getElementById("mob-lightbox");
+    if (lbOriginRect) {
+      const {top:t, left:l, width:w, height:h} = lbOriginRect;
+      const vw = window.innerWidth, vh = window.innerHeight;
+      lb.style.transform  = "translateY(0)";   // pin in place during close animation
+      lb.style.transition = "clip-path 0.26s cubic-bezier(0.4,0,0.2,1)";
+      lb.style.clipPath   = `inset(${t}px ${vw-l-w}px ${vh-t-h}px ${l}px round 6px)`;
+      setTimeout(() => {
+        lb.style.transition = "none";
+        lb.classList.remove("mob-lb-open");
+        lb.style.transform = "";
+        lb.style.clipPath  = "";
+        lb.style.transition = "";
+      }, 270);
+    } else {
+      lb.classList.remove("mob-lb-open");
+    }
   }
 
   // ── Collapsible panel toggle ──────────────────────────────────────────────
@@ -2681,11 +2726,12 @@ $("#foot-dims").textContent = "";
     });
     document.getElementById("mob-sheet-close")?.addEventListener("click", mobHideSheet);
 
-    // Image tap + foot tap → open full-screen lightbox (slides up smoothly, no position-change jump)
+    // Image tap + foot tap → lightbox expanding from image position
     const openSheetLightbox = () => {
       const item = state.items.find(i => i.id === state.selectedId);
       if (!item?.image) return;
-      openLightbox(item.image.replace(/_prev\.jpg$/, "_large.jpg"), item.title);
+      const fromEl = document.getElementById("mob-sheet-img");
+      openLightbox(item.image.replace(/_prev\.jpg$/, "_large.jpg"), item.title, fromEl);
     };
     document.getElementById("mob-sheet-img")?.addEventListener("click", openSheetLightbox);
     document.getElementById("mob-sheet-foot")?.addEventListener("click", openSheetLightbox);
