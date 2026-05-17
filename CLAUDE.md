@@ -523,3 +523,13 @@ Continued from v1.03.28. Session covered deep design and data work: the entire p
 - Tradeoff accepted: the old (broken) "remember exactly which panel was open and restore it" behaviour is replaced by a clean hide-all/show-all toggle.
 
 **Version: v1.04.01**
+
+**browse.html — mobile sheet swipe navigation (v1.04.02)**
+- Unified the mobile bottom-sheet gestures into one pipeline (replaced the bar-only vertical-swipe IIFE). Single `mode` state: `null | pending | v | h`.
+- Image area (sheet open, NOT full-screen): first finger move locks an axis. Horizontal → `selectAdjacent(±1)` (swipe left = next, right = previous; bounds-checked against `state.filtered`, follow-finger `translateX`, 0.18s slide-out then re-render, snap-back if at an edge or under 50px). Vertical → same as the bar.
+- Vertical open/close (down = close/collapse, up = expand) now also works on the image area and the foot bar, not just the top bar. Original bar behaviour preserved exactly.
+- Record area (`#mob-sheet-scroll`) deliberately left with no gesture handlers → native vertical scroll, no side gesture, as required.
+- Full-screen (`mob-sheet-img-expanded`) still owned by the existing pinch-zoom/pan handlers — new pipeline early-returns there. Added `swipeConsumedClick` guard so a finished swipe's trailing synthetic click can't also toggle full-screen (self-clears on consume + 500ms safety).
+- Pushed straight to main (deploys live) at Brandon's choice so swipes can be tested on-device; revertible.
+
+**Version: v1.04.02**
