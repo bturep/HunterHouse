@@ -1046,7 +1046,7 @@
 
 <div id="mobile-chrome" role="banner">
   <span id="mob-count"></span>
-  <button id="mobile-version" type="button" aria-label="About this archive">v1.03.04</button>
+  <button id="mobile-version" type="button" aria-label="About this archive">v1.03.05</button>
 </div>
 
 <header class="site-top" id="site-header">
@@ -1062,7 +1062,7 @@
     <span class="tr-sep"></span>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1.5 A6 6 0 0 0 7.5 13.5 Z"/><circle cx="7.5" cy="7.5" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
     <span class="tr-sep"></span>
-    <span id="topright" title="About this archive">v1.03.04</span>
+    <span id="topright" title="About this archive">v1.03.05</span>
   </div>
 </header>
 
@@ -1207,7 +1207,7 @@
 
 <script>
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.04";
+  const VERSION      = "v1.03.05";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -2681,23 +2681,24 @@ $("#foot-dims").textContent = "";
     });
     document.getElementById("mob-sheet-close")?.addEventListener("click", mobHideSheet);
 
-    // Image tap + img-bar tap → toggle expanded state
-    const toggleImgExpand = () => {
-      document.getElementById("mob-sheet").classList.toggle("mob-sheet-img-expanded");
+    // Image tap + foot tap → open full-screen lightbox (slides up smoothly, no position-change jump)
+    const openSheetLightbox = () => {
+      const item = state.items.find(i => i.id === state.selectedId);
+      if (!item?.image) return;
+      openLightbox(item.image.replace(/_prev\.jpg$/, "_large.jpg"), item.title);
     };
-    document.getElementById("mob-sheet-img")?.addEventListener("click", toggleImgExpand);
-    document.getElementById("mob-sheet-foot")?.addEventListener("click", toggleImgExpand);
+    document.getElementById("mob-sheet-img")?.addEventListener("click", openSheetLightbox);
+    document.getElementById("mob-sheet-foot")?.addEventListener("click", openSheetLightbox);
 
-    // Swipe on top bar: staged navigation with follow-finger animation
+    // Swipe on bar: down → dismiss sheet; up → open lightbox
     {
       const sheet = document.getElementById("mob-sheet");
       const bar   = document.getElementById("mob-sheet-bar");
-      let swipeStartY = 0, swipeStartH = 0, swiping = false;
+      let swipeStartY = 0, swiping = false;
 
       bar.addEventListener("touchstart", e => {
         if (e.target.closest(".mob-sheet-close, .mob-sheet-nav")) return;
-        swipeStartY  = e.touches[0].clientY;
-        swipeStartH  = sheet.getBoundingClientRect().height;
+        swipeStartY = e.touches[0].clientY;
         swiping = true;
         sheet.style.transition = "none";
         document.body.classList.add("swiping");
@@ -2706,15 +2707,9 @@ $("#foot-dims").textContent = "";
       document.addEventListener("touchmove", e => {
         if (!swiping) return;
         e.preventDefault();
-        const dy       = e.touches[0].clientY - swipeStartY;
-        const expanded = sheet.classList.contains("mob-sheet-img-expanded");
+        const dy = e.touches[0].clientY - swipeStartY;
         if (dy > 0) {
           sheet.style.transform = `translateY(${dy}px)`;
-          sheet.style.height    = "";
-        } else if (!expanded) {
-          const newH = Math.min(window.innerHeight, swipeStartH - dy);
-          sheet.style.height    = newH + "px";
-          sheet.style.transform = "";
         }
       }, { passive: false });
 
@@ -2722,38 +2717,24 @@ $("#foot-dims").textContent = "";
         if (!swiping) return;
         swiping = false;
         document.body.classList.remove("swiping");
-        const dy       = e.changedTouches[0].clientY - swipeStartY;
-        const expanded = sheet.classList.contains("mob-sheet-img-expanded");
+        const dy = e.changedTouches[0].clientY - swipeStartY;
 
         if (dy > 40) {
-          if (expanded) {
-            if (dy > swipeStartH / 2) {
-              sheet.style.transition = "";
-              sheet.classList.remove("mob-sheet-open", "mob-sheet-img-expanded");
-              const sc2 = document.getElementById("mob-sheet-scroll");
-              if (sc2) sc2.scrollTop = 0;
-              requestAnimationFrame(() => { sheet.style.transform = ""; });
-            } else {
-              sheet.style.transition = "";
-              sheet.style.transform  = "";
-              sheet.classList.remove("mob-sheet-img-expanded");
-            }
-          } else {
-            sheet.style.transition = "";
-            sheet.classList.remove("mob-sheet-open", "mob-sheet-img-expanded");
-            const sc = document.getElementById("mob-sheet-scroll");
-            if (sc) sc.scrollTop = 0;
-            requestAnimationFrame(() => { sheet.style.transform = ""; });
-          }
-        } else if (dy < -40 && !expanded) {
+          // Swipe down → dismiss to list
           sheet.style.transition = "";
-          sheet.style.height     = "100%";
-          sheet.classList.add("mob-sheet-img-expanded");
-          requestAnimationFrame(() => { sheet.style.height = ""; });
-        } else {
+          sheet.classList.remove("mob-sheet-open", "mob-sheet-img-expanded");
+          const sc = document.getElementById("mob-sheet-scroll");
+          if (sc) sc.scrollTop = 0;
+          requestAnimationFrame(() => { sheet.style.transform = ""; });
+        } else if (dy < -40) {
+          // Swipe up → open lightbox
           sheet.style.transition = "";
           sheet.style.transform  = "";
-          sheet.style.height     = "";
+          openSheetLightbox();
+        } else {
+          // Snap back
+          sheet.style.transition = "";
+          sheet.style.transform  = "";
         }
       }, { passive: true });
     }
