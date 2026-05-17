@@ -297,8 +297,9 @@ CCA's ISAD(G) hierarchy maps directly to our Wikibase: fonds = Richard Hunter fo
 | v1.02.18 | 2026-05-15 | Image foot overhaul, large previews, browse.html refactor (−65 lines) |
 | v1.03.00 | 2026-05-15 | Collapsible panels, mark feature, filter badge fix, loading-phase foot colour |
 | v1.03.01 | 2026-05-16 | Mobile bottom sheet: Google Maps layout, full record sections, lightbox |
+| v1.03.08 | 2026-05-16 | Image rotation batch job (17 items on R2); about card text size; PWA full-screen fix |
 
-Tags pushed: `v1.01.00` (fc98905), `v1.02.00` (2059cb7), `v1.02.18` (82065e6), `v1.03.00` (prior session), `v1.03.01` (this session).
+Tags pushed: `v1.01.00` (fc98905), `v1.02.00` (2059cb7), `v1.02.18` (82065e6), `v1.03.00` (prior session), `v1.03.01` (prior session), `v1.03.08` (this session).
 
 ---
 
@@ -382,3 +383,23 @@ Continued from prior session (v1.03.00). Mobile UI was mid-iteration: a contract
 - manifest.json `short_name` changed to `"HH Archive"`. All `apple-mobile-web-app-title` tags updated to match.
 
 **Version: v1.03.01**
+
+---
+
+### 2026-05-16 — Image rotation, about card polish, PWA full-screen fix (v1.03.08)
+
+**Image rotation batch job (scripts/rotate_images.py)**
+- 17 archive items rotated on R2 (master TIF + thumb/prev/large JPEG tiers each).
+- HH-CAA-0018: mirror horizontal. HH-HHC-0004/0037/0062: 90° CCW. 13 HHC items (0005/0008/0009/0038/0070/0071/0092/0098–0103/0109): 90° CW.
+- Script: `scripts/rotate_images.py` — downloads to `/tmp/rotate_work/`, transforms with Pillow, re-uploads via rclone.
+- Cloudflare CDN cache purged via dashboard → Caching → Purge Cache → Prefix on both collection directories after upload.
+
+**browse.html — about card text size (v1.03.07)**
+- Reduced font sizes in `.mob-about-*` CSS: body/credits text from 12px → 10px, title from 13px → 11px, version from 11px → 10px, credits dt from 10px → 9px.
+
+**browse.html — PWA full-screen fix (v1.03.08)**
+- Root cause: `html.pwa .mob-sheet{height:72vh}` (CSS specificity 21) was overriding `.mob-sheet.mob-sheet-img-expanded{height:100%}` (specificity 20) in standalone PWA mode. Sheet stayed at 72vh when image was tapped — foot moved to bottom of 72vh sheet, but top bar didn't move.
+- Fix: added `html.pwa .mob-sheet.mob-sheet-img-expanded{height:100%}` (specificity 31) — one line, no JS changes, no staged swipe changes.
+- Tapping the image in PWA now correctly expands the sheet to full height, pushing the top bar up to the browse bar position.
+
+**Version: v1.03.08**
