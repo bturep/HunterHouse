@@ -7,6 +7,10 @@ Load this file at the start of any Claude Code session.
 
 ## ⚑ Pending at next session start — prompt Brandon immediately
 
+**Branch check.** At session start, run `git branch` and announce the current branch. If on `main`, ask: "We're on main — should I switch to `v1.04` for this session?" If on `v1.04`, confirm: "We're on the `v1.04` branch — all work will go here until we're ready to cut v1.05."
+
+---
+
 **P100 needs reassignment.** The "notes" property (P100) is no longer rendered in the record pane — curator notes were migrated to researcher notes (localStorage, BP). The property label and purpose should be reassigned to something more useful. Decide what P100 should become before next cataloguing session.
 
 ---
