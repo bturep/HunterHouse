@@ -11,6 +11,10 @@ Load this file at the start of any Claude Code session.
 
 ---
 
+**Archival standards alignment — deferred.** The current cataloguing model uses ISAD(G) hierarchy loosely but is not formally RAD-compliant. Key gaps to revisit: (1) fonds-level item in Wikibase; (2) series level currently encodes physical custody (HHC/CAA) rather than creator function — decide whether to redefine or formally acknowledge as a custodial split; (3) Level of Description property (new P) needed for AtoM/LAC interoperability. Not urgent for current cataloguing work, but important before any academic write-up or cross-institutional integration.
+
+---
+
 **Wikidata items are ready to create.** Three items are drafted in `WIKIDATA_DRAFT.md`:
 1. Richard Hunter (person)
 2. Canadian Architectural Archives (institution)
