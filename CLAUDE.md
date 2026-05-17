@@ -129,7 +129,7 @@ Three tiers per item:
 ### Key JS patterns
 | Pattern | Detail |
 |---|---|
-| VERSION constant | `"v1.03.00"` — `CACHE_KEY` derived from it automatically |
+| VERSION constant | Line ~1303 in browse.html — **must be bumped on every push**. All version displays (topright, mobile button, about pane) read from this single constant. `CACHE_KEY` derived from it automatically. |
 | Dark mode | `html.dark` + `localStorage['hhf_theme_v2']` |
 | SPARQL | GET with `encodeURIComponent` in browser; POST in Python scripts |
 | Mark feature | `const marked = new Set()`. M key → `toggleMark(id)` → toggles `.marked` class on row. Dot rendered via `.row.marked::after` pseudo-element at `left:32px, bottom:4px`. Session-only (not persisted). |
