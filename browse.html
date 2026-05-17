@@ -515,14 +515,25 @@
   }
   #mob-about.open{display:flex;flex-direction:column;padding:0 28px 36px}
   #mob-about-toprow{
-    display:flex;justify-content:space-between;align-items:center;
+    display:flex;justify-content:flex-end;align-items:center;
     flex-shrink:0;margin:6px -4px 0;
   }
-  #mob-reload,#mob-about-close{
-    background:none;border:none;padding:4px 8px;line-height:1;color:var(--hint);cursor:pointer;
+  #mob-about-close{
+    background:none;border:none;line-height:1;color:var(--hint);cursor:pointer;
+    font-family:var(--mono);font-size:22px;
+    width:44px;height:44px;display:flex;align-items:center;justify-content:center;
   }
-  #mob-reload{font-size:16px}
-  #mob-about-close{font-family:var(--mono);font-size:20px}
+  #mob-about-close:active{color:var(--ink)}
+  #mob-about-bottomrow{
+    display:flex;justify-content:flex-end;align-items:center;
+    flex-shrink:0;margin:16px -4px 0;
+  }
+  #mob-reload{
+    background:none;border:none;line-height:1;color:var(--hint);cursor:pointer;
+    font-family:var(--mono);font-size:13px;letter-spacing:0.06em;
+    padding:6px 8px;
+  }
+  #mob-reload:active{color:var(--ink)}
   #mob-reload:active,#mob-about-close:active{color:var(--ink)}
   .mob-about-title{
     font-family:var(--mono);font-size:11px;font-weight:500;
@@ -1056,7 +1067,7 @@
 
 <div id="mobile-chrome" role="banner">
   <span id="mob-count"></span>
-  <button id="mobile-version" type="button" aria-label="About this archive">v1.03.14</button>
+  <button id="mobile-version" type="button" aria-label="About this archive">v1.03.15</button>
 </div>
 
 <header class="site-top" id="site-header">
@@ -1072,7 +1083,7 @@
     <span class="tr-sep"></span>
     <button class="theme-btn" id="theme-toggle" title="Toggle dark mode"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1.5 A6 6 0 0 0 7.5 13.5 Z"/><circle cx="7.5" cy="7.5" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
     <span class="tr-sep"></span>
-    <span id="topright" title="About this archive">v1.03.14</span>
+    <span id="topright" title="About this archive">v1.03.15</span>
   </div>
 </header>
 
@@ -1085,7 +1096,6 @@
 <div id="mob-about-backdrop"></div>
 <div id="mob-about" role="dialog" aria-modal="true" aria-label="About Hunter House Foundation Archive">
   <div id="mob-about-toprow">
-    <button id="mob-reload" aria-label="Reload archive">↺</button>
     <button id="mob-about-close" aria-label="Close">×</button>
   </div>
   <p class="mob-about-title">Hunter House<br>Foundation Archive</p>
@@ -1099,6 +1109,9 @@
     <dt>Project Lead</dt>
     <dd><span class="c-yellow">Brandon Poole</span></dd>
   </dl>
+  <div id="mob-about-bottomrow">
+    <button id="mob-reload" aria-label="Reload archive">↺ reload</button>
+  </div>
 </div>
 
 <div class="shell">
@@ -1217,7 +1230,7 @@
 
 <script>
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.03.14";
+  const VERSION      = "v1.03.15";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
