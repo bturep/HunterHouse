@@ -676,3 +676,7 @@ Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Tu
 - *Keyboard scheme.* Added **F** fit, **T** turn/rotate, **Z** zen (hide panels — clicks `#zoom-fs`), **= / +** zoom in, **− / _** zoom out (click the zoom buttons so disabled-bounds are respected), **R** reviewed, **?** info. Existing kept: `/` search, `Esc`, `1` 1:1, `M` mark, ↑/↓ nav, Enter open item. Browser/OS fullscreen left on its header button by design (needs a user gesture; avoids Z confusion). All gated by `!inInput`.
 
 **Version: v1.05-test.19** (next.html). Live `browse.html` unchanged.
+
+**v1.05-test.20 — fix `/` search shortcut (scope bug).** Root cause: `openSearch()` is declared inside `main()`, but the global keydown handler lives in the sibling `wireControls()` — `openSearch` was never in scope there, so `/` threw a ReferenceError (pre-existing; surfaced now via shortcut testing). Fixed by inlining the DOM ops (`#search-input` add `.open` + focus) so the handler has no cross-scope dependency. Enter (open item page) untouched pending Brandon's call on a fullscreen binding.
+
+**Version: v1.05-test.20** (next.html). Live `browse.html` unchanged.
