@@ -706,3 +706,7 @@ Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Tu
 - *Row flags.* Dropped the `[ ]` brackets. `.row-flags` is now a fixed **104px** strip (= the archid/`type mark + ID` column) at `left:20px`, three equal `.rf-slot` cells with **two interior vertical rules** (`.rf-slot + .rf-slot{border-left:1px solid var(--rule)}`, no outer edges), icons centred — aligned under the ID column. Removed the mono/bracket pseudo styling.
 
 **Version: v1.05-test.26** (next.html). Live `browse.html` unchanged.
+
+**v1.05-test.27 — fix row-flag alignment (Brandon).** The flag strip was `position:absolute;left:20px;width:104px` over the grid track; since `[D] HHC-0071` is narrower than the 104px track and left-aligned, the evenly-spread icons drifted right of the ID. Fix: wrapped `archid` + `row-flags` in a `.col-id` flex-column that *is* grid cell 1, so the strip flows in-cell (`width:100%`, `margin-top:7px`) and inherits the column's exact left edge + width — no absolute-positioning guesswork. Strip left now flush with `[D]`, two interior rules unchanged. Mobile hide selector still matches.
+
+**Version: v1.05-test.27** (next.html). Live `browse.html` unchanged.
