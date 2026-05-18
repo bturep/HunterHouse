@@ -285,18 +285,16 @@
   .fp-group{margin-bottom:14px}
   .fp-group:last-child{margin-bottom:0}
   .fp-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.16em;text-transform:uppercase;margin-bottom:8px}
-  .fp-chips{display:flex;flex-wrap:wrap;gap:5px 9px}
-  /* Filter options → bracket convention, colour-coded by category */
+  .fp-chips{display:flex;flex-wrap:wrap;gap:5px}
   .fp-chip{
     font-family:var(--mono);font-size:10px;letter-spacing:0.03em;
-    background:transparent;border:0;padding:0;border-radius:0;
-    color:var(--pf,var(--muted));cursor:pointer;line-height:1.6;
-    transition:color 0.1s,opacity 0.1s;
+    border:1px solid var(--pb,var(--rule));background:var(--pb,var(--soft));color:var(--pf,var(--muted));
+    padding:3px 9px;border-radius:2px;cursor:pointer;
+    transition:background 0.1s,color 0.1s,border-color 0.1s;
+    line-height:1.5;
   }
-  .fp-chip::before{content:"["}
-  .fp-chip::after{content:"]"}
-  .fp-chip:hover{opacity:0.7}
-  .fp-chip.on{color:var(--red-deep);font-weight:500}
+  .fp-chip:hover{filter:brightness(0.94)}
+  .fp-chip.on{background:var(--pd,var(--ink));color:#f0ede6;border-color:var(--pd,var(--ink))}
   .fp-footer{display:flex;justify-content:space-between;align-items:center;padding-top:12px;margin-top:12px;border-top:1px solid var(--rule)}
   .fp-clear{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;background:none;border:0;padding:0}
   .fp-clear:hover{color:var(--ink)}
@@ -1146,17 +1144,19 @@
   .filter-panel{padding:16px 20px 14px}
   .fp-group{margin-bottom:14px}
   .fp-lbl{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
-  .fp-chips{gap:5px}
+  .fp-chips{gap:5px 9px}
+  /* Filter options → bracket convention (no box), colour-coded by category */
   .fp-chip{
     font-family:var(--mono);font-size:9.5px;font-weight:500;
-    letter-spacing:0.08em;text-transform:uppercase;
-    padding:2.5px 8px;border-radius:1px;line-height:1.55;
-    background:transparent;color:var(--pf,var(--muted));
-    border:1px solid var(--pb,var(--rule));
-    transition:background 0.1s,color 0.1s,border-color 0.1s;
+    letter-spacing:0.08em;text-transform:uppercase;line-height:1.6;
+    background:transparent;border:0;padding:0;border-radius:0;cursor:pointer;
+    color:var(--pf,var(--muted));
+    transition:color 0.1s,opacity 0.1s;
   }
-  .fp-chip:hover{background:var(--pb,var(--soft));filter:none}
-  .fp-chip.on{background:var(--red-pale);color:var(--red-deep);border-color:var(--red);font-weight:500}
+  .fp-chip::before{content:"["}
+  .fp-chip::after{content:"]"}
+  .fp-chip:hover{opacity:0.7;background:transparent;filter:none}
+  .fp-chip.on{background:transparent;border:0;color:var(--red-deep);font-weight:600}
   .fp-footer{display:flex;justify-content:space-between;align-items:center;padding-top:12px;margin-top:12px;border-top:1px dashed var(--rule)}
   .fp-clear{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
   .fp-show{font-size:9px;font-weight:500;letter-spacing:0.18em;padding:5px 12px}
@@ -1466,7 +1466,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05-test.22";
+  const VERSION      = "v1.05-test.23";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
