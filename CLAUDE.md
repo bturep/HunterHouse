@@ -647,3 +647,9 @@ Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Tu
 **v1.05-test.14 — row diamond resized + aligned (Brandon).** `.row-mark` 9px→13px and moved from row vertical-centre (`top:50%`) to `top:13px` (= row `padding-top` 11px + `.archid` `padding-top` 2px) so it sits on the first text line, aligned with the `[D]` item-type badge. CSS-only.
 
 **Version: v1.05-test.14** (next.html). Live `browse.html` unchanged.
+
+**v1.05-test.15 — note-presence row dot + stuck-filter bugfix (Brandon).**
+- *Note dot.* New per-row indicator for entries that carry a researcher note (`hhf_rn`). Deliberately distinct from the mark: a quiet `var(--muted)` **● dot in the right margin**, non-interactive (selecting the row already shows the note). Helpers `rnNotedIds()` (one blob-parse → Set of noted ids, computed once per `renderList`) and `rnSyncRow(archId)` (live-toggles a single row's `.has-note` after note add/edit/delete in `renderRN`). Row gets `has-note` class; hidden on mobile with the mark. Not role-gated — notes are publicly visible, so the dot follows the note, not the researcher unlock.
+- *Bugfix (Brandon-reported).* With "only" active, unmarking the **last** item emptied the list while `filterMarkedOnly` stayed true and the bar's zero-state has no toggle → stranded: badge showed `1`, list empty, no way back. `toggleMark` now captures `wasOnly`, auto-clears `filterMarkedOnly` when `marked.size` hits 0, and re-renders whenever it *was* in only-mode (so the full list returns on exit). Reload also escapes (flag isn't persisted).
+
+**Version: v1.05-test.15** (next.html). Live `browse.html` unchanged.

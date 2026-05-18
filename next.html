@@ -297,6 +297,14 @@
   }
   .row.marked .row-mark{opacity:1;pointer-events:auto}
   .row .row-mark:hover{color:var(--red-deep)}
+  /* Per-row note presence — quiet muted dot in the right margin, not
+     interactive (selecting the row shows the note in the record pane). */
+  .row .row-note{
+    position:absolute;right:8px;top:17px;
+    width:5px;height:5px;border-radius:50%;background:var(--muted);
+    opacity:0;pointer-events:none;
+  }
+  .row.has-note .row-note{opacity:1}
 
   /* ── researcher marked bar (browse pane, research/admin only) ── */
   .mark-bar{
@@ -1113,7 +1121,7 @@
     .fp-search-input::placeholder{color:var(--hint)}
 
     /* Marking is desktop-only (keyboard M); hide the researcher bar + row mark */
-    .mark-bar,.row .row-mark{display:none}
+    .mark-bar,.row .row-mark,.row .row-note{display:none}
     /* Browse bar: always match sheet-bar colour; round corners only in PWA */
     .list-head{background:var(--bg);padding-left:20px;padding-right:24px}
     html.pwa .list-head{border-radius:14px 14px 0 0}
@@ -1371,7 +1379,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05-test.14";
+  const VERSION      = "v1.05-test.15";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -1751,6 +1759,19 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       localStorage.setItem("hhf_rn", JSON.stringify(all));
     } catch {}
   }
+  // Set of archIds with ≥1 researcher note — computed once per list render
+  // so we don't JSON.parse the whole blob for every row.
+  function rnNotedIds() {
+    try {
+      const all = JSON.parse(localStorage.getItem("hhf_rn") || "{}");
+      return new Set(Object.keys(all).filter(k => Array.isArray(all[k]) && all[k].length));
+    } catch { return new Set(); }
+  }
+  // Live-toggle one list row's note dot after a note add / edit / delete.
+  function rnSyncRow(archId) {
+    const r = document.querySelector(`.row[data-id="${CSS.escape(archId)}"]`);
+    if (r) r.classList.toggle("has-note", rnLoad(archId).length > 0);
+  }
 
   const LOCK_SVG = `<svg width="10" height="12" viewBox="0 0 10 12" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="5.5" width="8" height="6" rx="1"/><path d="M3 5.5V3.8a2 2 0 0 1 4 0v1.7"/></svg>`;
   const UNLOCK_SVG = `<svg width="10" height="12" viewBox="0 0 10 12" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="5.5" width="8" height="6" rx="1"/><path d="M3 5.5V3.8a2 2 0 0 1 4 0V1.5"/></svg>`;
@@ -1876,6 +1897,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
           updated.unshift({ by: researcher.initials, date: rnDate(), text });
         }
         rnSave(archId, updated);
+        rnSyncRow(archId);
         textarea.value = "";
         renderRN(archId);
       }
@@ -1901,6 +1923,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             const updated = rnLoad(archId);
             updated.splice(idx, 1);
             rnSave(archId, updated);
+            rnSyncRow(archId);
             renderRN(archId);
           }, 2000);
         };
@@ -2535,6 +2558,7 @@ WHERE {
     const grouped = state.sortCol === "phase";
     const frag = document.createDocumentFragment();
     let lastPhase = null;
+    const noted = rnNotedIds();   // which items carry a researcher note
 
     const anyFilter = state.filterArea.size || state.filterType.size || state.filterDrawType.size;
     if (anyFilter) {
@@ -2555,11 +2579,12 @@ WHERE {
         frag.appendChild(d);
       }
       const row = document.createElement("div");
-      row.className = "row" + (it.id === state.selectedId ? " sel" : "") + (marked.has(it.id) ? " marked" : "");
+      row.className = "row" + (it.id === state.selectedId ? " sel" : "") + (marked.has(it.id) ? " marked" : "") + (noted.has(it.id) ? " has-note" : "");
       row.dataset.id = it.id;
       const tmark = typeMark(it.itemType);
       row.innerHTML = `
         <span class="row-mark" title="Click to unmark" aria-hidden="true">◆</span>
+        <span class="row-note" title="Has a researcher note" aria-hidden="true"></span>
         <span class="archid">${tmark ? `<span class="tmark pc-stone" data-type="${escapeHTML(tmark)}" title="${escapeHTML(it.itemType)}">${tmark}</span>` : ""}${displayId(it.id)}</span>
         <div class="title-wrap">
           <div class="title">${escapeHTML(it.title)}</div>
@@ -3113,10 +3138,15 @@ $("#foot-dims").textContent = "";
 
   function toggleMark(id) {
     if (!id || !canMark()) return;          // Research/Admin only
+    const wasOnly = state.filterMarkedOnly;
     if (marked.has(id)) marked.delete(id); else marked.add(id);
     marksSave();                            // persist to this researcher's slot
-    if (state.filterMarkedOnly) {
-      // Unmarked rows must leave the list immediately when filtering to marks.
+    // An empty shortlist + "only" filter strands the list with no escape
+    // (the bar's zero-state has no toggle) — drop the filter automatically.
+    if (state.filterMarkedOnly && marked.size === 0) state.filterMarkedOnly = false;
+    if (wasOnly) {
+      // Re-filter: in only-mode an unmarked row must leave the list; if we
+      // just exited only-mode the full list must come back.
       applyFilters(); renderList();
     } else {
       const row = document.querySelector(`.row[data-id="${CSS.escape(id)}"]`);
