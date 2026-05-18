@@ -696,3 +696,7 @@ Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Tu
 **v1.05-test.24 — filter tags: typography parity with record-pane pills (Brandon).** Authoritative `.fp-chip` was uppercase / 9.5px / 0.08em. Changed to exactly match `.pane-meta .pill`: mono 11px, weight 400, letter-spacing 0.02em, `text-transform:none` (title/natural case — more legible), fallback colour `--pf,var(--ink)`, `.on` = `--red-deep` 500. Group labels (`.fp-lbl`) left uppercase (they're section labels, not tags). CSS-only.
 
 **Version: v1.05-test.24** (next.html). Live `browse.html` unchanged.
+
+**v1.05-test.25 — About: address on its own line (Brandon).** The Foundation address was tacked onto the end of the bio sentence and wrapped awkwardly. Split into its own line in both the desktop About pane (`.ap-body` → new `.ap-body.ap-addr`) and the mobile About (`.mob-about-body.ap-addr`); new `.ap-addr{margin-top:-6px;color:var(--muted)}` pulls it up under the bio as a quiet location stamp. Trailing period dropped (it's now a standalone address). CSS+HTML only.
+
+**Version: v1.05-test.25** (next.html). Live `browse.html` unchanged.
