@@ -5,6 +5,18 @@ Load this file at the start of any Claude Code session.
 
 ---
 
+## ⚑ Active working context — read FIRST, act accordingly
+
+<!-- LINE-MARKER: the claude() launcher rewrites the next line. Keep it on its own line. -->
+**LINE: NEXT**
+
+- **LINE: NEXT** → all browse work goes in **`next.html`**. Do **not** edit `browse.html` except an explicit live hotfix (then mirror the change into `next.html`). Version label convention: `next.html`'s `VERSION` constant is `v1.05-test.NN` — bump `NN` on every push, note it in the session log. Promotion to live = the documented Staging workflow.
+- **LINE: LIVE** → work directly in `browse.html`; normal `v1.MAJOR.SESSION.PATCH` convention applies. `next.html` is dormant.
+
+At session start: announce which LINE is active and which file you'll be editing. If LINE and the user's stated intent disagree, ask before editing.
+
+---
+
 ## ⚑ Pending at next session start — prompt Brandon immediately
 
 **P100 needs reassignment.** The "notes" property (P100) is no longer rendered in the record pane — curator notes were migrated to researcher notes (localStorage, BP). The property label and purpose should be reassigned to something more useful. Decide what P100 should become before next cataloguing session.
@@ -563,3 +575,8 @@ Continued from v1.03.28. Session covered deep design and data work: the entire p
 - Created `next.html` (copy of `browse.html`, `VERSION = "v1.05-test"`) as the parallel work-in-progress page at https://bturep.github.io/HunterHouse/next.html. Live `browse.html` untouched and stable. Full workflow + promotion steps documented in the new "Staging / test page" section above. v1.05 development happens in `next.html` from here.
 
 **Version: v1.04.03**
+
+**Active working-context marker (v1.04.04)**
+- Added the "⚑ Active working context" block at the top of CLAUDE.md with a machine-rewritable `**LINE: NEXT|LIVE**` marker. Claude reads this first each session to know whether to edit `next.html` (NEXT, label `v1.05-test.NN`) or `browse.html` (LIVE). Conceptual clarification logged: version numbers are pure convention; git is the real version tracking. `claude()` launcher to be extended to flip this marker at session start (pending Brandon's OK to edit ~/.zshrc).
+
+**Version: v1.04.04**
