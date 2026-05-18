@@ -357,7 +357,7 @@
 
   .meta-title{font-size:21px;font-weight:500;color:var(--ink);letter-spacing:-0.015em;line-height:1.2;margin-bottom:8px}
   /* ── Admin inline editing (Slice 3) ── */
-  .hh-editable{cursor:text;border-bottom:1px solid transparent;transition:border-color .12s}
+  .hh-editable{cursor:text;border-bottom:1px dashed transparent;transition:border-color .12s}
   .hh-editable:hover{border-bottom-color:var(--rule)}
   .hh-edit-input{font:inherit;color:inherit;background:transparent;border:none;border-bottom:1px solid var(--muted);border-radius:0;padding:0;width:100%;box-sizing:border-box;outline:none}
   .hh-saving{font-size:11px;color:var(--muted);font-family:var(--mono);margin-left:8px}
@@ -1309,7 +1309,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05-test.03";
+  const VERSION      = "v1.05-test.04";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -1396,7 +1396,7 @@
           const m = state.items.find(i => i.qid === item.qid); if (m) m.title = val;
           const rowT = document.querySelector(`.row[data-id="${CSS.escape(item.id)}"] .title`);
           if (rowT) rowT.textContent = val;
-          restore(val);
+          renderMeta(item);   // re-render so graph path + "In this set" pick up the new title
           hhToast("Saved · " + item.qid, "ok");
         } catch (e) {
           restore(item.title);
