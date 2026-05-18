@@ -291,6 +291,38 @@
   .row.marked::after{content:'';position:absolute;left:32px;bottom:4px;width:4px;height:4px;border-radius:50%;background:var(--ink);transform:translateX(-50%);pointer-events:none}
   html.dark .row.marked::after{background:var(--inv-fg)}
 
+  /* ── researcher marked bar (browse pane, research/admin only) ── */
+  .mark-bar{
+    display:flex;align-items:center;gap:12px;
+    padding:6px 14px;min-height:28px;box-sizing:border-box;
+    border-bottom:1px solid var(--rule-soft);
+    font-family:var(--mono);font-size:9px;font-weight:500;
+    letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);
+    user-select:none;-webkit-user-select:none;
+  }
+  .mark-bar[hidden]{display:none}
+  .mark-bar .mb-count{display:flex;align-items:center;gap:6px;color:var(--ink);white-space:nowrap}
+  .mark-bar .mb-dot{width:5px;height:5px;border-radius:50%;background:var(--ink);flex-shrink:0}
+  html.dark .mark-bar .mb-dot{background:var(--inv-fg)}
+  .mark-bar .mb-hint{color:var(--hint);text-transform:none;letter-spacing:0.04em;font-weight:400}
+  .mark-bar .mb-actions{display:flex;align-items:center;gap:14px;margin-left:auto}
+  .mark-bar .mb-btn{
+    background:none;border:0;padding:0;cursor:pointer;
+    font:inherit;letter-spacing:inherit;text-transform:inherit;
+    color:var(--muted);position:relative;
+  }
+  .mark-bar .mb-btn:hover{color:var(--ink)}
+  .mark-bar .mb-btn.on{color:var(--ink)}
+  .mark-bar .mb-btn.on::after{content:'';position:absolute;left:0;right:0;bottom:-3px;height:1px;background:var(--ink)}
+  .mark-bar .mb-clear:hover{color:var(--red-deep)}
+  .mark-bar .mb-clear.holding{color:var(--red-deep)}
+  .mark-bar .mb-clear.holding::before{
+    content:'';position:absolute;left:-4px;right:-4px;top:-3px;bottom:-3px;
+    background:var(--red-tint);z-index:-1;border-radius:2px;
+    animation:mark-charge 1.5s linear forwards;
+  }
+  @keyframes mark-charge{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+
   /* ── image pane ── */
   .image-stage{
     flex:1;position:relative;overflow:hidden;
@@ -1073,6 +1105,8 @@
     }
     .fp-search-input::placeholder{color:var(--hint)}
 
+    /* Marking is desktop-only (keyboard M); hide the researcher bar on mobile */
+    .mark-bar{display:none}
     /* Browse bar: always match sheet-bar colour; round corners only in PWA */
     .list-head{background:var(--bg);padding-left:20px;padding-right:24px}
     html.pwa .list-head{border-radius:14px 14px 0 0}
@@ -1201,6 +1235,7 @@
         </div>
       </div>
       <div class="filter-panel" id="filter-panel" hidden></div>
+      <div class="mark-bar" id="mark-bar" hidden></div>
       <div class="rows" id="rows">
         <div class="load-msg">Loading catalogue from Wikibase…</div>
       </div>
@@ -1329,7 +1364,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05-test.11";
+  const VERSION      = "v1.05-test.12";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -1716,6 +1751,11 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   // Re-render the whole record pane after an auth change (lock / unlock) so
   // admin affordances + proxy badge appear/disappear immediately.
   function rerenderRecord(archId) {
+    // Auth changed → swap to this researcher's marks (or clear for Public),
+    // then re-render the list so marked dots + the bar reflect the new session.
+    marksHydrate();
+    if (!canMark()) state.filterMarkedOnly = false;   // drop the filter on lock-out
+    if (state.items.length) { applyFilters(); renderList(); updateFilterBadge(); }
     const it = state.items.find(i => i.id === archId);
     if (it) renderMeta(it); else renderRN(archId);
   }
@@ -1871,6 +1911,92 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   // ── State ─────────────────────────────────────────────────────────────────
   const marked = new Set();
 
+  // ── Researcher marks — per-researcher localStorage shortlist ──────────────
+  // hhf_marks = { [pin]: [archId, …] }. Mirrors the rnLoad/rnSave pattern.
+  // Marking is a Research capability: Public (locked) can't mark and the bar
+  // is hidden. The in-memory `marked` Set is the source of truth for rendering;
+  // it is hydrated from / written back to the active researcher's slot.
+  function canMark()   { return rnRole() !== "public"; }
+  function marksKey()  { const s = rnSession(); return s && s.pin; }
+  function marksLoad() {
+    const k = marksKey(); if (!k) return [];
+    try { return JSON.parse(localStorage.getItem("hhf_marks") || "{}")[k] || []; }
+    catch { return []; }
+  }
+  function marksSave() {
+    const k = marksKey(); if (!k) return;
+    try {
+      const all = JSON.parse(localStorage.getItem("hhf_marks") || "{}");
+      all[k] = [...marked];
+      localStorage.setItem("hhf_marks", JSON.stringify(all));
+    } catch {}
+  }
+  // Sync the in-memory set to the active researcher (empty for Public).
+  function marksHydrate() {
+    marked.clear();
+    if (canMark()) marksLoad().forEach(id => marked.add(id));
+  }
+
+  // Slim researcher-only toolbar above the list: count, show-only, export, clear.
+  function renderMarkBar() {
+    const bar = document.getElementById("mark-bar");
+    if (!bar) return;
+    if (!canMark()) { bar.hidden = true; bar.innerHTML = ""; return; }
+    bar.hidden = false;
+
+    const n = marked.size;
+    if (!n) {
+      bar.innerHTML =
+        `<span class="mb-count"><span class="mb-dot"></span>marks</span>` +
+        `<span class="mb-hint">press M on a row to mark it</span>`;
+      return;
+    }
+
+    bar.innerHTML =
+      `<span class="mb-count"><span class="mb-dot"></span>${n} marked</span>` +
+      `<span class="mb-actions">` +
+        `<button class="mb-btn mb-only${state.filterMarkedOnly ? " on" : ""}" id="mb-only" title="Show only marked items">only</button>` +
+        `<button class="mb-btn" id="mb-export" title="Copy marked archive IDs">export</button>` +
+        `<button class="mb-btn mb-clear" id="mb-clear" title="Hold to clear all marks">clear</button>` +
+      `</span>`;
+
+    bar.querySelector("#mb-only").addEventListener("click", () => {
+      state.filterMarkedOnly = !state.filterMarkedOnly;
+      applyFilters(); renderList(); updateFilterBadge(); renderMarkBar();
+      if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
+        selectItem(state.filtered[0].id);
+    });
+
+    bar.querySelector("#mb-export").addEventListener("click", async () => {
+      const ids = [...marked].sort().join("\n");
+      try {
+        await navigator.clipboard.writeText(ids);
+        hhToast(`${n} marked ID${n === 1 ? "" : "s"} copied`, "ok");
+      } catch {
+        hhToast("copy failed — clipboard blocked", "err");
+      }
+    });
+
+    // Hold to clear — mirrors the rn-del hold-to-delete safety pattern.
+    const clr = bar.querySelector("#mb-clear");
+    let timer = null;
+    const start = e => {
+      e.preventDefault();
+      clr.classList.add("holding");
+      timer = setTimeout(() => {
+        marked.clear();
+        state.filterMarkedOnly = false;
+        marksSave();
+        applyFilters(); renderList(); updateFilterBadge(); renderMarkBar();
+        hhToast("marks cleared");
+      }, 1500);
+    };
+    const cancel = () => { clearTimeout(timer); timer = null; clr.classList.remove("holding"); };
+    clr.addEventListener("mousedown",  start);
+    clr.addEventListener("mouseup",    cancel);
+    clr.addEventListener("mouseleave", cancel);
+  }
+
   const state = {
     items: [],
     filtered: [],
@@ -1884,6 +2010,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     filterDrawType: new Set(),
     filterCreator: new Set(),
     filterBuiltStatus: new Set(),
+    filterMarkedOnly: false,
   };
 
   const BADGE_LEGEND = [
@@ -2322,6 +2449,7 @@ WHERE {
   function applyFilters() {
     const q = state.search.trim().toLowerCase();
     state.filtered = state.items.filter(it => {
+      if (state.filterMarkedOnly && !marked.has(it.id)) return false;
       if (state.filterCollection.size && !state.filterCollection.has(archiveAbbrev(collectionOf(it)))) return false;
       if (state.filterArea.size && !(it.areas||[]).some(a => state.filterArea.has(a))) return false;
       if (state.filterType.size && !state.filterType.has(it.itemType)) return false;
@@ -2447,6 +2575,7 @@ WHERE {
 
     requestAnimationFrame(() => updatePip("rows", "list-pip"));
     updateMobCount();
+    renderMarkBar();   // keep the researcher bar in sync with every list render
   }
 
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
@@ -2975,10 +3104,18 @@ $("#foot-dims").textContent = "";
   }
 
   function toggleMark(id) {
-    if (!id) return;
+    if (!id || !canMark()) return;          // Research/Admin only
     if (marked.has(id)) marked.delete(id); else marked.add(id);
-    const row = document.querySelector(`.row[data-id="${CSS.escape(id)}"]`);
-    if (row) row.classList.toggle("marked", marked.has(id));
+    marksSave();                            // persist to this researcher's slot
+    if (state.filterMarkedOnly) {
+      // Unmarked rows must leave the list immediately when filtering to marks.
+      applyFilters(); renderList();
+    } else {
+      const row = document.querySelector(`.row[data-id="${CSS.escape(id)}"]`);
+      if (row) row.classList.toggle("marked", marked.has(id));
+    }
+    updateFilterBadge();
+    renderMarkBar();
   }
 
   // ── Filter helpers ────────────────────────────────────────────────────────
@@ -2993,12 +3130,14 @@ $("#foot-dims").textContent = "";
     state.filterDrawType.clear();
     state.filterCreator.clear();
     state.filterBuiltStatus.clear();
+    state.filterMarkedOnly = false;
   }
 
   function updateFilterBadge() {
     const total = state.filterCollection.size +
                   state.filterArea.size + state.filterType.size + state.filterDrawType.size +
-                  state.filterCreator.size + state.filterBuiltStatus.size;
+                  state.filterCreator.size + state.filterBuiltStatus.size +
+                  (state.filterMarkedOnly ? 1 : 0);
     const badge = $("#filter-badge");
     if (!badge) return;
     badge.textContent = total || "";
@@ -3579,7 +3718,7 @@ $("#foot-dims").textContent = "";
       if (e.key === "Escape" && inInput) { e.target.blur(); return; }
       if (e.key === "Escape") { closeAllDropdowns(); closeAboutPane(); return; }
       if (e.key === "1"         && !inInput) { setZoom(1); return; }
-      if ((e.key === "m" || e.key === "M") && !inInput && state.selectedId) { toggleMark(state.selectedId); return; }
+      if ((e.key === "m" || e.key === "M") && !inInput && canMark() && state.selectedId) { toggleMark(state.selectedId); return; }
       if (e.key === "ArrowDown" && !inInput) { e.preventDefault(); selectAdjacent(+1); }
       if (e.key === "ArrowUp"   && !inInput) { e.preventDefault(); selectAdjacent(-1); }
       if (e.key === "Enter"     && !inInput && state.selectedId) {
@@ -3704,6 +3843,7 @@ $("#foot-dims").textContent = "";
       if (urlSort && ["id","phase","year"].includes(urlSort)) state.sortCol = urlSort;
       if (urlDir  && ["asc","desc"].includes(urlDir))         state.sortDir = urlDir;
 
+      marksHydrate();   // restore this session's researcher marks (if unlocked)
       applyFilters();
       renderList();
       wireControls();
