@@ -375,6 +375,12 @@
   .hh-pop-opt.cur{color:var(--muted)}
   .hh-pop-opt.cur::after{content:" ·current";color:var(--hint);font-size:10px}
   .hh-pop-msg{padding:11px;color:var(--hint)}
+  .hh-pop-cur{display:flex;flex-wrap:wrap;gap:5px;padding:9px 10px;border-bottom:1px solid var(--rule);max-height:96px;overflow-y:auto}
+  .hh-chip{display:inline-flex;align-items:center;gap:5px;background:var(--soft);border:1px solid var(--rule);border-radius:10px;padding:2px 6px 2px 9px;white-space:nowrap;max-width:100%}
+  .hh-chip span{overflow:hidden;text-overflow:ellipsis}
+  .hh-chip-x{cursor:pointer;color:var(--hint);font-weight:700;padding:0 2px}
+  .hh-chip-x:hover{color:var(--red)}
+  .hh-empty{color:var(--hint)}
   .meta-title-sub{display:block;font-size:13px;font-weight:400;color:var(--muted);letter-spacing:0;margin-top:4px}
   .meta-orig{
     font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;
@@ -1319,7 +1325,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05-test.07";
+  const VERSION      = "v1.05-test.08";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -1475,6 +1481,21 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     if (existing.length)
       await proxyEdit({ action: "wbremoveclaims", claim: existing.join("|") });
   }
+  // Multi-value item claims (P88 drawing type, P87 areas): add / remove one.
+  async function addMultiItem(entity, pid, valueQID) {
+    await proxyEdit({ action: "wbcreateclaim", entity, property: pid, snaktype: "value",
+      value: JSON.stringify({ "entity-type": "item", "numeric-id": parseInt(valueQID.slice(1), 10) }) });
+  }
+  async function removeMultiItem(entity, pid, valueQID) {
+    const api = WIKIBASE_URL + "/w/api.php";
+    const g = await fetch(`${api}?action=wbgetclaims&entity=${entity}&property=${pid}&format=json&origin=*`)
+      .then(r => r.json());
+    const guids = ((g.claims && g.claims[pid]) || [])
+      .filter(c => (c.mainsnak && c.mainsnak.datavalue && c.mainsnak.datavalue.value || {}).id === valueQID)
+      .map(c => c.id);
+    if (guids.length)
+      await proxyEdit({ action: "wbremoveclaims", claim: guids.join("|") });
+  }
 
   function closeFieldPicker() {
     const p = document.getElementById("hh-pop");
@@ -1486,6 +1507,69 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   function openFieldPicker(btn, item) {
     closeFieldPicker();
     const { pid, key, dt } = btn.dataset;
+
+    // Multi-value (P88 drawing type, P87 areas): chips + add-search popover.
+    if (btn.dataset.multi === "1") {
+      const pop = document.createElement("div");
+      pop.className = "hh-pop"; pop.id = "hh-pop";
+      pop.innerHTML = `<div class="hh-pop-cur"></div>
+        <input type="text" placeholder="add ${escapeHTML(dt)}…" autocomplete="off" spellcheck="false">
+        <div class="hh-pop-list"><div class="hh-pop-msg">loading…</div></div>`;
+      document.body.appendChild(pop);
+      const rr = btn.getBoundingClientRect();
+      pop.style.top  = Math.min(rr.bottom + 6, window.innerHeight - 320) + "px";
+      pop.style.left = Math.min(rr.left, window.innerWidth - 256) + "px";
+      const cur  = pop.querySelector(".hh-pop-cur");
+      const inp  = pop.querySelector("input");
+      const list = pop.querySelector(".hh-pop-list");
+      let opts = [];
+      const qidOf = lbl => (opts.find(o => o.label === lbl) || {}).qid;
+      const drawCur = () => {
+        const vals = item[key] || [];
+        cur.innerHTML = vals.length
+          ? vals.map(l => `<span class="hh-chip"><span>${escapeHTML(l)}</span><b class="hh-chip-x" data-lbl="${escapeHTML(l)}">×</b></span>`).join("")
+          : `<span class="hh-pop-msg" style="padding:0">none yet</span>`;
+      };
+      const drawList = () => {
+        const have = new Set(item[key] || []);
+        const f = inp.value.trim().toLowerCase();
+        const sh = opts.filter(o => !have.has(o.label) && o.label.toLowerCase().includes(f));
+        list.innerHTML = sh.length
+          ? sh.map(o => `<div class="hh-pop-opt" data-qid="${o.qid}">${escapeHTML(o.label)}</div>`).join("")
+          : `<div class="hh-pop-msg">${opts.length ? "no matches" : "vocabulary failed"}</div>`;
+      };
+      drawCur();
+      getVocab(pid).then(v => { opts = v; drawList(); })
+                   .catch(() => { list.innerHTML = `<div class="hh-pop-msg">vocabulary failed to load</div>`; });
+      inp.addEventListener("input", drawList);
+      inp.addEventListener("keydown", e => { if (e.key === "Escape") { e.preventDefault(); closeFieldPicker(); } });
+      const synced = () => {
+        const it = state.items.find(i => i.qid === item.qid); if (it) it[key] = [...(item[key] || [])];
+        drawCur(); drawList(); renderMeta(item);
+      };
+      cur.addEventListener("click", async e => {
+        const x = e.target.closest(".hh-chip-x"); if (!x) return;
+        const lbl = x.dataset.lbl, qid = qidOf(lbl);
+        if (!qid) { hhToast("can't resolve “" + lbl + "”", "err"); return; }
+        hhToast("removing " + lbl + "…");
+        try { await removeMultiItem(item.qid, pid, qid);
+          item[key] = (item[key] || []).filter(v => v !== lbl); synced();
+          hhToast("Removed · " + lbl, "ok");
+        } catch (err) { hhToast("Remove failed: " + err.message, "err"); }
+      });
+      list.addEventListener("click", async e => {
+        const o = e.target.closest(".hh-pop-opt"); if (!o) return;
+        const qid = o.dataset.qid, lbl = (opts.find(x => x.qid === qid) || {}).label || "";
+        hhToast("adding " + lbl + "…");
+        try { await addMultiItem(item.qid, pid, qid);
+          item[key] = [...(item[key] || []), lbl]; synced(); inp.value = ""; drawList();
+          hhToast("Added · " + lbl, "ok");
+        } catch (err) { hhToast("Add failed: " + err.message, "err"); }
+      });
+      inp.focus();
+      setTimeout(() => document.addEventListener("mousedown", _popOutside, true), 0);
+      return;
+    }
 
     // Date (P82) — a date input (YYYY-MM-DD; month/day optional), not a list.
     if (pid === "P82") {
@@ -2619,29 +2703,34 @@ $("#foot-dims").textContent = "";
       `<button class="pill area-pill ${pillCls(PC.sage)}${state.filterArea.has(a) ? " active" : ""}" data-area="${escapeHTML(a)}">${escapeHTML(a)}</button>`
     ).join("");
 
+    const adminEdit = canEditWikibase();
+    const EM = '<span class="hh-empty">—</span>';
     const descRows = [];
     if (item.id)          descRows.push(["Item",    displayId(item.id)]);
-    if (item.date)        descRows.push(["Date",    escapeHTML(item.date)]);
-    if (item.phase) {
+    if (item.date || adminEdit) descRows.push(["Date", item.date ? escapeHTML(item.date) : EM]);
+    if (item.phase || adminEdit) {
       const pos = item.setPosition ? ` <span style="color:var(--muted);font-family:var(--mono);font-size:10px;margin-left:4px">${escapeHTML(item.setPosition)}</span>` : "";
-      descRows.push(["Phase", escapeHTML(item.phase) + pos]);
+      descRows.push(["Phase", item.phase ? escapeHTML(item.phase) + pos : EM]);
     }
-    if (areasHtml)        descRows.push(["Areas",   areasHtml]);
-    if (item.itemType) {
+    if (areasHtml || adminEdit) descRows.push(["Areas", areasHtml || EM]);
+    if (item.itemType || adminEdit) {
       const isActive = state.filterType.has(item.itemType);
-      descRows.push(["Item type",
-        `<button class="pill type-pill ${pillCls(itemTypePillColor())}${isActive ? " active" : ""}" data-itype="${escapeHTML(item.itemType)}">${escapeHTML(item.itemType)}</button>`
+      descRows.push(["Item type", item.itemType
+        ? `<button class="pill type-pill ${pillCls(itemTypePillColor())}${isActive ? " active" : ""}" data-itype="${escapeHTML(item.itemType)}">${escapeHTML(item.itemType)}</button>`
+        : EM
       ]);
     }
-    if (item.drawTypes?.length) {
-      const drawHtml = sortDrawTypes(item.drawTypes).map(dt =>
+    if (item.drawTypes?.length || adminEdit) {
+      const drawHtml = sortDrawTypes(item.drawTypes || []).map(dt =>
         `<button class="pill drawtype-pill ${pillCls(drawTypePillColor())}${state.filterDrawType.has(dt) ? " active" : ""}" data-drawtype="${escapeHTML(dt)}">${escapeHTML(dt)}</button>`
       ).join("");
-      descRows.push(["Drawing type", drawHtml]);
+      descRows.push(["Drawing type", drawHtml || EM]);
     }
-    if (item.builtStatus) {
+    if (item.builtStatus || adminEdit) {
       const bsActive = state.filterBuiltStatus.has(item.builtStatus) ? " active" : "";
-      descRows.push(["Built", `<button class="pill builtstatus-pill ${pillCls(PC.moss)}${bsActive}" data-builtstatus="${escapeHTML(item.builtStatus)}">${escapeHTML(item.builtStatus)}</button>`]);
+      descRows.push(["Built", item.builtStatus
+        ? `<button class="pill builtstatus-pill ${pillCls(PC.moss)}${bsActive}" data-builtstatus="${escapeHTML(item.builtStatus)}">${escapeHTML(item.builtStatus)}</button>`
+        : EM]);
     }
     if (item.creator) {
       const cActive = state.filterCreator.has(item.creator) ? " active" : "";
@@ -2673,14 +2762,16 @@ $("#foot-dims").textContent = "";
     if (item.archiveLink) archRows.push(["Finding aid", `<a href="${escapeHTML(item.archiveLink)}" target="_blank" rel="noopener">${archiveLinkLabel(coll)}</a>`]);
 
     const EDITABLE = canEditWikibase() ? {
-      "Date":      { pid: "P82", key: "date"        },
-      "Phase":     { pid: "P62", key: "phase"       },
-      "Item type": { pid: "P1",  key: "itemType"    },
-      "Built":     { pid: "P92", key: "builtStatus" },
+      "Date":         { pid: "P82", key: "date"        },
+      "Phase":        { pid: "P62", key: "phase"       },
+      "Item type":    { pid: "P1",  key: "itemType"    },
+      "Drawing type": { pid: "P88", key: "drawTypes",  multi: true },
+      "Built":        { pid: "P92", key: "builtStatus" },
+      "Areas":        { pid: "P87", key: "areas",      multi: true },
     } : {};
     const descHTML = descRows.map(([k,v]) => {
       const e = EDITABLE[k];
-      const btn = e ? ` <button class="hh-fedit" data-pid="${e.pid}" data-key="${e.key}" data-dt="${escapeHTML(k)}" title="Edit ${escapeHTML(k)} (admin)" aria-label="Edit ${escapeHTML(k)}">✎</button>` : "";
+      const btn = e ? ` <button class="hh-fedit" data-pid="${e.pid}" data-key="${e.key}" data-dt="${escapeHTML(k)}"${e.multi ? ' data-multi="1"' : ''} title="Edit ${escapeHTML(k)} (admin)" aria-label="Edit ${escapeHTML(k)}">✎</button>` : "";
       return `<div class="row"><dt>${k}</dt><dd>${v}${btn}</dd></div>`;
     }).join("");
     const archHTML = archRows.map(([k,v]) => `<div class="row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
