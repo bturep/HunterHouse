@@ -660,3 +660,7 @@ Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Tu
 - *Admin toggle.* `[mine]`/`[all]` button in the rn header, **admin-role only** (`.rn-allbtn`, bracket style). Flips `rnShowAll` (session-scoped, reset on lock-out), re-renders the panel + list dots. Default = mine.
 
 **Version: v1.05-test.16** (next.html). Live `browse.html` unchanged.
+
+**v1.05-test.17 — row flags relocated + restyled (Brandon).** Split-margin indicators replaced by a single `.row-flags` cluster absolutely positioned **below the item ID on the left** (`left:20px;top:30px`, flex, gap 6px). `.rf-mark` = orange dot (`#cf7a2c`, dark `#e8924a`; hover → `--red-deep`; still click-to-unmark, delegate now matches `.rf-mark`). `.rf-note` = small page/document SVG icon in `var(--copper)` (teal), non-interactive. Visibility still driven by `.row.marked` / `.row.has-note`. Mobile-hide selector updated to `.row .row-flags`.
+
+**Version: v1.05-test.17** (next.html). Live `browse.html` unchanged.
