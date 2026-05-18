@@ -313,6 +313,31 @@ Tags pushed: `v1.01.00` (fc98905), `v1.02.00` (2059cb7), `v1.02.18` (82065e6), `
 
 ---
 
+## Staging / test page
+
+A live-stable + parallel-test setup, zero extra infrastructure (plain GitHub Pages serves only `main`, so a git branch is **not** a separate URL — a duplicate file is).
+
+| | |
+|---|---|
+| **Live** | `browse.html` → https://bturep.github.io/HunterHouse/browse.html — never edited during development; the stable public page |
+| **Staging** | `next.html` → https://bturep.github.io/HunterHouse/next.html — the work-in-progress copy; break/iterate freely |
+
+- Both files live on `main` (the only branch Pages serves). Pushing `next.html` redeploys the site but `browse.html` is untouched, so **live visitors are unaffected**.
+- `next.html` carries `const VERSION = "v1.05-test"` → its `CACHE_KEY` (`hhf_v1.05-test`) is isolated from live (`hhf_v1.04`); the on-screen version shows which build you're on.
+- `next.html` must stay in the **repo root** (relative `assets/…` paths). It links the shared `assets/verso.css` — inline `<style>` changes are isolated, but `verso.css` edits would leak to live. Fork to `assets/verso.next.css` only when a task needs CSS changes.
+- `index.html` splash + the manifest `start_url` still point at `browse.html`; the installed PWA shows live. Test the new version in the **phone browser** at the `next.html` URL. `next.html` opened directly skips index.html's SPARQL prefetch (just a slightly slower first load — fine).
+
+**Promotion (staging → live), when a version is ready:**
+1. `cp next.html browse.html`
+2. In `browse.html`, set `VERSION` to the real version (e.g. `v1.05`); update the session log.
+3. (If `verso.css` was forked) `cp assets/verso.next.css assets/verso.css`.
+4. Commit, `git tag v1.05.00 && git push --tags`, push. Live is now the new version.
+5. Re-sync `next.html` from the new `browse.html` for the next cycle.
+
+**Hotfixing live mid-cycle:** edit `browse.html` directly, push (deploys live immediately). Then port the same change into `next.html` so it isn't lost at next promotion.
+
+---
+
 ## Session log
 
 ---
@@ -533,3 +558,8 @@ Continued from v1.03.28. Session covered deep design and data work: the entire p
 - Pushed straight to main (deploys live) at Brandon's choice so swipes can be tested on-device; revertible.
 
 **Version: v1.04.02**
+
+**Staging page established (v1.04.03)**
+- Created `next.html` (copy of `browse.html`, `VERSION = "v1.05-test"`) as the parallel work-in-progress page at https://bturep.github.io/HunterHouse/next.html. Live `browse.html` untouched and stable. Full workflow + promotion steps documented in the new "Staging / test page" section above. v1.05 development happens in `next.html` from here.
+
+**Version: v1.04.03**
