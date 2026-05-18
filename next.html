@@ -356,6 +356,15 @@
   .meta-body{flex:1;overflow-y:auto;padding:22px 22px 32px;display:flex;flex-direction:column}
 
   .meta-title{font-size:21px;font-weight:500;color:var(--ink);letter-spacing:-0.015em;line-height:1.2;margin-bottom:8px}
+  /* ── Admin inline editing (Slice 3) ── */
+  .hh-editable{cursor:text;border-bottom:1px dashed var(--rule)}
+  .hh-editable:hover{border-bottom-color:var(--red)}
+  .hh-edit-input{font:inherit;color:inherit;background:var(--soft);border:1px solid var(--red);border-radius:3px;padding:2px 6px;width:100%;box-sizing:border-box}
+  .hh-saving{font-size:11px;color:var(--muted);font-family:var(--mono);margin-left:8px}
+  #hh-toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);font-family:var(--mono);font-size:12px;padding:8px 14px;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:300;max-width:80vw;text-align:center}
+  #hh-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #hh-toast.err{background:var(--red-deep)}
+  #hh-toast.ok{background:var(--copper-deep)}
   .meta-title-sub{display:block;font-size:13px;font-weight:400;color:var(--muted);letter-spacing:0;margin-top:4px}
   .meta-orig{
     font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;
@@ -1300,7 +1309,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05-test.01";
+  const VERSION      = "v1.05-test.02";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -1328,6 +1337,79 @@
   // Role / capability gate. Public = not unlocked.
   function rnRole()           { const s = rnSession(); return (s && s.role) || "public"; }
   function canEditWikibase()  { return rnRole() === "admin"; }
+
+  // ── Admin editing via local proxy (Slice 3) ──────────────────────────────
+  const PROXY_URL = "http://127.0.0.1:8731";
+  let _hhToastEl;
+  function hhToast(msg, kind = "") {
+    if (!_hhToastEl) { _hhToastEl = document.createElement("div"); _hhToastEl.id = "hh-toast"; document.body.appendChild(_hhToastEl); }
+    _hhToastEl.textContent = msg;
+    _hhToastEl.className = "show " + kind;
+    clearTimeout(hhToast._t);
+    hhToast._t = setTimeout(() => { _hhToastEl.className = ""; }, 3400);
+  }
+  // Relay one write through the local proxy. Throws on any failure.
+  async function proxyEdit(params) {
+    const s = rnSession();
+    let res;
+    try {
+      res = await fetch(PROXY_URL + "/edit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ secret: s && s.pin, params }),
+      });
+    } catch (e) {
+      throw new Error("proxy unreachable — run: python3 scripts/edit_proxy.py");
+    }
+    const j = await res.json().catch(() => ({ error: "bad response" }));
+    if (!res.ok || j.error || j.success === 0)
+      throw new Error((j.error && (j.error.info || j.error.code)) || j.error || ("HTTP " + res.status));
+    return j;
+  }
+
+  // Click-to-edit the item title (label) → wbsetlabel via proxy. Admin only.
+  function wireMetaEdit(item) {
+    if (!canEditWikibase() || !item || !item.qid) return;
+    const h = document.querySelector("#meta-body .meta-title");
+    if (!h || h.dataset.hhWired) return;
+    h.dataset.hhWired = "1";
+    h.classList.add("hh-editable");
+    h.title = "Click to edit title (admin)";
+    h.addEventListener("click", () => {
+      if (h.querySelector("input")) return;
+      const cur = item.title || "";
+      h.innerHTML = `<input class="hh-edit-input" type="text">`;
+      const inp = h.querySelector("input");
+      inp.value = cur; inp.focus(); inp.setSelectionRange(cur.length, cur.length);
+      let done = false;
+      const restore = (t) => { h.innerHTML = formatTitle(t); h.dataset.hhWired = ""; wireMetaEdit(item); };
+      const cancel  = () => { if (done) return; done = true; restore(item.title); };
+      const commit  = async () => {
+        if (done) return;
+        const val = inp.value.trim();
+        if (!val || val === cur) return cancel();
+        done = true;
+        h.innerHTML = formatTitle(val) + ` <span class="hh-saving">saving…</span>`;
+        try {
+          await proxyEdit({ action: "wbsetlabel", id: item.qid, language: "en", value: val });
+          item.title = val;
+          const m = state.items.find(i => i.qid === item.qid); if (m) m.title = val;
+          const rowT = document.querySelector(`.row[data-id="${CSS.escape(item.id)}"] .title`);
+          if (rowT) rowT.textContent = val;
+          restore(val);
+          hhToast("Saved · " + item.qid, "ok");
+        } catch (e) {
+          restore(item.title);
+          hhToast("Save failed: " + e.message, "err");
+        }
+      };
+      inp.addEventListener("keydown", e => {
+        if (e.key === "Enter")  { e.preventDefault(); commit(); }
+        if (e.key === "Escape") { e.preventDefault(); cancel(); }
+      });
+      inp.addEventListener("blur", commit);
+    });
+  }
   function rnLoad(archId) {
     try { return JSON.parse(localStorage.getItem("hhf_rn") || "{}")[archId] || []; }
     catch { return []; }
@@ -2520,6 +2602,7 @@ $("#foot-dims").textContent = "";
     });
 
     renderRN(item.id);
+    wireMetaEdit(item);
     requestAnimationFrame(() => updatePip("meta-body", "meta-pip"));
   }
 
