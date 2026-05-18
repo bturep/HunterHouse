@@ -81,6 +81,8 @@
   }
   .ap-body a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
   .ap-body a:hover{border-bottom-color:var(--copper-deep)}
+  /* Address: own line, pulled up under the bio, quiet location stamp */
+  .ap-addr{margin-top:-6px;color:var(--muted)}
   .ap-rule{border:0;border-top:1px solid var(--rule);margin:28px 0}
   .ap-credits{
     font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;
@@ -1299,7 +1301,8 @@
   </div>
   <p class="mob-about-title">Hunter House<br>Foundation Archive</p>
   <p class="mob-about-ver" id="mob-about-ver"></p>
-  <p class="mob-about-body">A foundation dedicated to the stewardship of the residence and architectural archive of architect <span class="c-red">Richard Morrow Hunter</span> (1930–2023). 203 Goward Road, Saanich, British Columbia.</p>
+  <p class="mob-about-body">A foundation dedicated to the stewardship of the residence and architectural archive of architect <span class="c-red">Richard Morrow Hunter</span> (1930–2023).</p>
+  <p class="mob-about-body ap-addr">203 Goward Road, Saanich, British Columbia</p>
   <p class="mob-about-body">Open data archive on Wikibase — the knowledge graph software underlying Wikidata. Items persistent and individually addressable by URI; statements are typed RDF triples carrying qualifiers, references, and ranks; the catalogue is SPARQL-queryable and federable against external Linked Open Data endpoints. Archival description follows GLAM conventions and the CCA Digital Archives Manual — multi-level arrangement at fonds, series, file, and item. Items aligned to external identifiers (Q-IDs) for cross-catalogue reconciliation.</p>
   <p class="mob-about-body">Structured metadata: CC0, per Wikibase/Wikidata convention. Content — drawings, documents, photographs: CC BY-NC-ND 4.0, rights granted by Frances Hunter. Material held by the Canadian Architectural Archives — University of Calgary remains under separate stewardship; contact the CAA for use.</p>
   <hr class="mob-about-rule">
@@ -1351,7 +1354,8 @@
         <p class="ap-title">Hunter House<br>Foundation Archive</p>
         <p class="ap-ver" id="ap-ver"></p>
         <div class="ap-section">
-          <p class="ap-body">A foundation dedicated to the stewardship of the residence and architectural archive of architect <span class="c-red">Richard Morrow Hunter</span> (1930–2023). 203 Goward Road, Saanich, British Columbia.</p>
+          <p class="ap-body">A foundation dedicated to the stewardship of the residence and architectural archive of architect <span class="c-red">Richard Morrow Hunter</span> (1930–2023).</p>
+          <p class="ap-body ap-addr">203 Goward Road, Saanich, British Columbia</p>
         </div>
         <div class="ap-section">
           <p class="ap-section-head">Archive</p>
@@ -1468,7 +1472,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05-test.24";
+  const VERSION      = "v1.05-test.25";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
