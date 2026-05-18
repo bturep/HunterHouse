@@ -668,3 +668,11 @@ Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Tu
 **v1.05-test.18 — bracketed flag slots + more headroom (Brandon).** Row-flags reworked into two `.rf-slot` bracket cells: very light mono `[ ]` (`::before/::after`, opacity .45 — applied to the pseudo-only so the icon stays crisp) framing a fixed-size `.rf-ico` (9×10). Empty rows read `[ ] [ ]`; marked = orange dot inside slot 1, note = teal page icon inside slot 2. `top:30→34px` for more space below the ID; gap 6→5px. Unmark delegate still matches `.rf-mark` (now nested); mobile-hide still `.row .row-flags`.
 
 **Version: v1.05-test.18** (next.html). Live `browse.html` unchanged.
+
+**v1.05-test.19 — seen/reviewed flag, info panel, keyboard scheme (Brandon).**
+- *Seen/reviewed.* Third flag slot — an eye icon, `var(--muted)`, click to clear. Per-researcher localStorage `hhf_seen = { [pin]: [...] }` mirroring the marks infra (`seen` Set, `seenLoad/Save/Hydrate`, `toggleSeen`; hydrated with marks on boot + auth change). Shortcut **R**. Row class `seen`.
+- *Flag strip now researcher-only.* `.row-flags` rendered only when `canMark()` (computed once per `renderList` as `flags`) — Public no longer sees empty bracket slots; the strip is a researcher workspace. Order: `[mark] [seen] [note]`, `.rf-ico` 9→10px.
+- *Info panel.* `[?]` button in the Record bar (`.rec-info`, red attention colour, faint bracket motif). `#info-pane` overlays `#panel-right` entirely (absolute inset:0, like `#about-pane` but scoped to the record panel). `renderInfoPane()` is role-aware: base orientation + grouped shortcut tables always; a Researcher group + an `.ip-note` callout that differs for public / research / admin. Points to the wordmark for the deep colophon (no duplication). Open/close/toggle; `?` toggles, `Esc` closes (added to the Escape chain).
+- *Keyboard scheme.* Added **F** fit, **T** turn/rotate, **Z** zen (hide panels — clicks `#zoom-fs`), **= / +** zoom in, **− / _** zoom out (click the zoom buttons so disabled-bounds are respected), **R** reviewed, **?** info. Existing kept: `/` search, `Esc`, `1` 1:1, `M` mark, ↑/↓ nav, Enter open item. Browser/OS fullscreen left on its header button by design (needs a user gesture; avoids Z confusion). All gated by `!inInput`.
+
+**Version: v1.05-test.19** (next.html). Live `browse.html` unchanged.
