@@ -1319,7 +1319,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05-test.05";
+  const VERSION      = "v1.05-test.06";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -1421,21 +1421,46 @@
     });
   }
 
-  // ── Slice 3b: single-value item-field editing (picker + claim swap) ───────
-  // Vocabulary per property = the values already in use for it (keeps edits
-  // within established terms). Cached after first fetch.
+  // ── Slice 3b/3c: single-value field editing (picker + claim swap) ────────
+  // Vocabulary is scoped per property so the picker stays relevant:
+  //   P1  (item type) → only classes used by real archive items (~6 media types)
+  //   P62 (phase)     → the phase items themselves (~38)
+  //   default         → values already in use for that property
+  const ARCHIVE_PFX = '("HH-HHC-","HH-CAA-","HH-FUL-","HH-GES-","HH-FRH-","HH-IVH-")';
+  function vocabQuery(pid) {
+    const P = `PREFIX wdt: <https://hunterhouse.wikibase.cloud/prop/direct/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+`;
+    if (pid === "P1")
+      return P + `SELECT DISTINCT ?v ?l WHERE { ?i wdt:P2 ?id .
+        FILTER(STRSTARTS(?id,"HH-HHC-")||STRSTARTS(?id,"HH-CAA-")||STRSTARTS(?id,"HH-FUL-")||STRSTARTS(?id,"HH-GES-")||STRSTARTS(?id,"HH-FRH-")||STRSTARTS(?id,"HH-IVH-"))
+        ?i wdt:P1 ?v . ?v rdfs:label ?l . FILTER(LANG(?l)="en") } ORDER BY ?l`;
+    if (pid === "P62")
+      return P + `SELECT ?v ?l WHERE { ?v wdt:P2 ?id . FILTER(STRSTARTS(?id,"HH-PH-")) .
+        ?v rdfs:label ?l . FILTER(LANG(?l)="en") } ORDER BY ?l`;
+    return P + `SELECT DISTINCT ?v ?l WHERE { ?i wdt:${pid} ?v . ?v rdfs:label ?l . FILTER(LANG(?l)="en") } ORDER BY ?l`;
+  }
   const _vocabCache = {};
   function getVocab(pid) {
     if (!_vocabCache[pid]) {
       _vocabCache[pid] = (async () => {
-        const rows = await sparqlQuery(
-          `PREFIX wdt: <https://hunterhouse.wikibase.cloud/prop/direct/>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-SELECT DISTINCT ?v ?l WHERE { ?i wdt:${pid} ?v . ?v rdfs:label ?l . FILTER(LANG(?l)="en") } ORDER BY ?l`);
+        const rows = await sparqlQuery(vocabQuery(pid));
         return rows.map(r => ({ qid: r.v.value.split("/").pop(), label: r.l.value }));
       })().catch(e => { delete _vocabCache[pid]; throw e; });
     }
     return _vocabCache[pid];
+  }
+  // Replace a single-valued YEAR claim (P82, year precision 9) — create-then-remove.
+  async function setYearClaim(entity, pid, year) {
+    const api = WIKIBASE_URL + "/w/api.php";
+    const g = await fetch(`${api}?action=wbgetclaims&entity=${entity}&property=${pid}&format=json&origin=*`)
+      .then(r => r.json());
+    const existing = ((g.claims && g.claims[pid]) || []).map(c => c.id);
+    await proxyEdit({ action: "wbcreateclaim", entity, property: pid, snaktype: "value",
+      value: JSON.stringify({ time: `+${year}-00-00T00:00:00Z`, timezone: 0, before: 0, after: 0,
+        precision: 9, calendarmodel: "http://www.wikidata.org/entity/Q1985727" }) });
+    if (existing.length)
+      await proxyEdit({ action: "wbremoveclaims", claim: existing.join("|") });
   }
   // Replace a single-valued item claim. Create-then-remove so a failure never
   // leaves the field empty (worst case = a visible duplicate, easily fixed).
@@ -1460,6 +1485,41 @@ SELECT DISTINCT ?v ?l WHERE { ?i wdt:${pid} ?v . ?v rdfs:label ?l . FILTER(LANG(
   function openFieldPicker(btn, item) {
     closeFieldPicker();
     const { pid, key, dt } = btn.dataset;
+
+    // Date (P82) — a year input, not a vocabulary list.
+    if (pid === "P82") {
+      const pop = document.createElement("div");
+      pop.className = "hh-pop"; pop.id = "hh-pop";
+      pop.innerHTML = `<input type="text" inputmode="numeric" maxlength="4" placeholder="year (YYYY)" value="${escapeHTML((item.date || "").slice(0,4))}">
+        <div class="hh-pop-msg">Enter a 4-digit year · ↵ to save · Esc</div>`;
+      document.body.appendChild(pop);
+      const rr = btn.getBoundingClientRect();
+      pop.style.top  = Math.min(rr.bottom + 6, window.innerHeight - 90) + "px";
+      pop.style.left = Math.min(rr.left, window.innerWidth - 256) + "px";
+      const yi = pop.querySelector("input");
+      yi.focus(); yi.select();
+      const save = async () => {
+        const y = yi.value.trim();
+        if (!/^\d{4}$/.test(y)) { hhToast("Year must be 4 digits", "err"); return; }
+        if (y === (item.date || "").slice(0,4)) return closeFieldPicker();
+        closeFieldPicker();
+        hhToast("saving Date…");
+        try {
+          await setYearClaim(item.qid, "P82", y);
+          item.date = y;
+          const m = state.items.find(i => i.qid === item.qid); if (m) m.date = y;
+          renderMeta(item);
+          hhToast("Saved · Date → " + y, "ok");
+        } catch (err) { hhToast("Save failed: " + err.message, "err"); }
+      };
+      yi.addEventListener("keydown", e => {
+        if (e.key === "Enter")  { e.preventDefault(); save(); }
+        if (e.key === "Escape") { e.preventDefault(); closeFieldPicker(); }
+      });
+      setTimeout(() => document.addEventListener("mousedown", _popOutside, true), 0);
+      return;
+    }
+
     const pop = document.createElement("div");
     pop.className = "hh-pop"; pop.id = "hh-pop";
     pop.innerHTML = `<input type="text" placeholder="${escapeHTML(dt)}…" autocomplete="off" spellcheck="false">
@@ -2605,10 +2665,10 @@ $("#foot-dims").textContent = "";
     if (item.archiveLink) archRows.push(["Finding aid", `<a href="${escapeHTML(item.archiveLink)}" target="_blank" rel="noopener">${archiveLinkLabel(coll)}</a>`]);
 
     const EDITABLE = canEditWikibase() ? {
-      "Item type":   { pid: "P1",   key: "itemType"    },
-      "Built":       { pid: "P92",  key: "builtStatus" },
-      "Built by":    { pid: "P140", key: "builtBy"     },
-      "Designed by": { pid: "P141", key: "designedBy"  },
+      "Date":      { pid: "P82", key: "date"        },
+      "Phase":     { pid: "P62", key: "phase"       },
+      "Item type": { pid: "P1",  key: "itemType"    },
+      "Built":     { pid: "P92", key: "builtStatus" },
     } : {};
     const descHTML = descRows.map(([k,v]) => {
       const e = EDITABLE[k];
