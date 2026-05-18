@@ -218,11 +218,12 @@
 
   /* ── filter badge on Browse label ── */
   .filter-badge{
-    display:none;font-family:var(--mono);font-size:8px;font-weight:500;
-    background:transparent;color:var(--ink);border:1px solid var(--ink);border-radius:10px;
-    padding:0px 4px;letter-spacing:0;
+    display:none;font-family:var(--mono);font-size:9px;font-weight:500;
+    color:var(--ink);letter-spacing:0;margin-left:5px;
   }
-  .filter-badge.visible{display:flex;align-items:center}
+  .filter-badge::before{content:"["}
+  .filter-badge::after{content:"]"}
+  .filter-badge.visible{display:inline-flex;align-items:baseline}
 
   /* ── filter panel ── */
   .filter-panel{
@@ -1010,6 +1011,15 @@
   .rn-who{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;color:#7a6010}
   html.dark .rn-who{color:#d4b840}
   .rn-count{font-family:var(--mono);font-size:9px;color:var(--muted);opacity:0.6}
+  /* Admin-only [mine]/[all] notes-visibility toggle in the rn header */
+  .rn-allbtn{
+    font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.04em;
+    background:none;border:0;padding:0;margin-left:8px;cursor:pointer;
+    color:var(--muted);text-transform:lowercase;flex-shrink:0;
+  }
+  .rn-allbtn::before{content:"["}
+  .rn-allbtn::after{content:"]"}
+  .rn-allbtn:hover,.rn-allbtn.on{color:var(--ink)}
   /* auth row — two-step: name then pin */
   .rn-auth{display:block;margin-bottom:7px}
   .rn-auth-step{display:flex;align-items:center;gap:6px}
@@ -1379,7 +1389,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05-test.15";
+  const VERSION      = "v1.05-test.16";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -1403,10 +1413,25 @@
   }
   function rnSession()        { try { return JSON.parse(sessionStorage.getItem("hhf_researcher")); } catch { return null; } }
   function rnUnlock(entry)    { sessionStorage.setItem("hhf_researcher", JSON.stringify(entry)); }
-  function rnLockOut()        { sessionStorage.removeItem("hhf_researcher"); }
+  function rnLockOut()        { sessionStorage.removeItem("hhf_researcher"); rnShowAll = false; }
   // Role / capability gate. Public = not unlocked.
   function rnRole()           { const s = rnSession(); return (s && s.role) || "public"; }
   function canEditWikibase()  { return rnRole() === "admin"; }
+
+  // Notes are private: a researcher sees only their own; an admin may toggle
+  // to see every researcher's notes; Public sees none. rnShowAll is the admin
+  // toggle (session-scoped, not persisted).
+  let rnShowAll = false;
+  function rnCanSeeAll() { return rnRole() === "admin" && rnShowAll; }
+  // Notes visible to the current viewer, paired with their RAW array index so
+  // edit/delete still target the right entry when the list is filtered.
+  function rnVisibleNotes(archId) {
+    const s = rnSession();
+    if (!s) return [];                                   // Public → nothing
+    const raw = rnLoad(archId).map((n, i) => ({ n, i }));
+    if (rnCanSeeAll()) return raw;                        // admin, toggle on
+    return raw.filter(({ n }) => n.by === s.initials);   // own notes only
+  }
 
   // ── Admin editing via local proxy (Slice 3) ──────────────────────────────
   const PROXY_URL = "http://127.0.0.1:8731";
@@ -1759,18 +1784,26 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       localStorage.setItem("hhf_rn", JSON.stringify(all));
     } catch {}
   }
-  // Set of archIds with ≥1 researcher note — computed once per list render
-  // so we don't JSON.parse the whole blob for every row.
+  // Set of archIds that carry a note VISIBLE to the current viewer — computed
+  // once per list render. Public → empty; researcher → only their own;
+  // admin with the toggle on → any note.
   function rnNotedIds() {
+    const s = rnSession();
+    if (!s) return new Set();
     try {
       const all = JSON.parse(localStorage.getItem("hhf_rn") || "{}");
-      return new Set(Object.keys(all).filter(k => Array.isArray(all[k]) && all[k].length));
+      const seeAll = rnCanSeeAll();
+      return new Set(Object.keys(all).filter(k => {
+        const arr = all[k];
+        if (!Array.isArray(arr) || !arr.length) return false;
+        return seeAll || arr.some(n => n.by === s.initials);
+      }));
     } catch { return new Set(); }
   }
   // Live-toggle one list row's note dot after a note add / edit / delete.
   function rnSyncRow(archId) {
     const r = document.querySelector(`.row[data-id="${CSS.escape(archId)}"]`);
-    if (r) r.classList.toggle("has-note", rnLoad(archId).length > 0);
+    if (r) r.classList.toggle("has-note", rnVisibleNotes(archId).length > 0);
   }
 
   const LOCK_SVG = `<svg width="10" height="12" viewBox="0 0 10 12" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="5.5" width="8" height="6" rx="1"/><path d="M3 5.5V3.8a2 2 0 0 1 4 0v1.7"/></svg>`;
@@ -1791,8 +1824,9 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     const panel = document.getElementById(panelId);
     if (!panel) return;
     const researcher = rnSession();
-    const notes      = rnLoad(archId);
-    const noteRows   = notes.map((n, i) =>
+    // Visible notes only, each carrying its RAW index for edit/delete.
+    const vis        = rnVisibleNotes(archId);
+    const noteRows   = vis.map(({ n, i }) =>
       `<div class="rn-row" data-idx="${i}"><span class="rn-by"><span class="rn-by-t">${escapeHTML(n.by)}</span><span class="rn-del" tabindex="-1">×</span></span><span class="rn-text">${escapeHTML(n.text)}</span><span class="rn-date">${escapeHTML(n.date)}</span></div>`
     ).join("");
 
@@ -1800,7 +1834,6 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       panel.innerHTML = `
         <div class="rn-head">
           <span class="rn-label">researcher notes</span>
-          ${notes.length ? `<span class="rn-count">${notes.length}</span>` : ""}
           <button class="rn-lock-btn" id="rn-lock-btn" title="Unlock to add notes">${LOCK_SVG}</button>
         </div>
         <div class="rn-auth" id="rn-auth" style="display:none">
@@ -1816,7 +1849,6 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             <span class="rn-pin-err" id="rn-pin-err"></span>
           </div>
         </div>
-        ${noteRows ? `<div class="rn-list rn-list-locked">${noteRows}</div>` : ""}
       `;
       const authRow   = panel.querySelector("#rn-auth");
       const stepName  = panel.querySelector("#rn-step-name");
@@ -1859,6 +1891,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         <div class="rn-head">
           <span class="rn-label">researcher notes</span>
           <span class="rn-who">${escapeHTML(researcher.name)}${researcher.role ? ` · ${escapeHTML(researcher.role)}` : ""}</span>
+          ${rnRole() === "admin" ? `<button class="rn-allbtn${rnShowAll ? " on" : ""}" id="rn-allbtn" title="${rnShowAll ? "Showing every researcher's notes — click for yours only" : "Showing only your notes — click to see all researchers'"}">${rnShowAll ? "all" : "mine"}</button>` : ""}
           <button class="rn-lock-btn" id="rn-lock-btn" title="Lock">${UNLOCK_SVG}</button>
         </div>
         ${noteRows ? `<div class="rn-list">${noteRows}</div>` : ""}
@@ -1868,6 +1901,11 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         </div>
       `;
       panel.querySelector("#rn-lock-btn").addEventListener("click", () => { rnLockOut(); rerenderRecord(archId); });
+      panel.querySelector("#rn-allbtn")?.addEventListener("click", () => {
+        rnShowAll = !rnShowAll;     // admin-only: see all researchers' notes
+        renderRN(archId);          // re-render panel (notes + toggle label)
+        renderList();              // refresh row note-dots to match
+      });
       const textarea = panel.querySelector("#rn-textarea");
       const addBtn   = panel.querySelector("#rn-add-btn");
       let editIdx = null;
@@ -1877,7 +1915,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         const current = rnLoad(archId);
         textarea.value = current[idx].text;
         addBtn.textContent = "save";
-        panel.querySelectorAll(".rn-row").forEach((r, i) => r.classList.toggle("editing", i === idx));
+        panel.querySelectorAll(".rn-row").forEach(r => r.classList.toggle("editing", parseInt(r.dataset.idx) === idx));
         textarea.focus();
         textarea.setSelectionRange(textarea.value.length, textarea.value.length);
       }
