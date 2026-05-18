@@ -19,6 +19,18 @@ At session start: announce which LINE is active and which file you'll be editing
 
 ## ⚑ Pending at next session start — prompt Brandon immediately
 
+**v1.05 editing — open threads (LINE: NEXT, work in `next.html`).** Slices 3a–3d shipped & tested (Date `YYYY-MM-DD`, Phase, Item type, Built, Drawing type, Areas, title — all admin-gated via local proxy). Brandon to handle, tomorrow:
+- **A few small `next.html` tweaks** Brandon has queued (unspecified — ask him).
+- **Held by** — P94 (CAA/FUL) vs P79 (HHC) ambiguity; needs a rule for which to write before it's editable.
+- **Phase rename** — distinct from "change phase" (P62, done). Renaming edits the shared Phase item's label → affects every item in that phase. Needs a confirm-guard. (`wbsetlabel` on `item.phaseQID`.)
+- **Built by / Designed by** (P140/P141) — 0 vocabulary exists; needs a person/org entity-search picker (not the in-use-vocab pattern).
+- **Promote `next.html` → live `browse.html`** when v1.05 is ready — the documented one-step Staging-workflow cycle (cp, bump to `v1.05.00`, tag, push).
+- **Restart the edit proxy** each session: `python3 scripts/edit_proxy.py` (dies on Mac sleep; editing on `next.html` is inert without it; could be auto-wired into the `claude()` launcher later).
+- **Housekeeping:** add `scripts/__pycache__/` to `.gitignore` (bytecode noise now untracked).
+- Plus the long-standing **Wikidata items** and **RAD/archival-standards** items below (still deferred).
+
+---
+
 **P100 needs reassignment.** The "notes" property (P100) is no longer rendered in the record pane — curator notes were migrated to researcher notes (localStorage, BP). The property label and purpose should be reassigned to something more useful. Decide what P100 should become before next cataloguing session.
 
 ---
@@ -606,3 +618,13 @@ Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Go
 **Slice 3b done — single-value item-field picker (next.html · v1.05-test.05).** Reusable: editable rows (Item type P1, Built P92, Built by P140, Designed by P141) get a ✎ (admin only) → `openFieldPicker` popover offering that property's existing vocabulary (`getVocab(pid)` SPARQL distinct, cached). Pick → `setSingleItemClaim` = wbgetclaims (read, origin=*) then **create-then-remove** via proxy (failure never empties the field) → optimistic `state.items` update + `renderMeta`. Reused `proxyEdit`/`hhToast`. Read paths smoke-tested. Held-by (P94/P79 ambiguous) + Areas multi-value (P87) = 3c; phase-title = 3d.
 
 **Slice 3a done — inline title editing end-to-end (next.html · v1.05-test.02).** Proves the full pipeline: admin-gated click-to-edit on the desktop record `.meta-title` → `proxyEdit()` → local proxy → `wbsetlabel` on `item.qid` → optimistic update of `state.items` + list row + toast. Helpers added: `PROXY_URL`, `hhToast()`, `proxyEdit()` (admin secret = `rnSession().pin`), `wireMetaEdit()` (called at end of `renderMeta`, no-op unless `canEditWikibase()`). Same `proxyEdit` plumbing now reused by later slices. Next: **Slice 3b** — reusable entity-picker for the QID-valued single-value fields (item type P1, built status P92, built/drawn/held by P140/P141/P94) via wbgetclaims→wbremoveclaims+wbcreateclaim; then **3c** multi-value Areas (P87 ±); then **3d** phase-title (`wbsetlabel` on `item.phaseQID`, with "renames the whole phase" guard). next.html = Brandon's primary-researcher working structure for v1.05 (metadata edits + UI iteration together).
+
+---
+
+### 2026-05-17/18 — Session summary (LIVE at v1.04.02 · staging next.html at v1.05-test.11)
+
+Large session. **Live `browse.html`:** panel↔fullscreen interlink fix (v1.04.01), mobile sheet swipe nav (v1.04.02). **Infra:** staging system established — `next.html` (copy, `v1.05-test.NN`) served on `main` alongside live `browse.html`; documented Staging/promotion workflow; "⚑ Active working context" `**LINE:**` marker; `claude()` launcher reworked so Hunter House auto-stays on `main` and the only prompt is **browse.html (LIVE) / next.html (NEXT)** — git-branch picker dropped for LINE projects (`v1.04` is **archive**, ignored). `WIKIBASE_MAINPAGE.md` rescued from `v1.04` onto `main` (30a992d). **Editing feature (next.html, Slices 1–3d):** roles (Admin/Research/Public via researcher unlock; Brandon=admin), local edit proxy `scripts/edit_proxy.py` (bot creds server-side, localhost-only, admin-secret), admin-gated inline editing of Title, Date (`YYYY-MM-DD`, precision 9/10/11), Phase, Item type, Built (pickers), Drawing type + Areas (multi-value chips), with optimistic update, create-then-remove claim safety, proxy-offline grey-out + auto-recover, lock/unlock re-render. Tested working by Brandon; edits hit the **real live Wikibase** (revision history = undo). Parked items → see Pending section.
+
+**Versioning note:** no SESSION bump / git tag taken tonight — v1.05 is mid-development on staging and **not promoted**; the live line stays `v1.04`. All work is committed and pushed to `main` (remote), so memory is durable without a tag. Bump SESSION + tag at v1.05 promotion (or per Brandon's call). Per Brandon: version numbers are convention; git is the real tracking.
+
+**State for resume:** `LINE: NEXT`; edit `next.html`; restart proxy with `python3 scripts/edit_proxy.py`; `browse.html` untouched since v1.04.02; open threads in the Pending section above.
