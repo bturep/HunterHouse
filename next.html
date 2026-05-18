@@ -289,15 +289,26 @@
   .row.sel{background:var(--red-tint)}
   .row.sel::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red)}
   .row.sel .archid{color:var(--red-deep)}
-  /* Per-row flags — clustered below the item ID on the left: an orange
-     "marked" dot (click to unmark) + a page icon when the item has a note
-     visible to the viewer. Absolutely positioned so the row grid is untouched. */
+  /* Per-row flags — two bracketed "slots" below the item ID on the left.
+     Empty reads as a very light [ ]; filled shows the icon framed inside it
+     (orange dot = marked, page icon = has a viewer-visible note). Absolutely
+     positioned so the row grid is untouched. */
   .row .row-flags{
-    position:absolute;left:20px;top:30px;
-    display:flex;align-items:center;gap:6px;
+    position:absolute;left:20px;top:34px;
+    display:flex;align-items:center;gap:5px;
+  }
+  .row .rf-slot{
+    font-family:var(--mono);font-size:11px;line-height:1;
+    display:inline-flex;align-items:center;color:var(--hint);
+  }
+  .row .rf-slot::before{content:"[";margin-right:1px;opacity:.45}
+  .row .rf-slot::after{content:"]";margin-left:1px;opacity:.45}
+  .row .rf-ico{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:9px;height:10px;
   }
   .row .rf-mark{
-    width:7px;height:7px;border-radius:50%;background:#cf7a2c;
+    width:6px;height:6px;border-radius:50%;background:#cf7a2c;
     opacity:0;pointer-events:none;cursor:pointer;transition:opacity .12s,background .12s;
   }
   html.dark .row .rf-mark{background:#e8924a}
@@ -1391,7 +1402,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05-test.17";
+  const VERSION      = "v1.05-test.18";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -2624,8 +2635,8 @@ WHERE {
       const tmark = typeMark(it.itemType);
       row.innerHTML = `
         <span class="row-flags" aria-hidden="true">
-          <span class="rf-mark" title="Click to unmark"></span>
-          <span class="rf-note" title="Has a researcher note"><svg viewBox="0 0 10 12" width="9" height="11" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"><path d="M2 1h4l3 3v7H2z"/><path d="M6 1v3h3"/><path d="M3.7 6.6h3M3.7 8.6h3"/></svg></span>
+          <span class="rf-slot rf-slot-mark"><span class="rf-ico"><span class="rf-mark" title="Click to unmark"></span></span></span>
+          <span class="rf-slot rf-slot-note"><span class="rf-ico"><span class="rf-note" title="Has a researcher note"><svg viewBox="0 0 10 12" width="8" height="10" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 1h4l3 3v7H2z"/><path d="M6 1v3h3"/><path d="M3.7 6.6h3M3.7 8.6h3"/></svg></span></span></span>
         </span>
         <span class="archid">${tmark ? `<span class="tmark pc-stone" data-type="${escapeHTML(tmark)}" title="${escapeHTML(it.itemType)}">${tmark}</span>` : ""}${displayId(it.id)}</span>
         <div class="title-wrap">
