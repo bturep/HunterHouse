@@ -578,5 +578,21 @@ Continued from v1.03.28. Session covered deep design and data work: the entire p
 
 **Active working-context marker (v1.04.04)**
 - Added the "⚑ Active working context" block at the top of CLAUDE.md with a machine-rewritable `**LINE: NEXT|LIVE**` marker. Claude reads this first each session to know whether to edit `next.html` (NEXT, label `v1.05-test.NN`) or `browse.html` (LIVE). Conceptual clarification logged: version numbers are pure convention; git is the real version tracking. `claude()` launcher to be extended to flip this marker at session start (pending Brandon's OK to edit ~/.zshrc).
+- Launcher wired: `~/.zshrc` `claude()` now prompts "Working line: LIVE / NEXT" (only for projects carrying the `LINE:` marker) and rewrites the CLAUDE.md marker. `zsh -n` verified. Active in new terminals only.
 
 **Version: v1.04.04**
+
+### 2026-05-17 — v1.05 line begins: role system foundation (next.html · v1.05-test.01)
+
+Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Goal of the v1.05 line: admin (Brandon) inline editing of Wikibase description fields, **desktop-only**, gated by the existing researcher-notes unlock, writing through a Cloudflare Worker proxy (auth path chosen). Scope settled over several clarifications:
+- Researcher/Admin modes are **desktop browser only**. Mobile stays read-only; mobile researcher-notes display is explicitly **out of scope** ("something else", later).
+- Role hierarchy: **Public** (not unlocked, read-only) · **Research** (notes/marking/selections) · **Admin** = Brandon only (+ Wikibase field editing). Researcher-notes unlock is the single gate.
+- Saved selections + marking = desktop, `localStorage` (per-device, fine — not needed on mobile).
+
+**Slice 1 done (this entry) — role plumbing, client-only, no Worker yet:**
+- `RPINS` entries gain `role`; Brandon = `"admin"`. Role flows automatically through `rnUnlock` (stores full entry) into `rnSession()`.
+- Added `rnRole()` → `"admin"|"research"|"public"` and `canEditWikibase()` (`role === "admin"`).
+- Unlocked researcher-notes header now shows the role (`Brandon Poole · admin`) so the gate is visible/verifiable on desktop.
+- No editing UI or Worker yet — that's Slice 2 (Cloudflare Worker; needs Brandon's Cloudflare deploy steps) then Slice 3 (field-edit UI + item pickers).
+
+**Version: v1.05-test.01** (next.html). Live `browse.html` unchanged.
