@@ -1464,7 +1464,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05-test.20";
+  const VERSION      = "v1.05-test.21";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -3909,7 +3909,12 @@ $("#foot-dims").textContent = "";
       const inInput = e.target.matches("input, select, textarea");
       if (e.key === "/" && !inInput) { e.preventDefault(); const si = document.getElementById("search-input"); if (si) { si.classList.add("open"); si.focus(); } return; }
       if (e.key === "Escape" && inInput) { e.target.blur(); return; }
-      if (e.key === "Escape") { closeAllDropdowns(); closeAboutPane(); closeInfoPane(); return; }
+      if (e.key === "Escape") {
+        closeAllDropdowns(); closeAboutPane(); closeInfoPane();
+        const lp = document.getElementById("panel-left"), rp = document.getElementById("panel-right");
+        if (lp && rp && lp.classList.contains("out") && rp.classList.contains("out")) document.getElementById("zoom-fs").click();
+        return;
+      }
       if (e.key === "?" && !inInput) { e.preventDefault(); toggleInfoPane(); return; }
       if (e.key === "1"         && !inInput) { setZoom(1); return; }
       if ((e.key === "f" || e.key === "F") && !inInput) { fitToFrame(); return; }
@@ -3921,9 +3926,10 @@ $("#foot-dims").textContent = "";
       if ((e.key === "r" || e.key === "R") && !inInput && canMark() && state.selectedId) { toggleSeen(state.selectedId); return; }
       if (e.key === "ArrowDown" && !inInput) { e.preventDefault(); selectAdjacent(+1); }
       if (e.key === "ArrowUp"   && !inInput) { e.preventDefault(); selectAdjacent(-1); }
-      if (e.key === "Enter"     && !inInput && state.selectedId) {
+      if (e.key === "Enter"     && !inInput) {
         e.preventDefault();
-        window.open(`item.html?id=${encodeURIComponent(state.selectedId)}`, "_blank");
+        document.getElementById("zoom-fs").click();   // zen — hide / show both panels
+        return;
       }
     });
   }
@@ -3955,9 +3961,9 @@ $("#foot-dims").textContent = "";
       <p class="ip-title">Hunter House Archive</p>
       <p class="ap-body">A live catalogue of the Richard Hunter architectural archive. <i>Left</i> browses items, <i>centre</i> shows the image (zoom / pan / rotate), <i>this panel</i> is the record. Everything is read live from a public Wikibase and is fully queryable — see the data links at the foot of a record.</p>
       <p class="ip-grp">Navigate</p>
-      ${keys([["↑ ↓", "Previous / next item"], ["&crarr;", "Open the full item page"], ["/", "Search"], ["Esc", "Close search / panels"]])}
+      ${keys([["↑ ↓", "Previous / next item"], ["/", "Search"], ["Esc", "Close · exit zen"]])}
       <p class="ip-grp">View</p>
-      ${keys([["F", "Fit image to frame"], ["1", "Actual size (1:1)"], ["+ &minus;", "Zoom in / out"], ["T", "Turn (rotate 90°)"], ["Z", "Zen — hide both panels"]])}`;
+      ${keys([["F", "Fit image to frame"], ["1", "Actual size (1:1)"], ["+ &minus;", "Zoom in / out"], ["T", "Turn (rotate 90°)"], ["Z / &crarr;", "Zen — hide both panels"]])}`;
     if (researcher) {
       html += `<p class="ip-grp">Researcher</p>
         ${keys([["M", "Mark / unmark (shortlist)"], ["R", "Reviewed / not reviewed"]])}`;
