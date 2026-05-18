@@ -628,3 +628,18 @@ Large session. **Live `browse.html`:** panel↔fullscreen interlink fix (v1.04.0
 **Versioning note:** no SESSION bump / git tag taken tonight — v1.05 is mid-development on staging and **not promoted**; the live line stays `v1.04`. All work is committed and pushed to `main` (remote), so memory is durable without a tag. Bump SESSION + tag at v1.05 promotion (or per Brandon's call). Per Brandon: version numbers are convention; git is the real tracking.
 
 **State for resume:** `LINE: NEXT`; edit `next.html`; restart proxy with `python3 scripts/edit_proxy.py`; `browse.html` untouched since v1.04.02; open threads in the Pending section above.
+
+---
+
+### 2026-05-18 — MARK dialled in as a researcher tool (next.html · v1.05-test.12)
+
+Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Turned the invisible session-only M-key toy into a real, persistent **Research-role** capability (Public stays read-only; mobile out of scope per v1.05).
+
+- **Per-researcher persistence.** New `hhf_marks = { [pin]: [archId,…] }` in localStorage, mirroring the `rnLoad/rnSave` pattern. Helpers: `canMark()` (`rnRole() !== "public"`), `marksKey()` (= `rnSession().pin`), `marksLoad/marksSave`, `marksHydrate()` (sync in-memory `marked` Set ↔ active researcher; empty for Public). Hydrated on boot and on every auth change via `rerenderRecord()`.
+- **Role gate.** `toggleMark` and the M-key handler now no-op for Public. One researcher's marks never leak to the Public view or to another researcher (per-pin slot).
+- **Marked bar** — slim researcher-only toolbar (`#mark-bar`) between `.list-head` and the rows; hidden for Public and on mobile. Shows `◆ N marked`; empty-state shows *"press M on a row to mark it"* (makes the otherwise-undiscoverable shortcut visible). Actions: **only** (toggles `state.filterMarkedOnly` → list narrows to marks), **export** (`navigator.clipboard` copy of sorted IDs, toast confirms), **clear** (hold-1.5s, reuses the `rn-del` hold-to-confirm safety; new `mark-charge` clip-path sweep).
+- **Filter integration.** `state.filterMarkedOnly` wired into `applyFilters`, `updateFilterBadge` (+1), `clearAllFilters` (resets it). `renderList()` now calls `renderMarkBar()` at its tail so the bar stays in sync through every render path.
+- Decision: placed in the **browse pane** (not a panel below the record-pane notes) — the marked set is list-scoped (count/only/clear/export all act on the list); a global panel in the per-item record pane would mismatch. All 4 requested affordances built.
+- Syntax-checked (all 3 inline script blocks `node --check` OK). Not yet committed/pushed — awaiting Brandon's go to deploy to the staging URL for desktop testing.
+
+**Version: v1.05-test.12** (next.html). Live `browse.html` unchanged.
