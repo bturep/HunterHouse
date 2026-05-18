@@ -644,4 +644,6 @@ Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Tu
 
 **v1.05-test.13 — visible per-row mark + single-item unmark (Brandon feedback).** The old `.row.marked::after` was a 4px dot in the row's bottom-left corner — technically rendering but easy to miss ("no mark on the item itself"). Replaced with `.row .row-mark` — a copper `◆` in the row's left margin (absolutely positioned, grid untouched; hover → red). It's a real element and **click-to-unmark that one item**: the `#rows` click delegate now checks `e.target.closest(".row-mark")` first and calls `toggleMark` instead of `selectItem`. Answers "remove a single item, not all of them" — per-item via the diamond or M-key toggle; clear-all stays the hold gesture. Hidden on mobile alongside `.mark-bar`. Syntax-checked OK.
 
-**Version: v1.05-test.13** (next.html). Live `browse.html` unchanged.
+**v1.05-test.14 — row diamond resized + aligned (Brandon).** `.row-mark` 9px→13px and moved from row vertical-centre (`top:50%`) to `top:13px` (= row `padding-top` 11px + `.archid` `padding-top` 2px) so it sits on the first text line, aligned with the `[D]` item-type badge. CSS-only.
+
+**Version: v1.05-test.14** (next.html). Live `browse.html` unchanged.
