@@ -1329,7 +1329,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05-test.10";
+  const VERSION      = "v1.05-test.11";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -1713,6 +1713,12 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   const LOCK_SVG = `<svg width="10" height="12" viewBox="0 0 10 12" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="5.5" width="8" height="6" rx="1"/><path d="M3 5.5V3.8a2 2 0 0 1 4 0v1.7"/></svg>`;
   const UNLOCK_SVG = `<svg width="10" height="12" viewBox="0 0 10 12" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="5.5" width="8" height="6" rx="1"/><path d="M3 5.5V3.8a2 2 0 0 1 4 0V1.5"/></svg>`;
 
+  // Re-render the whole record pane after an auth change (lock / unlock) so
+  // admin affordances + proxy badge appear/disappear immediately.
+  function rerenderRecord(archId) {
+    const it = state.items.find(i => i.id === archId);
+    if (it) renderMeta(it); else renderRN(archId);
+  }
   function renderRN(archId, panelId = "rn-panel") {
     const panel = document.getElementById(panelId);
     if (!panel) return;
@@ -1774,7 +1780,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
           pinErr.textContent = "invalid pin"; setTimeout(() => { pinErr.textContent = ""; }, 1800); pinInput.select(); return;
         }
         rnUnlock(pending);
-        renderRN(archId);
+        rerenderRecord(archId);
       }
       nameBtn.addEventListener("click", tryName);
       nameInput.addEventListener("keydown", e => { if (e.key === "Enter") tryName(); });
@@ -1793,7 +1799,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
           <div class="rn-add-foot"><button class="rn-add-btn" id="rn-add-btn">add</button></div>
         </div>
       `;
-      panel.querySelector("#rn-lock-btn").addEventListener("click", () => { rnLockOut(); renderRN(archId); });
+      panel.querySelector("#rn-lock-btn").addEventListener("click", () => { rnLockOut(); rerenderRecord(archId); });
       const textarea = panel.querySelector("#rn-textarea");
       const addBtn   = panel.querySelector("#rn-add-btn");
       let editIdx = null;
