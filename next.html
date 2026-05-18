@@ -289,23 +289,25 @@
   .row.sel{background:var(--red-tint)}
   .row.sel::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red)}
   .row.sel .archid{color:var(--red-deep)}
-  /* Per-row mark — copper diamond in the left margin; click it to unmark
-     just that one item. Absolutely positioned so the row grid is untouched. */
-  .row .row-mark{
-    position:absolute;left:5px;top:13px;
-    font-size:13px;line-height:1;color:var(--copper);
-    opacity:0;pointer-events:none;cursor:pointer;transition:color .12s;
+  /* Per-row flags — clustered below the item ID on the left: an orange
+     "marked" dot (click to unmark) + a page icon when the item has a note
+     visible to the viewer. Absolutely positioned so the row grid is untouched. */
+  .row .row-flags{
+    position:absolute;left:20px;top:30px;
+    display:flex;align-items:center;gap:6px;
   }
-  .row.marked .row-mark{opacity:1;pointer-events:auto}
-  .row .row-mark:hover{color:var(--red-deep)}
-  /* Per-row note presence — quiet muted dot in the right margin, not
-     interactive (selecting the row shows the note in the record pane). */
-  .row .row-note{
-    position:absolute;right:8px;top:17px;
-    width:5px;height:5px;border-radius:50%;background:var(--muted);
+  .row .rf-mark{
+    width:7px;height:7px;border-radius:50%;background:#cf7a2c;
+    opacity:0;pointer-events:none;cursor:pointer;transition:opacity .12s,background .12s;
+  }
+  html.dark .row .rf-mark{background:#e8924a}
+  .row.marked .rf-mark{opacity:1;pointer-events:auto}
+  .row .rf-mark:hover{background:var(--red-deep)}
+  .row .rf-note{
+    display:flex;line-height:0;color:var(--copper);
     opacity:0;pointer-events:none;
   }
-  .row.has-note .row-note{opacity:1}
+  .row.has-note .rf-note{opacity:1}
 
   /* ── researcher marked bar (browse pane, research/admin only) ── */
   .mark-bar{
@@ -1131,7 +1133,7 @@
     .fp-search-input::placeholder{color:var(--hint)}
 
     /* Marking is desktop-only (keyboard M); hide the researcher bar + row mark */
-    .mark-bar,.row .row-mark,.row .row-note{display:none}
+    .mark-bar,.row .row-flags{display:none}
     /* Browse bar: always match sheet-bar colour; round corners only in PWA */
     .list-head{background:var(--bg);padding-left:20px;padding-right:24px}
     html.pwa .list-head{border-radius:14px 14px 0 0}
@@ -1389,7 +1391,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05-test.16";
+  const VERSION      = "v1.05-test.17";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -2621,8 +2623,10 @@ WHERE {
       row.dataset.id = it.id;
       const tmark = typeMark(it.itemType);
       row.innerHTML = `
-        <span class="row-mark" title="Click to unmark" aria-hidden="true">◆</span>
-        <span class="row-note" title="Has a researcher note" aria-hidden="true"></span>
+        <span class="row-flags" aria-hidden="true">
+          <span class="rf-mark" title="Click to unmark"></span>
+          <span class="rf-note" title="Has a researcher note"><svg viewBox="0 0 10 12" width="9" height="11" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"><path d="M2 1h4l3 3v7H2z"/><path d="M6 1v3h3"/><path d="M3.7 6.6h3M3.7 8.6h3"/></svg></span>
+        </span>
         <span class="archid">${tmark ? `<span class="tmark pc-stone" data-type="${escapeHTML(tmark)}" title="${escapeHTML(it.itemType)}">${tmark}</span>` : ""}${displayId(it.id)}</span>
         <div class="title-wrap">
           <div class="title">${escapeHTML(it.title)}</div>
@@ -3763,7 +3767,7 @@ $("#foot-dims").textContent = "";
     $("#rows").addEventListener("click", e => {
       const row = e.target.closest(".row");
       if (!row || !row.dataset.id) return;
-      if (e.target.closest(".row-mark")) {   // clicking the diamond unmarks it
+      if (e.target.closest(".rf-mark")) {   // clicking the orange dot unmarks it
         toggleMark(row.dataset.id);
         return;
       }
