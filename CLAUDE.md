@@ -653,3 +653,10 @@ Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Tu
 - *Bugfix (Brandon-reported).* With "only" active, unmarking the **last** item emptied the list while `filterMarkedOnly` stayed true and the bar's zero-state has no toggle → stranded: badge showed `1`, list empty, no way back. `toggleMark` now captures `wasOnly`, auto-clears `filterMarkedOnly` when `marked.size` hits 0, and re-renders whenever it *was* in only-mode (so the full list returns on exit). Reload also escapes (flag isn't persisted).
 
 **Version: v1.05-test.15** (next.html). Live `browse.html` unchanged.
+
+**v1.05-test.16 — notes made private + admin all/mine toggle + bracket filter badge (Brandon).**
+- *Filter badge → `[#]`.* `.filter-badge` was a bordered circle; now bracket convention (`::before "[" / ::after "]"`, no border/bg, `margin-left:5px`) to match the `[D]`/`[Area]` pill style. JS untouched (still `textContent = total`).
+- *Notes are now private.* Researcher notes are no longer public. `rnVisibleNotes(archId)` returns notes paired with their **raw array index** (so edit/delete still hit the right entry when the view is filtered): Public → none; researcher → only `n.by === session.initials`; admin → all **only when** the new `rnShowAll` toggle is on. `rnNotedIds()` and `rnSyncRow()` are viewer-aware, so the row note-dots are private too. Public branch of `renderRN` no longer renders any notes or count (just the unlock affordance). `setEditMode` highlight now matches on `data-idx` (raw index) instead of DOM position, since visible rows can be non-contiguous.
+- *Admin toggle.* `[mine]`/`[all]` button in the rn header, **admin-role only** (`.rn-allbtn`, bracket style). Flips `rnShowAll` (session-scoped, reset on lock-out), re-renders the panel + list dots. Default = mine.
+
+**Version: v1.05-test.16** (next.html). Live `browse.html` unchanged.
