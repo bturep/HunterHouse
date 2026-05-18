@@ -680,3 +680,7 @@ Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Tu
 **v1.05-test.20 — fix `/` search shortcut (scope bug).** Root cause: `openSearch()` is declared inside `main()`, but the global keydown handler lives in the sibling `wireControls()` — `openSearch` was never in scope there, so `/` threw a ReferenceError (pre-existing; surfaced now via shortcut testing). Fixed by inlining the DOM ops (`#search-input` add `.open` + focus) so the handler has no cross-scope dependency. Enter (open item page) untouched pending Brandon's call on a fullscreen binding.
 
 **Version: v1.05-test.20** (next.html). Live `browse.html` unchanged.
+
+**v1.05-test.21 — Enter → zen (Brandon's call).** Enter no longer opens `item.html` (new tab); it now toggles zen / hide-both-panels (clicks `#zoom-fs`), same as Z. Esc also restores zen now: the Escape handler reveals both panels if both are `.out`. Info-panel shortcut list updated (Navigate drops the item-page row; View shows `Z / ↵` for zen; Esc = "Close · exit zen"). Note: the `item.html` deep-page is no longer reachable by keyboard — fine for now (data-footer links remain).
+
+**Version: v1.05-test.21** (next.html). Live `browse.html` unchanged.
