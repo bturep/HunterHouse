@@ -700,3 +700,9 @@ Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Tu
 **v1.05-test.25 — About: address on its own line (Brandon).** The Foundation address was tacked onto the end of the bio sentence and wrapped awkwardly. Split into its own line in both the desktop About pane (`.ap-body` → new `.ap-body.ap-addr`) and the mobile About (`.mob-about-body.ap-addr`); new `.ap-addr{margin-top:-6px;color:var(--muted)}` pulls it up under the bio as a quiet location stamp. Trailing period dropped (it's now a standalone address). CSS+HTML only.
 
 **Version: v1.05-test.25** (next.html). Live `browse.html` unchanged.
+
+**v1.05-test.26 — shortcut hints in tooltips + row-flags redesign (Brandon).**
+- *Tooltips.* Every shortcut-bound control's `title` now ends with its key in brackets, no added explanation: search `[/]`, zoom-out `[-]`, zoom-in `[+]`, fit `[F]`, 1:1 `[1]`, rotate `[T]`, zen `[Z]` (static + the JS `syncFsBtn` title), info `[?]` (replaced the old "(?)"), row mark `[M]`, row eye `[R]`. `#fs-toggle` (browser FS) left alone — no key by design; `.rf-note` left — no shortcut.
+- *Row flags.* Dropped the `[ ]` brackets. `.row-flags` is now a fixed **104px** strip (= the archid/`type mark + ID` column) at `left:20px`, three equal `.rf-slot` cells with **two interior vertical rules** (`.rf-slot + .rf-slot{border-left:1px solid var(--rule)}`, no outer edges), icons centred — aligned under the ID column. Removed the mono/bracket pseudo styling.
+
+**Version: v1.05-test.26** (next.html). Live `browse.html` unchanged.
