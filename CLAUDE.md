@@ -688,3 +688,7 @@ Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Tu
 **v1.05-test.22 — desktop filter options → bracket style (Brandon).** Desktop `.fp-chip` was still pill-style (border + bg + radius; `.on` = filled ink). Rebuilt to match the bracket convention already used on mobile and everywhere else: transparent, no border/radius, `::before/::after` `[ ]`, text + brackets in the per-category colour (`--pf`), selected = `--red-deep` bold. `.fp-chips` gap → `5px 9px` for bracket breathing room. CSS-only; `.fp-show`/`.fp-clear` buttons left as-is (user asked for the options).
 
 **Version: v1.05-test.22** (next.html). Live `browse.html` unchanged.
+
+**v1.05-test.23 — filter chips: remove the box (Brandon).** .22 edited the wrong `.fp-chip` block — there are two base-scope definitions and the later "outline tag chips" consolidation (~L1150) wins on desktop, so the border/padding/border-radius (the box) stayed while the bracket pseudo from the dead earlier block still showed → `[ ]` in a box. Reverted the earlier (overridden) block to its original pill and applied the real bracket treatment in the authoritative consolidation block: transparent, `border:0;padding:0;border-radius:0`, `::before/::after` `[ ]`, hover opacity, `.on` = `--red-deep` (no box). `.fp-chips` gap → `5px 9px`. CSS-only.
+
+**Version: v1.05-test.23** (next.html). Live `browse.html` unchanged.
