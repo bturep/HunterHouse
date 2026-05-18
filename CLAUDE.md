@@ -684,3 +684,7 @@ Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Tu
 **v1.05-test.21 — Enter → zen (Brandon's call).** Enter no longer opens `item.html` (new tab); it now toggles zen / hide-both-panels (clicks `#zoom-fs`), same as Z. Esc also restores zen now: the Escape handler reveals both panels if both are `.out`. Info-panel shortcut list updated (Navigate drops the item-page row; View shows `Z / ↵` for zen; Esc = "Close · exit zen"). Note: the `item.html` deep-page is no longer reachable by keyboard — fine for now (data-footer links remain).
 
 **Version: v1.05-test.21** (next.html). Live `browse.html` unchanged.
+
+**v1.05-test.22 — desktop filter options → bracket style (Brandon).** Desktop `.fp-chip` was still pill-style (border + bg + radius; `.on` = filled ink). Rebuilt to match the bracket convention already used on mobile and everywhere else: transparent, no border/radius, `::before/::after` `[ ]`, text + brackets in the per-category colour (`--pf`), selected = `--red-deep` bold. `.fp-chips` gap → `5px 9px` for bracket breathing room. CSS-only; `.fp-show`/`.fp-clear` buttons left as-is (user asked for the options).
+
+**Version: v1.05-test.22** (next.html). Live `browse.html` unchanged.
