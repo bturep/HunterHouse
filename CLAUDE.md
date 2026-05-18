@@ -692,3 +692,7 @@ Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Tu
 **v1.05-test.23 — filter chips: remove the box (Brandon).** .22 edited the wrong `.fp-chip` block — there are two base-scope definitions and the later "outline tag chips" consolidation (~L1150) wins on desktop, so the border/padding/border-radius (the box) stayed while the bracket pseudo from the dead earlier block still showed → `[ ]` in a box. Reverted the earlier (overridden) block to its original pill and applied the real bracket treatment in the authoritative consolidation block: transparent, `border:0;padding:0;border-radius:0`, `::before/::after` `[ ]`, hover opacity, `.on` = `--red-deep` (no box). `.fp-chips` gap → `5px 9px`. CSS-only.
 
 **Version: v1.05-test.23** (next.html). Live `browse.html` unchanged.
+
+**v1.05-test.24 — filter tags: typography parity with record-pane pills (Brandon).** Authoritative `.fp-chip` was uppercase / 9.5px / 0.08em. Changed to exactly match `.pane-meta .pill`: mono 11px, weight 400, letter-spacing 0.02em, `text-transform:none` (title/natural case — more legible), fallback colour `--pf,var(--ink)`, `.on` = `--red-deep` 500. Group labels (`.fp-lbl`) left uppercase (they're section labels, not tags). CSS-only.
+
+**Version: v1.05-test.24** (next.html). Live `browse.html` unchanged.

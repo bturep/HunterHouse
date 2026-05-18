@@ -1146,17 +1146,19 @@
   .fp-lbl{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
   .fp-chips{gap:5px 9px}
   /* Filter options → bracket convention (no box), colour-coded by category */
+  /* Exact typography parity with the record-pane tags (.pane-meta .pill):
+     mono 11px / 400 / 0.02em / title case — more legible, no box. */
   .fp-chip{
-    font-family:var(--mono);font-size:9.5px;font-weight:500;
-    letter-spacing:0.08em;text-transform:uppercase;line-height:1.6;
+    font-family:var(--mono);font-size:11px;font-weight:400;
+    letter-spacing:0.02em;text-transform:none;line-height:1.6;
     background:transparent;border:0;padding:0;border-radius:0;cursor:pointer;
-    color:var(--pf,var(--muted));
+    color:var(--pf,var(--ink));
     transition:color 0.1s,opacity 0.1s;
   }
   .fp-chip::before{content:"["}
   .fp-chip::after{content:"]"}
   .fp-chip:hover{opacity:0.7;background:transparent;filter:none}
-  .fp-chip.on{background:transparent;border:0;color:var(--red-deep);font-weight:600}
+  .fp-chip.on{background:transparent;border:0;color:var(--red-deep);font-weight:500}
   .fp-footer{display:flex;justify-content:space-between;align-items:center;padding-top:12px;margin-top:12px;border-top:1px dashed var(--rule)}
   .fp-clear{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
   .fp-show{font-size:9px;font-weight:500;letter-spacing:0.18em;padding:5px 12px}
@@ -1466,7 +1468,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05-test.23";
+  const VERSION      = "v1.05-test.24";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
