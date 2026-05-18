@@ -596,3 +596,5 @@ Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Go
 - No editing UI or Worker yet — that's Slice 2 (Cloudflare Worker; needs Brandon's Cloudflare deploy steps) then Slice 3 (field-edit UI + item pickers).
 
 **Version: v1.05-test.01** (next.html). Live `browse.html` unchanged.
+
+**Slice 2 done — local edit proxy (`scripts/edit_proxy.py`).** Backend chosen: **local proxy** (no Cloudflare account, no Floyd; runs only on Brandon's Mac, edits only from that machine while running). Holds the bot credential server-side; relays an allowlisted Wikibase write set (`wbsetlabel/description/aliases`, `wbcreateclaim`, `wbsetclaim`, `wbremoveclaims`) to the API. Localhost-only (127.0.0.1:8731), admin-secret guarded (admin pin, or `EDIT_PROXY_SECRET` in `.env`), CORS limited to the staging origin + localhost. Login + CSRF reuse the proven scripts/ flow; auto re-login on stale token. Smoke-tested OK. Run: `python3 scripts/edit_proxy.py`. Caveat: Chrome allows https→http://localhost; Safari may block it. Next: Slice 3 — wire the desktop Description fields to call it (item-picker components).
