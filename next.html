@@ -1464,7 +1464,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05-test.19";
+  const VERSION      = "v1.05-test.20";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -3907,7 +3907,7 @@ $("#foot-dims").textContent = "";
 
     document.addEventListener("keydown", e => {
       const inInput = e.target.matches("input, select, textarea");
-      if (e.key === "/" && !inInput) { e.preventDefault(); openSearch(); return; }
+      if (e.key === "/" && !inInput) { e.preventDefault(); const si = document.getElementById("search-input"); if (si) { si.classList.add("open"); si.focus(); } return; }
       if (e.key === "Escape" && inInput) { e.target.blur(); return; }
       if (e.key === "Escape") { closeAllDropdowns(); closeAboutPane(); closeInfoPane(); return; }
       if (e.key === "?" && !inInput) { e.preventDefault(); toggleInfoPane(); return; }
