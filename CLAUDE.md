@@ -640,6 +640,8 @@ Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Tu
 - **Marked bar** — slim researcher-only toolbar (`#mark-bar`) between `.list-head` and the rows; hidden for Public and on mobile. Shows `◆ N marked`; empty-state shows *"press M on a row to mark it"* (makes the otherwise-undiscoverable shortcut visible). Actions: **only** (toggles `state.filterMarkedOnly` → list narrows to marks), **export** (`navigator.clipboard` copy of sorted IDs, toast confirms), **clear** (hold-1.5s, reuses the `rn-del` hold-to-confirm safety; new `mark-charge` clip-path sweep).
 - **Filter integration.** `state.filterMarkedOnly` wired into `applyFilters`, `updateFilterBadge` (+1), `clearAllFilters` (resets it). `renderList()` now calls `renderMarkBar()` at its tail so the bar stays in sync through every render path.
 - Decision: placed in the **browse pane** (not a panel below the record-pane notes) — the marked set is list-scoped (count/only/clear/export all act on the list); a global panel in the per-item record pane would mismatch. All 4 requested affordances built.
-- Syntax-checked (all 3 inline script blocks `node --check` OK). Not yet committed/pushed — awaiting Brandon's go to deploy to the staging URL for desktop testing.
+- Pushed v1.05-test.12 (3e66149) for on-device testing.
 
-**Version: v1.05-test.12** (next.html). Live `browse.html` unchanged.
+**v1.05-test.13 — visible per-row mark + single-item unmark (Brandon feedback).** The old `.row.marked::after` was a 4px dot in the row's bottom-left corner — technically rendering but easy to miss ("no mark on the item itself"). Replaced with `.row .row-mark` — a copper `◆` in the row's left margin (absolutely positioned, grid untouched; hover → red). It's a real element and **click-to-unmark that one item**: the `#rows` click delegate now checks `e.target.closest(".row-mark")` first and calls `toggleMark` instead of `selectItem`. Answers "remove a single item, not all of them" — per-item via the diamond or M-key toggle; clear-all stays the hold gesture. Hidden on mobile alongside `.mark-bar`. Syntax-checked OK.
+
+**Version: v1.05-test.13** (next.html). Live `browse.html` unchanged.

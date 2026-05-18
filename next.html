@@ -288,8 +288,15 @@
   .row.sel{background:var(--red-tint)}
   .row.sel::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red)}
   .row.sel .archid{color:var(--red-deep)}
-  .row.marked::after{content:'';position:absolute;left:32px;bottom:4px;width:4px;height:4px;border-radius:50%;background:var(--ink);transform:translateX(-50%);pointer-events:none}
-  html.dark .row.marked::after{background:var(--inv-fg)}
+  /* Per-row mark — copper diamond in the left margin; click it to unmark
+     just that one item. Absolutely positioned so the row grid is untouched. */
+  .row .row-mark{
+    position:absolute;left:6px;top:50%;transform:translateY(-50%);
+    font-size:9px;line-height:1;color:var(--copper);
+    opacity:0;pointer-events:none;cursor:pointer;transition:color .12s;
+  }
+  .row.marked .row-mark{opacity:1;pointer-events:auto}
+  .row .row-mark:hover{color:var(--red-deep)}
 
   /* ── researcher marked bar (browse pane, research/admin only) ── */
   .mark-bar{
@@ -1105,8 +1112,8 @@
     }
     .fp-search-input::placeholder{color:var(--hint)}
 
-    /* Marking is desktop-only (keyboard M); hide the researcher bar on mobile */
-    .mark-bar{display:none}
+    /* Marking is desktop-only (keyboard M); hide the researcher bar + row mark */
+    .mark-bar,.row .row-mark{display:none}
     /* Browse bar: always match sheet-bar colour; round corners only in PWA */
     .list-head{background:var(--bg);padding-left:20px;padding-right:24px}
     html.pwa .list-head{border-radius:14px 14px 0 0}
@@ -1364,7 +1371,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05-test.12";
+  const VERSION      = "v1.05-test.13";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -2552,6 +2559,7 @@ WHERE {
       row.dataset.id = it.id;
       const tmark = typeMark(it.itemType);
       row.innerHTML = `
+        <span class="row-mark" title="Click to unmark" aria-hidden="true">◆</span>
         <span class="archid">${tmark ? `<span class="tmark pc-stone" data-type="${escapeHTML(tmark)}" title="${escapeHTML(it.itemType)}">${tmark}</span>` : ""}${displayId(it.id)}</span>
         <div class="title-wrap">
           <div class="title">${escapeHTML(it.title)}</div>
@@ -3686,7 +3694,12 @@ $("#foot-dims").textContent = "";
 
     $("#rows").addEventListener("click", e => {
       const row = e.target.closest(".row");
-      if (row && row.dataset.id) selectItem(row.dataset.id, { tap: true });
+      if (!row || !row.dataset.id) return;
+      if (e.target.closest(".row-mark")) {   // clicking the diamond unmarks it
+        toggleMark(row.dataset.id);
+        return;
+      }
+      selectItem(row.dataset.id, { tap: true });
     });
 
     document.getElementById("meta-body").addEventListener("click", e => {
