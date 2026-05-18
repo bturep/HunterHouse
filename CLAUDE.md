@@ -664,3 +664,7 @@ Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Tu
 **v1.05-test.17 — row flags relocated + restyled (Brandon).** Split-margin indicators replaced by a single `.row-flags` cluster absolutely positioned **below the item ID on the left** (`left:20px;top:30px`, flex, gap 6px). `.rf-mark` = orange dot (`#cf7a2c`, dark `#e8924a`; hover → `--red-deep`; still click-to-unmark, delegate now matches `.rf-mark`). `.rf-note` = small page/document SVG icon in `var(--copper)` (teal), non-interactive. Visibility still driven by `.row.marked` / `.row.has-note`. Mobile-hide selector updated to `.row .row-flags`.
 
 **Version: v1.05-test.17** (next.html). Live `browse.html` unchanged.
+
+**v1.05-test.18 — bracketed flag slots + more headroom (Brandon).** Row-flags reworked into two `.rf-slot` bracket cells: very light mono `[ ]` (`::before/::after`, opacity .45 — applied to the pseudo-only so the icon stays crisp) framing a fixed-size `.rf-ico` (9×10). Empty rows read `[ ] [ ]`; marked = orange dot inside slot 1, note = teal page icon inside slot 2. `top:30→34px` for more space below the ID; gap 6→5px. Unmark delegate still matches `.rf-mark` (now nested); mobile-hide still `.row .row-flags`.
+
+**Version: v1.05-test.18** (next.html). Live `browse.html` unchanged.
