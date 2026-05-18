@@ -285,16 +285,18 @@
   .fp-group{margin-bottom:14px}
   .fp-group:last-child{margin-bottom:0}
   .fp-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.16em;text-transform:uppercase;margin-bottom:8px}
-  .fp-chips{display:flex;flex-wrap:wrap;gap:5px}
+  .fp-chips{display:flex;flex-wrap:wrap;gap:5px 9px}
+  /* Filter options → bracket convention, colour-coded by category */
   .fp-chip{
     font-family:var(--mono);font-size:10px;letter-spacing:0.03em;
-    border:1px solid var(--pb,var(--rule));background:var(--pb,var(--soft));color:var(--pf,var(--muted));
-    padding:3px 9px;border-radius:2px;cursor:pointer;
-    transition:background 0.1s,color 0.1s,border-color 0.1s;
-    line-height:1.5;
+    background:transparent;border:0;padding:0;border-radius:0;
+    color:var(--pf,var(--muted));cursor:pointer;line-height:1.6;
+    transition:color 0.1s,opacity 0.1s;
   }
-  .fp-chip:hover{filter:brightness(0.94)}
-  .fp-chip.on{background:var(--pd,var(--ink));color:#f0ede6;border-color:var(--pd,var(--ink))}
+  .fp-chip::before{content:"["}
+  .fp-chip::after{content:"]"}
+  .fp-chip:hover{opacity:0.7}
+  .fp-chip.on{color:var(--red-deep);font-weight:500}
   .fp-footer{display:flex;justify-content:space-between;align-items:center;padding-top:12px;margin-top:12px;border-top:1px solid var(--rule)}
   .fp-clear{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;background:none;border:0;padding:0}
   .fp-clear:hover{color:var(--ink)}
@@ -1464,7 +1466,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05-test.21";
+  const VERSION      = "v1.05-test.22";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
