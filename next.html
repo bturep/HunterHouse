@@ -365,6 +365,16 @@
   #hh-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   #hh-toast.err{background:var(--red-deep)}
   #hh-toast.ok{background:var(--copper-deep)}
+  .hh-fedit{margin-left:7px;border:none;background:transparent;color:var(--hint);cursor:pointer;font-size:11px;padding:0 2px;line-height:1;vertical-align:baseline}
+  .hh-fedit:hover{color:var(--red)}
+  .hh-pop{position:fixed;z-index:320;background:var(--bg);border:1px solid var(--rule);border-radius:6px;box-shadow:0 8px 28px rgba(0,0,0,.20);width:248px;max-height:300px;display:flex;flex-direction:column;overflow:hidden;font-family:var(--mono);font-size:12px}
+  .hh-pop input{font:inherit;color:var(--ink);background:var(--soft);border:none;border-bottom:1px solid var(--rule);padding:9px 11px;outline:none}
+  .hh-pop-list{overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .hh-pop-opt{padding:7px 11px;cursor:pointer;border-bottom:1px solid var(--rule-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+  .hh-pop-opt:hover{background:var(--soft);color:var(--red)}
+  .hh-pop-opt.cur{color:var(--muted)}
+  .hh-pop-opt.cur::after{content:" ·current";color:var(--hint);font-size:10px}
+  .hh-pop-msg{padding:11px;color:var(--hint)}
   .meta-title-sub{display:block;font-size:13px;font-weight:400;color:var(--muted);letter-spacing:0;margin-top:4px}
   .meta-orig{
     font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;
@@ -1309,7 +1319,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05-test.04";
+  const VERSION      = "v1.05-test.05";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -1410,6 +1420,101 @@
       inp.addEventListener("blur", commit);
     });
   }
+
+  // ── Slice 3b: single-value item-field editing (picker + claim swap) ───────
+  // Vocabulary per property = the values already in use for it (keeps edits
+  // within established terms). Cached after first fetch.
+  const _vocabCache = {};
+  function getVocab(pid) {
+    if (!_vocabCache[pid]) {
+      _vocabCache[pid] = (async () => {
+        const rows = await sparqlQuery(
+          `PREFIX wdt: <https://hunterhouse.wikibase.cloud/prop/direct/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT DISTINCT ?v ?l WHERE { ?i wdt:${pid} ?v . ?v rdfs:label ?l . FILTER(LANG(?l)="en") } ORDER BY ?l`);
+        return rows.map(r => ({ qid: r.v.value.split("/").pop(), label: r.l.value }));
+      })().catch(e => { delete _vocabCache[pid]; throw e; });
+    }
+    return _vocabCache[pid];
+  }
+  // Replace a single-valued item claim. Create-then-remove so a failure never
+  // leaves the field empty (worst case = a visible duplicate, easily fixed).
+  async function setSingleItemClaim(entity, pid, valueQID) {
+    const api = WIKIBASE_URL + "/w/api.php";
+    const g = await fetch(`${api}?action=wbgetclaims&entity=${entity}&property=${pid}&format=json&origin=*`)
+      .then(r => r.json());
+    const existing = ((g.claims && g.claims[pid]) || []).map(c => c.id);
+    await proxyEdit({ action: "wbcreateclaim", entity, property: pid, snaktype: "value",
+      value: JSON.stringify({ "entity-type": "item", "numeric-id": parseInt(valueQID.slice(1), 10) }) });
+    if (existing.length)
+      await proxyEdit({ action: "wbremoveclaims", claim: existing.join("|") });
+  }
+
+  function closeFieldPicker() {
+    const p = document.getElementById("hh-pop");
+    if (p) p.remove();
+    document.removeEventListener("mousedown", _popOutside, true);
+  }
+  function _popOutside(e) { if (!e.target.closest("#hh-pop")) closeFieldPicker(); }
+
+  function openFieldPicker(btn, item) {
+    closeFieldPicker();
+    const { pid, key, dt } = btn.dataset;
+    const pop = document.createElement("div");
+    pop.className = "hh-pop"; pop.id = "hh-pop";
+    pop.innerHTML = `<input type="text" placeholder="${escapeHTML(dt)}…" autocomplete="off" spellcheck="false">
+      <div class="hh-pop-list"><div class="hh-pop-msg">loading…</div></div>`;
+    document.body.appendChild(pop);
+    const r = btn.getBoundingClientRect();
+    pop.style.top  = Math.min(r.bottom + 6, window.innerHeight - 308) + "px";
+    pop.style.left = Math.min(r.left, window.innerWidth - 256) + "px";
+
+    const inp  = pop.querySelector("input");
+    const list = pop.querySelector(".hh-pop-list");
+    const cur  = (item[key] || "").toLowerCase();
+    let opts   = [];
+    const draw = () => {
+      const f = inp.value.trim().toLowerCase();
+      const sh = opts.filter(o => o.label.toLowerCase().includes(f));
+      list.innerHTML = sh.length
+        ? sh.map(o => `<div class="hh-pop-opt${o.label.toLowerCase() === cur ? " cur" : ""}" data-qid="${o.qid}">${escapeHTML(o.label)}</div>`).join("")
+        : `<div class="hh-pop-msg">no matches</div>`;
+    };
+    getVocab(pid).then(v => { opts = v; draw(); })
+                 .catch(() => { list.innerHTML = `<div class="hh-pop-msg">vocabulary failed to load</div>`; });
+    inp.addEventListener("input", draw);
+    inp.addEventListener("keydown", e => { if (e.key === "Escape") { e.preventDefault(); closeFieldPicker(); } });
+    inp.focus();
+
+    list.addEventListener("click", async e => {
+      const o = e.target.closest(".hh-pop-opt");
+      if (!o) return;
+      const qid = o.dataset.qid;
+      const label = (opts.find(x => x.qid === qid) || {}).label || "";
+      if (label.toLowerCase() === cur) return closeFieldPicker();
+      closeFieldPicker();
+      hhToast("saving " + dt + "…");
+      try {
+        await setSingleItemClaim(item.qid, pid, qid);
+        item[key] = label;
+        const m = state.items.find(i => i.qid === item.qid); if (m) m[key] = label;
+        renderMeta(item);
+        hhToast("Saved · " + dt + " → " + label, "ok");
+      } catch (err) {
+        hhToast("Save failed: " + err.message, "err");
+      }
+    });
+    setTimeout(() => document.addEventListener("mousedown", _popOutside, true), 0);
+  }
+
+  // Wire the ✎ buttons rendered into editable description rows (admin only).
+  function wireFieldEdits(item) {
+    if (!canEditWikibase() || !item || !item.qid) return;
+    document.querySelectorAll("#meta-body .hh-fedit").forEach(b => {
+      b.addEventListener("click", ev => { ev.preventDefault(); ev.stopPropagation(); openFieldPicker(b, item); });
+    });
+  }
+
   function rnLoad(archId) {
     try { return JSON.parse(localStorage.getItem("hhf_rn") || "{}")[archId] || []; }
     catch { return []; }
@@ -2499,7 +2604,17 @@ $("#foot-dims").textContent = "";
     }
     if (item.archiveLink) archRows.push(["Finding aid", `<a href="${escapeHTML(item.archiveLink)}" target="_blank" rel="noopener">${archiveLinkLabel(coll)}</a>`]);
 
-    const descHTML = descRows.map(([k,v]) => `<div class="row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+    const EDITABLE = canEditWikibase() ? {
+      "Item type":   { pid: "P1",   key: "itemType"    },
+      "Built":       { pid: "P92",  key: "builtStatus" },
+      "Built by":    { pid: "P140", key: "builtBy"     },
+      "Designed by": { pid: "P141", key: "designedBy"  },
+    } : {};
+    const descHTML = descRows.map(([k,v]) => {
+      const e = EDITABLE[k];
+      const btn = e ? ` <button class="hh-fedit" data-pid="${e.pid}" data-key="${e.key}" data-dt="${escapeHTML(k)}" title="Edit ${escapeHTML(k)} (admin)" aria-label="Edit ${escapeHTML(k)}">✎</button>` : "";
+      return `<div class="row"><dt>${k}</dt><dd>${v}${btn}</dd></div>`;
+    }).join("");
     const archHTML = archRows.map(([k,v]) => `<div class="row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
 
     const phaseLabel = item.phase || null;
@@ -2603,6 +2718,7 @@ $("#foot-dims").textContent = "";
 
     renderRN(item.id);
     wireMetaEdit(item);
+    wireFieldEdits(item);
     requestAnimationFrame(() => updatePip("meta-body", "meta-pip"));
   }
 
