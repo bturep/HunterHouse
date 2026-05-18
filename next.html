@@ -1300,7 +1300,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05-test";
+  const VERSION      = "v1.05-test.01";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -1308,8 +1308,10 @@
   // ── Researcher notes — PIN auth + localStorage ───────────────────────────
   // Registry: pin → { name, initials, qid }
   // qid is null until the researcher has a Wikibase Person item.
+  // role: "admin" → may edit Wikibase fields (Slice 3); "research" → notes /
+  // marking / selections only; absent/Public → read-only.
   const RPINS = {
-    "203BTP": { name: "Brandon Poole", initials: "BP", qid: null },
+    "203BTP": { name: "Brandon Poole", initials: "BP", qid: null, role: "admin" },
   };
   // Reverse lookup by lowercase name → entry (with pin attached)
   const RNAMES = Object.fromEntries(
@@ -1323,6 +1325,9 @@
   function rnSession()        { try { return JSON.parse(sessionStorage.getItem("hhf_researcher")); } catch { return null; } }
   function rnUnlock(entry)    { sessionStorage.setItem("hhf_researcher", JSON.stringify(entry)); }
   function rnLockOut()        { sessionStorage.removeItem("hhf_researcher"); }
+  // Role / capability gate. Public = not unlocked.
+  function rnRole()           { const s = rnSession(); return (s && s.role) || "public"; }
+  function canEditWikibase()  { return rnRole() === "admin"; }
   function rnLoad(archId) {
     try { return JSON.parse(localStorage.getItem("hhf_rn") || "{}")[archId] || []; }
     catch { return []; }
@@ -1409,7 +1414,7 @@
       panel.innerHTML = `
         <div class="rn-head">
           <span class="rn-label">researcher notes</span>
-          <span class="rn-who">${escapeHTML(researcher.name)}</span>
+          <span class="rn-who">${escapeHTML(researcher.name)}${researcher.role ? ` · ${escapeHTML(researcher.role)}` : ""}</span>
           <button class="rn-lock-btn" id="rn-lock-btn" title="Lock">${UNLOCK_SVG}</button>
         </div>
         ${noteRows ? `<div class="rn-list">${noteRows}</div>` : ""}
