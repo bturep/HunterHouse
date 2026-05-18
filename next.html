@@ -291,8 +291,8 @@
   /* Per-row mark — copper diamond in the left margin; click it to unmark
      just that one item. Absolutely positioned so the row grid is untouched. */
   .row .row-mark{
-    position:absolute;left:6px;top:50%;transform:translateY(-50%);
-    font-size:9px;line-height:1;color:var(--copper);
+    position:absolute;left:5px;top:13px;
+    font-size:13px;line-height:1;color:var(--copper);
     opacity:0;pointer-events:none;cursor:pointer;transition:color .12s;
   }
   .row.marked .row-mark{opacity:1;pointer-events:auto}
@@ -1371,7 +1371,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05-test.13";
+  const VERSION      = "v1.05-test.14";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
