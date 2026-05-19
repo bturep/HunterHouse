@@ -73,6 +73,7 @@ For **bulk changes to many items at once**: use a SPARQL query to get the QIDs f
 | P139 | Wikidata QID | ExternalId | Cross-catalogue reconciliation. Not yet populated |
 | P142 | physical location | String | Archival path, e.g. `"S0004, SS0001, SSS0018, FL0003"`. Rendered as the Location crumb in browse.html |
 | P143 | access copy | URL | URL of an access derivative (a multi-page PDF) of the item; preservation masters held separately. Drives the browse.html/next.html PDF reader. Created 2026-05-19 |
+| P144 | display rotation | String | Clockwise degrees to rotate the stored image for correct display (`90`/`180`/`270`; absent/0 = none). Applied at render (desktop stage); the explicit "bake" pass later flattens it into the files and clears this claim. Created 2026-05-19 |
 
 ### Other properties in the schema (for reference)
 

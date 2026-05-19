@@ -60,7 +60,7 @@ Brandon needs a free Wikimedia account — takes 2 minutes at `wikidata.org/wiki
 ---
 
 **Rotation persistence — DECIDED (approach C: metadata now, bake later).** The viewer's T-key rotate is display-only. Brandon wants rotation to persist to the archive. Decision = hybrid:
-- *Part 1 (build after the publication ingest + PDF-viewer commit lands):* new Wikibase property **`display rotation`** (string `90`/`180`/`270` CW; absent = none) — minted one-off like "access copy". `next.html`: SPARQL OPTIONAL + mapping + `renderImage`/mobile/lightbox apply it as base orientation. T stays casual & writes nothing; an **admin-only "Save rotation to record"** affordance (mirrors the ✎ inline-edit → `proxyEdit` path; **no proxy change** — reuses the string-claim path) writes `net=(storedBase+delta)%360`, clears the transient delta, re-renders. Reversible (rewrite/blank the claim).
+- *Part 1 — **BUILT** (next.html v1.06-test.05, 2026-05-19):* property **P144 "display rotation"** (string; minted via new `scripts/mint_property.py`). next.html: SPARQL `OPTIONAL { ?item wdt:P144 ?rotation }` + `rotation` mapping; `renderImage` seeds `zoomState.rotation` from the stored value as the **base orientation** (fit/transpose logic already keyed off it). T stays casual (transient +90, writes nothing); an **admin-only `⤓ save`** control (`#zoom-rotsave` in the zoom bar, hidden unless admin AND rotated-off-base) writes the net via `setStringClaim` → P144 (create-then-remove; net 0 ⇒ clears the claim). Reversible. *Known v1 limit:* apply-at-render is **desktop image stage only** — the mobile sheet image + lightbox still show the unrotated file (deferred small follow-up; admin rotation is desktop-only anyway, and Part 2 bake fixes the bytes for all). *Caveat:* `index.html` prefetch lacks `?rotation` too → sync at promotion (see Staging note).
 - *Part 2 (specced, later):* a maintenance "bake" script = `rotate_images.py` core driven by the `display rotation` claims — rotate master+3 tiers on R2, **then clear the claim**, then purge CDN. Explicit run only. Prerequisite: an automated Cloudflare cache-purge API token (not yet wired; `rotate_images.py` currently purges via dashboard).
 
 ---
@@ -221,6 +221,7 @@ See `WIKIBASE.md` for full property table, QIDs, and SPARQL templates.
 | P139 | Wikidata QID | external-id, not yet populated |
 | P142 | Physical location | archival path, e.g. "S0004, SS0001, SSS0018, FL0003" |
 | P143 | access copy | URL — publication PDF; drives the browse/next PDF reader (created 2026-05-19) |
+| P144 | display rotation | String — `90`/`180`/`270` CW; applied at render (desktop stage); created 2026-05-19 |
 
 Next available IDs: **HH-HHC-0116**, **HH-CAA-0036**. (HH-HHC-0115 = Q490, the 1986 Hunter portfolio publication.)
 
@@ -278,6 +279,7 @@ Full protocol in `CLAUDE_archive_v1.02.md` §"Batch change protocol".
 | `scripts/edit_proxy.py` | Local admin Wikibase write proxy (localhost:8731, bot creds server-side) | Active |
 | `scripts/make_ges_intake.py` | Generate the GES collection intake workbook | Active |
 | `scripts/ingest_publication.py` | Ingest a multi-page publication (masters byte-for-byte + SHA-256 manifest + cover tiers + access PDF → R2; create the Wikibase item). Dry-run default; `--execute` to write | Active |
+| `scripts/mint_property.py` | Mint (or find, idempotent) one Wikibase property: `--label --desc --datatype` | Active |
 | `scripts/rename_ids.py` | HH-A → HH-HHC/CAA rename | Complete |
 | `scripts/renumber_hhc.py` | HHC renumber 0036–0149 → 0001–0114 | Complete |
 | `scripts/migrate_p142_location.py` | Move archival paths P100 → P142 | Complete |
@@ -395,7 +397,7 @@ A live-stable + parallel-test setup, zero extra infrastructure (plain GitHub Pag
 4. Commit, `git tag v1.05.00 && git push --tags`, push. Live is now the new version.
 5. Re-sync `next.html` from the new `browse.html` for the next cycle.
 
-**⚠ Prefetch-sync at promotion:** if `next.html`'s `CATALOGUE_QUERY` changed since the last promotion, also sync `index.html`'s prefetch copy of that query. As of v1.06-test.04 it gained `?accessCopy` + `OPTIONAL { ?item wdt:P143 ?accessCopy }` (the PDF reader). `cp next.html browse.html` carries it into `browse.html`, but `index.html` holds a *separate* copy — unsynced, the PDF "Read" affordance is dark for visitors who enter via the splash prefetch. (A code comment in next.html flags this too.)
+**⚠ Prefetch-sync at promotion:** if `next.html`'s `CATALOGUE_QUERY` changed since the last promotion, also sync `index.html`'s prefetch copy of that query. As of v1.06-test.05 it gained `?accessCopy` + `OPTIONAL{?item wdt:P143 ?accessCopy}` (PDF reader) **and** `?rotation` + `OPTIONAL{?item wdt:P144 ?rotation}` (display rotation). `cp next.html browse.html` carries them into `browse.html`, but `index.html` holds a *separate* copy — unsynced, the PDF "Read" affordance and stored rotation are dark for visitors who enter via the splash prefetch. (A code comment in next.html flags this too.)
 
 **Hotfixing live mid-cycle:** edit `browse.html` directly, push (deploys live immediately). Then port the same change into `next.html` so it isn't lost at next promotion.
 
@@ -483,3 +485,16 @@ Working LINE: **NEXT**. First multi-page **publication** added to the archive an
 - **Also this session (design only, captured in Pending):** rotation persistence decided as hybrid **C** (metadata now → bake later); **Curated mode / exhibition lens** designed (static-JSON store, numeric order, gallery "title-wall" threshold overlay whose "Continue to exhibition" CTA is the confirm). Both queued behind this commit. Standing **preview convention** added (artifacts → `~/Desktop`, auto-opened). Edit proxy restarted this session.
 
 **Version: next.html `v1.06-test.04`** (staging). Live `browse.html` unchanged at `v1.05.02`.
+
+---
+
+### 2026-05-19 — rotation persistence Part 1 (next.html v1.06-test.05)
+
+Working LINE: **NEXT**. Approach-C Part 1 built (metadata layer). Live `browse.html` untouched.
+
+- **Property P144 "display rotation"** (string) minted via new reusable **`scripts/mint_property.py`** (`--label/--desc/--datatype`, idempotent — exact-label match reused).
+- **`next.html`:** `ROTATE_PID="P144"`; SPARQL `OPTIONAL { ?item wdt:P144 ?rotation }` + `?rotation` SELECT + `rotation` mapping (normalised int, 0/90/180/270). `renderImage` seeds `zoomState.rotation` from the stored value as the **base orientation** instead of always 0 (the existing fit/`constrainPan` transpose logic already keys off `zoomState.rotation % 180`, so 90/270 fits correctly). The **T key stays casual** (transient +90, no write). New **admin-only `#zoom-rotsave` ("⤓ save")** control in the zoom bar — hidden unless `canEditWikibase()` AND the displayed rotation differs from stored; click → `setStringClaim(qid, P144, net)` (new helper, create-then-remove; `net===0` ⇒ clears the claim) → updates `state.items` rotation → toast. Reversible by definition. All inline JS passes `node --check`.
+- **Known v1 limitation (logged, not hidden):** apply-at-render covers the **desktop image stage only**. The mobile sheet image and the lightbox still display the unrotated file — a deferred small follow-up (admin rotation is desktop-only regardless; Part 2's bake pass fixes the actual bytes for every consumer). **Part 2** (bake script + Cloudflare purge token) remains specced/queued.
+- Unrelated, ongoing: a background poller is still waiting on the Wikibase Cloud SPARQL index to pick up `HH-HHC-0115`/P143 (query-service propagation lag — code/data verified correct; not a bug).
+
+**Version: next.html `v1.06-test.05`** (staging). Live `browse.html` unchanged at `v1.05.02`.
