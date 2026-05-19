@@ -70,6 +70,9 @@ For **bulk changes to many items at once**: use a SPARQL query to get the QIDs f
 | P100 | notes | String | Prose description shown in browse.html meta pane. This is the human-readable note — not the auto-generated Wikibase description. |
 | P118 | point in time | Time | Use when a single date applies (not a range) |
 | P128 | sourced from | String | Citation or evidence for a claim |
+| P139 | Wikidata QID | ExternalId | Cross-catalogue reconciliation. Not yet populated |
+| P142 | physical location | String | Archival path, e.g. `"S0004, SS0001, SSS0018, FL0003"`. Rendered as the Location crumb in browse.html |
+| P143 | access copy | URL | URL of an access derivative (a multi-page PDF) of the item; preservation masters held separately. Drives the browse.html/next.html PDF reader. Created 2026-05-19 |
 
 ### Other properties in the schema (for reference)
 
