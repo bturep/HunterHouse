@@ -65,12 +65,13 @@ Brandon needs a free Wikimedia account — takes 2 minutes at `wikidata.org/wiki
 
 ---
 
-**Curated mode / "exhibition lens" — DESIGNED, not built (queued).** A curator (artists/architects; first = Brandon Poole) authors a *selection* with a macro intro + per-item curator notes. It's a **mode/lens, not a filter**. Flow: pick a curator from the `[Curated]` list (top of BROWSE) → **curator threshold overlay** (about-pane-style `inset:0`, the gallery "title wall": a *standing* one-line "what is a curated lens" explainer [a `next.html` constant, shared across curators — NOT per-JSON] + curator bio + external link + **"Continue to exhibition" CTA**) → CTA **is** the confirm/commit (this overlay *replaces* the earlier dim-tags+separate-confirm step — net simplification) → filter pane collapses → list shows only that curation in the **curator's order** → right pane swaps researcher-notes for the **curator's note** → an intro card (the `#mark-bar` slot pattern, bigger: the curation's *macro argument* + **exit**) sits above the list. Esc also exits. Overlay = person + concept; card = content (keep separate). **Public-visible** (outreach/exhibition); only *editing* is gated. *Scope note:* the v1 overlay is a viewer-facing threshold only; a real **in-tool authoring tutorial** for invited curators belongs to Phase 2 (no in-browser authoring in v1). Decisions made:
+**Curated mode / "exhibition lens" — Phase 1 BUILT (next.html v1.06-test.06).** A curator (artists/architects; first = Brandon Poole) authors a *selection* with a macro intro + per-item curator notes. It's a **mode/lens, not a filter**. Flow: pick a curator from the `[Curated]` list (top of BROWSE) → **curator threshold overlay** (about-pane-style `inset:0`, the gallery "title wall": a *standing* one-line "what is a curated lens" explainer [a `next.html` constant, shared across curators — NOT per-JSON] + curator bio + external link + **"Continue to exhibition" CTA**) → CTA **is** the confirm/commit (this overlay *replaces* the earlier dim-tags+separate-confirm step — net simplification) → filter pane collapses → list shows only that curation in the **curator's order** → right pane swaps researcher-notes for the **curator's note** → an intro card (the `#mark-bar` slot pattern, bigger: the curation's *macro argument* + **exit**) sits above the list. Esc also exits. Overlay = person + concept; card = content (keep separate). **Public-visible** (outreach/exhibition); only *editing* is gated. *Scope note:* the v1 overlay is a viewer-facing threshold only; a real **in-tool authoring tutorial** for invited curators belongs to Phase 2 (no in-browser authoring in v1). Decisions made:
 - *Store (v1):* **static JSON** `curations/<slug>.json` `{curator{name,role,affiliation,qid,bio,url,url_label}, slug, title, intro, updated, items:[{id,pos,note}]}` + `curations/index.json` (curator chooser, forward-compat). (`curator.bio`/`url`/`url_label` feed the threshold overlay; `intro` is the card's macro argument.) Wikibase model (Curation = first-class item, membership + ordinal/curator-note qualifiers, reuses the phase/sibling arrangement pattern) is the **documented canonical target** for later (needs proxy `wbsetqualifier`).
 - *Order (v1):* explicit integer `pos` per item (reuses the P86 "X of Y" mental model). In curation mode the ID/Phase/Year sort header is **locked/replaced ("Sequence")**; optional later "catalogue order" toggle.
 - *Authoring (v1):* Brandon supplies ordered list + intro + per-item notes; the JSON is generated/committed (no in-browser curation editor in v1 — deferred). Any future bespoke exhibition `.html` consumes the same JSON (that's the contract).
 - *Open at build:* intro text format (recommend plain w/ paragraph breaks); exact visual placement of `[Curated]`; search behaviour inside a curation; cache-busting the JSON (use `?v=`+VERSION). Curator-only role + in-browser authoring + multi-curator chooser = Phase 2.
-- *Sequence:* build **after** publication ingest+viewer commit **and** rotation Part 1.
+- *Status: Phase 1 BUILT* (next.html v1.06-test.06). Seed `curations/index.json` + `curations/brandon-poole.json` (PLACEHOLDER content — real ids/intro/notes/bio/url pending from Brandon; swap-in needs **no rebuild**). `[Curated]` entry = `#curated-bar` above the filter panel (hidden if no curations / in-mode); threshold overlay `#curator-pane` (about-pane pattern, LENS_BLURB + bio + link + "Continue to exhibition"); `state.curation` drives an `applyFilters` early-return (authored membership, `pos` order, sort+filter locked with a toast); `#curation-card` intro card above the list with an **exit** button; record pane swaps `renderRN`→`renderCuratorNote`; mark-bar hidden in-mode. All gated behind `state.curation`/file presence (zero change when absent). *Deliberate v1 deviation:* Esc cancels the **threshold overlay** but does **not** exit an active curation (avoids clobbering Esc's zen/search/overlay duties) — leaving the lens is the always-visible card **exit** button. Revisit if Brandon wants Esc-to-exit.
+- *Phase 2 (later):* in-browser curator authoring + the authoring tutorial, multi-curator polish, Wikibase promotion (Curation as first-class item w/ qualifiers; needs proxy `wbsetqualifier`), optional bespoke exhibition `.html` (consumes the same JSON).
 
 ---
 
@@ -127,6 +128,7 @@ HunterHouse/
 │   ├── verso.css           Light design system (all pages)
 │   └── inverse.css         Dark design system (4 reading pages only)
 ├── scripts/                Batch Wikibase + R2 scripts (see Scripts table)
+├── curations/              Curated-lens JSON (index.json + <slug>.json) — Phase 1 seed
 ├── WIKIBASE.md             Full property table, QIDs, SPARQL templates
 ├── WIKIDATA_DRAFT.md       Draft QuickStatements for 3 Wikidata items (not yet submitted)
 ├── CLAUDE_archive_v1.05.md Frozen full session log v1.03.00 → v1.05.02
@@ -498,3 +500,17 @@ Working LINE: **NEXT**. Approach-C Part 1 built (metadata layer). Live `browse.h
 - Unrelated, ongoing: a background poller is still waiting on the Wikibase Cloud SPARQL index to pick up `HH-HHC-0115`/P143 (query-service propagation lag — code/data verified correct; not a bug).
 
 **Version: next.html `v1.06-test.05`** (staging). Live `browse.html` unchanged at `v1.05.02`.
+
+---
+
+### 2026-05-19 — Curated mode / exhibition lens, Phase 1 (next.html v1.06-test.06)
+
+Working LINE: **NEXT**. Built the full curated-lens *viewing* mode (no in-browser authoring — that's Phase 2). Live `browse.html` untouched.
+
+- **Store:** new `curations/` dir — `index.json` (lens chooser) + `brandon-poole.json` (PLACEHOLDER content: real archive ids `HH-HHC-0001/0010/0050`, `HH-CAA-0001/0010` so the lens visibly works; Brandon replaces title/intro/per-item notes/bio/url — **no rebuild needed**, just edit the JSON & push).
+- **next.html (all gated behind `state.curation` / file presence — zero behaviour change when absent):** `loadCurationIndex()` on boot; `#curated-bar` `[Curated]` entry above the filter panel; threshold overlay `#curator-pane` (about-pane overlay pattern — standing `LENS_BLURB` + curator name/role/affiliation + bio + external link + **"Continue to exhibition →"** = the confirm); `enterCuration/exitCuration`; `applyFilters` early-returns the authored membership in `pos` order; sort headers + filter-toggle locked in-mode (toast); `#curation-card` intro card (curator + title + macro intro + **exit**) above the list; record pane swaps `renderRN → renderCuratorNote`; researcher mark-bar hidden in-mode. CSS bracket-consistent. All inline JS passes `node --check`; curations JSON valid.
+- **Deliberate v1 deviation from the captured spec:** Esc cancels the *threshold overlay* but does **not** exit an active curation — Esc already serves zen/search/overlay-close; binding it to also nuke the lens caused conflicts. Leaving the lens is the always-visible card **exit** button. Logged in Pending; revisit if Brandon wants Esc-to-exit.
+- **Phase 2** (in-browser authoring + tutorial, multi-curator polish, Wikibase promotion, optional exhibition `.html`) remains queued.
+- Unrelated/ongoing: `HH-HHC-0115`/P143 still awaiting the Wikibase Cloud SPARQL index (their infra lag — code/data verified correct).
+
+**Version: next.html `v1.06-test.06`** (staging). Live `browse.html` unchanged at `v1.05.02`.
