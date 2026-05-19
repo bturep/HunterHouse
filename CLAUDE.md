@@ -514,3 +514,16 @@ Working LINE: **NEXT**. Built the full curated-lens *viewing* mode (no in-browse
 - Unrelated/ongoing: `HH-HHC-0115`/P143 still awaiting the Wikibase Cloud SPARQL index (their infra lag — code/data verified correct).
 
 **Version: next.html `v1.06-test.06`** (staging). Live `browse.html` unchanged at `v1.05.02`.
+
+---
+
+### 2026-05-19 — PDF reader → stage-integrated; search matches item type (next.html v1.06-test.07)
+
+Working LINE: **NEXT**. Reworked the PDF reader per Brandon, plus a small search fix. Live `browse.html` untouched.
+
+- **PDF reader, native + stage-integrated** (replaces the v1.06-test.04 separate overlay). The `#pdf-frame` iframe now lives *inside* `#stage`; a `.pane-image.pdf-mode` class hides the canvas and shows the PDF, and **repurposes the existing foot bar**: image-only controls (zoom/pct/fit/1:1/rotate/rotsave/seps) hide; **`↓ PDF`** (`#pdf-dl`, replaces `↓ Original`), a real **Fullscreen** button (`#pdf-fs`, Fullscreen API on `#stage`, vendor-prefixed), and **`✕ image`** close (`#pdf-close`) show; zen (`#zoom-fs`) stays; the title shows in the foot-left. `openPdf/closePdf/pdfFullscreen` replace `openPdfPane/closePdfPane`; `renderImage` calls `closePdf()` so switching items returns to the image; Esc closes the PDF and early-returns when `document.fullscreenElement` (lets the browser just exit fullscreen). Old `#pdf-pane`/header/CSS removed cleanly (grep-verified no stale refs). All inline JS passes `node --check`.
+- **Native-viewer limits (unchanged, by design):** single-page-vs-continuous and the viewer's *internal* grey are the browser's and not controllable via a plain iframe — accepted as the cost of the no-library choice (Brandon chose native, stage-integrated over PDF.js). Our chrome/frame backing matches the stage (`var(--soft)`/dark) so the surrounding view area is seamless.
+- **Search now matches item type:** added `it.itemType` to the `applyFilters` search haystack — typing "drawings"/"photographs" surfaces all of that type (previously only drawing *sub*-types/titles matched). Client-side only; no SPARQL/prefetch change. (Search remains intentionally inert inside a curated lens.)
+- Mobile PDF path unchanged (open-in-tab). Rotation mobile/lightbox gap + Curated Phase 2 + Rotation Part 2 still queued; `HH-HHC-0115`/P143 still awaiting Wikibase Cloud's SPARQL index (their infra).
+
+**Version: next.html `v1.06-test.07`** (staging). Live `browse.html` unchanged at `v1.05.02`.
