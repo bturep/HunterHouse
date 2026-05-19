@@ -1592,7 +1592,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.09";
+  const VERSION      = "v1.06-test.10";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4317,7 +4317,11 @@ WHERE {
   const paneImageEl = () => document.querySelector(".pane-image");
   function openPdf(url) {
     if (!url) return;
-    document.getElementById("pdf-frame").src = url;
+    // #pagemode=none asks Firefox's bundled PDF.js to open with the side tab
+    // collapsed. Chrome/Safari ignore it (harmless). Skip if the URL already
+    // carries its own fragment.
+    const src = url + (url.includes("#") ? "" : "#pagemode=none");
+    document.getElementById("pdf-frame").src = src;
     paneImageEl().classList.add("pdf-mode");
     syncFootPdfView();
   }
