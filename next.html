@@ -113,6 +113,10 @@
     flex-direction:column;background:var(--bg);padding:18px 22px 36px;
   }
   #info-pane.open{display:flex}
+  /* When the right panel is collapsed, the absolutely-positioned info overlay
+     would otherwise squeeze into the 41px strip and show compressed text.
+     Hide it while collapsed; it returns on re-expand if it was open. */
+  .panel-right.out #info-pane{display:none}
   #info-pane-close{
     position:absolute;top:8px;right:12px;background:none;border:0;cursor:pointer;
     font-size:18px;color:var(--hint);line-height:1;padding:4px 6px;
@@ -1471,7 +1475,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.01";
+  const VERSION      = "v1.06-test.02";
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
