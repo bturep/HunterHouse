@@ -601,6 +601,13 @@ Two bugs Brandon reported on first look at the PDF.js viewer.
 
 ---
 
+### 2026-05-19 — PDF.js cross-origin allowlist + dark bg match (next.html v1.06-test.14)
+
+Brandon: "I don't see the PDF, only the viewer." Diagnosis: PDF.js v5 has a hardcoded same-origin check on the `?file=` parameter — `HOSTED_VIEWER_ORIGINS` only allows `mozilla.github.io` by default; anything else logs `"file origin does not match viewer's"` and bails *before* rendering. CORS + Content-Disposition were both fine — the block is internal to PDF.js, not at the network layer.
+
+- **Patched** `assets/pdfjs/web/viewer.mjs`: added `"https://bturep.github.io"`, `"http://localhost"`, `"http://127.0.0.1"` to `HOSTED_VIEWER_ORIGINS`. One-line edit (kept the original list intact, just appended). Must be re-applied on PDF.js version upgrades — captured in `scripts/repatch_pdfjs.py` ? (not built yet; trivial when needed).
+- **Fixed background mismatch** Brandon flagged: `html.dark .image-stage` uses `#242220`, but `hh-pdfjs.css` had `#26231e` for `.hh-theme-dark --hh-soft`. Aligned to `#242220` so the PDF viewer surface matches the image stage exactly.
+
 ### 2026-05-19 — R2 CORS configured (no code change)
 
 R2 bucket `hunter-house-archive` now serves CORS headers for the in-app PDF.js viewer. Rule applied via boto3 `PutBucketCors` using a one-off admin-scope R2 API token Brandon minted (rclone keys are object-scope only — `AccessDenied` on bucket-config ops):

@@ -32,7 +32,7 @@
   --hh-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 .hh-theme-dark {
-  --hh-soft: #26231e;
+  --hh-soft: #242220;   /* matches html.dark .image-stage in next.html exactly */
   --hh-ink:  #f0ede6;
   --hh-muted:#a8a59c;
   --hh-hint: #76726a;
