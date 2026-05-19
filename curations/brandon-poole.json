@@ -1,0 +1,23 @@
+{
+  "_note": "PHASE 1 SEED — placeholder content. Replace title/intro/items/notes and the curator bio+url. Item ids must be real archive ids (HH-HHC-####, HH-CAA-####); unknown ids are silently skipped. pos = display order (1-based).",
+  "slug": "brandon-poole",
+  "title": "PLACEHOLDER — A working selection",
+  "curator": {
+    "name": "Brandon Poole",
+    "role": "Project Lead",
+    "affiliation": "Hunter House Foundation · McGill University",
+    "qid": null,
+    "bio": "PLACEHOLDER — a short curator biography goes here: who you are, your relationship to the Hunter archive, and the lens you bring to this selection. A few sentences.",
+    "url": "https://example.org",
+    "url_label": "PLACEHOLDER — external site (academic page / portfolio)"
+  },
+  "updated": "2026-05-19",
+  "intro": "PLACEHOLDER — the macro framing of this selection. This is the curatorial argument that sits on the card above the list: what binds these items, what you want a viewer to notice, the through-line. One or two short paragraphs.",
+  "items": [
+    { "id": "HH-HHC-0001", "pos": 1, "note": "PLACEHOLDER — curator's note for this item: why it's here, what it does in the sequence." },
+    { "id": "HH-HHC-0010", "pos": 2, "note": "PLACEHOLDER — curator's note." },
+    { "id": "HH-CAA-0001", "pos": 3, "note": "PLACEHOLDER — curator's note." },
+    { "id": "HH-HHC-0050", "pos": 4, "note": "PLACEHOLDER — curator's note." },
+    { "id": "HH-CAA-0010", "pos": 5, "note": "PLACEHOLDER — curator's note." }
+  ]
+}
