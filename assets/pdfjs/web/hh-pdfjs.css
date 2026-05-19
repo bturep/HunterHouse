@@ -11,8 +11,16 @@
 #printButton,
 #downloadButton,
 #secondaryToolbarToggle,   /* » overflow menu (presentation, rotate, first/last page…) */
-#viewFindButton            /* find/search */
+#viewFindButton,           /* find/search */
+#viewsManagerToggleButton, /* left-most "views manager" (PDF.js v5's sidebar toggle) */
+#viewsManager              /* + its panel, kept hidden so it never opens */
 { display: none !important; }
+
+/* PDF.js v5 paints toolbar icons via ::before { mask-image: var(--…-icon) }.
+   Our ::after text glyphs were stacking on top → doubled icons. Kill the
+   ::before pseudo on the four buttons we re-glyph. */
+#previous::before, #next::before,
+#zoomOutButton::before, #zoomInButton::before { display: none !important; }
 
 /* ── Theme tokens (light default; dark via class set from URL ?theme=) ──── */
 :root {

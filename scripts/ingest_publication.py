@@ -275,7 +275,11 @@ def main():
     run(["rclone", "copy", tier_files["_thumb.jpg"], R2_THUMBS + "/"])
     run(["rclone", "copy", tier_files["_prev.jpg"],  R2_PREVIEWS + "/"])
     run(["rclone", "copy", tier_files["_large.jpg"], R2_LARGE + "/"])
-    run(["rclone", "copy", pdf_path, R2_PDF + "/"])
+    # Force the public URL to download (not preview inline). PDF.js still
+    # renders fine — it reads the bytes via XHR regardless of disposition.
+    run(["rclone", "copy", pdf_path, R2_PDF + "/",
+         "--header-upload",
+         f'Content-Disposition: attachment; filename="{os.path.basename(pdf_path)}"'])
     print("  all objects uploaded.")
 
     print("\nWikibase …")
