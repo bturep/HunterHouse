@@ -1475,7 +1475,13 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05.01";
+  const VERSION      = "v1.05.02";
+  // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
+  // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
+  // still uses the full VERSION, so per-patch cache busting is unaffected.
+  const VERSION_DISPLAY = /-test/.test(VERSION)
+    ? VERSION
+    : VERSION.replace(/^(v\d+\.\d+).*$/, "$1");
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -3861,11 +3867,11 @@ $("#foot-dims").textContent = "";
     }
 
     // Version displays
-    document.getElementById("mob-about-ver").textContent = VERSION;
-    document.getElementById("topright").textContent = VERSION;
-    document.getElementById("ap-ver").textContent = VERSION;
+    document.getElementById("mob-about-ver").textContent = VERSION_DISPLAY;
+    document.getElementById("topright").textContent = VERSION_DISPLAY;
+    document.getElementById("ap-ver").textContent = VERSION_DISPLAY;
     const mvBtn = document.getElementById("mobile-version");
-    if (mvBtn) mvBtn.textContent = "HHFA " + VERSION;
+    if (mvBtn) mvBtn.textContent = "HHFA " + VERSION_DISPLAY;
     // markid: desktop → about pane, mobile → mob-about
     document.querySelector(".markid").addEventListener("click", e => {
       e.preventDefault();
