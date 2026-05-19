@@ -582,3 +582,19 @@ Brandon reversed the earlier native-vs-PDF.js call after seeing the irreducible 
 - **Minimal toolbar contents** (per Brandon's pick): `↑` prev page · `↓` next page · page-N-of-N input · `−` zoom out · `+` zoom in · zoom-mode dropdown (Auto / Fit Page / Fit Width / %). Nothing else.
 
 **Version: next.html `v1.06-test.12`** (staging). Live `browse.html` unchanged at `v1.05.02`.
+
+---
+
+### 2026-05-19 — PDF.js toolbar fixes + ↓ PDF actually downloads (next.html v1.06-test.13)
+
+Two bugs Brandon reported on first look at the PDF.js viewer.
+
+- **Bar looked terrible** — two distinct causes:
+  - PDF.js v5 paints toolbar icons via `::before { mask-image: var(--…-icon) }`. My override only nuked `background-image`, so my `::after` text glyphs stacked **on top of** PDF.js's chevrons (`^↑`, `v↓`, `−−`, `++`). Fixed: `#previous::before, #next::before, #zoomOutButton::before, #zoomInButton::before { display:none !important; }`.
+  - The left-most sidebar toggle in v5 is `#viewsManagerToggleButton` (renamed from `sidebarToggleButton`), missed by my first grep. Added it + `#viewsManager` to the hide list.
+- **`↓ PDF` was opening in a new tab instead of downloading.** Cross-origin browsers ignore the `download` attribute. **Bypassed CORS entirely** by setting `Content-Disposition: attachment; filename="…"` on the PDF *object* in R2 via `boto3 copy_object` (data-plane op — works with the existing rclone keys, no admin needed). Verified over the public URL: `content-disposition: attachment; …`. PDF.js's XHR fetch is unaffected (it reads bytes regardless of disposition). The foot `<a id="pdf-dl">` also got `download` (filename hint) and lost `target="_blank"`. **`scripts/ingest_publication.py` updated** so future publications upload with the same `--header-upload Content-Disposition`. Side-effect: navigating directly to the PDF URL in a browser now downloads instead of previewing — the "directly viewable by URL" fallback during SPARQL lag is no longer; acceptable since PDF.js renders it inline once CORS is set.
+- All inline JS passes `node --check`.
+
+**R2 CORS still pending** to make the in-app PDF.js viewer actually fetch & render. Tried via the rclone keys — `AccessDenied` (object-only scope; CORS is a bucket-config op). Brandon to either (a) add the rule via Cloudflare dashboard, or (b) mint a new R2 API token with **Admin Read & Write** scope and paste it; I run the boto3 PutBucketCors. Documented in the v1.06-test.12 entry above.
+
+**Version: next.html `v1.06-test.13`** (staging). Live `browse.html` unchanged at `v1.05.02`.

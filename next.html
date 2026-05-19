@@ -1526,7 +1526,7 @@
           <svg id="fs-icon-collapse" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M4 1v3H1M8 1v3h3M8 11V8h3M4 11V8H1"/></svg>
         </button>
       </div>
-      <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">↓ Original</a><a href="#" id="pdf-dl" target="_blank" rel="noopener" hidden>↓ PDF</a></span>
+      <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">↓ Original</a><a href="#" id="pdf-dl" rel="noopener" download hidden>↓ PDF</a></span>
     </div>
     <div class="mobile-img-nav" id="mobile-img-nav">
       <button id="mob-prev" class="mob-nav-btn" aria-label="Previous item">←</button>
@@ -1592,7 +1592,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.12";
+  const VERSION      = "v1.06-test.13";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
