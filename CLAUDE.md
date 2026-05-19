@@ -568,3 +568,17 @@ Brandon asked if any of the native PDF viewer chrome could be hidden (annotation
 Per Brandon: the publication has no phase, so the empty "No phase assigned. Item not yet linked into work hierarchy." block in the record was just noise. **The whole `<section class="graph-section">` is now omitted when `phaseLabel` is null** — in both `renderMeta` (desktop) and `renderMobSheet` (mobile). The graph-empty fallback HTML in `graphPathHTML` is left in place but unused (harmless dead branch; preserved for safety). JS clean.
 
 **Version: next.html `v1.06-test.11`** (staging). Live `browse.html` unchanged at `v1.05.02`.
+
+---
+
+### 2026-05-19 — Switched to bundled PDF.js with a Minimal toolbar (next.html v1.06-test.12)
+
+Brandon reversed the earlier native-vs-PDF.js call after seeing the irreducible native-viewer chrome (annotation row, side tab, browser-specific layout). Switched to **self-hosted PDF.js v5.7.284**, vendored under `assets/pdfjs/`.
+
+- **Install.** Dropped the official `pdfjs-5.7.284-dist.zip` into `assets/pdfjs/` and pruned to **5.7 MB**: kept `build/pdf.mjs` + `build/pdf.worker.mjs`; `web/viewer.html` + `viewer.css` + `viewer.mjs` + `images/` + `iccs/` + `wasm/` + `locale/en-US/` only. Dropped all `*.mjs.map` (~9 MB), all other locales (~2.7 MB), `cmaps/` (~1.6 MB, non-Latin charmaps unused for English PDFs), `standard_fonts/` (~800 KB, our PDFs are JPEG-in-PDF), `pdf.sandbox.mjs` (PDF embedded JS, unused), `debugger.*`, the sample PDF.
+- **Override.** `assets/pdfjs/web/hh-pdfjs.css` (loaded after `viewer.css` from a one-line edit to `viewer.html`) handles two jobs: (1) **hides every toolbar item outside the Minimal set** — `#editorModeButtons`, `#editorModeSeparator`, `#printButton`, `#downloadButton`, `#secondaryToolbarToggle`, `#viewFindButton`; (2) **themes what's kept** to match the archive foot-bar — mono font, our soft / ink / muted / rule tokens, our `↑ ↓ − +` glyphs replacing PDF.js's icon backgrounds via `::after` (the localized label `<span>` inside each button is visually-hidden). A tiny inline `<script>` in `viewer.html` reads `?theme=dark|light` from the URL and tags `<html>` so the override switches palette to match the archive's current mode.
+- **Wiring.** `openPdf(url)` now sets the iframe `src` to `assets/pdfjs/web/viewer.html?file=<encoded url>&theme=<dark|light>`. Everything else — the foot-left View PDF ↔ ✕ swap, the foot-right ↓ PDF download, `closePdf`, mobile open-in-tab — unchanged. The `#pagemode=none` Firefox nudge from v1.06-test.10 is no longer relevant (different viewer) and was removed. All inline JS passes `node --check`.
+- **⚠ Prerequisite for the viewer to actually render: R2 CORS.** PDF.js does cross-origin XHR to fetch the PDF bytes; `archive.hunterhousefoundation.com` currently returns no `Access-Control-Allow-Origin`, so the fetch is blocked. Brandon adds a CORS rule on the R2 bucket once: `AllowedOrigins: ["https://bturep.github.io", "http://localhost"]` (or `*`), `AllowedMethods: ["GET","HEAD"]`, `AllowedHeaders: ["*"]`, `MaxAgeSeconds: 86400`. Cloudflare dashboard → R2 → bucket → Settings → CORS Policy.
+- **Minimal toolbar contents** (per Brandon's pick): `↑` prev page · `↓` next page · page-N-of-N input · `−` zoom out · `+` zoom in · zoom-mode dropdown (Auto / Fit Page / Fit Width / %). Nothing else.
+
+**Version: next.html `v1.06-test.12`** (staging). Live `browse.html` unchanged at `v1.05.02`.
