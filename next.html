@@ -488,6 +488,9 @@
   .zoom-ctl button#zoom-fit,
   .zoom-ctl button#zoom-1to1{letter-spacing:0.1em}
   .zoom-ctl button#zoom-rotate{font-size:15px}
+  .zoom-ctl button#zoom-rotsave{font-size:10px;letter-spacing:0.06em;color:var(--copper-deep);font-weight:600}
+  .zoom-ctl button#zoom-rotsave:hover{color:var(--ink)}
+  .zoom-ctl button#zoom-rotsave[hidden]{display:none}
   .zoom-ctl button#zoom-fs.fs-active{color:var(--ink)}
   .zoom-ctl button:hover{color:var(--ink)}
   .zoom-ctl button:disabled{color:var(--hint);cursor:not-allowed}
@@ -1447,6 +1450,7 @@
         <button id="zoom-1to1" type="button" title="1:1 — one screen pixel per image pixel [1]">1:1</button>
         <span class="zoom-sep"></span>
         <button id="zoom-rotate" type="button" title="Rotate 90° [T]">↻</button>
+        <button id="zoom-rotsave" type="button" title="Save this rotation to the record (admin)" hidden>⤓ save</button>
         <span class="zoom-sep"></span>
         <button id="zoom-fs" type="button" title="Fullscreen — hide panels [Z]">
           <svg id="fs-icon-expand" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8"/></svg>
@@ -1519,7 +1523,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.04";
+  const VERSION      = "v1.06-test.05";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -1723,6 +1727,20 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     if (existing.length)
       await proxyEdit({ action: "wbremoveclaims", claim: existing.join("|") });
   }
+  // Replace a single-valued string claim — create-then-remove. An empty/null
+  // value writes nothing and just clears the claim (used to reset rotation to 0).
+  async function setStringClaim(entity, pid, value) {
+    const api = WIKIBASE_URL + "/w/api.php";
+    const g = await fetch(`${api}?action=wbgetclaims&entity=${entity}&property=${pid}&format=json&origin=*`)
+      .then(r => r.json());
+    const existing = ((g.claims && g.claims[pid]) || []).map(c => c.id);
+    if (value !== null && value !== undefined && value !== "")
+      await proxyEdit({ action: "wbcreateclaim", entity, property: pid,
+        snaktype: "value", value: JSON.stringify(String(value)) });
+    if (existing.length)
+      await proxyEdit({ action: "wbremoveclaims", claim: existing.join("|") });
+  }
+
   // Multi-value item claims (P88 drawing type, P87 areas): add / remove one.
   async function addMultiItem(entity, pid, valueQID) {
     await proxyEdit({ action: "wbcreateclaim", entity, property: pid, snaktype: "value",
@@ -2580,6 +2598,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
           archiveLink:      r.archiveLink?.value || null,
           location:         r.location?.value || null,
           accessCopy:       r.accessCopy?.value || null,
+          rotation:         (parseInt(r.rotation?.value, 10) % 360 + 360) % 360 || 0,
         });
       }
       const it = map.get(qid);
@@ -2594,6 +2613,12 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   // "access copy" property — a publication's multi-page PDF. Minted by
   // scripts/ingest_publication.py (P143, url datatype, created 2026-05-19).
   const ACCESS_PID = "P143";
+
+  // "display rotation" property (P144, string, created 2026-05-19): clockwise
+  // degrees the stored image must be rotated for correct display (90/180/270;
+  // absent/0 = none). Applied at render as the base orientation; the explicit
+  // "bake" pass (later) flattens it into the files and clears the claim.
+  const ROTATE_PID = "P144";
 
   // SPARQL query — must stay in sync with the prefetch copy in index.html.
   // (index.html prefetch sync is deferred to promotion — the extra OPTIONAL
@@ -2618,7 +2643,7 @@ SELECT ?item ?archId ?label ?img ?master
        ?setPos ?notes
        ?rights ?rightsLabel
        ?heldBy ?heldByLabel
-       ?archiveLink ?location ?accessCopy
+       ?archiveLink ?location ?accessCopy ?rotation
 WHERE {
   ?item wdt:P2 ?archId .
   ?item wdt:P96 ?img .
@@ -2645,6 +2670,7 @@ WHERE {
   OPTIONAL { ?item wdt:P99 ?archiveLink }
   OPTIONAL { ?item wdt:P142 ?location }
   OPTIONAL { ?item wdt:${ACCESS_PID} ?accessCopy }
+  OPTIONAL { ?item wdt:${ROTATE_PID} ?rotation }
 }`;
 
   async function loadFromWikibase() {
@@ -2907,7 +2933,7 @@ $("#foot-dims").textContent = "";
         });
       } else {
         // Full arrived before thumb (rare on cold load, normal on cached)
-        zoomState.rotation = 0;
+        zoomState.rotation = item.rotation || 0;   // stored display rotation = base orientation
         currentImg = fullImg;
         canvas.appendChild(fullImg);
         fitToFrame();
@@ -2937,7 +2963,7 @@ $("#foot-dims").textContent = "";
         if (currentImg === fullImg) return; // full already rendered, skip
         zoomState.naturalW = thumbImg.naturalWidth;
         zoomState.naturalH = thumbImg.naturalHeight;
-        zoomState.rotation = 0;
+        zoomState.rotation = item.rotation || 0;   // stored display rotation = base orientation
         currentImg = thumbImg;
         canvas.appendChild(thumbImg);
         // Fit thumb to frame without upscale cap — thumb must fill the same
@@ -2985,11 +3011,26 @@ $("#foot-dims").textContent = "";
       `translate(${-z.naturalW*z.scale/2 + z.tx}px, ${-z.naturalH*z.scale/2 + z.ty}px) scale(${z.scale}) translate(${z.naturalW/2}px,${z.naturalH/2}px) rotate(${z.rotation}deg) translate(${-z.naturalW/2}px,${-z.naturalH/2}px)`;
   }
 
+  function curRotItem() {
+    return state.items.find(i => i.id === state.selectedId) || null;
+  }
+  // Show the admin "save rotation" control only when an admin has rotated the
+  // image away from its stored base orientation. Hidden for everyone else.
+  function syncRotSave() {
+    const btn = document.getElementById("zoom-rotsave");
+    if (!btn) return;
+    const it = curRotItem();
+    const dirty = canEditWikibase() && !!currentImg && it && it.qid &&
+      ((zoomState.rotation % 360) !== ((it.rotation || 0) % 360));
+    btn.hidden = !dirty;
+  }
+
   function updateZoomUI() {
     const pct = Math.round((zoomState.scale / zoomState.fitScale) * 100);
     $("#zoom-pct").textContent = pct + "%";
     $("#zoom-out").disabled = zoomState.scale <= zoomState.fitScale * 0.5;
     $("#zoom-in").disabled  = zoomState.scale >= zoomState.fitScale * 8;
+    syncRotSave();
   }
 
   function setZoom(newScale, cx, cy) {
@@ -3107,6 +3148,26 @@ $("#foot-dims").textContent = "";
     $("#zoom-out").addEventListener("click", () => setZoom(zoomState.scale * 0.71));
     $("#zoom-fit").addEventListener("click", fitToFrame);
     $("#zoom-1to1").addEventListener("click", () => setZoom(1));
+    $("#zoom-rotsave").addEventListener("click", async () => {
+      const it = curRotItem();
+      if (!it || !it.qid || !canEditWikibase()) return;
+      const net  = ((zoomState.rotation % 360) + 360) % 360;
+      const prev = (it.rotation || 0) % 360;
+      if (net === prev) { syncRotSave(); return; }
+      const btn = document.getElementById("zoom-rotsave");
+      btn.disabled = true; btn.textContent = "saving…";
+      try {
+        await setStringClaim(it.qid, ROTATE_PID, net === 0 ? "" : String(net));
+        it.rotation = net;   // curRotItem() returns the state.items entry — persists
+        hhToast(net === 0 ? "Rotation cleared · " + it.qid
+                          : `Rotation ${net}° saved · ` + it.qid, "ok");
+      } catch (e) {
+        hhToast("Rotation save failed: " + e.message, "err");
+      } finally {
+        btn.disabled = false; btn.textContent = "⤓ save";
+        syncRotSave();
+      }
+    });
 
     let resizeT;
     window.addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(fitToFrame, 120); });
