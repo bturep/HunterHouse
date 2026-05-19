@@ -1,0 +1,116 @@
+/* Hunter House Archive — PDF.js viewer overrides.
+   Loaded after viewer.css. Hides everything outside the "Minimal" toolbar
+   (page nav + zoom only) and themes the rest to match the archive's mono
+   foot-bar style. Theme is passed as ?theme=dark|light by openPdf() and
+   set as .hh-theme-dark / .hh-theme-light on <html> by a tiny inline
+   bootstrap script at the top of viewer.html. */
+
+/* ── Hide everything outside the Minimal set ────────────────────────────── */
+#editorModeButtons,        /* annotation row: comment, signature, highlight, text, ink, image */
+#editorModeSeparator,
+#printButton,
+#downloadButton,
+#secondaryToolbarToggle,   /* » overflow menu (presentation, rotate, first/last page…) */
+#viewFindButton            /* find/search */
+{ display: none !important; }
+
+/* ── Theme tokens (light default; dark via class set from URL ?theme=) ──── */
+:root {
+  --hh-soft: #ebe8df;
+  --hh-ink:  #1e1c1a;
+  --hh-muted:#76726a;
+  --hh-hint: #a8a59c;
+  --hh-rule: #d6d2c8;
+  --hh-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+.hh-theme-dark {
+  --hh-soft: #26231e;
+  --hh-ink:  #f0ede6;
+  --hh-muted:#a8a59c;
+  --hh-hint: #76726a;
+  --hh-rule: #3a362f;
+  color-scheme: dark;
+}
+
+/* ── Surfaces ──────────────────────────────────────────────────────────── */
+html, body, #outerContainer, #viewerContainer, #mainContainer {
+  background: var(--hh-soft) !important;
+}
+#toolbarContainer {
+  background: var(--hh-soft) !important;
+  border-bottom: 1px solid var(--hh-rule) !important;
+  box-shadow: none !important;
+}
+
+/* ── Toolbar buttons / labels — mono, muted ─────────────────────────────── */
+#toolbarContainer button,
+#toolbarContainer input,
+#toolbarContainer select,
+#toolbarContainer .toolbarLabel {
+  font-family: var(--hh-mono) !important;
+  color: var(--hh-muted) !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+#toolbarContainer button:hover { color: var(--hh-ink) !important; background: transparent !important; }
+
+/* ── Replace PDF.js's icon backgrounds with our text glyphs ─────────────── */
+#previous, #next, #zoomOutButton, #zoomInButton {
+  background-image: none !important;
+  width: auto !important;
+  min-width: 30px !important;
+  padding: 0 6px !important;
+}
+#previous::after, #next::after, #zoomOutButton::after, #zoomInButton::after {
+  font-family: var(--hh-mono);
+  font-size: 15px;
+  color: var(--hh-muted);
+  line-height: 1;
+  display: inline-block;
+}
+#previous:hover::after, #next:hover::after,
+#zoomOutButton:hover::after, #zoomInButton:hover::after { color: var(--hh-ink); }
+#previous::after      { content: "↑"; }   /* prev page  */
+#next::after          { content: "↓"; }   /* next page  */
+#zoomOutButton::after { content: "−"; }
+#zoomInButton::after  { content: "+"; }
+/* PDF.js puts a localized label span inside each button — visually-hidden it */
+#previous > span, #next > span,
+#zoomOutButton > span, #zoomInButton > span {
+  position: absolute !important; width: 1px !important; height: 1px !important;
+  overflow: hidden !important; clip: rect(0 0 0 0) !important;
+}
+
+/* ── Page number input + "of N" label ──────────────────────────────────── */
+#pageNumber {
+  font-family: var(--hh-mono) !important;
+  font-size: 11px !important;
+  color: var(--hh-ink) !important;
+  text-align: center !important;
+  width: 36px !important;
+  padding: 1px 4px !important;
+  border: 1px solid var(--hh-rule) !important;
+  background: var(--hh-soft) !important;
+}
+#numPages {
+  font-family: var(--hh-mono) !important;
+  font-size: 11px !important;
+  color: var(--hh-muted) !important;
+}
+
+/* ── Zoom-mode dropdown ─────────────────────────────────────────────────── */
+#scaleSelect {
+  font-family: var(--hh-mono) !important;
+  font-size: 11px !important;
+  color: var(--hh-ink) !important;
+  background: var(--hh-soft) !important;
+  border: 1px solid var(--hh-rule) !important;
+  padding: 1px 4px !important;
+}
+#scaleSelectContainer { background: transparent !important; }
+
+/* ── Loading bar / dialogs — minimal restyle so nothing looks foreign ──── */
+#loadingBar, #loadingBar .progress { background: var(--hh-rule) !important; }
+.dialog, dialog { background: var(--hh-soft) !important; color: var(--hh-ink) !important;
+  border: 1px solid var(--hh-rule) !important; }
