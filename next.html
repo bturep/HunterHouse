@@ -133,6 +133,73 @@
   .pub-read::after{content:" ]";color:var(--hint);opacity:.55}
   .pub-read:hover{color:var(--ink)}
 
+  /* ── Curated lenses ── */
+  /* [Curated] entry — slim bar above the filter/list (mark-bar slot pattern) */
+  .curated-bar{display:flex;align-items:center;gap:10px;padding:7px 20px;
+    border-bottom:1px solid var(--rule-soft);background:var(--bg)}
+  .curated-bar[hidden]{display:none}
+  .cb-lead{font-family:var(--mono);font-size:9px;letter-spacing:0.16em;
+    text-transform:uppercase;color:var(--muted)}
+  .cb-entry{font-family:var(--mono);font-size:11px;letter-spacing:0.04em;
+    color:var(--copper-deep);background:none;border:0;cursor:pointer;padding:2px 0}
+  .cb-entry::before{content:"[ ";color:var(--hint);opacity:.55}
+  .cb-entry::after{content:" ]";color:var(--hint);opacity:.55}
+  .cb-entry:hover{color:var(--ink)}
+
+  /* Threshold overlay — gallery "title wall" (about-pane overlay pattern) */
+  #curator-pane{display:none;position:absolute;inset:0;z-index:18;overflow-y:auto;
+    flex-direction:column;align-items:center;background:var(--soft);
+    padding:48px 40px 64px}
+  html.dark #curator-pane{background:#242220}
+  #curator-pane.open{display:flex}
+  .cur-blurb{font-family:var(--mono);font-size:10px;line-height:1.7;
+    letter-spacing:0.04em;color:var(--muted);text-transform:uppercase;
+    border-bottom:1px solid var(--rule);padding-bottom:14px;margin-bottom:22px}
+  .cur-name{font-family:var(--mono);font-size:13px;letter-spacing:0.14em;
+    text-transform:uppercase;color:var(--ink);font-weight:500;margin:0 0 2px}
+  .cur-role{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;
+    color:var(--muted);margin:0 0 18px}
+  .cur-title{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;
+    color:var(--copper-deep);margin:0 0 18px}
+  .cur-bio{font-family:var(--mono);font-size:11.5px;line-height:1.75;
+    color:var(--ink);margin:0 0 16px}
+  .cur-link{font-family:var(--mono);font-size:11px;color:var(--copper-deep);
+    text-decoration:none;border-bottom:1px solid var(--copper-pale)}
+  .cur-link:hover{border-bottom-color:var(--copper-deep)}
+  .cur-actions{display:flex;gap:18px;align-items:center;margin-top:28px}
+  .cur-continue{font-family:var(--mono);font-size:11px;font-weight:600;
+    letter-spacing:0.06em;color:var(--bg);background:var(--ink);
+    border:0;cursor:pointer;padding:9px 16px}
+  .cur-continue:hover{background:var(--copper-deep)}
+  .cur-cancel{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;
+    text-transform:uppercase;color:var(--hint);background:none;border:0;cursor:pointer}
+  .cur-cancel:hover{color:var(--ink)}
+
+  /* Intro card — bigger than mark-bar, sits above the list in curation mode */
+  .curation-card{padding:14px 20px 16px;border-bottom:1px solid var(--rule);
+    background:var(--soft)}
+  html.dark .curation-card{background:#242220}
+  .curation-card[hidden]{display:none}
+  .cc-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:8px}
+  .cc-curator{font-family:var(--mono);font-size:9px;letter-spacing:0.18em;
+    text-transform:uppercase;color:var(--muted)}
+  .cc-exit{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;
+    text-transform:uppercase;color:var(--hint);background:none;border:0;cursor:pointer}
+  .cc-exit::before{content:"[ ";opacity:.55}
+  .cc-exit::after{content:" ]";opacity:.55}
+  .cc-exit:hover{color:var(--red-deep)}
+  .cc-title{font-family:var(--mono);font-size:12px;letter-spacing:0.04em;
+    color:var(--ink);font-weight:500;margin:0 0 6px}
+  .cc-intro{font-family:var(--mono);font-size:11px;line-height:1.7;
+    color:var(--ink);margin:0;white-space:pre-line}
+
+  /* Curator note — replaces researcher notes in the record pane (curation mode) */
+  .cur-note{margin-top:14px;border-top:1px dashed var(--rule);padding-top:10px}
+  .cur-note .cn-label{font-family:var(--mono);font-size:9px;letter-spacing:0.16em;
+    text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+  .cur-note .cn-text{font-family:var(--mono);font-size:11.5px;line-height:1.7;color:var(--ink)}
+  .cur-note .cn-empty{font-family:var(--mono);font-size:10.5px;color:var(--hint)}
+
   /* Info ([?]) button in the Record bar — attention colour, bracket motif */
   .rec-info{
     font-family:var(--mono);font-size:11px;font-weight:600;
@@ -1378,8 +1445,10 @@
           <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>
         </div>
       </div>
+      <div class="curated-bar" id="curated-bar" hidden></div>
       <div class="filter-panel" id="filter-panel" hidden></div>
       <div class="mark-bar" id="mark-bar" hidden></div>
+      <div class="curation-card" id="curation-card" hidden></div>
       <div class="rows" id="rows">
         <div class="load-msg">Loading catalogue from Wikibase…</div>
       </div>
@@ -1428,6 +1497,9 @@
         <button id="pdf-pane-close" aria-label="Close reader">×</button>
       </div>
       <iframe id="pdf-frame" title="Publication PDF" src="about:blank"></iframe>
+    </div>
+    <div id="curator-pane" role="dialog" aria-modal="true" aria-label="Curated lens">
+      <div class="ap-inner" id="curator-pane-inner"></div>
     </div>
     <div id="load-screen">
       <img class="load-mark" src="assets/hunter-mark.png" alt="">
@@ -1523,7 +1595,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.05";
+  const VERSION      = "v1.06-test.06";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2192,7 +2264,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   function renderMarkBar() {
     const bar = document.getElementById("mark-bar");
     if (!bar) return;
-    if (!canMark()) { bar.hidden = true; bar.innerHTML = ""; return; }
+    if (!canMark() || state.curation) { bar.hidden = true; bar.innerHTML = ""; return; }
     bar.hidden = false;
 
     const n = marked.size;
@@ -2262,6 +2334,8 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     filterCreator: new Set(),
     filterBuiltStatus: new Set(),
     filterMarkedOnly: false,
+    curations: [],      // available curated lenses (from curations/index.json)
+    curation: null,     // active curation object, or null = normal archive mode
   };
 
   const BADGE_LEGEND = [
@@ -2620,6 +2694,30 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   // "bake" pass (later) flattens it into the files and clears the claim.
   const ROTATE_PID = "P144";
 
+  // ── Curated lenses (exhibition mode) ─────────────────────────────────────
+  // A curation = an authored selection: ordered items + per-item curator notes
+  // + a macro intro, served as static JSON in /curations. Public; viewing only
+  // in Phase 1 (no in-browser authoring). Everything is a no-op when no
+  // curations/index.json is present.
+  const LENS_BLURB = "A curated lens is an invited selection through the archive — one curator's ordered path and notes, not a filter. Leave it any time to return to the full catalogue.";
+  const curationCache = {};
+  async function loadCurationIndex() {
+    try {
+      const r = await fetch(`curations/index.json?v=${encodeURIComponent(VERSION)}`, { cache: "no-store" });
+      if (!r.ok) return;
+      const j = await r.json();
+      state.curations = Array.isArray(j.curations) ? j.curations : [];
+    } catch { /* absent file → feature simply not shown */ }
+  }
+  async function getCuration(slug) {
+    if (curationCache[slug]) return curationCache[slug];
+    const r = await fetch(`curations/${encodeURIComponent(slug)}.json?v=${encodeURIComponent(VERSION)}`, { cache: "no-store" });
+    if (!r.ok) throw new Error("curation not found");
+    const c = await r.json();
+    curationCache[slug] = c;
+    return c;
+  }
+
   // SPARQL query — must stay in sync with the prefetch copy in index.html.
   // (index.html prefetch sync is deferred to promotion — the extra OPTIONAL
   //  + column is backward-compatible, so live browse.html is unaffected.)
@@ -2715,6 +2813,14 @@ WHERE {
     drawTypePriority(a) - drawTypePriority(b) || a.localeCompare(b));
 
   function applyFilters() {
+    if (state.curation) {
+      // Curated lens: authored membership, authored order. No facets, no sort.
+      const byId = new Map(state.items.map(i => [i.id, i]));
+      state.filtered = (state.curation.items || [])
+        .slice().sort((a, b) => (a.pos || 0) - (b.pos || 0))
+        .map(e => byId.get(e.id)).filter(Boolean);
+      return;
+    }
     const q = state.search.trim().toLowerCase();
     state.filtered = state.items.filter(it => {
       if (state.filterMarkedOnly && !marked.has(it.id)) return false;
@@ -2784,6 +2890,96 @@ WHERE {
     el.textContent = (f < t) ? `${f} / ${t}` : `${t}`;
   }
 
+  // ── Curated lens: entry bar, threshold overlay, mode enter/exit, card, note ──
+  function renderCuratedBar() {
+    const bar = document.getElementById("curated-bar");
+    if (!bar) return;
+    if (state.curation || !state.curations.length) { bar.hidden = true; bar.innerHTML = ""; return; }
+    bar.hidden = false;
+    bar.innerHTML = `<span class="cb-lead">Curated</span>` + state.curations.map(c =>
+      `<button class="cb-entry" data-slug="${escapeHTML(c.slug)}">${escapeHTML(c.title || c.curator || c.slug)}</button>`
+    ).join("");
+    bar.querySelectorAll(".cb-entry").forEach(b =>
+      b.addEventListener("click", () => openCuratorPane(b.dataset.slug)));
+  }
+
+  const curatorPane = () => document.getElementById("curator-pane");
+  async function openCuratorPane(slug) {
+    let c;
+    try { c = await getCuration(slug); }
+    catch { hhToast("Curation unavailable", "err"); return; }
+    const cu = c.curator || {};
+    const link = cu.url
+      ? `<a class="cur-link" href="${escapeHTML(cu.url)}" target="_blank" rel="noopener">${escapeHTML(cu.url_label || cu.url)} ↗</a>`
+      : "";
+    document.getElementById("curator-pane-inner").innerHTML = `
+      <p class="cur-blurb">${escapeHTML(LENS_BLURB)}</p>
+      <p class="cur-name">${escapeHTML(cu.name || c.curator || "Curator")}</p>
+      <p class="cur-role">${escapeHTML([cu.role, cu.affiliation].filter(Boolean).join(" · "))}</p>
+      ${c.title ? `<p class="cur-title">${escapeHTML(c.title)}</p>` : ""}
+      ${cu.bio ? `<p class="cur-bio">${escapeHTML(cu.bio)}</p>` : ""}
+      ${link}
+      <div class="cur-actions">
+        <button class="cur-continue" id="cur-continue">Continue to exhibition →</button>
+        <button class="cur-cancel" id="cur-cancel">cancel</button>
+      </div>`;
+    curatorPane().classList.add("open");
+    document.getElementById("cur-continue").addEventListener("click", () => enterCuration(c));
+    document.getElementById("cur-cancel").addEventListener("click", closeCuratorPane);
+  }
+  function closeCuratorPane() { const p = curatorPane(); if (p) p.classList.remove("open"); }
+
+  function enterCuration(c) {
+    state.curation = c;
+    closeCuratorPane();
+    const fp = document.getElementById("filter-panel");
+    if (fp && !fp.hidden) {
+      fp.hidden = true;
+      const ft = document.getElementById("filter-toggle");
+      if (ft) { ft.classList.remove("fp-open");
+        const ch = ft.querySelector(".filter-chevron"); if (ch) ch.textContent = "›"; }
+    }
+    applyFilters(); renderListHead(); renderList();
+    if (state.filtered.length) selectItem(state.filtered[0].id, { scrollIntoView:false });
+  }
+  function exitCuration() {
+    if (!state.curation) return;
+    state.curation = null;
+    applyFilters(); renderListHead(); renderList();
+    if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
+      selectItem(state.filtered[0].id, { scrollIntoView:false });
+  }
+
+  function renderCurationCard() {
+    const card = document.getElementById("curation-card");
+    if (!card) return;
+    const c = state.curation;
+    if (!c) { card.hidden = true; card.innerHTML = ""; return; }
+    const cu = c.curator || {};
+    card.hidden = false;
+    card.innerHTML = `
+      <div class="cc-top">
+        <span class="cc-curator">Curated · ${escapeHTML(cu.name || c.curator || "")}</span>
+        <button class="cc-exit" id="cc-exit" title="Leave this curation">exit</button>
+      </div>
+      ${c.title ? `<p class="cc-title">${escapeHTML(c.title)}</p>` : ""}
+      ${c.intro ? `<p class="cc-intro">${escapeHTML(c.intro)}</p>` : ""}`;
+    document.getElementById("cc-exit").addEventListener("click", exitCuration);
+  }
+
+  // Curator note for the selected item — replaces researcher notes in curation mode.
+  function renderCuratorNote(item) {
+    const panel = document.getElementById("rn-panel");
+    if (!panel) return;
+    const entry = ((state.curation && state.curation.items) || []).find(x => x.id === item.id);
+    const note = entry && entry.note ? entry.note : "";
+    panel.innerHTML = `<div class="cur-note">
+      <span class="cn-label">curator's note</span>
+      ${note ? `<div class="cn-text">${escapeHTML(note)}</div>`
+             : `<div class="cn-empty">No curator note for this item.</div>`}
+    </div>`;
+  }
+
   function renderList() {
     const container = $("#rows");
     container.innerHTML = "";
@@ -2793,7 +2989,7 @@ WHERE {
       return;
     }
 
-    const grouped = state.sortCol === "phase";
+    const grouped = !state.curation && state.sortCol === "phase";
     const frag = document.createDocumentFragment();
     let lastPhase = null;
     const noted = rnNotedIds();   // items with a viewer-visible note
@@ -2852,7 +3048,9 @@ WHERE {
 
     requestAnimationFrame(() => updatePip("rows", "list-pip"));
     updateMobCount();
-    renderMarkBar();   // keep the researcher bar in sync with every list render
+    renderMarkBar();      // keep the researcher bar in sync with every list render
+    renderCuratedBar();   // [Curated] entry (hidden in curation mode / when none)
+    renderCurationCard(); // intro card (shown only in curation mode)
   }
 
   // ── Image pane (pan + zoom) ───────────────────────────────────────────────
@@ -3356,7 +3554,7 @@ $("#foot-dims").textContent = "";
     const prBtn = document.getElementById("pub-read");
     if (prBtn) prBtn.addEventListener("click", () => openPdfPane(item.accessCopy, item.title));
 
-    renderRN(item.id);
+    if (state.curation) renderCuratorNote(item); else renderRN(item.id);
     wireMetaEdit(item);
     wireFieldEdits(item);
     proxyWatch();
@@ -3604,6 +3802,7 @@ $("#foot-dims").textContent = "";
 
     $("#filter-toggle").addEventListener("click", e => {
       e.stopPropagation();
+      if (state.curation) { hhToast("Filtering is off inside a curated lens"); return; }
       const panel = $("#filter-panel");
       const btn   = $("#filter-toggle");
       const opening = panel.hidden;
@@ -3622,6 +3821,7 @@ $("#foot-dims").textContent = "";
     // Column-header sort
     document.querySelectorAll(".sort-hd[data-sort-col]").forEach(btn => {
       btn.addEventListener("click", () => {
+        if (state.curation) { hhToast("Order is set by the curator in this lens"); return; }
         const col = btn.dataset.sortCol;
         if (state.sortCol === col) {
           state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
@@ -4046,7 +4246,7 @@ $("#foot-dims").textContent = "";
       if (e.key === "/" && !inInput) { e.preventDefault(); const si = document.getElementById("search-input"); if (si) { si.classList.add("open"); si.focus(); } return; }
       if (e.key === "Escape" && inInput) { e.target.blur(); return; }
       if (e.key === "Escape") {
-        closeAllDropdowns(); closeAboutPane(); closeInfoPane(); closePdfPane();
+        closeAllDropdowns(); closeAboutPane(); closeInfoPane(); closePdfPane(); closeCuratorPane();
         const lp = document.getElementById("panel-left"), rp = document.getElementById("panel-right");
         if (lp && rp && lp.classList.contains("out") && rp.classList.contains("out")) document.getElementById("zoom-fs").click();
         return;
@@ -4238,6 +4438,7 @@ $("#foot-dims").textContent = "";
 
       marksHydrate();   // restore this session's researcher marks (if unlocked)
       seenHydrate();
+      await loadCurationIndex();   // populate [Curated] entry (tiny local JSON; no-op if absent)
       applyFilters();
       renderList();
       wireControls();
