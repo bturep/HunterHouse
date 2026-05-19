@@ -539,3 +539,16 @@ Working LINE: **NEXT**. Three small follow-ups to the stage-integrated PDF reade
 - **Relocated the "View PDF" trigger from the record pane to the foot-left.** Removed `.pub-read` button (and its handler) from `renderMeta`; added `#pdf-view` in `.foot-left`, with `syncFootPdfView(item)` toggling `hidden` + setting `data-url` per item selection (called from `renderImage`). Click → `openPdf(url)` (signature trimmed: no title arg). Hidden in pdf-mode. The bottom-right keeps `↓ PDF` (foot-dl) for download. **Mobile** sheet still uses the `.pub-read` link (Open in tab) — no foot bar on mobile, so the in-record affordance stays there by necessity. All inline JS passes `node --check`.
 
 **Version: next.html `v1.06-test.08`** (staging). Live `browse.html` unchanged at `v1.05.02`.
+
+---
+
+### 2026-05-19 — Foot bar: drop pixel count; View PDF ↔ ✕ in the same foot-left slot; ↓ PDF always foot-right (next.html v1.06-test.09)
+
+Working LINE: **NEXT**. Three small follow-ups to the foot bar per Brandon.
+
+- **Removed `#foot-dims`** (image pixel count) — element, CSS, and the two `renderImage` setters. The bar no longer carries metric clutter.
+- **Foot-left = single PDF-control slot.** `#pdf-close` moved out of `.zoom-ctl` into `.foot-left`; **View PDF** and **✕** occupy the *exact same position* — visible alternately by mode. Close-button text simplified from `✕ image` to just `✕`.
+- **Foot-right = `↓ PDF` whenever the item has one** (both image AND pdf-mode), replacing `↓ Original`. So download position is consistent across modes.
+- **`syncFootPdfView()` is now the single source of truth** for foot controls — reads `state.selectedId` + `pdf-mode`, sets `hidden`/`href` for `#pdf-view`/`#pdf-close`/`#pdf-dl`/`#if-full`. Called from `renderImage`, `openPdf`, `closePdf`. The View-PDF click handler reads the current item directly (no `data-url` plumbing). All inline JS passes `node --check`.
+
+**Version: next.html `v1.06-test.09`** (staging). Live `browse.html` unchanged at `v1.05.02`.
