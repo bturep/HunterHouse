@@ -97,30 +97,34 @@
   }
   #about-pane-refresh:hover{color:var(--ink)}
 
-  /* PDF reader — native-browser iframe overlay on the image area */
-  #pdf-pane{
-    display:none;position:absolute;inset:0;z-index:16;
-    flex-direction:column;background:var(--soft);
+  /* PDF reader — native browser viewer inside the image stage; the foot bar
+     is repurposed (zoom/rotate hidden, ↓ PDF + fullscreen + close shown). The
+     frame backing matches the stage; the viewer's own interior is the
+     browser's (unstyleable with a native iframe). */
+  #pdf-frame{
+    position:absolute;inset:0;width:100%;height:100%;border:0;
+    display:none;z-index:5;background:var(--soft);
   }
-  html.dark #pdf-pane{background:#242220}
-  #pdf-pane.open{display:flex}
-  #pdf-pane-head{
-    display:flex;align-items:center;gap:14px;flex:0 0 auto;
-    padding:8px 12px;border-bottom:1px solid var(--rule);
-    font-family:var(--mono);font-size:11px;letter-spacing:0.04em;
-  }
-  #pdf-pane-title{
-    flex:1;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  }
-  #pdf-pane-dl{color:var(--copper-deep);text-decoration:none}
-  #pdf-pane-dl:hover{color:var(--ink)}
-  #pdf-pane-close{
-    background:none;border:0;cursor:pointer;
-    font-size:18px;color:var(--hint);line-height:1;padding:2px 6px;
-  }
-  #pdf-pane-close:hover{color:var(--ink)}
-  #pdf-frame{flex:1 1 auto;width:100%;border:0;background:var(--soft)}
-  html.dark #pdf-frame{background:#242220}
+  .pane-image.pdf-mode #pdf-frame{display:block}
+  .pane-image.pdf-mode #canvas,
+  .pane-image.pdf-mode #load-screen{display:none}
+  #pdf-fs,#pdf-close,#pdf-dl{display:none}
+  #pdf-title{color:var(--ink);margin-left:2px}
+  .pane-image.pdf-mode #pdf-fs,
+  .pane-image.pdf-mode #pdf-close{display:flex}
+  .pane-image.pdf-mode #pdf-dl{display:inline}
+  .pane-image.pdf-mode #if-full,
+  .pane-image.pdf-mode #foot-dims,
+  .pane-image.pdf-mode #zoom-out,
+  .pane-image.pdf-mode #zoom-in,
+  .pane-image.pdf-mode #zoom-fit,
+  .pane-image.pdf-mode #zoom-1to1,
+  .pane-image.pdf-mode #zoom-rotate,
+  .pane-image.pdf-mode #zoom-rotsave,
+  .pane-image.pdf-mode .zoom-ctl .pct,
+  .pane-image.pdf-mode .zoom-ctl .zoom-sep{display:none}
+  .zoom-ctl button#pdf-close{font-size:10px;letter-spacing:0.06em}
+  .zoom-ctl button#pdf-fs{font-size:13px}
 
   /* "Read publication (PDF)" affordance — bracket style, desktop + mobile */
   .pub-read{
@@ -1490,14 +1494,6 @@
         <button id="about-pane-refresh">↺ Refresh archive data</button>
       </div>
     </div>
-    <div id="pdf-pane" role="dialog" aria-modal="true" aria-label="Publication reader">
-      <div id="pdf-pane-head">
-        <span class="t" id="pdf-pane-title"></span>
-        <a id="pdf-pane-dl" href="#" target="_blank" rel="noopener" title="Open or download the PDF">↓ PDF</a>
-        <button id="pdf-pane-close" aria-label="Close reader">×</button>
-      </div>
-      <iframe id="pdf-frame" title="Publication PDF" src="about:blank"></iframe>
-    </div>
     <div id="curator-pane" role="dialog" aria-modal="true" aria-label="Curated lens">
       <div class="ap-inner" id="curator-pane-inner"></div>
     </div>
@@ -1509,9 +1505,10 @@
       <div class="canvas" id="canvas">
         <div class="placeholder">Select an item<b id="ph-name"></b></div>
       </div>
+      <iframe id="pdf-frame" title="Publication PDF" src="about:blank"></iframe>
     </div>
     <div class="image-foot">
-      <span class="foot-left"><span id="foot-dims"></span></span>
+      <span class="foot-left"><span id="foot-dims"></span><span id="pdf-title"></span></span>
       <div class="zoom-ctl">
         <button id="zoom-out" type="button" title="Zoom out [-]">−</button>
         <span class="pct" id="zoom-pct">100%</span>
@@ -1528,8 +1525,10 @@
           <svg id="fs-icon-expand" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8"/></svg>
           <svg id="fs-icon-collapse" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M4 1v3H1M8 1v3h3M8 11V8h3M4 11V8H1"/></svg>
         </button>
+        <button id="pdf-fs" type="button" title="Fullscreen">⛶</button>
+        <button id="pdf-close" type="button" title="Close PDF — back to image">✕ image</button>
       </div>
-      <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">↓ Original</a></span>
+      <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">↓ Original</a><a href="#" id="pdf-dl" target="_blank" rel="noopener">↓ PDF</a></span>
     </div>
     <div class="mobile-img-nav" id="mobile-img-nav">
       <button id="mob-prev" class="mob-nav-btn" aria-label="Previous item">←</button>
@@ -1595,7 +1594,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.06";
+  const VERSION      = "v1.06-test.07";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2831,7 +2830,7 @@ WHERE {
       if (state.filterCreator.size && ![it.creator, it.designedBy, it.builtBy].some(c => c && state.filterCreator.has(c))) return false;
       if (state.filterBuiltStatus.size && !state.filterBuiltStatus.has(it.builtStatus)) return false;
       if (q) {
-        const hay = [it.id, it.title, it.phase, (it.drawTypes||[]).join(" "), (it.areas||[]).join(" "), it.creator, it.designedBy||"", it.builtBy||"", it.notes||"", it.location||""].join(" ").toLowerCase();
+        const hay = [it.id, it.title, it.phase, it.itemType||"", (it.drawTypes||[]).join(" "), (it.areas||[]).join(" "), it.creator, it.designedBy||"", it.builtBy||"", it.notes||"", it.location||""].join(" ").toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
@@ -3059,6 +3058,7 @@ WHERE {
   let renderGen = 0; // incremented on each renderImage call; stale callbacks self-cancel
 
   function renderImage(item) {
+    closePdf();   // switching items always returns to the image view
     const canvas = $("#canvas");
     const idx = state.filtered.findIndex(i => i.id === item.id);
 
@@ -3552,7 +3552,7 @@ $("#foot-dims").textContent = "";
       el.addEventListener("click", e => { e.preventDefault(); selectItem(el.dataset.sibId); });
     });
     const prBtn = document.getElementById("pub-read");
-    if (prBtn) prBtn.addEventListener("click", () => openPdfPane(item.accessCopy, item.title));
+    if (prBtn) prBtn.addEventListener("click", () => openPdf(item.accessCopy, item.title));
 
     if (state.curation) renderCuratorNote(item); else renderRN(item.id);
     wireMetaEdit(item);
@@ -4246,7 +4246,8 @@ $("#foot-dims").textContent = "";
       if (e.key === "/" && !inInput) { e.preventDefault(); const si = document.getElementById("search-input"); if (si) { si.classList.add("open"); si.focus(); } return; }
       if (e.key === "Escape" && inInput) { e.target.blur(); return; }
       if (e.key === "Escape") {
-        closeAllDropdowns(); closeAboutPane(); closeInfoPane(); closePdfPane(); closeCuratorPane();
+        if (document.fullscreenElement) return;   // let the browser just exit fullscreen
+        closeAllDropdowns(); closeAboutPane(); closeInfoPane(); closePdf(); closeCuratorPane();
         const lp = document.getElementById("panel-left"), rp = document.getElementById("panel-right");
         if (lp && rp && lp.classList.contains("out") && rp.classList.contains("out")) document.getElementById("zoom-fs").click();
         return;
@@ -4317,21 +4318,33 @@ $("#foot-dims").textContent = "";
   function closeInfoPane() { infoPane.classList.remove("open"); }
   function toggleInfoPane(){ infoPane.classList.contains("open") ? closeInfoPane() : openInfoPane(); }
 
-  // ── PDF reader — items carrying an "access copy" (e.g. a publication) ─────
-  // Desktop: a native-browser <iframe> overlay on the image area (same
-  // overlay pattern as #about-pane). Mobile uses a plain open-in-new-tab
-  // link in renderMobSheet — iframed PDFs are unreliable on iOS Safari.
-  const pdfPane = document.getElementById("pdf-pane");
-  function openPdfPane(url, title) {
+  // ── PDF reader — native browser viewer in the image stage ───────────────
+  // Desktop: the PDF fills the image stage; the foot bar is repurposed
+  // (↓ PDF + fullscreen + close). Mobile uses a plain open-in-new-tab link
+  // in renderMobSheet — iframed PDFs are unreliable on iOS Safari.
+  const paneImageEl = () => document.querySelector(".pane-image");
+  function openPdf(url, title) {
     if (!url) return;
-    document.getElementById("pdf-pane-title").textContent = title || "Publication";
-    document.getElementById("pdf-pane-dl").href = url;
     document.getElementById("pdf-frame").src = url;
-    pdfPane.classList.add("open");
+    document.getElementById("pdf-dl").href = url;
+    document.getElementById("pdf-title").textContent = title || "Publication";
+    paneImageEl().classList.add("pdf-mode");
   }
-  function closePdfPane() {
-    pdfPane.classList.remove("open");
+  function closePdf() {
+    const pane = paneImageEl();
+    if (!pane || !pane.classList.contains("pdf-mode")) return;
+    pane.classList.remove("pdf-mode");
     document.getElementById("pdf-frame").src = "about:blank"; // stop render / free memory
+    document.getElementById("pdf-title").textContent = "";
+    if (document.fullscreenElement) (document.exitFullscreen || function(){}).call(document);
+  }
+  function pdfFullscreen() {
+    if (document.fullscreenElement) {
+      (document.exitFullscreen || document.webkitExitFullscreen || function(){}).call(document);
+      return;
+    }
+    const el = document.getElementById("stage");
+    (el.requestFullscreen || el.webkitRequestFullscreen || function(){}).call(el);
   }
 
   // ── Main (async load) ─────────────────────────────────────────────────────
@@ -4347,7 +4360,8 @@ $("#foot-dims").textContent = "";
     document.getElementById("about-pane-refresh").addEventListener("click", () => { clearCache(); location.reload(); });
     document.getElementById("rec-info").addEventListener("click", toggleInfoPane);
     document.getElementById("info-pane-close").addEventListener("click", closeInfoPane);
-    document.getElementById("pdf-pane-close").addEventListener("click", closePdfPane);
+    document.getElementById("pdf-close").addEventListener("click", closePdf);
+    document.getElementById("pdf-fs").addEventListener("click", pdfFullscreen);
 
     // Panels + bottom-bar "hide panels" button.
     // Single source of truth = the .out classes on the panels themselves, so the
