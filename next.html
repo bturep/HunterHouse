@@ -1592,7 +1592,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.10";
+  const VERSION      = "v1.06-test.11";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2519,11 +2519,11 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         <h3><span><span class="n">02</span>Archival</span><span class="ct">${archRows.length} fields</span></h3>
         <dl class="kv">${archHTML}</dl>
       </section>` : "") +
-      `<section class="graph-section">
+      (phaseLabel ? `<section class="graph-section">
         <h3><span><span class="n">${graphN}</span>In the graph</span><span class="ct">Wikibase context</span></h3>
         <div class="graph-path">${graphPathHTML}</div>
         ${siblingsHTML}
-      </section>`;
+      </section>` : "");
 
     body.querySelectorAll(".sib[data-sib-id]").forEach(el => {
       el.addEventListener("click", e => { e.preventDefault(); selectItem(el.dataset.sibId); });
@@ -3536,11 +3536,11 @@ WHERE {
         <h3><span><span class="n">02</span>Archival</span><span class="ct">${archRows.length} fields</span></h3>
         <dl class="kv">${archHTML}</dl>
       </section>` : ""}
-      <section class="graph-section">
+      ${phaseLabel ? `<section class="graph-section">
         <h3><span><span class="n">${graphN}</span>In the graph</span><span class="ct">Wikibase context</span></h3>
         <div class="graph-path">${graphPathHTML}</div>
         ${siblingsHTML}
-      </section>
+      </section>` : ""}
       <div class="rn-panel" id="rn-panel"></div>
     `;
 

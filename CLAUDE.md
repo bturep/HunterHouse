@@ -560,3 +560,11 @@ Working LINE: **NEXT**. Three small follow-ups to the foot bar per Brandon.
 Brandon asked if any of the native PDF viewer chrome could be hidden (annotation tools row, side tab). Honest answer: not with the cross-origin iframe approach we picked — that's the trade-off we accepted vs. PDF.js. Implemented the only cheap nudge available: append `#pagemode=none` to the iframe `src` in `openPdf`, which asks **Firefox's bundled PDF.js to open with the side panel collapsed** (Chrome/Safari ignore it; harmless). The top annotation row remains uncontrollable in any browser. Defensive: only appended when the URL has no existing fragment. PDF.js path stays available if the constraint becomes intolerable.
 
 **Version: next.html `v1.06-test.10`** (staging). Live `browse.html` unchanged at `v1.05.02`.
+
+---
+
+### 2026-05-19 — Hide "In the graph" section when an item has no phase (next.html v1.06-test.11)
+
+Per Brandon: the publication has no phase, so the empty "No phase assigned. Item not yet linked into work hierarchy." block in the record was just noise. **The whole `<section class="graph-section">` is now omitted when `phaseLabel` is null** — in both `renderMeta` (desktop) and `renderMobSheet` (mobile). The graph-empty fallback HTML in `graphPathHTML` is left in place but unused (harmless dead branch; preserved for safety). JS clean.
+
+**Version: next.html `v1.06-test.11`** (staging). Live `browse.html` unchanged at `v1.05.02`.
