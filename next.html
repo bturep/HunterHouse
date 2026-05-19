@@ -98,10 +98,10 @@
   #about-pane-refresh:hover{color:var(--ink)}
 
   /* PDF reader — native browser viewer inside the image stage; the foot bar
-     is repurposed (zoom/rotate hidden, ↓ PDF + ✕ image shown; View PDF lives
-     in the foot-left, zen handles "fullscreen"). The frame backing matches
-     the stage; the viewer's own interior is the browser's (unstyleable
-     with a native iframe). */
+     is repurposed: foot-left swaps View PDF ↔ ✕ in the SAME slot, foot-right
+     shows ↓ PDF whenever the item has one; zoom/rotate hidden. Zen handles
+     "fullscreen". The frame backing matches the stage; the viewer's own
+     interior is the browser's (unstyleable with a native iframe). */
   #pdf-frame{
     position:absolute;inset:0;width:100%;height:100%;border:0;
     display:none;z-index:5;background:var(--soft);
@@ -109,12 +109,10 @@
   .pane-image.pdf-mode #pdf-frame{display:block}
   .pane-image.pdf-mode #canvas,
   .pane-image.pdf-mode #load-screen{display:none}
-  #pdf-close,#pdf-dl{display:none}
-  .pane-image.pdf-mode #pdf-close{display:flex}
-  .pane-image.pdf-mode #pdf-dl{display:inline}
-  .pane-image.pdf-mode #pdf-view,
-  .pane-image.pdf-mode #if-full,
-  .pane-image.pdf-mode #foot-dims,
+  /* Foot bar in pdf-mode: image-only controls hidden. Visibility of
+     #pdf-view / #pdf-close / #pdf-dl / #if-full is driven by JS via the
+     `hidden` attribute — foot-left swaps View PDF (image) ↔ ✕ (pdf-mode)
+     in the SAME slot; foot-right is ↓ PDF when the item has one. */
   .pane-image.pdf-mode #zoom-out,
   .pane-image.pdf-mode #zoom-in,
   .pane-image.pdf-mode #zoom-fit,
@@ -123,12 +121,11 @@
   .pane-image.pdf-mode #zoom-rotsave,
   .pane-image.pdf-mode .zoom-ctl .pct,
   .pane-image.pdf-mode .zoom-ctl .zoom-sep{display:none}
-  .zoom-ctl button#pdf-close{font-size:10px;letter-spacing:0.06em}
-  /* "View PDF" trigger in the foot-left — appears when the selected item has an access copy */
-  #pdf-view{font:inherit;background:none;border:0;cursor:pointer;
-    color:var(--copper-deep);letter-spacing:0.04em;padding:0 0 0 14px;line-height:inherit}
-  #pdf-view[hidden]{display:none}
-  #pdf-view:hover{color:var(--ink)}
+  /* "View PDF" + "✕" close — both in foot-left, copper accent */
+  #pdf-view,#pdf-close{font:inherit;background:none;border:0;cursor:pointer;
+    color:var(--copper-deep);letter-spacing:0.04em;line-height:inherit;padding:0}
+  #pdf-view:hover,#pdf-close:hover{color:var(--ink)}
+  #pdf-close{font-size:13px}
 
   /* "Read publication (PDF)" affordance — bracket style, desktop + mobile */
   .pub-read{
@@ -551,7 +548,6 @@
   .image-stage .placeholder b{color:var(--muted);font-weight:500}
 
   .foot-left{flex:1}
-  #foot-dims{color:var(--hint)}
   .zoom-ctl{
     display:flex;align-items:center;justify-content:center;gap:0;user-select:none;flex-shrink:0;
   }
@@ -1512,7 +1508,7 @@
       <iframe id="pdf-frame" title="Publication PDF" src="about:blank"></iframe>
     </div>
     <div class="image-foot">
-      <span class="foot-left"><span id="foot-dims"></span><button id="pdf-view" type="button" hidden>View PDF</button></span>
+      <span class="foot-left"><button id="pdf-view" type="button" hidden>View PDF</button><button id="pdf-close" type="button" title="Close PDF" hidden>✕</button></span>
       <div class="zoom-ctl">
         <button id="zoom-out" type="button" title="Zoom out [-]">−</button>
         <span class="pct" id="zoom-pct">100%</span>
@@ -1529,9 +1525,8 @@
           <svg id="fs-icon-expand" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8"/></svg>
           <svg id="fs-icon-collapse" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M4 1v3H1M8 1v3h3M8 11V8h3M4 11V8H1"/></svg>
         </button>
-        <button id="pdf-close" type="button" title="Close PDF — back to image">✕ image</button>
       </div>
-      <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">↓ Original</a><a href="#" id="pdf-dl" target="_blank" rel="noopener">↓ PDF</a></span>
+      <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">↓ Original</a><a href="#" id="pdf-dl" target="_blank" rel="noopener" hidden>↓ PDF</a></span>
     </div>
     <div class="mobile-img-nav" id="mobile-img-nav">
       <button id="mob-prev" class="mob-nav-btn" aria-label="Previous item">←</button>
@@ -1597,7 +1592,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.08";
+  const VERSION      = "v1.06-test.09";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3062,11 +3057,10 @@ WHERE {
 
   function renderImage(item) {
     closePdf();   // switching items always returns to the image view
-    syncFootPdfView(item);
+    syncFootPdfView();
     const canvas = $("#canvas");
     const idx = state.filtered.findIndex(i => i.id === item.id);
 
-$("#foot-dims").textContent = "";
 
     const url = imageUrl(item);
     canvas.innerHTML = "";
@@ -3101,7 +3095,6 @@ $("#foot-dims").textContent = "";
       if (gen !== renderGen) return; // stale — a newer item was selected
       zoomState.naturalW = fullImg.naturalWidth;
       zoomState.naturalH = fullImg.naturalHeight;
-      $("#foot-dims").textContent = `${fullImg.naturalWidth} × ${fullImg.naturalHeight} px`;
 
       if (thumbActive) {
         // Append full on top of thumb, already invisible
@@ -4325,22 +4318,33 @@ $("#foot-dims").textContent = "";
   function openPdf(url) {
     if (!url) return;
     document.getElementById("pdf-frame").src = url;
-    document.getElementById("pdf-dl").href = url;
     paneImageEl().classList.add("pdf-mode");
+    syncFootPdfView();
   }
   function closePdf() {
     const pane = paneImageEl();
     if (!pane || !pane.classList.contains("pdf-mode")) return;
     pane.classList.remove("pdf-mode");
     document.getElementById("pdf-frame").src = "about:blank"; // stop render / free memory
+    syncFootPdfView();
   }
-  // Toggle the foot-left "View PDF" trigger for the currently selected item.
-  function syncFootPdfView(item) {
-    const btn = document.getElementById("pdf-view");
-    if (!btn) return;
-    const url = item && item.accessCopy;
-    btn.hidden = !url;
-    btn.dataset.url = url || "";
+  // Single source of truth for the foot-bar PDF controls. Driven by:
+  //   hasPdf = current selected item has an access-copy URL
+  //   pdfMode = #pane-image is in pdf-mode
+  // Foot-left:  View PDF (hasPdf && !pdfMode) ↔ ✕ (pdfMode) — same slot.
+  // Foot-right: ↓ PDF (hasPdf, both modes) ; ↓ Original hidden when hasPdf.
+  function syncFootPdfView() {
+    const item    = state.items.find(i => i.id === state.selectedId);
+    const hasPdf  = !!(item && item.accessCopy);
+    const pdfMode = !!paneImageEl() && paneImageEl().classList.contains("pdf-mode");
+    const el = id => document.getElementById(id);
+    if (el("pdf-view"))  el("pdf-view").hidden  = !hasPdf || pdfMode;
+    if (el("pdf-close")) el("pdf-close").hidden = !pdfMode;
+    if (el("pdf-dl")) {
+      el("pdf-dl").hidden = !hasPdf;
+      el("pdf-dl").href   = hasPdf ? item.accessCopy : "#";
+    }
+    if (el("if-full"))   el("if-full").hidden   = hasPdf;
   }
 
   // ── Main (async load) ─────────────────────────────────────────────────────
@@ -4358,8 +4362,8 @@ $("#foot-dims").textContent = "";
     document.getElementById("info-pane-close").addEventListener("click", closeInfoPane);
     document.getElementById("pdf-close").addEventListener("click", closePdf);
     document.getElementById("pdf-view").addEventListener("click", () => {
-      const btn = document.getElementById("pdf-view");
-      if (btn && btn.dataset.url) openPdf(btn.dataset.url);
+      const it = state.items.find(i => i.id === state.selectedId);
+      if (it && it.accessCopy) openPdf(it.accessCopy);
     });
 
     // Panels + bottom-bar "hide panels" button.
