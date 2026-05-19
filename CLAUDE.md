@@ -527,3 +527,15 @@ Working LINE: **NEXT**. Reworked the PDF reader per Brandon, plus a small search
 - Mobile PDF path unchanged (open-in-tab). Rotation mobile/lightbox gap + Curated Phase 2 + Rotation Part 2 still queued; `HH-HHC-0115`/P143 still awaiting Wikibase Cloud's SPARQL index (their infra).
 
 **Version: next.html `v1.06-test.07`** (staging). Live `browse.html` unchanged at `v1.05.02`.
+
+---
+
+### 2026-05-19 — PDF reader tweaks: foot trigger, no title, no fullscreen button (next.html v1.06-test.08)
+
+Working LINE: **NEXT**. Three small follow-ups to the stage-integrated PDF reader per Brandon.
+
+- **Removed the `#pdf-fs` Fullscreen button + `pdfFullscreen()` + the Esc-fullscreen guard + the `exitFullscreen` call in `closePdf`.** Zen (`#zoom-fs` / Z) is the maximize-the-view affordance; we don't need a separate Fullscreen API path. The project's pre-existing `#fs-toggle` browser-fullscreen header button stays untouched.
+- **Removed `#pdf-title` from the foot-left.** Title belongs in the side panel record, not the bottom bar — that's the bar's convention.
+- **Relocated the "View PDF" trigger from the record pane to the foot-left.** Removed `.pub-read` button (and its handler) from `renderMeta`; added `#pdf-view` in `.foot-left`, with `syncFootPdfView(item)` toggling `hidden` + setting `data-url` per item selection (called from `renderImage`). Click → `openPdf(url)` (signature trimmed: no title arg). Hidden in pdf-mode. The bottom-right keeps `↓ PDF` (foot-dl) for download. **Mobile** sheet still uses the `.pub-read` link (Open in tab) — no foot bar on mobile, so the in-record affordance stays there by necessity. All inline JS passes `node --check`.
+
+**Version: next.html `v1.06-test.08`** (staging). Live `browse.html` unchanged at `v1.05.02`.
