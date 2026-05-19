@@ -710,3 +710,7 @@ Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Tu
 **v1.05-test.27 — fix row-flag alignment (Brandon).** The flag strip was `position:absolute;left:20px;width:104px` over the grid track; since `[D] HHC-0071` is narrower than the 104px track and left-aligned, the evenly-spread icons drifted right of the ID. Fix: wrapped `archid` + `row-flags` in a `.col-id` flex-column that *is* grid cell 1, so the strip flows in-cell (`width:100%`, `margin-top:7px`) and inherits the column's exact left edge + width — no absolute-positioning guesswork. Strip left now flush with `[D]`, two interior rules unchanged. Mobile hide selector still matches.
 
 **Version: v1.05-test.27** (next.html). Live `browse.html` unchanged.
+
+**v1.05-test.28 — row flags: compact left-aligned register (Brandon).** `width:100%` stretched the 3 cells across the full 104px column → sparse, note icon floated far right. Changed to a compact register: `.row-flags` `align-self:flex-start` (no stretch), `.rf-slot` fixed `width:26px` (was `flex:1`), `margin-top:6px`. Now ~80px wide, left edge flush with `[D]`, two interior rules unchanged.
+
+**Version: v1.05-test.28** (next.html). Live `browse.html` unchanged.
