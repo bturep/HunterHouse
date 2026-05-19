@@ -1592,7 +1592,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.11";
+  const VERSION      = "v1.06-test.12";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4317,10 +4317,12 @@ WHERE {
   const paneImageEl = () => document.querySelector(".pane-image");
   function openPdf(url) {
     if (!url) return;
-    // #pagemode=none asks Firefox's bundled PDF.js to open with the side tab
-    // collapsed. Chrome/Safari ignore it (harmless). Skip if the URL already
-    // carries its own fragment.
-    const src = url + (url.includes("#") ? "" : "#pagemode=none");
+    // Render via our bundled PDF.js (assets/pdfjs/web/viewer.html). The PDF
+    // URL is passed as ?file=; theme as ?theme= so the override CSS
+    // (hh-pdfjs.css) picks the right palette. Requires R2 CORS to allow this
+    // origin — PDF.js fetches the PDF cross-origin.
+    const theme = document.documentElement.classList.contains("dark") ? "dark" : "light";
+    const src = `assets/pdfjs/web/viewer.html?file=${encodeURIComponent(url)}&theme=${theme}`;
     document.getElementById("pdf-frame").src = src;
     paneImageEl().classList.add("pdf-mode");
     syncFootPdfView();
