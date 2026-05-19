@@ -19,12 +19,12 @@ At session start: announce which LINE is active and which file you'll be editing
 
 ## ⚑ Pending at next session start — prompt Brandon immediately
 
-**v1.05 editing — open threads (LINE: NEXT, work in `next.html`).** Slices 3a–3d shipped & tested (Date `YYYY-MM-DD`, Phase, Item type, Built, Drawing type, Areas, title — all admin-gated via local proxy). Brandon to handle, tomorrow:
+**v1.05 PROMOTED to live (2026-05-19).** `next.html` → `browse.html`; live is now **`v1.05.00`** (tagged). Staging line rolled forward — `next.html` is now **`v1.06-test.01`** (LINE: NEXT, all browse work continues there; `browse.html` is the stable public page again). Open threads carried into the v1.06 line:
 - **A few small `next.html` tweaks** Brandon has queued (unspecified — ask him).
 - **Held by** — P94 (CAA/FUL) vs P79 (HHC) ambiguity; needs a rule for which to write before it's editable.
 - **Phase rename** — distinct from "change phase" (P62, done). Renaming edits the shared Phase item's label → affects every item in that phase. Needs a confirm-guard. (`wbsetlabel` on `item.phaseQID`.)
 - **Built by / Designed by** (P140/P141) — 0 vocabulary exists; needs a person/org entity-search picker (not the in-use-vocab pattern).
-- **Promote `next.html` → live `browse.html`** when v1.05 is ready — the documented one-step Staging-workflow cycle (cp, bump to `v1.05.00`, tag, push).
+- **GES collection ingest** — `GES_intake.xlsx` issued (~70 items: 35 Hunter furniture drawings + 35 photos of Gessinger's built furniture). When Brandon returns the filled sheet: mint phase items from the "Furniture piece / set" column, create any missing drawing-type items, flag rows missing the photographer ("Mary —") name, then generate the batch for confirmation. Generator: `scripts/make_ges_intake.py`.
 - **Restart the edit proxy** each session: `python3 scripts/edit_proxy.py` (dies on Mac sleep; editing on `next.html` is inert without it; could be auto-wired into the `claude()` launcher later).
 - **Housekeeping:** add `scripts/__pycache__/` to `.gitignore` (bytecode noise now untracked).
 - Plus the long-standing **Wikidata items** and **RAD/archival-standards** items below (still deferred).
@@ -332,8 +332,9 @@ CCA's ISAD(G) hierarchy maps directly to our Wikibase: fonds = Richard Hunter fo
 | v1.03.08 | 2026-05-16 | Image rotation batch job (17 items on R2); about card text size; PWA full-screen fix |
 | v1.03.28 | 2026-05-16 | Mobile list-head alignment; portrait lock; white flash fixes; splash removed from PWA |
 | v1.04.00 | 2026-05-16 | UI colour overhaul; about pane redesign; filter system; data fixes; CSS audit |
+| v1.05.00 | 2026-05-19 | **Promotion of the full v1.05 line.** Role system (Admin/Research/Public), local edit proxy, admin inline Wikibase editing (title, date, phase, item type, built, drawing type, areas), mark/seen/note row flags, info panel, keyboard scheme, filter & About typography parity. `next.html` → `browse.html`. |
 
-Tags pushed: `v1.01.00` (fc98905), `v1.02.00` (2059cb7), `v1.02.18` (82065e6), `v1.03.00` (prior session), `v1.03.01` (prior session), `v1.03.08` (prior session), `v1.04.00` (this session).
+Tags pushed: `v1.01.00` (fc98905), `v1.02.00` (2059cb7), `v1.02.18` (82065e6), `v1.03.00` (prior session), `v1.03.01` (prior session), `v1.03.08` (prior session), `v1.04.00` (prior session), `v1.05.00` (this session — v1.05 promotion).
 
 ---
 
@@ -347,7 +348,7 @@ A live-stable + parallel-test setup, zero extra infrastructure (plain GitHub Pag
 | **Staging** | `next.html` → https://bturep.github.io/HunterHouse/next.html — the work-in-progress copy; break/iterate freely |
 
 - Both files live on `main` (the only branch Pages serves). Pushing `next.html` redeploys the site but `browse.html` is untouched, so **live visitors are unaffected**.
-- `next.html` carries `const VERSION = "v1.05-test"` → its `CACHE_KEY` (`hhf_v1.05-test`) is isolated from live (`hhf_v1.04`); the on-screen version shows which build you're on.
+- `next.html` carries `const VERSION = "v1.06-test.NN"` → its `CACHE_KEY` (`hhf_v1.06-test.NN`) is isolated from live (`hhf_v1.05.00`); the on-screen version shows which build you're on.
 - `next.html` must stay in the **repo root** (relative `assets/…` paths). It links the shared `assets/verso.css` — inline `<style>` changes are isolated, but `verso.css` edits would leak to live. Fork to `assets/verso.next.css` only when a task needs CSS changes.
 - `index.html` splash + the manifest `start_url` still point at `browse.html`; the installed PWA shows live. Test the new version in the **phone browser** at the `next.html` URL. `next.html` opened directly skips index.html's SPARQL prefetch (just a slightly slower first load — fine).
 
@@ -714,3 +715,21 @@ Working LINE: **NEXT** — all edits in `next.html`; `browse.html` untouched. Tu
 **v1.05-test.28 — row flags: compact left-aligned register (Brandon).** `width:100%` stretched the 3 cells across the full 104px column → sparse, note icon floated far right. Changed to a compact register: `.row-flags` `align-self:flex-start` (no stretch), `.rf-slot` fixed `width:26px` (was `flex:1`), `margin-top:6px`. Now ~80px wide, left edge flush with `[D]`, two interior rules unchanged.
 
 **Version: v1.05-test.28** (next.html). Live `browse.html` unchanged.
+
+---
+
+### 2026-05-19 — v1.05 promoted to live; v1.06 staging line opened (browse.html v1.05.00 · next.html v1.06-test.01)
+
+**Promotion (documented Staging → Live cycle).** The full v1.05 line — built and tested entirely on `next.html` across v1.05-test.01→28 — went live.
+- `cp next.html browse.html`; `browse.html` `VERSION` → **`v1.05.00`**. No `verso.css` fork existed (all v1.05 CSS was inline `<style>` in next.html), so step 3 was correctly skipped. Verified `browse.html` and `next.html` are byte-identical except the single `VERSION` line; script tags balanced; no hardcoded version literals (single source of truth = the `const VERSION` line; all four display points read it).
+- `CACHE_KEY` auto-derives `hhf_` + VERSION → live cache breaks cleanly from `hhf_v1.04` to `hhf_v1.05.00`. Researcher data (`hhf_rn`, `hhf_marks`, `hhf_seen`) uses stable, non-versioned keys — **no user data wiped** by the bump.
+- `next.html` `VERSION` → **`v1.06-test.01`**, opening the v1.06 staging cycle. Content identical to the new live; only the label rebranded (the "re-sync next.html" step). LINE stays **NEXT**.
+- Committed in two commits: the promotion (tagged `v1.05.00`, pushed with `--tags`) then the next.html roll-forward. Version-history table, "Tags pushed" line, Staging-section CACHE_KEY example, and the Pending block all updated; global `~/.claude/CLAUDE.md` "Current versions" table bumped to v1.05.00.
+
+**What is now live on the public site (v1.05.00):** role system (Admin/Research/Public via the researcher unlock; Brandon = admin), the local edit proxy path for admin inline Wikibase editing (title, date, phase, item type, built, drawing type, areas — desktop only, proxy must be running locally), per-researcher persistent mark/seen/note row flags, the marked bar, the `[?]` info panel, the full keyboard scheme, and the filter/About typography-parity polish.
+
+**Versioning note.** This is the SESSION-level promotion milestone for the v1.05 line; tagged `v1.05.00` (not a MAJOR bump, so no GitHub Release per the snapshot rule — git tag only). Per Brandon's standing note: version numbers are convention; git is the real tracking.
+
+**Also this session:** issued `GES_intake.xlsx` (Eric Gessinger Collection intake workbook — ~70 stub rows: 35 Hunter furniture drawings + 35 photos of Gessinger's built furniture, photographer "Mary —" left as a fill-in, free-text "Furniture piece / set" → phase at batch time). Generator `scripts/make_ges_intake.py`. Workbook + generator + `swatches.html` left untracked (working data, not committed in the promotion).
+
+**Version: browse.html `v1.05.00` (LIVE, tagged) · next.html `v1.06-test.01` (staging).**
