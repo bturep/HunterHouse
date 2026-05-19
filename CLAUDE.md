@@ -552,3 +552,11 @@ Working LINE: **NEXT**. Three small follow-ups to the foot bar per Brandon.
 - **`syncFootPdfView()` is now the single source of truth** for foot controls — reads `state.selectedId` + `pdf-mode`, sets `hidden`/`href` for `#pdf-view`/`#pdf-close`/`#pdf-dl`/`#if-full`. Called from `renderImage`, `openPdf`, `closePdf`. The View-PDF click handler reads the current item directly (no `data-url` plumbing). All inline JS passes `node --check`.
 
 **Version: next.html `v1.06-test.09`** (staging). Live `browse.html` unchanged at `v1.05.02`.
+
+---
+
+### 2026-05-19 — Firefox PDF side-tab nudge (next.html v1.06-test.10)
+
+Brandon asked if any of the native PDF viewer chrome could be hidden (annotation tools row, side tab). Honest answer: not with the cross-origin iframe approach we picked — that's the trade-off we accepted vs. PDF.js. Implemented the only cheap nudge available: append `#pagemode=none` to the iframe `src` in `openPdf`, which asks **Firefox's bundled PDF.js to open with the side panel collapsed** (Chrome/Safari ignore it; harmless). The top annotation row remains uncontrollable in any browser. Defensive: only appended when the URL has no existing fragment. PDF.js path stays available if the constraint becomes intolerable.
+
+**Version: next.html `v1.06-test.10`** (staging). Live `browse.html` unchanged at `v1.05.02`.
