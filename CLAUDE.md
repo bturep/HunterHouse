@@ -598,3 +598,19 @@ Two bugs Brandon reported on first look at the PDF.js viewer.
 **R2 CORS still pending** to make the in-app PDF.js viewer actually fetch & render. Tried via the rclone keys — `AccessDenied` (object-only scope; CORS is a bucket-config op). Brandon to either (a) add the rule via Cloudflare dashboard, or (b) mint a new R2 API token with **Admin Read & Write** scope and paste it; I run the boto3 PutBucketCors. Documented in the v1.06-test.12 entry above.
 
 **Version: next.html `v1.06-test.13`** (staging). Live `browse.html` unchanged at `v1.05.02`.
+
+---
+
+### 2026-05-19 — R2 CORS configured (no code change)
+
+R2 bucket `hunter-house-archive` now serves CORS headers for the in-app PDF.js viewer. Rule applied via boto3 `PutBucketCors` using a one-off admin-scope R2 API token Brandon minted (rclone keys are object-scope only — `AccessDenied` on bucket-config ops):
+
+```
+AllowedOrigins:  https://bturep.github.io, http://localhost, http://127.0.0.1
+AllowedMethods:  GET, HEAD
+AllowedHeaders:  *
+ExposeHeaders:   Content-Length, Content-Type, Content-Disposition
+MaxAgeSeconds:   86400
+```
+
+Verified: `Origin: https://bturep.github.io` → `access-control-allow-origin: https://bturep.github.io`; foreign origins get no allow header. PDF.js can now fetch the PDF cross-origin and render in-app. Combined with the earlier `Content-Disposition: attachment` object metadata, the foot `↓ PDF` truly downloads and the in-app viewer truly renders. **Token + leaked rclone keys to be rotated post-session (see Pending).**
