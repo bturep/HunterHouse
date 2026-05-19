@@ -18,6 +18,8 @@ Load this file at the start of any Claude Code session.
 
 At session start: announce which LINE is active and which file you'll be editing. If LINE and the user's stated intent disagree, ask before editing.
 
+**Preview convention (standing):** any artifact Brandon needs to eyeball (PDF, image, export) is written to `~/Desktop` with a clear name and opened automatically — never left in a temp folder for him to hunt down.
+
 ---
 
 ## ⚑ Pending at next session start — prompt Brandon immediately
@@ -54,6 +56,21 @@ Brandon needs a free Wikimedia account — takes 2 minutes at `wikidata.org/wiki
 ---
 
 **PWA splash page** — reinstall needed on iPhone. The manifest already has `start_url: browse.html` but the old install is cached with index.html. Remove HH Archive from home screen and re-add from `bturep.github.io/HunterHouse/browse.html`.
+
+---
+
+**Rotation persistence — DECIDED (approach C: metadata now, bake later).** The viewer's T-key rotate is display-only. Brandon wants rotation to persist to the archive. Decision = hybrid:
+- *Part 1 (build after the publication ingest + PDF-viewer commit lands):* new Wikibase property **`display rotation`** (string `90`/`180`/`270` CW; absent = none) — minted one-off like "access copy". `next.html`: SPARQL OPTIONAL + mapping + `renderImage`/mobile/lightbox apply it as base orientation. T stays casual & writes nothing; an **admin-only "Save rotation to record"** affordance (mirrors the ✎ inline-edit → `proxyEdit` path; **no proxy change** — reuses the string-claim path) writes `net=(storedBase+delta)%360`, clears the transient delta, re-renders. Reversible (rewrite/blank the claim).
+- *Part 2 (specced, later):* a maintenance "bake" script = `rotate_images.py` core driven by the `display rotation` claims — rotate master+3 tiers on R2, **then clear the claim**, then purge CDN. Explicit run only. Prerequisite: an automated Cloudflare cache-purge API token (not yet wired; `rotate_images.py` currently purges via dashboard).
+
+---
+
+**Curated mode / "exhibition lens" — DESIGNED, not built (queued).** A curator (artists/architects; first = Brandon Poole) authors a *selection* with a macro intro + per-item curator notes. It's a **mode/lens, not a filter**. Flow: pick a curator from the `[Curated]` list (top of BROWSE) → **curator threshold overlay** (about-pane-style `inset:0`, the gallery "title wall": a *standing* one-line "what is a curated lens" explainer [a `next.html` constant, shared across curators — NOT per-JSON] + curator bio + external link + **"Continue to exhibition" CTA**) → CTA **is** the confirm/commit (this overlay *replaces* the earlier dim-tags+separate-confirm step — net simplification) → filter pane collapses → list shows only that curation in the **curator's order** → right pane swaps researcher-notes for the **curator's note** → an intro card (the `#mark-bar` slot pattern, bigger: the curation's *macro argument* + **exit**) sits above the list. Esc also exits. Overlay = person + concept; card = content (keep separate). **Public-visible** (outreach/exhibition); only *editing* is gated. *Scope note:* the v1 overlay is a viewer-facing threshold only; a real **in-tool authoring tutorial** for invited curators belongs to Phase 2 (no in-browser authoring in v1). Decisions made:
+- *Store (v1):* **static JSON** `curations/<slug>.json` `{curator{name,role,affiliation,qid,bio,url,url_label}, slug, title, intro, updated, items:[{id,pos,note}]}` + `curations/index.json` (curator chooser, forward-compat). (`curator.bio`/`url`/`url_label` feed the threshold overlay; `intro` is the card's macro argument.) Wikibase model (Curation = first-class item, membership + ordinal/curator-note qualifiers, reuses the phase/sibling arrangement pattern) is the **documented canonical target** for later (needs proxy `wbsetqualifier`).
+- *Order (v1):* explicit integer `pos` per item (reuses the P86 "X of Y" mental model). In curation mode the ID/Phase/Year sort header is **locked/replaced ("Sequence")**; optional later "catalogue order" toggle.
+- *Authoring (v1):* Brandon supplies ordered list + intro + per-item notes; the JSON is generated/committed (no in-browser curation editor in v1 — deferred). Any future bespoke exhibition `.html` consumes the same JSON (that's the contract).
+- *Open at build:* intro text format (recommend plain w/ paragraph breaks); exact visual placement of `[Curated]`; search behaviour inside a curation; cache-busting the JSON (use `?v=`+VERSION). Curator-only role + in-browser authoring + multi-curator chooser = Phase 2.
+- *Sequence:* build **after** publication ingest+viewer commit **and** rotation Part 1.
 
 ---
 
@@ -203,8 +220,9 @@ See `WIKIBASE.md` for full property table, QIDs, and SPARQL templates.
 | P100 | notes | curator prose (no longer rendered — slated for reassignment) |
 | P139 | Wikidata QID | external-id, not yet populated |
 | P142 | Physical location | archival path, e.g. "S0004, SS0001, SSS0018, FL0003" |
+| P143 | access copy | URL — publication PDF; drives the browse/next PDF reader (created 2026-05-19) |
 
-Next available IDs: **HH-HHC-0115**, **HH-CAA-0036**.
+Next available IDs: **HH-HHC-0116**, **HH-CAA-0036**. (HH-HHC-0115 = Q490, the 1986 Hunter portfolio publication.)
 
 ### Wikibase editing
 - **Small (1–5 items):** QuickStatements at `/tools/quickstatements` — sometimes unreliable (redirect issue), fall back to Python script.
@@ -259,6 +277,7 @@ Full protocol in `CLAUDE_archive_v1.02.md` §"Batch change protocol".
 | `scripts/strip_counter_brackets.py` | Remove [N/N] counter patterns from labels | Active |
 | `scripts/edit_proxy.py` | Local admin Wikibase write proxy (localhost:8731, bot creds server-side) | Active |
 | `scripts/make_ges_intake.py` | Generate the GES collection intake workbook | Active |
+| `scripts/ingest_publication.py` | Ingest a multi-page publication (masters byte-for-byte + SHA-256 manifest + cover tiers + access PDF → R2; create the Wikibase item). Dry-run default; `--execute` to write | Active |
 | `scripts/rename_ids.py` | HH-A → HH-HHC/CAA rename | Complete |
 | `scripts/renumber_hhc.py` | HHC renumber 0036–0149 → 0001–0114 | Complete |
 | `scripts/migrate_p142_location.py` | Move archival paths P100 → P142 | Complete |
@@ -376,6 +395,8 @@ A live-stable + parallel-test setup, zero extra infrastructure (plain GitHub Pag
 4. Commit, `git tag v1.05.00 && git push --tags`, push. Live is now the new version.
 5. Re-sync `next.html` from the new `browse.html` for the next cycle.
 
+**⚠ Prefetch-sync at promotion:** if `next.html`'s `CATALOGUE_QUERY` changed since the last promotion, also sync `index.html`'s prefetch copy of that query. As of v1.06-test.04 it gained `?accessCopy` + `OPTIONAL { ?item wdt:P143 ?accessCopy }` (the PDF reader). `cp next.html browse.html` carries it into `browse.html`, but `index.html` holds a *separate* copy — unsynced, the PDF "Read" affordance is dark for visitors who enter via the splash prefetch. (A code comment in next.html flags this too.)
+
 **Hotfixing live mid-cycle:** edit `browse.html` directly, push (deploys live immediately). Then port the same change into `next.html` so it isn't lost at next promotion.
 
 ---
@@ -450,3 +471,15 @@ Staging line ended this era at **next.html v1.05-test.28**, ready for promotion.
 ### 2026-05-19 — working memory rotated (CLAUDE_archive_v1.05.md frozen)
 
 Working memory compacted. The full `CLAUDE.md` at v1.05.02 / next.html v1.06-test.03 was frozen verbatim to **`CLAUDE_archive_v1.05.md`** (read-only FROZEN banner added; covers v1.03.00 → v1.05.02). This file rewritten: every living-reference section + the ⚑ Active-context marker (and the `LINE-MARKER` launcher comment) + the full ⚑ Pending block carried forward intact; only the session log rotated — v1.03→v1.04.02 and the v1.05-test.01→.28 line collapsed to two digest sections, the v1.05.00/.01/.02 promotion-and-hotfix entries kept in full as current live-state context. Strategy: log rotation with a frozen, non-editable snapshot (the project's own v1.02 precedent, refined with an explicit FROZEN banner so the two files can't drift); git retains all detail regardless. No code or version change — `browse.html` v1.05.02 and `next.html` v1.06-test.03 untouched. LINE stays **NEXT**.
+
+---
+
+### 2026-05-19 — first publication ingested + in-browser PDF reader (next.html v1.06-test.04)
+
+Working LINE: **NEXT**. First multi-page **publication** added to the archive and a PDF reader built to view it. Live `browse.html` untouched.
+
+- **Ingest — `HH-HHC-0115` = `Q490`** ("Richard Hunter Architect — Portfolio (1986, self-published)"). New script **`scripts/ingest_publication.py`** (model: one item, 10 pages as an internal sequence; dry-run default with the preview PDF auto-opened on the Desktop per the standing convention; `--execute` writes). Uploaded **byte-for-byte**: 10 master TIFs (~2.04 GB) → `hunter-house-collection/masters/HH-HHC-0115/HH-HHC-0115_p01..p10.tif`, a **SHA-256 fixity manifest** (new preservation habit), the 3 cover tiers from the title page, and a 6.3 MB 10-page access PDF → `…/pdf/`. A page-order bug (the un-numbered cover sorting last because `1986.tif` ends in 4 digits) was caught in the dry-run and fixed (longest-common-prefix ordering) before anything uploaded. New Wikibase property **P143 "access copy" (url)** minted by the script; `Q490` carries P1=Q91(publication)/P2/P79=Q180/P80=Q201/P82=1986/P96/P143. Verified: all R2 objects 200 (PDF `application/pdf` 6.3 MB; master p01 = 204,454,670 B = source-exact); Q490 claims complete. WIKIBASE.md table filled (P139/P142/P143); next HHC ID → **0116**.
+- **PDF reader (`next.html`).** `OPTIONAL { ?item wdt:${ACCESS_PID} ?accessCopy }` (`ACCESS_PID="P143"`) + mapping. Desktop: a bracket-style `[ Read publication (PDF) ]` affordance under the record title opens `#pdf-pane` — a native-browser `<iframe>` overlay on the image area (same pattern as `#about-pane`/`#info-pane`), with title + `↓ PDF` link + ×/Esc (frame blanked on close). Mobile: a plain `Open publication (PDF) ↗` new-tab link (iframed PDFs are unreliable on iOS). Zero effect on non-publication items (affordance only renders when `accessCopy` exists). All inline JS passes `node --check`. **Known follow-up:** `index.html`'s prefetch `CATALOGUE_QUERY` is *not* synced — deliberately deferred to promotion (flagged in a next.html comment + the Staging checklist); harmless until then (the OPTIONAL is backward-compatible; live `browse.html` unaffected).
+- **Also this session (design only, captured in Pending):** rotation persistence decided as hybrid **C** (metadata now → bake later); **Curated mode / exhibition lens** designed (static-JSON store, numeric order, gallery "title-wall" threshold overlay whose "Continue to exhibition" CTA is the confirm). Both queued behind this commit. Standing **preview convention** added (artifacts → `~/Desktop`, auto-opened). Edit proxy restarted this session.
+
+**Version: next.html `v1.06-test.04`** (staging). Live `browse.html` unchanged at `v1.05.02`.

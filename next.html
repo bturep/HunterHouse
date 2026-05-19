@@ -97,6 +97,42 @@
   }
   #about-pane-refresh:hover{color:var(--ink)}
 
+  /* PDF reader — native-browser iframe overlay on the image area */
+  #pdf-pane{
+    display:none;position:absolute;inset:0;z-index:16;
+    flex-direction:column;background:var(--soft);
+  }
+  html.dark #pdf-pane{background:#242220}
+  #pdf-pane.open{display:flex}
+  #pdf-pane-head{
+    display:flex;align-items:center;gap:14px;flex:0 0 auto;
+    padding:8px 12px;border-bottom:1px solid var(--rule);
+    font-family:var(--mono);font-size:11px;letter-spacing:0.04em;
+  }
+  #pdf-pane-title{
+    flex:1;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  #pdf-pane-dl{color:var(--copper-deep);text-decoration:none}
+  #pdf-pane-dl:hover{color:var(--ink)}
+  #pdf-pane-close{
+    background:none;border:0;cursor:pointer;
+    font-size:18px;color:var(--hint);line-height:1;padding:2px 6px;
+  }
+  #pdf-pane-close:hover{color:var(--ink)}
+  #pdf-frame{flex:1 1 auto;width:100%;border:0;background:var(--soft)}
+  html.dark #pdf-frame{background:#242220}
+
+  /* "Read publication (PDF)" affordance — bracket style, desktop + mobile */
+  .pub-read{
+    display:block;width:100%;box-sizing:border-box;
+    font-family:var(--mono);font-size:11px;letter-spacing:0.04em;
+    color:var(--copper-deep);background:none;border:0;cursor:pointer;
+    text-align:left;text-decoration:none;padding:6px 0 14px;
+  }
+  .pub-read::before{content:"[ ";color:var(--hint);opacity:.55}
+  .pub-read::after{content:" ]";color:var(--hint);opacity:.55}
+  .pub-read:hover{color:var(--ink)}
+
   /* Info ([?]) button in the Record bar — attention colour, bracket motif */
   .rec-info{
     font-family:var(--mono);font-size:11px;font-weight:600;
@@ -1382,6 +1418,14 @@
         <button id="about-pane-refresh">↺ Refresh archive data</button>
       </div>
     </div>
+    <div id="pdf-pane" role="dialog" aria-modal="true" aria-label="Publication reader">
+      <div id="pdf-pane-head">
+        <span class="t" id="pdf-pane-title"></span>
+        <a id="pdf-pane-dl" href="#" target="_blank" rel="noopener" title="Open or download the PDF">↓ PDF</a>
+        <button id="pdf-pane-close" aria-label="Close reader">×</button>
+      </div>
+      <iframe id="pdf-frame" title="Publication PDF" src="about:blank"></iframe>
+    </div>
     <div id="load-screen">
       <img class="load-mark" src="assets/hunter-mark.png" alt="">
       <span class="load-text">Loading Archive Data from Wikibase<span class="load-dots"></span></span>
@@ -1475,7 +1519,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.03";
+  const VERSION      = "v1.06-test.04";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2377,6 +2421,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
     const body = document.getElementById("mob-sheet-body");
     body.innerHTML =
+      (item.accessCopy ? `<a class="pub-read" href="${escapeHTML(item.accessCopy)}" target="_blank" rel="noopener">Open publication (PDF) ↗</a>` : "") +
       `<section class="meta-section">
         <h3><span><span class="n">01</span>Description</span><span class="ct">${descRows.length} fields</span></h3>
         <dl class="kv">${descHTML}</dl>
@@ -2534,6 +2579,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
           heldBy:           r.heldByLabel?.value || null,
           archiveLink:      r.archiveLink?.value || null,
           location:         r.location?.value || null,
+          accessCopy:       r.accessCopy?.value || null,
         });
       }
       const it = map.get(qid);
@@ -2545,7 +2591,13 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     return [...map.values()].sort((a, b) => (a.id || "").localeCompare(b.id || ""));
   }
 
-  // SPARQL query — must stay in sync with the prefetch copy in index.html
+  // "access copy" property — a publication's multi-page PDF. Minted by
+  // scripts/ingest_publication.py (P143, url datatype, created 2026-05-19).
+  const ACCESS_PID = "P143";
+
+  // SPARQL query — must stay in sync with the prefetch copy in index.html.
+  // (index.html prefetch sync is deferred to promotion — the extra OPTIONAL
+  //  + column is backward-compatible, so live browse.html is unaffected.)
   const CATALOGUE_QUERY = `
 PREFIX wdt: <https://hunterhouse.wikibase.cloud/prop/direct/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -2566,7 +2618,7 @@ SELECT ?item ?archId ?label ?img ?master
        ?setPos ?notes
        ?rights ?rightsLabel
        ?heldBy ?heldByLabel
-       ?archiveLink ?location
+       ?archiveLink ?location ?accessCopy
 WHERE {
   ?item wdt:P2 ?archId .
   ?item wdt:P96 ?img .
@@ -2592,6 +2644,7 @@ WHERE {
   OPTIONAL { ?item wdt:P94 ?heldBy . ?heldBy rdfs:label ?heldByLabel . FILTER(LANG(?heldByLabel)="en") }
   OPTIONAL { ?item wdt:P99 ?archiveLink }
   OPTIONAL { ?item wdt:P142 ?location }
+  OPTIONAL { ?item wdt:${ACCESS_PID} ?accessCopy }
 }`;
 
   async function loadFromWikibase() {
@@ -3218,6 +3271,7 @@ $("#foot-dims").textContent = "";
     const graphN = archRows.length > 0 ? "03" : "02";
     body.innerHTML = `
       <h1 class="meta-title">${formatTitle(item.title)}</h1>
+      ${item.accessCopy ? `<button class="pub-read" id="pub-read" type="button">Read publication (PDF)</button>` : ""}
 
       <section class="meta-section">
         <h3><span><span class="n">01</span>Description</span><span class="ct">${descRows.length} fields</span></h3>
@@ -3238,6 +3292,8 @@ $("#foot-dims").textContent = "";
     body.querySelectorAll(".sib[data-sib-id]").forEach(el => {
       el.addEventListener("click", e => { e.preventDefault(); selectItem(el.dataset.sibId); });
     });
+    const prBtn = document.getElementById("pub-read");
+    if (prBtn) prBtn.addEventListener("click", () => openPdfPane(item.accessCopy, item.title));
 
     renderRN(item.id);
     wireMetaEdit(item);
@@ -3929,7 +3985,7 @@ $("#foot-dims").textContent = "";
       if (e.key === "/" && !inInput) { e.preventDefault(); const si = document.getElementById("search-input"); if (si) { si.classList.add("open"); si.focus(); } return; }
       if (e.key === "Escape" && inInput) { e.target.blur(); return; }
       if (e.key === "Escape") {
-        closeAllDropdowns(); closeAboutPane(); closeInfoPane();
+        closeAllDropdowns(); closeAboutPane(); closeInfoPane(); closePdfPane();
         const lp = document.getElementById("panel-left"), rp = document.getElementById("panel-right");
         if (lp && rp && lp.classList.contains("out") && rp.classList.contains("out")) document.getElementById("zoom-fs").click();
         return;
@@ -4000,6 +4056,23 @@ $("#foot-dims").textContent = "";
   function closeInfoPane() { infoPane.classList.remove("open"); }
   function toggleInfoPane(){ infoPane.classList.contains("open") ? closeInfoPane() : openInfoPane(); }
 
+  // ── PDF reader — items carrying an "access copy" (e.g. a publication) ─────
+  // Desktop: a native-browser <iframe> overlay on the image area (same
+  // overlay pattern as #about-pane). Mobile uses a plain open-in-new-tab
+  // link in renderMobSheet — iframed PDFs are unreliable on iOS Safari.
+  const pdfPane = document.getElementById("pdf-pane");
+  function openPdfPane(url, title) {
+    if (!url) return;
+    document.getElementById("pdf-pane-title").textContent = title || "Publication";
+    document.getElementById("pdf-pane-dl").href = url;
+    document.getElementById("pdf-frame").src = url;
+    pdfPane.classList.add("open");
+  }
+  function closePdfPane() {
+    pdfPane.classList.remove("open");
+    document.getElementById("pdf-frame").src = "about:blank"; // stop render / free memory
+  }
+
   // ── Main (async load) ─────────────────────────────────────────────────────
   (async function main() {
     const mobileVersionBtn = document.getElementById("mobile-version");
@@ -4013,6 +4086,7 @@ $("#foot-dims").textContent = "";
     document.getElementById("about-pane-refresh").addEventListener("click", () => { clearCache(); location.reload(); });
     document.getElementById("rec-info").addEventListener("click", toggleInfoPane);
     document.getElementById("info-pane-close").addEventListener("click", closeInfoPane);
+    document.getElementById("pdf-pane-close").addEventListener("click", closePdfPane);
 
     // Panels + bottom-bar "hide panels" button.
     // Single source of truth = the .out classes on the panels themselves, so the
