@@ -98,9 +98,10 @@
   #about-pane-refresh:hover{color:var(--ink)}
 
   /* PDF reader — native browser viewer inside the image stage; the foot bar
-     is repurposed (zoom/rotate hidden, ↓ PDF + fullscreen + close shown). The
-     frame backing matches the stage; the viewer's own interior is the
-     browser's (unstyleable with a native iframe). */
+     is repurposed (zoom/rotate hidden, ↓ PDF + ✕ image shown; View PDF lives
+     in the foot-left, zen handles "fullscreen"). The frame backing matches
+     the stage; the viewer's own interior is the browser's (unstyleable
+     with a native iframe). */
   #pdf-frame{
     position:absolute;inset:0;width:100%;height:100%;border:0;
     display:none;z-index:5;background:var(--soft);
@@ -108,11 +109,10 @@
   .pane-image.pdf-mode #pdf-frame{display:block}
   .pane-image.pdf-mode #canvas,
   .pane-image.pdf-mode #load-screen{display:none}
-  #pdf-fs,#pdf-close,#pdf-dl{display:none}
-  #pdf-title{color:var(--ink);margin-left:2px}
-  .pane-image.pdf-mode #pdf-fs,
+  #pdf-close,#pdf-dl{display:none}
   .pane-image.pdf-mode #pdf-close{display:flex}
   .pane-image.pdf-mode #pdf-dl{display:inline}
+  .pane-image.pdf-mode #pdf-view,
   .pane-image.pdf-mode #if-full,
   .pane-image.pdf-mode #foot-dims,
   .pane-image.pdf-mode #zoom-out,
@@ -124,7 +124,11 @@
   .pane-image.pdf-mode .zoom-ctl .pct,
   .pane-image.pdf-mode .zoom-ctl .zoom-sep{display:none}
   .zoom-ctl button#pdf-close{font-size:10px;letter-spacing:0.06em}
-  .zoom-ctl button#pdf-fs{font-size:13px}
+  /* "View PDF" trigger in the foot-left — appears when the selected item has an access copy */
+  #pdf-view{font:inherit;background:none;border:0;cursor:pointer;
+    color:var(--copper-deep);letter-spacing:0.04em;padding:0 0 0 14px;line-height:inherit}
+  #pdf-view[hidden]{display:none}
+  #pdf-view:hover{color:var(--ink)}
 
   /* "Read publication (PDF)" affordance — bracket style, desktop + mobile */
   .pub-read{
@@ -1508,7 +1512,7 @@
       <iframe id="pdf-frame" title="Publication PDF" src="about:blank"></iframe>
     </div>
     <div class="image-foot">
-      <span class="foot-left"><span id="foot-dims"></span><span id="pdf-title"></span></span>
+      <span class="foot-left"><span id="foot-dims"></span><button id="pdf-view" type="button" hidden>View PDF</button></span>
       <div class="zoom-ctl">
         <button id="zoom-out" type="button" title="Zoom out [-]">−</button>
         <span class="pct" id="zoom-pct">100%</span>
@@ -1525,7 +1529,6 @@
           <svg id="fs-icon-expand" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8"/></svg>
           <svg id="fs-icon-collapse" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M4 1v3H1M8 1v3h3M8 11V8h3M4 11V8H1"/></svg>
         </button>
-        <button id="pdf-fs" type="button" title="Fullscreen">⛶</button>
         <button id="pdf-close" type="button" title="Close PDF — back to image">✕ image</button>
       </div>
       <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">↓ Original</a><a href="#" id="pdf-dl" target="_blank" rel="noopener">↓ PDF</a></span>
@@ -1594,7 +1597,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.07";
+  const VERSION      = "v1.06-test.08";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3059,6 +3062,7 @@ WHERE {
 
   function renderImage(item) {
     closePdf();   // switching items always returns to the image view
+    syncFootPdfView(item);
     const canvas = $("#canvas");
     const idx = state.filtered.findIndex(i => i.id === item.id);
 
@@ -3530,7 +3534,6 @@ $("#foot-dims").textContent = "";
     const graphN = archRows.length > 0 ? "03" : "02";
     body.innerHTML = `
       <h1 class="meta-title">${formatTitle(item.title)}</h1>
-      ${item.accessCopy ? `<button class="pub-read" id="pub-read" type="button">Read publication (PDF)</button>` : ""}
 
       <section class="meta-section">
         <h3><span><span class="n">01</span>Description</span><span class="ct">${descRows.length} fields</span></h3>
@@ -3551,9 +3554,6 @@ $("#foot-dims").textContent = "";
     body.querySelectorAll(".sib[data-sib-id]").forEach(el => {
       el.addEventListener("click", e => { e.preventDefault(); selectItem(el.dataset.sibId); });
     });
-    const prBtn = document.getElementById("pub-read");
-    if (prBtn) prBtn.addEventListener("click", () => openPdf(item.accessCopy, item.title));
-
     if (state.curation) renderCuratorNote(item); else renderRN(item.id);
     wireMetaEdit(item);
     wireFieldEdits(item);
@@ -4246,7 +4246,6 @@ $("#foot-dims").textContent = "";
       if (e.key === "/" && !inInput) { e.preventDefault(); const si = document.getElementById("search-input"); if (si) { si.classList.add("open"); si.focus(); } return; }
       if (e.key === "Escape" && inInput) { e.target.blur(); return; }
       if (e.key === "Escape") {
-        if (document.fullscreenElement) return;   // let the browser just exit fullscreen
         closeAllDropdowns(); closeAboutPane(); closeInfoPane(); closePdf(); closeCuratorPane();
         const lp = document.getElementById("panel-left"), rp = document.getElementById("panel-right");
         if (lp && rp && lp.classList.contains("out") && rp.classList.contains("out")) document.getElementById("zoom-fs").click();
@@ -4323,11 +4322,10 @@ $("#foot-dims").textContent = "";
   // (↓ PDF + fullscreen + close). Mobile uses a plain open-in-new-tab link
   // in renderMobSheet — iframed PDFs are unreliable on iOS Safari.
   const paneImageEl = () => document.querySelector(".pane-image");
-  function openPdf(url, title) {
+  function openPdf(url) {
     if (!url) return;
     document.getElementById("pdf-frame").src = url;
     document.getElementById("pdf-dl").href = url;
-    document.getElementById("pdf-title").textContent = title || "Publication";
     paneImageEl().classList.add("pdf-mode");
   }
   function closePdf() {
@@ -4335,16 +4333,14 @@ $("#foot-dims").textContent = "";
     if (!pane || !pane.classList.contains("pdf-mode")) return;
     pane.classList.remove("pdf-mode");
     document.getElementById("pdf-frame").src = "about:blank"; // stop render / free memory
-    document.getElementById("pdf-title").textContent = "";
-    if (document.fullscreenElement) (document.exitFullscreen || function(){}).call(document);
   }
-  function pdfFullscreen() {
-    if (document.fullscreenElement) {
-      (document.exitFullscreen || document.webkitExitFullscreen || function(){}).call(document);
-      return;
-    }
-    const el = document.getElementById("stage");
-    (el.requestFullscreen || el.webkitRequestFullscreen || function(){}).call(el);
+  // Toggle the foot-left "View PDF" trigger for the currently selected item.
+  function syncFootPdfView(item) {
+    const btn = document.getElementById("pdf-view");
+    if (!btn) return;
+    const url = item && item.accessCopy;
+    btn.hidden = !url;
+    btn.dataset.url = url || "";
   }
 
   // ── Main (async load) ─────────────────────────────────────────────────────
@@ -4361,7 +4357,10 @@ $("#foot-dims").textContent = "";
     document.getElementById("rec-info").addEventListener("click", toggleInfoPane);
     document.getElementById("info-pane-close").addEventListener("click", closeInfoPane);
     document.getElementById("pdf-close").addEventListener("click", closePdf);
-    document.getElementById("pdf-fs").addEventListener("click", pdfFullscreen);
+    document.getElementById("pdf-view").addEventListener("click", () => {
+      const btn = document.getElementById("pdf-view");
+      if (btn && btn.dataset.url) openPdf(btn.dataset.url);
+    });
 
     // Panels + bottom-bar "hide panels" button.
     // Single source of truth = the .out classes on the panels themselves, so the
