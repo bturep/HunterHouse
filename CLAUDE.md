@@ -645,3 +645,13 @@ Resolution of the HH-HHC-0112/HH-HHC-0115 duplicate Brandon caught earlier today
 Brandon: "show 111, 113, 114 in list but without images." Changed the catalogue SPARQL `?item wdt:P96 ?img .` (required) → `OPTIONAL { ?item wdt:P96 ?img }`, and `image: r.img.value` → `image: r.img?.value || null`. The list row rendering doesn't depend on `item.image`, so stubs (HH-HHC-0111 / Q461, 0113 / Q474, 0114 / Q471) now appear with their titles + dates + phase. When selected, `renderImage` already shows its built-in `"No image yet"` placeholder text (no need to substitute the `assets/placeholders/image-missing_prev.jpg` JPG asset — that's reserved for cases where you want a styled placeholder served as a real preview). All inline JS passes `node --check`. **`index.html` prefetch sync deferred to promotion** per existing convention — flagged in the Staging-prefetch-sync note above.
 
 **Version: next.html `v1.06-test.20`** (staging). Live `browse.html` unchanged at `v1.05.02`.
+
+---
+
+### 2026-05-19 — Hotfix: P96-loosened query was pulling in non-archive entities (next.html v1.06-test.21)
+
+Brandon: "you added a whole shit ton of extra items. CAA, Hunter House Stewardship Project, District of Saanich, Silvia Exposito, people, phases, works in CAA." The previous turn's loosening of `?item wdt:P96 ?img .` removed an implicit filter — non-archive entities (Q321 area, Q289 phase, Q187 Stewardship Project, Q201 Richard Hunter, etc.) all carry a `P2` archive ID (`HH-A-…`, `HH-PH-…`, `HH-I-…`, `HH-P-…`) and the only thing keeping them out of the catalogue was that they had no `P96`.
+
+Verified data shape: the 3 HHC stubs (Q461/Q474/Q471) all carry **P79** (source collection); vocab/people/institutions don't. Solution: require P79 in the catalogue SPARQL. Made `OPTIONAL { ?item wdt:P79 ?src . ?src rdfs:label ?srcLabel . FILTER(LANG(?srcLabel)="en") }` into `?item wdt:P79 ?src . OPTIONAL { ?src rdfs:label ?srcLabel . FILTER(LANG(?srcLabel)="en") }`. The P96 loosening from v1.06-test.20 stays — so HHC-0111/0113/0114 still appear in the list (with the existing 'No image yet' state in the viewer), but the polluters are out again. JS clean.
+
+**Version: next.html `v1.06-test.21`** (staging). Live `browse.html` unchanged at `v1.05.02`.
