@@ -1610,7 +1610,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.34";
+  const VERSION      = "v1.06-test.35";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3010,10 +3010,19 @@ WHERE {
   function renderCuratorNote(item) {
     const panel = document.getElementById("rn-panel");
     if (!panel) return;
+    const cu = (state.curation && state.curation.curator) || {};
+    const name = (cu.name || (state.curation && state.curation.curator) || "").toString().trim();
     const entry = ((state.curation && state.curation.items) || []).find(x => x.id === item.id);
     const note = entry && entry.note ? entry.note : "";
+    // Label gets the curator's name as an attribution after a · separator,
+    // wrapped in .cur-name-c (var(--red)) so it matches the chip + the
+    // threshold byline + the curation-card. .cn-label's uppercase +
+    // letter-spacing is inherited, so the name renders in red small-caps.
+    const labelHTML = name
+      ? `curator's note · <span class="cur-name-c">${escapeHTML(name)}</span>`
+      : `curator's note`;
     panel.innerHTML = `<div class="cur-note">
-      <span class="cn-label">curator's note</span>
+      <span class="cn-label">${labelHTML}</span>
       ${note ? `<div class="cn-text">${escapeHTML(note)}</div>`
              : `<div class="cn-empty">No curator note for this item.</div>`}
     </div>`;
