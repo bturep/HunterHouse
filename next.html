@@ -161,14 +161,11 @@
   .ap-credits a{color:var(--copper-deep);text-decoration:none;
     border-bottom:1px solid var(--copper-pale)}
   .ap-credits a:hover{border-bottom-color:var(--copper-deep)}
-  /* Eyebrow above the ap-title — small-caps section divider with flanking
-     rules, exhibition-wall feel. "A CURATED SELECTION" sits as a descriptor
-     above the byline-as-title ("CURATED BY <NAME>"), so the title-treatment
-     belongs to the curator-of-record, equivalent to an exhibition title. */
-  .cur-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:0.22em;
-    text-transform:uppercase;color:var(--muted);margin:0 0 18px;
-    display:flex;align-items:center;gap:14px;width:100%}
-  .cur-eyebrow::before,.cur-eyebrow::after{content:"";flex:1;height:1px;background:var(--rule)}
+  /* Curator's name highlight — used wherever the curator's name appears in
+     the pane (title byline + every occurrence in the bio). Uses the same
+     var(--red) token as the .pc-red chip in the BROWSE filter panel, so
+     chip-color and name-color stay in sync (auto-darkens via verso.css). */
+  .cur-name-c{color:var(--red)}
   .cur-actions{display:flex;justify-content:center;margin-top:28px}
   .cur-continue{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;
     color:var(--ink);background:none;border:0;cursor:pointer;padding:0;
@@ -680,15 +677,14 @@
   .pc-moss  {--pf:#386028}  /* olive — built status */
   .pc-indigo{--pf:var(--copper-deep)}
   .pc-denim {--pf:#283878}  /* navy — collection */
-  .pc-red   {--pf:#c43820}  /* Richard Morrow Hunter accent — curators (matches .c-red on HHFA pane) */
+  .pc-red   {--pf:var(--red)}  /* curators — softer sibling of the brighter .c-red used on HHFA pane (Hunter accent); var(--red) auto-darkens via verso.css */
   html.dark .pc-sage  {--pf:#c09858}
   html.dark .pc-stone {--pf:#b09870}
   html.dark .pc-slate {--pf:#7898b8}
   html.dark .pc-clay  {--pf:#a07898}
   html.dark .pc-moss  {--pf:#88a070}
   html.dark .pc-denim {--pf:#6890a8}
-  /* .pc-red intentionally has no dark override — #c43820 reads well on both
-     light and dark surfaces, same as .c-red on the HHFA pane. */
+  /* .pc-red uses var(--red), which already has a light/dark pair in verso.css. */
 
   /* dark mode overrides for hardcoded colours */
   /* dark mode: image pane goes black, structural borders go black */
@@ -1599,7 +1595,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.30";
+  const VERSION      = "v1.06-test.31";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2912,20 +2908,31 @@ WHERE {
     const link = cu.url
       ? `<a href="${escapeHTML(cu.url)}" target="_blank" rel="noopener">${escapeHTML(cu.url_label || cu.url)} ↗</a>`
       : "";
-    // Layout mirrors HHFA pane rhythm with one inversion: the byline
-    // ("Curated by <Name>") gets the .ap-title treatment because Brandon
-    // wants it to read as the title-of-the-exhibition (the curator IS the
-    // headliner). "A curated selection" sits above as a small-caps eyebrow.
-    // Bio carries the role/affiliation context implicitly — no credits dl.
-    // Dismissal is the corner × only (no cancel button competing with the CTA).
-    const name = escapeHTML(cu.name || c.curator || "an invited curator");
+    // Layout: c.title sits directly above the byline, both in .ap-title
+    // (so they read as a two-line exhibition heading: WORK title /
+    // CURATED-BY-AUTHOR byline, equal weight). The curator's name is
+    // wrapped in .cur-name-c (var(--red)) everywhere it appears — byline
+    // and every occurrence in the bio — to echo the .pc-red chip in the
+    // BROWSE filter panel. No top eyebrow (it visually fought the × close
+    // button positioned in the top-right corner). Bio carries role and
+    // affiliation context implicitly; dismissal is the corner × only.
+    const rawName = (cu.name || c.curator || "an invited curator");
+    const name = escapeHTML(rawName);
+    const nameSpan = `<span class="cur-name-c">${name}</span>`;
+    // Use split/join to wrap every occurrence of the curator's name in the
+    // bio with the .cur-name-c span. Split/join is safer than regex here
+    // (no need to escape regex metachars in the name).
+    const bioEscaped = escapeHTML(cu.bio || "");
+    const bioWithName = rawName
+      ? bioEscaped.split(name).join(nameSpan)
+      : bioEscaped;
     const bioHTML = cu.bio
-      ? escapeHTML(cu.bio) + (link ? ` ${link}` : "")
+      ? bioWithName + (link ? ` ${link}` : "")
       : "";
     document.getElementById("curator-pane-inner").innerHTML = `
       <button id="cur-pane-close" class="cur-pane-close" aria-label="Close">×</button>
-      <p class="cur-eyebrow">A curated selection</p>
-      <p class="ap-title">Curated by ${name}</p>
+      ${c.title ? `<p class="ap-title">${escapeHTML(c.title)}</p>` : ""}
+      <p class="ap-title">Curated by ${nameSpan}</p>
       <div class="ap-section">
         <p class="ap-body">${escapeHTML(LENS_BLURB)}</p>
       </div>
