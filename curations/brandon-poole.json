@@ -7,7 +7,7 @@
     "role": "Artist",
     "affiliation": "Victoria, BC",
     "qid": null,
-    "bio": "PLACEHOLDER bio for testing the curator-name rendering. Robert Youds is a Victoria-based artist whose practice has long engaged the built environment of the Pacific Northwest. This placeholder text exists so the name-highlight (.cur-name-c → var(--red)) has something to wrap inside the bio paragraph — the real Robert Youds bio is not yet supplied. For more information, please contact.",
+    "bio": "PLACEHOLDER bio for testing the curator-name rendering. Robert Youds is a Victoria-based artist whose practice has long engaged the built environment of the Pacific Northwest. This placeholder text exists so the name-highlight (.cur-name-c → var(--red)) has something to wrap inside the bio paragraph — the real Robert Youds bio is not yet supplied.",
     "url": "https://example.org",
     "url_label": "placeholder.example"
   },
