@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
 <meta charset="utf-8">
 <title>Browse Archive — Hunter House Foundation</title>
@@ -78,6 +78,12 @@
      guarded separately in the keydown handler. */
   body.hh-about-open .panel-handle,
   body.hh-about-open #zoom-fs{pointer-events:none}
+  /* Panel content blank: regardless of whether one, both, or no panels
+     were expanded when the about-pane opens, the panel content goes
+     blank (visibility:hidden) so no list rows or record meta show
+     through alongside the splash. visibility (not display) keeps the
+     panel boxes in their current width — they don't reflow. */
+  body.hh-about-open .panel-content{visibility:hidden}
   .ap-inner{width:100%;max-width:520px;position:relative}
   #about-pane-close{
     position:absolute;top:-8px;right:0;
@@ -1272,18 +1278,11 @@
   }
 </style>
 <script>
-  /* theme toggle — runs before render to avoid flash */
+  /* PWA detect (still useful for the .pwa CSS overrides). Dark mode is
+     now hardcoded via class="dark" on <html> directly — no toggle, no
+     localStorage. The old hhf_theme_v2 key is now stale; harmless. */
   (function(){
-    if(localStorage.getItem('hhf_theme_v2')!=='light') document.documentElement.classList.add('dark');
     if(navigator.standalone||matchMedia('(display-mode:standalone)').matches) document.documentElement.classList.add('pwa');
-    document.addEventListener('DOMContentLoaded',function(){
-      var btn=document.getElementById('theme-toggle');
-      if(!btn)return;
-      btn.addEventListener('click',function(){
-        var dark=document.documentElement.classList.toggle('dark');
-        localStorage.setItem('hhf_theme_v2',dark?'dark':'light');
-      });
-    });
   })();
 </script>
 </head>
@@ -1309,9 +1308,10 @@
     <button class="theme-btn" id="search-toggle" title="Search [/]"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="5.2" cy="5.2" r="3.5"/><line x1="7.8" y1="7.8" x2="12" y2="12"/></svg></button>
     <span class="tr-sep"></span>
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
-    <span class="tr-sep"></span>
-    <button class="theme-btn" id="theme-toggle" title="Toggle dark mode"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1.5 A6 6 0 0 0 7.5 13.5 Z"/><circle cx="7.5" cy="7.5" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
-    <span class="tr-sep"></span>
+    <!-- theme-toggle + trailing tr-seps removed — site is dark-only, no
+         theme switch needed. The topright version was already hidden in
+         live (kept the element so the JS topright lookup doesn't break,
+         but the surrounding separators dangled visually). -->
     <span id="topright" title="About this archive"></span>
   </div>
 </header>
@@ -1513,7 +1513,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05.06";
+  const VERSION      = "v1.05.07";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
