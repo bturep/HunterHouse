@@ -1483,17 +1483,14 @@
   </a>
   <div class="header-search"></div>
   <div class="site-topright">
-    <!-- Corner = fullscreen button only (the visible affordance). The
-         hidden #search-input below stays for mobile's filter-panel search
-         proxy — the mobile path mirrors values into this element and
-         dispatches synthetic 'input' events on it; removing it would
-         break mobile search. Its CSS default is max-width:0 (invisible
-         until .open class added; the / keyboard shortcut and the
-         search-toggle button that added .open are both gone, so the
-         input never becomes visible on desktop). Same for #topright —
-         kept for the JS lookup; no visible content. -->
-    <input id="search-input" class="tr-search-input" placeholder="" autocomplete="off" aria-hidden="true" tabindex="-1">
+    <!-- Desktop search: the input is normally collapsed (max-width:0) and
+         expands when #search-toggle is clicked or the / shortcut fires.
+         Mobile's filter-panel search also proxies values into this input,
+         so the element must stay even if the desktop UI is hidden. -->
+    <input id="search-input" class="tr-search-input" placeholder="" autocomplete="off">
     <span id="topright" title="About this archive"></span>
+    <button class="theme-btn" id="search-toggle" title="Search [/]"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="5.2" cy="5.2" r="3.5"/><line x1="7.8" y1="7.8" x2="12" y2="12"/></svg></button>
+    <span class="tr-sep"></span>
     <!-- fs-toggle deliberately LAST so flex-end + padding-right:13px on
          .site-topright lands its right edge at viewport_right - 41. -->
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
@@ -1713,7 +1710,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.56";
+  const VERSION      = "v1.06-test.57";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4481,9 +4478,7 @@ WHERE {
 
     document.addEventListener("keydown", e => {
       const inInput = e.target.matches("input, select, textarea");
-      // '/' search shortcut removed — search affordance is gone from the
-      // desktop UI (mobile still has its filter-panel search row, which
-      // proxies into the hidden #search-input).
+      if (e.key === "/" && !inInput) { e.preventDefault(); openSearch(); return; }
       if (e.key === "Escape" && inInput) { e.target.blur(); return; }
       if (e.key === "Escape") {
         closeAllDropdowns(); closeAboutPane(); closeInfoPane(); closePdf(); closeCuratorPane();
