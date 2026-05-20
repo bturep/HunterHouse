@@ -1662,7 +1662,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06.09";
+  const VERSION      = "v1.06.10";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4524,13 +4524,9 @@ WHERE {
   // ── Info panel — system orientation + shortcuts, role-aware ──────────────
   const infoPane = document.getElementById("info-pane");
   function renderInfoPane() {
-    const role = rnRole();
-    const researcher = role !== "public";
-    const admin = role === "admin";
+    const researcher = rnRole() !== "public";
     const keys = rows => `<div class="ip-keys">${rows.map(([k, d]) => `<b>${k}</b><span>${d}</span>`).join("")}</div>`;
     let html = `
-      <p class="ip-title">Hunter House Archive</p>
-      <p class="ap-body">A live catalogue of the Richard Hunter architectural archive. <i>Left</i> browses items, <i>centre</i> shows the image (zoom / pan / rotate), <i>this panel</i> is the record. Everything is read live from a public Wikibase and is fully queryable — see the data links at the foot of a record.</p>
       <p class="ip-grp">Navigate</p>
       ${keys([["↑ ↓", "Previous / next item"], ["/", "Search"], ["Esc", "Close · exit zen"]])}
       <p class="ip-grp">View</p>
@@ -4538,12 +4534,6 @@ WHERE {
     if (researcher) {
       html += `<p class="ip-grp">Researcher</p>
         ${keys([["M", "Mark / unmark (shortlist)"], ["R", "Reviewed / not reviewed"]])}`;
-    }
-    html += `<p class="ip-grp">Help</p>${keys([["?", "This panel"]])}`;
-    if (!researcher) {
-      html += `<div class="ip-note"><b>Researcher tools.</b> Unlock with your name + PIN at <b>researcher notes</b> below to add private notes, build a marked shortlist, and track which items you've reviewed.</div>`;
-    } else {
-      html += `<div class="ip-note"><b>Researcher mode active${admin ? " · admin" : ""}.</b> Notes you add are private to you. <b>Mark</b> (M) builds a personal shortlist — the browse bar can show-only, export IDs, or clear it. <b>Reviewed</b> (R) tracks what you've examined.${admin ? " As admin you can edit record fields inline and toggle [mine]/[all] on notes." : ""}</div>`;
     }
     html += `<p class="ip-foot">Credits, rights &amp; data endpoints → the wordmark, top-left.</p>`;
     document.getElementById("ip-inner").innerHTML = html;
