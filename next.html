@@ -864,6 +864,10 @@
   body.loading .image-foot { background:var(--bg); border-top-color:transparent }
 
   body.loading #canvas{ visibility:hidden }
+  /* Hide the image while panels finish transitioning + fitting after
+     Continue — otherwise the splash-fit image flashes briefly before it
+     shrinks down to the post-open size. */
+  body.refitting #canvas{ visibility:hidden }
 
   /* ── Mobile about overlay ── */
   #mob-about-backdrop{display:none;position:fixed;inset:0;z-index:299;background:rgba(0,0,0,0.55)}
@@ -1709,7 +1713,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.54";
+  const VERSION      = "v1.06-test.56";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4651,10 +4655,14 @@ WHERE {
       leftP.classList.remove("out");
       rightP.classList.remove("out");
       syncFsBtn();
-      // Panels transition width over 260ms; wait it out so the stage size
-      // reflects the open layout, then re-fit the image (same as FIT button)
-      // so it isn't sized to the wider splash stage and overflowing.
-      setTimeout(fitToFrame, 280);
+      // Hide the canvas while panels animate + fit settles; reveal once the
+      // image is at the correct post-open size. Avoids the flash where the
+      // splash-fit image shrinks visibly in front of the visitor.
+      document.body.classList.add("refitting");
+      setTimeout(() => {
+        fitToFrame();
+        document.body.classList.remove("refitting");
+      }, 280);
     });
     document.getElementById("rec-info").addEventListener("click", toggleInfoPane);
     document.getElementById("info-pane-close").addEventListener("click", closeInfoPane);
