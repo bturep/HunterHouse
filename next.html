@@ -5,7 +5,15 @@
 <title>Browse Archive — Hunter House Foundation</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta name="theme-color" content="#1a1816">
-<meta name="color-scheme" content="dark light">
+<!-- color-scheme meta removed (was: "dark light"). It was added in bd48368
+     for splash white-flash prevention (index.html still needs it), but on
+     browse/next.html it triggered Chrome's "dark-aware" color transform on
+     archive JPEGs carrying the embedded kip2300-v6- scanner ICC profile —
+     producing a cyan cast in Chrome only (Safari & Firefox fine). We don't
+     need it here: the inline <style>html{background:#1a1816}</style> below
+     handles the dark paint-holdout, and the runtime light/dark toggle is
+     driven by the html.dark class via localStorage, independent of this
+     meta. Side effect: scrollbars/form-controls use browser defaults. -->
 <link rel="manifest" href="/HunterHouse/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -530,16 +538,6 @@
     border:1px solid var(--rule);box-shadow:0 8px 24px -10px rgba(30,28,26,0.22);
   }
   .image-stage img.hh-thumb{border:none;box-shadow:none;}
-  /* Color-management fix: when the document carries color-scheme:dark (set
-     for splash white-flash prevention), Chrome's color pipeline applies a
-     "dark-aware" transform to images with embedded non-sRGB ICC profiles
-     (our scanner JPEGs carry kip2300-v6-, ~435KB), pushing whites cool/cyan.
-     Firefox & Safari don't. Scoping color-scheme:light to the archive
-     image elements tells Chrome to color-manage them in a light context,
-     leaving page chrome (scrollbars, form controls) dark-aware as intended. */
-  .image-stage img,
-  #mob-sheet-img,
-  #mob-lb-img{ color-scheme: light; }
   .image-stage .placeholder{
     font-family:var(--mono);font-size:10.5px;color:var(--hint);
     letter-spacing:0.12em;text-transform:uppercase;text-align:center;
@@ -1600,7 +1598,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.23";
+  const VERSION      = "v1.06-test.24";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
