@@ -1610,7 +1610,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.36";
+  const VERSION      = "v1.06-test.37";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2715,7 +2715,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   // + a macro intro, served as static JSON in /curations. Public; viewing only
   // in Phase 1 (no in-browser authoring). Everything is a no-op when no
   // curations/index.json is present.
-  const LENS_BLURB = "An invited path through the archive — one curator's chosen items, in their order, with their notes. Not a filter. Leave it any time to return to the full catalogue.";
+  const LENS_BLURB = "An ordered reading of the archive, drawn and annotated by an invited curator.";
   const curationCache = {};
   async function loadCurationIndex() {
     try {
