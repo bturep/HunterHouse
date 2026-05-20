@@ -166,6 +166,18 @@
      var(--red) token as the .pc-red chip in the BROWSE filter panel, so
      chip-color and name-color stay in sync (auto-darkens via verso.css). */
   .cur-name-c{color:var(--red)}
+  /* Curated-mode chrome stripdown. Reason: in curation mode applyFilters
+     early-returns (authored membership), sort is locked, search is inert,
+     and the metadata pills act as dead filter triggers. The viewer is
+     reading an exhibition, not exploring the archive — show only what the
+     curator placed (the item's title + their note). Exit is on the
+     curation-card. Toggled by body.hh-in-curation in enter/exitCuration. */
+  body.hh-in-curation .list-head,
+  body.hh-in-curation #search-input,
+  body.hh-in-curation #search-toggle,
+  body.hh-in-curation #search-toggle + .tr-sep,
+  body.hh-in-curation #rec-info,
+  body.hh-in-curation #data-footer{display:none !important}
   .cur-actions{display:flex;justify-content:center;margin-top:28px}
   .cur-continue{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;
     color:var(--ink);background:none;border:0;cursor:pointer;padding:0;
@@ -1595,7 +1607,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.32";
+  const VERSION      = "v1.06-test.33";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2952,6 +2964,9 @@ WHERE {
   function enterCuration(c) {
     state.curation = c;
     closeCuratorPane();
+    // Body-level flag drives the CSS chrome stripdown (browse-bar, search,
+    // [?] info button, data-footer) — see the body.hh-in-curation rules.
+    document.body.classList.add("hh-in-curation");
     const fp = document.getElementById("filter-panel");
     if (fp && !fp.hidden) {
       fp.hidden = true;
@@ -2965,6 +2980,7 @@ WHERE {
   function exitCuration() {
     if (!state.curation) return;
     state.curation = null;
+    document.body.classList.remove("hh-in-curation");
     applyFilters(); renderListHead(); renderList();
     if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
       selectItem(state.filtered[0].id, { scrollIntoView:false });
@@ -3393,6 +3409,23 @@ WHERE {
   // ── Meta pane ─────────────────────────────────────────────────────────────
   function renderMeta(item) {
     const body = $("#meta-body");
+
+    // Curated mode: clamped render — only the item title + the curator's
+    // note. No description-fields KV (those pills doubled as dead filter
+    // triggers), no archival rows, no graph section, no data-footer wiring.
+    // The body.hh-in-curation class (set in enterCuration) hides the data
+    // footer + browse-bar + [?] info button via CSS. Exit lives on the
+    // curation-card. The rn-panel id is preserved so renderCuratorNote
+    // can locate its mount point.
+    if (state.curation) {
+      body.innerHTML = `
+        <h1 class="meta-title">${formatTitle(item.title)}</h1>
+        <div class="rn-panel" id="rn-panel"></div>
+      `;
+      renderCuratorNote(item);
+      requestAnimationFrame(() => updatePip("meta-body", "meta-pip"));
+      return;
+    }
 
     const areasHtml = (item.areas || []).map(a =>
       `<button class="pill area-pill ${pillCls(PC.sage)}${state.filterArea.has(a) ? " active" : ""}" data-area="${escapeHTML(a)}">${escapeHTML(a)}</button>`
