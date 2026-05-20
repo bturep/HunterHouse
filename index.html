@@ -13,6 +13,12 @@
 <link rel="apple-touch-icon" href="/HunterHouse/assets/icon-180.png">
 <!-- Paint holdout: dark bg before any other style resolves, no white flash. -->
 <style>html,body{background:#1a1816;color:#f0ede6}</style>
+<!-- Prefetch the page we're going to + its stylesheet so the navigation
+     after the fade-out hits the browser cache, not the network. Minimizes
+     the white-flash window between index.html unload and browse.html's
+     first paint (the inter-page browser default canvas). -->
+<link rel="prefetch" href="browse.html" as="document">
+<link rel="prefetch" href="assets/verso.css" as="style">
 <style>
   /* ── Soft threshold landing ────────────────────────────────────────────
      A typographic-only entry into the archive. No images, no chrome, no
@@ -107,7 +113,12 @@
   }
 
   /* Fade-out on click — short transition before navigation, so the page
-     dissolves rather than swaps. */
+     dissolves rather than swaps. The animation finishes at 380ms; the JS
+     waits 480ms before calling navigate(), giving 100ms of solid-dark
+     body bg between the fade ending and the document unload. Combined
+     with the prefetch in <head>, this gives the cached browse.html time
+     to start painting before the browser default canvas (white on light-
+     mode OS) becomes visible. */
   .threshold.exiting { animation: fade-out 380ms ease-out forwards; pointer-events: none; }
   @keyframes fade-out { to { opacity: 0; } }
 
@@ -164,7 +175,9 @@
     if (t.classList.contains('exiting')) return;
     t.classList.add('exiting');
     sessionStorage.setItem('hhf_splash', '1');
-    setTimeout(() => { window.location.href = 'browse.html'; }, 400);
+    // 480ms = 380ms fade + 100ms dark hold; gives the prefetched
+    // browse.html a beat to start painting before navigation.
+    setTimeout(() => { window.location.href = 'browse.html'; }, 480);
   });
 </script>
 
