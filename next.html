@@ -161,16 +161,21 @@
   .ap-credits a{color:var(--copper-deep);text-decoration:none;
     border-bottom:1px solid var(--copper-pale)}
   .ap-credits a:hover{border-bottom-color:var(--copper-deep)}
-  .cur-actions{display:flex;gap:20px;align-items:center;margin-top:28px}
+  /* Eyebrow above the ap-title — small-caps section divider with flanking
+     rules, exhibition-wall feel. "A CURATED SELECTION" sits as a descriptor
+     above the byline-as-title ("CURATED BY <NAME>"), so the title-treatment
+     belongs to the curator-of-record, equivalent to an exhibition title. */
+  .cur-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:0.22em;
+    text-transform:uppercase;color:var(--muted);margin:0 0 18px;
+    display:flex;align-items:center;gap:14px;width:100%}
+  .cur-eyebrow::before,.cur-eyebrow::after{content:"";flex:1;height:1px;background:var(--rule)}
+  .cur-actions{display:flex;justify-content:center;margin-top:28px}
   .cur-continue{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;
     color:var(--ink);background:none;border:0;cursor:pointer;padding:0;
     transition:color .12s}
   .cur-continue::before{content:"[ ";color:var(--hint);opacity:.55}
   .cur-continue::after{content:" ]";color:var(--hint);opacity:.55}
   .cur-continue:hover{color:var(--copper-deep)}
-  .cur-cancel{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;
-    text-transform:uppercase;color:var(--hint);background:none;border:0;cursor:pointer}
-  .cur-cancel:hover{color:var(--ink)}
 
   /* Intro card — bigger than mark-bar, sits above the list in curation mode */
   .curation-card{padding:14px 20px 16px;border-bottom:1px solid var(--rule);
@@ -675,12 +680,15 @@
   .pc-moss  {--pf:#386028}  /* olive — built status */
   .pc-indigo{--pf:var(--copper-deep)}
   .pc-denim {--pf:#283878}  /* navy — collection */
+  .pc-red   {--pf:#c43820}  /* Richard Morrow Hunter accent — curators (matches .c-red on HHFA pane) */
   html.dark .pc-sage  {--pf:#c09858}
   html.dark .pc-stone {--pf:#b09870}
   html.dark .pc-slate {--pf:#7898b8}
   html.dark .pc-clay  {--pf:#a07898}
   html.dark .pc-moss  {--pf:#88a070}
   html.dark .pc-denim {--pf:#6890a8}
+  /* .pc-red intentionally has no dark override — #c43820 reads well on both
+     light and dark surfaces, same as .c-red on the HHFA pane. */
 
   /* dark mode overrides for hardcoded colours */
   /* dark mode: image pane goes black, structural borders go black */
@@ -1591,7 +1599,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.29";
+  const VERSION      = "v1.06-test.30";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2876,6 +2884,7 @@ WHERE {
     moss:   { cls:"pc-moss"   },
     indigo: { cls:"pc-indigo" },
     denim:  { cls:"pc-denim"  },
+    red:    { cls:"pc-red"    },   // Richard Morrow Hunter accent — used by Curators chooser
   };
   const itemTypePillColor = () => PC.stone;
   const drawTypePillColor = () => PC.slate;
@@ -2903,20 +2912,20 @@ WHERE {
     const link = cu.url
       ? `<a href="${escapeHTML(cu.url)}" target="_blank" rel="noopener">${escapeHTML(cu.url_label || cu.url)} ↗</a>`
       : "";
-    // Layout mirrors the HHFA "Foundation Archive" pane: ap-title → ap-ver
-    // subtitle → unheaded opening blurb → headed Curator section (bio with
-    // inline link) → ap-rule → credits dl (Role/Affiliation) → actions.
-    const name  = escapeHTML(cu.name || c.curator || "an invited curator");
+    // Layout mirrors HHFA pane rhythm with one inversion: the byline
+    // ("Curated by <Name>") gets the .ap-title treatment because Brandon
+    // wants it to read as the title-of-the-exhibition (the curator IS the
+    // headliner). "A curated selection" sits above as a small-caps eyebrow.
+    // Bio carries the role/affiliation context implicitly — no credits dl.
+    // Dismissal is the corner × only (no cancel button competing with the CTA).
+    const name = escapeHTML(cu.name || c.curator || "an invited curator");
     const bioHTML = cu.bio
       ? escapeHTML(cu.bio) + (link ? ` ${link}` : "")
       : "";
-    const creditRows =
-      (cu.role        ? `<dt>Role</dt><dd>${escapeHTML(cu.role)}</dd>` : "") +
-      (cu.affiliation ? `<dt>Affiliation</dt><dd>${escapeHTML(cu.affiliation)}</dd>` : "");
     document.getElementById("curator-pane-inner").innerHTML = `
       <button id="cur-pane-close" class="cur-pane-close" aria-label="Close">×</button>
-      <p class="ap-title">A curated selection</p>
-      <p class="ap-ver">Curated by ${name}</p>
+      <p class="cur-eyebrow">A curated selection</p>
+      <p class="ap-title">Curated by ${name}</p>
       <div class="ap-section">
         <p class="ap-body">${escapeHTML(LENS_BLURB)}</p>
       </div>
@@ -2924,14 +2933,11 @@ WHERE {
         <p class="ap-section-head">Curator</p>
         <p class="ap-body">${bioHTML}</p>
       </div>` : ""}
-      ${creditRows ? `<hr class="ap-rule"><dl class="ap-credits">${creditRows}</dl>` : ""}
       <div class="cur-actions">
         <button class="cur-continue" id="cur-continue">Enter exhibition →</button>
-        <button class="cur-cancel" id="cur-cancel">cancel</button>
       </div>`;
     curatorPane().classList.add("open");
     document.getElementById("cur-continue").addEventListener("click", () => enterCuration(c));
-    document.getElementById("cur-cancel").addEventListener("click", closeCuratorPane);
     document.getElementById("cur-pane-close").addEventListener("click", closeCuratorPane);
   }
   function closeCuratorPane() { const p = curatorPane(); if (p) p.classList.remove("open"); }
@@ -3695,7 +3701,7 @@ WHERE {
     const curatedRow = (!state.curation && (state.curations || []).length)
       ? `<div class="fp-group fp-grp-cur"><div class="fp-lbl">Curators</div><div class="fp-chips">${
           state.curations.map(c =>
-            `<button class="fp-chip ${pillCls(PC.indigo)}" data-cur-slug="${escapeHTML(c.slug)}">${escapeHTML(c.curator || c.title || c.slug)}</button>`
+            `<button class="fp-chip ${pillCls(PC.red)}" data-cur-slug="${escapeHTML(c.slug)}">${escapeHTML(c.curator || c.title || c.slug)}</button>`
           ).join("")
         }</div></div>`
       : "";
