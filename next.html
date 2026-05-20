@@ -1647,7 +1647,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.40";
+  const VERSION      = "v1.06-test.41";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4580,6 +4580,17 @@ WHERE {
         syncFsBtn();
       });
 
+      // Splash-mode init: on every page load (refresh or first visit),
+      // collapse both side panels and open the HHFA about-pane. browse.html
+      // acts as its own opener — visitor dismisses the × to reveal the
+      // image stage, then discovers the collapsed panels by clicking the
+      // edge handles. Desktop only (mobile has tabbed sheets + #mob-about,
+      // no parallel desktop about-pane).
+      if (!window.matchMedia("(max-width:767px)").matches) {
+        leftP.classList.add("out");
+        rightP.classList.add("out");
+        openAboutPane();
+      }
       syncFsBtn();   // start with the icon/title matching the DOM
     }
 
