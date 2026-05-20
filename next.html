@@ -1709,7 +1709,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.52";
+  const VERSION      = "v1.06-test.53";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3327,10 +3327,11 @@ WHERE {
         zoomState.tx = 0; zoomState.ty = 0;
         currentImg = fullImg;
         applyTransform(); updateZoomUI();
-        // Splash-entry one-shot: HH-HHC-0028 lands at 1:1 (native pixel scale)
-        // rather than fit. setZoom(1) clamps to fitScale*8, which is well above
-        // 1 for the large drawing scans, so this lands at true 1:1.
-        if (state.boot1to1) { state.boot1to1 = false; setZoom(1); }
+        // Splash-entry one-shot: HH-HHC-0028 lands at a tight fit (no padding).
+        // Only fires if both side panels are already open — otherwise the
+        // measurement would be against the wide splash stage; the Continue
+        // handler triggers the fit after the panel transition settles.
+        maybeApplyBootFitTight();
 
         // Fade in full, then remove thumb
         requestAnimationFrame(() => {
@@ -3348,7 +3349,7 @@ WHERE {
         currentImg = fullImg;
         canvas.appendChild(fullImg);
         fitToFrame();
-        if (state.boot1to1) { state.boot1to1 = false; setZoom(1); }
+        maybeApplyBootFitTight();
       }
       canvas.classList.remove("no-zoom");
     }
@@ -3414,6 +3415,36 @@ WHERE {
     zoomState.scale = fit;
     zoomState.tx = 0; zoomState.ty = 0;
     applyTransform(); updateZoomUI();
+  }
+
+  // Tight fit — like fitToFrame but with zero padding, so the image edge
+  // meets the stage edge on the constrained axis. Used by the boot
+  // one-shot for HH-HHC-0028. The image is still capped at native 1:1.
+  function applyBootFitTight() {
+    if (!currentImg) return;
+    const stage = $("#stage");
+    const sw = stage.clientWidth, sh = stage.clientHeight;
+    const transposed = zoomState.rotation % 180 !== 0;
+    const iw = transposed ? zoomState.naturalH : zoomState.naturalW;
+    const ih = transposed ? zoomState.naturalW : zoomState.naturalH;
+    if (!iw || !ih) return;
+    const fit = Math.min(sw / iw, sh / ih, 1);
+    zoomState.fitScale = fit;
+    zoomState.scale = fit;
+    zoomState.tx = 0; zoomState.ty = 0;
+    applyTransform(); updateZoomUI();
+  }
+  // Boot one-shot guard: fires the tight fit only when both side panels are
+  // already expanded AND the flag is still pending. Called from showFull
+  // (image-arrived path) and from the Continue handler (panels-expanded path);
+  // the second caller wins.
+  function maybeApplyBootFitTight() {
+    if (!state.bootFitTight || !currentImg) return;
+    const leftOut  = document.getElementById("panel-left").classList.contains("out");
+    const rightOut = document.getElementById("panel-right").classList.contains("out");
+    if (leftOut || rightOut) return;   // still in splash; defer to Continue
+    state.bootFitTight = false;
+    applyBootFitTight();
   }
 
   function applyTransform() {
@@ -4656,6 +4687,11 @@ WHERE {
       leftP.classList.remove("out");
       rightP.classList.remove("out");
       syncFsBtn();
+      // Panels transition width over 260ms; wait it out so the stage size
+      // reflects the open layout, then apply the tight fit for HH-HHC-0028.
+      // If the image hasn't loaded yet, the flag stays live and showFull
+      // applies the fit when it arrives.
+      setTimeout(maybeApplyBootFitTight, 280);
     });
     document.getElementById("rec-info").addEventListener("click", toggleInfoPane);
     document.getElementById("info-pane-close").addEventListener("click", closeInfoPane);
@@ -4795,9 +4831,11 @@ WHERE {
         ? urlId
         : defaultItem?.id;
       // Splash-entry-only one-shot: when HH-HHC-0028 is the default landing
-      // item (no ?id= deep-link), show it at native 1:1 instead of fit. The
-      // flag is consumed by renderImage when the full image arrives.
-      if (target === "HH-HHC-0028" && !urlId) state.boot1to1 = true;
+      // item (no ?id= deep-link), fit it tightly to the stage (no padding)
+      // once both side panels are expanded. The flag is consumed by
+      // maybeApplyBootFitTight from either the Continue click (post panel
+      // transition) or the image-load showFull, whichever comes second.
+      if (target === "HH-HHC-0028" && !urlId) state.bootFitTight = true;
       if (target) selectItem(target, { scrollIntoView: true, tap: !!urlId });
 
     } catch (err) {
