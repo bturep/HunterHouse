@@ -1627,7 +1627,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.38";
+  const VERSION      = "v1.06-test.39";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4266,10 +4266,21 @@ WHERE {
 
     // Version displays
     document.getElementById("mob-about-ver").textContent = VERSION_DISPLAY;
-    document.getElementById("topright").textContent = VERSION_DISPLAY;
     document.getElementById("ap-ver").textContent = VERSION_DISPLAY;
     const mvBtn = document.getElementById("mobile-version");
     if (mvBtn) mvBtn.textContent = "HHFA " + VERSION_DISPLAY;
+    // Topright version: shown only on staging (where -test in VERSION acts
+    // as the "iterating" signal). On live (VERSION without -test) the
+    // topright is hidden — the about pane carries it at the appropriate
+    // scale, no need for a second always-visible display. Auto-applies at
+    // promotion: when v1.06 lands in browse.html with VERSION="v1.06.00",
+    // the -test test is false and topright hides without manual change.
+    const tr = document.getElementById("topright");
+    if (/-test/.test(VERSION)) {
+      tr.textContent = VERSION_DISPLAY;
+    } else {
+      tr.style.display = "none";
+    }
     // markid: desktop → about pane, mobile → mob-about
     document.querySelector(".markid").addEventListener("click", e => {
       e.preventDefault();
