@@ -1691,7 +1691,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06.14";
+  const VERSION      = "v1.06.15";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2043,6 +2043,42 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         } catch (err) { hhToast("Save failed: " + err.message, "err"); }
       };
       yi.addEventListener("keydown", e => {
+        if (e.key === "Enter")  { e.preventDefault(); save(); }
+        if (e.key === "Escape") { e.preventDefault(); closeFieldPicker(); }
+      });
+      setTimeout(() => document.addEventListener("mousedown", _popOutside, true), 0);
+      return;
+    }
+
+    // String fields (Medium, Physical location, Set position, Scale,
+    // Drawing use): a plain text input — Enter saves via setStringClaim,
+    // blank value clears the claim.
+    if (btn.dataset.kind === "string") {
+      const pop = document.createElement("div");
+      pop.className = "hh-pop"; pop.id = "hh-pop";
+      const cur0 = item[key] || "";
+      pop.innerHTML = `<input type="text" placeholder="${escapeHTML(dt)}…" value="${escapeHTML(cur0)}" autocomplete="off" spellcheck="false">
+        <div class="hh-pop-msg">↵ save · blank ↵ clears · Esc</div>`;
+      document.body.appendChild(pop);
+      const rr = btn.getBoundingClientRect();
+      pop.style.top  = Math.min(rr.bottom + 6, window.innerHeight - 90) + "px";
+      pop.style.left = Math.min(rr.left, window.innerWidth - 256) + "px";
+      const inp = pop.querySelector("input");
+      inp.focus(); inp.select();
+      const save = async () => {
+        const v = inp.value.trim();
+        if (v === cur0.trim()) return closeFieldPicker();
+        closeFieldPicker();
+        hhToast("saving " + dt + "…");
+        try {
+          await setStringClaim(item.qid, pid, v);
+          item[key] = v || null;
+          const m = state.items.find(i => i.qid === item.qid); if (m) m[key] = v || null;
+          renderMeta(item);
+          hhToast(v ? `Saved · ${dt} → ${v}` : `Cleared · ${dt}`, "ok");
+        } catch (err) { hhToast("Save failed: " + err.message, "err"); }
+      };
+      inp.addEventListener("keydown", e => {
         if (e.key === "Enter")  { e.preventDefault(); save(); }
         if (e.key === "Escape") { e.preventDefault(); closeFieldPicker(); }
       });
@@ -2874,6 +2910,8 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
           builtBy:          [],   // multi: accumulated below
           designedBy:       r.designedByLabel?.value || null,
           use:              r.use?.value || null,
+          scale:            r.scale?.value || null,
+          medium:           r.medium?.value || null,
           builtStatus:      r.builtStatusLabel?.value || null,
           setPosition:      r.setPos?.value || null,
           notes:            r.notes?.value || null,
@@ -2951,7 +2989,7 @@ SELECT ?item ?archId ?label ?img ?master
        ?creator ?creatorLabel
        ?builtBy ?builtByLabel
        ?designedBy ?designedByLabel
-       ?use
+       ?use ?scale ?medium
        ?builtStatus ?builtStatusLabel
        ?setPos ?notes
        ?rights ?rightsLabel
@@ -2977,6 +3015,8 @@ WHERE {
   OPTIONAL { ?item wdt:P140 ?builtBy . ?builtBy rdfs:label ?builtByLabel . FILTER(LANG(?builtByLabel)="en") }
   OPTIONAL { ?item wdt:P141 ?designedBy . ?designedBy rdfs:label ?designedByLabel . FILTER(LANG(?designedByLabel)="en") }
   OPTIONAL { ?item wdt:P89 ?use }
+  OPTIONAL { ?item wdt:P90 ?scale }
+  OPTIONAL { ?item wdt:P91 ?medium }
   OPTIONAL { ?item wdt:P92 ?builtStatus . ?builtStatus rdfs:label ?builtStatusLabel . FILTER(LANG(?builtStatusLabel)="en") }
   OPTIONAL { ?item wdt:P86 ?setPos }
   OPTIONAL { ?item wdt:P100 ?notes }
@@ -3639,8 +3679,10 @@ WHERE {
     if (item.id)          descRows.push(["Item",    displayId(item.id)]);
     if (item.date || adminEdit) descRows.push(["Date", item.date ? escapeHTML(item.date) : EM]);
     if (item.phase || adminEdit) {
-      const pos = item.setPosition ? ` <span style="color:var(--muted);font-family:var(--mono);font-size:10px;margin-left:4px">${escapeHTML(item.setPosition)}</span>` : "";
-      descRows.push(["Phase", item.phase ? escapeHTML(item.phase) + pos : EM]);
+      descRows.push(["Phase", item.phase ? escapeHTML(item.phase) : EM]);
+    }
+    if (item.setPosition || adminEdit) {
+      descRows.push(["Sheet", item.setPosition ? escapeHTML(item.setPosition) : EM]);
     }
     if (areasHtml || adminEdit) descRows.push(["Areas", areasHtml || EM]);
     if (categoriesHtml || adminEdit) descRows.push(["Category", categoriesHtml || EM]);
@@ -3663,13 +3705,18 @@ WHERE {
         ? `<button class="pill builtstatus-pill ${pillCls(PC.moss)}${bsActive}" data-builtstatus="${escapeHTML(item.builtStatus)}">${escapeHTML(item.builtStatus)}</button>`
         : EM]);
     }
-    if (item.creator) {
-      const cActive = state.filterCreator.has(item.creator) ? " active" : "";
-      descRows.push([creatorLabel(item.itemType), `<button class="pill creator-pill ${pillCls(PC.clay)}${cActive}" data-creator="${escapeHTML(item.creator)}">${escapeHTML(item.creator)}</button>`]);
+    const creatorRowLabel = creatorLabel(item.itemType);
+    if (item.creator || adminEdit) {
+      const cActive = item.creator && state.filterCreator.has(item.creator) ? " active" : "";
+      descRows.push([creatorRowLabel, item.creator
+        ? `<button class="pill creator-pill ${pillCls(PC.clay)}${cActive}" data-creator="${escapeHTML(item.creator)}">${escapeHTML(item.creator)}</button>`
+        : EM]);
     }
-    if (item.designedBy) {
-      const cActive = state.filterCreator.has(item.designedBy) ? " active" : "";
-      descRows.push(["Designed by", `<button class="pill creator-pill ${pillCls(PC.clay)}${cActive}" data-creator="${escapeHTML(item.designedBy)}">${escapeHTML(item.designedBy)}</button>`]);
+    if (item.designedBy || adminEdit) {
+      const cActive = item.designedBy && state.filterCreator.has(item.designedBy) ? " active" : "";
+      descRows.push(["Designed by", item.designedBy
+        ? `<button class="pill creator-pill ${pillCls(PC.clay)}${cActive}" data-creator="${escapeHTML(item.designedBy)}">${escapeHTML(item.designedBy)}</button>`
+        : EM]);
     }
     if (item.builtBy?.length || adminEdit) {
       const html = (item.builtBy || []).map(b => {
@@ -3678,13 +3725,18 @@ WHERE {
       }).join("");
       descRows.push(["Built by", html || EM]);
     }
+    if (item.medium || adminEdit) descRows.push(["Medium", item.medium ? escapeHTML(item.medium) : EM]);
+    if (item.scale  || adminEdit) descRows.push(["Scale",  item.scale  ? escapeHTML(item.scale)  : EM]);
+    if (item.use    || adminEdit) descRows.push(["Use",    item.use    ? escapeHTML(item.use)    : EM]);
     const coll = collectionOf(item);
     if (coll)             descRows.push(["Held by", `<span class="pill collection-pill ${pillCls(PC.denim)}">${escapeHTML(archiveAbbrev(coll))}</span>`]);
 
     const archRows = [];
-    if (item.location) {
-      const crumbs = item.location.split(/,\s*/).map(escapeHTML).join(" › ");
-      archRows.push(["Location", `<span class="location-path">${crumbs}</span>`]);
+    if (item.location || adminEdit) {
+      const crumbs = item.location
+        ? item.location.split(/,\s*/).map(escapeHTML).join(" › ")
+        : EM;
+      archRows.push(["Location", item.location ? `<span class="location-path">${crumbs}</span>` : EM]);
     }
     if (item.rights) {
       const abbrev = archiveAbbrev(coll);
@@ -3696,21 +3748,32 @@ WHERE {
     if (item.archiveLink) archRows.push(["Finding aid", `<a href="${escapeHTML(item.archiveLink)}" target="_blank" rel="noopener">${archiveLinkLabel(coll)}</a>`]);
 
     const EDITABLE = canEditWikibase() ? {
-      "Date":         { pid: "P82", key: "date"        },
-      "Phase":        { pid: "P62", key: "phase"       },
-      "Item type":    { pid: "P1",  key: "itemType"    },
-      "Drawing type": { pid: "P88", key: "drawTypes",  multi: true },
-      "Built":        { pid: "P92", key: "builtStatus" },
-      "Areas":        { pid: "P87", key: "areas",      multi: true },
-      "Category":     { pid: "P145", key: "categories", multi: true },
-      "Built by":     { pid: "P140", key: "builtBy",   multi: true },
+      "Date":          { pid: "P82",  key: "date"        },
+      "Phase":         { pid: "P62",  key: "phase"       },
+      "Sheet":         { pid: "P86",  key: "setPosition", kind: "string" },
+      "Item type":     { pid: "P1",   key: "itemType"    },
+      "Drawing type":  { pid: "P88",  key: "drawTypes",  multi: true },
+      "Built":         { pid: "P92",  key: "builtStatus" },
+      "Areas":         { pid: "P87",  key: "areas",       multi: true },
+      "Category":      { pid: "P145", key: "categories",  multi: true },
+      "Built by":      { pid: "P140", key: "builtBy",     multi: true },
+      "Designed by":   { pid: "P141", key: "designedBy"  },
+      [creatorRowLabel]: { pid: "P80", key: "creator"    },
+      "Medium":        { pid: "P91",  key: "medium",      kind: "string" },
+      "Scale":         { pid: "P90",  key: "scale",       kind: "string" },
+      "Use":           { pid: "P89",  key: "use",         kind: "string" },
+      "Location":      { pid: "P142", key: "location",    kind: "string" },
     } : {};
     const descHTML = descRows.map(([k,v]) => {
       const e = EDITABLE[k];
-      const btn = e ? ` <button class="hh-fedit" data-pid="${e.pid}" data-key="${e.key}" data-dt="${escapeHTML(k)}"${e.multi ? ' data-multi="1"' : ''} title="Edit ${escapeHTML(k)} (admin)" aria-label="Edit ${escapeHTML(k)}">✎</button>` : "";
+      const btn = e ? ` <button class="hh-fedit" data-pid="${e.pid}" data-key="${e.key}" data-dt="${escapeHTML(k)}"${e.multi ? ' data-multi="1"' : ''}${e.kind ? ` data-kind="${e.kind}"` : ''} title="Edit ${escapeHTML(k)} (admin)" aria-label="Edit ${escapeHTML(k)}">✎</button>` : "";
       return `<div class="row"><dt>${k}</dt><dd>${v}${btn}</dd></div>`;
     }).join("");
-    const archHTML = archRows.map(([k,v]) => `<div class="row"><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+    const archHTML = archRows.map(([k,v]) => {
+      const e = EDITABLE[k];
+      const btn = e ? ` <button class="hh-fedit" data-pid="${e.pid}" data-key="${e.key}" data-dt="${escapeHTML(k)}"${e.multi ? ' data-multi="1"' : ''}${e.kind ? ` data-kind="${e.kind}"` : ''} title="Edit ${escapeHTML(k)} (admin)" aria-label="Edit ${escapeHTML(k)}">✎</button>` : "";
+      return `<div class="row"><dt>${k}</dt><dd>${v}${btn}</dd></div>`;
+    }).join("");
 
     const phaseLabel = item.phase || null;
     const workLabel  = "Hunter Residence";
