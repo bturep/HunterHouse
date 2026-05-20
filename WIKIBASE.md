@@ -133,6 +133,7 @@ For **bulk changes to many items at once**: use a SPARQL query to get the QIDs f
 | Q111 | land survey |
 | Q112 | survey |
 | Q113 | construction (drawing type — check) |
+| Q493 | axonometric |
 
 ### Built status (P92)
 
@@ -152,7 +153,7 @@ For **bulk changes to many items at once**: use a SPARQL query to get the QIDs f
 | Q180 | HHC | Hunter House Collection | Hunter House Foundation | 110 |
 | Q178 | CAA | Canadian Architectural Archives | University of Calgary | 18 |
 | Q184 | FUL | John Fulker Collection | West Vancouver Museum | 9 |
-| Q182 | GES | Eric Gessinger Collection | Eric Gessinger | pending |
+| Q182 | EGC | Eric Gesinger Collection | Eric Gesinger | 30 (drawings; photos pending) |
 | Q181 | FRH | Frances Hunter Collection | Frances Hunter | pending |
 | Q183 | IVH | Ivan Hunter Collection | Ivan Hunter | pending |
 
@@ -185,6 +186,15 @@ These are the QIDs for project sets that items belong to.
 | Q278 | 2009 East Wing Kitchen Counter |
 | Q279 | 2010 East Wing Dining Room Design |
 | Q281 | 2015 Veranda Roof Set |
+| Q494 | Channel Chair and Ottoman (EGC) |
+| Q495 | Dining Room Table and Chairs (EGC) |
+| Q496 | Living Room Double Seats (EGC) |
+| Q497 | Living Room Side Table (EGC) |
+| Q498 | Living Room Sketches (EGC) |
+| Q499 | Orphan (EGC) |
+| Q500 | Owl Chairs and Table (EGC) |
+| Q501 | Saanich Chair and La Table Francoise (EGC) |
+| Q502 | Studio Table (EGC) |
 
 *To add a new project set: create a new item with `instance of` → `Q2` (architectural phase).*
 
@@ -199,7 +209,7 @@ These are the QIDs for project sets that items belong to.
 | Q205 | Floyd Marinescu |
 | Q206 | Olivia Jol |
 | Q207 | Brandon Poole |
-| Q209 | Eric Gessinger |
+| Q209 | Eric Gesinger |
 
 ### Key works / buildings
 

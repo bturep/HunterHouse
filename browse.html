@@ -1663,7 +1663,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06.05";
+  const VERSION      = "v1.06.07";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -1828,14 +1828,14 @@
   //   P1  (item type) → only classes used by real archive items (~6 media types)
   //   P62 (phase)     → the phase items themselves (~38)
   //   default         → values already in use for that property
-  const ARCHIVE_PFX = '("HH-HHC-","HH-CAA-","HH-FUL-","HH-GES-","HH-FRH-","HH-IVH-")';
+  const ARCHIVE_PFX = '("HH-HHC-","HH-CAA-","HH-FUL-","HH-EGC-","HH-FRH-","HH-IVH-")';
   function vocabQuery(pid) {
     const P = `PREFIX wdt: <https://hunterhouse.wikibase.cloud/prop/direct/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 `;
     if (pid === "P1")
       return P + `SELECT DISTINCT ?v ?l WHERE { ?i wdt:P2 ?id .
-        FILTER(STRSTARTS(?id,"HH-HHC-")||STRSTARTS(?id,"HH-CAA-")||STRSTARTS(?id,"HH-FUL-")||STRSTARTS(?id,"HH-GES-")||STRSTARTS(?id,"HH-FRH-")||STRSTARTS(?id,"HH-IVH-"))
+        FILTER(STRSTARTS(?id,"HH-HHC-")||STRSTARTS(?id,"HH-CAA-")||STRSTARTS(?id,"HH-FUL-")||STRSTARTS(?id,"HH-EGC-")||STRSTARTS(?id,"HH-FRH-")||STRSTARTS(?id,"HH-IVH-"))
         ?i wdt:P1 ?v . ?v rdfs:label ?l . FILTER(LANG(?l)="en") } ORDER BY ?l`;
     if (pid === "P62")
       return P + `SELECT ?v ?l WHERE { ?v wdt:P2 ?id . FILTER(STRSTARTS(?id,"HH-PH-")) .
@@ -2506,6 +2506,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     "hunter house":               "HHC",
     "canadian architectural":     "CAA",
     "fulker":                     "FUL",
+    "eric gesinger":              "EGC",
   };
   function archiveAbbrev(label) {
     const lb = (label || "").toLowerCase();
@@ -2576,6 +2577,9 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     }
     if (item.areas?.length) {
       descRows.push(["Areas", item.areas.map(a => pill(`area-pill ${pillCls(PC.sage)}`, a)).join("")]);
+    }
+    if (item.categories?.length) {
+      descRows.push(["Category", item.categories.map(c => pill(`category-pill ${pillCls(PC.indigo)}`, c)).join("")]);
     }
     if (item.itemType) {
       descRows.push(["Item type", pill(`type-pill ${pillCls(itemTypePillColor())}`, item.itemType)]);
@@ -2800,6 +2804,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
           phase:            r.phaseLabel?.value || r.phase2Label?.value || null,
           phaseQID:         r.phase?.value?.split("/").pop() || r.phase2?.value?.split("/").pop() || null,
           areas:            [],
+          categories:       [],
           drawTypes:        [],
           itemType:         r.itypeLabel?.value || null,
           sourceCollection: r.srcLabel?.value || null,
@@ -2821,6 +2826,8 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       const it = map.get(qid);
       if (r.areaLabel?.value && !it.areas.includes(r.areaLabel.value))
         it.areas.push(r.areaLabel.value);
+      if (r.categoryLabel?.value && !it.categories.includes(r.categoryLabel.value))
+        it.categories.push(r.categoryLabel.value);
       if (r.drawTypeLabel?.value && !it.drawTypes.includes(r.drawTypeLabel.value))
         it.drawTypes.push(r.drawTypeLabel.value);
     }
@@ -2874,6 +2881,7 @@ SELECT ?item ?archId ?label ?img ?master
        ?phase ?phaseLabel ?phase2 ?phase2Label
        ?drawType ?drawTypeLabel
        ?area ?areaLabel
+       ?category ?categoryLabel
        ?itype ?itypeLabel
        ?src ?srcLabel
        ?creator ?creatorLabel
@@ -2897,6 +2905,7 @@ WHERE {
   OPTIONAL { ?item wdt:P84 ?phase2 . ?phase2 rdfs:label ?phase2Label . FILTER(LANG(?phase2Label)="en") }
   OPTIONAL { ?item wdt:P88 ?drawType . ?drawType rdfs:label ?drawTypeLabel . FILTER(LANG(?drawTypeLabel)="en") }
   OPTIONAL { ?item wdt:P87 ?area . ?area rdfs:label ?areaLabel . FILTER(LANG(?areaLabel)="en") }
+  OPTIONAL { ?item wdt:P145 ?category . ?category rdfs:label ?categoryLabel . FILTER(LANG(?categoryLabel)="en") }
   OPTIONAL { ?item wdt:P1 ?itype . ?itype rdfs:label ?itypeLabel . FILTER(LANG(?itypeLabel)="en") }
   ?item wdt:P79 ?src .   # required: only items belonging to a source collection (excludes vocab/people/institutions that happen to carry a P2)
   OPTIONAL { ?src rdfs:label ?srcLabel . FILTER(LANG(?srcLabel)="en") }
@@ -3553,6 +3562,10 @@ WHERE {
       `<button class="pill area-pill ${pillCls(PC.sage)}${state.filterArea.has(a) ? " active" : ""}" data-area="${escapeHTML(a)}">${escapeHTML(a)}</button>`
     ).join("");
 
+    const categoriesHtml = (item.categories || []).map(c =>
+      `<span class="pill category-pill ${pillCls(PC.indigo)}">${escapeHTML(c)}</span>`
+    ).join("");
+
     const adminEdit = canEditWikibase();
     const EM = '<span class="hh-empty">—</span>';
     const descRows = [];
@@ -3563,6 +3576,7 @@ WHERE {
       descRows.push(["Phase", item.phase ? escapeHTML(item.phase) + pos : EM]);
     }
     if (areasHtml || adminEdit) descRows.push(["Areas", areasHtml || EM]);
+    if (categoriesHtml) descRows.push(["Category", categoriesHtml]);
     if (item.itemType || adminEdit) {
       const isActive = state.filterType.has(item.itemType);
       descRows.push(["Item type", item.itemType
