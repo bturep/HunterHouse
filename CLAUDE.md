@@ -77,6 +77,10 @@ Brandon needs a free Wikimedia account — takes 2 minutes at `wikidata.org/wiki
 
 ---
 
+**Cyan-cast JPEGs — DIAGNOSED, fix pending.** Every preview/thumb/large JPEG in the archive carries an embedded **`kip2300-v6-` ICC profile (435 KB)** — the KIP 2300 large-format scanner's *output* profile, not sRGB. Browsers honor it and produce a strong cyan/light-blue cast on all images. Confirmed by Pillow inspection of `HH-HHC-0035`'s prev.jpg. Side-by-side on Brandon's Desktop (5/19 ~6:55pm): `HHC-0035_AS-IS_(scanner-profile).jpg` vs `HHC-0035_FIXED_(sRGB).jpg` — converting via `ImageCms.profileToProfile(im, src_profile, sRGB, intent=PERCEPTUAL)` and saving with the small sRGB profile produces correct near-white paper. **Fix plan:** `scripts/recolor_previews.py` — list all R2 `thumbs/`, `previews/`, `large/` JPEGs (~145 items × 3 tiers ≈ 435 files), download, transform in-memory, re-upload. Doesn't need the masters refetched (preview JPEGs already carry the profile). Also patch `regen_previews.py` to add `sips -m /System/Library/ColorSync/Profiles/sRGB Profile.icc` for future runs so this can't recur. ~20–40 min upload depending on bandwidth. Pending Brandon's go-ahead after eyeballing the Desktop comparison.
+
+---
+
 ## Memory protocol
 
 1. **On load** — read this file before doing anything else.
