@@ -1663,13 +1663,23 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06.04";
+  const VERSION      = "v1.06.05";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
   const VERSION_DISPLAY = /-test/.test(VERSION)
     ? VERSION
     : VERSION.replace(/^(v\d+\.\d+).*$/, "$1");
+  // Paint the version text immediately on script parse. The script tag is at
+  // the end of body so the elements exist; running this synchronously here
+  // (rather than inside wireControls, which fires after the SPARQL fetch
+  // awaits) means no late "drop-in" + layout shift on first paint.
+  {
+    const apv = document.getElementById("ap-ver");
+    const mav = document.getElementById("mob-about-ver");
+    if (apv) apv.textContent = VERSION_DISPLAY;
+    if (mav) mav.textContent = VERSION_DISPLAY;
+  }
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
   const API_URL      = WIKIBASE_URL + "/w/api.php";
@@ -4364,9 +4374,10 @@ WHERE {
       }
     }
 
-    // Version displays
-    document.getElementById("mob-about-ver").textContent = VERSION_DISPLAY;
-    document.getElementById("ap-ver").textContent = VERSION_DISPLAY;
+    // Version displays (ap-ver / mob-about-ver are already painted at script
+    // parse time — see the block right after VERSION_DISPLAY — so no late
+    // drop-in. The HHFA button label is static now and could move there too,
+    // but it doesn't shift layout so leaving it here is harmless.)
     const mvBtn = document.getElementById("mobile-version");
     if (mvBtn) mvBtn.textContent = "HHFA";   // version lives only inside the HHFA card
     // Topright version: TEMPORARILY hidden on staging too — Brandon
