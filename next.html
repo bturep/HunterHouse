@@ -166,11 +166,13 @@
   .cur-link{font-family:var(--mono);font-size:11px;color:var(--copper-deep);
     text-decoration:none;border-bottom:1px solid var(--copper-pale)}
   .cur-link:hover{border-bottom-color:var(--copper-deep)}
-  .cur-actions{display:flex;gap:18px;align-items:center;margin-top:28px}
-  .cur-continue{font-family:var(--mono);font-size:11px;font-weight:600;
-    letter-spacing:0.06em;color:var(--bg);background:var(--ink);
-    border:0;cursor:pointer;padding:9px 16px}
-  .cur-continue:hover{background:var(--copper-deep)}
+  .cur-actions{display:flex;gap:20px;align-items:center;margin-top:28px}
+  .cur-continue{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;
+    color:var(--ink);background:none;border:0;cursor:pointer;padding:0;
+    transition:color .12s}
+  .cur-continue::before{content:"[ ";color:var(--hint);opacity:.55}
+  .cur-continue::after{content:" ]";color:var(--hint);opacity:.55}
+  .cur-continue:hover{color:var(--copper-deep)}
   .cur-cancel{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;
     text-transform:uppercase;color:var(--hint);background:none;border:0;cursor:pointer}
   .cur-cancel:hover{color:var(--ink)}
@@ -1594,7 +1596,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.27";
+  const VERSION      = "v1.06-test.28";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
