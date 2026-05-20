@@ -1691,7 +1691,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06.12";
+  const VERSION      = "v1.06.13";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3638,7 +3638,7 @@ WHERE {
       descRows.push(["Phase", item.phase ? escapeHTML(item.phase) + pos : EM]);
     }
     if (areasHtml || adminEdit) descRows.push(["Areas", areasHtml || EM]);
-    if (categoriesHtml) descRows.push(["Category", categoriesHtml]);
+    if (categoriesHtml || adminEdit) descRows.push(["Category", categoriesHtml || EM]);
     if (item.itemType || adminEdit) {
       const isActive = state.filterType.has(item.itemType);
       descRows.push(["Item type", item.itemType
@@ -3694,6 +3694,7 @@ WHERE {
       "Drawing type": { pid: "P88", key: "drawTypes",  multi: true },
       "Built":        { pid: "P92", key: "builtStatus" },
       "Areas":        { pid: "P87", key: "areas",      multi: true },
+      "Category":     { pid: "P145", key: "categories", multi: true },
     } : {};
     const descHTML = descRows.map(([k,v]) => {
       const e = EDITABLE[k];
