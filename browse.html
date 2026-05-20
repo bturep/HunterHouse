@@ -198,6 +198,12 @@
   #pdf-view:hover,#pdf-close:hover{color:var(--ink)}
   #pdf-close{font-size:13px}
 
+  /* Hunter accent — applied to Richard Morrow Hunter in the HHFA pane.
+     Uses var(--red), the shared "Hunter accent" token also used by .pc-red
+     curator chips and .cur-name-c, so the colour stays consistent everywhere
+     a Hunter-name is highlighted across the site. */
+  .c-hunter{color:var(--red)}
+
   /* "Read publication (PDF)" affordance — bracket style, desktop + mobile */
   .pub-read{
     display:block;width:100%;box-sizing:border-box;
@@ -1479,7 +1485,7 @@
     <p class="ap-title">Hunter House<br>Foundation Archive</p>
     <p class="ap-ver" id="mob-about-ver"></p>
     <div class="ap-section">
-      <p class="ap-body">A foundation dedicated to the stewardship of the residence and architectural archive of architect Richard Morrow Hunter (1930–2023).</p>
+      <p class="ap-body">A foundation dedicated to the stewardship of the residence and architectural archive of architect <span class="c-hunter">Richard Morrow Hunter</span> (1930–2023).</p>
       <p class="ap-body ap-addr">203 Goward Road, Saanich, British Columbia</p>
     </div>
     <div class="ap-section">
@@ -1538,7 +1544,7 @@
         <p class="ap-title">Hunter House<br>Foundation Archive</p>
         <p class="ap-ver" id="ap-ver"></p>
         <div class="ap-section">
-          <p class="ap-body">A foundation dedicated to the stewardship of the residence and architectural archive of architect Richard Morrow Hunter (1930–2023).</p>
+          <p class="ap-body">A foundation dedicated to the stewardship of the residence and architectural archive of architect <span class="c-hunter">Richard Morrow Hunter</span> (1930–2023).</p>
           <p class="ap-body ap-addr">203 Goward Road, Saanich, British Columbia</p>
         </div>
         <div class="ap-section">
@@ -1657,7 +1663,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06.03";
+  const VERSION      = "v1.06.04";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4462,6 +4468,11 @@ WHERE {
     // Splash mode lives until either close path runs — desktop's closeAboutPane
     // mirror. Clears the × ↔ Continue swap so subsequent HHFA opens get ×.
     document.body.classList.remove("hh-splash");
+    // After dismissing the HHFA splash, the visitor lands on the full list —
+    // never on the bottom sheet. Mobile is deliberately different from desktop
+    // (desktop expands both side panels; mobile shows just the list, sheet
+    // closed until the visitor taps a row).
+    mobHideSheet();
   }
 
   // ── About pane ────────────────────────────────────────────────────────────
