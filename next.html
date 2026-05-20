@@ -1709,7 +1709,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.51";
+  const VERSION      = "v1.06-test.52";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3327,6 +3327,10 @@ WHERE {
         zoomState.tx = 0; zoomState.ty = 0;
         currentImg = fullImg;
         applyTransform(); updateZoomUI();
+        // Splash-entry one-shot: HH-HHC-0028 lands at 1:1 (native pixel scale)
+        // rather than fit. setZoom(1) clamps to fitScale*8, which is well above
+        // 1 for the large drawing scans, so this lands at true 1:1.
+        if (state.boot1to1) { state.boot1to1 = false; setZoom(1); }
 
         // Fade in full, then remove thumb
         requestAnimationFrame(() => {
@@ -3344,6 +3348,7 @@ WHERE {
         currentImg = fullImg;
         canvas.appendChild(fullImg);
         fitToFrame();
+        if (state.boot1to1) { state.boot1to1 = false; setZoom(1); }
       }
       canvas.classList.remove("no-zoom");
     }
@@ -4789,6 +4794,10 @@ WHERE {
       const target = urlId && state.filtered.find(i => i.id === urlId)
         ? urlId
         : defaultItem?.id;
+      // Splash-entry-only one-shot: when HH-HHC-0028 is the default landing
+      // item (no ?id= deep-link), show it at native 1:1 instead of fit. The
+      // flag is consumed by renderImage when the full image arrives.
+      if (target === "HH-HHC-0028" && !urlId) state.boot1to1 = true;
       if (target) selectItem(target, { scrollIntoView: true, tap: !!urlId });
 
     } catch (err) {
