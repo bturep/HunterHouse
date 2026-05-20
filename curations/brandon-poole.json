@@ -1,15 +1,15 @@
 {
-  "_note": "Curator bio + url filled in 2026-05-19. Still PLACEHOLDER: title, intro, items + per-item notes — Brandon will fill those next. Swap-in needs no rebuild.",
+  "_note": "TESTING SWAP (2026-05-19): curator displayed as Robert Youds while we verify the curator-name treatment across all four surfaces (chip / threshold byline / curation-card / right-pane curator's-note label). File + slug remain 'brandon-poole' — internal only. Swap back (or rename file + slug to 'robert-youds') when Brandon's bio returns. Still PLACEHOLDER: title, intro, items + per-item notes.",
   "slug": "brandon-poole",
   "title": "PLACEHOLDER — A working selection",
   "curator": {
-    "name": "Brandon Poole",
-    "role": "PhD Candidate",
-    "affiliation": "McGill University School of Architecture",
+    "name": "Robert Youds",
+    "role": "Artist",
+    "affiliation": "Victoria, BC",
     "qid": null,
-    "bio": "Brandon Poole is an artist, filmmaker, architectural designer, and PhD Candidate at McGill University's School of Architecture, where he is a Vadasz Scholar and SSHRC Doctoral Fellow. With a background in journalism and philosophy, his practice and research examine the entwined histories and speculative futures of architecture, simulation, and the image, while his films document the folkloric and vernacular constructions of place. He holds a Master of Visual Studies from the University of Toronto and a Bachelor of Fine Arts (Honours, with Distinction) from the University of Victoria. His work has been exhibited at Dazibao (Montreal), the University of Toronto Art Museum, the Toronto Biennial, Polygon Gallery (Vancouver), and Deluge Contemporary Art (Victoria, BC). His films have screened at IMAGES (Toronto), EXiS (Seoul), Mimesis (US), non_syntax (Tokyo/Taipei), Antimatter (Victoria), and Iowa City Docs, among others. He is a Lecturer in the Visual Arts department at the University of Victoria. For more information, please contact.",
-    "url": "https://www.brandonpoole.net",
-    "url_label": "brandonpoole.net"
+    "bio": "PLACEHOLDER bio for testing the curator-name rendering. Robert Youds is a Victoria-based artist whose practice has long engaged the built environment of the Pacific Northwest. This placeholder text exists so the name-highlight (.cur-name-c → var(--red)) has something to wrap inside the bio paragraph — the real Robert Youds bio is not yet supplied. For more information, please contact.",
+    "url": "https://example.org",
+    "url_label": "placeholder.example"
   },
   "updated": "2026-05-19",
   "intro": "PLACEHOLDER — the macro framing of this selection. This is the curatorial argument that sits on the card above the list: what binds these items, what you want a viewer to notice, the through-line. One or two short paragraphs.",
