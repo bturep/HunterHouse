@@ -28,6 +28,7 @@ PORT  = 8731
 ALLOWED_ACTIONS = {
     "wbsetlabel", "wbsetdescription", "wbsetaliases",
     "wbcreateclaim", "wbsetclaim", "wbremoveclaims",
+    "wbeditentity",   # admins can mint new vocab/person items via the picker (mint-new affordance)
 }
 # Origins allowed to call this proxy from the browser.
 ALLOWED_ORIGINS = ("https://bturep.github.io", "http://localhost", "http://127.0.0.1")
