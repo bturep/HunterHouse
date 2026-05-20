@@ -1595,7 +1595,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.31";
+  const VERSION      = "v1.06-test.32";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2979,7 +2979,7 @@ WHERE {
     card.hidden = false;
     card.innerHTML = `
       <div class="cc-top">
-        <span class="cc-curator">Curated by ${escapeHTML(cu.name || c.curator || "an invited curator")}</span>
+        <span class="cc-curator">Curated by <span class="cur-name-c">${escapeHTML(cu.name || c.curator || "an invited curator")}</span></span>
         <button class="cc-exit" id="cc-exit" title="Leave this curation">exit</button>
       </div>
       ${c.title ? `<p class="cc-title">${escapeHTML(c.title)}</p>` : ""}
