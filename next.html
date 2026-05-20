@@ -665,6 +665,7 @@
   button.builtstatus-pill:hover,button.builtstatus-pill.active,
   button.collection-pill:hover,button.collection-pill.active{background:none;opacity:0.6}
   button.type-pill{height:auto;padding:0;align-items:center;gap:0}
+  .type-pill{text-transform:capitalize}  /* Wikibase labels are lowercase by convention; display Capital-case */
   .archid-mono{font-family:var(--mono);font-size:11px;color:var(--red);background:var(--red-pale);padding:1.5px 7px;letter-spacing:0.04em;white-space:nowrap}
   .rights-note{display:block;font-size:10.5px;color:var(--muted);margin-top:3px;font-style:italic}
   .location-path{font-family:var(--mono);font-size:11px;letter-spacing:0.02em;color:var(--ink)}
@@ -1599,7 +1600,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.18";
+  const VERSION      = "v1.06-test.19";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
