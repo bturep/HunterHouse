@@ -108,13 +108,21 @@ html, body, #outerContainer, #viewerContainer, #mainContainer {
 }
 
 /* ── Zoom-mode dropdown ─────────────────────────────────────────────────── */
+/* Don't override background on the <select> itself — macOS Chrome/Safari
+   render the OPEN dropdown panel via the OS form-control engine and our
+   background was leaking into the option list, making text invisible.
+   Style the closed widget via inherited color; give <option>s explicit
+   colors for browsers that respect option styling (Chrome / Firefox). */
 #scaleSelect {
   font-family: var(--hh-mono) !important;
   font-size: 11px !important;
-  color: var(--hh-ink) !important;
-  background: var(--hh-soft) !important;
   border: 1px solid var(--hh-rule) !important;
   padding: 1px 4px !important;
+}
+#scaleSelect option {
+  font-family: var(--hh-mono);
+  color: var(--hh-ink);
+  background: var(--hh-soft);
 }
 #scaleSelectContainer { background: transparent !important; }
 
