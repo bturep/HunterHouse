@@ -1600,7 +1600,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.20";
+  const VERSION      = "v1.06-test.21";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2761,7 +2761,8 @@ WHERE {
   OPTIONAL { ?item wdt:P88 ?drawType . ?drawType rdfs:label ?drawTypeLabel . FILTER(LANG(?drawTypeLabel)="en") }
   OPTIONAL { ?item wdt:P87 ?area . ?area rdfs:label ?areaLabel . FILTER(LANG(?areaLabel)="en") }
   OPTIONAL { ?item wdt:P1 ?itype . ?itype rdfs:label ?itypeLabel . FILTER(LANG(?itypeLabel)="en") }
-  OPTIONAL { ?item wdt:P79 ?src . ?src rdfs:label ?srcLabel . FILTER(LANG(?srcLabel)="en") }
+  ?item wdt:P79 ?src .   # required: only items belonging to a source collection (excludes vocab/people/institutions that happen to carry a P2)
+  OPTIONAL { ?src rdfs:label ?srcLabel . FILTER(LANG(?srcLabel)="en") }
   OPTIONAL { ?item wdt:P80 ?creator . ?creator rdfs:label ?creatorLabel . FILTER(LANG(?creatorLabel)="en") }
   OPTIONAL { ?item wdt:P140 ?builtBy . ?builtBy rdfs:label ?builtByLabel . FILTER(LANG(?builtByLabel)="en") }
   OPTIONAL { ?item wdt:P141 ?designedBy . ?designedBy rdfs:label ?designedByLabel . FILTER(LANG(?designedByLabel)="en") }
