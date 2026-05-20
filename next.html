@@ -148,24 +148,19 @@
     padding:48px 40px 64px}
   html.dark #curator-pane{background:#242220}
   #curator-pane.open{display:flex}
-  .cur-heading{font-family:var(--mono);font-size:9px;letter-spacing:0.22em;
-    text-transform:uppercase;color:var(--muted);margin:0 0 18px;
-    display:flex;align-items:center;gap:14px;width:100%;max-width:560px}
-  .cur-heading::before,.cur-heading::after{content:"";flex:1;height:1px;background:var(--rule)}
-  .cur-blurb{font-family:var(--mono);font-size:10px;line-height:1.7;
-    letter-spacing:0.04em;color:var(--muted);text-transform:uppercase;
-    border-bottom:1px solid var(--rule);padding-bottom:14px;margin-bottom:22px}
-  .cur-name{font-family:var(--mono);font-size:13px;letter-spacing:0.14em;
-    text-transform:uppercase;color:var(--ink);font-weight:500;margin:0 0 2px}
-  .cur-role{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;
-    color:var(--muted);margin:0 0 18px}
-  .cur-title{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;
-    color:var(--copper-deep);margin:0 0 18px}
-  .cur-bio{font-family:var(--mono);font-size:11.5px;line-height:1.75;
-    color:var(--ink);margin:0 0 16px}
-  .cur-link{font-family:var(--mono);font-size:11px;color:var(--copper-deep);
-    text-decoration:none;border-bottom:1px solid var(--copper-pale)}
-  .cur-link:hover{border-bottom-color:var(--copper-deep)}
+  /* Curator-pane layout reuses the .ap-* typography family from #about-pane
+     (ap-title → ap-ver → ap-section/ap-section-head/ap-body → ap-rule →
+     ap-credits). Only curator-specific bits below: a corner close button
+     mirroring #about-pane-close, link-in-credits styling, and the actions row. */
+  .cur-pane-close{
+    position:absolute;top:-8px;right:0;
+    background:none;border:0;cursor:pointer;
+    font-size:18px;color:var(--hint);line-height:1;padding:4px 6px;
+  }
+  .cur-pane-close:hover{color:var(--ink)}
+  .ap-credits a{color:var(--copper-deep);text-decoration:none;
+    border-bottom:1px solid var(--copper-pale)}
+  .ap-credits a:hover{border-bottom-color:var(--copper-deep)}
   .cur-actions{display:flex;gap:20px;align-items:center;margin-top:28px}
   .cur-continue{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;
     color:var(--ink);background:none;border:0;cursor:pointer;padding:0;
@@ -1596,7 +1591,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.28";
+  const VERSION      = "v1.06-test.29";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2701,7 +2696,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   // + a macro intro, served as static JSON in /curations. Public; viewing only
   // in Phase 1 (no in-browser authoring). Everything is a no-op when no
   // curations/index.json is present.
-  const LENS_BLURB = "A curated selection is an invited path through the archive — one curator's chosen items, in their order, with their notes. Not a filter. Leave it any time to return to the full catalogue.";
+  const LENS_BLURB = "An invited path through the archive — one curator's chosen items, in their order, with their notes. Not a filter. Leave it any time to return to the full catalogue.";
   const curationCache = {};
   async function loadCurationIndex() {
     try {
@@ -2903,17 +2898,33 @@ WHERE {
     try { c = await getCuration(slug); }
     catch { hhToast("Curation unavailable", "err"); return; }
     const cu = c.curator || {};
+    // Plain <a> — the .ap-body rule styles it automatically (copper-deep w/
+    // copper-pale underline), matching every other link in the about-pane.
     const link = cu.url
-      ? `<a class="cur-link" href="${escapeHTML(cu.url)}" target="_blank" rel="noopener">${escapeHTML(cu.url_label || cu.url)} ↗</a>`
+      ? `<a href="${escapeHTML(cu.url)}" target="_blank" rel="noopener">${escapeHTML(cu.url_label || cu.url)} ↗</a>`
       : "";
+    // Layout mirrors the HHFA "Foundation Archive" pane: ap-title → ap-ver
+    // subtitle → unheaded opening blurb → headed Curator section (bio with
+    // inline link) → ap-rule → credits dl (Role/Affiliation) → actions.
+    const name  = escapeHTML(cu.name || c.curator || "an invited curator");
+    const bioHTML = cu.bio
+      ? escapeHTML(cu.bio) + (link ? ` ${link}` : "")
+      : "";
+    const creditRows =
+      (cu.role        ? `<dt>Role</dt><dd>${escapeHTML(cu.role)}</dd>` : "") +
+      (cu.affiliation ? `<dt>Affiliation</dt><dd>${escapeHTML(cu.affiliation)}</dd>` : "");
     document.getElementById("curator-pane-inner").innerHTML = `
-      <p class="cur-heading">A curated selection</p>
-      <p class="cur-blurb">${escapeHTML(LENS_BLURB)}</p>
-      <p class="cur-name">${escapeHTML(cu.name || c.curator || "an invited curator")}</p>
-      <p class="cur-role">${escapeHTML([cu.role, cu.affiliation].filter(Boolean).join(" · "))}</p>
-      ${c.title ? `<p class="cur-title">${escapeHTML(c.title)}</p>` : ""}
-      ${cu.bio ? `<p class="cur-bio">${escapeHTML(cu.bio)}</p>` : ""}
-      ${link}
+      <button id="cur-pane-close" class="cur-pane-close" aria-label="Close">×</button>
+      <p class="ap-title">A curated selection</p>
+      <p class="ap-ver">Curated by ${name}</p>
+      <div class="ap-section">
+        <p class="ap-body">${escapeHTML(LENS_BLURB)}</p>
+      </div>
+      ${bioHTML ? `<div class="ap-section">
+        <p class="ap-section-head">Curator</p>
+        <p class="ap-body">${bioHTML}</p>
+      </div>` : ""}
+      ${creditRows ? `<hr class="ap-rule"><dl class="ap-credits">${creditRows}</dl>` : ""}
       <div class="cur-actions">
         <button class="cur-continue" id="cur-continue">Enter exhibition →</button>
         <button class="cur-cancel" id="cur-cancel">cancel</button>
@@ -2921,6 +2932,7 @@ WHERE {
     curatorPane().classList.add("open");
     document.getElementById("cur-continue").addEventListener("click", () => enterCuration(c));
     document.getElementById("cur-cancel").addEventListener("click", closeCuratorPane);
+    document.getElementById("cur-pane-close").addEventListener("click", closeCuratorPane);
   }
   function closeCuratorPane() { const p = curatorPane(); if (p) p.classList.remove("open"); }
 
