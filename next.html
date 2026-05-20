@@ -139,17 +139,8 @@
   .pub-read:hover{color:var(--ink)}
 
   /* ── Curated lenses ── */
-  /* [Curated] entry — slim bar above the filter/list (mark-bar slot pattern) */
-  .curated-bar{display:flex;align-items:center;gap:10px;padding:7px 20px;
-    border-bottom:1px solid var(--rule-soft);background:var(--bg)}
-  .curated-bar[hidden]{display:none}
-  .cb-lead{font-family:var(--mono);font-size:9px;letter-spacing:0.16em;
-    text-transform:uppercase;color:var(--muted)}
-  .cb-entry{font-family:var(--mono);font-size:11px;letter-spacing:0.04em;
-    color:var(--copper-deep);background:none;border:0;cursor:pointer;padding:2px 0}
-  .cb-entry::before{content:"[ ";color:var(--hint);opacity:.55}
-  .cb-entry::after{content:" ]";color:var(--hint);opacity:.55}
-  .cb-entry:hover{color:var(--ink)}
+  /* Curator entry now lives as a row in the Browse filter panel (renderFilterPanel);
+     the chips are styled with the standard .fp-chip family. No dedicated bar. */
 
   /* Threshold overlay — gallery "title wall" (about-pane overlay pattern) */
   #curator-pane{display:none;position:absolute;inset:0;z-index:18;overflow-y:auto;
@@ -1457,7 +1448,6 @@
           <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>
         </div>
       </div>
-      <div class="curated-bar" id="curated-bar" hidden></div>
       <div class="filter-panel" id="filter-panel" hidden></div>
       <div class="mark-bar" id="mark-bar" hidden></div>
       <div class="curation-card" id="curation-card" hidden></div>
@@ -1600,7 +1590,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.21";
+  const VERSION      = "v1.06-test.22";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2897,18 +2887,9 @@ WHERE {
     el.textContent = (f < t) ? `${f} / ${t}` : `${t}`;
   }
 
-  // ── Curated lens: entry bar, threshold overlay, mode enter/exit, card, note ──
-  function renderCuratedBar() {
-    const bar = document.getElementById("curated-bar");
-    if (!bar) return;
-    if (state.curation || !state.curations.length) { bar.hidden = true; bar.innerHTML = ""; return; }
-    bar.hidden = false;
-    bar.innerHTML = `<span class="cb-lead">Curated</span>` + state.curations.map(c =>
-      `<button class="cb-entry" data-slug="${escapeHTML(c.slug)}">${escapeHTML(c.title || c.curator || c.slug)}</button>`
-    ).join("");
-    bar.querySelectorAll(".cb-entry").forEach(b =>
-      b.addEventListener("click", () => openCuratorPane(b.dataset.slug)));
-  }
+  // ── Curated lens: threshold overlay, mode enter/exit, card, note ──
+  // (The curator chooser lives as a row inside renderFilterPanel — Curated
+  //  appears in the Browse overlay above Collection.)
 
   const curatorPane = () => document.getElementById("curator-pane");
   async function openCuratorPane(slug) {
@@ -3056,7 +3037,6 @@ WHERE {
     requestAnimationFrame(() => updatePip("rows", "list-pip"));
     updateMobCount();
     renderMarkBar();      // keep the researcher bar in sync with every list render
-    renderCuratedBar();   // [Curated] entry (hidden in curation mode / when none)
     renderCurationCard(); // intro card (shown only in curation mode)
   }
 
@@ -3689,7 +3669,20 @@ WHERE {
     const hasActive = [state.filterCollection, state.filterArea,
                         state.filterType, state.filterDrawType,
                         state.filterCreator, state.filterBuiltStatus].some(s => s.size > 0);
+
+    // Curated row — visually a filter row (.fp-chip family) but the chips
+    // don't toggle a Set; clicking opens the curator threshold overlay.
+    // Hidden while inside a curation (the card's exit is the way out).
+    const curatedRow = (!state.curation && (state.curations || []).length)
+      ? `<div class="fp-group fp-grp-cur"><div class="fp-lbl">Curated</div><div class="fp-chips">${
+          state.curations.map(c =>
+            `<button class="fp-chip ${pillCls(PC.indigo)}" data-cur-slug="${escapeHTML(c.slug)}">${escapeHTML(c.curator || c.title || c.slug)}</button>`
+          ).join("")
+        }</div></div>`
+      : "";
+
     panel.innerHTML =
+      curatedRow +
       group("Collection",   uniqueCollections, state.filterCollection,  "coll",        "collection",  PC.denim) +
       group("Areas",        uniqueAreas,       state.filterArea,        "area",        "area",        PC.sage)  +
       group("Item type",    uniqueTypes,       state.filterType,        "itype",       "itype",       PC.stone) +
@@ -3728,6 +3721,14 @@ WHERE {
           if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
             selectItem(state.filtered[0].id, { scrollIntoView: false });
         });
+      });
+    });
+
+    // Curated chips — don't toggle a Set, they trigger the threshold overlay
+    panel.querySelectorAll(".fp-chip[data-cur-slug]").forEach(chip => {
+      chip.addEventListener("click", e => {
+        e.stopPropagation();
+        openCuratorPane(chip.dataset.curSlug);
       });
     });
 
