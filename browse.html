@@ -496,6 +496,35 @@
   .fp-clear:hover{color:var(--ink)}
   .fp-show{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;background:transparent;color:var(--muted);border:1px solid var(--rule);padding:4px 10px;border-radius:2px}
   .fp-show:hover{color:var(--ink);border-color:var(--ink);background:var(--soft)}
+  /* ⓘ next to each Collection chip — opens a small popover with the
+     collection's description (per-collection info lives where collections
+     live; zero weight on the record pane). */
+  .fp-info{
+    background:none;border:0;cursor:pointer;
+    color:var(--hint);font-family:var(--mono);font-size:11px;
+    padding:0 2px;margin-left:-2px;line-height:1;vertical-align:baseline;
+  }
+  .fp-info:hover,.fp-info.on{color:var(--ink)}
+  #fp-info-pop{
+    position:fixed;z-index:200;width:min(300px, calc(100vw - 32px));
+    background:var(--bg);border:1px solid var(--rule);
+    padding:14px 16px 12px;font-family:var(--mono);
+  }
+  .fpi-title{
+    font-size:10px;letter-spacing:0.18em;text-transform:uppercase;
+    color:var(--ink);font-weight:500;margin-bottom:10px;
+  }
+  .fpi-body{
+    font-size:11px;line-height:1.6;color:var(--ink);margin-bottom:12px;
+  }
+  .fpi-meta{
+    font-size:9px;letter-spacing:0.06em;color:var(--muted);
+    padding-top:8px;border-top:1px solid var(--rule);
+    display:flex;flex-direction:column;gap:3px;
+  }
+  .fpi-meta a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
+  .fpi-meta a:hover{border-bottom-color:var(--copper-deep)}
+  html.dark #fp-info-pop{background:#1f1d1a;border-color:#3a3733}
 
   .row{
     display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
@@ -1662,7 +1691,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06.10";
+  const VERSION      = "v1.06.11";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2506,6 +2535,40 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     "canadian architectural":     "CAA",
     "fulker":                     "FUL",
     "eric gesinger":              "EGC",
+  };
+  // Per-collection blurbs shown in the filter-panel ⓘ popover. Stats and
+  // counts are hand-maintained; refresh when collections grow.
+  const COLLECTION_INFO = {
+    HHC: {
+      title: "Hunter House Collection",
+      body:  "Drawings and documents from the residence, passed to the new owners Olivia Jol and Floyd Marinescu on purchase in 2024. The catalogue's primary collection — the source from which future design work for the house departs. From cottage, to house, to Haus.",
+      qid:   "Q180",
+      stats: "115 items",
+      custodian: "Hunter House Foundation",
+    },
+    CAA: {
+      title: "Canadian Architectural Archives",
+      body:  "Richard Hunter's career donations to the Canadian Architectural Archives at the University of Calgary, made in 2019 and 2021. Spans his student work at the University of Oklahoma (mid-1950s), his California and Alaska practice (1958–1967), and his Victoria practice (1968–2015); predominantly 1955–2010.",
+      qid:   "Q178",
+      stats: "35 of 344 drawings catalogued here",
+      custodian: "University of Calgary",
+      url:   "https://searcharchives.ucalgary.ca/richard-hunter-accession",
+      urlLabel: "Finding aid ↗",
+    },
+    EGC: {
+      title: "Eric Gesinger Collection",
+      body:  "Furniture drawings gifted to cabinetmaker Eric Gesinger by Frances Hunter after Richard's passing in 2023. Gesinger built the Owl Chairs (designed 2006) and the East Wing Dining Room Chairs (designed 2019–2021). Mary McNeill Knowles' photographs document the chairs in situ.",
+      qid:   "Q182",
+      stats: "30 drawings · 36 photographs pending intake",
+      custodian: "Eric Gesinger",
+    },
+    FUL: {
+      title: "John Fulker Collection",
+      body:  "Photographs by John Fulker held at the West Vancouver Museum. Catalogue entry pending.",
+      qid:   "Q184",
+      stats: "Pending",
+      custodian: "West Vancouver Museum",
+    },
   };
   function archiveAbbrev(label) {
     const lb = (label || "").toLowerCase();
@@ -3857,12 +3920,16 @@ WHERE {
       [i.creator, i.designedBy, i.builtBy].filter(Boolean)));
     const uniqueBuiltStatus = uniqueSorted(state.items.map(i => i.builtStatus).filter(Boolean));
 
-    const group = (label, vals, activeSet, cls, attr, color) => {
+    const group = (label, vals, activeSet, cls, attr, color, infoMap) => {
       if (!vals.length) return "";
       const pc = color ? ` ${pillCls(color)}` : "";
-      const chips = vals.map(v =>
-        `<button class="fp-chip${activeSet.has(v) ? " on" : ""}${pc}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}</button>`
-      ).join("");
+      const chips = vals.map(v => {
+        const chip = `<button class="fp-chip${activeSet.has(v) ? " on" : ""}${pc}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}</button>`;
+        const info = infoMap?.[v]
+          ? `<button class="fp-info" data-coll-info="${escapeHTML(v)}" title="About ${escapeHTML(v)}" aria-label="About ${escapeHTML(v)}">ⓘ</button>`
+          : "";
+        return chip + info;
+      }).join("");
       return `<div class="fp-group fp-grp-${cls}"><div class="fp-lbl">${label}</div><div class="fp-chips">${chips}</div></div>`;
     };
 
@@ -3883,7 +3950,7 @@ WHERE {
 
     panel.innerHTML =
       curatedRow +
-      group("Collection",   uniqueCollections, state.filterCollection,  "coll",        "collection",  PC.denim) +
+      group("Collection",   uniqueCollections, state.filterCollection,  "coll",        "collection",  PC.denim, COLLECTION_INFO) +
       group("Areas",        uniqueAreas,       state.filterArea,        "area",        "area",        PC.sage)  +
       group("Item type",    uniqueTypes,       state.filterType,        "itype",       "itype",       PC.stone) +
       group("Drawing type", uniqueDrawTypes,   state.filterDrawType,    "drawtype",    "drawtype",    PC.slate) +
@@ -3904,6 +3971,14 @@ WHERE {
       e.stopPropagation();
       closeAllDropdowns();
     });
+
+    // ⓘ next to each Collection chip — pop a per-collection blurb.
+    panel.querySelectorAll(".fp-info").forEach(btn =>
+      btn.addEventListener("click", e => {
+        e.stopPropagation();
+        openCollectionInfo(btn.dataset.collInfo, btn);
+      })
+    );
 
     [
       ["collection",  state.filterCollection  ],
@@ -4555,6 +4630,68 @@ WHERE {
   }
   function closeInfoPane() { infoPane.classList.remove("open"); }
   function toggleInfoPane(){ infoPane.classList.contains("open") ? closeInfoPane() : openInfoPane(); }
+
+  // ── Filter-panel collection ⓘ popover ──────────────────────────────────
+  // Anchored to the clicked ⓘ. Esc / outside-click / re-click closes.
+  function openCollectionInfo(abbrev, anchor) {
+    const info = COLLECTION_INFO[abbrev];
+    if (!info) return;
+    let pop = document.getElementById("fp-info-pop");
+    if (!pop) {
+      pop = document.createElement("div");
+      pop.id = "fp-info-pop";
+      pop.hidden = true;
+      document.body.appendChild(pop);
+    }
+    // Toggle off if clicking the same ⓘ while open
+    if (!pop.hidden && pop.dataset.anchor === abbrev) {
+      closeCollectionInfo();
+      return;
+    }
+    const qidUrl = `https://hunterhouse.wikibase.cloud/wiki/Item:${info.qid}`;
+    pop.innerHTML = `
+      <div class="fpi-title">${escapeHTML(info.title)}</div>
+      <div class="fpi-body">${escapeHTML(info.body)}</div>
+      <div class="fpi-meta">
+        <span><a href="${qidUrl}" target="_blank" rel="noopener">${info.qid}</a> · ${escapeHTML(info.stats)}</span>
+        ${info.custodian ? `<span>Custodian: ${escapeHTML(info.custodian)}</span>` : ""}
+        ${info.url ? `<span><a href="${info.url}" target="_blank" rel="noopener">${escapeHTML(info.urlLabel || "External record ↗")}</a></span>` : ""}
+      </div>`;
+    pop.hidden = false;
+    // Position after layout so width is known
+    const r  = anchor.getBoundingClientRect();
+    const pw = pop.offsetWidth;
+    const gutter = 8;
+    let left = r.left;
+    if (left + pw > window.innerWidth - gutter) left = window.innerWidth - pw - gutter;
+    if (left < gutter) left = gutter;
+    pop.style.left = `${left}px`;
+    pop.style.top  = `${r.bottom + 4}px`;
+    pop.dataset.anchor = abbrev;
+    document.querySelectorAll(".fp-info.on").forEach(b => b.classList.remove("on"));
+    anchor.classList.add("on");
+  }
+  function closeCollectionInfo() {
+    const pop = document.getElementById("fp-info-pop");
+    if (pop) { pop.hidden = true; delete pop.dataset.anchor; }
+    document.querySelectorAll(".fp-info.on").forEach(b => b.classList.remove("on"));
+  }
+  // Esc + outside-click dismissal (capture phase on Esc so we close before
+  // other Esc handlers fire — keeps zen/about-pane untouched).
+  document.addEventListener("keydown", e => {
+    const pop = document.getElementById("fp-info-pop");
+    if (e.key === "Escape" && pop && !pop.hidden) {
+      e.stopPropagation();
+      closeCollectionInfo();
+    }
+  }, true);
+  document.addEventListener("click", e => {
+    const pop = document.getElementById("fp-info-pop");
+    if (!pop || pop.hidden) return;
+    if (pop.contains(e.target)) return;
+    if (e.target.closest(".fp-info")) return;
+    closeCollectionInfo();
+  });
 
   // ── PDF reader — native browser viewer in the image stage ───────────────
   // Desktop: the PDF fills the image stage; the foot bar is repurposed
