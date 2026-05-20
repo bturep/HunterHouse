@@ -33,7 +33,7 @@
   .site-top{padding:0 28px;flex-shrink:0;grid-template-columns:28% 1fr 28%;gap:0;height:41px;box-sizing:border-box;border-bottom-color:var(--rule)}
   .site-topright{display:flex;align-items:center;gap:14px;height:41px;color:var(--ink)}
   .site-topright .theme-btn{display:flex;align-items:center;background:none;border:none;border-radius:0;padding:0;color:var(--ink)}
-  .site-topright .theme-btn svg{display:block}
+  .site-topright .theme-btn svg{display:block;pointer-events:none}/* clicks land on the button, not the inner SVG (Safari) */
   .site-topright .tr-sep{width:1px;height:16px;background:var(--rule);flex-shrink:0}
   #topright{cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;display:flex;align-items:center;color:var(--ink)}
   .site-topright .theme-btn:hover{opacity:0.5}
@@ -1362,16 +1362,23 @@
   }
 </style>
 <script>
-  /* theme toggle — runs before render to avoid flash */
+  /* theme toggle — runs before render to avoid flash. All localStorage
+     access is try/catch'd so Safari modes that throw on storage access
+     (Block all cookies, certain private/strict configs) don't crash the
+     IIFE before the 'dark' class is added or the click listener attaches. */
   (function(){
-    if(localStorage.getItem('hhf_theme_v2')!=='light') document.documentElement.classList.add('dark');
-    if(navigator.standalone||matchMedia('(display-mode:standalone)').matches) document.documentElement.classList.add('pwa');
+    var stored=null;
+    try{ stored=localStorage.getItem('hhf_theme_v2'); }catch(e){}
+    if(stored!=='light') document.documentElement.classList.add('dark');
+    try{
+      if(navigator.standalone||matchMedia('(display-mode:standalone)').matches) document.documentElement.classList.add('pwa');
+    }catch(e){}
     document.addEventListener('DOMContentLoaded',function(){
       var btn=document.getElementById('theme-toggle');
       if(!btn)return;
       btn.addEventListener('click',function(){
         var dark=document.documentElement.classList.toggle('dark');
-        localStorage.setItem('hhf_theme_v2',dark?'dark':'light');
+        try{ localStorage.setItem('hhf_theme_v2',dark?'dark':'light'); }catch(e){}
       });
     });
   })();
@@ -1592,7 +1599,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.17";
+  const VERSION      = "v1.06-test.18";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2336,15 +2343,16 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   };
 
   const BADGE_LEGEND = [
-    ["D",  "Drawing"],
-    ["P",  "Photograph"],
-    ["LS", "Land survey"],
-    ["EN", "Engineering document"],
-    ["L",  "Letter / Correspondence"],
-    ["N",  "Notebook / Sketch"],
-    ["E",  "Ephemera"],
-    ["PM", "Permit set"],
-    ["R",  "Report"],
+    ["D",   "Drawing"],
+    ["Ph",  "Photograph"],
+    ["Pub", "Publication"],
+    ["LS",  "Land survey"],
+    ["EN",  "Engineering document"],
+    ["L",   "Letter / Correspondence"],
+    ["N",   "Notebook / Sketch"],
+    ["E",   "Ephemera"],
+    ["PM",  "Permit set"],
+    ["R",   "Report"],
   ];
 
   // ── Utilities ─────────────────────────────────────────────────────────────
@@ -2857,7 +2865,7 @@ WHERE {
 
   // ── Render list ───────────────────────────────────────────────────────────
   const TYPE_MARKS = {
-    "drawing":"D","photograph":"P","letter":"L","correspondence":"L",
+    "drawing":"D","photograph":"Ph","publication":"Pub","letter":"L","correspondence":"L",
     "engineering":"EN","engineering document":"EN","notebook":"N","sketch":"N",
     "ephemera":"E","permit":"PM","permit set":"PM","report":"R","land survey":"LS",
   };
