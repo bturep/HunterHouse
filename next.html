@@ -713,6 +713,15 @@
   .hh-fedit:hover{color:var(--red)}
   .hh-pop{position:fixed;z-index:320;background:var(--bg);border:1px solid var(--rule);border-radius:6px;box-shadow:0 8px 28px rgba(0,0,0,.20);width:248px;max-height:300px;display:flex;flex-direction:column;overflow:hidden;font-family:var(--mono);font-size:12px}
   .hh-pop input{flex-shrink:0;font:inherit;color:var(--ink);background:var(--soft);border:none;border-bottom:1px solid var(--rule);padding:9px 11px;outline:none}
+  /* Text-kind picker (Notes) is wider; the textarea grows the popover. */
+  .hh-pop-text{width:320px}
+  .hh-pop textarea{flex-shrink:0;font:inherit;color:var(--ink);background:var(--soft);
+    border:none;border-bottom:1px solid var(--rule);padding:9px 11px;outline:none;
+    resize:vertical;line-height:1.5;min-height:88px}
+  /* Notes prose — multi-line render in the record pane, slightly indented
+     and a touch of breathing room above/below to read as a paragraph
+     distinct from the key/value rows. */
+  .hh-note-text{display:block;white-space:pre-wrap;line-height:1.55;margin:2px 0}
   .hh-pop-list{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
   .hh-pop-opt{padding:7px 11px;cursor:pointer;border-bottom:1px solid var(--rule-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
   .hh-pop-opt:hover{background:var(--soft);color:var(--red)}
@@ -1714,7 +1723,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.17";
+  const VERSION      = "v1.07-test.18";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2171,6 +2180,41 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       yi.addEventListener("keydown", e => {
         if (e.key === "Enter")  { e.preventDefault(); save(); }
         if (e.key === "Escape") { e.preventDefault(); closeFieldPicker(); }
+      });
+      setTimeout(() => document.addEventListener("mousedown", _popOutside, true), 0);
+      return;
+    }
+
+    // Text field (Notes prose): a textarea — ⌘↵ saves via setStringClaim
+    // (Enter inserts a newline), blank ⌘↵ clears, Esc cancels.
+    if (btn.dataset.kind === "text") {
+      const pop = document.createElement("div");
+      pop.className = "hh-pop hh-pop-text"; pop.id = "hh-pop";
+      const cur0 = item[key] || "";
+      pop.innerHTML = `<textarea placeholder="${escapeHTML(dt)}…" rows="6" autocomplete="off" spellcheck="true">${escapeHTML(cur0)}</textarea>
+        <div class="hh-pop-msg">⌘↵ save · ↵ newline · blank ⌘↵ clears · Esc</div>`;
+      document.body.appendChild(pop);
+      const rr = btn.getBoundingClientRect();
+      pop.style.top  = Math.min(rr.bottom + 6, window.innerHeight - 220) + "px";
+      pop.style.left = Math.min(rr.left, window.innerWidth - 332) + "px";
+      const ta = pop.querySelector("textarea");
+      ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length);
+      const save = async () => {
+        const v = ta.value.trim();
+        if (v === cur0.trim()) return closeFieldPicker();
+        closeFieldPicker();
+        hhToast("saving " + dt + "…");
+        try {
+          await setStringClaim(item.qid, pid, v);
+          item[key] = v || null;
+          const m = state.items.find(i => i.qid === item.qid); if (m) m[key] = v || null;
+          renderMeta(item);
+          hhToast(v ? `Saved · ${dt}` : `Cleared · ${dt}`, "ok");
+        } catch (err) { hhToast("Save failed: " + err.message, "err"); }
+      };
+      ta.addEventListener("keydown", e => {
+        if (e.key === "Escape") { e.preventDefault(); closeFieldPicker(); return; }
+        if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); save(); }
       });
       setTimeout(() => document.addEventListener("mousedown", _popOutside, true), 0);
       return;
@@ -3822,6 +3866,11 @@ WHERE {
     const EM = '<span class="hh-empty">—</span>';
     const descRows = [];
     if (item.id)          descRows.push(["Item",    displayId(item.id)]);
+    if (item.notes || adminEdit) {
+      descRows.push(["Notes", item.notes
+        ? `<span class="hh-note-text">${escapeHTML(item.notes)}</span>`
+        : EM]);
+    }
     if (item.date || adminEdit) descRows.push(["Date", item.date ? escapeHTML(item.date) : EM]);
     if (item.phase || adminEdit) {
       descRows.push(["Phase", item.phase ? escapeHTML(item.phase) : EM]);
@@ -3893,6 +3942,7 @@ WHERE {
     if (item.archiveLink) archRows.push(["Finding aid", `<a href="${escapeHTML(item.archiveLink)}" target="_blank" rel="noopener">${archiveLinkLabel(coll)}</a>`]);
 
     const EDITABLE = canEditWikibase() ? {
+      "Notes":         { pid: "P100", key: "notes",       kind: "text" },
       "Date":          { pid: "P82",  key: "date"        },
       "Phase":         { pid: "P62",  key: "phase"       },
       "Sheet":         { pid: "P86",  key: "setPosition", kind: "string" },

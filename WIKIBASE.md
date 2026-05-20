@@ -67,7 +67,7 @@ For **bulk changes to many items at once**: use a SPARQL query to get the QIDs f
 | P97 | legacy identifier | String | Old ID if renumbered |
 | P98 | unique identifier | String | UUID or other permanent ID |
 | P99 | archive link | URL | Link to CAA finding aid or external record |
-| P100 | notes | String | Prose description shown in browse.html meta pane. This is the human-readable note — not the auto-generated Wikibase description. |
+| P100 | notes | String | Cataloguer's public prose about the item — what it is, why it matters, anything notable. Multi-line. Renders as the first row in the record pane (above Date). Inline-editable via textarea (admin only). Distinct from private researcher notes (localStorage) and curator notes (curation JSON). Repurposed 2026-05-20 from the former "curator notes" role. |
 | P118 | point in time | Time | Use when a single date applies (not a range) |
 | P128 | sourced from | String | Citation or evidence for a claim |
 | P139 | Wikidata QID | ExternalId | Cross-catalogue reconciliation. Not yet populated |
