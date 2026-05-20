@@ -26,12 +26,16 @@ At session start: announce which LINE is active and which file you'll be editing
 
 ## ⚑ Pending at next session start — prompt Brandon immediately
 
-**v1.05 PROMOTED to live (2026-05-19).** `next.html` → `browse.html`; live is now **`v1.05.00`** (tagged). Staging line rolled forward — `next.html` is now **`v1.06-test.01`** (LINE: NEXT, all browse work continues there; `browse.html` is the stable public page again). Open threads carried into the v1.06 line:
-- **A few small `next.html` tweaks** Brandon has queued (unspecified — ask him).
+**v1.06 PROMOTED to live (2026-05-20).** `next.html` → `browse.html`; live is now **`v1.06.00`** (tagged). Staging line rolled forward — `next.html` is now **`v1.07-test.01`** (LINE: NEXT, all browse work continues there). What's now live (delta over v1.05): splash overhaul (Continue-to-archive replaces Refresh; HHFA × ↔ Continue swap by `body.hh-splash`; default landing item HH-CAA-0028; `body.refitting` hides canvas during the panel transition so the splash-fit image doesn't visibly shrink), in-stage PDF reader with bundled PDF.js (P143 access copy), admin display rotation **P144** with ⤓ save, SPARQL changes (P79 required, P96 OPTIONAL so stubs appear), "In the graph" hidden when no phase, search matches item type, search bar + `/` shortcut restored next to the fullscreen icon, browser tab "Browse Archive — Hunter House Foundation". **Hidden on live but kept in next:** the Curators / curated-lens entry (the curator JSON load is commented out on browse; all overlay/card/state code stays inert as dormant code, promotable later by uncommenting one line).
+
+Open threads carried into the v1.07 line:
+- **Curator Phase 2** — in-browser authoring + multi-curator polish + Wikibase promotion (Curation as first-class item w/ qualifiers; needs proxy `wbsetqualifier`); the Phase 1 lens still lives in next.html.
 - **Held by** — P94 (CAA/FUL) vs P79 (HHC) ambiguity; needs a rule for which to write before it's editable.
 - **Phase rename** — distinct from "change phase" (P62, done). Renaming edits the shared Phase item's label → affects every item in that phase. Needs a confirm-guard. (`wbsetlabel` on `item.phaseQID`.)
 - **Built by / Designed by** (P140/P141) — 0 vocabulary exists; needs a person/org entity-search picker (not the in-use-vocab pattern).
 - **GES collection ingest** — `GES_intake.xlsx` issued (~70 items: 35 Hunter furniture drawings + 35 photos of Gessinger's built furniture). When Brandon returns the filled sheet: mint phase items from the "Furniture piece / set" column, create any missing drawing-type items, flag rows missing the photographer ("Mary —") name, then generate the batch for confirmation. Generator: `scripts/make_ges_intake.py`.
+- **Rotation Part 2** (later) — maintenance bake script driven by P144 claims; clears the claim and purges CDN. Prerequisite: an automated Cloudflare cache-purge API token (still not wired).
+- **Mobile/lightbox rotation gap** — `wdt:P144` is applied desktop image stage only; mobile sheet image + lightbox still show the unrotated file (Part 2 bake fixes for all).
 - **Restart the edit proxy** each session: `python3 scripts/edit_proxy.py` (dies on Mac sleep; editing on `next.html` is inert without it; could be auto-wired into the `claude()` launcher later).
 - **Housekeeping:** add `scripts/__pycache__/` to `.gitignore` (bytecode noise now untracked).
 - Plus the long-standing **Wikidata items** and **RAD/archival-standards** items below (still deferred).
@@ -379,8 +383,9 @@ CCA's ISAD(G) hierarchy maps directly to our Wikibase: fonds = Richard Hunter fo
 | v1.04.02 | 2026-05-17 | Panel↔fullscreen interlink fix; mobile sheet swipe nav (last live build before v1.05) |
 | v1.05.00 | 2026-05-19 | **Promotion of the full v1.05 line.** Role system (Admin/Research/Public), local edit proxy, admin inline Wikibase editing (title, date, phase, item type, built, drawing type, areas), mark/seen/note row flags, info panel, keyboard scheme, filter & About typography parity. `next.html` → `browse.html`. |
 | v1.05.02 | 2026-05-19 | Live hotfixes on the v1.05 line: info panel hidden when right panel collapsed; public version display drops the patch number. |
+| v1.06.00 | 2026-05-20 | **Promotion of the full v1.06 line.** Splash overhaul (Continue-to-archive button, HHFA × ↔ Continue swap by `body.hh-splash`, default landing HH-CAA-0028, `body.refitting` hides canvas during panel transition), in-stage PDF reader + bundled PDF.js (P143), admin display rotation P144 with ⤓ save, SPARQL P79 required / P96 OPTIONAL, "In the graph" hidden when no phase, search matches item type, search bar + `/` restored next to fullscreen. **Curated lens hidden on live** (Phase 1 stays in `next.html`; the curator JSON load is commented out on `browse.html` and all curator code is dormant — promotable later by uncommenting one line). `next.html` → `browse.html`. |
 
-Tags pushed: `v1.01.00` (fc98905), `v1.02.00` (2059cb7), `v1.02.18` (82065e6), `v1.03.00`, `v1.03.01`, `v1.03.08`, `v1.04.00` (prior sessions), `v1.05.00` (2026-05-19 — v1.05 promotion).
+Tags pushed: `v1.01.00` (fc98905), `v1.02.00` (2059cb7), `v1.02.18` (82065e6), `v1.03.00`, `v1.03.01`, `v1.03.08`, `v1.04.00` (prior sessions), `v1.05.00` (2026-05-19 — v1.05 promotion), `v1.06.00` (2026-05-20 — v1.06 promotion).
 
 Full per-version detail: `CLAUDE_archive_v1.05.md` (v1.03→v1.05), `CLAUDE_archive_v1.02.md` (≤v1.02).
 
@@ -723,3 +728,20 @@ Text changes (no class/function renames — `curation`, `#curator-pane`, `LENS_B
 `brandon-poole.json` itself untouched — still PLACEHOLDER content (real title/intro/items/notes/bio/url pending from Brandon). Swap-in needs no rebuild.
 
 **Version: next.html `v1.06-test.26`** (staging). Live `browse.html` unchanged at `v1.05.02`.
+
+---
+
+### 2026-05-20 — v1.06 promoted to live; v1.07 staging line opened (browse.html v1.06.00 · next.html v1.07-test.01)
+
+**Promotion (documented Staging → Live cycle).** The full v1.06 line — built and tested across `next.html` v1.06-test.01→.58 — went live.
+
+- Pre-promotion tidy on next.html (v1.06-test.58): default landing item HHC-0028 → **HH-CAA-0028** (Brandon's original intent before the mid-session complexity revert); pruned the 26-line ARCHIVED-2026-05-19 commented-out HTML block in the HHFA pane (Archive/Rights/Endpoints, superseded by the Wikibase Main Page link); updated two stale comments around the prefetch path (index.html is currently a thin redirect with no SPARQL prefetch, so the "must stay in sync" warning is moot — the code paths stay in case prefetch returns later). All visible behaviour unchanged.
+- Promoted: `cp next.html browse.html`; `browse.html` `VERSION` → **`v1.06.00`**, browser tab title restored to "Browse Archive — Hunter House Foundation"; the curator JSON load on boot (`await loadCurationIndex()`) is **commented out** as the only structural divergence from next — `state.curations` stays empty, the curator row in `renderFilterPanel` is gated on `.length` and renders nothing, all the overlay/card/state code stays in place as dormant, **promotable later by uncommenting one line**. Tagged `v1.06.00` and pushed with `--tags`. `CACHE_KEY` auto-derives `hhf_v1.06.00`, breaking cleanly from `hhf_v1.05.12`. Researcher data (`hhf_rn`, `hhf_marks`, `hhf_seen`) uses stable non-versioned keys — **no user data wiped**.
+- `next.html` `VERSION` → **`v1.07-test.01`** (LINE: NEXT continues). next is byte-identical to the new live except VERSION and the curator JSON-load line.
+- CLAUDE.md updated: version-history table + Tags-pushed line + Pending block (carried-forward open threads: Curator Phase 2, Held-by P94/P79 ambiguity, Phase rename, Built/Designed-by entity picker, GES intake, Rotation Part 2 bake, mobile/lightbox rotation gap, edit-proxy restart habit). Standing conventions (Preview to `~/Desktop`, version-in-update line) carried forward.
+
+**What is now live on the public site (v1.06.00):** the splash overhaul ("Continue to archive" replaces "Refresh archive data" in the HHFA pane styled as a curator-style `.cur-continue` button right of the credits row; HHFA `×` ↔ Continue swap by `body.hh-splash` — first-paint splash shows only Continue, subsequent HHFA opens swap back to `×`; default landing item HH-CAA-0028; `body.refitting` hides `#canvas` during the 260ms panel-width transition + the `setTimeout(280, fitToFrame)` so the splash-fit image doesn't visibly shrink in front of the visitor); in-stage PDF reader with bundled PDF.js v5.7.284 at `assets/pdfjs/` (~5.7 MB; `?file=...&theme=...&v=...` driven; minimal toolbar via `hh-pdfjs.css`; HOSTED_VIEWER_ORIGINS patched in `viewer.mjs`; R2 CORS allows `https://bturep.github.io` etc.; PDF objects carry `Content-Disposition: attachment` so `↓ PDF` truly downloads); admin display rotation **P144** with `⤓ save` (create-then-remove, net 0 ⇒ clear); SPARQL changes (P79 required so vocab/people/institutions stay out of the catalogue, P96 OPTIONAL so HHC stubs without a preview appear); "In the graph" section omitted when item has no phase; search haystack includes `itemType` ("drawings"/"photographs" surface all of that type); search bar (`#search-toggle` magnifier + `.tr-sep`) + `/` keyboard shortcut restored to the right side of `.site-topright`. Browser tab "Browse Archive — Hunter House Foundation".
+
+**Versioning note.** SESSION-level promotion milestone for the v1.06 line; tagged `v1.06.00` (not a MAJOR bump — git tag only, no GitHub Release per the snapshot rule).
+
+**Version: browse.html `v1.06.00` (LIVE, tagged) · next.html `v1.07-test.01` (staging).**
