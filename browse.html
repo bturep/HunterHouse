@@ -18,7 +18,12 @@
      paint instead of flashing visible-then-fading-out as the main JS init
      catches up. Mobile skips splash-mode (and thus this pre-init). -->
 <script>if(!matchMedia('(max-width:767px)').matches)document.documentElement.dataset.splashInit='1';</script>
-<style>html[data-splash-init="1"] body .markid{opacity:0}</style>
+<style>
+  html[data-splash-init="1"] body .markid{opacity:0}
+  /* #rec-info ("?") is hidden during splash so it doesn't flash before
+     main() opens the about-pane and body.hh-about-open takes over. */
+  html[data-splash-init="1"] body #rec-info{display:none}
+</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -36,7 +41,10 @@
   html,body{overflow:hidden}
   @keyframes page-in{from{opacity:0}to{opacity:1}}
   body{height:100%;display:flex;flex-direction:column;animation:page-in 400ms ease-out both}
-  .site-top{padding:0 28px;flex-shrink:0;grid-template-columns:28% 1fr 28%;gap:0;height:41px;box-sizing:border-box;border-bottom-color:var(--rule)}
+  /* .site-top is position:relative so the absolute #rec-info "?" button
+     (placed as its direct child, outside .site-topright) can anchor to
+     the header bar's right edge. */
+  .site-top{padding:0 28px;flex-shrink:0;grid-template-columns:28% 1fr 28%;gap:0;height:41px;box-sizing:border-box;border-bottom-color:var(--rule);position:relative}
   /* .site-topright stays as flex but right-aligns its contents and adds
      13px of right-padding so the last visible item (fs-toggle) has its
      right edge at (column_right - 13) = (viewport_right - 28 - 13) =
@@ -46,12 +54,27 @@
   .site-topright{display:flex;align-items:center;justify-content:flex-end;gap:14px;padding-right:13px;height:41px;color:var(--ink)}
   .site-topright .theme-btn{display:flex;align-items:center;background:none;border:none;border-radius:0;padding:0;color:var(--ink)}
   .site-topright .theme-btn svg{display:block}
-  /* Info ("?") button — text glyph sized to match the 13×13 fs-toggle SVG.
-     font-size:14 in mono lands at the same optical height as the icon.
-     Keep id="rec-info" so the existing click handler + keyboard shortcut
-     still wire up without changes. */
-  .site-topright .info-btn{font-family:var(--mono);font-size:14px;font-weight:500;line-height:1;color:var(--ink);cursor:pointer;justify-content:center}
   .site-topright .tr-sep{width:1px;height:16px;background:var(--rule);flex-shrink:0}
+  /* Info ("?") button — text glyph sized to match the 13×13 fs-toggle SVG
+     (font-size:14 in mono lands at the same optical height). Sits OUTSIDE
+     .site-topright as an absolute child of .site-top so it can land to
+     the RIGHT of #fs-toggle without disturbing fs-toggle's flex position.
+     right:13px centres it in the 41px right-tab strip (the collapsed
+     right-panel column above viewport_right-41 → viewport_right). */
+  .site-top #rec-info{
+    position:absolute;right:13px;top:50%;transform:translateY(-50%);
+    background:none;border:0;padding:0;cursor:pointer;color:var(--ink);
+    font-family:var(--mono);font-size:14px;font-weight:500;line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    z-index:5;
+  }
+  .site-top #rec-info:hover{opacity:0.5}
+  /* Hide-on-splash: while the about-pane is open the "?" disappears
+     (the splash is the only navigation aid then). The data-splash-init
+     pre-init also nullifies it on first paint, matching the .markid
+     pattern so there's no flash before main() runs openAboutPane(). */
+  body.hh-about-open .site-top #rec-info,
+  html[data-splash-init="1"] body .site-top #rec-info{display:none}
   #topright{cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;display:flex;align-items:center;color:var(--ink)}
   .site-topright .theme-btn:hover{opacity:0.5}
   a.markid{text-decoration:none;color:inherit;display:flex;align-items:center}
@@ -800,6 +823,9 @@
     .header-search{padding:0 12px;border-left:0;border-right:0}
     .fbtn{padding:0 14px}
     .site-topright{display:none}
+    /* #rec-info is now an absolute child of .site-top (sibling of
+       .site-topright), so the rule above no longer hides it on mobile. */
+    .site-top #rec-info{display:none}
     .mobile-tabs{display:none}
     .panel-handle{display:none!important}
     .zoom-ctl{display:none}
@@ -1319,13 +1345,16 @@
          kept for the JS lookup; no visible content. -->
     <input id="search-input" class="tr-search-input" placeholder="" autocomplete="off" aria-hidden="true" tabindex="-1">
     <span id="topright" title="About this archive"></span>
-    <!-- Info ("?") button — moved up from the record-bar meta-head. Sized
-         to match the fs-toggle SVG optically (info-btn CSS above). -->
-    <button class="theme-btn info-btn" id="rec-info" title="About this archive &amp; shortcuts [?]" aria-label="Info">?</button>
     <!-- fs-toggle deliberately LAST so flex-end + padding-right:13px on
          .site-topright lands its right edge at viewport_right - 41. -->
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
   </div>
+  <!-- Info ("?") button — absolute-positioned sibling of .site-topright,
+       anchored to .site-top so it lands TO THE RIGHT of #fs-toggle (in
+       the 41px right-tab strip) without changing fs-toggle's position.
+       Hidden while the about-pane is open (and before it opens on first
+       paint via data-splash-init); see the .site-top #rec-info rules. -->
+  <button id="rec-info" title="About this archive &amp; shortcuts [?]" aria-label="Info">?</button>
 </header>
 
 
@@ -1526,7 +1555,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05.11";
+  const VERSION      = "v1.05.12";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
