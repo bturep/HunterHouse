@@ -81,6 +81,14 @@
      appears AS the pane fades, not before. */
   .markid{transition:opacity 280ms ease 100ms}
   body.hh-about-open .markid{opacity:0;pointer-events:none;transition:opacity 200ms ease}
+  /* Panel lock: while the about-pane is open the side panels can't be
+     expanded — the visitor must press × to dismiss first. Covers the
+     edge handles (mouse click) and the bottom-bar fullscreen button
+     (which also toggles both panels). The Z keyboard shortcut is
+     guarded in the keydown handler (CSS can't disable programmatic
+     clicks fired by the Z key calling button.click()). */
+  body.hh-about-open .panel-handle,
+  body.hh-about-open #zoom-fs{pointer-events:none}
   .ap-inner{width:100%;max-width:520px;position:relative}
   #about-pane-close{
     position:absolute;top:-8px;right:0;
@@ -1516,7 +1524,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.05.05";
+  const VERSION      = "v1.05.06";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3987,7 +3995,10 @@ $("#foot-dims").textContent = "";
       if (e.key === "1"         && !inInput) { setZoom(1); return; }
       if ((e.key === "f" || e.key === "F") && !inInput) { fitToFrame(); return; }
       if ((e.key === "t" || e.key === "T") && !inInput) { document.getElementById("zoom-rotate").click(); return; }
-      if ((e.key === "z" || e.key === "Z") && !inInput) { document.getElementById("zoom-fs").click(); return; }
+      if ((e.key === "z" || e.key === "Z") && !inInput) {
+        if (document.body.classList.contains("hh-about-open")) return;  // panel-lock while about-pane is open
+        document.getElementById("zoom-fs").click(); return;
+      }
       if ((e.key === "=" || e.key === "+") && !inInput) { document.getElementById("zoom-in").click();  return; }
       if ((e.key === "-" || e.key === "_") && !inInput) { document.getElementById("zoom-out").click(); return; }
       if ((e.key === "m" || e.key === "M") && !inInput && canMark() && state.selectedId) { toggleMark(state.selectedId); return; }
@@ -4019,7 +4030,13 @@ $("#foot-dims").textContent = "";
   // the title swap coordinated as one transition.
   function openAboutPane()  { aboutPane.classList.add("open");    document.body.classList.add("hh-about-open"); }
   function closeAboutPane() { aboutPane.classList.remove("open"); document.body.classList.remove("hh-about-open"); }
-  function toggleAboutPane(){ aboutPane.classList.toggle("open"); }
+  // Route through open/closeAboutPane so body.hh-about-open stays in sync
+  // (a direct classList.toggle("open") would skip the body-class flip and
+  // the .markid fade-out would never trigger on subsequent re-opens).
+  function toggleAboutPane(){
+    if (aboutPane.classList.contains("open")) closeAboutPane();
+    else openAboutPane();
+  }
 
   // ── Info panel — system orientation + shortcuts, role-aware ──────────────
   const infoPane = document.getElementById("info-pane");
