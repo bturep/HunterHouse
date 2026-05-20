@@ -1691,7 +1691,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06.13";
+  const VERSION      = "v1.06.14";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2652,7 +2652,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     if (item.builtStatus)       descRows.push(["Built",     pill(`builtstatus-pill ${pillCls(PC.moss)}`, item.builtStatus)]);
     if (item.creator)           descRows.push([creatorLabel(item.itemType), pill(`creator-pill ${pillCls(PC.clay)}`, item.creator)]);
     if (item.designedBy)        descRows.push(["Designed by", pill(`creator-pill ${pillCls(PC.clay)}`, item.designedBy)]);
-    if (item.builtBy)           descRows.push(["Built by",  pill(`creator-pill ${pillCls(PC.clay)}`, item.builtBy)]);
+    if (item.builtBy?.length)   descRows.push(["Built by",  item.builtBy.map(b => pill(`creator-pill ${pillCls(PC.clay)}`, b)).join("")]);
     const coll = collectionOf(item);
     if (coll)                   descRows.push(["Held by",   pill(`collection-pill ${pillCls(PC.denim)}`, archiveAbbrev(coll))]);
 
@@ -2871,7 +2871,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
           itemType:         r.itypeLabel?.value || null,
           sourceCollection: r.srcLabel?.value || null,
           creator:          r.creatorLabel?.value || null,
-          builtBy:          r.builtByLabel?.value || null,
+          builtBy:          [],   // multi: accumulated below
           designedBy:       r.designedByLabel?.value || null,
           use:              r.use?.value || null,
           builtStatus:      r.builtStatusLabel?.value || null,
@@ -2892,6 +2892,8 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         it.categories.push(r.categoryLabel.value);
       if (r.drawTypeLabel?.value && !it.drawTypes.includes(r.drawTypeLabel.value))
         it.drawTypes.push(r.drawTypeLabel.value);
+      if (r.builtByLabel?.value && !it.builtBy.includes(r.builtByLabel.value))
+        it.builtBy.push(r.builtByLabel.value);
     }
     return [...map.values()].sort((a, b) => (a.id || "").localeCompare(b.id || ""));
   }
@@ -3043,10 +3045,13 @@ WHERE {
       if (state.filterArea.size && !(it.areas||[]).some(a => state.filterArea.has(a))) return false;
       if (state.filterType.size && !state.filterType.has(it.itemType)) return false;
       if (state.filterDrawType.size && !(it.drawTypes||[]).some(dt => state.filterDrawType.has(dt))) return false;
-      if (state.filterCreator.size && ![it.creator, it.designedBy, it.builtBy].some(c => c && state.filterCreator.has(c))) return false;
+      if (state.filterCreator.size) {
+        const persons = [it.creator, it.designedBy, ...(it.builtBy || [])].filter(Boolean);
+        if (!persons.some(c => state.filterCreator.has(c))) return false;
+      }
       if (state.filterBuiltStatus.size && !state.filterBuiltStatus.has(it.builtStatus)) return false;
       if (q) {
-        const hay = [it.id, it.title, it.phase, it.itemType||"", (it.drawTypes||[]).join(" "), (it.areas||[]).join(" "), it.creator, it.designedBy||"", it.builtBy||"", it.notes||"", it.location||""].join(" ").toLowerCase();
+        const hay = [it.id, it.title, it.phase, it.itemType||"", (it.drawTypes||[]).join(" "), (it.areas||[]).join(" "), it.creator, it.designedBy||"", (it.builtBy||[]).join(" "), it.notes||"", it.location||""].join(" ").toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
@@ -3666,9 +3671,12 @@ WHERE {
       const cActive = state.filterCreator.has(item.designedBy) ? " active" : "";
       descRows.push(["Designed by", `<button class="pill creator-pill ${pillCls(PC.clay)}${cActive}" data-creator="${escapeHTML(item.designedBy)}">${escapeHTML(item.designedBy)}</button>`]);
     }
-    if (item.builtBy) {
-      const cActive = state.filterCreator.has(item.builtBy) ? " active" : "";
-      descRows.push(["Built by", `<button class="pill creator-pill ${pillCls(PC.clay)}${cActive}" data-creator="${escapeHTML(item.builtBy)}">${escapeHTML(item.builtBy)}</button>`]);
+    if (item.builtBy?.length || adminEdit) {
+      const html = (item.builtBy || []).map(b => {
+        const a = state.filterCreator.has(b) ? " active" : "";
+        return `<button class="pill creator-pill ${pillCls(PC.clay)}${a}" data-creator="${escapeHTML(b)}">${escapeHTML(b)}</button>`;
+      }).join("");
+      descRows.push(["Built by", html || EM]);
     }
     const coll = collectionOf(item);
     if (coll)             descRows.push(["Held by", `<span class="pill collection-pill ${pillCls(PC.denim)}">${escapeHTML(archiveAbbrev(coll))}</span>`]);
@@ -3695,6 +3703,7 @@ WHERE {
       "Built":        { pid: "P92", key: "builtStatus" },
       "Areas":        { pid: "P87", key: "areas",      multi: true },
       "Category":     { pid: "P145", key: "categories", multi: true },
+      "Built by":     { pid: "P140", key: "builtBy",   multi: true },
     } : {};
     const descHTML = descRows.map(([k,v]) => {
       const e = EDITABLE[k];
