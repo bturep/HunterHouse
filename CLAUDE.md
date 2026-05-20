@@ -20,6 +20,8 @@ At session start: announce which LINE is active and which file you'll be editing
 
 **Preview convention (standing):** any artifact Brandon needs to eyeball (PDF, image, export) is written to `~/Desktop` with a clear name and opened automatically — never left in a temp folder for him to hunt down.
 
+**Version-in-update convention (standing):** every status/update message Brandon receives must explicitly state the **next.html version** (and the live `browse.html` version when relevant) — e.g. "Pushed (`abc123`, `next.html` v1.06-test.NN)". Don't bury it in the commit message; surface it in the prose he reads.
+
 ---
 
 ## ⚑ Pending at next session start — prompt Brandon immediately
