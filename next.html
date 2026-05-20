@@ -73,7 +73,6 @@
      (the splash is the only navigation aid then). The data-splash-init
      pre-init also nullifies it on first paint, matching the .markid
      pattern so there's no flash before main() runs openAboutPane(). */
-  body.hh-about-open .site-top #rec-info,
   html[data-splash-init="1"] body .site-top #rec-info{display:none}
   #topright{cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;display:flex;align-items:center;color:var(--ink)}
   .site-topright .theme-btn:hover{opacity:0.5}
@@ -104,7 +103,8 @@
      data-splash-init head-script + paired <style> prevents a one-frame
      flash on first paint by pinning the markid to opacity:0 before this
      CSS rule applies. */
-  body.hh-about-open .markid{opacity:0;pointer-events:none}
+  /* HHFA wordmark stays visible while the about-pane is open (clicking it
+     again toggles the pane closed). Was: body.hh-about-open .markid{opacity:0} */
   /* Splash-only lock: the initial load opens the about-pane as a "title
      wall" with both side panels collapsed; while in splash the edge
      handles, bottom-bar zen button, and any residual panel content are
@@ -1610,11 +1610,7 @@
     </button>
     <div class="panel-content">
       <div class="scroll-pip scroll-pip-r" id="meta-pip"></div>
-      <!-- meta-head intentionally empty: the "Record" label and the [?]
-           info button both moved out. The 41px bar stays as a structural
-           spacer so the right panel's content top aligns with the left
-           panel's list-head (both = site-top height). -->
-      <div class="meta-head"></div>
+      <div class="meta-head"><span class="l">Record</span></div>
       <div class="meta-body" id="meta-body">
         <div class="empty">Select an item from the list</div>
       </div>
@@ -1663,7 +1659,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.08";
+  const VERSION      = "v1.07-test.09";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
