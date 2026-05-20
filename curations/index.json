@@ -1,6 +1,6 @@
 {
-  "_note": "Index of available curators. Each entry's <slug>.json holds that curator's selection + bio + intro. Phase 1: just Brandon Poole (additional curators come in Phase 2). Add more entries here as their <slug>.json files land; the Browse filter panel's Curators row auto-populates.",
+  "_note": "Index of available curators. Each entry's <slug>.json holds that curator's selection + bio + intro. Phase 1 testing: chip says 'Robert Youds' but slug + file remain 'brandon-poole' for the duration of this testing pass (filename rename happens when Brandon settles on the final lineup). The slug is internal — only the displayed `curator` string is user-visible in the chip.",
   "curations": [
-    { "slug": "brandon-poole", "curator": "Brandon Poole" }
+    { "slug": "brandon-poole", "curator": "Robert Youds" }
   ]
 }
