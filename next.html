@@ -1600,7 +1600,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.19";
+  const VERSION      = "v1.06-test.20";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2657,7 +2657,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
           qid,
           id:               r.archId.value,
           title:            r.label.value,
-          image:            r.img.value,
+          image:            r.img?.value || null,
           master:           r.master?.value || null,
           date:             dateStr(r.d1?.value) || dateStr(r.d2?.value) || dateStr(r.d3?.value),
           phase:            r.phaseLabel?.value || r.phase2Label?.value || null,
@@ -2750,7 +2750,7 @@ SELECT ?item ?archId ?label ?img ?master
        ?archiveLink ?location ?accessCopy ?rotation
 WHERE {
   ?item wdt:P2 ?archId .
-  ?item wdt:P96 ?img .
+  OPTIONAL { ?item wdt:P96 ?img }   # loosened: stubs without a preview still appear in the list; renderImage shows 'No image yet' when item.image is null
   ?item rdfs:label ?label . FILTER(LANG(?label)="en")
   OPTIONAL { ?item wdt:P95 ?master }
   OPTIONAL { ?item wdt:P82 ?d1 }
