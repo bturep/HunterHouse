@@ -726,6 +726,29 @@
      Phase entity — propagates to every item in that phase, so the rename
      mode shows an affected-count line as a passive confirm-guard. */
   .hh-pop-foot{flex-shrink:0;border-top:1px solid var(--rule);background:var(--soft)}
+  /* Mint affordance — appears at the bottom of the picker list when the
+     typed text doesn't match any existing vocab. Clicking swaps the
+     popover to mountMintConfirmUI's two-step confirm. */
+  .hh-pop-mint{padding:8px 11px;border-top:1px dashed var(--rule);background:var(--soft)}
+  .hh-mint-btn{display:block;width:100%;font:inherit;font-size:11px;color:var(--muted);
+    background:var(--bg);border:1px dashed var(--rule);padding:5px 8px;cursor:pointer;text-align:left}
+  .hh-mint-btn:hover{color:var(--ink);border-color:var(--ink)}
+  .hh-mint-confirm{padding:14px;font-family:var(--mono);font-size:11px}
+  .hh-mint-head{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+  .hh-mint-row{display:grid;grid-template-columns:48px 1fr;gap:8px;align-items:baseline;padding:3px 0}
+  .hh-mint-row b{font-weight:400;color:var(--muted);font-size:10px}
+  .hh-mint-row span{color:var(--ink)}
+  .hh-mint-row input{width:100%;font-family:var(--mono);font-size:11px;padding:3px 6px;
+    background:var(--bg);border:1px solid var(--rule);color:var(--ink);outline:none}
+  .hh-mint-row input:focus{border-color:var(--ink)}
+  .hh-mint-desc-preview{color:var(--hint);font-style:italic}
+  .hh-mint-foot{display:flex;justify-content:space-between;margin-top:14px;padding-top:10px;border-top:1px solid var(--rule)}
+  .hh-mint-foot button{font:inherit;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;
+    background:transparent;border:1px solid var(--rule);padding:5px 10px;cursor:pointer;color:var(--muted)}
+  .hh-mint-foot button:hover{color:var(--ink);border-color:var(--ink)}
+  .hh-mint-foot .hh-mint-go{color:var(--ink);border-color:var(--ink)}
+  .hh-mint-foot .hh-mint-go:hover{background:var(--soft)}
+  .hh-mint-foot .hh-mint-go:disabled{opacity:.5;cursor:not-allowed}
   .hh-pop-rename{display:block;width:100%;text-align:left;padding:9px 11px;
     font:inherit;color:var(--muted);background:none;border:0;cursor:pointer}
   .hh-pop-rename::before{content:"[ ";color:var(--hint);opacity:.55}
@@ -1691,7 +1714,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.16";
+  const VERSION      = "v1.07-test.17";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -1942,6 +1965,91 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   }
   function _popOutside(e) { if (!e.target.closest("#hh-pop")) closeFieldPicker(); }
 
+  // Per-property mint policy — what kind of new item the picker should create
+  // when the user types a label that doesn't match any existing vocab.
+  //   kind: "vocab"  → mint a vocabulary item; description is templated.
+  //   kind: "person" → mint a person/org item; description is prompted.
+  // `instance` is the P1 QID to write (Q3 = area, Q2 = phase); null = no P1.
+  // Closed vocabularies (P1 item-type, P92 built-status, P79 collection) are
+  // intentionally absent — those shouldn't be extended through the picker.
+  const MINT_POLICY = {
+    P87:  { kind: "vocab",  instance: "Q3", noun: "Area",         desc: l => `area: ${l.toLowerCase()} (Hunter Residence)` },
+    P62:  { kind: "vocab",  instance: "Q2", noun: "Phase",        desc: l => `phase: ${l.toLowerCase()}-related design and documentation` },
+    P88:  { kind: "vocab",  instance: null, noun: "Drawing type", desc: l => `drawing type: ${l.toLowerCase()}` },
+    P145: { kind: "vocab",  instance: null, noun: "Category",     desc: l => `category: ${l.toLowerCase()}` },
+    P140: { kind: "person", instance: null, noun: "Builder" },
+    P141: { kind: "person", instance: null, noun: "Designer" },
+    P80:  { kind: "person", instance: null, noun: "Person" },
+  };
+  function canMintFor(pid) { return !!MINT_POLICY[pid]; }
+  async function mintNewVocab(pid, label, descUser) {
+    const policy = MINT_POLICY[pid];
+    if (!policy) throw new Error("no mint policy for " + pid);
+    const data = { labels: { en: { language: "en", value: label } } };
+    const desc = descUser || (policy.desc ? policy.desc(label) : "");
+    if (desc) data.descriptions = { en: { language: "en", value: desc } };
+    if (policy.instance) {
+      data.claims = [{
+        mainsnak: { snaktype: "value", property: "P1",
+          datavalue: { value: { "entity-type": "item", id: policy.instance }, type: "wikibase-entityid" } },
+        type: "statement", rank: "normal"
+      }];
+    }
+    const r = await proxyEdit({ action: "wbeditentity", new: "item", data: JSON.stringify(data) });
+    // proxyEdit may wrap the response — normalise to .entity.id
+    const newQID = r?.entity?.id || r?.id;
+    if (!newQID) throw new Error("mint returned no QID");
+    // Invalidate the cached vocab for this property so the new item appears
+    // the next time getVocab(pid) is called.
+    delete _vocabCache[pid];
+    return newQID;
+  }
+
+  // Swap a picker popover's contents to a "Create new …" confirm dialog.
+  // After Confirm the new item is minted, onMinted(qid, label) is called to
+  // do whatever the picker would have done with an existing pick.
+  function mountMintConfirmUI(pop, pid, label, onMinted) {
+    const policy = MINT_POLICY[pid];
+    const isPerson = policy.kind === "person";
+    const previewDesc = policy.desc ? policy.desc(label) : "";
+    pop.innerHTML = `
+      <div class="hh-mint-confirm">
+        <p class="hh-mint-head">Create new ${escapeHTML(policy.noun)}</p>
+        <div class="hh-mint-row"><b>label</b><span>${escapeHTML(label)}</span></div>
+        <div class="hh-mint-row"><b>desc</b>${
+          isPerson
+            ? `<input type="text" class="hh-mint-desc" placeholder="brief description (e.g. photographer)" autocomplete="off">`
+            : `<span class="hh-mint-desc-preview">${escapeHTML(previewDesc)}</span>`
+        }</div>
+        <div class="hh-mint-foot">
+          <button class="hh-mint-cancel" type="button">Cancel · Esc</button>
+          <button class="hh-mint-go" type="button">Create ↵</button>
+        </div>
+      </div>`;
+    const descInp = pop.querySelector(".hh-mint-desc");
+    const goBtn   = pop.querySelector(".hh-mint-go");
+    if (descInp) descInp.focus(); else goBtn.focus();
+    const go = async () => {
+      const userDesc = descInp ? descInp.value.trim() : null;
+      goBtn.disabled = true;
+      hhToast("minting " + policy.noun + "…");
+      try {
+        const newQID = await mintNewVocab(pid, label, userDesc);
+        hhToast(`Created ${newQID} · ${label}`, "ok");
+        await onMinted(newQID, label);
+      } catch (err) {
+        hhToast("Mint failed: " + err.message, "err");
+        closeFieldPicker();
+      }
+    };
+    pop.querySelector(".hh-mint-cancel").addEventListener("click", closeFieldPicker);
+    goBtn.addEventListener("click", go);
+    pop.addEventListener("keydown", e => {
+      if (e.key === "Escape") { e.preventDefault(); closeFieldPicker(); }
+      if (e.key === "Enter")  { e.preventDefault(); go(); }
+    });
+  }
+
   function openFieldPicker(btn, item) {
     closeFieldPicker();
     const { pid, key, dt } = btn.dataset;
@@ -1970,11 +2078,16 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       };
       const drawList = () => {
         const have = new Set(item[key] || []);
-        const f = inp.value.trim().toLowerCase();
-        const sh = opts.filter(o => !have.has(o.label) && o.label.toLowerCase().includes(f));
-        list.innerHTML = sh.length
+        const raw  = inp.value.trim();
+        const f    = raw.toLowerCase();
+        const sh   = opts.filter(o => !have.has(o.label) && o.label.toLowerCase().includes(f));
+        let html = sh.length
           ? sh.map(o => `<div class="hh-pop-opt" data-qid="${o.qid}">${escapeHTML(o.label)}</div>`).join("")
           : `<div class="hh-pop-msg">${opts.length ? "no matches" : "vocabulary failed"}</div>`;
+        if (raw && canMintFor(pid) && !opts.some(o => o.label.toLowerCase() === f)) {
+          html += `<div class="hh-pop-mint"><button class="hh-mint-btn" type="button">+ mint "${escapeHTML(raw)}" as ${escapeHTML(MINT_POLICY[pid].noun)}</button></div>`;
+        }
+        list.innerHTML = html;
       };
       drawCur();
       getVocab(pid).then(v => { opts = v; drawList(); })
@@ -1996,6 +2109,19 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         } catch (err) { hhToast("Remove failed: " + err.message, "err"); }
       });
       list.addEventListener("click", async e => {
+        const mintBtn = e.target.closest(".hh-mint-btn");
+        if (mintBtn) {
+          const newLabel = inp.value.trim();
+          mountMintConfirmUI(pop, pid, newLabel, async (newQID, newLbl) => {
+            try {
+              await addMultiItem(item.qid, pid, newQID);
+              item[key] = [...(item[key] || []), newLbl];
+              synced();
+              closeFieldPicker();
+            } catch (err) { hhToast("Add failed: " + err.message, "err"); }
+          });
+          return;
+        }
         const o = e.target.closest(".hh-pop-opt"); if (!o) return;
         const qid = o.dataset.qid, lbl = (opts.find(x => x.qid === qid) || {}).label || "";
         hhToast("adding " + lbl + "…");
@@ -2100,11 +2226,16 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     const cur  = (item[key] || "").toLowerCase();
     let opts   = [];
     const draw = () => {
-      const f = inp.value.trim().toLowerCase();
-      const sh = opts.filter(o => o.label.toLowerCase().includes(f));
-      list.innerHTML = sh.length
+      const raw = inp.value.trim();
+      const f   = raw.toLowerCase();
+      const sh  = opts.filter(o => o.label.toLowerCase().includes(f));
+      let html = sh.length
         ? sh.map(o => `<div class="hh-pop-opt${o.label.toLowerCase() === cur ? " cur" : ""}" data-qid="${o.qid}">${escapeHTML(o.label)}</div>`).join("")
         : `<div class="hh-pop-msg">no matches</div>`;
+      if (raw && canMintFor(pid) && !opts.some(o => o.label.toLowerCase() === f)) {
+        html += `<div class="hh-pop-mint"><button class="hh-mint-btn" type="button">+ mint "${escapeHTML(raw)}" as ${escapeHTML(MINT_POLICY[pid].noun)}</button></div>`;
+      }
+      list.innerHTML = html;
     };
     getVocab(pid).then(v => { opts = v; draw(); })
                  .catch(() => { list.innerHTML = `<div class="hh-pop-msg">vocabulary failed to load</div>`; });
@@ -2113,6 +2244,20 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     inp.focus();
 
     list.addEventListener("click", async e => {
+      const mintBtn = e.target.closest(".hh-mint-btn");
+      if (mintBtn) {
+        const newLabel = inp.value.trim();
+        mountMintConfirmUI(pop, pid, newLabel, async (newQID, newLbl) => {
+          try {
+            await setSingleItemClaim(item.qid, pid, newQID);
+            item[key] = newLbl;
+            const m = state.items.find(i => i.qid === item.qid); if (m) m[key] = newLbl;
+            renderMeta(item);
+            closeFieldPicker();
+          } catch (err) { hhToast("Save failed: " + err.message, "err"); }
+        });
+        return;
+      }
       const o = e.target.closest(".hh-pop-opt");
       if (!o) return;
       const qid = o.dataset.qid;
