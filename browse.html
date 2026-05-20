@@ -121,6 +121,13 @@
      × in the corner is the dismissal, Continue is gone. */
   body.hh-splash #about-pane-close{display:none}
   body:not(.hh-splash) #about-pane-continue{display:none}
+  /* Mobile mirrors: × hidden during splash, Continue hidden after dismissal. */
+  body.hh-splash #mob-about-close{display:none}
+  body:not(.hh-splash) #mob-about-continue{display:none}
+  /* During splash, the top-bar search affordance is dead weight — hide it
+     (and its trailing separator) until the visitor leaves the title wall. */
+  body.hh-splash #search-toggle,
+  body.hh-splash #search-toggle + .tr-sep{display:none}
   /* Foot row: credits on the left, Continue button on the right baseline. */
   /* Credits stack as normal flow; Continue button drops to its own line
      with a generous gap and right-aligns — clear separation from the
@@ -894,17 +901,9 @@
     width:44px;height:44px;display:flex;align-items:center;justify-content:center;
   }
   #mob-about-close:active{color:var(--ink)}
-  #mob-about-bottomrow{
-    display:flex;justify-content:flex-end;align-items:center;
-    flex-shrink:0;margin:16px -4px 0;
-  }
-  #mob-reload{
-    background:none;border:none;line-height:1;color:var(--hint);cursor:pointer;
-    font-size:17px;
-    width:44px;height:44px;display:flex;align-items:center;justify-content:center;
-  }
-  #mob-reload:active{color:var(--ink)}
-  #mob-reload:active,#mob-about-close:active{color:var(--ink)}
+  /* Mobile mirrors the desktop foot row: credits in normal flow, Continue
+     button on its own line below with right-alignment + a clear gap. */
+  .mob-about-actions{display:flex;justify-content:flex-end;margin-top:44px}
   .mob-about-title{
     font-family:var(--mono);font-size:11px;font-weight:500;
     letter-spacing:0.12em;text-transform:uppercase;color:var(--ink);line-height:1.3;
@@ -918,6 +917,8 @@
     font-family:var(--mono);font-size:10px;line-height:1.7;color:var(--ink);
     letter-spacing:0.02em;margin:0 0 10px;
   }
+  .mob-about-body a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
+  .mob-about-body a:active{border-bottom-color:var(--copper-deep)}
   .mob-about-rule{border:0;border-top:1px solid var(--rule);margin:20px 0}
   .mob-about-credits{
     display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:baseline;
@@ -1516,8 +1517,7 @@
   <p class="mob-about-ver" id="mob-about-ver"></p>
   <p class="mob-about-body">A foundation dedicated to the stewardship of the residence and architectural archive of architect <span class="c-red">Richard Morrow Hunter</span> (1930–2023).</p>
   <p class="mob-about-body ap-addr">203 Goward Road, Saanich, British Columbia</p>
-  <p class="mob-about-body">Open data archive on Wikibase — the knowledge graph software underlying Wikidata. Items persistent and individually addressable by URI; statements are typed RDF triples carrying qualifiers, references, and ranks; the catalogue is SPARQL-queryable and federable against external Linked Open Data endpoints. Archival description follows GLAM conventions and the CCA Digital Archives Manual — multi-level arrangement at fonds, series, file, and item. Items aligned to external identifiers (Q-IDs) for cross-catalogue reconciliation.</p>
-  <p class="mob-about-body">Structured metadata: CC0, per Wikibase/Wikidata convention. Content — drawings, documents, photographs: CC BY-NC-ND 4.0, rights granted by Frances Hunter. Material held by the Canadian Architectural Archives — University of Calgary remains under separate stewardship; contact the CAA for use.</p>
+  <p class="mob-about-body"><a href="https://hunterhouse.wikibase.cloud/wiki/Main_Page" target="_blank" rel="noopener">Archive structure, rights &amp; endpoints — Wikibase Main Page ↗</a></p>
   <hr class="mob-about-rule">
   <dl class="mob-about-credits">
     <dt>Stewards</dt>
@@ -1525,8 +1525,8 @@
     <dt>Project Lead</dt>
     <dd><span class="c-yellow">Brandon Poole</span></dd>
   </dl>
-  <div id="mob-about-bottomrow">
-    <button id="mob-reload" aria-label="Reload archive">↺</button>
+  <div class="mob-about-actions">
+    <button class="cur-continue" id="mob-about-continue">Continue to archive →</button>
   </div>
 </div>
 
@@ -1687,7 +1687,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06.01";
+  const VERSION      = "v1.06.02";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4392,7 +4392,7 @@ WHERE {
     document.getElementById("mob-about-ver").textContent = VERSION_DISPLAY;
     document.getElementById("ap-ver").textContent = VERSION_DISPLAY;
     const mvBtn = document.getElementById("mobile-version");
-    if (mvBtn) mvBtn.textContent = "HHFA " + VERSION_DISPLAY;
+    if (mvBtn) mvBtn.textContent = "HHFA";   // version lives only inside the HHFA card
     // Topright version: TEMPORARILY hidden on staging too — Brandon
     // wants to preview what live will look like. To restore the staging
     // "which test build am I on?" affordance, re-enable the -test
@@ -4413,9 +4413,7 @@ WHERE {
     });
     document.getElementById("mob-about-close").addEventListener("click", closeMobAbout);
     document.getElementById("mob-about-backdrop").addEventListener("click", closeMobAbout);
-    document.getElementById("mob-reload").addEventListener("click", () => {
-      clearCache(); location.reload();
-    });
+    document.getElementById("mob-about-continue").addEventListener("click", closeMobAbout);
 
     $("#rows").addEventListener("click", e => {
       const row = e.target.closest(".row");
@@ -4494,6 +4492,9 @@ WHERE {
   function closeMobAbout() {
     document.getElementById("mob-about").classList.remove("open");
     document.getElementById("mob-about-backdrop").classList.remove("open");
+    // Splash mode lives until either close path runs — desktop's closeAboutPane
+    // mirror. Clears the × ↔ Continue swap so subsequent HHFA opens get ×.
+    document.body.classList.remove("hh-splash");
   }
 
   // ── About pane ────────────────────────────────────────────────────────────
@@ -4681,13 +4682,14 @@ WHERE {
         syncFsBtn();
       });
 
-      // Splash-mode init: on every page load (refresh or first visit),
-      // collapse both side panels and open the HHFA about-pane. browse.html
-      // acts as its own opener — visitor dismisses the × to reveal the
-      // image stage, then discovers the collapsed panels by clicking the
-      // edge handles. Desktop only (mobile has tabbed sheets + #mob-about,
-      // no parallel desktop about-pane).
-      if (!window.matchMedia("(max-width:767px)").matches) {
+      // Splash-mode init: on every page load (refresh or first visit), open
+      // the HHFA about pane as a title-wall threshold. Desktop also collapses
+      // both side panels; mobile uses its own #mob-about modal (no panels to
+      // collapse — the tabs handle layout).
+      if (window.matchMedia("(max-width:767px)").matches) {
+        document.body.classList.add("hh-splash");   // × hidden, Continue shown
+        openMobAbout();
+      } else {
         leftP.classList.add("out");
         rightP.classList.add("out");
         document.body.classList.add("hh-splash");   // first-paint title-wall lock
