@@ -148,6 +148,10 @@
     padding:48px 40px 64px}
   html.dark #curator-pane{background:#242220}
   #curator-pane.open{display:flex}
+  .cur-heading{font-family:var(--mono);font-size:9px;letter-spacing:0.22em;
+    text-transform:uppercase;color:var(--muted);margin:0 0 18px;
+    display:flex;align-items:center;gap:14px;width:100%;max-width:560px}
+  .cur-heading::before,.cur-heading::after{content:"";flex:1;height:1px;background:var(--rule)}
   .cur-blurb{font-family:var(--mono);font-size:10px;line-height:1.7;
     letter-spacing:0.04em;color:var(--muted);text-transform:uppercase;
     border-bottom:1px solid var(--rule);padding-bottom:14px;margin-bottom:22px}
@@ -1590,7 +1594,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.25";
+  const VERSION      = "v1.06-test.26";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2695,7 +2699,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   // + a macro intro, served as static JSON in /curations. Public; viewing only
   // in Phase 1 (no in-browser authoring). Everything is a no-op when no
   // curations/index.json is present.
-  const LENS_BLURB = "A curated lens is an invited selection through the archive — one curator's ordered path and notes, not a filter. Leave it any time to return to the full catalogue.";
+  const LENS_BLURB = "A curated selection is an invited path through the archive — one curator's chosen items, in their order, with their notes. Not a filter. Leave it any time to return to the full catalogue.";
   const curationCache = {};
   async function loadCurationIndex() {
     try {
@@ -2901,14 +2905,15 @@ WHERE {
       ? `<a class="cur-link" href="${escapeHTML(cu.url)}" target="_blank" rel="noopener">${escapeHTML(cu.url_label || cu.url)} ↗</a>`
       : "";
     document.getElementById("curator-pane-inner").innerHTML = `
+      <p class="cur-heading">A curated selection</p>
       <p class="cur-blurb">${escapeHTML(LENS_BLURB)}</p>
-      <p class="cur-name">${escapeHTML(cu.name || c.curator || "Curator")}</p>
+      <p class="cur-name">${escapeHTML(cu.name || c.curator || "an invited curator")}</p>
       <p class="cur-role">${escapeHTML([cu.role, cu.affiliation].filter(Boolean).join(" · "))}</p>
       ${c.title ? `<p class="cur-title">${escapeHTML(c.title)}</p>` : ""}
       ${cu.bio ? `<p class="cur-bio">${escapeHTML(cu.bio)}</p>` : ""}
       ${link}
       <div class="cur-actions">
-        <button class="cur-continue" id="cur-continue">Continue to exhibition →</button>
+        <button class="cur-continue" id="cur-continue">Enter exhibition →</button>
         <button class="cur-cancel" id="cur-cancel">cancel</button>
       </div>`;
     curatorPane().classList.add("open");
@@ -2947,7 +2952,7 @@ WHERE {
     card.hidden = false;
     card.innerHTML = `
       <div class="cc-top">
-        <span class="cc-curator">Curated · ${escapeHTML(cu.name || c.curator || "")}</span>
+        <span class="cc-curator">Curated by ${escapeHTML(cu.name || c.curator || "an invited curator")}</span>
         <button class="cc-exit" id="cc-exit" title="Leave this curation">exit</button>
       </div>
       ${c.title ? `<p class="cc-title">${escapeHTML(c.title)}</p>` : ""}
@@ -3674,7 +3679,7 @@ WHERE {
     // don't toggle a Set; clicking opens the curator threshold overlay.
     // Hidden while inside a curation (the card's exit is the way out).
     const curatedRow = (!state.curation && (state.curations || []).length)
-      ? `<div class="fp-group fp-grp-cur"><div class="fp-lbl">Curated</div><div class="fp-chips">${
+      ? `<div class="fp-group fp-grp-cur"><div class="fp-lbl">Curators</div><div class="fp-chips">${
           state.curations.map(c =>
             `<button class="fp-chip ${pillCls(PC.indigo)}" data-cur-slug="${escapeHTML(c.slug)}">${escapeHTML(c.curator || c.title || c.slug)}</button>`
           ).join("")

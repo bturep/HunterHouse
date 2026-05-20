@@ -1,13 +1,6 @@
 {
-  "_note": "Index of available curated lenses. Each entry's <slug>.json holds the curator's selection + bio + intro. Entries without a corresponding <slug>.json render in the Browse panel but throw 'Curation unavailable' on click — placeholders until the curator's content is in.",
+  "_note": "Index of available curators. Each entry's <slug>.json holds that curator's selection + bio + intro. Phase 1: just Brandon Poole (additional curators come in Phase 2). Add more entries here as their <slug>.json files land; the Browse filter panel's Curators row auto-populates.",
   "curations": [
-    { "slug": "brandon-poole",     "curator": "Brandon Poole" },
-    { "slug": "robert-youds",      "curator": "Robert Youds" },
-    { "slug": "kristina-leach",    "curator": "Kristina Leach" },
-    { "slug": "theodora-vardouli", "curator": "Theodora Vardouli" },
-    { "slug": "julian-dime",       "curator": "Julian Dime" },
-    { "slug": "olivia-jol",        "curator": "Olivia Jol" },
-    { "slug": "frances-hunter",    "curator": "Frances Hunter" },
-    { "slug": "mowry-baden",       "curator": "Mowry Baden" }
+    { "slug": "brandon-poole", "curator": "Brandon Poole" }
   ]
 }
