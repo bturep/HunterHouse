@@ -115,6 +115,16 @@
   body.hh-splash .panel-handle,
   body.hh-splash #zoom-fs{pointer-events:none}
   body.hh-splash .panel-content{visibility:hidden}
+  /* Splash vs. subsequent opens: the first-paint about-pane is a deliberate
+     threshold — only the Continue button exits it (× hidden). After dismissal,
+     hh-splash is cleared; subsequent HHFA opens swap the affordances back —
+     × in the corner is the dismissal, Continue is gone. */
+  body.hh-splash #about-pane-close{display:none}
+  body:not(.hh-splash) #about-pane-continue{display:none}
+  /* Foot row: credits on the left, Continue button on the right baseline. */
+  .ap-foot-row{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:28px}
+  .ap-foot-row .ap-credits{margin-bottom:0}
+  .ap-foot-row .cur-actions{margin-top:0;flex-shrink:0}
   .ap-inner{width:100%;max-width:520px;position:relative}
   #about-pane-close{
     position:absolute;top:-8px;right:0;
@@ -1587,14 +1597,16 @@
         </div>
         -->
         <hr class="ap-rule">
-        <dl class="ap-credits">
-          <dt>Stewards</dt>
-          <dd><span class="pc-sage">Floyd Marinescu</span><br><span class="pc-slate">Olivia Jol</span></dd>
-          <dt>Project Lead</dt>
-          <dd><span class="c-yellow">Brandon Poole</span></dd>
-        </dl>
-        <div class="cur-actions">
-          <button class="cur-continue" id="about-pane-continue">Continue to archive →</button>
+        <div class="ap-foot-row">
+          <dl class="ap-credits">
+            <dt>Stewards</dt>
+            <dd><span class="pc-sage">Floyd Marinescu</span><br><span class="pc-slate">Olivia Jol</span></dd>
+            <dt>Project Lead</dt>
+            <dd><span class="c-yellow">Brandon Poole</span></dd>
+          </dl>
+          <div class="cur-actions">
+            <button class="cur-continue" id="about-pane-continue">Continue to archive →</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1697,7 +1709,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.50";
+  const VERSION      = "v1.06-test.51";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4773,11 +4785,11 @@ WHERE {
       updateFilterBadge();
       initPanZoom();
 
-      const defaultItem = state.filtered.find(i => i.qid === "Q331") || state.filtered[0];
+      const defaultItem = state.filtered.find(i => i.id === "HH-HHC-0028") || state.filtered[0];
       const target = urlId && state.filtered.find(i => i.id === urlId)
         ? urlId
         : defaultItem?.id;
-      if (target) selectItem(target, { scrollIntoView: !!urlId, tap: !!urlId });
+      if (target) selectItem(target, { scrollIntoView: true, tap: !!urlId });
 
     } catch (err) {
       console.error(err);
