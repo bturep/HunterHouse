@@ -13,6 +13,12 @@
 <link rel="apple-touch-icon" href="/HunterHouse/assets/icon-180.png">
 <!-- Paint holdout: sets dark bg before render-blocking external CSS resolves -->
 <style>html{background:#1a1816}</style>
+<!-- Splash-mode pre-init: if this load will fire splash-mode (desktop), mark
+     body so the header .markid renders at opacity:0 from the very first
+     paint instead of flashing visible-then-fading-out as the main JS init
+     catches up. Mobile skips splash-mode (and thus this pre-init). -->
+<script>if(!matchMedia('(max-width:767px)').matches)document.documentElement.dataset.splashInit='1';</script>
+<style>html[data-splash-init="1"] body .markid{opacity:0}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -51,13 +57,30 @@
   .header-search input::placeholder{color:var(--hint)}
 
   /* ── about pane (image area overlay) ── */
+  /* Opacity-based fade instead of display toggle so opening/closing the
+     pane can transition with the header .markid (see body.hh-about-open
+     rule below). Always rendered as display:flex; visibility hidden +
+     pointer-events:none when not open, with a transition-delay on
+     visibility so it's interactive throughout the fade-out. */
   #about-pane{
-    display:none;position:absolute;inset:0;z-index:15;overflow-y:auto;
+    display:flex;position:absolute;inset:0;z-index:15;overflow-y:auto;
     flex-direction:column;align-items:center;
     background:var(--soft);padding:48px 40px 64px;
+    opacity:0;visibility:hidden;pointer-events:none;
+    transition:opacity 380ms ease, visibility 0s linear 380ms;
   }
   html.dark #about-pane{background:#242220}
-  #about-pane.open{display:flex}
+  #about-pane.open{
+    opacity:1;visibility:visible;pointer-events:auto;
+    transition:opacity 380ms ease, visibility 0s linear 0s;
+  }
+  /* Header title swap: when the about-pane is open, the .markid in the
+     header bar fades out — the pane's big ap-title takes over as the
+     visible title. Fast on open (200ms, no delay) so the swap reads as
+     immediate handoff; slower with a 100ms delay on close so the markid
+     appears AS the pane fades, not before. */
+  .markid{transition:opacity 280ms ease 100ms}
+  body.hh-about-open .markid{opacity:0;pointer-events:none;transition:opacity 200ms ease}
   .ap-inner{width:100%;max-width:520px;position:relative}
   #about-pane-close{
     position:absolute;top:-8px;right:0;
@@ -1647,7 +1670,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.41";
+  const VERSION      = "v1.06-test.42";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4449,8 +4472,11 @@ WHERE {
 
   // ── About pane ────────────────────────────────────────────────────────────
   const aboutPane = document.getElementById("about-pane");
-  function openAboutPane()  { aboutPane.classList.add("open"); }
-  function closeAboutPane() { aboutPane.classList.remove("open"); }
+  // body.hh-about-open is the single switch that drives both the about-
+  // pane fade AND the header .markid fade-out (see CSS above) — keeps
+  // the title swap coordinated as one transition.
+  function openAboutPane()  { aboutPane.classList.add("open");    document.body.classList.add("hh-about-open"); }
+  function closeAboutPane() { aboutPane.classList.remove("open"); document.body.classList.remove("hh-about-open"); }
   function toggleAboutPane(){ aboutPane.classList.toggle("open"); }
 
   // ── Info panel — system orientation + shortcuts, role-aware ──────────────
@@ -4589,7 +4615,11 @@ WHERE {
       if (!window.matchMedia("(max-width:767px)").matches) {
         leftP.classList.add("out");
         rightP.classList.add("out");
-        openAboutPane();
+        openAboutPane();   // adds body.hh-about-open → keeps .markid opacity:0
+        // openAboutPane has the markid pinned via body.hh-about-open now,
+        // so the head-level data-splash-init attribute (which prevented the
+        // visible-then-fade-out flash before this JS ran) can stand down.
+        document.documentElement.removeAttribute("data-splash-init");
       }
       syncFsBtn();   // start with the icon/title matching the DOM
     }
