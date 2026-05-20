@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Hunter House Foundation</title>
+<title>Hunter House Foundation Archive</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#1a1816">
 <meta name="color-scheme" content="dark">
@@ -11,91 +11,124 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="HH Archive">
 <link rel="apple-touch-icon" href="/HunterHouse/assets/icon-180.png">
-<style>html,body{background:#1a1816}</style>
-<link rel="preload" as="image" href="https://archive.hunterhousefoundation.com/web/media/HH-Splash-poster.jpg">
+<!-- Paint holdout: dark bg before any other style resolves, no white flash. -->
+<style>html,body{background:#1a1816;color:#f0ede6}</style>
 <style>
-  html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#1a1816;color:#f3f1ec;font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace}
+  /* ── Soft threshold landing ────────────────────────────────────────────
+     A typographic-only entry into the archive. No images, no chrome, no
+     borders. Type is positioned at the EXACT spatial coordinates the
+     equivalent UI element occupies in browse.html — so when the visitor
+     clicks through, the typography stays put and the borders/panels/
+     images appear AROUND it. Soft reveal, not a jarring jump.
 
-  .splash{
-    position:fixed;inset:0;cursor:pointer;
-    display:flex;flex-direction:column;
-    text-decoration:none;color:inherit;
+     Spatial map:
+       .markid → top-left at 28px / 14px, 11px mono caps 0.18em
+                 (identical to browse.html .markid in .site-top)
+       .intro  → middle (where image-stage lives), centered horizontally
+                 and vertically, .ap-body typography (11.5px mono 1.75)
+       .enter  → bottom-right, small mono caps, gentle pulse arrow
+   ───────────────────────────────────────────────────────────────────────── */
+
+  :root {
+    --bg:    #1a1816;
+    --ink:   #f0ede6;
+    --muted: #76726a;
+    --hint:  #a8a59c;
+    --rule:  #2a2723;
+    --red:   #c4826e;   /* matches verso.css dark-mode --red */
+    --mono:  'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace;
+  }
+  html, body {
+    margin: 0; padding: 0; height: 100%; overflow: hidden;
+    background: var(--bg); color: var(--ink);
+    font-family: var(--mono);
   }
 
-  .film{
-    position:absolute;inset:0;overflow:hidden;
-    transform:translateZ(0);
-  }
-  .film::after{
-    content:"";position:absolute;inset:0;pointer-events:none;z-index:2;
-    background:radial-gradient(ellipse at center, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.45) 85%);
-  }
-  .film video{opacity:0;transition:opacity 900ms ease-in-out;position:absolute;top:50%;left:50%;width:max(100vw,calc(100vh*16/9));height:max(100vh,calc(100vw*9/16));transform:translate(-50%,-50%);object-fit:cover}
-  .film video.show{opacity:1}
-
-  .splash .mark{
-    position:absolute;left:18%;top:50%;
-    transform:translateY(-50%);
-    padding:28px 36px;
-    display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px;
-    font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace;
-    font-size:2.6vw;font-weight:700;letter-spacing:0.18em;line-height:1.2;
-    text-transform:uppercase;color:#f3f1ec;
-    text-shadow:0 2px 12px rgba(0,0,0,0.45);
-    z-index:5;pointer-events:none;
-    opacity:0;animation:mark-in 700ms ease-out 450ms forwards;
-  }
-  .splash .mark span{display:block}
-  @keyframes mark-in{
-    from{opacity:0}
-    to  {opacity:1}
+  /* Full-viewport clickable threshold. */
+  .threshold {
+    position: fixed; inset: 0;
+    cursor: pointer;
+    text-decoration: none; color: inherit;
+    display: block;
   }
 
-  .splash.exiting{pointer-events:none;cursor:default;animation:splash-out 550ms ease-in-out forwards}
-  @keyframes splash-out{to{opacity:0}}
-
-  .splash .enter{
-    position:absolute;right:36px;bottom:32px;z-index:5;
-    font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace;font-size:13px;color:#9dc2b2;
-    letter-spacing:0.28em;text-transform:uppercase;
-    display:flex;align-items:center;gap:14px;
-    text-shadow:0 1px 8px rgba(0,0,0,0.6);
-    pointer-events:none;
-    opacity:0;animation:fade-in 700ms ease-out 1300ms forwards;
-  }
-  .splash .enter .arrow{color:#9dc2b2;font-size:13px;letter-spacing:0;animation:enter-pulse 2.4s ease-in-out 3000ms infinite}
-  @keyframes fade-in{from{opacity:0}to{opacity:1}}
-  @keyframes enter-pulse{0%,100%{transform:translateX(0)}50%{transform:translateX(4px)}}
-
-  .splash .imprint{
-    position:absolute;left:36px;top:28px;z-index:5;
-    font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace;font-size:10.5px;color:rgba(243,241,236,0.45);
-    letter-spacing:0.18em;text-transform:uppercase;
-    pointer-events:none;
-    opacity:0;animation:fade-in 700ms ease-out 1500ms forwards;
-  }
-  .splash .imprint b{color:#d49a86;font-weight:500;margin-right:8px}
-
-  .splash:hover .enter{color:#f3f1ec}
-  .splash:active{transform:scale(0.998)}
-
-  @media (max-width:767px){
-    .splash .mark{font-size:6vw;left:8%;padding:18px 22px}
-    .splash .enter{right:20px;bottom:24px}
-    .splash .imprint{left:20px}
+  /* Site mark — identical placement and type to browse.html's .markid.
+     Position-preserved on transition: the mark doesn't move, the
+     header bar + panels just appear around it. */
+  .markid {
+    position: absolute;
+    left: 28px; top: 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink);
+    line-height: 1.4;
+    white-space: nowrap;
   }
 
-  /* Portrait lock */
-  #rotate-msg{
-    display:none;position:fixed;inset:0;z-index:99999;
-    background:#000;color:rgba(243,241,236,0.7);
-    flex-direction:column;align-items:center;justify-content:center;
-    gap:16px;font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace;
-    font-size:11px;letter-spacing:0.18em;text-transform:uppercase;pointer-events:none;
+  /* Wall-text intro — sits in the area the image stage will occupy.
+     Uses .ap-body typography (the HHFA pane body font + size + leading).
+     The architect's name picks up var(--red) — same Hunter accent as
+     the HHFA pane span. */
+  .intro {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(520px, calc(100% - 80px));
+    font-family: var(--mono);
+    font-size: 11.5px;
+    line-height: 1.75;
+    color: var(--ink);
+    letter-spacing: 0.02em;
   }
-  #rotate-msg svg{opacity:0.45}
-  @media screen and (orientation:landscape) and (max-height:500px){
-    #rotate-msg{display:flex}
+  .intro p { margin: 0 0 14px; }
+  .intro .c-red { color: var(--red); }
+  .intro .ap-addr { color: var(--muted); margin-top: 6px; }
+
+  /* Enter affordance — bottom-right, quiet mono caps. */
+  .enter {
+    position: absolute;
+    right: 28px; bottom: 18px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex; align-items: center; gap: 10px;
+    transition: color .25s;
+  }
+  .threshold:hover .enter { color: var(--ink); }
+  .enter .arrow { font-size: 11px; letter-spacing: 0; animation: enter-pulse 2.4s ease-in-out 1200ms infinite; }
+  @keyframes enter-pulse {
+    0%, 100% { transform: translateX(0); }
+    50%      { transform: translateX(4px); }
+  }
+
+  /* Fade-out on click — short transition before navigation, so the page
+     dissolves rather than swaps. */
+  .threshold.exiting { animation: fade-out 380ms ease-out forwards; pointer-events: none; }
+  @keyframes fade-out { to { opacity: 0; } }
+
+  /* Mobile */
+  @media (max-width: 767px) {
+    .markid { left: 20px; top: 18px; font-size: 11px; }
+    .intro { width: calc(100% - 48px); }
+    .enter { right: 20px; bottom: 22px; }
+  }
+
+  /* Portrait lock — same constraint browse.html honors on phones. */
+  #rotate-msg {
+    display: none; position: fixed; inset: 0; z-index: 99999;
+    background: #000; color: rgba(243,241,236,0.7);
+    flex-direction: column; align-items: center; justify-content: center;
+    gap: 16px; font-family: var(--mono);
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; pointer-events: none;
+  }
+  #rotate-msg svg { opacity: 0.45; }
+  @media screen and (orientation:landscape) and (max-height:500px) {
+    #rotate-msg { display: flex; }
   }
 </style>
 </head>
@@ -105,57 +138,47 @@
   <span>Rotate to portrait</span>
 </div>
 
-<a href="browse.html" class="splash" id="splash" aria-label="Enter the Hunter House Foundation archive">
-  <div class="film" id="film">
-    <video id="film-video" autoplay loop muted playsinline preload="auto"></video>
+<a href="browse.html" class="threshold" id="threshold" aria-label="Enter the Hunter House Foundation Archive">
+
+  <div class="markid">Hunter House Foundation Archive</div>
+
+  <div class="intro">
+    <p>A foundation dedicated to the stewardship of the residence and architectural archive of architect <span class="c-red">Richard Morrow Hunter</span> (1930&ndash;2023).</p>
+    <p class="ap-addr">203 Goward Road, Saanich, British Columbia.</p>
   </div>
-  <div class="imprint"><b>2026.05</b>v1.04</div>
-  <div class="mark">
-    <span>Hunter</span>
-    <span>House</span>
-    <span>Foundation</span>
-    <span>Archive</span>
+
+  <div class="enter">
+    <span>Enter the archive</span>
+    <span class="arrow">→</span>
   </div>
-  <div class="enter"><span>Enter to Archive</span><span class="arrow">→</span></div>
+
 </a>
 
 <script>
-  const splash = document.getElementById('splash');
-  const video  = document.getElementById('film-video');
-
-  const R2 = 'https://archive.hunterhousefoundation.com/web/media';
-  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-  const fast = conn && !conn.saveData && conn.effectiveType === '4g' && (conn.downlink || 10) >= 5;
-  video.src = fast ? `${R2}/HH-Splash4k.mp4` : `${R2}/HH-Splash1080.mp4`;
-
-  // Poster is preloaded in <head> (network fetch starts at parse time).
-  // Set it here in JS so the video element never renders it before
-  // CSS opacity:0 has been composited — avoids first-frame flash.
-  // Start the fade only when decode() confirms it is GPU-ready.
-  const posterSrc = `${R2}/HH-Splash-poster.jpg`;
-  // Double-rAF: first frame paints video at opacity:0, second frame triggers
-  // the transition — ensures it fires on cached loads where decode() resolves
-  // before the first paint.
-  const go = () => requestAnimationFrame(() => requestAnimationFrame(() => video.classList.add('show')));
-  const img = new Image();
-  img.src = posterSrc;
-  img.decode ? img.decode().then(() => { video.poster = posterSrc; go(); }, go)
-             : (img.onload = () => { video.poster = posterSrc; go(); }, img.onerror = go);
-  setTimeout(go, 1500);
-
-  // Click → animate out → navigate to browse
-  splash.addEventListener('click', (e) => {
+  // Click → brief fade → navigate. Sets the hhf_splash flag so browse.html
+  // knows the visitor arrived through the threshold (used elsewhere for
+  // splash-aware UX decisions).
+  const t = document.getElementById('threshold');
+  t.addEventListener('click', (e) => {
     e.preventDefault();
-    if (splash.classList.contains('exiting')) return;
-    splash.classList.add('exiting');
+    if (t.classList.contains('exiting')) return;
+    t.classList.add('exiting');
     sessionStorage.setItem('hhf_splash', '1');
-    setTimeout(() => { window.location.href = 'browse.html'; }, 570);
+    setTimeout(() => { window.location.href = 'browse.html'; }, 400);
   });
 </script>
 
 <script>
-  // Fire SPARQL prefetch so browse.html loads instantly from sessionStorage.
-  // Runs fire-and-forget — any error is silently swallowed.
+  // ── SPARQL prefetch ───────────────────────────────────────────────────
+  // Invisible. Fires fire-and-forget so browse.html loads instantly from
+  // sessionStorage instead of round-tripping to the Wikibase Cloud SPARQL
+  // endpoint. Any error is silently swallowed (the splash still navigates;
+  // browse.html will just fetch normally).
+  //
+  // CRITICAL: must stay in sync with CATALOGUE_QUERY in browse.html.
+  // When next.html v1.06 promotes, this query needs updating to add
+  // ?accessCopy + ?rotation OPTIONALs and to loosen P96 → OPTIONAL with
+  // a required P79 (see "Prefetch-sync at promotion" in CLAUDE.md).
   (function () {
     try {
       const existing = sessionStorage.getItem("hhf_prefetch");
@@ -166,7 +189,6 @@
     } catch {}
 
     const SPARQL = "https://hunterhouse.wikibase.cloud/query/sparql";
-    // Must stay in sync with CATALOGUE_QUERY in browse.html
     const QUERY = `
 PREFIX wdt: <https://hunterhouse.wikibase.cloud/prop/direct/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -231,6 +253,7 @@ WHERE {
     .catch(() => {});
   })();
 </script>
+
 <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/HunterHouse/sw.js');</script>
 </body>
 </html>
