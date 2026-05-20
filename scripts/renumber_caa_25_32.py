@@ -39,8 +39,10 @@ from urllib3.util.retry import Retry
 API     = "https://hunterhouse.wikibase.cloud/w/api.php"
 SPARQL  = "https://hunterhouse.wikibase.cloud/query/sparql"
 ENV     = os.path.expanduser("~/Documents/hh-wikibase-migration/.env")
-MAPPING = os.path.expanduser(
+DEFAULT_MAPPING = os.path.expanduser(
     "~/Documents/hh-wikibase-migration/data/snapshots/mapping_caa_25_32.tsv")
+# Reassigned in main() if --mapping PATH is given.
+MAPPING = DEFAULT_MAPPING
 
 # R2 layout — four tiers per item, one filename pattern. Suffix per tier
 # differs (master keeps .tif, the three jpg tiers add _thumb/_prev/_large).
@@ -353,7 +355,11 @@ def main():
     g.add_argument("--cleanup",     action="store_true", help="Delete old R2 files (post-verify)")
     p.add_argument("--skip-r2",        action="store_true")
     p.add_argument("--skip-wikibase",  action="store_true")
+    p.add_argument("--mapping",        default=DEFAULT_MAPPING,
+                   help=f"Path to mapping TSV (default: {DEFAULT_MAPPING})")
     args = p.parse_args()
+    global MAPPING
+    MAPPING = os.path.expanduser(args.mapping)
 
     if args.verify_only:
         cmd_verify()
