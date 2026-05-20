@@ -36,8 +36,14 @@
   html,body{overflow:hidden}
   @keyframes page-in{from{opacity:0}to{opacity:1}}
   body{height:100%;display:flex;flex-direction:column;animation:page-in 400ms ease-out both}
-  .site-top{padding:0 28px;flex-shrink:0;grid-template-columns:28% 1fr 28%;gap:0;height:41px;box-sizing:border-box;border-bottom-color:var(--rule)}
+  .site-top{padding:0 28px;flex-shrink:0;grid-template-columns:28% 1fr 28%;gap:0;height:41px;box-sizing:border-box;border-bottom-color:var(--rule);position:relative}
   .site-topright{display:flex;align-items:center;gap:14px;height:41px;color:var(--ink)}
+  /* Fullscreen button absolutely positioned at right:41px so its right
+     edge aligns with the LEFT EDGE of the collapsed right panel (the
+     "right tab" — both panels collapse to 41px on splash). Lifts the
+     button out of the .site-topright flex flow; .site-top is the
+     positioning context. */
+  .site-top #fs-toggle{position:absolute;right:41px;top:50%;transform:translateY(-50%)}
   .site-topright .theme-btn{display:flex;align-items:center;background:none;border:none;border-radius:0;padding:0;color:var(--ink)}
   .site-topright .theme-btn svg{display:block;pointer-events:none}/* clicks land on the button, not the inner SVG (Safari) */
   .site-topright .tr-sep{width:1px;height:16px;background:var(--rule);flex-shrink:0}
@@ -1448,14 +1454,17 @@
   </a>
   <div class="header-search"></div>
   <div class="site-topright">
-    <input id="search-input" class="tr-search-input" placeholder="" autocomplete="off">
-    <button class="theme-btn" id="search-toggle" title="Search [/]"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="5.2" cy="5.2" r="3.5"/><line x1="7.8" y1="7.8" x2="12" y2="12"/></svg></button>
-    <span class="tr-sep"></span>
+    <!-- Corner = fullscreen button only (the visible affordance). The
+         hidden #search-input below stays for mobile's filter-panel search
+         proxy — the mobile path mirrors values into this element and
+         dispatches synthetic 'input' events on it; removing it would
+         break mobile search. Its CSS default is max-width:0 (invisible
+         until .open class added; the / keyboard shortcut and the
+         search-toggle button that added .open are both gone, so the
+         input never becomes visible on desktop). Same for #topright —
+         kept for the JS lookup; no visible content. -->
+    <input id="search-input" class="tr-search-input" placeholder="" autocomplete="off" aria-hidden="true" tabindex="-1">
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
-    <!-- theme-toggle + trailing tr-seps removed — site is dark-only, no
-         theme switch needed. The topright version was already hidden in
-         live (kept the element so the JS topright lookup doesn't break,
-         but the surrounding separators dangled visually). -->
     <span id="topright" title="About this archive"></span>
   </div>
 </header>
@@ -1662,7 +1671,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.44";
+  const VERSION      = "v1.06-test.45";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4359,18 +4368,15 @@ WHERE {
     document.getElementById("ap-ver").textContent = VERSION_DISPLAY;
     const mvBtn = document.getElementById("mobile-version");
     if (mvBtn) mvBtn.textContent = "HHFA " + VERSION_DISPLAY;
-    // Topright version: shown only on staging (where -test in VERSION acts
-    // as the "iterating" signal). On live (VERSION without -test) the
-    // topright is hidden — the about pane carries it at the appropriate
-    // scale, no need for a second always-visible display. Auto-applies at
-    // promotion: when v1.06 lands in browse.html with VERSION="v1.06.00",
-    // the -test test is false and topright hides without manual change.
+    // Topright version: TEMPORARILY hidden on staging too — Brandon
+    // wants to preview what live will look like. To restore the staging
+    // "which test build am I on?" affordance, re-enable the -test
+    // conditional below.
     const tr = document.getElementById("topright");
-    if (/-test/.test(VERSION)) {
-      tr.textContent = VERSION_DISPLAY;
-    } else {
-      tr.style.display = "none";
-    }
+    tr.style.display = "none";
+    // Previous conditional (re-enable for staging-version-visible mode):
+    //   if (/-test/.test(VERSION)) tr.textContent = VERSION_DISPLAY;
+    //   else tr.style.display = "none";
     // markid: desktop → about pane, mobile → mob-about
     document.querySelector(".markid").addEventListener("click", e => {
       e.preventDefault();
@@ -4425,7 +4431,9 @@ WHERE {
 
     document.addEventListener("keydown", e => {
       const inInput = e.target.matches("input, select, textarea");
-      if (e.key === "/" && !inInput) { e.preventDefault(); const si = document.getElementById("search-input"); if (si) { si.classList.add("open"); si.focus(); } return; }
+      // '/' search shortcut removed — search affordance is gone from the
+      // desktop UI (mobile still has its filter-panel search row, which
+      // proxies into the hidden #search-input).
       if (e.key === "Escape" && inInput) { e.target.blur(); return; }
       if (e.key === "Escape") {
         closeAllDropdowns(); closeAboutPane(); closeInfoPane(); closePdf(); closeCuratorPane();
