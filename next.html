@@ -36,14 +36,14 @@
   html,body{overflow:hidden}
   @keyframes page-in{from{opacity:0}to{opacity:1}}
   body{height:100%;display:flex;flex-direction:column;animation:page-in 400ms ease-out both}
-  .site-top{padding:0 28px;flex-shrink:0;grid-template-columns:28% 1fr 28%;gap:0;height:41px;box-sizing:border-box;border-bottom-color:var(--rule);position:relative}
-  .site-topright{display:flex;align-items:center;gap:14px;height:41px;color:var(--ink)}
-  /* Fullscreen button absolutely positioned at right:41px so its right
-     edge aligns with the LEFT EDGE of the collapsed right panel (the
-     "right tab" — both panels collapse to 41px on splash). Lifts the
-     button out of the .site-topright flex flow; .site-top is the
-     positioning context. */
-  .site-top #fs-toggle{position:absolute;right:41px;top:50%;transform:translateY(-50%)}
+  .site-top{padding:0 28px;flex-shrink:0;grid-template-columns:28% 1fr 28%;gap:0;height:41px;box-sizing:border-box;border-bottom-color:var(--rule)}
+  /* .site-topright stays as flex but right-aligns its contents and adds
+     13px of right-padding so the last visible item (fs-toggle) has its
+     right edge at (column_right - 13) = (viewport_right - 28 - 13) =
+     viewport_right - 41 — exactly the left edge of the collapsed right
+     panel ("right tab"). Click target stays inside normal flex flow
+     (an earlier absolute-positioning attempt broke the click). */
+  .site-topright{display:flex;align-items:center;justify-content:flex-end;gap:14px;padding-right:13px;height:41px;color:var(--ink)}
   .site-topright .theme-btn{display:flex;align-items:center;background:none;border:none;border-radius:0;padding:0;color:var(--ink)}
   .site-topright .theme-btn svg{display:block;pointer-events:none}/* clicks land on the button, not the inner SVG (Safari) */
   .site-topright .tr-sep{width:1px;height:16px;background:var(--rule);flex-shrink:0}
@@ -1464,8 +1464,10 @@
          input never becomes visible on desktop). Same for #topright —
          kept for the JS lookup; no visible content. -->
     <input id="search-input" class="tr-search-input" placeholder="" autocomplete="off" aria-hidden="true" tabindex="-1">
-    <button class="theme-btn" id="fs-toggle" title="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
     <span id="topright" title="About this archive"></span>
+    <!-- fs-toggle deliberately LAST so flex-end + padding-right:13px on
+         .site-topright lands its right edge at viewport_right - 41. -->
+    <button class="theme-btn" id="fs-toggle" title="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
   </div>
 </header>
 
@@ -1671,7 +1673,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.45";
+  const VERSION      = "v1.06-test.46";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
