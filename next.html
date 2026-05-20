@@ -187,8 +187,11 @@
   .cur-continue:hover{color:var(--copper-deep)}
 
   /* Intro card — bigger than mark-bar, sits above the list in curation mode */
-  .curation-card{padding:14px 20px 16px;border-bottom:1px solid var(--rule);
+  .curation-card{padding:14px 20px 16px 28px;border-bottom:1px solid var(--rule);
     background:var(--soft)}
+  /* 28px left matches .site-top and .list-head, so the curator name in the
+     card lines up vertically under the "Hunter House Foundation Archive"
+     mark in the header. Right stays 20px, mirroring .list-head's right side. */
   html.dark .curation-card{background:#242220}
   .curation-card[hidden]{display:none}
   .cc-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:8px}
@@ -1607,7 +1610,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.33";
+  const VERSION      = "v1.06-test.34";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3410,23 +3413,6 @@ WHERE {
   function renderMeta(item) {
     const body = $("#meta-body");
 
-    // Curated mode: clamped render — only the item title + the curator's
-    // note. No description-fields KV (those pills doubled as dead filter
-    // triggers), no archival rows, no graph section, no data-footer wiring.
-    // The body.hh-in-curation class (set in enterCuration) hides the data
-    // footer + browse-bar + [?] info button via CSS. Exit lives on the
-    // curation-card. The rn-panel id is preserved so renderCuratorNote
-    // can locate its mount point.
-    if (state.curation) {
-      body.innerHTML = `
-        <h1 class="meta-title">${formatTitle(item.title)}</h1>
-        <div class="rn-panel" id="rn-panel"></div>
-      `;
-      renderCuratorNote(item);
-      requestAnimationFrame(() => updatePip("meta-body", "meta-pip"));
-      return;
-    }
-
     const areasHtml = (item.areas || []).map(a =>
       `<button class="pill area-pill ${pillCls(PC.sage)}${state.filterArea.has(a) ? " active" : ""}" data-area="${escapeHTML(a)}">${escapeHTML(a)}</button>`
     ).join("");
@@ -3587,11 +3573,11 @@ WHERE {
         <h3><span><span class="n">01</span>Description</span><span class="ct">${descRows.length} fields</span></h3>
         <dl class="kv">${descHTML}</dl>
       </section>
-      ${archRows.length > 0 ? `<section class="meta-section">
+      ${(!state.curation && archRows.length > 0) ? `<section class="meta-section">
         <h3><span><span class="n">02</span>Archival</span><span class="ct">${archRows.length} fields</span></h3>
         <dl class="kv">${archHTML}</dl>
       </section>` : ""}
-      ${phaseLabel ? `<section class="graph-section">
+      ${(!state.curation && phaseLabel) ? `<section class="graph-section">
         <h3><span><span class="n">${graphN}</span>In the graph</span><span class="ct">Wikibase context</span></h3>
         <div class="graph-path">${graphPathHTML}</div>
         ${siblingsHTML}
