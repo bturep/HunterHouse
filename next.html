@@ -46,6 +46,11 @@
   .site-topright{display:flex;align-items:center;justify-content:flex-end;gap:14px;padding-right:13px;height:41px;color:var(--ink)}
   .site-topright .theme-btn{display:flex;align-items:center;background:none;border:none;border-radius:0;padding:0;color:var(--ink)}
   .site-topright .theme-btn svg{display:block;pointer-events:none}/* clicks land on the button, not the inner SVG (Safari) */
+  /* Info ("?") button — text glyph sized to match the 13×13 fs-toggle SVG.
+     font-size:14 in mono lands at the same optical height as the icon.
+     Keep id="rec-info" so the existing click handler + keyboard shortcut
+     still wire up without changes. */
+  .site-topright .info-btn{font-family:var(--mono);font-size:14px;font-weight:500;line-height:1;color:var(--ink);cursor:pointer;justify-content:center}
   .site-topright .tr-sep{width:1px;height:16px;background:var(--rule);flex-shrink:0}
   #topright{cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;display:flex;align-items:center;color:var(--ink)}
   .site-topright .theme-btn:hover{opacity:0.5}
@@ -246,15 +251,8 @@
   .cur-note .cn-text{font-family:var(--mono);font-size:11.5px;line-height:1.7;color:var(--ink)}
   .cur-note .cn-empty{font-family:var(--mono);font-size:10.5px;color:var(--hint)}
 
-  /* Info ([?]) button in the Record bar — attention colour, bracket motif */
-  .rec-info{
-    font-family:var(--mono);font-size:11px;font-weight:600;
-    background:none;border:0;cursor:pointer;color:var(--red);
-    letter-spacing:0.04em;line-height:1;padding:2px 2px;
-  }
-  .rec-info::before{content:"[";color:var(--hint);opacity:.5;font-weight:400}
-  .rec-info::after{content:"]";color:var(--hint);opacity:.5;font-weight:400}
-  .rec-info:hover{color:var(--red-deep)}
+  /* Info ([?]) button moved to the top bar (.site-topright .info-btn).
+     The old in-record bracket-style .rec-info CSS has been removed. */
 
   /* Info panel — overlays the record (right) panel entirely */
   #info-pane{
@@ -1465,6 +1463,9 @@
          kept for the JS lookup; no visible content. -->
     <input id="search-input" class="tr-search-input" placeholder="" autocomplete="off" aria-hidden="true" tabindex="-1">
     <span id="topright" title="About this archive"></span>
+    <!-- Info ("?") button — moved up from the record-bar meta-head. Sized
+         to match the fs-toggle SVG optically (info-btn CSS above). -->
+    <button class="theme-btn info-btn" id="rec-info" title="About this archive &amp; shortcuts [?]" aria-label="Info">?</button>
     <!-- fs-toggle deliberately LAST so flex-end + padding-right:13px on
          .site-topright lands its right edge at viewport_right - 41. -->
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
@@ -1621,10 +1622,11 @@
     </button>
     <div class="panel-content">
       <div class="scroll-pip scroll-pip-r" id="meta-pip"></div>
-      <div class="meta-head">
-        <span class="l">Record</span>
-        <button class="rec-info" id="rec-info" title="About this archive &amp; shortcuts [?]" aria-label="Info">?</button>
-      </div>
+      <!-- meta-head intentionally empty: the "Record" label and the [?]
+           info button both moved out. The 41px bar stays as a structural
+           spacer so the right panel's content top aligns with the left
+           panel's list-head (both = site-top height). -->
+      <div class="meta-head"></div>
       <div class="meta-body" id="meta-body">
         <div class="empty">Select an item from the list</div>
       </div>
@@ -1673,7 +1675,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.47";
+  const VERSION      = "v1.06-test.48";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2739,6 +2741,14 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   function togglePanel(side) {
     document.getElementById("panel-" + side).classList.toggle("out");
   }
+
+  // Module-scope sync helper: re-paints the bottom-bar fullscreen icon
+  // (#zoom-fs) to match the current .out state of the two side panels.
+  // Reassigned to the real implementation inside the main() panel-block
+  // (which captures the panel-element refs). Other modules — notably
+  // openInfoPane, which auto-expands the right panel — call this so the
+  // bottom-bar icon never falls out of sync with the panels.
+  let syncFsBtn = () => {};
 
   function updatePip(scrollId, pipId) {
     const scrollEl = document.getElementById(scrollId);
@@ -4517,7 +4527,21 @@ WHERE {
     html += `<p class="ip-foot">Credits, rights &amp; data endpoints → the wordmark, top-left.</p>`;
     document.getElementById("ip-inner").innerHTML = html;
   }
-  function openInfoPane()  { renderInfoPane(); infoPane.classList.add("open"); }
+  function openInfoPane()  {
+    renderInfoPane();
+    // The info pane lives inside #panel-right (position:absolute;inset:0)
+    // and is force-hidden when that panel is collapsed
+    // (.panel-right.out #info-pane{display:none}). The "?" trigger now
+    // lives in the top bar, so it's clickable even when the panel is
+    // collapsed — expand the panel first so the pane is actually visible,
+    // and resync the bottom-bar fullscreen icon to match.
+    const rightP = document.getElementById("panel-right");
+    if (rightP && rightP.classList.contains("out")) {
+      rightP.classList.remove("out");
+      syncFsBtn();
+    }
+    infoPane.classList.add("open");
+  }
   function closeInfoPane() { infoPane.classList.remove("open"); }
   function toggleInfoPane(){ infoPane.classList.contains("open") ? closeInfoPane() : openInfoPane(); }
 
@@ -4596,13 +4620,16 @@ WHERE {
 
       const allHidden = () => leftP.classList.contains("out") && rightP.classList.contains("out");
 
-      function syncFsBtn() {
+      // Reassign the module-scope syncFsBtn (declared at the top of the
+      // script) so callers outside this block — openInfoPane in particular
+      // — can re-sync the bottom-bar icon after they mutate panel state.
+      syncFsBtn = function() {
         const hidden = allHidden();
         pfsBtn.classList.toggle("fs-active", hidden);
         pfsBtn.title = hidden ? "Show panels [Z]" : "Fullscreen — hide panels [Z]";
         pfsExp.style.display = hidden ? "none" : "";
         pfsCol.style.display = hidden ? ""     : "none";
-      }
+      };
 
       // Edge handles: toggle one panel, then refresh the button so its icon
       // always reflects the real panel state.
