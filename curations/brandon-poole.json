@@ -1,15 +1,15 @@
 {
-  "_note": "PHASE 1 SEED — placeholder content. Replace title/intro/items/notes and the curator bio+url. Item ids must be real archive ids (HH-HHC-####, HH-CAA-####); unknown ids are silently skipped. pos = display order (1-based).",
+  "_note": "Curator bio + url filled in 2026-05-19. Still PLACEHOLDER: title, intro, items + per-item notes — Brandon will fill those next. Swap-in needs no rebuild.",
   "slug": "brandon-poole",
   "title": "PLACEHOLDER — A working selection",
   "curator": {
     "name": "Brandon Poole",
-    "role": "Project Lead",
-    "affiliation": "Hunter House Foundation · McGill University",
+    "role": "PhD Candidate",
+    "affiliation": "McGill University School of Architecture",
     "qid": null,
-    "bio": "PLACEHOLDER — a short curator biography goes here: who you are, your relationship to the Hunter archive, and the lens you bring to this selection. A few sentences.",
-    "url": "https://example.org",
-    "url_label": "PLACEHOLDER — external site (academic page / portfolio)"
+    "bio": "Brandon Poole is an artist, filmmaker, architectural designer, and PhD Candidate at McGill University's School of Architecture, where he is a Vadasz Scholar and SSHRC Doctoral Fellow. With a background in journalism and philosophy, his practice and research examine the entwined histories and speculative futures of architecture, simulation, and the image, while his films document the folkloric and vernacular constructions of place. He holds a Master of Visual Studies from the University of Toronto and a Bachelor of Fine Arts (Honours, with Distinction) from the University of Victoria. His work has been exhibited at Dazibao (Montreal), the University of Toronto Art Museum, the Toronto Biennial, Polygon Gallery (Vancouver), and Deluge Contemporary Art (Victoria, BC). His films have screened at IMAGES (Toronto), EXiS (Seoul), Mimesis (US), non_syntax (Tokyo/Taipei), Antimatter (Victoria), and Iowa City Docs, among others. He is a Lecturer in the Visual Arts department at the University of Victoria. For more information, please contact.",
+    "url": "https://www.brandonpoole.net",
+    "url_label": "brandonpoole.net"
   },
   "updated": "2026-05-19",
   "intro": "PLACEHOLDER — the macro framing of this selection. This is the curatorial argument that sits on the card above the list: what binds these items, what you want a viewer to notice, the through-line. One or two short paragraphs.",
