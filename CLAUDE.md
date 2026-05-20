@@ -398,3 +398,13 @@ Working LINE: **NEXT**. The morning's EGC ingest (above) was R2+Wikibase only; t
 - **Housekeeping shipped**: `.gitignore` added (`__pycache__/`, Excel `~$` lock files); `EGC_intake.xlsx` archived to R2 at `eric-gesinger-collection/intake/EGC_intake.xlsx` as a working-state snapshot (will be regenerated when canonical entries are populated in the next intake cycle); confirmed HHC + CAA have no equivalent intake files (predate the workbook workflow).
 
 **Version line at session close: browse.html `v1.06.12` (LIVE) · next.html `v1.07-test.13` (staging).**
+
+#### Follow-up after session-close — built-by data + inline category edit (v1.06.13 / v1.07-test.14)
+
+Brandon logged back in to wrap two loose ends from the design discussion:
+
+- **P140 built-by writes** — the property was plumbed end-to-end in browse/next but had zero values anywhere in the wikibase. Filled in for the EGC pieces Gesinger actually built: P140 → Q209 (Gesinger) on the 9 Channel-Chair-phase items (HH-EGC-0014..0019) + Dining Room Chairs (0021, 0022) + East Wing Living Room Side Table (0023). The **Dining Room Table** (HH-EGC-0020) was built by **Martin Byers** — minted as **Q536** and P140 written on Q524. Owl Chairs and the rest of EGC have no built-by attribution (pre-Gesinger or unbuilt). **Kitchen Stool** flagged as not-yet-in-archive (drawing exists per Brandon; future intake).
+- **Designer (P141) deferred.** Hunter designed all the EGC pieces, so a separate designer tag isn't relevant yet; Pending block already carries the entity-search-picker task for when P140/P141 need to surface persons not yet in vocab.
+- **P145 Category inline-editable.** Added `"Category": { pid: "P145", key: "categories", multi: true }` to the EDITABLE map in renderMeta; the existing generic multi-value picker (P88/P87 pattern) handles add/remove with no other changes. Category row now renders for admins even when empty (matches the Areas / Drawing-type fallback). One limitation: `getVocab(P145)` returns only in-use values, so the picker currently shows just "Furniture" — minting a new category (e.g. Architecture) still needs the bot. The Pending entity-search-picker task covers the eventual fix for P140/P141/P145 all at once.
+
+**Final state: browse.html `v1.06.13` (LIVE) · next.html `v1.07-test.14` (staging).** Time already logged (HH-T-34, 6.0h Research, batch HH03) — this follow-up rolled into that block.

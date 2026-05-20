@@ -74,6 +74,9 @@ For **bulk changes to many items at once**: use a SPARQL query to get the QIDs f
 | P142 | physical location | String | Archival path, e.g. `"S0004, SS0001, SSS0018, FL0003"`. Rendered as the Location crumb in browse.html |
 | P143 | access copy | URL | URL of an access derivative (a multi-page PDF) of the item; preservation masters held separately. Drives the browse.html/next.html PDF reader. Created 2026-05-19 |
 | P144 | display rotation | String | Clockwise degrees to rotate the stored image for correct display (`90`/`180`/`270`; absent/0 = none). Applied at render (desktop stage); the explicit "bake" pass later flattens it into the files and clears this claim. Created 2026-05-19 |
+| P140 | built by | Item | Person/org who built the physical piece (distinct from P80 creator = drawer/photographer). First values written 2026-05-20 (EGC: Q209 Gesinger on 9 items, Q536 Byers on 1). |
+| P141 | designed by | Item | Person who designed the physical piece (distinct from creator/built-by). Property exists; no values yet — Hunter implicit as designer on everything for now. |
+| P145 | category | Item | Subject category (e.g. Furniture, Architecture). Multi-value. Inline-editable by admins. Created 2026-05-20. |
 
 ### Other properties in the schema (for reference)
 
@@ -210,6 +213,7 @@ These are the QIDs for project sets that items belong to.
 | Q206 | Olivia Jol |
 | Q207 | Brandon Poole |
 | Q209 | Eric Gesinger |
+| Q536 | Martin Byers |
 
 ### Key works / buildings
 
