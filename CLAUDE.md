@@ -77,7 +77,7 @@ Brandon needs a free Wikimedia account — takes 2 minutes at `wikidata.org/wiki
 
 ---
 
-**Cyan-cast JPEGs — DIAGNOSED, fix pending.** Every preview/thumb/large JPEG in the archive carries an embedded **`kip2300-v6-` ICC profile (435 KB)** — the KIP 2300 large-format scanner's *output* profile, not sRGB. Browsers honor it and produce a strong cyan/light-blue cast on all images. Confirmed by Pillow inspection of `HH-HHC-0035`'s prev.jpg. Side-by-side on Brandon's Desktop (5/19 ~6:55pm): `HHC-0035_AS-IS_(scanner-profile).jpg` vs `HHC-0035_FIXED_(sRGB).jpg` — converting via `ImageCms.profileToProfile(im, src_profile, sRGB, intent=PERCEPTUAL)` and saving with the small sRGB profile produces correct near-white paper. **Fix plan:** `scripts/recolor_previews.py` — list all R2 `thumbs/`, `previews/`, `large/` JPEGs (~145 items × 3 tiers ≈ 435 files), download, transform in-memory, re-upload. Doesn't need the masters refetched (preview JPEGs already carry the profile). Also patch `regen_previews.py` to add `sips -m /System/Library/ColorSync/Profiles/sRGB Profile.icc` for future runs so this can't recur. ~20–40 min upload depending on bandwidth. Pending Brandon's go-ahead after eyeballing the Desktop comparison.
+**Cyan-cast JPEGs — FIXED (2026-05-19).** The cast was Chrome-specific on wide-gamut Mac displays — Chrome's color pipeline mishandled the KIP 2300 scanner's `kip2300-v6-` ICC profile (Safari & Firefox color-managed it cleanly). Resolved via `scripts/recolor_previews.py`: 254 of 441 R2 JPEGs converted from kip2300 → sRGB; 183 had no profile (Chrome-safe); 0 errors. Prevention: `regen_previews.py`, `ingest_item.py`, and `ingest_publication.py` now pass `-m /System/Library/ColorSync/Profiles/sRGB Profile.icc` to sips so future runs bake sRGB and this can't recur. See session log entry for the full diagnosis and the false starts. **Outstanding:** Cloudflare CDN purge (manual via dashboard — needed to make the fix visible to all visitors immediately; otherwise files age out naturally).
 
 ---
 
@@ -289,6 +289,7 @@ Full protocol in `CLAUDE_archive_v1.02.md` §"Batch change protocol".
 | `scripts/ingest_publication.py` | Ingest a multi-page publication (masters byte-for-byte + SHA-256 manifest + cover tiers + access PDF → R2; create the Wikibase item). Dry-run default; `--execute` to write | Active |
 | `scripts/mint_property.py` | Mint (or find, idempotent) one Wikibase property: `--label --desc --datatype` | Active |
 | `scripts/ingest_item.py` | Ingest a single-image archive item: master TIF + 3 R2 tiers + Wikibase claims. Auto-resolves/creates vocab (phase, areas) by *label + instance-of*. Supports `QID_OVERWRITE` (config) to repurpose an existing stub. Dry-run default; `--execute` to write | Active |
+| `scripts/recolor_previews.py` | Convert R2 preview/thumb/large JPEGs from the kip2300 scanner ICC profile to sRGB in place. Idempotent. Modes: `--dry-run` (default), `--one KEY` (single-file proof), `--execute` (bulk) | Active |
 | `scripts/rename_ids.py` | HH-A → HH-HHC/CAA rename | Complete |
 | `scripts/renumber_hhc.py` | HHC renumber 0036–0149 → 0001–0114 | Complete |
 | `scripts/migrate_p142_location.py` | Move archival paths P100 → P142 | Complete |
@@ -667,3 +668,58 @@ Verified data shape: the 3 HHC stubs (Q461/Q474/Q471) all carry **P79** (source 
 Per Brandon: don't keep the slim "Curated" bar above the list. Instead, the curator chooser lives as a row inside the Browse filter overlay, above Collection — chips styled with the standard `.fp-chip` family (using `pc-indigo` for distinction). Clicking a chip triggers the existing `openCuratorPane(slug)` threshold-overlay flow (not a filter toggle). The row hides while a curation is active (the card's exit is the way out). `#curated-bar` HTML element, `renderCuratedBar()` function, `.curated-bar`/`.cb-lead`/`.cb-entry` CSS, and the `renderList`-tail call all removed cleanly (grep-verified no stale refs). `curations/index.json` seeded with 8 curators — Brandon Poole, Robert Youds, Kristina Leach, Theodora Vardouli, Julian Dime, Olivia Jol, Frances Hunter, Mowry Baden. Only `brandon-poole.json` exists; clicking the other 7 throws the existing "Curation unavailable" toast (intentional placeholder behaviour). JS clean.
 
 **Version: next.html `v1.06-test.22`** (staging). Live `browse.html` unchanged at `v1.05.02`.
+
+---
+
+### 2026-05-19 — Cyan-cast story: chased, false-led, re-diagnosed, fixed (next.html v1.06-test.23 → .25)
+
+Working LINE: **NEXT**. The "Cyan-cast JPEGs — DIAGNOSED, fix pending" Pending entry resolved this session. Worth recording the path because half of it was a wrong turn.
+
+**The chase.** Brandon: "blue cast across the entire HHC." Earlier today's diagnosis blamed the embedded `kip2300-v6-` scanner ICC profile (435 KB per JPEG) and queued `recolor_previews.py`. I re-opened it after Brandon /cleared and noted that the two Desktop comparison files (AS-IS scanner-profile vs FIXED sRGB) had *both* looked fine to him — a tell that something didn't add up. Raw pixel inspection of `HHC-0035` prev.jpg backed the doubt: R=243.7 G=243.1 **B=240.5** — B is the *lowest* channel; a cyan cast would show B>R. So I argued the profile was a red herring and went looking elsewhere.
+
+**The false lead.** Brandon volunteered the next clue — "fine in Firefox, blue in Chrome" + "we applied a fix because dark mode wasn't working in Safari" — and grep found the suspect: `<meta name="color-scheme" content="dark light">` (added in `bd48368` for splash white-flash). Theory: that meta was triggering Chrome's "dark-aware" color transform on images with non-standard ICC profiles. Two attempts to fix:
+- **v1.06-test.23** — scoped `color-scheme:light` to `.image-stage img` + the mobile sheet/lightbox images. **Chrome still blue.** The page-level scheme overrides per-element on the image color-management path.
+- **v1.06-test.24** — removed the meta from `next.html` entirely (`index.html` keeps it for the splash). **Chrome still blue.** Hypothesis falsified.
+
+**Re-diagnosis.** Back to the ICC profile theory, but now scoped properly: it's not "the profile is universally broken," it's "Chrome on wide-gamut Mac displays mishandles this *specific* unusual profile while Safari & Firefox color-manage it cleanly." Confirmed by drag-and-drop: Brandon dropped both Desktop files into Chrome — AS-IS rendered cyan; FIXED rendered correct. The pixel-mean argument I'd used to dismiss the profile was wrong, because raw bytes don't predict what Chrome's compositor does after profile→display conversion. **v1.06-test.25** reverted the meta removal (irrelevant change; clean head).
+
+**The fix — new `scripts/recolor_previews.py`.** rclone-based (no boto3 dep; matches the rest of `scripts/`). Lists every JPEG under `*/thumbs/`, `*/previews/`, `*/large/` for both collections; downloads via `rclone cat`; classifies the embedded ICC by description match (`kip2300` → convert; sRGB → skip; none → skip; other → log + skip); transforms via `PIL.ImageCms.profileToProfile(src=kip2300, dst=sRGB, intent=PERCEPTUAL)`; re-saves at quality=90 (higher than the 75/82/85 originals — minimizes generational JPEG loss); uploads back via `rclone rcat`. Idempotent (already-sRGB files skip), so safe to re-run. Modes: `--dry-run` (default), `--one KEY` (single-file proof), `--execute` (bulk). Single-file proof on `HH-HHC-0035` prev: 830 KB → 237 KB; confirmed correct in Chrome via `?v=1` cache-bust (verified the served bytes matched Brandon's known-good Desktop FIXED file at R=247.9 G=250.5 B=249.4).
+
+**Bulk run.** `--execute` against both collection prefixes, 924.6 s (~15.4 min), **0 errors**:
+- 254 converted (kip2300 → sRGB) — the affected files
+- 1 already sRGB (the HHC-0035 prev from the single-file proof)
+- 183 no embedded profile (Chrome's default = sRGB, so already cast-free)
+- 3 other / unknown profile (likely Q490 cover tiers from `ingest_publication.py`, which used different source profiles)
+
+Aggregate bucket savings ≈ **~108 MB** (254 files × ~430 KB profile each); biggest *relative* savings on thumbs, where the profile was bigger than the image data itself.
+
+**Prevention — three sips call sites patched.** `regen_previews.py`, `ingest_item.py`, `ingest_publication.py` all gained `-m /System/Library/ColorSync/Profiles/sRGB Profile.icc` on their `sips` invocation. Future regen/ingest passes bake sRGB into the output JPEG regardless of the master TIF's profile. This can't recur.
+
+**What's NOT in scope:** the master TIFs on R2 untouched — they keep the scanner's actual output profile (correct preservation behavior; masters reflect the capture device). Fix is access-tier only.
+
+**Outstanding:** Cloudflare CDN cache holds the cyan copies until edges expire. Brandon to "Purge Everything" in CF dashboard (manual; we don't have a purge API token wired — that's still queued under rotation Part 2 specs). Without purge, fix is visible to anyone whose edge has been refreshed, but not universally.
+
+**Quality qualification (honest):** "no quality loss" isn't strictly true — there's a second JPEG encode at q=90 (generational loss, imperceptible on top of already-lossy previews) plus a colorimetric transform (pixel values change by design — that *is* the fix). The Desktop FIXED file Brandon eyeballed as correct went through this exact pipeline; bulk reproduces it.
+
+**Version: next.html `v1.06-test.25`** (staging). Live `browse.html` unchanged at `v1.05.02`. The cyan-cast fix is media-asset only — no `browse.html` code change needed; live will reflect the fix automatically once CDN clears (both `browse.html` and `next.html` reference the same R2 URLs).
+
+---
+
+### 2026-05-19 — Curators: rename row label + strip index to Brandon Poole (next.html v1.06-test.26)
+
+Working LINE: **NEXT**. Brandon: "strip the curated listing to just me, brandon poole. Also, curated doesn't seem like the right term here. Curator? Selection? But then I am naming a person."
+
+Settled framing: row label **"Curators"** (plural category, forward-compatible for Phase 2 when more curators land), chip = person's name, threshold/card framing language "Curated by [name]." Reasoning: 'Curated' alone is an adjective without a noun (curated what?); 'Selection' implies the person *is* the selection ("Selection: Brandon Poole" reads wrong); 'Curators' names the role and reads naturally as a category header alongside 'Collection' and 'Phase'.
+
+Text changes (no class/function renames — `curation`, `#curator-pane`, `LENS_BLURB`, `cur-blurb` etc. stay stable; touching them buys no user-facing improvement and risks regression):
+- Filter panel row label: `Curated` → `Curators`
+- `LENS_BLURB`: "curated lens" framing → "curated selection" framing — "A curated selection is an invited path through the archive — one curator's chosen items, in their order, with their notes. Not a filter. Leave it any time to return to the full catalogue."
+- Threshold overlay: new `.cur-heading` ("A curated selection", small-caps section divider w/ flanking horizontal rules, matching `.cc-curator` family); CTA "Continue to exhibition →" → "Enter exhibition →"; name-fallback "Curator" → "an invited curator"
+- In-mode card pill: "Curated · NAME" → "Curated by NAME"
+- One new CSS rule: `.cur-heading` (mono 9px / 0.22em letter-spacing / muted / flex with `::before`/`::after` flex:1 rules)
+
+`curations/index.json` stripped from 8 entries → 1 (only `brandon-poole`). Removed: Robert Youds, Kristina Leach, Theodora Vardouli, Julian Dime, Olivia Jol, Frances Hunter, Mowry Baden (those were placeholders; clicking them threw the existing "Curation unavailable" toast). Card-row now shows exactly one chip. Phase 2 adds more entries here; chooser auto-populates.
+
+`brandon-poole.json` itself untouched — still PLACEHOLDER content (real title/intro/items/notes/bio/url pending from Brandon). Swap-in needs no rebuild.
+
+**Version: next.html `v1.06-test.26`** (staging). Live `browse.html` unchanged at `v1.05.02`.
