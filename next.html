@@ -530,6 +530,16 @@
     border:1px solid var(--rule);box-shadow:0 8px 24px -10px rgba(30,28,26,0.22);
   }
   .image-stage img.hh-thumb{border:none;box-shadow:none;}
+  /* Color-management fix: when the document carries color-scheme:dark (set
+     for splash white-flash prevention), Chrome's color pipeline applies a
+     "dark-aware" transform to images with embedded non-sRGB ICC profiles
+     (our scanner JPEGs carry kip2300-v6-, ~435KB), pushing whites cool/cyan.
+     Firefox & Safari don't. Scoping color-scheme:light to the archive
+     image elements tells Chrome to color-manage them in a light context,
+     leaving page chrome (scrollbars, form controls) dark-aware as intended. */
+  .image-stage img,
+  #mob-sheet-img,
+  #mob-lb-img{ color-scheme: light; }
   .image-stage .placeholder{
     font-family:var(--mono);font-size:10.5px;color:var(--hint);
     letter-spacing:0.12em;text-transform:uppercase;text-align:center;
@@ -1590,7 +1600,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.22";
+  const VERSION      = "v1.06-test.23";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
