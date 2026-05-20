@@ -115,11 +115,6 @@
   body.hh-splash .panel-handle,
   body.hh-splash #zoom-fs{pointer-events:none}
   body.hh-splash .panel-content{visibility:hidden}
-  /* First-image fade: the canvas is invisible until the first image actually
-     arrives, then fades up. Subsequent item switches don't fade (the body
-     class is cleared after the first paint). */
-  #canvas{transition:opacity 480ms ease-in-out}
-  body.first-image-pending #canvas{opacity:0}
   /* Splash vs. subsequent opens: the first-paint about-pane is a deliberate
      threshold — only the Continue button exits it (× hidden). After dismissal,
      hh-splash is cleared; subsequent HHFA opens swap the affordances back —
@@ -1466,7 +1461,7 @@
   })();
 </script>
 </head>
-<body class="loading first-image-pending">
+<body class="loading">
 
 <div id="rotate-msg">
   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
@@ -1714,7 +1709,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.55";
+  const VERSION      = "v1.06-test.54";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3332,11 +3327,6 @@ WHERE {
         zoomState.tx = 0; zoomState.ty = 0;
         currentImg = fullImg;
         applyTransform(); updateZoomUI();
-        // First-image fade-in: trigger the canvas opacity transition by
-        // clearing the body class on the next frame (so the transition runs).
-        if (document.body.classList.contains("first-image-pending")) {
-          requestAnimationFrame(() => document.body.classList.remove("first-image-pending"));
-        }
 
         // Fade in full, then remove thumb
         requestAnimationFrame(() => {
@@ -3354,9 +3344,6 @@ WHERE {
         currentImg = fullImg;
         canvas.appendChild(fullImg);
         fitToFrame();
-        if (document.body.classList.contains("first-image-pending")) {
-          requestAnimationFrame(() => document.body.classList.remove("first-image-pending"));
-        }
       }
       canvas.classList.remove("no-zoom");
     }
@@ -3399,9 +3386,6 @@ WHERE {
         applyTransform(); updateZoomUI();
         canvas.classList.remove("no-zoom");
         thumbActive = true;
-        if (document.body.classList.contains("first-image-pending")) {
-          requestAnimationFrame(() => document.body.classList.remove("first-image-pending"));
-        }
       };
       // onerror on thumb: silently ignored — full will show when ready
 
@@ -4667,24 +4651,10 @@ WHERE {
       leftP.classList.remove("out");
       rightP.classList.remove("out");
       syncFsBtn();
-      // Wait for the panel width transition to actually finish before
-      // re-fitting — setTimeout can fire while layout is still settling,
-      // which produced the overflow Brandon saw. transitionend on the
-      // width property is the precise signal; a long-stop safety timer
-      // covers the case where the browser drops the event.
-      const refit = (e) => {
-        if (e.propertyName !== "width") return;
-        leftP.removeEventListener("transitionend", refit);
-        clearTimeout(refitFallback);
-        // Two rAFs guarantee the post-transition layout is painted before
-        // we measure stage.clientWidth.
-        requestAnimationFrame(() => requestAnimationFrame(fitToFrame));
-      };
-      leftP.addEventListener("transitionend", refit);
-      const refitFallback = setTimeout(() => {
-        leftP.removeEventListener("transitionend", refit);
-        requestAnimationFrame(() => requestAnimationFrame(fitToFrame));
-      }, 500);
+      // Panels transition width over 260ms; wait it out so the stage size
+      // reflects the open layout, then re-fit the image (same as FIT button)
+      // so it isn't sized to the wider splash stage and overflowing.
+      setTimeout(fitToFrame, 280);
     });
     document.getElementById("rec-info").addEventListener("click", toggleInfoPane);
     document.getElementById("info-pane-close").addEventListener("click", closeInfoPane);
@@ -4819,7 +4789,7 @@ WHERE {
       updateFilterBadge();
       initPanZoom();
 
-      const defaultItem = state.filtered.find(i => i.id === "HH-CAA-0028") || state.filtered[0];
+      const defaultItem = state.filtered.find(i => i.id === "HH-HHC-0028") || state.filtered[0];
       const target = urlId && state.filtered.find(i => i.id === urlId)
         ? urlId
         : defaultItem?.id;
