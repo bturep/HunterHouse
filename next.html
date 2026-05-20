@@ -1592,7 +1592,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.14";
+  const VERSION      = "v1.06-test.15";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4322,7 +4322,8 @@ WHERE {
     // (hh-pdfjs.css) picks the right palette. Requires R2 CORS to allow this
     // origin — PDF.js fetches the PDF cross-origin.
     const theme = document.documentElement.classList.contains("dark") ? "dark" : "light";
-    const src = `assets/pdfjs/web/viewer.html?file=${encodeURIComponent(url)}&theme=${theme}`;
+    // ?v=VERSION cache-busts the override CSS via the bootstrap in viewer.html
+    const src = `assets/pdfjs/web/viewer.html?file=${encodeURIComponent(url)}&theme=${theme}&v=${encodeURIComponent(VERSION)}`;
     document.getElementById("pdf-frame").src = src;
     paneImageEl().classList.add("pdf-mode");
     syncFootPdfView();
