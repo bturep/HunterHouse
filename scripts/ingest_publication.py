@@ -121,8 +121,11 @@ def ordered_pages(src):
 
 
 def sips_jpeg(src_tif, dst_jpg, max_px, quality):
-    """Identical invocation to scripts/regen_previews.py."""
+    """Identical invocation to scripts/regen_previews.py. `-m <sRGB.icc>`
+    matches the image into sRGB so the output JPEG carries sRGB (not the
+    master's kip2300-v6- scanner profile, which causes a Chrome cyan cast)."""
     run(["sips", "-Z", str(max_px),
+         "-m", "/System/Library/ColorSync/Profiles/sRGB Profile.icc",
          "-s", "format", "jpeg",
          "-s", "formatOptions", str(quality),
          src_tif, "--out", dst_jpg], capture_output=True)

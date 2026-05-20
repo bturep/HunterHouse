@@ -22,6 +22,16 @@ THUMB_MODE = "--thumb" in sys.argv
 LARGE_MODE = "--large" in sys.argv
 COLLECTION = next((a for a in sys.argv[1:] if a in ("hhc", "caa")), None)
 
+# Color-management: convert each output JPEG into sRGB. The TIF masters
+# carry the KIP 2300 scanner's "kip2300-v6-" output profile (~435 KB); sips
+# passes that profile through to the JPEG by default, which causes Chrome on
+# wide-gamut Mac displays to render whites cyan (Safari & Firefox color-
+# manage it cleanly, but Chrome does not). `-m <profile>` matches the image
+# into the target profile and embeds it, so the output JPEG carries sRGB
+# (the universal browser-trusted reference) regardless of master's profile.
+# Fix applied 2026-05-19 after the cyan-cast diagnosis; see CLAUDE.md.
+SRGB_PROFILE = "/System/Library/ColorSync/Profiles/sRGB Profile.icc"
+
 R2 = "hh-r2:hunter-house-archive"
 COLLECTIONS = {
     "hhc": {
@@ -88,6 +98,7 @@ def process(name, paths, tmpdir):
             print(" ↓", end="", flush=True)
 
             run(["sips", "-Z", str(SIZE),
+                 "-m", SRGB_PROFILE,
                  "-s", "format", "jpeg",
                  "-s", "formatOptions", str(QUALITY),
                  local_tif, "--out", local_jpg])

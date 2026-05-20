@@ -96,7 +96,12 @@ def load_env(path):
 
 
 def sips_jpeg(src, dst, max_px, quality):
-    run(["sips", "-Z", str(max_px), "-s", "format", "jpeg",
+    # `-m <sRGB.icc>`: bake sRGB into the output JPEG so the master's
+    # kip2300-v6- scanner profile doesn't propagate (Chrome on wide-gamut
+    # Mac displays renders it cyan). See CLAUDE.md cyan-cast entry.
+    run(["sips", "-Z", str(max_px),
+         "-m", "/System/Library/ColorSync/Profiles/sRGB Profile.icc",
+         "-s", "format", "jpeg",
          "-s", "formatOptions", str(quality), src, "--out", dst],
         capture_output=True)
 
