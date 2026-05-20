@@ -284,6 +284,7 @@ Full protocol in `CLAUDE_archive_v1.02.md` §"Batch change protocol".
 | `scripts/make_ges_intake.py` | Generate the GES collection intake workbook | Active |
 | `scripts/ingest_publication.py` | Ingest a multi-page publication (masters byte-for-byte + SHA-256 manifest + cover tiers + access PDF → R2; create the Wikibase item). Dry-run default; `--execute` to write | Active |
 | `scripts/mint_property.py` | Mint (or find, idempotent) one Wikibase property: `--label --desc --datatype` | Active |
+| `scripts/ingest_item.py` | Ingest a single-image archive item: master TIF + 3 R2 tiers + Wikibase claims. Auto-resolves/creates vocab (phase, areas) by *label + instance-of*. Supports `QID_OVERWRITE` (config) to repurpose an existing stub. Dry-run default; `--execute` to write | Active |
 | `scripts/rename_ids.py` | HH-A → HH-HHC/CAA rename | Complete |
 | `scripts/renumber_hhc.py` | HHC renumber 0036–0149 → 0001–0114 | Complete |
 | `scripts/migrate_p142_location.py` | Move archival paths P100 → P142 | Complete |
@@ -623,3 +624,16 @@ MaxAgeSeconds:   86400
 ```
 
 Verified: `Origin: https://bturep.github.io` → `access-control-allow-origin: https://bturep.github.io`; foreign origins get no allow header. PDF.js can now fetch the PDF cross-origin and render in-app. Combined with the earlier `Content-Disposition: attachment` object metadata, the foot `↓ PDF` truly downloads and the in-app viewer truly renders. **Token + leaked rclone keys to be rotated post-session (see Pending).**
+
+---
+
+### 2026-05-19 — Repurposed Q463 (HH-HHC-0112) for Covenant Site Plan + new ingest_item.py + placeholder asset
+
+Resolution of the HH-HHC-0112/HH-HHC-0115 duplicate Brandon caught earlier today. He had a real item to slot into 0112 (option B from that discussion), so the publication stays at HH-HHC-0115 and **Q463 was repurposed** — old "Richard Hunter Architect Portfolio" ephemera stub wiped (`wbeditentity clear:1`), new claims written.
+
+- **Item now at Q463 / HH-HHC-0112:** "Covenant Site Plan with Annotations" — land survey (P1=Q488), 2006, built (P92=Q51), creator Richard Hunter (P80=Q201), HHC (P79=Q180), areas Site + Covenant + Kinhin Trail (P87 × 3), medium "Annotation on 8.5 x 11 site plan reproduction." (P91), master + preview URLs (P95/P96). Source: a 106 MB TIF in `~/Pictures/`. R2 verified: master byte-perfect (106,000,614 B), 3 tiers serving 200.
+- **Two new vocab items created** by the ingest: **Q491** = area "Kinhin Trail" (P1=Q3), **Q492** = phase "Covenant" (P1=Q2).
+- **New reusable script `scripts/ingest_item.py`** — single-image equivalent of `ingest_publication.py`. Config block at top; resolves/creates vocab items by *label + instance-of*; `QID_OVERWRITE` config field repurposes a stub via `wbeditentity clear:1` instead of creating fresh. Dry-run by default (preview to Desktop), `--execute` to write.
+- **Bug caught and fixed mid-execute:** the first version of `wb_find_exact` matched candidates by label only — so "Covenant" the *area* (Q321) got returned when the script asked for the "Covenant" *phase*, and Q463.P62 silently landed on the area QID. Caught immediately from the script's "phase «Covenant» → Q321 (reused)" log line; patched Q463 inline (`wbremoveclaims` the bogus P62, `wbcreateclaim` with the new Q492 phase). The resolver now does a second-pass `wbgetentities` and only returns candidates whose P1 matches the expected instance-of.
+- **Placeholder asset for stub items without P96** — `assets/placeholders/image-missing_{thumb,prev,large}.jpg` (600/2000/3840 px). Dark warm-near-black background matching `image-stage`; mono text reads `[ PREVIEW PENDING ] — P96 unset — scan not yet ingested for this archive item.` Public URL once committed: `https://bturep.github.io/HunterHouse/assets/placeholders/image-missing_prev.jpg`. **Use:** when an archive item is catalogued but its scan isn't ready yet, set its P96 to this URL so it appears in browse with the placeholder. Candidates right now: the three other HHC stubs **HH-HHC-0111 (Q461), 0113 (Q474), 0114 (Q471)** — each catalogued without P96, currently invisible in browse. (Apply later via the admin inline editor, or batched.)
+- **Versioning:** no code change to `next.html`; stays at **v1.06-test.19**. The next available HHC ID stays **0116** (we used 0112, not a fresh allocation).
