@@ -618,6 +618,26 @@
   .hh-pop-opt.cur::after{content:" ·current";color:var(--hint);font-size:10px}
   .hh-pop-msg{padding:11px;color:var(--hint)}
   .hh-pop-cur{flex-shrink:0;display:flex;flex-wrap:wrap;gap:5px;padding:9px 10px;border-bottom:1px solid var(--rule);max-height:96px;overflow-y:auto}
+  /* Phase rename affordance (P62 only). Footer sits under the change-phase
+     list with a top rule; the button itself is a quiet bracket-style action
+     consistent with the rest of the site. Renaming wbsetlabel's the shared
+     Phase entity — propagates to every item in that phase, so the rename
+     mode shows an affected-count line as a passive confirm-guard. */
+  .hh-pop-foot{flex-shrink:0;border-top:1px solid var(--rule);background:var(--soft)}
+  .hh-pop-rename{display:block;width:100%;text-align:left;padding:9px 11px;
+    font:inherit;color:var(--muted);background:none;border:0;cursor:pointer}
+  .hh-pop-rename::before{content:"[ ";color:var(--hint);opacity:.55}
+  .hh-pop-rename::after{content:" ]";color:var(--hint);opacity:.55}
+  .hh-pop-rename:hover{color:var(--red);background:var(--bg)}
+  .hh-pop-actions{display:flex;gap:14px;align-items:center;justify-content:flex-end;
+    padding:9px 11px;border-top:1px solid var(--rule);background:var(--soft)}
+  .hh-pop-cancel{font:inherit;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;
+    color:var(--hint);background:none;border:0;cursor:pointer;padding:0}
+  .hh-pop-cancel:hover{color:var(--ink)}
+  .hh-pop-save{font:inherit;color:var(--ink);background:none;border:0;cursor:pointer;padding:0}
+  .hh-pop-save::before{content:"[ ";color:var(--hint);opacity:.55}
+  .hh-pop-save::after{content:" ]";color:var(--hint);opacity:.55}
+  .hh-pop-save:hover{color:var(--red)}
   .hh-chip{display:inline-flex;align-items:center;gap:5px;background:var(--soft);border:1px solid var(--rule);border-radius:10px;padding:2px 6px 2px 9px;white-space:nowrap;max-width:100%}
   .hh-chip span{overflow:hidden;text-overflow:ellipsis}
   .hh-chip-x{cursor:pointer;color:var(--hint);font-weight:700;padding:0 2px}
@@ -1627,7 +1647,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.39";
+  const VERSION      = "v1.06-test.40";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2020,7 +2040,62 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         hhToast("Save failed: " + err.message, "err");
       }
     });
+
+    // Phase rename (P62 only): append a footer affordance that lets admin
+    // wbsetlabel the shared Phase entity. Distinct from "change phase" above
+    // (which swaps this item's P62 to a different phase QID); rename edits
+    // THIS phase's label in place, affecting every item in it.
+    if (pid === "P62" && item.phaseQID) {
+      const foot = document.createElement("div");
+      foot.className = "hh-pop-foot";
+      foot.innerHTML = `<button class="hh-pop-rename" type="button" title="Rename this phase (affects every item in it)">✎ rename «${escapeHTML(item.phase || "")}»</button>`;
+      pop.appendChild(foot);
+      foot.querySelector(".hh-pop-rename").addEventListener("click", () => enterPhaseRename(pop, item));
+    }
+
     setTimeout(() => document.addEventListener("mousedown", _popOutside, true), 0);
+  }
+
+  // Swap an open Phase picker into rename mode: pre-filled input + affected-
+  // item count (passive confirm-guard) + Rename/cancel. On save calls
+  // wbsetlabel on item.phaseQID; optimistically rewrites every state.items
+  // entry whose phaseQID matches; re-renders list + meta.
+  function enterPhaseRename(pop, item) {
+    const oldLabel = item.phase || "";
+    const phaseQID = item.phaseQID;
+    if (!phaseQID) { hhToast("No phase QID on this item", "err"); return; }
+    const affected = state.items.filter(i => i.phaseQID === phaseQID).length;
+    pop.innerHTML = `
+      <input type="text" id="hh-pop-rename-input" value="${escapeHTML(oldLabel)}" autocomplete="off" spellcheck="false">
+      <div class="hh-pop-msg">Renames phase «${escapeHTML(oldLabel)}» — affects ${affected} item${affected === 1 ? "" : "s"}. ↵ save · Esc</div>
+      <div class="hh-pop-actions">
+        <button class="hh-pop-cancel" type="button">cancel</button>
+        <button class="hh-pop-save" type="button">Rename</button>
+      </div>`;
+    const inp = pop.querySelector("#hh-pop-rename-input");
+    inp.focus(); inp.select();
+    const save = async () => {
+      const newLabel = inp.value.trim();
+      if (!newLabel) { hhToast("Phase label cannot be empty", "err"); return; }
+      if (newLabel === oldLabel) return closeFieldPicker();
+      closeFieldPicker();
+      hhToast("renaming phase…");
+      try {
+        await proxyEdit({ action: "wbsetlabel", id: phaseQID, language: "en", value: newLabel });
+        // Optimistic update: rewrite every item that shares this phaseQID.
+        state.items.forEach(i => { if (i.phaseQID === phaseQID) i.phase = newLabel; });
+        applyFilters(); renderList(); renderMeta(item);
+        hhToast(`Renamed · ${oldLabel} → ${newLabel} (${affected} item${affected === 1 ? "" : "s"})`, "ok");
+      } catch (err) {
+        hhToast("Rename failed: " + err.message, "err");
+      }
+    };
+    inp.addEventListener("keydown", e => {
+      if (e.key === "Escape") { e.preventDefault(); closeFieldPicker(); }
+      else if (e.key === "Enter") { e.preventDefault(); save(); }
+    });
+    pop.querySelector(".hh-pop-cancel").addEventListener("click", closeFieldPicker);
+    pop.querySelector(".hh-pop-save").addEventListener("click", save);
   }
 
   // Wire the ✎ buttons rendered into editable description rows (admin only).
