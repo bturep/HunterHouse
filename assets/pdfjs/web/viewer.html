@@ -32,9 +32,8 @@ See https://github.com/adobe-type-tools/cmap-resources
 <script src="../build/pdf.mjs" type="module"></script>
 
     <link rel="stylesheet" href="viewer.css" />
-    <link rel="stylesheet" href="hh-pdfjs.css" />
-    <script>/* Hunter House — read ?theme=dark|light from the URL and tag <html> so the override CSS can switch palette. Must run before paint. */
-      (function(){var m=location.search.match(/[?&]theme=(dark|light)/);if(m)document.documentElement.classList.add("hh-theme-"+m[1]);})();</script>
+    <script>/* Hunter House — read ?theme=dark|light + ?v=… from the URL, tag <html> so the override CSS picks the right palette, and inject the override CSS with the cache-bust query so the browser always pulls the latest. */
+      (function(){var qs=location.search;var m=qs.match(/[?&]theme=(dark|light)/);if(m)document.documentElement.classList.add("hh-theme-"+m[1]);var vM=qs.match(/[?&]v=([^&]+)/);var v=vM?vM[1]:Date.now();var l=document.createElement("link");l.rel="stylesheet";l.href="hh-pdfjs.css?v="+encodeURIComponent(v);document.currentScript.parentNode.insertBefore(l,document.currentScript);})();</script>
 
   <script src="viewer.mjs" type="module"></script>
   </head>
