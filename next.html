@@ -125,9 +125,12 @@
   body.hh-splash #mob-about-close{display:none}
   body:not(.hh-splash) #mob-about-continue{display:none}
   /* During splash, the top-bar search affordance is dead weight — hide it
-     (and its trailing separator) until the visitor leaves the title wall. */
+     (and its trailing separator) until the visitor leaves the title wall.
+     [?] info button is also hidden during splash for the same reason — no
+     archive context to explain yet. */
   body.hh-splash #search-toggle,
-  body.hh-splash #search-toggle + .tr-sep{display:none}
+  body.hh-splash #search-toggle + .tr-sep,
+  body.hh-splash #rec-info{display:none}
   /* Foot row: credits on the left, Continue button on the right baseline. */
   /* Credits stack as normal flow; Continue button drops to its own line
      with a generous gap and right-aligns — clear separation from the
@@ -1659,7 +1662,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.09";
+  const VERSION      = "v1.07-test.10";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
