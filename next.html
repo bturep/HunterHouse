@@ -122,9 +122,12 @@
   body.hh-splash #about-pane-close{display:none}
   body:not(.hh-splash) #about-pane-continue{display:none}
   /* Foot row: credits on the left, Continue button on the right baseline. */
-  .ap-foot-row{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:28px}
+  /* Credits stack as normal flow; Continue button drops to its own line
+     with a generous gap and right-aligns — clear separation from the
+     credits row above (Brandon's name shouldn't sit beside the CTA). */
+  .ap-foot-row{display:flex;flex-direction:column;gap:44px;margin-bottom:28px}
   .ap-foot-row .ap-credits{margin-bottom:0}
-  .ap-foot-row .cur-actions{margin-top:0;flex-shrink:0}
+  .ap-foot-row .cur-actions{margin-top:0;flex-shrink:0;align-self:flex-end}
   .ap-inner{width:100%;max-width:520px;position:relative}
   #about-pane-close{
     position:absolute;top:-8px;right:0;
@@ -1684,7 +1687,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.01";
+  const VERSION      = "v1.07-test.02";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
