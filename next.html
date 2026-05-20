@@ -5,15 +5,7 @@
 <title>Browse Archive — Hunter House Foundation</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta name="theme-color" content="#1a1816">
-<!-- color-scheme meta removed (was: "dark light"). It was added in bd48368
-     for splash white-flash prevention (index.html still needs it), but on
-     browse/next.html it triggered Chrome's "dark-aware" color transform on
-     archive JPEGs carrying the embedded kip2300-v6- scanner ICC profile —
-     producing a cyan cast in Chrome only (Safari & Firefox fine). We don't
-     need it here: the inline <style>html{background:#1a1816}</style> below
-     handles the dark paint-holdout, and the runtime light/dark toggle is
-     driven by the html.dark class via localStorage, independent of this
-     meta. Side effect: scrollbars/form-controls use browser defaults. -->
+<meta name="color-scheme" content="dark light">
 <link rel="manifest" href="/HunterHouse/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1598,7 +1590,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.24";
+  const VERSION      = "v1.06-test.25";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
