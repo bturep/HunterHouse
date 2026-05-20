@@ -1673,7 +1673,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06-test.46";
+  const VERSION      = "v1.06-test.47";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4636,14 +4636,23 @@ WHERE {
     }
 
     // Fullscreen toggle
+    // Search-toggle button was removed in v1.06-test.45 (desktop search killed);
+    // the #search-input element is kept (mobile filter-panel search proxies
+    // through it). Guard every lookup so a missing element doesn't throw
+    // and abort main() before loadFromWikibase() runs.
     const searchInput = document.getElementById("search-input");
-    function openSearch() { searchInput.classList.add("open"); searchInput.focus(); }
-    function closeSearch() { searchInput.classList.remove("open"); searchInput.value = ""; searchInput.dispatchEvent(new Event("input")); }
-    document.getElementById("search-toggle").addEventListener("click", () => {
-      searchInput.classList.contains("open") ? closeSearch() : openSearch();
-    });
-    searchInput.addEventListener("blur", () => { if (!searchInput.value) closeSearch(); });
-    searchInput.addEventListener("keydown", e => { if (e.key === "Escape") { closeSearch(); e.preventDefault(); } });
+    function openSearch() { if (!searchInput) return; searchInput.classList.add("open"); searchInput.focus(); }
+    function closeSearch() { if (!searchInput) return; searchInput.classList.remove("open"); searchInput.value = ""; searchInput.dispatchEvent(new Event("input")); }
+    const searchToggleBtn = document.getElementById("search-toggle");
+    if (searchToggleBtn) {
+      searchToggleBtn.addEventListener("click", () => {
+        searchInput.classList.contains("open") ? closeSearch() : openSearch();
+      });
+    }
+    if (searchInput) {
+      searchInput.addEventListener("blur", () => { if (!searchInput.value) closeSearch(); });
+      searchInput.addEventListener("keydown", e => { if (e.key === "Escape") { closeSearch(); e.preventDefault(); } });
+    }
 
     const fsBtn = document.getElementById("fs-toggle");
     if (fsBtn && document.fullscreenEnabled) {
