@@ -747,6 +747,9 @@
      and a touch of breathing room above/below to read as a paragraph
      distinct from the key/value rows. */
   .hh-note-text{display:block;white-space:pre-wrap;line-height:1.55;margin:2px 0}
+  /* Notes row sits after Held by with a gap above — visually separates the
+     prose paragraph from the dense key/value stack. */
+  .pane-meta .kv .row-notes{margin-top:14px}
   /* Bulk-edit popover: wider than the field picker (it's a multi-stage
      wizard — property → value → confirm) and uses the same pop chrome. */
   .bb-pop{width:280px}
@@ -1770,7 +1773,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.19";
+  const VERSION      = "v1.07-test.20";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4174,11 +4177,6 @@ WHERE {
     const EM = '<span class="hh-empty">—</span>';
     const descRows = [];
     if (item.id)          descRows.push(["Item",    displayId(item.id)]);
-    if (item.notes || adminEdit) {
-      descRows.push(["Notes", item.notes
-        ? `<span class="hh-note-text">${escapeHTML(item.notes)}</span>`
-        : EM]);
-    }
     if (item.date || adminEdit) descRows.push(["Date", item.date ? escapeHTML(item.date) : EM]);
     if (item.phase || adminEdit) {
       descRows.push(["Phase", item.phase ? escapeHTML(item.phase) : EM]);
@@ -4232,6 +4230,11 @@ WHERE {
     if (item.use    || adminEdit) descRows.push(["Use",    item.use    ? escapeHTML(item.use)    : EM]);
     const coll = collectionOf(item);
     if (coll)             descRows.push(["Held by", `<span class="pill collection-pill ${pillCls(PC.denim)}">${escapeHTML(archiveAbbrev(coll))}</span>`]);
+    if (item.notes || adminEdit) {
+      descRows.push(["Notes", item.notes
+        ? `<span class="hh-note-text">${escapeHTML(item.notes)}</span>`
+        : EM]);
+    }
 
     const archRows = [];
     if (item.location || adminEdit) {
@@ -4270,7 +4273,8 @@ WHERE {
     const descHTML = descRows.map(([k,v]) => {
       const e = EDITABLE[k];
       const btn = e ? ` <button class="hh-fedit" data-pid="${e.pid}" data-key="${e.key}" data-dt="${escapeHTML(k)}"${e.multi ? ' data-multi="1"' : ''}${e.kind ? ` data-kind="${e.kind}"` : ''} title="Edit ${escapeHTML(k)} (admin)" aria-label="Edit ${escapeHTML(k)}">✎</button>` : "";
-      return `<div class="row"><dt>${k}</dt><dd>${v}${btn}</dd></div>`;
+      const cls = k === "Notes" ? "row row-notes" : "row";
+      return `<div class="${cls}"><dt>${k}</dt><dd>${v}${btn}</dd></div>`;
     }).join("");
     const archHTML = archRows.map(([k,v]) => {
       const e = EDITABLE[k];
