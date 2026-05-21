@@ -401,3 +401,19 @@ Working LINE: **NEXT**. Live `browse.html` ended the day still at `v1.06.18`; st
 - Deferred / structural items unchanged.
 
 **Version line at session close: next.html `v1.07-test.22` (staging) · browse.html `v1.06.18` (LIVE, unchanged this afternoon).**
+
+---
+
+### 2026-05-21 — Made-by filter chip cleanup + mobile splash unstuck (browse.html v1.06.20 · next.html v1.07-test.23)
+
+Working LINE: **NEXT**. Two live hotfixes mirrored from next.html to browse.html — both visible to real visitors, neither a feature ship.
+
+- **Empty `[]` chips in the Made-by filter row** (mobile and desktop). After v1.06.18 restructured `i.builtBy` from string → array, `uniqueCreators` was still building `[i.creator, i.designedBy, i.builtBy]` and flatMap-ing — empty arrays survived `.filter(Boolean)` (truthy) and stringified to `""` in the chip render, producing rows of empty `[]` chips polluting the filter panel. Fixed by spreading: `[i.creator, i.designedBy, ...(i.builtBy || [])]`. Matches the pattern already in use at applyFilters. → **browse.html v1.06.19, next.html v1.07-test.22** (commit `182a3f0`).
+
+- **Mobile splash Continue button unresponsive on iOS** (live broken for real visitors). The HHFA splash modal (`#mob-about`) is `position:fixed; overflow-y:auto; z-index:300`; the Continue button (`.cur-continue` → `#mob-about-continue`) had `padding:0` and 11px text — borderline tap target. iOS Safari treats taps inside scrollable fixed containers as ambiguous between tap and scroll-start, and with that small a hit area + no `touch-action` hint, the tap was being eaten. Handler binding itself was confirmed clean (lines 5065-5066 are top-level, bound before `main()` even runs). Fix: add `touch-action:manipulation` + `-webkit-tap-highlight-color:transparent` to `.cur-continue` (universal, zero visual impact); add a generous `padding:12px 10px` with negative margin compensation to `#mob-about-continue` specifically (mobile-only since the desktop button is `#about-pane-continue`). Negative margin keeps the visual size identical while expanding the click target. → **browse.html v1.06.20, next.html v1.07-test.23**.
+
+- **Q524 / Q536 / Martin Byers attribution removed** (data fix, no code). Yesterday I minted Q536 (Martin Byers) and wrote P140→Q536 on Q524 (Dining Room Table, HH-EGC-0020); Brandon called for a full undo. Removed the P140 claim from Q524, cleared Q536 via `wbeditentity clear:1`, relabelled Q536 as `(unused)` with no description — available for reuse via the same QID. Original Martin Byers note removed from the v1.06.18 follow-up entry in this file (git history preserves it per memory protocol).
+
+**Versioning note:** browse.html got two patch bumps in one day (v1.06.19 + v1.06.20) — both were genuine "real visitors blocked" hotfixes, not feature ships. The LINE: NEXT rule held; next.html got the same fixes first as v1.07-test.22 and .23. The Continue-button hit-area issue probably existed since the v1.06.00 promotion but went unnoticed on desktop.
+
+**Version line: browse.html `v1.06.20` (LIVE) · next.html `v1.07-test.23` (staging).**
