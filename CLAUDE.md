@@ -13,7 +13,7 @@ Load this file at the start of any Claude Code session.
 <!-- LINE-MARKER: the claude() launcher rewrites the next line. Keep it on its own line. -->
 **LINE: NEXT**
 
-- **LINE: NEXT** → all browse work goes in **`next.html`**. Do **not** edit `browse.html` except an explicit live hotfix (then mirror the change into `next.html`). Version label: `next.html`'s `VERSION` constant is `v1.07-test.NN` — bump `NN` on every push, note it in the session log. Promotion to live = the documented Staging workflow.
+- **LINE: NEXT** → all browse work goes in **`next.html`** only. Do **not** edit `browse.html` — including hotfixes. The bar for touching `browse.html` is "the live site is broken for real visitors and there is no other path"; if you're framing it as a hotfix to ship a new feature alongside, you're wrong, and it goes to `next.html` to wait for the next promotion. Version label: `next.html`'s `VERSION` constant is `v1.07-test.NN` — bump `NN` on every push, note it in the session log. Promotion to live = the documented Staging workflow.
 - **LINE: LIVE** → work directly in `browse.html`; normal `v1.MAJOR.SESSION.PATCH` convention. `next.html` dormant.
 
 At session start: announce which LINE is active and which file you'll be editing. If LINE and the user's stated intent disagree, ask before editing.
