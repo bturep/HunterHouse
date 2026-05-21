@@ -633,10 +633,7 @@
   }
   .bulk-bar .bb-btn:hover{color:var(--ink)}
   .bulk-bar .bb-clear:hover{color:var(--red-deep)}
-  /* Bulk-selected rows get a left-edge red stripe (same pattern as .row.sel
-     uses) plus a faint background tint so multi-row selection is visible at
-     a glance. The ::before pseudo is shared with .row.sel — both red, so
-     overlapping is fine. */
+  /* Bulk-selected rows: faint red tint + the same ::before red stripe .row.sel uses. */
   .row.bulk-sel{background:rgba(139,58,42,0.06)}
   html.dark .row.bulk-sel{background:rgba(139,58,42,0.12)}
   .row.bulk-sel::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red)}
@@ -1967,15 +1964,16 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     return _vocabCache[pid];
   }
   // Replace a single-valued time claim (P82) — create-then-remove.
-  // precision: 9 = year, 10 = month, 11 = day.
+  // precision: 9 = year, 10 = month, 11 = day. Pass time="" to just clear.
   async function setTimeClaim(entity, pid, time, precision) {
     const api = WIKIBASE_URL + "/w/api.php";
     const g = await fetch(`${api}?action=wbgetclaims&entity=${entity}&property=${pid}&format=json&origin=*`)
       .then(r => r.json());
     const existing = ((g.claims && g.claims[pid]) || []).map(c => c.id);
-    await proxyEdit({ action: "wbcreateclaim", entity, property: pid, snaktype: "value",
-      value: JSON.stringify({ time, timezone: 0, before: 0, after: 0,
-        precision, calendarmodel: "http://www.wikidata.org/entity/Q1985727" }) });
+    if (time)
+      await proxyEdit({ action: "wbcreateclaim", entity, property: pid, snaktype: "value",
+        value: JSON.stringify({ time, timezone: 0, before: 0, after: 0,
+          precision, calendarmodel: "http://www.wikidata.org/entity/Q1985727" }) });
     if (existing.length)
       await proxyEdit({ action: "wbremoveclaims", claim: existing.join("|") });
   }
@@ -2045,6 +2043,36 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     P80:  { kind: "person", instance: null, noun: "Person" },
   };
   function canMintFor(pid) { return !!MINT_POLICY[pid]; }
+
+  // Render a vocab-pick list (item-valued single OR multi OR bulk). Three
+  // small variations folded into options: exclude already-present labels,
+  // mark the current value, include data-lbl for the bulk picker. The mint
+  // tail (if any) is appended automatically.
+  function drawVocabList(list, raw, opts, pid, {exclude, current, withLbl} = {}) {
+    const f = raw.toLowerCase();
+    const sh = opts.filter(o =>
+      (!exclude || !exclude.has(o.label)) && o.label.toLowerCase().includes(f));
+    const cur = (current || "").toLowerCase();
+    let html = sh.length
+      ? sh.map(o => {
+          const isCur = o.label.toLowerCase() === cur;
+          const lbl   = withLbl ? ` data-lbl="${escapeHTML(o.label)}"` : "";
+          return `<div class="hh-pop-opt${isCur ? " cur" : ""}" data-qid="${o.qid}"${lbl}>${escapeHTML(o.label)}</div>`;
+        }).join("")
+      : `<div class="hh-pop-msg">${opts.length ? "no matches" : "vocabulary failed"}</div>`;
+    if (raw && canMintFor(pid) && !opts.some(o => o.label.toLowerCase() === f)) {
+      html += `<div class="hh-pop-mint"><button class="hh-mint-btn" type="button">+ mint "${escapeHTML(raw)}" as ${escapeHTML(MINT_POLICY[pid].noun)}</button></div>`;
+    }
+    list.innerHTML = html;
+  }
+  // Intercept a click on the mint button inside a picker. Returns true if
+  // handled (caller should early-return). onMinted gets (newQID, newLabel).
+  function handleMintClick(e, pop, pid, inp, onMinted) {
+    if (!e.target.closest(".hh-mint-btn")) return false;
+    mountMintConfirmUI(pop, pid, inp.value.trim(), onMinted);
+    return true;
+  }
+
   async function mintNewVocab(pid, label, descUser) {
     const policy = MINT_POLICY[pid];
     if (!policy) throw new Error("no mint policy for " + pid);
@@ -2139,19 +2167,9 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
           ? vals.map(l => `<span class="hh-chip"><span>${escapeHTML(l)}</span><b class="hh-chip-x" data-lbl="${escapeHTML(l)}">×</b></span>`).join("")
           : `<span class="hh-pop-msg" style="padding:0">none yet</span>`;
       };
-      const drawList = () => {
-        const have = new Set(item[key] || []);
-        const raw  = inp.value.trim();
-        const f    = raw.toLowerCase();
-        const sh   = opts.filter(o => !have.has(o.label) && o.label.toLowerCase().includes(f));
-        let html = sh.length
-          ? sh.map(o => `<div class="hh-pop-opt" data-qid="${o.qid}">${escapeHTML(o.label)}</div>`).join("")
-          : `<div class="hh-pop-msg">${opts.length ? "no matches" : "vocabulary failed"}</div>`;
-        if (raw && canMintFor(pid) && !opts.some(o => o.label.toLowerCase() === f)) {
-          html += `<div class="hh-pop-mint"><button class="hh-mint-btn" type="button">+ mint "${escapeHTML(raw)}" as ${escapeHTML(MINT_POLICY[pid].noun)}</button></div>`;
-        }
-        list.innerHTML = html;
-      };
+      const drawList = () =>
+        drawVocabList(list, inp.value.trim(), opts, pid,
+                      { exclude: new Set(item[key] || []) });
       drawCur();
       getVocab(pid).then(v => { opts = v; drawList(); })
                    .catch(() => { list.innerHTML = `<div class="hh-pop-msg">vocabulary failed to load</div>`; });
@@ -2171,27 +2189,21 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
           hhToast("Removed · " + lbl, "ok");
         } catch (err) { hhToast("Remove failed: " + err.message, "err"); }
       });
+      const addPicked = async (qid, lbl) => {
+        try { await addMultiItem(item.qid, pid, qid);
+          item[key] = [...(item[key] || []), lbl]; synced();
+        } catch (err) { hhToast("Add failed: " + err.message, "err"); }
+      };
       list.addEventListener("click", async e => {
-        const mintBtn = e.target.closest(".hh-mint-btn");
-        if (mintBtn) {
-          const newLabel = inp.value.trim();
-          mountMintConfirmUI(pop, pid, newLabel, async (newQID, newLbl) => {
-            try {
-              await addMultiItem(item.qid, pid, newQID);
-              item[key] = [...(item[key] || []), newLbl];
-              synced();
-              closeFieldPicker();
-            } catch (err) { hhToast("Add failed: " + err.message, "err"); }
-          });
-          return;
-        }
+        if (handleMintClick(e, pop, pid, inp, async (qid, lbl) => {
+          await addPicked(qid, lbl); closeFieldPicker();
+        })) return;
         const o = e.target.closest(".hh-pop-opt"); if (!o) return;
         const qid = o.dataset.qid, lbl = (opts.find(x => x.qid === qid) || {}).label || "";
         hhToast("adding " + lbl + "…");
-        try { await addMultiItem(item.qid, pid, qid);
-          item[key] = [...(item[key] || []), lbl]; synced(); inp.value = ""; drawList();
-          hhToast("Added · " + lbl, "ok");
-        } catch (err) { hhToast("Add failed: " + err.message, "err"); }
+        await addPicked(qid, lbl);
+        inp.value = ""; drawList();
+        hhToast("Added · " + lbl, "ok");
       });
       inp.focus();
       setTimeout(() => document.addEventListener("mousedown", _popOutside, true), 0);
@@ -2323,39 +2335,25 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     const list = pop.querySelector(".hh-pop-list");
     const cur  = (item[key] || "").toLowerCase();
     let opts   = [];
-    const draw = () => {
-      const raw = inp.value.trim();
-      const f   = raw.toLowerCase();
-      const sh  = opts.filter(o => o.label.toLowerCase().includes(f));
-      let html = sh.length
-        ? sh.map(o => `<div class="hh-pop-opt${o.label.toLowerCase() === cur ? " cur" : ""}" data-qid="${o.qid}">${escapeHTML(o.label)}</div>`).join("")
-        : `<div class="hh-pop-msg">no matches</div>`;
-      if (raw && canMintFor(pid) && !opts.some(o => o.label.toLowerCase() === f)) {
-        html += `<div class="hh-pop-mint"><button class="hh-mint-btn" type="button">+ mint "${escapeHTML(raw)}" as ${escapeHTML(MINT_POLICY[pid].noun)}</button></div>`;
-      }
-      list.innerHTML = html;
-    };
+    const draw = () =>
+      drawVocabList(list, inp.value.trim(), opts, pid, { current: cur });
     getVocab(pid).then(v => { opts = v; draw(); })
                  .catch(() => { list.innerHTML = `<div class="hh-pop-msg">vocabulary failed to load</div>`; });
     inp.addEventListener("input", draw);
     inp.addEventListener("keydown", e => { if (e.key === "Escape") { e.preventDefault(); closeFieldPicker(); } });
     inp.focus();
 
+    const setPicked = async (qid, label) => {
+      await setSingleItemClaim(item.qid, pid, qid);
+      item[key] = label;
+      const m = state.items.find(i => i.qid === item.qid); if (m) m[key] = label;
+      renderMeta(item);
+    };
     list.addEventListener("click", async e => {
-      const mintBtn = e.target.closest(".hh-mint-btn");
-      if (mintBtn) {
-        const newLabel = inp.value.trim();
-        mountMintConfirmUI(pop, pid, newLabel, async (newQID, newLbl) => {
-          try {
-            await setSingleItemClaim(item.qid, pid, newQID);
-            item[key] = newLbl;
-            const m = state.items.find(i => i.qid === item.qid); if (m) m[key] = newLbl;
-            renderMeta(item);
-            closeFieldPicker();
-          } catch (err) { hhToast("Save failed: " + err.message, "err"); }
-        });
-        return;
-      }
+      if (handleMintClick(e, pop, pid, inp, async (qid, lbl) => {
+        try { await setPicked(qid, lbl); closeFieldPicker(); }
+        catch (err) { hhToast("Save failed: " + err.message, "err"); }
+      })) return;
       const o = e.target.closest(".hh-pop-opt");
       if (!o) return;
       const qid = o.dataset.qid;
@@ -2363,15 +2361,8 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       if (label.toLowerCase() === cur) return closeFieldPicker();
       closeFieldPicker();
       hhToast("saving " + dt + "…");
-      try {
-        await setSingleItemClaim(item.qid, pid, qid);
-        item[key] = label;
-        const m = state.items.find(i => i.qid === item.qid); if (m) m[key] = label;
-        renderMeta(item);
-        hhToast("Saved · " + dt + " → " + label, "ok");
-      } catch (err) {
-        hhToast("Save failed: " + err.message, "err");
-      }
+      try { await setPicked(qid, label); hhToast("Saved · " + dt + " → " + label, "ok"); }
+      catch (err) { hhToast("Save failed: " + err.message, "err"); }
     });
 
     // Phase rename (P62 only): append a footer affordance that lets admin
@@ -2761,11 +2752,6 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   }
 
   // ── Bulk-edit selection (admin) ────────────────────────────────────────────
-  // Cmd/Ctrl-click toggles individual items into state.bulkSel; Shift-click
-  // ranges from the anchor. Selected rows get a red left-edge stripe. The
-  // bulk-bar above the list shows count + Edit + Clear; Edit opens a popover
-  // that picks a property then a value, then a confirm preview, then loops
-  // the appropriate write helper across all selected items.
   function bulkSelectRow(id, e) {
     if (e.shiftKey && state.bulkAnchor) {
       const ids = state.filtered.map(i => i.id);
@@ -2780,14 +2766,12 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       else state.bulkSel.add(id);
       state.bulkAnchor = id;
     }
-    renderList();
-    renderBulkBar();
+    renderList();   // renderList already calls renderBulkBar at the tail
   }
   function clearBulkSel() {
     state.bulkSel.clear();
     state.bulkAnchor = null;
     renderList();
-    renderBulkBar();
   }
   function renderBulkBar() {
     const bar = document.getElementById("bulk-bar");
@@ -2860,7 +2844,6 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     setTimeout(() => document.addEventListener("mousedown", _bbOutside, true), 0);
   }
 
-  // Stage 2 of bulk edit: pick the value to apply.
   async function startBulkValuePick(pop, op) {
     if (op.kind === "string" || op.kind === "text") {
       const ta = op.kind === "text" ? "textarea" : "input";
@@ -2909,38 +2892,22 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     const list = pop.querySelector("#bb-val-list");
     inp.focus();
     let opts = [];
-    const draw = () => {
-      const raw = inp.value.trim();
-      const f = raw.toLowerCase();
-      const sh = opts.filter(o => o.label.toLowerCase().includes(f));
-      let html = sh.length
-        ? sh.map(o => `<div class="hh-pop-opt" data-qid="${o.qid}" data-lbl="${escapeHTML(o.label)}">${escapeHTML(o.label)}</div>`).join("")
-        : `<div class="hh-pop-msg">${opts.length ? "no matches" : "vocabulary failed"}</div>`;
-      if (raw && canMintFor(op.pid) && !opts.some(o => o.label.toLowerCase() === f)) {
-        html += `<div class="hh-pop-mint"><button class="hh-mint-btn" type="button">+ mint "${escapeHTML(raw)}" as ${escapeHTML(MINT_POLICY[op.pid].noun)}</button></div>`;
-      }
-      list.innerHTML = html;
-    };
+    const draw = () =>
+      drawVocabList(list, inp.value.trim(), opts, op.pid, { withLbl: true });
     getVocab(op.pid).then(v => { opts = v; draw(); })
                     .catch(() => { list.innerHTML = `<div class="hh-pop-msg">vocabulary failed to load</div>`; });
     inp.addEventListener("input", draw);
     inp.addEventListener("keydown", e => { if (e.key === "Escape") { e.preventDefault(); closeBulkPicker(); } });
     pop.querySelector(".bb-stage-cancel").addEventListener("click", closeBulkPicker);
     list.addEventListener("click", async e => {
-      const mintBtn = e.target.closest(".hh-mint-btn");
-      if (mintBtn) {
-        const newLabel = inp.value.trim();
-        mountMintConfirmUI(pop, op.pid, newLabel, async (newQID, newLbl) => {
-          confirmBulkApply(pop, op, { qid: newQID, label: newLbl });
-        });
-        return;
-      }
+      if (handleMintClick(e, pop, op.pid, inp, async (newQID, newLbl) => {
+        confirmBulkApply(pop, op, { qid: newQID, label: newLbl });
+      })) return;
       const o = e.target.closest(".hh-pop-opt"); if (!o) return;
       confirmBulkApply(pop, op, { qid: o.dataset.qid, label: o.dataset.lbl });
     });
   }
 
-  // Stage 3: preview the change across selected items + confirm.
   function confirmBulkApply(pop, op, value) {
     const ids = [...state.bulkSel];
     const valueDisplay = (value && typeof value === "object") ? value.label : (value || "(clear)");
@@ -2964,47 +2931,54 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     });
   }
 
-  // Stage 4: actually apply the operation across each item.
+  // One row per (kind, op) pair. Each applier writes to Wikibase then mutates
+  // the local item to match — renderList/renderMeta after the loop picks up
+  // the new state without a SPARQL refetch.
+  const BULK_APPLIERS = {
+    "multi:add": async (item, op, v) => {
+      await addMultiItem(item.qid, op.pid, v.qid);
+      if (!(item[op.key] || []).includes(v.label))
+        item[op.key] = [...(item[op.key] || []), v.label];
+    },
+    "multi:remove": async (item, op, v) => {
+      await removeMultiItem(item.qid, op.pid, v.qid);
+      item[op.key] = (item[op.key] || []).filter(x => x !== v.label);
+    },
+    "single:set": async (item, op, v) => {
+      await setSingleItemClaim(item.qid, op.pid, v.qid);
+      item[op.key] = v.label;
+    },
+    "string:set": async (item, op, v) => {
+      await setStringClaim(item.qid, op.pid, v);
+      item[op.key] = v || null;
+    },
+    "text:set": async (item, op, v) => {
+      await setStringClaim(item.qid, op.pid, v);
+      item[op.key] = v || null;
+    },
+    "date:set": async (item, op, v) => {
+      if (v === "") {
+        await setTimeClaim(item.qid, "P82", "", 11);
+        item.date = null;
+      } else {
+        const m = v.match(/^(\d{4})(?:-(\d{2})(?:-(\d{2}))?)?$/);
+        const Y = m[1], Mo = m[2] || "00", D = m[3] || "00";
+        const precision = m[3] ? 11 : (m[2] ? 10 : 9);
+        await setTimeClaim(item.qid, "P82", `+${Y}-${Mo}-${D}T00:00:00Z`, precision);
+        item.date = `${Y}-${Mo}-${D}`;
+      }
+    },
+  };
   async function applyBulkOp(op, value, ids) {
+    const applier = BULK_APPLIERS[`${op.kind}:${op.op}`];
+    if (!applier) throw new Error(`no applier for ${op.kind}:${op.op}`);
     let done = 0, failed = 0;
     hhToast(`applying to 0/${ids.length}…`);
     for (const id of ids) {
       const item = state.items.find(i => i.id === id);
       if (!item) { failed++; continue; }
       try {
-        if (op.kind === "multi") {
-          if (op.op === "add") {
-            await addMultiItem(item.qid, op.pid, value.qid);
-            if (!(item[op.key] || []).includes(value.label))
-              item[op.key] = [...(item[op.key] || []), value.label];
-          } else { // remove
-            await removeMultiItem(item.qid, op.pid, value.qid);
-            item[op.key] = (item[op.key] || []).filter(v => v !== value.label);
-          }
-        } else if (op.kind === "single") {
-          await setSingleItemClaim(item.qid, op.pid, value.qid);
-          item[op.key] = value.label;
-        } else if (op.kind === "date") {
-          if (value === "") {
-            // Clear: setStringClaim with empty value works for strings; for time
-            // we wbremoveclaims directly.
-            const api = WIKIBASE_URL + "/w/api.php";
-            const g = await fetch(`${api}?action=wbgetclaims&entity=${item.qid}&property=P82&format=json&origin=*`).then(r => r.json());
-            const existing = ((g.claims && g.claims.P82) || []).map(c => c.id);
-            if (existing.length)
-              await proxyEdit({ action: "wbremoveclaims", claim: existing.join("|") });
-            item.date = null;
-          } else {
-            const m = value.match(/^(\d{4})(?:-(\d{2})(?:-(\d{2}))?)?$/);
-            const Y = m[1], Mo = m[2] || "00", D = m[3] || "00";
-            const precision = m[3] ? 11 : (m[2] ? 10 : 9);
-            await setTimeClaim(item.qid, "P82", `+${Y}-${Mo}-${D}T00:00:00Z`, precision);
-            item.date = `${Y}-${Mo}-${D}`;
-          }
-        } else if (op.kind === "string" || op.kind === "text") {
-          await setStringClaim(item.qid, op.pid, value);
-          item[op.key] = value || null;
-        }
+        await applier(item, op, value);
         done++;
         hhToast(`applying ${done}/${ids.length}…`);
       } catch (err) {
@@ -4504,12 +4478,13 @@ WHERE {
       [i.creator, i.designedBy, ...(i.builtBy || [])].filter(Boolean)));
     const uniqueBuiltStatus = uniqueSorted(state.items.map(i => i.builtStatus).filter(Boolean));
 
-    const group = (label, vals, activeSet, cls, attr, color, infoMap) => {
+    const group = (label, vals, activeSet, cls, attr, color) => {
       if (!vals.length) return "";
       const pc = color ? ` ${pillCls(color)}` : "";
       const chips = vals.map(v => {
         const chip = `<button class="fp-chip${activeSet.has(v) ? " on" : ""}${pc}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}</button>`;
-        const info = infoMap?.[v]
+        // Collection chips get an ⓘ for the per-collection blurb popover.
+        const info = (attr === "collection" && COLLECTION_INFO[v])
           ? `<button class="fp-info" data-coll-info="${escapeHTML(v)}" title="About ${escapeHTML(v)}" aria-label="About ${escapeHTML(v)}">ⓘ</button>`
           : "";
         return chip + info;
@@ -4534,7 +4509,7 @@ WHERE {
 
     panel.innerHTML =
       curatedRow +
-      group("Collection",   uniqueCollections, state.filterCollection,  "coll",        "collection",  PC.denim, COLLECTION_INFO) +
+      group("Collection",   uniqueCollections, state.filterCollection,  "coll",        "collection",  PC.denim) +
       group("Areas",        uniqueAreas,       state.filterArea,        "area",        "area",        PC.sage)  +
       group("Item type",    uniqueTypes,       state.filterType,        "itype",       "itype",       PC.stone) +
       group("Drawing type", uniqueDrawTypes,   state.filterDrawType,    "drawtype",    "drawtype",    PC.slate) +
@@ -5223,7 +5198,6 @@ WHERE {
   function toggleInfoPane(){ infoPane.classList.contains("open") ? closeInfoPane() : openInfoPane(); }
 
   // ── Filter-panel collection ⓘ popover ──────────────────────────────────
-  // Anchored to the clicked ⓘ. Esc / outside-click / re-click closes.
   function openCollectionInfo(abbrev, anchor) {
     const info = COLLECTION_INFO[abbrev];
     if (!info) return;
