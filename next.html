@@ -633,9 +633,13 @@
   }
   .bulk-bar .bb-btn:hover{color:var(--ink)}
   .bulk-bar .bb-clear:hover{color:var(--red-deep)}
-  /* Selected rows get a left-edge red stripe — visible cue without recoloring
-     the row background (which is used by .marked / .has-note already). */
-  .row.bulk-sel{box-shadow:inset 3px 0 0 var(--red)}
+  /* Bulk-selected rows get a left-edge red stripe (same pattern as .row.sel
+     uses) plus a faint background tint so multi-row selection is visible at
+     a glance. The ::before pseudo is shared with .row.sel — both red, so
+     overlapping is fine. */
+  .row.bulk-sel{background:rgba(139,58,42,0.06)}
+  html.dark .row.bulk-sel{background:rgba(139,58,42,0.12)}
+  .row.bulk-sel::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red)}
   .mark-bar .mb-count{display:flex;align-items:center;gap:6px;color:var(--ink);white-space:nowrap}
   .mark-bar .mb-dot{width:5px;height:5px;border-radius:50%;background:var(--ink);flex-shrink:0}
   html.dark .mark-bar .mb-dot{background:var(--inv-fg)}
@@ -1773,7 +1777,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.20";
+  const VERSION      = "v1.07-test.21";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
