@@ -1,13 +1,13 @@
 {
-  "_note": "TESTING SWAP (2026-05-19): curator displayed as Robert Youds while we verify the curator-name treatment across all four surfaces (chip / threshold byline / curation-card / right-pane curator's-note label). File + slug remain 'brandon-poole' — internal only. Swap back (or rename file + slug to 'robert-youds') when Brandon's bio returns. Still PLACEHOLDER: title, intro, items + per-item notes.",
+  "_note": "Brandon Poole curation — Phase 1. Title, bio, intro, and per-item notes are still PLACEHOLDER, pending the real material.",
   "slug": "brandon-poole",
   "title": "PLACEHOLDER — A working selection",
   "curator": {
-    "name": "Robert Youds",
+    "name": "Brandon Poole",
     "role": "Artist",
     "affiliation": "Victoria, BC",
     "qid": null,
-    "bio": "PLACEHOLDER bio for testing the curator-name rendering. Robert Youds is a Victoria-based artist whose practice has long engaged the built environment of the Pacific Northwest. This placeholder text exists so the name-highlight (.cur-name-c → var(--red)) has something to wrap inside the bio paragraph — the real Robert Youds bio is not yet supplied.",
+    "bio": "PLACEHOLDER bio for testing the curator-name rendering. Brandon Poole is a Victoria-based artist whose practice has long engaged the built environment of the Pacific Northwest. This placeholder text exists so the name-highlight (.cur-name-c → var(--red)) has something to wrap inside the bio paragraph — the real Brandon Poole bio is not yet supplied.",
     "url": "https://example.org",
     "url_label": "placeholder.example"
   },
