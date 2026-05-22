@@ -225,6 +225,11 @@
     padding:48px 40px 64px}
   html.dark #curator-pane{background:#242220}
   #curator-pane.open{display:flex}
+  @media (max-width:767px){
+    /* Mobile: the threshold covers the whole shell — pad past the iOS
+       status bar and tighten the side gutters for narrow screens. */
+    #curator-pane{padding:max(40px,calc(env(safe-area-inset-top,0px) + 20px)) 24px 48px}
+  }
   /* Curator-pane layout reuses the .ap-* typography family from #about-pane
      (ap-title → ap-ver → ap-section/ap-section-head/ap-body → ap-rule →
      ap-credits). Only curator-specific bits below: a corner close button
@@ -293,6 +298,9 @@
     text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
   .cur-note .cn-text{font-family:var(--mono);font-size:11.5px;line-height:1.7;color:var(--ink)}
   .cur-note .cn-empty{font-family:var(--mono);font-size:10.5px;color:var(--hint)}
+  /* Curator note leading the mobile sheet — drop the divider line so it
+     reads as the sheet's opening element, not a mid-list separator. */
+  .mob-sheet-body .cur-note:first-child{margin-top:0;border-top:0;padding-top:0}
 
   /* Info ([?]) button moved to the top bar (.site-topright .info-btn).
      The old in-record bracket-style .rec-info CSS has been removed. */
@@ -1680,9 +1688,6 @@
         </div>
       </div>
     </div>
-    <div id="curator-pane" role="dialog" aria-modal="true" aria-label="Curated lens">
-      <div class="ap-inner" id="curator-pane-inner"></div>
-    </div>
     <div id="load-screen">
       <img class="load-mark" src="assets/hunter-mark.png" alt="">
       <span class="load-text">Loading Archive Data from Wikibase<span class="load-dots"></span></span>
@@ -1762,6 +1767,13 @@
     </div>
   </div>
 
+  <!-- Curated-lens threshold overlay. A child of .shell (not .pane-image)
+       so it survives .pane-image{display:none} on mobile — it covers the
+       whole content area as a modal on both desktop and mobile. -->
+  <div id="curator-pane" role="dialog" aria-modal="true" aria-label="Curated lens">
+    <div class="ap-inner" id="curator-pane-inner"></div>
+  </div>
+
 </div>
 
 <div id="mob-lightbox" class="mob-lightbox">
@@ -1775,7 +1787,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.33";
+  const VERSION      = "v1.07-test.34";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3227,6 +3239,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
     const body = document.getElementById("mob-sheet-body");
     body.innerHTML =
+      curatorNoteBlock(item) +
       (item.accessCopy ? `<a class="pub-read" href="${escapeHTML(item.accessCopy)}" target="_blank" rel="noopener">Open publication (PDF) ↗</a>` : "") +
       `<section class="meta-section">
         <h3><span><span class="n">01</span>Description</span><span class="ct">${descRows.length} fields</span></h3>
@@ -3743,6 +3756,24 @@ WHERE {
       ? `curator's note · <span class="cur-name-c">${escapeHTML(name)}</span>`
       : `curator's note`;
     panel.innerHTML = `<div class="cur-note">
+      <span class="cn-label">${labelHTML}</span>
+      ${note ? `<div class="cn-text">${escapeHTML(note)}</div>`
+             : `<div class="cn-empty">No curator note for this item.</div>`}
+    </div>`;
+  }
+
+  // Curator note as a mobile-sheet block — same data as renderCuratorNote,
+  // shown at the top of the bottom sheet while a curation is active.
+  function curatorNoteBlock(item) {
+    if (!state.curation) return "";
+    const cu = state.curation.curator || {};
+    const name = (cu.name || state.curation.curator || "").toString().trim();
+    const entry = (state.curation.items || []).find(x => x.id === item.id);
+    const note = entry && entry.note ? entry.note : "";
+    const labelHTML = name
+      ? `curator's note · <span class="cur-name-c">${escapeHTML(name)}</span>`
+      : `curator's note`;
+    return `<div class="cur-note">
       <span class="cn-label">${labelHTML}</span>
       ${note ? `<div class="cn-text">${escapeHTML(note)}</div>`
              : `<div class="cn-empty">No curator note for this item.</div>`}
