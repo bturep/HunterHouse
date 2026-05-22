@@ -486,7 +486,7 @@
   .fp-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.16em;text-transform:uppercase;margin-bottom:8px}
   .fp-chips{display:flex;flex-wrap:wrap;gap:5px}
   .fp-chip{
-    font-family:var(--mono);font-size:10px;letter-spacing:0.03em;
+    font-family:var(--mono);font-size:10px;letter-spacing:0.03em;text-transform:capitalize;
     border:1px solid var(--pb,var(--rule));background:var(--pb,var(--soft));color:var(--pf,var(--muted));
     padding:3px 9px;border-radius:2px;cursor:pointer;
     transition:background 0.1s,color 0.1s,border-color 0.1s;
@@ -555,7 +555,7 @@
   }
   .row .ph{
     font-family:var(--mono);font-size:9.5px;color:var(--muted);
-    letter-spacing:0.04em;margin-top:4px;
+    letter-spacing:0.04em;margin-top:4px;text-transform:capitalize;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
   .row .year{
@@ -1448,7 +1448,7 @@
      mono 11px / 400 / 0.02em / title case — more legible, no box. */
   .fp-chip{
     font-family:var(--mono);font-size:11px;font-weight:400;
-    letter-spacing:0.02em;text-transform:none;line-height:1.6;
+    letter-spacing:0.02em;text-transform:capitalize;line-height:1.6;
     background:transparent;border:0;padding:0;border-radius:0;cursor:pointer;
     color:var(--pf,var(--ink));
     transition:color 0.1s,opacity 0.1s;
@@ -1515,7 +1515,7 @@
     /* Filter chips → manifest [pill] style on mobile */
     .fp-chip{
       background:transparent;border:0;padding:0;border-radius:0;
-      font-size:11px;font-weight:400;letter-spacing:0.02em;text-transform:none;
+      font-size:11px;font-weight:400;letter-spacing:0.02em;text-transform:capitalize;
       color:var(--pf,var(--ink));line-height:1.55;
     }
     .fp-chip::before{content:"["}
@@ -1771,7 +1771,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06.29";
+  const VERSION      = "v1.06.30";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
