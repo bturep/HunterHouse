@@ -76,9 +76,9 @@
   html[data-splash-init="1"] body .site-top #rec-info{display:none}
   #topright{cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;display:flex;align-items:center;color:var(--ink)}
   .site-topright .theme-btn:hover{opacity:0.5}
-  /* padding-left:13px → wordmark left edge at 41px (.site-top's 28px + 13px),
-     mirroring the right side where #fs-toggle's edge lands at viewport-41. */
-  a.markid{text-decoration:none;color:inherit;display:flex;align-items:center;padding-left:13px}
+  /* No left padding: the wordmark starts at .site-top's 28px, aligning with
+     the "Browse" label in .list-head (also 28px). */
+  a.markid{text-decoration:none;color:inherit;display:flex;align-items:center}
   .markid .name{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
   .markid .name .dim{font-size:9px;letter-spacing:0.14em;font-weight:400}
   .header-search{display:flex;align-items:center}
@@ -275,9 +275,9 @@
   /* Intro card — bigger than mark-bar, sits above the list in curation mode */
   .curation-card{padding:14px 20px 16px 28px;border-bottom:1px solid var(--rule);
     background:var(--soft)}
-  /* 28px left matches .list-head, so the curator name in the card lines up
-     with the list rows below. Right stays 20px, mirroring .list-head's
-     right side. */
+  /* 28px left matches .site-top and .list-head, so the curator name in the
+     card lines up vertically under the "Hunter House Archive"
+     mark in the header. Right stays 20px, mirroring .list-head's right side. */
   html.dark .curation-card{background:#242220}
   .curation-card[hidden]{display:none}
   .cc-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:8px}
@@ -1788,7 +1788,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.27";
+  const VERSION      = "v1.07-test.28";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
