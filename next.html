@@ -226,18 +226,10 @@
   html.dark #curator-pane{background:#242220}
   #curator-pane.open{display:flex}
   @media (max-width:767px){
-    /* Mobile: the threshold covers the whole shell — pad past the iOS
-       status bar and tighten the side gutters for narrow screens. */
-    #curator-pane{padding:max(40px,calc(env(safe-area-inset-top,0px) + 20px)) 24px 48px}
+    /* On the web app, copy #mob-about exactly — same fullscreen padding,
+       same top-aligned flow (the desktop pane stays vertically centred). */
+    #curator-pane{padding:max(48px, calc(env(safe-area-inset-top, 0px) + 24px)) 28px 64px;justify-content:flex-start}
   }
-  /* Curator threshold types a notch smaller than the splash — it carries
-     more text (exhibition title + byline + blurb + bio), so the reduced
-     scale keeps it as restrained as the about-pane it mimics. */
-  #curator-pane .ap-title{font-size:10px;letter-spacing:0.14em;margin-bottom:3px}
-  #curator-pane .ap-body{font-size:10.5px;line-height:1.7}
-  #curator-pane .ap-section{margin-bottom:18px}
-  #curator-pane .ap-section-head{font-size:8px;letter-spacing:0.2em}
-  #curator-pane .cur-continue{font-size:10px}
   /* Curator-pane layout reuses the .ap-* typography family from #about-pane
      (ap-title → ap-ver → ap-section/ap-section-head/ap-body → ap-rule →
      ap-credits). Only curator-specific bits below: a corner close button
@@ -1793,7 +1785,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.39";
+  const VERSION      = "v1.07-test.40";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3682,14 +3674,11 @@ WHERE {
     const link = cu.url
       ? `<a href="${escapeHTML(cu.url)}" target="_blank" rel="noopener">${escapeHTML(cu.url_label || cu.url)} ↗</a>`
       : "";
-    // Layout: c.title sits directly above the byline, both in .ap-title
-    // (so they read as a two-line exhibition heading: WORK title /
-    // CURATED-BY-AUTHOR byline, equal weight). The curator's name is
-    // wrapped in .cur-name-c (var(--red)) everywhere it appears — byline
-    // and every occurrence in the bio — to echo the .pc-red chip in the
-    // BROWSE filter panel. No top eyebrow (it visually fought the × close
-    // button positioned in the top-right corner). Bio carries role and
-    // affiliation context implicitly; dismissal is the corner × only.
+    // The pane mirrors the splash skeleton exactly (.ap-title → .ap-ver
+    // byline → .ap-section paragraphs → .ap-rule → .ap-foot-row of credits
+    // + action). Shared classes ⇒ identical colours and type. The curator's
+    // name is wrapped in .cur-name-c (var(--red)) wherever it appears —
+    // byline and every occurrence in the bio — to echo the .pc-red chip.
     const rawName = (cu.name || c.curator || "an invited curator");
     const name = escapeHTML(rawName);
     const nameSpan = `<span class="cur-name-c">${name}</span>`;
@@ -3703,19 +3692,25 @@ WHERE {
     const bioHTML = cu.bio
       ? bioWithName + (link ? ` ${link}` : "")
       : "";
+    const credits =
+      (cu.role        ? `<dt>Role</dt><dd>${escapeHTML(cu.role)}</dd>` : "") +
+      (cu.affiliation ? `<dt>Based in</dt><dd>${escapeHTML(cu.affiliation)}</dd>` : "");
     document.getElementById("curator-pane-inner").innerHTML = `
       <button id="cur-pane-close" class="cur-pane-close" aria-label="Close">×</button>
-      ${c.title ? `<p class="ap-title">${escapeHTML(c.title)}</p>` : ""}
-      <p class="ap-title">Curated by ${nameSpan}</p>
+      <p class="ap-title">${escapeHTML(c.title || "A curated selection")}</p>
+      <p class="ap-ver">Curated by ${nameSpan}</p>
       <div class="ap-section">
         <p class="ap-body">${escapeHTML(LENS_BLURB)}</p>
       </div>
       ${bioHTML ? `<div class="ap-section">
-        <p class="ap-section-head">Curator</p>
         <p class="ap-body">${bioHTML}</p>
       </div>` : ""}
-      <div class="cur-actions">
-        <button class="cur-continue" id="cur-continue">Enter exhibition →</button>
+      <hr class="ap-rule">
+      <div class="ap-foot-row">
+        ${credits ? `<dl class="ap-credits">${credits}</dl>` : ""}
+        <div class="cur-actions">
+          <button class="cur-continue" id="cur-continue">Enter exhibition →</button>
+        </div>
       </div>`;
     curatorPane().classList.add("open");
     document.getElementById("cur-continue").addEventListener("click", () => enterCuration(c));
