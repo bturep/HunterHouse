@@ -221,7 +221,7 @@
 
   /* Threshold overlay — gallery "title wall" (about-pane overlay pattern) */
   #curator-pane{display:none;position:absolute;inset:0;z-index:18;overflow-y:auto;
-    flex-direction:column;align-items:center;background:var(--soft);
+    flex-direction:column;align-items:center;justify-content:center;background:var(--soft);
     padding:48px 40px 64px}
   html.dark #curator-pane{background:#242220}
   #curator-pane.open{display:flex}
@@ -230,6 +230,14 @@
        status bar and tighten the side gutters for narrow screens. */
     #curator-pane{padding:max(40px,calc(env(safe-area-inset-top,0px) + 20px)) 24px 48px}
   }
+  /* Curator threshold types a notch smaller than the splash — it carries
+     more text (exhibition title + byline + blurb + bio), so the reduced
+     scale keeps it as restrained as the about-pane it mimics. */
+  #curator-pane .ap-title{font-size:10px;letter-spacing:0.14em;margin-bottom:3px}
+  #curator-pane .ap-body{font-size:10.5px;line-height:1.7}
+  #curator-pane .ap-section{margin-bottom:18px}
+  #curator-pane .ap-section-head{font-size:8px;letter-spacing:0.2em}
+  #curator-pane .cur-continue{font-size:10px}
   /* Curator-pane layout reuses the .ap-* typography family from #about-pane
      (ap-title → ap-ver → ap-section/ap-section-head/ap-body → ap-rule →
      ap-credits). Only curator-specific bits below: a corner close button
@@ -1785,7 +1793,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.35";
+  const VERSION      = "v1.07-test.36";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
