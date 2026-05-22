@@ -220,21 +220,21 @@
      the chips are styled with the standard .fp-chip family. No dedicated bar. */
 
   /* Threshold overlay — gallery "title wall" (about-pane overlay pattern).
-     Sits on a deep copper-green field (#365549, the hyperlink colour) to
-     set the exhibition threshold apart from the beige entry splash. The
-     .ap-* type all reads via colour tokens, so redefining the tokens on
-     this scope recolours everything cream-on-green in one place — no
-     per-element overrides, identical in light + dark mode. */
+     A fixed pale copper-green card (#dde6df, the hyperlink-green family) —
+     set apart from the beige entry splash but still light, so it keeps the
+     standard palette type: brown body, red names, dark copper links. The
+     tokens are pinned to their light-mode values so the card reads the same
+     in either app theme. */
   #curator-pane{display:none;position:absolute;inset:0;z-index:18;overflow-y:auto;
     flex-direction:column;align-items:center;justify-content:center;
-    background:#365549;
-    --ink:#f0ede6;
-    --muted:rgba(240,237,230,0.62);
-    --hint:rgba(240,237,230,0.42);
-    --rule:rgba(240,237,230,0.22);
-    --copper-deep:#ffffff;
-    --copper-pale:rgba(255,255,255,0.4);
-    --red:#ffffff;
+    background:#dde6df;
+    --ink:#1e1c1a;
+    --muted:#76726a;
+    --hint:#a8a59c;
+    --rule:#c8d3cb;
+    --copper-deep:#365549;
+    --copper-pale:#bcccc1;
+    --red:#8b3a2a;
     padding:48px 40px 64px}
   #curator-pane.open{display:flex}
   @media (max-width:767px){
@@ -1827,7 +1827,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.47";
+  const VERSION      = "v1.07-test.48";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3717,9 +3717,9 @@ WHERE {
       ? `<a href="${escapeHTML(cu.url)}" target="_blank" rel="noopener">${escapeHTML(cu.url_label || cu.url)} ↗</a>`
       : "";
     // The pane mirrors the splash skeleton exactly (.ap-title → .ap-ver
-    // byline → .ap-section paragraphs → .ap-rule → .ap-foot-row of credits
-    // + action). Shared classes ⇒ identical colours and type. The curator's
-    // name is wrapped in .cur-name-c (var(--red)) wherever it appears —
+    // byline → .ap-section paragraphs → .ap-rule → .ap-foot-row with the
+    // action button. The curator's name is wrapped in .cur-name-c
+    // (var(--red) → red) wherever it appears —
     // byline and every occurrence in the bio — to echo the .pc-red chip.
     const rawName = (cu.name || c.curator || "an invited curator");
     const name = escapeHTML(rawName);
@@ -3734,9 +3734,6 @@ WHERE {
     const bioHTML = cu.bio
       ? bioWithName + (link ? ` ${link}` : "")
       : "";
-    const credits =
-      (cu.role        ? `<dt>Role</dt><dd>${escapeHTML(cu.role)}</dd>` : "") +
-      (cu.affiliation ? `<dt>Based in</dt><dd>${escapeHTML(cu.affiliation)}</dd>` : "");
     document.getElementById("curator-pane-inner").innerHTML = `
       <button id="cur-pane-close" class="cur-pane-close" aria-label="Close">×</button>
       <p class="ap-title">${escapeHTML(c.title || "A curated selection")}</p>
@@ -3749,7 +3746,6 @@ WHERE {
       </div>` : ""}
       <hr class="ap-rule">
       <div class="ap-foot-row">
-        ${credits ? `<dl class="ap-credits">${credits}</dl>` : ""}
         <div class="cur-actions">
           <button class="cur-continue" id="cur-continue">Enter exhibition →</button>
         </div>
