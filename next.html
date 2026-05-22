@@ -220,14 +220,14 @@
      the chips are styled with the standard .fp-chip family. No dedicated bar. */
 
   /* Threshold overlay — gallery "title wall" (about-pane overlay pattern).
-     Sits on a deep-red field (palette --red-deep) to set the exhibition
-     threshold apart from the beige entry splash. The .ap-* type all reads
-     via colour tokens, so redefining the tokens on this scope recolours
-     everything cream-on-red in one place — no per-element overrides, and
-     identical in light + dark mode (the bg is fixed in both). */
+     Sits on a deep copper-green field (#365549, the hyperlink colour) to
+     set the exhibition threshold apart from the beige entry splash. The
+     .ap-* type all reads via colour tokens, so redefining the tokens on
+     this scope recolours everything cream-on-green in one place — no
+     per-element overrides, identical in light + dark mode. */
   #curator-pane{display:none;position:absolute;inset:0;z-index:18;overflow-y:auto;
     flex-direction:column;align-items:center;justify-content:center;
-    background:#6b2a1e;
+    background:#365549;
     --ink:#f0ede6;
     --muted:rgba(240,237,230,0.62);
     --hint:rgba(240,237,230,0.42);
@@ -271,6 +271,21 @@
   body.hh-in-curation #search-toggle,
   body.hh-in-curation #rec-info,
   body.hh-in-curation #data-footer{display:none !important}
+  /* Curation mode tints the whole environment toward the copper-green of
+     the exhibition threshold — the accent shifts red → green and the
+     surfaces pick up a faint green wash. Removing body.hh-in-curation on
+     exit reverts every token, so the UI goes straight back to normal. */
+  body.hh-in-curation{
+    --red:#4f7a6b;
+    --bg:#eef2ee;
+    --soft:#e3e9e2;
+  }
+  html.dark body.hh-in-curation{
+    --red:#7aaa98;
+    --bg:#161b17;
+    --soft:#1f241f;
+  }
+  html.dark body.hh-in-curation .curation-card{background:#1f241f}
   .cur-actions{display:flex;justify-content:center;margin-top:28px}
   .cur-continue{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;
     color:var(--ink);background:none;border:0;cursor:pointer;padding:0;
@@ -1812,7 +1827,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.46";
+  const VERSION      = "v1.07-test.47";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
