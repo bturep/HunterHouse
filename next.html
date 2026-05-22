@@ -1793,7 +1793,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.37";
+  const VERSION      = "v1.07-test.38";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4009,6 +4009,16 @@ WHERE {
     }
 
     fullImg.src = fullSrc; // start loading full immediately (parallel with thumb)
+
+    // Prefetch the adjacent items' tiers so arrow-key / click switching is
+    // instant — the desktop mirror of renderMobSheet's neighbour prefetch.
+    [idx - 1, idx + 1].forEach(j => {
+      const nb = state.filtered[j];
+      const nu = nb && imageUrl(nb);
+      if (!nu) return;
+      new Image().src = nu.replace(/\/previews\//, "/thumbs/").replace(/_prev\.jpg$/, "_thumb.jpg");
+      new Image().src = nu.replace(/\/previews\//, "/large/").replace(/_prev\.jpg$/, "_large.jpg");
+    });
   }
 
   function fitToFrame() {
