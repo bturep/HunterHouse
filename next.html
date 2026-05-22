@@ -20,9 +20,11 @@
 <script>if(!matchMedia('(max-width:767px)').matches)document.documentElement.dataset.splashInit='1';</script>
 <style>
   html[data-splash-init="1"] body .markid{opacity:0}
-  /* #rec-info ("?") is hidden during splash so it doesn't flash before
-     main() opens the about-pane and body.hh-about-open takes over. */
-  html[data-splash-init="1"] body #rec-info{display:none}
+  /* During splash the top bar retracts to the collapsed-pane width (28px)
+     and its right-hand controls (search · ? · fullscreen) fade out. Painted
+     here too so there's no flash before main() applies body.hh-splash. */
+  html[data-splash-init="1"] body .site-top{height:28px}
+  html[data-splash-init="1"] body .site-topright{opacity:0}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -85,7 +87,7 @@
   /* ── about pane (image area overlay) ── */
   #about-pane{
     display:none;position:absolute;inset:0;z-index:15;overflow-y:auto;
-    flex-direction:column;align-items:center;
+    flex-direction:column;align-items:center;justify-content:center;
     background:var(--soft);padding:48px 40px 64px;
   }
   html.dark #about-pane{background:#242220}
@@ -99,31 +101,33 @@
   /* HHFA wordmark stays visible while the about-pane is open (clicking it
      again toggles the pane closed). Was: body.hh-about-open .markid{opacity:0} */
   /* Splash-only lock: the initial load opens the about-pane as a "title
-     wall" with both side panels collapsed; while in splash the wordmark,
-     edge handles, bottom-bar zen button, and any residual panel content
-     are inert so the splash reads as a clean threshold — Continue is the
-     only way through. Continue-to-archive (or ×) clears body.hh-splash,
-     after which subsequent wordmark clicks re-open the about-pane in-place
-     — it sits inside the middle column while the side panels stay visible
-     and usable. */
-  body.hh-splash .markid,
+     wall". The top bar retracts to the collapsed-pane width (28px) and
+     empties — wordmark + right-hand controls (search · ? · fullscreen)
+     fade out — and the side panels stay collapsed, so the splash reads as
+     a clean 28px-framed threshold. Edge handles, the bottom-bar zen
+     button, and residual panel content are inert. Continue is the only
+     way through; clearing body.hh-splash animates everything open into
+     place — bar back to 41px, wordmark fading in, panels popping out.
+     After dismissal, subsequent wordmark clicks re-open the about-pane
+     in-place with the side panels staying visible and usable. */
+  .site-top{transition:height 280ms cubic-bezier(0.4,0,0.2,1)}
+  .markid{transition:opacity 240ms ease}
+  .site-topright{transition:opacity 220ms ease}
+  body.hh-splash .site-top{height:28px}
+  body.hh-splash .markid{opacity:0;pointer-events:none}
+  body.hh-splash .site-topright{opacity:0;pointer-events:none}
   body.hh-splash .panel-handle,
   body.hh-splash #zoom-fs{pointer-events:none}
   body.hh-splash .panel-content{visibility:hidden}
   /* Splash vs. subsequent opens: the first-paint about-pane is a deliberate
      threshold — only the Continue button exits it (× hidden). After dismissal,
-     hh-splash is cleared; subsequent HHFA opens swap the affordances back —
-     × in the corner is the dismissal, Continue is gone. */
+     hh-splash is cleared; subsequent wordmark opens swap the affordances back
+     — × in the corner is the dismissal, Continue is gone. */
   body.hh-splash #about-pane-close{display:none}
   body:not(.hh-splash) #about-pane-continue{display:none}
   /* Mobile mirrors: × hidden during splash, Continue hidden after dismissal. */
   body.hh-splash #mob-about-close{display:none}
   body:not(.hh-splash) #mob-about-continue{display:none}
-  /* During splash, the top-bar search affordance is dead weight — hide it
-     until the visitor leaves the title wall. [?] info button is also hidden
-     during splash for the same reason — no archive context to explain yet. */
-  body.hh-splash #search-toggle,
-  body.hh-splash #rec-info{display:none}
   /* Foot row: credits on the left, Continue button on the right baseline. */
   /* Credits stack as normal flow; Continue button drops to its own line
      with a generous gap and right-aligns — clear separation from the
@@ -1590,15 +1594,15 @@
 <div id="mob-about" role="dialog" aria-modal="true" aria-label="About Hunter House Archive">
   <div class="ap-inner">
     <button id="mob-about-close" aria-label="Close">×</button>
-    <p class="ap-title">Hunter House<br>Archive</p>
+    <p class="ap-title">Hunter House Archive</p>
     <p class="ap-ver" id="mob-about-ver"></p>
     <div class="ap-section">
       <p class="ap-body">A project supported by the Hunter House Foundation — an initiative dedicated to the stewardship of the residence and architectural archive of architect <span class="c-hunter">Richard Morrow Hunter</span> (1930–2023).</p>
       <p class="ap-body ap-addr">203 Goward Road, Saanich, British Columbia</p>
-      <p class="ap-body ap-addr">www.hunterhousefoundation.com</p>
     </div>
     <div class="ap-section">
-      <p class="ap-body"><a href="https://hunterhouse.wikibase.cloud/wiki/Main_Page" target="_blank" rel="noopener">Archive structure, rights &amp; endpoints — Wikibase Main Page ↗</a></p>
+      <p class="ap-body"><a href="https://hunterhouse.wikibase.cloud/wiki/Main_Page" target="_blank" rel="noopener">Wikibase Main Page — archive structure, rights &amp; endpoints ↗</a></p>
+      <p class="ap-body"><a href="https://www.hunterhousefoundation.com" target="_blank" rel="noopener">Hunter House Foundation — mandate, people &amp; contact ↗</a></p>
     </div>
     <hr class="ap-rule">
     <div class="ap-foot-row">
@@ -1652,15 +1656,15 @@
     <div id="about-pane" role="dialog" aria-modal="true" aria-label="About Hunter House Archive">
       <div class="ap-inner">
         <button id="about-pane-close" aria-label="Close">×</button>
-        <p class="ap-title">Hunter House<br>Archive</p>
+        <p class="ap-title">Hunter House Archive</p>
         <p class="ap-ver" id="ap-ver"></p>
         <div class="ap-section">
           <p class="ap-body">A project supported by the Hunter House Foundation — an initiative dedicated to the stewardship of the residence and architectural archive of architect <span class="c-hunter">Richard Morrow Hunter</span> (1930–2023).</p>
           <p class="ap-body ap-addr">203 Goward Road, Saanich, British Columbia</p>
-          <p class="ap-body ap-addr">www.hunterhousefoundation.com</p>
         </div>
         <div class="ap-section">
-          <p class="ap-body"><a href="https://hunterhouse.wikibase.cloud/wiki/Main_Page" target="_blank" rel="noopener">Archive structure, rights &amp; endpoints — Wikibase Main Page ↗</a></p>
+          <p class="ap-body"><a href="https://hunterhouse.wikibase.cloud/wiki/Main_Page" target="_blank" rel="noopener">Wikibase Main Page — archive structure, rights &amp; endpoints ↗</a></p>
+          <p class="ap-body"><a href="https://www.hunterhousefoundation.com" target="_blank" rel="noopener">Hunter House Foundation — mandate, people &amp; contact ↗</a></p>
         </div>
         <hr class="ap-rule">
         <div class="ap-foot-row">
@@ -1771,7 +1775,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.31";
+  const VERSION      = "v1.07-test.32";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
