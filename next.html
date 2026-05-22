@@ -1104,20 +1104,21 @@
       display:flex!important;flex-direction:column;
       overflow:hidden;
     }
-    .rows{background:var(--soft)}
+    .rows{background:var(--soft);position:relative;z-index:1}
     html.dark .rows{background:#0f0e0d}
-    /* Pull-to-refresh indicator — fades in as the list is pulled down;
-       a release past the threshold reloads the whole page. */
+    /* Pull-to-refresh indicator — sits in the black gap that opens between
+       the list-head and the list as it is pulled down. top + height are
+       set in JS to track that gap; the gap shows .panel-left's black, so
+       the type stays light in both themes. */
     #list-ptr{
-      display:flex;align-items:flex-end;justify-content:center;
-      position:fixed;left:0;right:0;top:0;z-index:40;
-      height:calc(env(safe-area-inset-top,0px) + 46px);
-      padding-bottom:9px;
+      display:flex;align-items:center;justify-content:center;
+      position:absolute;left:0;right:0;top:0;height:0;z-index:0;
+      overflow:hidden;
       font-family:var(--mono);font-size:9px;font-weight:500;
       letter-spacing:0.2em;text-transform:uppercase;
-      color:var(--hint);opacity:0;pointer-events:none;
+      color:rgba(240,237,230,0.45);opacity:0;pointer-events:none;
     }
-    #list-ptr.armed{color:var(--ink)}
+    #list-ptr.armed{color:rgba(240,237,230,0.95)}
 
     .pane-image{display:none!important}
     .panel-right{display:none!important}
@@ -1811,7 +1812,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.45";
+  const VERSION      = "v1.07-test.46";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -5057,7 +5058,8 @@ WHERE {
         const drawPtr = () => {
           ptrRows.style.transform = ptrDist ? `translateY(${ptrDist}px)` : "";
           const armed = ptrDist >= PTR_TRIGGER;
-          ptrEl.style.opacity = Math.min(1, ptrDist / PTR_TRIGGER);
+          ptrEl.style.height  = ptrDist + "px";        // fills the opening gap
+          ptrEl.style.opacity = ptrDist ? Math.min(1, ptrDist / PTR_TRIGGER) : 0;
           ptrEl.classList.toggle("armed", armed);
           ptrEl.textContent = armed ? "Release to reset" : "Pull to reset";
         };
@@ -5066,6 +5068,7 @@ WHERE {
           ptrStartY = e.touches[0].clientY;
           ptrDist = 0;
           ptrRows.style.transition = ""; ptrEl.style.transition = "";
+          ptrEl.style.top = ptrRows.offsetTop + "px";  // align with the list's top edge
         }, { passive: true });
         ptrRows.addEventListener("touchmove", e => {
           if (!ptrTracking) return;
@@ -5086,7 +5089,8 @@ WHERE {
           ptrDist = 0;
           ptrRows.style.transition = "transform .25s ease";
           ptrRows.style.transform  = "";
-          ptrEl.style.transition = "opacity .2s ease";
+          ptrEl.style.transition = "height .25s ease, opacity .2s ease";
+          ptrEl.style.height  = "0px";
           ptrEl.style.opacity = 0;
         }, { passive: true });
       }
