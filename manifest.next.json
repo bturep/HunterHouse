@@ -1,0 +1,25 @@
+{
+  "name": "Hunter House Archive — Next",
+  "short_name": "HH Next",
+  "id": "/HunterHouse/next.html",
+  "description": "Staging build of the Hunter House Archive",
+  "start_url": "/HunterHouse/next.html",
+  "scope": "/HunterHouse/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a1816",
+  "theme_color": "#1a1816",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
