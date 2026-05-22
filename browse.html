@@ -76,7 +76,9 @@
   html[data-splash-init="1"] body .site-top #rec-info{display:none}
   #topright{cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;display:flex;align-items:center;color:var(--ink)}
   .site-topright .theme-btn:hover{opacity:0.5}
-  a.markid{text-decoration:none;color:inherit;display:flex;align-items:center}
+  /* padding-left:13px → wordmark left edge at 41px (.site-top's 28px + 13px),
+     mirroring the right side where #fs-toggle's edge lands at viewport-41. */
+  a.markid{text-decoration:none;color:inherit;display:flex;align-items:center;padding-left:13px}
   .markid .name{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
   .markid .name .dim{font-size:9px;letter-spacing:0.14em;font-weight:400}
   .header-search{display:flex;align-items:center}
@@ -273,9 +275,9 @@
   /* Intro card — bigger than mark-bar, sits above the list in curation mode */
   .curation-card{padding:14px 20px 16px 28px;border-bottom:1px solid var(--rule);
     background:var(--soft)}
-  /* 28px left matches .site-top and .list-head, so the curator name in the
-     card lines up vertically under the "Hunter House Archive"
-     mark in the header. Right stays 20px, mirroring .list-head's right side. */
+  /* 28px left matches .list-head, so the curator name in the card lines up
+     with the list rows below. Right stays 20px, mirroring .list-head's
+     right side. */
   html.dark .curation-card{background:#242220}
   .curation-card[hidden]{display:none}
   .cc-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:8px}
@@ -1474,7 +1476,7 @@
     html.pwa #mobile-chrome{
       display:flex;align-items:center;justify-content:flex-end;
       background:#000;color:rgba(243,241,236,0.55);
-      padding:0 24px;
+      padding:0 16px;
       padding-top:env(safe-area-inset-top,0px);
       height:calc(32px + env(safe-area-inset-top,0px));
       flex-shrink:0;
@@ -1484,6 +1486,8 @@
       font-family:var(--mono);font-size:10.5px;font-weight:500;
       letter-spacing:0.18em;text-transform:uppercase;
       color:rgba(243,241,236,0.55);
+      /* kern the wordmark edge-to-edge across the chrome bar */
+      display:block;width:100%;text-align:justify;text-align-last:justify;
     }
     html.pwa #mobile-version:hover{color:#f0ede6}
     html.pwa #mob-count{display:none}
@@ -1508,9 +1512,8 @@
 
     /* Marking is desktop-only (keyboard M); hide the researcher bar + row mark */
     .mark-bar,.row .row-flags{display:none}
-    /* Browse bar: always match sheet-bar colour; round corners only in PWA */
+    /* Browse bar: always match sheet-bar colour (square corners) */
     .list-head{background:var(--bg);padding-left:20px;padding-right:24px}
-    html.pwa .list-head{border-radius:14px 14px 0 0}
     .row{padding-right:24px}
     /* Sort-mini fills list-head; flex-end packs ID/PHASE/YEAR to right so YEAR is flush */
     .sort-mini{flex-grow:1;justify-content:flex-end;gap:22px}
@@ -1781,7 +1784,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06.23";
+  const VERSION      = "v1.06.24";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
