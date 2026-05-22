@@ -1793,7 +1793,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.36";
+  const VERSION      = "v1.07-test.37";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3151,14 +3151,33 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     document.getElementById("mob-sheet-title").textContent = item.id.replace(/^HH-/, "");
     const imgEl = document.getElementById("mob-sheet-img");
     if (item.image) {
-      imgEl.src = item.image.replace(/_prev\.jpg$/, "_thumb.jpg");
       imgEl.alt = item.title;
-      const hi = new Image();
-      hi.onload = () => { imgEl.src = item.image; };
-      hi.src = item.image;
+      const thumb = item.image.replace(/_prev\.jpg$/, "_thumb.jpg");
+      // Assign to the visible <img> only once a tier has decoded — handing it
+      // a still-loading URL is what flashed the broken "?" glyph mid-switch.
+      const set = url => { if (state.selectedId === id) imgEl.src = url; };
+      const prev = new Image();
+      prev.onload = () => set(item.image);          // full quality — final
+      prev.src = item.image;
+      if (prev.complete) { set(item.image); }
+      else {
+        const t = new Image();                       // interim low-res
+        t.onload = () => { if (!prev.complete) set(thumb); };
+        t.src = thumb;
+        if (t.complete && !prev.complete) set(thumb);
+      }
     } else {
-      imgEl.src = ""; imgEl.alt = "";
+      imgEl.removeAttribute("src"); imgEl.alt = "";
     }
+    // Prefetch the adjacent items' tiers so a swipe to them is instant.
+    const nbIdx = state.filtered.findIndex(i => i.id === id);
+    [nbIdx - 1, nbIdx + 1].forEach(j => {
+      const nb = state.filtered[j];
+      if (nb && nb.image) {
+        new Image().src = nb.image.replace(/_prev\.jpg$/, "_thumb.jpg");
+        new Image().src = nb.image;
+      }
+    });
 
     // KV rows — same fields as desktop, pills as colored text (not chips)
     const pill = (cls, text) => `<span class="pill ${cls}">${escapeHTML(text)}</span>`;
@@ -4830,6 +4849,17 @@ WHERE {
             pzOriginX = pzX; pzOriginY = pzY;
             pzLastDist = null;
           } else if (e.touches.length === 0) {
+            // At fit zoom there's nothing to pan, so a horizontal swipe
+            // navigates to the previous/next item instead.
+            if (pzScale <= 1.02) {
+              const ce = e.changedTouches[0];
+              if (ce) {
+                const dx = ce.clientX - pzPanStartX;
+                const dy = ce.clientY - pzPanStartY;
+                if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.6)
+                  { pzReset(); selectAdjacent(dx < 0 ? +1 : -1); }
+              }
+            }
             pzLastDist = null;
           }
         }, { passive: true });
