@@ -417,3 +417,17 @@ Working LINE: **NEXT**. Two live hotfixes mirrored from next.html to browse.html
 **Versioning note:** browse.html got two patch bumps in one day (v1.06.19 + v1.06.20) — both were genuine "real visitors blocked" hotfixes, not feature ships. The LINE: NEXT rule held; next.html got the same fixes first as v1.07-test.22 and .23. The Continue-button hit-area issue probably existed since the v1.06.00 promotion but went unnoticed on desktop.
 
 **Version line: browse.html `v1.06.20` (LIVE) · next.html `v1.07-test.23` (staging).**
+
+---
+
+### 2026-05-22 — Curator mode reskinned to the "Vellum" palette (next.html v1.07-test.50)
+
+Working LINE: **NEXT**. CSS-only — no markup, no JS, no `verso.css`.
+
+- **Curator splash + in-archive curator mode reskinned warm-cream.** Both surfaces previously read copper-green (threshold card `#dde6df`; in-curation tokens tinted `--bg`/`--soft` green *and* overrode `--red` → green). New "Vellum" treatment makes both feel like a warm-cream curator's-notebook surface. Three CSS blocks touched in `next.html`:
+  - `#curator-pane` (threshold splash) — eight token values swapped to vellum: `background:#ebe1cb`, warm-brown ink/muted/hint/rule, copper `#6b4a1f`/`#d4c2a0`. Layout untouched.
+  - `body.hh-in-curation` / `html.dark body.hh-in-curation` — **the `--red` override is gone.** Old rules pushed `--red` to green in curator mode; now Hunter-red persists everywhere (name accent, selected-row stripe). Only surfaces (`--bg`/`--soft`/`--rule`) and the copper link family drift to vellum tones. Added a 240ms background/color transition on the light block.
+  - `html.dark body.hh-in-curation .curation-card` background `#1f241f → #2a2218` (matches new dark `--soft`).
+- Comment above `body.hh-in-curation` rewritten to describe the surfaces-only re-tint. **Note:** the comment above `#curator-pane` still references the old `#dde6df` copper-green card — left as-is per the task scope, flagged for a future touch.
+
+**Version line: browse.html `v1.06.20` (LIVE, unchanged) · next.html `v1.07-test.50` (staging).**

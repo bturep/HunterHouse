@@ -227,13 +227,13 @@
      in either app theme. */
   #curator-pane{display:none;position:absolute;inset:0;z-index:18;overflow-y:auto;
     flex-direction:column;align-items:center;justify-content:center;
-    background:#dde6df;
-    --ink:#1e1c1a;
-    --muted:#76726a;
-    --hint:#a8a59c;
-    --rule:#c8d3cb;
-    --copper-deep:#365549;
-    --copper-pale:#bcccc1;
+    background:#ebe1cb;
+    --ink:#2a2218;
+    --muted:#7a6f5a;
+    --hint:#a89e85;
+    --rule:#d4c9af;
+    --copper-deep:#6b4a1f;
+    --copper-pale:#d4c2a0;
     --red:#8b3a2a;
     padding:48px 40px 64px}
   #curator-pane.open{display:flex}
@@ -271,21 +271,29 @@
   body.hh-in-curation #search-toggle,
   body.hh-in-curation #rec-info,
   body.hh-in-curation #data-footer{display:none !important}
-  /* Curation mode tints the whole environment toward the copper-green of
-     the exhibition threshold — the accent shifts red → green and the
-     surfaces pick up a faint green wash. Removing body.hh-in-curation on
-     exit reverts every token, so the UI goes straight back to normal. */
+  /* Curation mode re-tints the surfaces and link accent toward the vellum
+     threshold while leaving --red (the Hunter name-accent) untouched, so
+     item-selection chrome stays legible against the mode wash. Removing
+     body.hh-in-curation on exit reverts every token. */
   body.hh-in-curation{
-    --red:#4f7a6b;
-    --bg:#eef2ee;
-    --soft:#e3e9e2;
+    /* keep --red as the Hunter accent — only surfaces + links drift */
+    --bg:#ede5d4;
+    --soft:#e0d6bf;
+    --rule:#d4c5a3;
+    --copper:#8a6332;
+    --copper-deep:#6b4a1f;
+    --copper-pale:#e6d4b0;
+    transition:background-color 240ms ease, color 240ms ease;
   }
   html.dark body.hh-in-curation{
-    --red:#7aaa98;
-    --bg:#161b17;
-    --soft:#1f241f;
+    --bg:#1c1814;
+    --soft:#2a2218;
+    --rule:rgba(228,210,168,0.16);
+    --copper:#c89968;
+    --copper-deep:#dfb583;
+    --copper-pale:rgba(200,153,104,0.22);
   }
-  html.dark body.hh-in-curation .curation-card{background:#1f241f}
+  html.dark body.hh-in-curation .curation-card{background:#2a2218}
   .cur-actions{display:flex;justify-content:center;margin-top:28px}
   .cur-continue{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;
     color:var(--ink);background:none;border:0;cursor:pointer;padding:0;
@@ -1827,7 +1835,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.49";
+  const VERSION      = "v1.07-test.50";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
