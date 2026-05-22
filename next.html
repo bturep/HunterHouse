@@ -41,34 +41,25 @@
   html,body{overflow:hidden}
   @keyframes page-in{from{opacity:0}to{opacity:1}}
   body{height:100%;display:flex;flex-direction:column;animation:page-in 400ms ease-out both}
-  /* .site-top is position:relative so the absolute #rec-info "?" button
-     (placed as its direct child, outside .site-topright) can anchor to
-     the header bar's right edge. */
+  /* .site-top keeps position:relative as a generic positioning context. */
   .site-top{padding:0 28px;flex-shrink:0;grid-template-columns:28% 1fr 28%;gap:0;height:41px;box-sizing:border-box;border-bottom-color:var(--rule);position:relative}
-  /* .site-topright stays as flex but right-aligns its contents and adds
-     13px of right-padding so the last visible item (fs-toggle) has its
-     right edge at (column_right - 13) = (viewport_right - 28 - 13) =
-     viewport_right - 41 — exactly the left edge of the collapsed right
-     panel ("right tab"). Click target stays inside normal flex flow
-     (an earlier absolute-positioning attempt broke the click). */
-  .site-topright{display:flex;align-items:center;justify-content:flex-end;gap:14px;padding-right:13px;height:41px;color:var(--ink)}
+  /* .site-topright right-aligns its contents — search · ? · fullscreen —
+     with no right padding, so the last item (#fs-toggle) lands its right
+     edge at the grid column's right edge = viewport_right - 28, the inner
+     edge of the collapsed right panel ("right tab"). gap:14px keeps the
+     three controls evenly spaced. */
+  .site-topright{display:flex;align-items:center;justify-content:flex-end;gap:14px;padding-right:0;height:41px;color:var(--ink)}
   .site-topright .theme-btn{display:flex;align-items:center;background:none;border:none;border-radius:0;padding:0;color:var(--ink)}
   .site-topright .theme-btn svg{display:block;pointer-events:none}/* clicks land on the button, not the inner SVG (Safari) */
-  .site-topright .tr-sep{width:1px;height:16px;background:var(--rule);flex-shrink:0}
   /* Info ("?") button — text glyph sized to match the 13×13 fs-toggle SVG
-     (font-size:14 in mono lands at the same optical height). Sits OUTSIDE
-     .site-topright as an absolute child of .site-top so it can land to
-     the RIGHT of #fs-toggle without disturbing fs-toggle's flex position.
-     right:13px centres it in the 41px right-tab strip (the collapsed
-     right-panel column above viewport_right-41 → viewport_right). */
-  .site-top #rec-info{
-    position:absolute;right:13px;top:50%;transform:translateY(-50%);
+     (font-size:14 in mono lands at the same optical height). In-flow flex
+     child of .site-topright, ordered between #search-toggle and #fs-toggle. */
+  .site-topright #rec-info{
     background:none;border:0;padding:0;cursor:pointer;color:var(--ink);
     font-family:var(--mono);font-size:14px;font-weight:500;line-height:1;
     display:flex;align-items:center;justify-content:center;
-    z-index:5;
   }
-  .site-top #rec-info:hover{opacity:0.5}
+  .site-topright #rec-info:hover{opacity:0.5}
   /* Hide-on-splash: while the about-pane is open the "?" disappears
      (the splash is the only navigation aid then). The data-splash-init
      pre-init also nullifies it on first paint, matching the .markid
@@ -127,11 +118,9 @@
   body.hh-splash #mob-about-close{display:none}
   body:not(.hh-splash) #mob-about-continue{display:none}
   /* During splash, the top-bar search affordance is dead weight — hide it
-     (and its trailing separator) until the visitor leaves the title wall.
-     [?] info button is also hidden during splash for the same reason — no
-     archive context to explain yet. */
+     until the visitor leaves the title wall. [?] info button is also hidden
+     during splash for the same reason — no archive context to explain yet. */
   body.hh-splash #search-toggle,
-  body.hh-splash #search-toggle + .tr-sep,
   body.hh-splash #rec-info{display:none}
   /* Foot row: credits on the left, Continue button on the right baseline. */
   /* Credits stack as normal flow; Continue button drops to its own line
@@ -257,7 +246,6 @@
   body.hh-in-curation .list-head,
   body.hh-in-curation #search-input,
   body.hh-in-curation #search-toggle,
-  body.hh-in-curation #search-toggle + .tr-sep,
   body.hh-in-curation #rec-info,
   body.hh-in-curation #data-footer{display:none !important}
   .cur-actions{display:flex;justify-content:center;margin-top:28px}
@@ -391,7 +379,7 @@
   }
   .panel-left{border-right:1px solid var(--rule)}
   .panel-right{border-left:1px solid var(--rule)}
-  .panel-left.out,.panel-right.out{width:41px}
+  .panel-left.out,.panel-right.out{width:28px}
   .panel-content{flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;position:relative}
   .panel-left.out .panel-content,.panel-right.out .panel-content{max-width:0}
 
@@ -426,6 +414,9 @@
   .list-head .l{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;letter-spacing:0.18em;text-transform:uppercase;display:flex;align-items:center;gap:6px;background:none;border:0;padding:0;cursor:pointer}
   .list-head .l .filter-chevron{font-size:13px;color:var(--muted);letter-spacing:0;font-weight:400;line-height:1}
   .list-head .l:hover .filter-chevron,.list-head .l.fp-open .filter-chevron{color:var(--ink)}
+  /* List-head "?" — mobile-only About re-entry; the desktop header carries
+     its own #rec-info, so this stays hidden until the mobile block shows it. */
+  #list-info{display:none}
   .sort-mini{display:flex;gap:14px;align-items:center}
   .sort-mini .sort-hd{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
   .sort-mini .sort-hd[data-sort-col="phase"]{margin-left:8px}
@@ -1069,10 +1060,7 @@
     .site-top{gap:12px}
     .header-search{padding:0 12px;border-left:0;border-right:0}
     .fbtn{padding:0 14px}
-    .site-topright{display:none}
-    /* #rec-info is now an absolute child of .site-top (sibling of
-       .site-topright), so the rule above no longer hides it on mobile. */
-    .site-top #rec-info{display:none}
+    .site-topright{display:none}/* #rec-info lives inside it now — hidden too */
     .mobile-tabs{display:none}
     .panel-handle{display:none!important}
     .zoom-ctl{display:none}
@@ -1506,8 +1494,16 @@
     /* Browse bar: always match sheet-bar colour (square corners) */
     .list-head{background:var(--bg);padding-left:20px;padding-right:24px}
     .row{padding-right:24px}
-    /* Sort-mini fills list-head; flex-end packs ID/PHASE/YEAR to right so YEAR is flush */
-    .sort-mini{flex-grow:1;justify-content:flex-end;gap:22px}
+    /* Sort-mini sits at the list-head's right edge (last flex child); YEAR
+       stays flush right. No flex-grow, so .list-head's space-between can
+       centre #list-info between "Browse" and the sort headers. */
+    .sort-mini{justify-content:flex-end;gap:22px}
+    #list-info{
+      display:flex;align-items:center;justify-content:center;
+      background:none;border:0;padding:6px;cursor:pointer;
+      font-family:var(--mono);font-size:14px;font-weight:500;line-height:1;
+      color:var(--muted);
+    }
     .sort-mini .sort-hd[data-sort-col="phase"]{margin-left:0}
     .sort-mini .sort-hd[data-sort-col="year"]{margin-left:0}
     /* Hide sort arrows — they shift text left of button edge, breaking YEAR alignment.
@@ -1578,17 +1574,14 @@
     <input id="search-input" class="tr-search-input" placeholder="" autocomplete="off">
     <span id="topright" title="About this archive"></span>
     <button class="theme-btn" id="search-toggle" title="Search [/]"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="5.2" cy="5.2" r="3.5"/><line x1="7.8" y1="7.8" x2="12" y2="12"/></svg></button>
-    <span class="tr-sep"></span>
-    <!-- fs-toggle deliberately LAST so flex-end + padding-right:13px on
-         .site-topright lands its right edge at viewport_right - 41. -->
+    <!-- Info ("?") button — opens the shortcuts/info pane. In-flow between
+         #search-toggle and #fs-toggle; hidden while the about-pane is open
+         and on first paint via data-splash-init (see the #rec-info rules). -->
+    <button id="rec-info" title="About this archive &amp; shortcuts [?]" aria-label="Info">?</button>
+    <!-- fs-toggle LAST so flex-end (padding-right:0) lands its right edge at
+         viewport_right - 28 — the inner edge of the collapsed right panel. -->
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
   </div>
-  <!-- Info ("?") button — absolute-positioned sibling of .site-topright,
-       anchored to .site-top so it lands TO THE RIGHT of #fs-toggle (in
-       the 41px right-tab strip) without changing fs-toggle's position.
-       Hidden while the about-pane is open (and before it opens on first
-       paint via data-splash-init); see the .site-top #rec-info rules. -->
-  <button id="rec-info" title="About this archive &amp; shortcuts [?]" aria-label="Info">?</button>
 </header>
 
 
@@ -1633,6 +1626,7 @@
       <div class="scroll-pip" id="list-pip"></div>
       <div class="list-head">
         <button class="l" id="filter-toggle" title="Filter">Browse<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">›</span></button>
+        <button id="list-info" type="button" title="About this archive" aria-label="About this archive">?</button>
         <div class="sort-mini">
           <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>
           <button class="sort-hd" data-sort-col="phase">Phase<span class="sort-arrow" id="sa-phase"></span></button>
@@ -1775,7 +1769,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.29";
+  const VERSION      = "v1.07-test.30";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -5308,6 +5302,15 @@ WHERE {
     const mobileVersionBtn = document.getElementById("mobile-version");
     if (mobileVersionBtn) {
       mobileVersionBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openMobAbout();
+      });
+    }
+    // List-head "?" — mobile re-entry to the about pane (replaces the removed
+    // #mobile-chrome wordmark button as the way back to "About").
+    const listInfoBtn = document.getElementById("list-info");
+    if (listInfoBtn) {
+      listInfoBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         openMobAbout();
       });
