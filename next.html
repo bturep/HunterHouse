@@ -99,12 +99,14 @@
   /* HHFA wordmark stays visible while the about-pane is open (clicking it
      again toggles the pane closed). Was: body.hh-about-open .markid{opacity:0} */
   /* Splash-only lock: the initial load opens the about-pane as a "title
-     wall" with both side panels collapsed; while in splash the edge
-     handles, bottom-bar zen button, and any residual panel content are
-     inert so the splash reads as a clean threshold. Continue-to-archive
-     (or ×) clears body.hh-splash, after which subsequent HHFA clicks
-     re-open the about-pane in-place — it sits inside the middle column
-     while the side panels stay visible and usable. */
+     wall" with both side panels collapsed; while in splash the wordmark,
+     edge handles, bottom-bar zen button, and any residual panel content
+     are inert so the splash reads as a clean threshold — Continue is the
+     only way through. Continue-to-archive (or ×) clears body.hh-splash,
+     after which subsequent wordmark clicks re-open the about-pane in-place
+     — it sits inside the middle column while the side panels stay visible
+     and usable. */
+  body.hh-splash .markid,
   body.hh-splash .panel-handle,
   body.hh-splash #zoom-fs{pointer-events:none}
   body.hh-splash .panel-content{visibility:hidden}
@@ -1769,7 +1771,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.30";
+  const VERSION      = "v1.07-test.31";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
