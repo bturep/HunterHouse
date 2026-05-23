@@ -475,3 +475,22 @@ Working LINE: **NEXT**. Two-part change in one push: (A) re-tint the curator sur
 **Pending threads** carried into the next session unchanged (Curator Phase 2, Held-by P94/P79, Phase rename, EGC photo ingest, Rotation Part 2, deferred structural items). ARCHITECTURE.md §11 is the new, more actionable companion list — distinct in intent (security/hygiene) from Pending (feature/data).
 
 **Version line: browse.html `v1.06.31` (LIVE) · next.html `v1.07-test.51` (staging).**
+
+---
+
+### 2026-05-22 — Edit-proxy CSRF hardening + CI validation workflow (no version bump)
+
+Acted on ARCHITECTURE.md §11.1 + §11.2 the same day they were drafted. Two changes, neither touching the live browser files:
+
+- **`scripts/edit_proxy.py` hardened.** `do_POST` now rejects mismatched `Origin` *before* reading the body (403), rejects non-`application/json` `Content-Type` (415; forces a real CORS preflight), and matches origins with `urlparse` rather than `startswith`. New `origin_allowed()` helper accepts exactly `https://bturep.github.io` for production and any port on `localhost`/`127.0.0.1` for local dev. 12-case sanity test included in the commit narrative — covers the `bturep.github.io.attacker.com` prefix attack, port-suffix attacks, subdomain attacks, file:// `null` origin, and missing/garbage Origin (all 12 pass). Browser side already sent `application/json` (verified in `proxyEdit` for both `browse.html` and `next.html`), so no client change required. **Restart the proxy** (`python3 scripts/edit_proxy.py`) before next admin editing session. §11.1 CRITICAL step 3 (per-startup random secret replacing the hardcoded pin fallback) **deferred** — it touches the unlock UI in next.html and deserves its own ~1–2 hr session.
+- **CI: `.github/workflows/validate.yml` + `.github/scripts/validate.mjs`.** First-ever GitHub Actions workflow on the repo. Runs after every push to `main` (and on PRs). Checks: each inline `<script>` block in `browse.html` and `next.html` parses (`node --check`); `VERSION` constant matches the expected pattern per file (live = `v\d+\.\d{2}\.\d{2}`, staging = `v\d+\.\d{2}-test\.\d{2}`); both manifests parse and carry `start_url`. Does **not** gate the push — GitHub emails on a failed workflow run, which is the audit's "alert, don't block" model. Smoke-tested both positive (current tree → pass) and negative (deliberately broken VERSION + JS syntax → both caught, exit 1).
+
+ARCHITECTURE.md §11.5 appended with the same details so the audit document tracks its own resolved items.
+
+**Standing-rule notes:**
+- Edit-proxy restart is now strictly required for admin editing on the next session (the convention already says daily restart, but a CSRF-defence change is the kind of thing that's silent until it bites).
+- The new validate workflow will run on this very commit — first run will establish the baseline. Failures arrive in the GitHub Actions tab + by email.
+
+**Pending threads:** unchanged. ARCHITECTURE.md §11.1 step 3 + §11.1 HIGH metadata backup + everything in §11.2 (post pre-push validation), §11.3 remain. §11.1 CRITICAL is now partially resolved (the two biggest CSRF gaps closed); step 3 is the next priority on that thread.
+
+**Version line: browse.html `v1.06.31` (LIVE, unchanged) · next.html `v1.07-test.51` (staging, unchanged).**

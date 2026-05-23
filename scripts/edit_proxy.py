@@ -12,10 +12,26 @@ Listens on http://127.0.0.1:8731  (localhost only — not exposed to the network
 
 Auth: every request must carry the admin secret (the admin pin, or
 EDIT_PROXY_SECRET in .env). Action is restricted to a safe Wikibase allowlist.
+
+CSRF defences in do_POST (added 2026-05-22, audit §11.1):
+  1. Origin header must exactly match an allowed entry — checked BEFORE the
+     body is read, so a malicious page cannot trigger the side-effect even
+     if the browser's CORS-response check would later reject the answer.
+  2. Content-Type must be application/json — forces the browser to send a
+     CORS preflight (rather than treating it as a "simple request"), so
+     CORS-Origin-mismatch failures actually block the call client-side too.
+  3. Origin matching is exact (not startswith), so a hostname like
+     bturep.github.io.attacker.com can no longer match the allowlist entry
+     for bturep.github.io. Localhost/127.0.0.1 are still accepted on any
+     port (attacker control of those hosts implies box compromise — a
+     separate threat model).
+Step 3 of the audit (per-startup random secret replacing the hardcoded pin
+fallback) is a separate change still pending.
 """
 
 import json, os, sys
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
+from urllib.parse import urlparse
 
 try:
     import requests
@@ -31,7 +47,28 @@ ALLOWED_ACTIONS = {
     "wbeditentity",   # admins can mint new vocab/person items via the picker (mint-new affordance)
 }
 # Origins allowed to call this proxy from the browser.
-ALLOWED_ORIGINS = ("https://bturep.github.io", "http://localhost", "http://127.0.0.1")
+# - Production: exact match on https://bturep.github.io (no subdomain
+#   extension, no custom port). This is the deployed GitHub Pages origin.
+# - Local dev: any port on http(s)://localhost or http(s)://127.0.0.1.
+#   Attacker control of those hosts implies box compromise — different
+#   threat model — so port flexibility is fine here.
+# The match is performed by origin_allowed() below, not by string prefix.
+ALLOWED_REMOTE_ORIGINS = frozenset({"https://bturep.github.io"})
+ALLOWED_LOCAL_HOSTS    = frozenset({"localhost", "127.0.0.1"})
+
+
+def origin_allowed(origin):
+    """True iff the Origin header is exactly one of the allowed values."""
+    if not origin:
+        return False
+    if origin in ALLOWED_REMOTE_ORIGINS:
+        return True
+    try:
+        p = urlparse(origin)
+    except Exception:
+        return False
+    return (p.scheme in ("http", "https")
+            and p.hostname in ALLOWED_LOCAL_HOSTS)
 
 cred = {}
 for line in open(ENV):
@@ -85,7 +122,7 @@ def do_edit(params):
 class Handler(BaseHTTPRequestHandler):
     def _cors(self):
         origin = self.headers.get("Origin", "")
-        ok = next((o for o in ALLOWED_ORIGINS if origin.startswith(o)), None)
+        ok = origin if origin_allowed(origin) else None
         self.send_header("Access-Control-Allow-Origin", ok or "null")
         self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
@@ -112,6 +149,18 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         if self.path != "/edit":
             return self._json(404, {"error": "not found"})
+        # CSRF defence (1) — Origin header must be an exact match against
+        # the allowlist. Done BEFORE reading the body so a malicious page's
+        # request never produces a Wikibase side-effect, even if the
+        # browser would later reject our (wrong) ACAO response header.
+        if not origin_allowed(self.headers.get("Origin", "")):
+            return self._json(403, {"error": "origin not allowed"})
+        # CSRF defence (2) — Content-Type must be application/json. This
+        # forces a CORS preflight (so the Origin check on OPTIONS actually
+        # matters), closing the text/plain "simple request" bypass path.
+        ct = self.headers.get("Content-Type", "").split(";")[0].strip().lower()
+        if ct != "application/json":
+            return self._json(415, {"error": "Content-Type must be application/json"})
         try:
             n = int(self.headers.get("Content-Length", 0))
             data = json.loads(self.rfile.read(n) or b"{}")
