@@ -494,3 +494,24 @@ ARCHITECTURE.md §11.5 appended with the same details so the audit document trac
 **Pending threads:** unchanged. ARCHITECTURE.md §11.1 step 3 + §11.1 HIGH metadata backup + everything in §11.2 (post pre-push validation), §11.3 remain. §11.1 CRITICAL is now partially resolved (the two biggest CSRF gaps closed); step 3 is the next priority on that thread.
 
 **Version line: browse.html `v1.06.31` (LIVE, unchanged) · next.html `v1.07-test.51` (staging, unchanged).**
+
+---
+
+### 2026-05-22 — Backend-hygiene bundle: .env audit + Wikibase helper + metadata backup (no version bump)
+
+Three more audit items off the list, all backend, no live-site touch.
+
+- **`.env` / `.gitignore` audit (§11.2 LOW).** Added `.env`, `.env.*` (with a `!.env.example` allow), and `data/snapshots/wikibase_full_*/` to `.gitignore`. Verified no credential ever leaked into history (grep over `git log --all -p` for `(PASSWORD|SECRET|TOKEN).*=.{8,}` returns zero matches — only `<in .env>` markdown placeholders). The actual `.env` lives outside the repo at `~/Documents/hh-wikibase-migration/.env`; gitignore entries are belt-and-braces.
+
+- **`scripts/_wikibase.py` — shared Wikibase helper (§11.2 LOW).** Extracted the env-loading + login + CSRF + retry-on-stale-token boilerplate that lived (copy-pasted) in 11 scripts. New module exposes `load_env(path)` and a `WikibaseSession` class with `.login()`, `.post(action, **params)` (auto-retry on `badtoken`/`assertuserfailed`/`notoken`), and `.get(action, **params)`. Deliberately narrow scope: doesn't wrap every wbX action — scripts that build `data` dicts by hand keep doing so; the module centralises transport + auth only. Migrated **`patch_dates.py`** and **`mint_property.py`** as proof of fit; the bigger scripts (`ingest_item.py`, `ingest_publication.py`, `batch_ingest_egc.py`, the renumber pair, `recolor_previews.py`, `clean_titles.py`, `fix_caa_scheme_split.py`, `strip_counter_brackets.py`) intentionally left alone — they work, the payback is on the *next* new ingest, not on re-touching working code. Smoke-tested: helper imports clean, both migrated scripts compile + their `--help` works.
+
+- **`scripts/backup_metadata.py` — local-only metadata backup (§11.1 HIGH partial).** New read-only script (no credentials needed) that SPARQLs every catalogue item, fetches the full `wbgetentities` for each, walks one hop to pull every referenced vocab / person / institution, and also dumps every property in use. Writes raw JSON sidecars to `data/snapshots/wikibase_full_YYYYMMDD/<COLLECTION>/<ARCHID>.json` + `_referenced/<Qnnn>.json` + `_properties/<Pnn>.json` + `_manifest.json`. **First run today:** 180 catalogue items (HHC 115 · CAA 35 · EGC 30) + 123 referenced + 29 properties = 332 entities, 3.0 MB. Each sidecar is a complete recovery artifact — claims with hashes, all qualifiers and references preserved — enough to rebuild via `wbeditentity` if the Wikibase Cloud instance disappears tonight. **Snapshot is gitignored**: living on disk only at `data/snapshots/wikibase_full_20260522/` — Brandon to decide whether to commit a periodic snapshot, push to R2, or rely on local backup. The other half of §11.1 HIGH (R2 sidecar mirror + ingest-script patches) is still pending.
+
+**Standing-rule notes:**
+- New scripts that talk to Wikibase should now `from _wikibase import WikibaseSession` rather than re-implementing the login dance. Pattern in the two migrated scripts.
+- `backup_metadata.py` is safe to run on demand — it's read-only, no rate-limit risk at this catalogue size (built-in 100ms pause between 50-item batches).
+- `git status` won't show today's snapshot directory (it's gitignored). It lives at `data/snapshots/wikibase_full_20260522/` if you want to inspect.
+
+**Pending threads:** §11.1 CRITICAL step 3 (per-startup random secret + unlock UI) and §11.1 HIGH part 2 (R2 sidecar mirror + ingest-script patches) remain. §11.2 LOW items still pending: PIDs central dictionary, researcher-notes label honesty. §11.3 (bend-before-break) untouched. Original v1.07 pending threads (Curator Phase 2, Held-by, Phase rename, EGC photo ingest, Rotation Part 2) unchanged.
+
+**Version line: browse.html `v1.06.31` (LIVE, unchanged) · next.html `v1.07-test.51` (staging, unchanged).**
