@@ -1,0 +1,37 @@
+# Pre-push validation — runs after every push to main.
+#
+# Catches the failure mode that previously had nothing between keyboard and
+# the live archive: a JS syntax error in browse.html, a malformed VERSION
+# constant, or a broken manifest would deploy and break the site silently.
+#
+# This workflow does NOT gate the push — GitHub Pages publishes regardless.
+# Instead it runs after the push lands; on failure, GitHub emails the repo
+# owner. That's the "alert, don't block" model from ARCHITECTURE.md §11.2.
+#
+# Run locally first if you want to:    node .github/scripts/validate.mjs
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:  # lets you re-run on demand from the Actions UI
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate HTML script blocks, VERSION constants, manifests
+        run: node .github/scripts/validate.mjs
