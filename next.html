@@ -941,6 +941,12 @@
   .hh-empty{color:var(--hint)}
   #hh-proxy-badge{position:fixed;left:14px;bottom:18px;z-index:300;display:none;background:var(--red-deep);color:#fff;font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:5px;opacity:.93;max-width:82vw}
   body.hh-proxy-off #hh-proxy-badge{display:block}
+  /* Token-paste form (shown when proxy is online but no valid token). */
+  #hh-proxy-badge .hh-tok-row{display:flex;gap:6px;align-items:center;margin-top:5px}
+  #hh-proxy-badge .hh-tok-input{font-family:var(--mono);font-size:11px;padding:3px 6px;border:0;border-radius:2px;background:#fff;color:#1a1816;min-width:220px;outline:none}
+  #hh-proxy-badge .hh-tok-btn{font-family:var(--mono);font-size:11px;padding:3px 8px;border:1px solid #fff;background:transparent;color:#fff;border-radius:2px;cursor:pointer}
+  #hh-proxy-badge .hh-tok-btn:hover{background:rgba(255,255,255,.15)}
+  #hh-proxy-badge .hh-tok-hint{font-size:9px;opacity:.7;margin-top:3px;letter-spacing:.04em}
   body.hh-proxy-off .hh-fedit{opacity:.3;pointer-events:none}
   body.hh-proxy-off .meta-title.hh-editable{border-bottom-color:transparent;cursor:default;pointer-events:none}
   .meta-title-sub{display:block;font-size:13px;font-weight:400;color:var(--muted);letter-spacing:0;margin-top:4px}
@@ -1901,7 +1907,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.52";
+  const VERSION      = "v1.07-test.53";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2023,43 +2029,141 @@
     clearTimeout(hhToast._t);
     hhToast._t = setTimeout(() => { _hhToastEl.className = ""; }, 3400);
   }
+  // ── Per-startup proxy token (audit §11.1 step 3, 2026-05-22) ────────────
+  // The local proxy generates a fresh random token each time it starts
+  // (printed on stdout). Admin pastes it once via the badge below; it's
+  // stored in localStorage["hhf_proxy_token"] and sent as the `secret`
+  // field on every /edit. On a 403 the token is cleared and the paste
+  // form re-appears. This replaces the prior pattern where the admin PIN
+  // (visible in client code as RPINS["203BTP"]) doubled as the secret.
+  const PROXY_TOKEN_KEY = "hhf_proxy_token";
+  function getProxyToken() { try { return localStorage.getItem(PROXY_TOKEN_KEY) || ""; } catch { return ""; } }
+  function setProxyToken(v) { try { v ? localStorage.setItem(PROXY_TOKEN_KEY, v) : localStorage.removeItem(PROXY_TOKEN_KEY); } catch {} }
+
   // Relay one write through the local proxy. Throws on any failure.
   async function proxyEdit(params) {
-    const s = rnSession();
+    const tok = getProxyToken();
+    if (!tok) {
+      setProxyAuthenticated(false);
+      throw new Error("no proxy token — paste it from the proxy stdout into the badge");
+    }
     let res;
     try {
       res = await fetch(PROXY_URL + "/edit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ secret: s && s.pin, params }),
+        body: JSON.stringify({ secret: tok, params }),
       });
     } catch (e) {
       setProxyOnline(false);
       throw new Error("proxy unreachable — run: python3 scripts/edit_proxy.py");
     }
     const j = await res.json().catch(() => ({ error: "bad response" }));
+    // 403 "bad secret" → token is stale (proxy was restarted, fresh random
+    // token in stdout). Clear ours and re-prompt; the next edit will be
+    // attempted with the new token the admin pastes.
+    if (res.status === 403 && (j.error === "bad secret" || (j.error && j.error.code === "bad secret"))) {
+      setProxyToken("");
+      setProxyAuthenticated(false);
+      throw new Error("proxy rejected the token — paste the current one from proxy stdout");
+    }
     if (!res.ok || j.error || j.success === 0)
       throw new Error((j.error && (j.error.info || j.error.code)) || j.error || ("HTTP " + res.status));
     setProxyOnline(true);
+    setProxyAuthenticated(true);
     return j;
   }
 
-  // ── Proxy availability → grey out editing when it's down ─────────────────
-  let _proxyOnline = true, _proxyLastPing = 0, _proxyTimer = null;
+  // ── Proxy availability + authentication state ───────────────────────────
+  // Editing requires BOTH: proxy reachable AND token validated. The badge
+  // shows "offline" when unreachable, "needs token" when reachable but not
+  // authenticated, hidden when both true.
+  let _proxyOnline = true, _proxyAuthenticated = true;
+  let _proxyLastPing = 0, _proxyTimer = null;
   function reflectProxyState() {
-    if (!document.getElementById("hh-proxy-badge")) {
-      const b = document.createElement("div");
-      b.id = "hh-proxy-badge";
-      b.textContent = "⚠ edit proxy offline — run: python3 scripts/edit_proxy.py";
-      document.body.appendChild(b);
+    let badge = document.getElementById("hh-proxy-badge");
+    if (!badge) {
+      badge = document.createElement("div");
+      badge.id = "hh-proxy-badge";
+      document.body.appendChild(badge);
     }
-    document.body.classList.toggle("hh-proxy-off", canEditWikibase() && !_proxyOnline);
+    const editing = canEditWikibase();
+    const gateOff = editing && (!_proxyOnline || !_proxyAuthenticated);
+    document.body.classList.toggle("hh-proxy-off", gateOff);
+    if (!gateOff) return;
+    if (!_proxyOnline) {
+      badge.innerHTML = "⚠ edit proxy offline — run: <code>python3 scripts/edit_proxy.py</code>";
+      return;
+    }
+    // Online but not authenticated → render the token-paste form.
+    badge.innerHTML =
+      '⚠ edit proxy connected · paste startup token to enable edits:' +
+      '<div class="hh-tok-row">' +
+        '<input class="hh-tok-input" id="hh-tok-input" type="text" autocomplete="off" spellcheck="false" placeholder="paste token from proxy stdout" />' +
+        '<button class="hh-tok-btn" id="hh-tok-save">save</button>' +
+      '</div>' +
+      '<div class="hh-tok-hint">token rotates on every proxy restart</div>';
+    const input = badge.querySelector("#hh-tok-input");
+    const btn   = badge.querySelector("#hh-tok-save");
+    if (input && btn) {
+      const submit = async () => {
+        const v = input.value.trim();
+        if (!v) return;
+        setProxyToken(v);
+        // Validate immediately via /ping?secret=… — gives instant feedback
+        // without requiring the admin to attempt a real edit first.
+        try {
+          const r = await fetch(PROXY_URL + "/ping?secret=" + encodeURIComponent(v), { cache: "no-store" });
+          const j = await r.json();
+          if (j.authenticated) {
+            setProxyOnline(true);
+            setProxyAuthenticated(true);
+            hhToast("proxy token accepted");
+          } else {
+            setProxyToken("");
+            setProxyAuthenticated(false);
+            hhToast("token rejected — paste the current one from proxy stdout", "err");
+          }
+        } catch {
+          setProxyOnline(false);
+        }
+      };
+      btn.addEventListener("click", submit);
+      input.addEventListener("keydown", e => { if (e.key === "Enter") submit(); });
+      // Focus once when the form first appears, then let the admin be.
+      if (!badge.dataset.focused) { input.focus(); badge.dataset.focused = "1"; }
+    }
   }
-  function setProxyOnline(v) { if (v !== _proxyOnline) { _proxyOnline = v; } reflectProxyState(); }
+  function setProxyOnline(v) {
+    if (v !== _proxyOnline) {
+      _proxyOnline = v;
+      // Clear the focus latch so the next needs-token render re-focuses.
+      const b = document.getElementById("hh-proxy-badge");
+      if (b) delete b.dataset.focused;
+    }
+    reflectProxyState();
+  }
+  function setProxyAuthenticated(v) {
+    if (v !== _proxyAuthenticated) {
+      _proxyAuthenticated = v;
+      const b = document.getElementById("hh-proxy-badge");
+      if (b) delete b.dataset.focused;
+    }
+    reflectProxyState();
+  }
   async function pingProxy() {
     _proxyLastPing = Date.now();
-    try { const r = await fetch(PROXY_URL + "/ping", { cache: "no-store" }); setProxyOnline(r.ok); }
-    catch { setProxyOnline(false); }
+    const tok = getProxyToken();
+    const url = PROXY_URL + "/ping" + (tok ? ("?secret=" + encodeURIComponent(tok)) : "");
+    try {
+      const r = await fetch(url, { cache: "no-store" });
+      if (!r.ok) { setProxyOnline(false); return; }
+      const j = await r.json().catch(() => ({}));
+      setProxyOnline(true);
+      setProxyAuthenticated(!!j.authenticated);
+    } catch {
+      setProxyOnline(false);
+    }
   }
   // Called from renderMeta: reflect now, re-ping if stale, poll to auto-recover.
   function proxyWatch() {

@@ -22,7 +22,7 @@ At session start: announce which LINE is active and which file you'll be editing
 **Standing conventions:**
 - **Preview convention** — any artifact Brandon needs to eyeball (PDF, image, export) is written to `~/Desktop` with a clear name and opened automatically.
 - **Version-in-update convention** — every status message Brandon receives must explicitly state the next.html version (and live browse.html version when relevant) in the prose he reads — e.g. "Pushed (`abc123`, `next.html` v1.07-test.NN)".
-- **Edit-proxy restart** — `python3 scripts/edit_proxy.py` each session (dies on Mac sleep; admin inline editing in next.html is inert without it).
+- **Edit-proxy restart** — `python3 scripts/edit_proxy.py` each session (dies on Mac sleep; admin inline editing in next.html is inert without it). **As of 2026-05-22:** the proxy prints a per-startup random token in its stdout banner; paste it into next.html's badge (bottom-left when the badge appears) before editing. Token rotates on every restart.
 
 ---
 
@@ -555,3 +555,55 @@ Acted on the follow-up the verifier surfaced. New `scripts/fix_p95_legacy_urls.p
 **Updated pending threads:** today's "fix 6 dead P95 URLs" follow-up — DONE. §11.1 CRITICAL step 3 and §11.1 HIGH part 2 still the biggest open audit items.
 
 **Version line: browse.html `v1.06.31` (LIVE, unchanged) · next.html `v1.07-test.52` (staging, unchanged).**
+
+---
+
+### 2026-05-22 — Per-startup proxy token + paste UI (CRITICAL row fully closed) (next.html v1.07-test.53)
+
+Closed §11.1 CRITICAL step 3 — the last item in the CRITICAL audit row. The prior model used the admin PIN (hardcoded in `RPINS["203BTP"]` in client code) as the proxy secret; now the proxy generates a per-startup random token and the browser stores it in `localStorage["hhf_proxy_token"]` after the admin pastes it.
+
+**Python side (`scripts/edit_proxy.py`):**
+- `SECRET = cred.get("EDIT_PROXY_SECRET") or secrets.token_urlsafe(24)` (32-char URL-safe random; `.env` override still works for power users / stable testing but loses the rotation benefit).
+- Startup banner now prints the token in a small ASCII frame on stdout, plus a one-line "paste this into next.html" instruction.
+- `/ping` extended: optionally takes `?secret=…` and returns `{ok, user, authenticated}`. Uses `secrets.compare_digest()` for constant-time comparison.
+- Hardcoded `"203BTP"` fallback removed entirely.
+
+**Browser side (`next.html`):**
+- `getProxyToken()` / `setProxyToken()` wrap `localStorage["hhf_proxy_token"]`.
+- `proxyEdit()` reads token from localStorage; if missing → throw + mark unauthenticated. Sends it as `secret`. On 403 "bad secret" → clear token + mark unauthenticated.
+- New state boolean `_proxyAuthenticated` alongside `_proxyOnline`. Editing requires both. `body.hh-proxy-off` gate now fires when either is false.
+- `#hh-proxy-badge` now renders three states: offline (the existing message), needs-token (inline `<input>` + save button with a "token rotates on every proxy restart" hint), ready (hidden). First time the form appears, focus lands on the input.
+- `pingProxy()` sends `?secret=…` (if a token is stored) and updates both state booleans from the response.
+
+**End-to-end smoke-tested** (proxy launched in background, `curl`-driven):
+- `/ping` with no secret → `authenticated:false` ✓
+- `/ping` with correct token → `authenticated:true` ✓
+- `/edit` with correct token + valid Origin + JSON → secret accepted (failed at action-allowlist as expected for `wbgetentities`) ✓
+- `/edit` with wrong token → 403 "bad secret" ✓
+- `/edit` with no Origin → 403 "origin not allowed" (CSRF defence 1 fires before secret check) ✓
+- `/edit` with text/plain → 415 (CSRF defence 2 fires before secret check) ✓
+All four defences (Origin, Content-Type, exact-match origin, per-startup secret) layer correctly. Validate workflow green.
+
+**Workflow change for admin editing (next session):**
+1. `python3 scripts/edit_proxy.py` (as before) — startup prints a token.
+2. Open next.html, unlock admin via PIN (as before).
+3. Wait for the red badge at bottom-left ("edit proxy connected · paste startup token to enable edits"). Paste, save. Edits enable.
+4. Restart the proxy → new token → badge re-appears → paste new token.
+
+If you ever restart the proxy mid-session, the next ping flips `_proxyAuthenticated → false`, the badge re-appears, and any in-flight edit returns "proxy rejected the token — paste the current one from proxy stdout".
+
+**`browse.html` (LIVE) caveat:** still uses the old `secret: s && s.pin` pattern. Admin editing on LIVE was never the workflow per the LINE: NEXT rule (real visitors don't admin-edit), so this is benign until the next promotion — at which point the new auth flow rides along.
+
+**Standing-rule update:** "Edit-proxy restart" convention in the Active Working Context section now mentions the token paste step.
+
+**Audit standing:**
+- ✅ **§11.1 CRITICAL row fully closed** (steps 1, 2, 3 all done; MEDIUM startswith folded in)
+- ◐ §11.1 HIGH (local backup done; R2 sidecar mirror + ingest-script patches still pending)
+- ✅ §11.2 row fully closed (MEDIUM CI + all three LOW items)
+- ✅ §11.3 image pipeline integrity check + its first finding fixed
+- ⏸ §11.3 still has `renderMeta`/`renderMobSheet` dedup and Playwright smoke tests
+- §11.1 HIGH part 2 is now the highest-priority remaining audit item
+
+**Pending threads:** unchanged from prior entries except §11.1 CRITICAL step 3 now resolved.
+
+**Version line: browse.html `v1.06.31` (LIVE, unchanged) · next.html `v1.07-test.53` (staging).**
