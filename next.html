@@ -2062,7 +2062,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.70";
+  const VERSION      = "v1.07-test.71";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2977,7 +2977,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     if (!researcher) {
       panel.innerHTML = `
         <div class="rn-head">
-          <span class="rn-label">researcher notes</span>
+          <span class="rn-label">researcher mode</span>
           <button class="rn-lock-btn" id="rn-lock-btn" title="Sign in to add a note (stored locally on this device, not encrypted)">${LOCK_SVG}</button>
         </div>
         <div class="rn-auth" id="rn-auth" style="display:none">
@@ -3033,7 +3033,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     } else {
       panel.innerHTML = `
         <div class="rn-head">
-          <span class="rn-label">researcher notes</span>
+          <span class="rn-label">notes</span>
           <span class="rn-who">${escapeHTML(researcher.name)}${researcher.role ? ` · ${escapeHTML(researcher.role)}` : ""}</span>
           ${rnRole() === "admin" ? `<button class="rn-allbtn${rnShowAll ? " on" : ""}" id="rn-allbtn" title="${rnShowAll ? "Showing every researcher's notes — click for yours only" : "Showing only your notes — click to see all researchers'"}">${rnShowAll ? "all" : "mine"}</button>` : ""}
           <button class="rn-lock-btn" id="rn-lock-btn" title="Sign out (notes stay on this device)">${UNLOCK_SVG}</button>
@@ -6422,7 +6422,7 @@ WHERE {
         you don't see theirs. (The site admin can toggle to see every researcher's
         notes.)
         <br><br>
-        Add a note with the <b>+</b> button beside "researcher notes." Click your
+        Add a note with the <b>+</b> button beside "notes." Click your
         own note's text to edit it. Hold the <b>×</b> beside a note to delete it.
         Marks, notes, and "reviewed" state live on this device — they survive
         reloads and tab restarts.</p>
@@ -6457,7 +6457,7 @@ WHERE {
       ])}
 
       <p class="ip-foot">Signed in until you close the tab. To switch researchers,
-        click the lock icon beside "researcher notes".</p>`;
+        click the lock icon beside "notes".</p>`;
     document.getElementById("rn-help-inner").innerHTML = html;
   }
   function openRnHelpPane() {
