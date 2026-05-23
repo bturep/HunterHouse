@@ -660,7 +660,12 @@
     font-variant-numeric:tabular-nums;
     white-space:nowrap;padding-top:2px;text-align:right;
   }
-  .row:hover{background:var(--soft)}
+  /* Gate hover to real pointer devices. On touch, :hover sticks after a
+     tap (no "pointer left" event) and the row looks glitchy until the user
+     taps elsewhere. .sel still drives the selected-row visual on mobile. */
+  @media (hover: hover) and (pointer: fine) {
+    .row:hover{background:var(--soft)}
+  }
   .row.sel{background:var(--red-tint)}
   .row.sel::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red)}
   .row.sel .archid{color:var(--red-deep)}
@@ -2057,7 +2062,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.66";
+  const VERSION      = "v1.07-test.67";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
