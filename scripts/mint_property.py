@@ -3,9 +3,9 @@
 Mint (or find) a single Wikibase property. Idempotent: if a property with the
 exact label already exists it is reused, not duplicated.
 
-Reuses the proven login/CSRF flow from scripts/patch_dates.py and the
-wbeditentity-new pattern from scripts/ingest_publication.py. Credentials load
-from ~/Documents/hh-wikibase-migration/.env.
+Uses scripts/_wikibase.py for env loading + login + CSRF (migrated
+2026-05-22 as part of ARCHITECTURE.md §11.2 LOW dedup pass). Credentials
+load from ~/Documents/hh-wikibase-migration/.env.
 
 Usage:
   python3 scripts/mint_property.py --label "display rotation" \
@@ -14,23 +14,8 @@ Usage:
 
 import argparse
 import json
-import os
 
-import requests
-
-API = "https://hunterhouse.wikibase.cloud/w/api.php"
-ENV_FILE = os.path.expanduser("~/Documents/hh-wikibase-migration/.env")
-
-
-def load_env(path):
-    env = {}
-    with open(path) as f:
-        for line in f:
-            line = line.strip()
-            if line and not line.startswith("#") and "=" in line:
-                k, _, v = line.partition("=")
-                env[k.strip()] = v.strip()
-    return env
+from _wikibase import WikibaseSession
 
 
 def main():
@@ -41,38 +26,26 @@ def main():
                     help="string | url | wikibase-item | time | quantity | external-id …")
     args = ap.parse_args()
 
-    env = load_env(ENV_FILE)
-    s = requests.Session()
-    s.headers.update({"User-Agent": "HunterHouseBot/1.0 (mint_property)"})
-
-    # idempotency — exact-label match wins, no duplicate property
-    hits = [h for h in s.get(API, params={
-        "action": "wbsearchentities", "search": args.label, "language": "en",
-        "type": "property", "limit": 10, "format": "json"}).json().get("search", [])
-        if h.get("label", "").lower() == args.label.lower()]
+    # idempotency check first — read-only, no need to log in yet, so build the
+    # session lazily (login_now=False keeps the boot fast on a find-and-skip).
+    wb = WikibaseSession(user_agent="HunterHouseBot/1.0 (mint_property)",
+                         login_now=False)
+    hits = [h for h in wb.get("wbsearchentities",
+                              search=args.label, language="en",
+                              type="property", limit=10
+                              ).get("search", [])
+            if h.get("label", "").lower() == args.label.lower()]
     if hits:
         print(f"exists: {hits[0]['id']}  ({args.label})")
         return
 
-    # login + csrf
-    t = s.get(API, params={"action": "query", "meta": "tokens",
-                           "type": "login", "format": "json"}
-              ).json()["query"]["tokens"]["logintoken"]
-    r = s.post(API, data={"action": "login", "lgname": env["WIKIBASE_BOT_USER"],
-                          "lgpassword": env["WIKIBASE_BOT_PASSWORD"],
-                          "lgtoken": t, "format": "json"}).json()
-    if r["login"]["result"] != "Success":
-        raise SystemExit(f"login failed: {r['login']['result']}")
-    token = s.get(API, params={"action": "query", "meta": "tokens",
-                               "format": "json"}).json()["query"]["tokens"]["csrftoken"]
-
+    # New property: now we actually need credentials.
+    wb.login()
     data = {"labels": {"en": {"language": "en", "value": args.label}},
             "datatype": args.datatype}
     if args.desc:
         data["descriptions"] = {"en": {"language": "en", "value": args.desc}}
-    r = s.post(API, data={"action": "wbeditentity", "new": "property",
-                          "data": json.dumps(data), "token": token,
-                          "format": "json"}).json()
+    r = wb.post("wbeditentity", new="property", data=json.dumps(data))
     if "error" in r:
         raise SystemExit(f"create failed: {r['error']}")
     print(f"created: {r['entity']['id']}  ({args.label}, {args.datatype})")

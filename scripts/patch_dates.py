@@ -3,25 +3,16 @@
 Patch 18 undated archive items: add P82 date claim + update English description.
 Run: python3 scripts/patch_dates.py
 Loads bot credentials from ~/Documents/hh-wikibase-migration/.env automatically.
+
+Migrated to scripts/_wikibase.py 2026-05-22 (ARCHITECTURE.md §11.2 LOW
+dedup pass) — env loading + login + CSRF + retry now live in the shared
+helper. This script's actual logic (the ITEMS list + the two write
+helpers) is unchanged.
 """
 
 import json
-import os
-import requests
 
-API = "https://hunterhouse.wikibase.cloud/w/api.php"
-ENV_FILE = os.path.expanduser("~/Documents/hh-wikibase-migration/.env")
-
-
-def load_env(path):
-    env = {}
-    with open(path) as f:
-        for line in f:
-            line = line.strip()
-            if line and not line.startswith("#") and "=" in line:
-                k, _, v = line.partition("=")
-                env[k.strip()] = v.strip()
-    return env
+from _wikibase import WikibaseSession
 
 ITEMS = [
     # (QID, archive_id, year)
@@ -48,73 +39,36 @@ ITEMS = [
 ]
 
 
-def login(s, username, password):
-    r = s.get(API, params={"action": "query", "meta": "tokens",
-                           "type": "login", "format": "json"})
-    token = r.json()["query"]["tokens"]["logintoken"]
-    r = s.post(API, data={"action": "login", "lgname": username,
-                          "lgpassword": password, "lgtoken": token,
-                          "format": "json"})
-    result = r.json()["login"]["result"]
-    if result != "Success":
-        raise SystemExit(f"Login failed: {result}")
-    print(f"Logged in as {r.json()['login']['lgusername']}\n")
-
-
-def csrf(s):
-    r = s.get(API, params={"action": "query", "meta": "tokens", "format": "json"})
-    return r.json()["query"]["tokens"]["csrftoken"]
-
-
-def set_description(s, token, qid, text):
-    r = s.post(API, data={
-        "action": "wbsetdescription",
-        "id": qid, "language": "en", "value": text,
-        "token": token, "format": "json",
-    })
-    d = r.json()
+def set_description(wb, qid, text):
+    d = wb.post("wbsetdescription", id=qid, language="en", value=text)
     if "error" in d:
         return False, d["error"].get("info", d["error"])
     return True, d.get("description", {}).get("value", text)
 
 
-def add_date(s, token, qid, year):
+def add_date(wb, qid, year):
     value = json.dumps({
         "time": f"+{year}-00-00T00:00:00Z",
         "timezone": 0, "before": 0, "after": 0,
         "precision": 9,
         "calendarmodel": "http://www.wikidata.org/entity/Q1985727",
     })
-    r = s.post(API, data={
-        "action": "wbcreateclaim",
-        "entity": qid, "snaktype": "value",
-        "property": "P82", "value": value,
-        "token": token, "format": "json",
-    })
-    d = r.json()
+    d = wb.post("wbcreateclaim",
+                entity=qid, snaktype="value",
+                property="P82", value=value)
     if "error" in d:
         return False, d["error"].get("info", d["error"])
     return True, d.get("claim", {}).get("id", "ok")
 
 
 def main():
-    env = load_env(ENV_FILE)
-    bot_user = env.get("WIKIBASE_BOT_USER", "")
-    bot_pass = env.get("WIKIBASE_BOT_PASSWORD", "")
-    if not bot_user or not bot_pass:
-        raise SystemExit(f"Missing WIKIBASE_BOT_USER or WIKIBASE_BOT_PASSWORD in {ENV_FILE}")
-    print(f"Using bot: {bot_user}\n")
-
-    s = requests.Session()
-    s.headers.update({"User-Agent": "HunterHouseBot/1.0"})
-
-    login(s, bot_user, bot_pass)
-    token = csrf(s)
+    wb = WikibaseSession(user_agent="HunterHouseBot/1.0 (patch_dates)")
+    print(f"Using bot: {wb.user}\n")
 
     for qid, aid, year in ITEMS:
         desc = f"architectural drawing; HHC; {year}"
-        ok_d, msg_d = set_description(s, token, qid, desc)
-        ok_c, msg_c = add_date(s, token, qid, year)
+        ok_d, msg_d = set_description(wb, qid, desc)
+        ok_c, msg_c = add_date(wb, qid, year)
         status = "OK" if (ok_d and ok_c) else "FAIL"
         print(f"[{status}] {aid} ({qid})  desc={'ok' if ok_d else msg_d}  P82={'ok' if ok_c else msg_c}")
 
