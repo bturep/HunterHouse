@@ -637,3 +637,37 @@ Collection-folder map matches the existing image-tier layout (HHC → `hunter-ho
 **Remaining piece of §11.1 HIGH:** per-ingest sidecar writes — when `ingest_item.py` / `ingest_publication.py` / `batch_ingest_egc.py` create a new Wikibase item, also write its sidecar to R2 at the end. Next bundle.
 
 **Version line: browse.html `v1.06.31` (LIVE, unchanged) · next.html `v1.07-test.53` (staging, unchanged).**
+
+---
+
+### 2026-05-22 — Per-ingest sidecar writes (§11.1 HIGH row fully closed)
+
+Final piece of §11.1 HIGH. New `scripts/sync_one_metadata.py` is the single-item version of `sync_metadata_to_r2.py`: given an archId, SPARQLs the QID, fetches the entity via `wbgetentities`, and rclone-copies the JSON sidecar to the right `{collection-folder}/metadata/` path on R2. Read-only against Wikibase (no bot creds); writes only via rclone. Dry-run default; `--execute` writes; `--quiet` for non-error silence.
+
+**Smoke-tested:** dry-run on HH-HHC-0001 resolved Q369 + reported a 10,718-byte payload would copy. Then `--execute` on HH-EGC-0001 wrote the actual sidecar (Q505, 6,462 bytes), HEAD-confirmed 200 via the CDN.
+
+**Patched the three ingest scripts** (each got a 10-line fail-safe tail):
+- `scripts/ingest_item.py` — single-image ingest. Hook fires once at end of `main()` after `wbeditentity new=item` succeeds.
+- `scripts/ingest_publication.py` — multi-page publication ingest. Same shape, single hook at end.
+- `scripts/batch_ingest_egc.py` — workbook-driven batch loop. Hook lives inside the loop, after `results.append((r["id"], qid))` — fires for both the "created" and the "existed; desc updated" branches.
+
+Each call is `subprocess.run([…sync_one_metadata.py, ARCH_ID, --execute, --quiet], timeout=60, check=False)` wrapped in `try/except`. **A sidecar upload glitch never breaks an otherwise-successful ingest** — the worst case is a `⚠ sidecar sync skipped (non-fatal)` line; the periodic `backup_metadata.py + sync_metadata_to_r2.py` pair will catch the gap on the next run.
+
+Imports were already present in all three scripts (`subprocess`, `os`); zero new dependencies. All four touched scripts compile.
+
+**Operational shape going forward:**
+- Every new ingest → sidecar lands on R2 immediately.
+- `backup_metadata.py` + `sync_metadata_to_r2.py` remain as the safety-net + periodic full-snapshot mechanism.
+- `verify_r2_links.py` could be extended later to also HEAD-check sidecar URLs alongside image URLs — small follow-up; not in this commit.
+
+**Audit standing now:**
+- ✅ **§11.1 CRITICAL row fully closed** (steps 1, 2, 3 + MEDIUM startswith)
+- ✅ **§11.1 HIGH row fully closed** (local backup + R2 mirror + per-ingest sidecar writes)
+- ✅ §11.2 row fully closed
+- ✅ §11.3 image-pipeline integrity check + first finding fixed
+- ⏸ §11.3 `renderMeta`/`renderMobSheet` dedup
+- ⏸ §11.3 Playwright smoke tests
+
+The two big severity rows (CRITICAL + HIGH) are both fully done. What remains in §11.3 is refactor-shaped, not security-shaped.
+
+**Version line: browse.html `v1.06.31` (LIVE, unchanged) · next.html `v1.07-test.53` (staging, unchanged).**

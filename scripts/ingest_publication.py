@@ -333,6 +333,18 @@ def main():
     print(f"\nDone.\n  https://hunterhouse.wikibase.cloud/wiki/Item:{qid}")
     print(f"  {URL_PDF}")
 
+    # §11.1 HIGH part 2b — fail-safe sidecar push to R2 (see ingest_item.py
+    # for rationale).
+    try:
+        subprocess.run(
+            ["python3", os.path.join(os.path.dirname(__file__),
+                                     "sync_one_metadata.py"),
+             ARCH_ID, "--execute", "--quiet"],
+            timeout=60, check=False,
+        )
+    except Exception as _e:
+        print(f"  ⚠ sidecar sync skipped (non-fatal): {_e}")
+
     shutil.rmtree(work, ignore_errors=True)
 
 
