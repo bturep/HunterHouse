@@ -220,21 +220,19 @@
      the chips are styled with the standard .fp-chip family. No dedicated bar. */
 
   /* Threshold overlay — gallery "title wall" (about-pane overlay pattern).
-     A fixed pale copper-green card (#dde6df, the hyperlink-green family) —
-     set apart from the beige entry splash but still light, so it keeps the
-     standard palette type: brown body, red names, dark copper links. The
-     tokens are pinned to their light-mode values so the card reads the same
-     in either app theme. */
+     Cognac threshold — warm amber-dark, set apart from the beige splash and
+     darker than the in-mode tea-stain surface. The tokens are pinned to their
+     own values so the card reads the same in either app theme. */
   #curator-pane{display:none;position:absolute;inset:0;z-index:18;overflow-y:auto;
     flex-direction:column;align-items:center;justify-content:center;
-    background:#ebe1cb;
-    --ink:#2a2218;
-    --muted:#7a6f5a;
-    --hint:#a89e85;
-    --rule:#d4c9af;
-    --copper-deep:#6b4a1f;
-    --copper-pale:#d4c2a0;
-    --red:#8b3a2a;
+    background:#2c2218;
+    --ink:#f2e7d4;
+    --muted:rgba(242,231,212,0.55);
+    --hint:rgba(242,231,212,0.32);
+    --rule:rgba(242,231,212,0.14);
+    --copper-deep:#d4a26a;
+    --copper-pale:rgba(212,162,106,0.22);
+    --red:#c4826e;
     padding:48px 40px 64px}
   #curator-pane.open{display:flex}
   @media (max-width:767px){
@@ -264,36 +262,53 @@
      early-returns (authored membership), sort is locked, search is inert,
      and the metadata pills act as dead filter triggers. The viewer is
      reading an exhibition, not exploring the archive — show only what the
-     curator placed (the item's title + their note). Exit is on the
-     curation-card. Toggled by body.hh-in-curation in enter/exitCuration. */
+     curator placed (the item's title + their note). Exit is the
+     LEAVE SELECTION × in the top-right of .panel-left. Toggled by
+     body.hh-in-curation in enter/exitCuration. */
   body.hh-in-curation .list-head,
   body.hh-in-curation #search-input,
   body.hh-in-curation #search-toggle,
   body.hh-in-curation #rec-info,
   body.hh-in-curation #data-footer{display:none !important}
-  /* Curation mode re-tints the surfaces and link accent toward the vellum
-     threshold while leaving --red (the Hunter name-accent) untouched, so
-     item-selection chrome stays legible against the mode wash. Removing
-     body.hh-in-curation on exit reverts every token. */
+  /* Curation mode rewarms the surfaces and link accent toward the cognac
+     threshold while leaving --red (the Hunter name-accent) untouched —
+     the selection stripe and name highlights stay legible against the
+     mode wash. Removing body.hh-in-curation on exit reverts every token. */
   body.hh-in-curation{
-    /* keep --red as the Hunter accent — only surfaces + links drift */
-    --bg:#ede5d4;
-    --soft:#e0d6bf;
-    --rule:#d4c5a3;
+    /* Light-mode curator surface — tea-stained paper. --red kept as the
+       Hunter accent; only surfaces + link accent drift toward amber. */
+    --bg:#efe5d2;
+    --soft:#e6d8bf;
+    --rule:#d4c4a3;
     --copper:#8a6332;
     --copper-deep:#6b4a1f;
     --copper-pale:#e6d4b0;
     transition:background-color 240ms ease, color 240ms ease;
   }
   html.dark body.hh-in-curation{
-    --bg:#1c1814;
+    --bg:#1c1813;
     --soft:#2a2218;
-    --rule:rgba(228,210,168,0.16);
-    --copper:#c89968;
-    --copper-deep:#dfb583;
-    --copper-pale:rgba(200,153,104,0.22);
+    --rule:rgba(242,231,212,0.14);
+    --copper:#b88a52;
+    --copper-deep:#d4a26a;
+    --copper-pale:rgba(212,162,106,0.18);
   }
   html.dark body.hh-in-curation .curation-card{background:#2a2218}
+  /* Continuity column — a 2px copper hairline running down the left edge of
+     the panel-left in curator mode. Solid copper at the top (under the
+     curation card) fading to a softer tone down through the list. No
+     z-index: the pseudo is first in tree order, so it paints under .row.sel's
+     own ::before (red stripe stays dominant) but over the panel background
+     and row hover/selection tints. */
+  body.hh-in-curation .panel-left::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:2px;
+    background:linear-gradient(to bottom,
+      var(--copper-deep) 0,
+      var(--copper-deep) 120px,
+      var(--copper-pale) 240px,
+      var(--copper-pale) 100%);
+    pointer-events:none;
+  }
   .cur-actions{display:flex;justify-content:center;margin-top:28px}
   .cur-continue{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;
     color:var(--ink);background:none;border:0;cursor:pointer;padding:0;
@@ -317,25 +332,51 @@
   .cc-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:8px}
   .cc-curator{font-family:var(--mono);font-size:9px;letter-spacing:0.18em;
     text-transform:uppercase;color:var(--muted)}
-  .cc-exit{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;
-    text-transform:uppercase;color:var(--hint);background:none;border:0;cursor:pointer}
-  .cc-exit::before{content:"[ ";opacity:.55}
-  .cc-exit::after{content:" ]";opacity:.55}
-  .cc-exit:hover{color:var(--red-deep)}
+  /* Curator-mode dismissal — mirrors the right pane's × close pattern, sits
+     in the top-right corner of .panel-left. Quiet by default, ink on hover. */
+  .cur-leave{
+    position:absolute;top:14px;right:18px;z-index:30;
+    background:none;border:0;padding:4px 0;cursor:pointer;
+    font-family:var(--mono);font-size:9px;letter-spacing:0.16em;
+    text-transform:uppercase;color:var(--hint);
+    display:inline-flex;align-items:baseline;gap:6px;
+    transition:color .12s;
+  }
+  .cur-leave[hidden]{display:none}
+  .cur-leave:hover{color:var(--ink)}
+  .cur-leave .cl-x{font-size:14px;line-height:1;letter-spacing:0}
+  .panel-left.out .cur-leave{display:none}
   .cc-title{font-family:var(--mono);font-size:12px;letter-spacing:0.04em;
     color:var(--ink);font-weight:500;margin:0 0 6px}
   .cc-intro{font-family:var(--mono);font-size:11px;line-height:1.7;
     color:var(--ink);margin:0;white-space:pre-line}
 
-  /* Curator note — replaces researcher notes in the record pane (curation mode) */
-  .cur-note{margin-top:14px;border-top:1px dashed var(--rule);padding-top:10px}
-  .cur-note .cn-label{font-family:var(--mono);font-size:9px;letter-spacing:0.16em;
-    text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
-  .cur-note .cn-text{font-family:var(--mono);font-size:11.5px;line-height:1.7;color:var(--ink)}
-  .cur-note .cn-empty{font-family:var(--mono);font-size:10.5px;color:var(--hint)}
-  /* Curator note leading the mobile sheet — drop the divider line so it
+  /* Curator note — first section of the record in curation mode. Rendered
+     as a native meta-section (tracked-out small-caps header with an underline
+     rule), no callout chrome. The curator's first name in the header is
+     wrapped in var(--red) to echo the CURATED BY [NAME] byline. */
+  .cur-note{margin-bottom:24px}
+  .cur-note .cn-label{font-family:var(--mono);font-size:9.5px;letter-spacing:0.18em;
+    text-transform:uppercase;color:var(--ink);display:block;font-weight:500;
+    padding-bottom:8px;border-bottom:1px solid var(--ink);margin-bottom:14px}
+  .cur-note .cn-text{font-family:var(--mono);font-size:12px;line-height:1.75;color:var(--ink)}
+  .cur-note .cn-empty{font-family:var(--mono);font-size:11px;line-height:1.6;color:var(--hint)}
+  /* Inline next-in-selection line, sits between the curator note and the
+     DESCRIPTION section. Quiet label on the left, copper-deep clickable
+     title on the right. */
+  .cur-next{display:flex;align-items:baseline;justify-content:space-between;
+    gap:12px;margin-bottom:26px;font-family:var(--mono);font-size:10px}
+  .cur-next .cn-lbl{color:var(--hint);letter-spacing:0.16em;text-transform:uppercase;
+    flex-shrink:0}
+  .cur-next .cn-go{color:var(--copper-deep);cursor:pointer;background:none;
+    border:0;padding:0;font:inherit;letter-spacing:0.04em;text-align:right;
+    min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cur-next .cn-go:hover{color:var(--ink)}
+  .cur-next .cn-end{color:var(--hint);letter-spacing:0.04em}
+  /* Curator note leading the mobile sheet — drop the underline so it
      reads as the sheet's opening element, not a mid-list separator. */
-  .mob-sheet-body .cur-note:first-child{margin-top:0;border-top:0;padding-top:0}
+  .mob-sheet-body .cur-note:first-child{margin-top:0}
+  .mob-sheet-body .cur-note:first-child .cn-label{border-bottom:0;padding-bottom:0}
 
   /* Info ([?]) button moved to the top bar (.site-topright .info-btn).
      The old in-record bracket-style .rec-info CSS has been removed. */
@@ -591,6 +632,15 @@
   .row .archid .tmark::before{content:"["}
   .row .archid .tmark::after{content:"]"}
   .row.sel .archid .tmark{color:var(--red-deep)!important}
+  /* Curator mode: list rows show the authored sequence (01, 02, 03…) instead
+     of the type-mark chip. Item ID slides into the phase subtitle line as a
+     quiet prefix. Tabular numerals so the digits align column-style. */
+  body.hh-in-curation .row .archid.cur-seq{
+    font-family:var(--mono);font-size:11px;letter-spacing:0.06em;
+    font-variant-numeric:tabular-nums;color:var(--muted);font-weight:500;
+  }
+  body.hh-in-curation .row.sel .archid.cur-seq{color:var(--red-deep)}
+  body.hh-in-curation .row .ph .rid{color:var(--hint);margin-right:2px}
   .row .title-wrap{min-width:0;overflow:hidden}
   .row .title{
     font-size:13px;letter-spacing:-0.005em;color:var(--ink);
@@ -732,6 +782,21 @@
   .image-stage .placeholder b{color:var(--muted);font-weight:500}
 
   .foot-left{flex:1}
+  /* Curator-mode foot pager — single source of truth for selection position.
+     Lives in the foot bar's left zone, hidden by default; shown in curator
+     mode (and never alongside pdf-mode, which owns the same slot). */
+  .cur-pager{display:inline-flex;align-items:center;gap:10px;
+    font-family:var(--mono);font-size:10px;letter-spacing:0.06em;
+    color:var(--hint);text-transform:uppercase}
+  .cur-pager[hidden]{display:none}
+  .cur-pager .cp-btn{background:none;border:0;padding:0;cursor:pointer;
+    font:inherit;letter-spacing:inherit;text-transform:inherit;
+    color:var(--copper-deep)}
+  .cur-pager .cp-btn:hover{color:var(--ink)}
+  .cur-pager .cp-btn:disabled{color:var(--hint);cursor:default}
+  .cur-pager .cp-sep{display:inline-block;width:1px;height:11px;background:var(--rule)}
+  .cur-pager .cp-count{color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:0.04em}
+  .pane-image.pdf-mode .cur-pager{display:none}
   .zoom-ctl{
     display:flex;align-items:center;justify-content:center;gap:0;user-select:none;flex-shrink:0;
   }
@@ -1684,6 +1749,7 @@
   </div>
 
   <div class="panel-left pane-list mobile-active" id="panel-left">
+    <button class="cur-leave" id="cur-leave" type="button" hidden title="Leave this selection">LEAVE SELECTION <span class="cl-x">×</span></button>
     <div class="panel-content">
       <div class="scroll-pip" id="list-pip"></div>
       <div class="list-head">
@@ -1747,7 +1813,7 @@
       <iframe id="pdf-frame" title="Publication PDF" src="about:blank"></iframe>
     </div>
     <div class="image-foot">
-      <span class="foot-left"><button id="pdf-view" type="button" hidden>View PDF</button><button id="pdf-close" type="button" title="Close PDF" hidden>✕</button></span>
+      <span class="foot-left"><button id="pdf-view" type="button" hidden>View PDF</button><button id="pdf-close" type="button" title="Close PDF" hidden>✕</button><span class="cur-pager" id="cur-pager" hidden><button class="cp-btn" id="cp-prev" type="button" aria-label="Previous in selection">← Prev</button><span class="cp-sep"></span><span class="cp-count" id="cp-count">— / —</span><span class="cp-sep"></span><button class="cp-btn" id="cp-next" type="button" aria-label="Next in selection">Next →</button></span></span>
       <div class="zoom-ctl">
         <button id="zoom-out" type="button" title="Zoom out [-]">−</button>
         <span class="pct" id="zoom-pct">100%</span>
@@ -1835,7 +1901,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.50";
+  const VERSION      = "v1.07-test.51";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3785,6 +3851,7 @@ WHERE {
     state.curation = null;
     document.body.classList.remove("hh-in-curation");
     applyFilters(); renderListHead(); renderList();
+    updateCurPager();
     if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
       selectItem(state.filtered[0].id, { scrollIntoView:false });
   }
@@ -3793,57 +3860,68 @@ WHERE {
     const card = document.getElementById("curation-card");
     if (!card) return;
     const c = state.curation;
-    if (!c) { card.hidden = true; card.innerHTML = ""; return; }
+    const leave = document.getElementById("cur-leave");
+    if (!c) {
+      card.hidden = true; card.innerHTML = "";
+      if (leave) leave.hidden = true;
+      return;
+    }
     const cu = c.curator || {};
     card.hidden = false;
     card.innerHTML = `
       <div class="cc-top">
         <span class="cc-curator">Curated by <span class="cur-name-c">${escapeHTML(cu.name || c.curator || "an invited curator")}</span></span>
-        <button class="cc-exit" id="cc-exit" title="Leave this curation">exit</button>
       </div>
       ${c.title ? `<p class="cc-title">${escapeHTML(c.title)}</p>` : ""}
       ${c.intro ? `<p class="cc-intro">${escapeHTML(c.intro)}</p>` : ""}`;
-    document.getElementById("cc-exit").addEventListener("click", exitCuration);
+    if (leave) leave.hidden = false;
   }
 
-  // Curator note for the selected item — replaces researcher notes in curation mode.
-  function renderCuratorNote(item) {
-    const panel = document.getElementById("rn-panel");
-    if (!panel) return;
+  // Curator's first name → "BRANDON ON THIS ITEM" header (first name in red).
+  function curatorNoteLabel() {
     const cu = (state.curation && state.curation.curator) || {};
-    const name = (cu.name || (state.curation && state.curation.curator) || "").toString().trim();
-    const entry = ((state.curation && state.curation.items) || []).find(x => x.id === item.id);
-    const note = entry && entry.note ? entry.note : "";
-    // Label gets the curator's name as an attribution after a · separator,
-    // wrapped in .cur-name-c (var(--red)) so it matches the chip + the
-    // threshold byline + the curation-card. .cn-label's uppercase +
-    // letter-spacing is inherited, so the name renders in red small-caps.
-    const labelHTML = name
-      ? `curator's note · <span class="cur-name-c">${escapeHTML(name)}</span>`
-      : `curator's note`;
-    panel.innerHTML = `<div class="cur-note">
-      <span class="cn-label">${labelHTML}</span>
-      ${note ? `<div class="cn-text">${escapeHTML(note)}</div>`
-             : `<div class="cn-empty">No curator note for this item.</div>`}
-    </div>`;
+    const full = (cu.name || (state.curation && state.curation.curator) || "").toString().trim();
+    const first = full ? full.split(/\s+/)[0] : "";
+    if (!first) return `<span style="color:var(--red)">CURATOR</span> ON THIS ITEM`;
+    return `<span style="color:var(--red)">${escapeHTML(first.toUpperCase())}</span> ON THIS ITEM`;
   }
 
-  // Curator note as a mobile-sheet block — same data as renderCuratorNote,
-  // shown at the top of the bottom sheet while a curation is active.
+  // Curator note HTML — used both as the first section of the record pane
+  // (via renderMeta) and as the opening block of the mobile sheet.
   function curatorNoteBlock(item) {
     if (!state.curation) return "";
-    const cu = state.curation.curator || {};
-    const name = (cu.name || state.curation.curator || "").toString().trim();
     const entry = (state.curation.items || []).find(x => x.id === item.id);
     const note = entry && entry.note ? entry.note : "";
-    const labelHTML = name
-      ? `curator's note · <span class="cur-name-c">${escapeHTML(name)}</span>`
-      : `curator's note`;
     return `<div class="cur-note">
-      <span class="cn-label">${labelHTML}</span>
+      <span class="cn-label">${curatorNoteLabel()}</span>
       ${note ? `<div class="cn-text">${escapeHTML(note)}</div>`
              : `<div class="cn-empty">No curator note for this item.</div>`}
     </div>`;
+  }
+
+  // "Next in selection" inline link — rendered between the curator note
+  // and the DESCRIPTION section in curator mode.
+  function curatorNextBlock(item) {
+    if (!state.curation) return "";
+    const idx = state.filtered.findIndex(i => i.id === item.id);
+    if (idx < 0) return "";
+    const nxt = state.filtered[idx + 1];
+    if (!nxt) {
+      return `<div class="cur-next"><span class="cn-lbl">Next in selection</span><span class="cn-end">— end of selection —</span></div>`;
+    }
+    const title = nxt.title || "";
+    const clip = title.length > 32 ? title.slice(0, 31) + "…" : title;
+    return `<div class="cur-next">
+      <span class="cn-lbl">Next in selection</span>
+      <button class="cn-go" data-next-id="${escapeHTML(nxt.id)}" title="${escapeHTML(title)}">${escapeHTML(clip)} →</button>
+    </div>`;
+  }
+
+  // Researcher-notes panel uses #rn-panel; in curation mode the curator note
+  // is hoisted to the top of the record pane, so #rn-panel is left empty.
+  function renderCuratorNote(_item) {
+    const panel = document.getElementById("rn-panel");
+    if (panel) panel.innerHTML = "";
   }
 
   function renderList() {
@@ -3870,7 +3948,7 @@ WHERE {
       frag.appendChild(d);
     }
 
-    state.filtered.forEach(it => {
+    state.filtered.forEach((it, _idx) => {
       if (grouped && it.phase !== lastPhase) {
         lastPhase = it.phase;
         const count = state.filtered.filter(x => x.phase === lastPhase).length;
@@ -3882,10 +3960,23 @@ WHERE {
       const row = document.createElement("div");
       row.className = "row" + (it.id === state.selectedId ? " sel" : "") + (marked.has(it.id) ? " marked" : "") + (seen.has(it.id) ? " seen" : "") + (noted.has(it.id) ? " has-note" : "") + (state.bulkSel.has(it.id) ? " bulk-sel" : "");
       row.dataset.id = it.id;
-      const tmark = typeMark(it.itemType);
+      // In curation mode: replace [LS]/[D] tmark chip with the 01/02/03
+      // sequence number reflecting the curator's authored order, and move
+      // the item ID into the phase subtitle line as a faint prefix.
+      let idSlotHTML, phSlotHTML;
+      if (state.curation) {
+        const seq = String(_idx + 1).padStart(2, "0");
+        idSlotHTML = `<span class="archid cur-seq">${seq}</span>`;
+        const phText = it.phase ? ` · ${escapeHTML(it.phase)}` : "";
+        phSlotHTML = `<span class="rid">${displayId(it.id)}</span>${phText}`;
+      } else {
+        const tmark = typeMark(it.itemType);
+        idSlotHTML = `<span class="archid">${tmark ? `<span class="tmark pc-stone" data-type="${escapeHTML(tmark)}" title="${escapeHTML(it.itemType)}">${tmark}</span>` : ""}${displayId(it.id)}</span>`;
+        phSlotHTML = escapeHTML(it.phase || "");
+      }
       row.innerHTML = `
         <span class="col-id">
-          <span class="archid">${tmark ? `<span class="tmark pc-stone" data-type="${escapeHTML(tmark)}" title="${escapeHTML(it.itemType)}">${tmark}</span>` : ""}${displayId(it.id)}</span>
+          ${idSlotHTML}
           ${flags ? `<span class="row-flags" aria-hidden="true">
             <span class="rf-slot rf-slot-mark"><span class="rf-ico"><span class="rf-mark" title="Click to unmark [M]"></span></span></span>
             <span class="rf-slot rf-slot-seen"><span class="rf-ico"><span class="rf-seen" title="Reviewed — click to clear [R]"><svg viewBox="0 0 14 10" width="10" height="7" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5s2.2-4 6-4 6 4 6 4-2.2 4-6 4-6-4-6-4z"/><circle cx="7" cy="5" r="1.7"/></svg></span></span></span>
@@ -3894,7 +3985,7 @@ WHERE {
         </span>
         <div class="title-wrap">
           <div class="title">${escapeHTML(it.title)}</div>
-          <div class="ph">${escapeHTML(it.phase || "")}</div>
+          <div class="ph">${phSlotHTML}</div>
         </div>
         <span class="year">${escapeHTML(yearOf(it.date))}</span>
       `;
@@ -4446,6 +4537,8 @@ WHERE {
     const graphN = archRows.length > 0 ? "03" : "02";
     body.innerHTML = `
       <h1 class="meta-title">${formatTitle(item.title)}</h1>
+      ${state.curation ? curatorNoteBlock(item) : ""}
+      ${state.curation ? curatorNextBlock(item) : ""}
 
       <section class="meta-section">
         <h3><span><span class="n">01</span>Description</span><span class="ct">${descRows.length} fields</span></h3>
@@ -4466,6 +4559,8 @@ WHERE {
     body.querySelectorAll(".sib[data-sib-id]").forEach(el => {
       el.addEventListener("click", e => { e.preventDefault(); selectItem(el.dataset.sibId); });
     });
+    const cnGo = body.querySelector(".cn-go[data-next-id]");
+    if (cnGo) cnGo.addEventListener("click", () => selectItem(cnGo.dataset.nextId));
     if (state.curation) renderCuratorNote(item); else renderRN(item.id);
     wireMetaEdit(item);
     wireFieldEdits(item);
@@ -4501,11 +4596,29 @@ WHERE {
 
     renderImage(item);
     renderMeta(item);
+    updateCurPager();
 
     const url = new URL(location.href);
     url.searchParams.set("id", id);
     history.replaceState({}, "", url);
     updateMobileNav();
+  }
+
+  // Curator-mode foot pager — hidden when no curation, otherwise shows
+  // ← Prev · 02 / 05 · Next → reflecting the authored selection order.
+  function updateCurPager() {
+    const pager = document.getElementById("cur-pager");
+    if (!pager) return;
+    if (!state.curation) { pager.hidden = true; return; }
+    const idx = state.filtered.findIndex(i => i.id === state.selectedId);
+    const total = state.filtered.length;
+    const prev = document.getElementById("cp-prev");
+    const next = document.getElementById("cp-next");
+    const count = document.getElementById("cp-count");
+    pager.hidden = false;
+    if (count) count.textContent = `${String(idx + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}`;
+    if (prev) prev.disabled = idx <= 0;
+    if (next) next.disabled = idx < 0 || idx >= total - 1;
   }
 
   function selectAdjacent(delta) {
@@ -5065,6 +5178,9 @@ WHERE {
     }
     document.getElementById("mob-snav-prev")?.addEventListener("click", () => selectAdjacent(-1));
     document.getElementById("mob-snav-next")?.addEventListener("click", () => selectAdjacent(+1));
+    document.getElementById("cp-prev")?.addEventListener("click", () => selectAdjacent(-1));
+    document.getElementById("cp-next")?.addEventListener("click", () => selectAdjacent(+1));
+    document.getElementById("cur-leave")?.addEventListener("click", exitCuration);
 
     // Pull-to-refresh: a downward drag at the top of the list resets the
     // whole page (location.reload). Mobile only.
