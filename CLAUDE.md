@@ -431,3 +431,29 @@ Working LINE: **NEXT**. CSS-only — no markup, no JS, no `verso.css`.
 - Comment above `body.hh-in-curation` rewritten to describe the surfaces-only re-tint. **Note:** the comment above `#curator-pane` still references the old `#dde6df` copper-green card — left as-is per the task scope, flagged for a future touch.
 
 **Version line: browse.html `v1.06.20` (LIVE, unchanged) · next.html `v1.07-test.50` (staging).**
+
+---
+
+### 2026-05-22 — Curator mode → "Cognac" palette + chrome restructure (next.html v1.07-test.51)
+
+Working LINE: **NEXT**. Two-part change in one push: (A) re-tint the curator surfaces from vellum to cognac, (B) restructure the in-curation chrome so the curator's voice and authored sequence get proper weight.
+
+- **A. Cognac palette.** Three CSS blocks re-tinted:
+  - `#curator-pane` (threshold splash) — warm amber-dark card (`background:#2c2218`, cream ink `#f2e7d4`, translucent muted/hint/rule, copper `#d4a26a`, softened red accent `#c4826e`). The threshold now reads as a backstage/foyer rather than another sheet of paper.
+  - `body.hh-in-curation` (in-mode surfaces, light + dark) — tea-stained paper light (`--bg:#efe5d2`, `--soft:#e6d8bf`, `--rule:#d4c4a3`); a step-warmer dark (`--bg:#1c1813`, `--soft:#2a2218`). `--red` left untouched both sides → Hunter accent stays exact on name highlights and the selected-row stripe.
+  - `html.dark body.hh-in-curation .curation-card` already at `#2a2218` from the vellum pass; matches new dark `--soft`.
+  - Updated the mode-block comment to describe cognac instead of vellum; updated the splash comment to match (drops the stale `#dde6df` copper-green reference).
+
+- **B. Chrome restructure.** Six independent moves, all gated behind `body.hh-in-curation` or `state.curation`:
+  1. **Curator note hoisted above DESCRIPTION** in the record pane. `renderMeta` now renders, in order: title → curator note → next-in-selection line → DESCRIPTION (and the rest unchanged). `renderCuratorNote` is now a no-op (clears `#rn-panel`) since the note is in the main body; `curatorNoteBlock` was reworked to return the HTML for both the record pane (via renderMeta) and the mobile sheet.
+  2. **Curator note styled as a native meta-section** — drop the dashed top-border / padding-top callout chrome. `.cn-label` is now a tracked-out small-caps header with `font-size:9.5px`, `letter-spacing:0.18em`, `border-bottom:1px solid var(--ink)`, `padding-bottom:8px`, `margin-bottom:14px` — i.e. the `.meta-section h3` pattern. Label reads `<span style="color:var(--red)">BRANDON</span> ON THIS ITEM` (curator's first name in red, echoing the CURATED BY [NAME] byline). `.cn-text` bumped to `font-size:12px`, `line-height:1.75`. The mobile-sheet override drops the underline when the note is first child.
+  3. **List rows numbered in curator mode.** Replaced the `[LS]/[D]` `.tmark` chip in the `.archid` slot with `01, 02, 03…` reflecting the authored selection order (just `_idx + 1` from the `forEach`, no item mutation). Style: same mono, no brackets, `font-size:11px`, `letter-spacing:0.06em`, `font-variant-numeric:tabular-nums`. Selected row → `var(--red-deep)`. The item ID (HHC-0010) slid into the `.ph` subtitle line as a prefix span (`.rid` in `var(--hint)`) before the phase. Outside curator mode the original `.tmark` chip rendering is untouched.
+  4. **Continuity column.** `body.hh-in-curation .panel-left::before` — absolute-positioned 2px stripe with a top-down `linear-gradient(var(--copper-deep) → var(--copper-pale))`. No z-index manipulation: the pseudo is first in tree order, so it paints under `.row.sel::before` (Hunter-red stripe stays dominant inside the curator column) but over the panel background and hover tints.
+  5. **Foot-bar pager + Next-in-selection inline link.** Added `.cur-pager` inside `.foot-left` (hidden by default, shown when `state.curation` is set, hidden again in `.pane-image.pdf-mode`). Renders `← Prev · NN / NN · Next →` with copper-deep buttons and hairline separators; wired to `selectAdjacent(±1)`. `updateCurPager()` is called from `selectItem` and `exitCuration`. The inline `.cur-next` row (label + clickable 32-char-clipped title + arrow) is rendered between the curator note and DESCRIPTION via `curatorNextBlock(item)`; "— end of selection —" when at the last item.
+  6. **LEAVE SELECTION ×** moved off the curation-card and into the top-right corner of `.panel-left` (`.cur-leave`, absolute `top:14px right:18px`, mono small-caps `font-size:9px`, hint color → ink on hover; `×` in a larger inline span). Bound once at startup; shown/hidden by `renderCurationCard` (and `.panel-left.out .cur-leave{display:none}` for the collapsed-panel case). The old `.cc-exit` button removed from the card markup; the CSS rules for `.cc-exit::before/::after/:hover` were dropped at the same time. The card now contains just `cc-top` (curator byline) + `cc-title` + `cc-intro`.
+
+- **B7 — counter dedup.** No `Reading X of Y` ever existed on the card and the RECORD `.meta-head` shows just `Record` (no count), so the foot pager (B5) is now the single source of truth.
+
+- **Did not touch** — `assets/verso.css` palette, any non-curator-mode behavior, the mobile sheet layout (the curator-note CSS override at `.mob-sheet-body .cur-note:first-child` was kept intact; the new header underline is dropped when the note is the sheet's opening element).
+
+**Version line: browse.html `v1.06.20` (LIVE, unchanged) · next.html `v1.07-test.51` (staging).**
