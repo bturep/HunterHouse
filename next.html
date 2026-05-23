@@ -465,11 +465,16 @@
     width:28%;flex-shrink:0;
     display:flex;flex-direction:row;
     background:var(--bg);position:relative;z-index:1;
-    transition:width 260ms cubic-bezier(0.4,0,0.2,1);
+    transition:width 260ms cubic-bezier(0.4,0,0.2,1), opacity 240ms ease;
   }
   .panel-left{border-right:1px solid var(--rule)}
   .panel-right{border-left:1px solid var(--rule)}
   .panel-left.out,.panel-right.out{width:28px}
+  /* While the about-pane is open, the side panels dim back so attention
+     reads to the HHFA card sitting on top of them. Pointer-events stay
+     enabled (the existing panel-lock + close handlers already gate input). */
+  body.hh-about-open .panel-left,
+  body.hh-about-open .panel-right{opacity:0.3}
   .panel-content{flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;position:relative}
   .panel-left.out .panel-content,.panel-right.out .panel-content{max-width:0}
 
@@ -1937,7 +1942,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.57";
+  const VERSION      = "v1.07-test.58";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3410,6 +3415,12 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   }
   // P94 (heldBy) is only set on CAA/FUL items; HHC items carry collection via P79 (sourceCollection)
   const collectionOf = item => item.heldBy || item.sourceCollection;
+  // Collections that sort to the bottom of every list — outside the dominant
+  // residential catalogue. Used by both applyFilters (the catalogue list) and
+  // renderFilterPanel (the Collection chip row) so the two stay in sync.
+  // Extend the Set if/when another satellite collection lands.
+  const TAIL_COLLECTIONS = new Set(["EGC"]);
+  const isTailCollection = abbrev => TAIL_COLLECTIONS.has(abbrev);
   function creatorLabel(itemType) {
     const t = (itemType || "").toLowerCase();
     if (t === "photograph") return "Photographed by";
@@ -3932,11 +3943,9 @@ WHERE {
     const dir = state.sortDir === "asc" ? 1 : -1;
     const dateKey = it => it.date || "9999-99-99";
     // Tail-collections sort to the bottom regardless of sort column or
-    // direction. EGC is Hunter's furniture work for Eric Gesinger — outside
-    // the dominant residential catalogue, so it reads as a footer block.
-    // Extend the Set if/when another satellite collection lands.
-    const TAIL_COLLECTIONS = new Set(["EGC"]);
-    const tailRank = it => TAIL_COLLECTIONS.has(archiveAbbrev(collectionOf(it))) ? 1 : 0;
+    // direction. TAIL_COLLECTIONS is module-scope (near collectionOf) so
+    // renderFilterPanel can mirror the same order in the Collection chips.
+    const tailRank = it => isTailCollection(archiveAbbrev(collectionOf(it))) ? 1 : 0;
     const tailLast = cmp => (a, b) => {
       const ra = tailRank(a), rb = tailRank(b);
       return ra !== rb ? ra - rb : cmp(a, b);
@@ -4909,7 +4918,14 @@ WHERE {
     const panel = $("#filter-panel");
     if (!panel) return;
 
-    const uniqueCollections = uniqueSorted(state.items.map(i => archiveAbbrev(collectionOf(i))).filter(Boolean));
+    // Collections in the filter panel mirror the catalogue list's order:
+    // tail collections (EGC) sort to the bottom regardless of alphabet.
+    const uniqueCollections = [...new Set(
+      state.items.map(i => archiveAbbrev(collectionOf(i))).filter(Boolean)
+    )].sort((a, b) =>
+      (isTailCollection(a) ? 1 : 0) - (isTailCollection(b) ? 1 : 0)
+      || a.localeCompare(b)
+    );
     const uniqueAreas       = uniqueSorted(state.items.flatMap(i => i.areas || []));
     const uniqueTypes       = uniqueSorted(state.items.map(i => i.itemType).filter(Boolean));
     const uniqueDrawTypes   = uniqueSorted(state.items.flatMap(i => i.drawTypes || []));
