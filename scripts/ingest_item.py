@@ -317,6 +317,20 @@ def main():
     print(f"  https://hunterhouse.wikibase.cloud/wiki/Item:{qid}")
     print(f"  {URL_PREVIEW}")
 
+    # §11.1 HIGH part 2b — write the R2 metadata sidecar so this item is
+    # preserved offsite immediately, without waiting for the next periodic
+    # backup_metadata.py + sync_metadata_to_r2.py pair. Fail-safe: a
+    # sidecar upload glitch never breaks an otherwise-successful ingest.
+    try:
+        subprocess.run(
+            ["python3", os.path.join(os.path.dirname(__file__),
+                                     "sync_one_metadata.py"),
+             ARCH_ID, "--execute", "--quiet"],
+            timeout=60, check=False,
+        )
+    except Exception as _e:
+        print(f"  ⚠ sidecar sync skipped (non-fatal): {_e}")
+
     shutil.rmtree(work, ignore_errors=True)
 
 
