@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 """
+ARCHIVED 2026-05-22 — superseded by EGC_intake.xlsx + batch_ingest_egc.py.
+Generated GES_intake.xlsx (since deleted) for the original "GES" naming
+of the collection before it was renamed to EGC. Kept here for the
+intake-template patterns it documents, in case a future collection
+needs a similar fill-in workbook.
+
 make_ges_intake.py — generate the GES (Eric Gesinger Collection) intake workbook.
 
 Produces GES_intake.xlsx at the repo root: a fill-in spreadsheet for cataloguing
