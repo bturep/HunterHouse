@@ -905,18 +905,6 @@
   }
   .hh-dirty-badge:hover{opacity:.85}
   body.is-researcher .hh-dirty-badge:not([hidden]){display:inline-block}
-  /* Export / import tools inside the researcher help pane. */
-  .hh-tool-row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
-  .hh-tool-btn{
-    font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;
-    color:var(--ink);background:var(--bg);border:1px solid var(--rule);
-    padding:7px 12px;border-radius:2px;cursor:pointer;
-  }
-  .hh-tool-btn:hover{background:var(--soft);border-color:var(--ink)}
-  .hh-tool-status{
-    font-family:var(--mono);font-size:10px;color:var(--muted);
-    letter-spacing:0.04em;margin:8px 0 0;
-  }
   /* Import preview dialog — centred modal, light overlay. */
   .hh-import-dlg{
     position:fixed;inset:0;background:rgba(30,28,26,.45);z-index:400;
@@ -955,6 +943,7 @@
      point into the hidden record. */
   body.hh-compose #meta-body > *{display:none}
   body.hh-compose #meta-body > #rn-panel{display:block;margin-top:0;border-top:0;padding-top:0}
+  body.hh-compose #meta-body > #rn-tools{display:block}
   body.hh-compose #data-footer{display:none}
   /* Curation mode owns the record pane differently — suppress the toggle
      there so it doesn't conflict with the curator card. */
@@ -1628,6 +1617,26 @@
 
   /* ── Researcher notes panel ── */
   .rn-panel{margin-top:14px;border-top:1px dashed var(--rule);padding-top:10px}
+  /* Action strip below the notes panel. Visually attached but quieter than
+     the notes (no top rule, smaller label). Researcher-only; renderRnTools
+     hides itself for public + curation mode. */
+  .rn-tools{margin-top:14px;padding-top:10px}
+  .rn-tools-head{
+    font-family:var(--mono);font-size:9px;letter-spacing:0.18em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:8px;
+  }
+  .rn-tools-row{display:flex;flex-wrap:wrap;gap:6px}
+  .rn-tools-btn{
+    font-family:var(--mono);font-size:9.5px;letter-spacing:0.06em;
+    color:var(--ink);background:var(--bg);border:1px solid var(--rule);
+    padding:5px 9px;border-radius:2px;cursor:pointer;
+  }
+  .rn-tools-btn:hover{background:var(--soft);border-color:var(--ink)}
+  .rn-tools-status{
+    font-family:var(--mono);font-size:10px;color:var(--muted);
+    letter-spacing:0.02em;margin:8px 0 0;
+  }
+  .rn-tools-status.rn-tools-dirty{color:var(--red-deep)}
   .rn-head{display:flex;align-items:center;gap:6px;margin-bottom:7px}
   .rn-lock-btn{background:none;border:none;padding:0;cursor:pointer;color:var(--muted);display:flex;align-items:center;line-height:1;flex-shrink:0;margin-left:auto}
   .rn-lock-btn:hover{color:var(--ink)}
@@ -2048,7 +2057,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.64";
+  const VERSION      = "v1.07-test.65";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3192,13 +3201,43 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   }
   function hhRenderDirtyBadge() {
     const badge = document.getElementById("hh-dirty-badge");
-    if (!badge) return;
-    const n = canMark() ? hhDirtyCount() : 0;
-    badge.textContent = n > 0 ? String(n) : "";
-    badge.hidden = n === 0;
-    badge.title = n === 0
-      ? "All changes exported"
-      : `${n} unsaved change${n === 1 ? "" : "s"} since last export — click for tools`;
+    if (badge) {
+      const n = canMark() ? hhDirtyCount() : 0;
+      badge.textContent = n > 0 ? String(n) : "";
+      badge.hidden = n === 0;
+      badge.title = n === 0
+        ? "All changes exported"
+        : `${n} unsaved change${n === 1 ? "" : "s"} since last export — click for tools`;
+    }
+    // Keep the rn-tools status line in lock-step.
+    const status = document.getElementById("rn-tools-status");
+    if (status) {
+      const n = canMark() ? hhDirtyCount() : 0;
+      status.textContent = n
+        ? `${n} unsaved change${n === 1 ? "" : "s"} since your last export.`
+        : "All changes exported.";
+      status.classList.toggle("rn-tools-dirty", n > 0);
+    }
+  }
+  // Render the action strip that sits below the researcher-notes panel. Same
+  // role gate (canMark) as the notes themselves, suppressed in curation mode.
+  function renderRnTools() {
+    const el = document.getElementById("rn-tools");
+    if (!el) return;
+    if (!canMark() || state.curation) { el.hidden = true; el.innerHTML = ""; return; }
+    el.hidden = false;
+    el.innerHTML = `
+      <div class="rn-tools-head">researcher tools</div>
+      <div class="rn-tools-row">
+        <button class="rn-tools-btn" id="rt-export-json">Export JSON</button>
+        <button class="rn-tools-btn" id="rt-export-md">Save Markdown copy</button>
+        <button class="rn-tools-btn" id="rt-import">Import…</button>
+      </div>
+      <p class="rn-tools-status" id="rn-tools-status"></p>`;
+    el.querySelector("#rt-export-json").addEventListener("click", hhExportJson);
+    el.querySelector("#rt-export-md"  ).addEventListener("click", hhExportMd);
+    el.querySelector("#rt-import"     ).addEventListener("click", hhImportPick);
+    hhRenderDirtyBadge();
   }
 
   // ── Export / import (notes + marks) ───────────────────────────────────────
@@ -5208,6 +5247,7 @@ WHERE {
         ${siblingsHTML}
       </section>` : ""}
       <div class="rn-panel" id="rn-panel"></div>
+      <div class="rn-tools" id="rn-tools" hidden></div>
     `;
 
     body.querySelectorAll(".sib[data-sib-id]").forEach(el => {
@@ -5216,6 +5256,7 @@ WHERE {
     const cnGo = body.querySelector(".cn-go[data-next-id]");
     if (cnGo) cnGo.addEventListener("click", () => selectItem(cnGo.dataset.nextId));
     if (state.curation) renderCuratorNote(item); else renderRN(item.id);
+    renderRnTools();
     wireMetaEdit(item);
     wireFieldEdits(item);
     proxyWatch();
@@ -6277,14 +6318,10 @@ WHERE {
       <p class="ip-note">Your marks and notes live on this device. <b>Export JSON</b>
         is the canonical save — share, archive, or move it to another machine, and
         use it to import later. <b>Save Markdown</b> is an optional human-readable
-        copy for reading outside the app. <b>Import</b> reads someone's JSON and
-        merges it additively into yours — nothing of yours is ever overwritten.</p>
-      <div class="hh-tool-row">
-        <button class="hh-tool-btn" id="hh-export-json-btn">Export JSON</button>
-        <button class="hh-tool-btn" id="hh-export-md-btn">Save Markdown copy</button>
-        <button class="hh-tool-btn" id="hh-import-btn">Import from file…</button>
-      </div>
-      <p id="hh-export-status" class="hh-tool-status"></p>
+        copy. <b>Import</b> reads someone's JSON and merges it additively into
+        yours — nothing of yours is ever overwritten.
+        <br><br>
+        Find the buttons below your researcher-notes panel.</p>
 
       <p class="ip-grp">Shortcuts</p>
       ${keys([
@@ -6303,20 +6340,6 @@ WHERE {
       <p class="ip-foot">Signed in until you close the tab. To switch researchers,
         click the lock icon beside "researcher notes".</p>`;
     document.getElementById("rn-help-inner").innerHTML = html;
-    // Wire export / import buttons that just got painted in.
-    const jsonBtn = document.getElementById("hh-export-json-btn");
-    const mdBtn   = document.getElementById("hh-export-md-btn");
-    const imBtn   = document.getElementById("hh-import-btn");
-    const status  = document.getElementById("hh-export-status");
-    if (jsonBtn) jsonBtn.addEventListener("click", hhExportJson);
-    if (mdBtn)   mdBtn.addEventListener("click", hhExportMd);
-    if (imBtn)   imBtn.addEventListener("click", hhImportPick);
-    if (status) {
-      const n = hhDirtyCount();
-      status.textContent = n
-        ? `${n} unsaved change${n === 1 ? "" : "s"} since your last export.`
-        : "All changes exported.";
-    }
   }
   function openRnHelpPane() {
     if (!canMark()) return;
