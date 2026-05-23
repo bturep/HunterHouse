@@ -1,0 +1,7 @@
+# tests/requirements.txt — install with:  pip3 install -r tests/requirements.txt
+#
+# Then one-time:  playwright install chromium  (~150 MB browser binary,
+# lands in Playwright's own cache outside this repo)
+
+pytest>=8.0
+pytest-playwright>=0.5
