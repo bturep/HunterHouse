@@ -2062,7 +2062,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.67";
+  const VERSION      = "v1.07-test.68";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3342,22 +3342,93 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     hhToast("Markdown copy saved (does not reset unsaved counter)", "ok");
   }
 
-  // Import: read JSON, validate, show a preview dialog, additively merge on
-  // confirm. Notes dedupe on (by,date,text). Marks append (importer's tail
-  // entries land after the importer's current marks, preserving relative
-  // order). Seen is untouched. Never destructive.
+  // Import: read JSON or Markdown, validate, show a preview dialog, additively
+  // merge on confirm. Notes dedupe on (by,date,text). Marks append (importer
+  // tail lands after the importer's current marks, preserving relative order).
+  // Seen is untouched. Never destructive.
   function hhImportPick() {
     if (!canMark()) return;
     const inp = document.createElement("input");
-    inp.type = "file"; inp.accept = ".json,application/json";
+    inp.type = "file";
+    inp.accept = ".json,.md,.markdown,application/json,text/markdown";
     inp.addEventListener("change", () => {
       const f = inp.files && inp.files[0]; if (!f) return;
       const r = new FileReader();
-      r.onload = () => { try { hhImportPreview(JSON.parse(r.result)); }
-                         catch { hhToast("not a valid export file", "err"); } };
+      r.onload = () => {
+        const text = r.result || "";
+        const looksJson = /\.json$/i.test(f.name) || /^\s*\{/.test(text);
+        let bundle = null;
+        try { bundle = looksJson ? JSON.parse(text) : hhParseMarkdown(text); }
+        catch { hhToast("couldn't read that file", "err"); return; }
+        if (!bundle) { hhToast("couldn't parse anything from this file", "err"); return; }
+        const total = (bundle.marks ? bundle.marks.length : 0) +
+                      Object.values(bundle.notes || {}).reduce((a, b) => a + b.length, 0);
+        if (!total && !looksJson) {
+          hhToast("the markdown didn't match the export format — nothing to merge", "err");
+          return;
+        }
+        hhImportPreview(bundle);
+      };
       r.readAsText(f);
     });
     inp.click();
+  }
+
+  // Best-effort parser for the canonical Markdown that hhExportMarkdown writes.
+  // Recognises:
+  //   # <Name> — researcher notes & marks
+  //   Exported <YYYY-MM-DD> (<INITIALS>)
+  //   ## Marked items (in order)     →  NN. **<ARCH-ID>** [— title]
+  //   ## Notes                       →  ### <ARCH-ID>     followed by
+  //                                     *<DATE> (<BY>)* — <text>
+  // Anything that doesn't match is silently skipped — by design (rather than
+  // misimport on edited markdown, do nothing). Multi-line note bodies and
+  // freely-formatted edits won't round-trip; use the JSON if that matters.
+  function hhParseMarkdown(text) {
+    const lines = String(text).split(/\r?\n/);
+    let exporterName = "", exporterInitials = "", exportedAt = new Date().toISOString();
+    for (const ln of lines) {
+      const m = ln.match(/^#\s+(.+?)\s+—\s+researcher notes/i);
+      if (m) { exporterName = m[1].trim(); break; }
+    }
+    for (const ln of lines) {
+      const m = ln.match(/^Exported\s+(\d{4}-\d{2}-\d{2})\s*\((\w+)\)/);
+      if (m) { exportedAt = m[1] + "T00:00:00.000Z"; exporterInitials = m[2]; break; }
+    }
+    const marks = [];
+    const notes = {};
+    let mode = null;            // null | "marks" | "notes"
+    let currentNoteId = null;
+    const ARCHID = /\b([A-Z]{2,4}-[A-Z]{2,4}-\d{3,5})\b/;
+    for (const raw of lines) {
+      const ln = raw.trimEnd();
+      if (/^##\s+marked items/i.test(ln))  { mode = "marks"; currentNoteId = null; continue; }
+      if (/^##\s+notes\b/i.test(ln))       { mode = "notes"; currentNoteId = null; continue; }
+      if (/^##\s+/.test(ln))               { mode = null; currentNoteId = null; continue; }
+      if (mode === "marks") {
+        const m = ln.match(ARCHID); if (m) marks.push(m[1]);
+        continue;
+      }
+      if (mode === "notes") {
+        if (/^###\s+/.test(ln)) {
+          const idm = ln.match(ARCHID);
+          currentNoteId = idm ? idm[1] : null;
+          if (currentNoteId && !notes[currentNoteId]) notes[currentNoteId] = [];
+          continue;
+        }
+        const n = ln.match(/^\*([\d.\-/]+)\s*\((\w+)\)\*\s+—\s+(.+)$/);
+        if (n && currentNoteId) {
+          notes[currentNoteId].push({ date: n[1], by: n[2], text: n[3] });
+        }
+      }
+    }
+    return {
+      version: 1,
+      exportedAt,
+      exporter: { pin: null, initials: exporterInitials, name: exporterName, role: "research" },
+      notes,
+      marks,
+    };
   }
   function hhImportPreview(bundle) {
     if (!bundle || bundle.version !== 1 || !bundle.exporter) { hhToast("unrecognised export format", "err"); return; }
@@ -6321,10 +6392,12 @@ WHERE {
 
       <p class="ip-grp">Export & import</p>
       <p class="ip-note">Your marks and notes live on this device. <b>Export JSON</b>
-        is the canonical save — share, archive, or move it to another machine, and
-        use it to import later. <b>Save Markdown</b> is an optional human-readable
-        copy. <b>Import</b> reads someone's JSON and merges it additively into
-        yours — nothing of yours is ever overwritten.
+        is the canonical save — share, archive, or move it to another machine.
+        <b>Save Markdown</b> is the human-readable version (and you can edit it
+        in any text editor — keep the section headers and the <i>*date (XX)* —
+        note</i> shape and Import will pick the changes back up). <b>Import</b>
+        reads either format and merges it additively into yours — nothing of
+        yours is ever overwritten.
         <br><br>
         Find the buttons below your researcher-notes panel.</p>
 
