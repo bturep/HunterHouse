@@ -299,3 +299,56 @@ For an engineer with ~1 hour:
 6. **`WIKIBASE.md`** — property table + QID list; the Wikibase shape is the data contract.
 
 Everything else is layered on those six points.
+
+---
+
+## 11. To do — from 2026-05-22 audit
+
+Distinct from §9 (observational): these are actionable items from a deeper security + maintainability pass on 2026-05-22, prioritised by severity and effort. File:line references are against `next.html` at `v1.07-test.51` and `browse.html` at `v1.06.20` unless noted.
+
+### 11.1 Now (security-meaningful; do this week)
+
+- **[CRITICAL] Edit proxy is CSRF-exploitable in principle.** `scripts/edit_proxy.py` lines 34, 46, 85–126.
+  - Three compounding facts: (a) the auth secret is the admin pin, which is hardcoded in public client code (`RPINS = {"203BTP": …}` at `next.html:1930`, `browse.html:1798`), and `edit_proxy.py:46` falls back to `"203BTP"` when `.env` lacks `EDIT_PROXY_SECRET`; (b) `_cors` at line 86–91 only *sets* the response ACAO header conditionally — `do_POST` never *rejects* mismatched origins before reading the body; (c) the proxy parses the body with `json.loads` without checking `Content-Type`, so a `text/plain` body bypasses CORS preflight as a "simple request" and the side-effect lands before the browser sees the (wrong) ACAO.
+  - **Today's mitigation:** Chrome Private Network Access preflights cross-origin requests to `127.0.0.1` and the proxy doesn't return `Access-Control-Allow-Private-Network: true`, so the path is blocked in modern Chrome. Safari and older Firefox are not fully covered.
+  - **Fix (~2 hours):**
+    1. In `do_POST`, validate `self.headers.get("Origin")` against `ALLOWED_ORIGINS` (exact match, not `startswith`) *before* reading the body. Return 403 on mismatch.
+    2. Reject any `Content-Type` other than `application/json`. This forces preflight and re-establishes CORS as a real check.
+    3. Replace the fallback `"203BTP"` secret with a per-startup `secrets.token_urlsafe(24)` printed to the proxy stdout; require the admin to paste it once into a `localStorage["hhf_proxy_token"]` field in the unlock UI. The PIN stays as a UI affordance; the proxy secret leaves client code.
+
+- **[HIGH] Wikibase metadata has no offsite backup.** Item-level claims, descriptions, dates, attributions, and locations live only in `hunterhouse.wikibase.cloud`. R2 holds the images; git holds code + curations. If the Wikibase Cloud instance is deleted, corrupted, or sunsets, the catalogue is unrecoverable as data. (CLAUDE.md "Pending" already flags this as deferred.)
+  - **Fix (~half day):** write `scripts/backup_metadata.py` — one-time dump of every item under each collection prefix as JSON sidecars at `{collection}/metadata/{ARCH_ID}.json` in R2. Then patch the three ingest scripts (`ingest_item.py`, `ingest_publication.py`, `batch_ingest_egc.py`) to also write the sidecar on each ingest. Idempotent on re-run.
+
+- **[MEDIUM] `ALLOWED_ORIGINS` uses `startswith`.** `scripts/edit_proxy.py:88`. `origin.startswith(o)` matches `https://bturep.github.io.attacker.com` against the `https://bturep.github.io` allowlist entry. Not currently exploitable (the proxy then sets ACAO to the allowlisted value, not the requesting origin, so the browser rejects the response), but it bites the moment the header is refactored to echo `origin` back. Replace with exact equality. Folds into the CRITICAL fix above.
+
+### 11.2 Soon (operational hygiene; do this month)
+
+- **[MEDIUM] No pre-push validation.** A JS syntax error or malformed `VERSION` constant in `browse.html` takes the live archive offline with nothing between keyboard and `bturep.github.io`. Add `.github/workflows/validate.yml` (or a local `.git/hooks/pre-push`) that, on every push: (a) `node --check` on each `<script>` block extracted from `browse.html` + `next.html`; (b) confirms the `VERSION` constant matches `v1.XX.NN` (live) / `v1.XX-test.NN` (staging); (c) parses `manifest.json` and `manifest.next.json`. Don't gate the push — email-alert on failure. ~1 hour.
+
+- **[LOW] Python scripts share ~130 lines of Wikibase boilerplate.** `ingest_item.py`, `ingest_publication.py`, `batch_ingest_egc.py`, `patch_dates.py`, `renumber_caa.py` each re-implement `.env` loading + login + CSRF token handling + claim builders. Extract `scripts/_wikibase.py` with a `WikibaseSession` class. The existing code is correct; this is pure deduplication. ~30 minutes; payback on the next ingest.
+
+- **[LOW] PIDs are scattered as string literals** in three places: the SPARQL query in `loadFromWikibase`, the `EDITABLE` map (`next.html:4432`), and inline `setStringClaim` / `setClaim` calls. No central dictionary. Renumbering a property is a three-place grep-and-replace and easy to miss one. Add a top-of-file `const PROPERTIES = {DATE: "P82", PHASE: "P62", …}` and migrate references opportunistically (not all at once). ~30 minutes initial, plus per-property migration.
+
+- **[LOW] Researcher notes stored as plaintext in `localStorage`.** `next.html` ~`hhf_rn` localStorage key. The lock-icon UI implies privacy that isn't backed by encryption. Either soften the UI claim ("local notes; not encrypted") or derive a key from the pin + site salt and encrypt at rest. Low immediate impact; flagged for honesty.
+
+- **[LOW] Rotate `.env` credentials + verify `.gitignore`.** Audit hygiene: confirm `.env` is in `.gitignore` (it lives outside the repo today at `~/Documents/hh-wikibase-migration/.env`, so this is belt-and-braces); rotate `WIKIBASE_BOT_PASSWORD` and R2 keys on any suspicion of exposure. ~15 minutes.
+
+### 11.3 Bend before break (watch; refactor when triggered)
+
+- **HTML monolith approaching the inflection point.** `next.html` 5,667 lines, `browse.html` 5,520. Each significant feature adds 150–300 lines. At 7–8 K lines, editor performance degrades, diffs become hostile to review, and merge conflicts get real. The lightest credible refactor is to fork `assets/verso.next.css` first (CLAUDE.md already documents this), then extract `curator.js` / `record.js` as `<script src=…>` modules. Plain GitHub Pages serves static files; no build step needed.
+
+- **`renderMeta` / `renderMobSheet` duplication.** ~150 lines of near-identical row construction (the same `descRows` array, different HTML wrapping). Extract `function buildRows(item) → {descRows, archRows}`; both callers iterate. Pays off when adding an editable field (currently 15).
+
+- **`state.curation` checks at ~26 sites.** Today this is fine — most are at function entry. A hypothetical second display mode ("exhibition mode") forces either 26 nested `if/else if` blocks or a refactor to a `state.mode` enum with mode-specific render branches. Don't refactor pre-emptively; do it *before* adding the second mode.
+
+- **Image pipeline has no integrity check.** Ingest scripts upload to R2 via `rclone copy` then write the Wikibase P95/P96 URL. A silent `rclone` failure leaves a 404-pointing claim, with no canary. Add `scripts/verify_r2_links.py` that SPARQL-fetches every P95/P96 URL and HEADs it. Run before each session-end. Same script catches accidental R2 renames. ~1 hour.
+
+- **No tests, not even smoke tests.** Given the complexity of three-pane shell + mobile sheet + zoom/pan + curator mode + admin editor, this is generous trust. Three Playwright smoke tests (~100 lines, dev-only, never deployed): load `next.html`, search "hunter", click an item, verify the title renders; toggle dark mode; mobile swipe. Worth doing the next time a refactor breaks something subtle.
+
+### 11.4 Resolved on inspection (looked like issues; aren't)
+
+- **Curator-name XSS path.** Reviewed `openCuratorPane` at `next.html:3795–3826`. `bioEscaped.split(name).join(nameSpan)` splits by the *escaped* name (`name = escapeHTML(rawName)` at line 3799), not the raw name. The byline and bio paths are correctly defended. **No action.**
+- **Python scripts: no shell injection.** All `subprocess` calls use list args; no `shell=True`; no `os.system` with user input; no `eval`. `.env` loading is plain string parsing. **No action.**
+- **PDF.js v5.7.284.** No known CVEs against this patch version as of audit. `viewer.mjs` HOSTED_VIEWER_ORIGINS patch is sensible and code-commented. On any future PDF.js upgrade, re-apply the patch and recheck the Mozilla CVE feed. **No action today.**
+- **R2 CORS allows `http://localhost` + `http://127.0.0.1`.** Fine — public read-only assets, no write API exposed. **No action.**
+- **GitHub Pages HTTPS.** Enforced by default. No `.env` / R2 keys / Wikibase password in git history (verified via `git log --all -p | grep -i 'PASS|TOKEN|SECRET'`). **No action.**
