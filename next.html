@@ -1901,7 +1901,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.51";
+  const VERSION      = "v1.07-test.52";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -1920,6 +1920,58 @@
   }
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
+
+  // ── Wikibase property identifiers — single source of truth ──────────────
+  // Audit §11.2 LOW (introduced 2026-05-22, test.52): PIDs were previously
+  // scattered as string literals across the SPARQL query, the EDITABLE map,
+  // and inline setClaim calls — three places to remember to update if a
+  // property is ever renumbered. This dict is the central registry.
+  // MIGRATION STATUS: opportunistic. The EDITABLE map, the ACCESS_COPY +
+  // DISPLAY_ROTATION call sites, and the SPARQL OPTIONAL lines for those
+  // two have been migrated. The rest of the catalogue SPARQL (~25 PIDs as
+  // wdt:Pxx literals inside a template string) is deliberately left alone
+  // to keep the query readable — extend opportunistically when touching it.
+  const PROPERTIES = {
+    // Identifiers
+    ARCH_ID:           "P2",     // HH archive ID (HH-{COLL}-{NNNN})
+    ITEM_TYPE:         "P1",     // instance of (drawing / publication / …)
+    LEGACY_ID:         "P97",    // prior HH-A-* identifiers, append on rename
+    WIKIDATA_QID:      "P139",   // external-id, not yet populated
+    // Dates — readers fall through P82 → P64 → P118 in firstDate()
+    DATE:              "P82",    // primary "date created"
+    DATE_ALT:          "P64",    // alternate / approximate
+    DATE_PUB:          "P118",   // publication date
+    // Hierarchy + sheet position
+    PHASE:             "P62",    // part of (project phase)
+    PHASE_ALT:         "P84",    // secondary phase
+    SET_POSITION:      "P86",    // sheet # within a set
+    // Custody, rights, links
+    SOURCE_COLLECTION: "P79",    // HHC / CAA / EGC / FUL — gates the catalogue
+    HELD_BY:           "P94",    // institution physically holding the original
+    RIGHTS:            "P93",
+    ARCHIVE_LINK:      "P99",    // AtoM item-level URL (CAA items)
+    LOCATION:          "P142",   // physical archival path
+    // Attribution
+    CREATOR:           "P80",    // primary creator (drawn by / photographer)
+    DESIGNED_BY:       "P141",
+    BUILT_BY:          "P140",   // multi-value
+    // Subject classification
+    DRAWING_TYPE:      "P88",    // multi-value
+    AREA:              "P87",    // multi-value
+    CATEGORY:          "P145",   // multi-value
+    USE:               "P89",
+    // Production detail
+    SCALE:             "P90",
+    MEDIUM:            "P91",
+    BUILT_STATUS:      "P92",
+    // Files (R2 URLs)
+    MASTER_IMAGE:      "P95",
+    PREVIEW_IMAGE:     "P96",
+    ACCESS_COPY:       "P143",   // publication PDF (url datatype, 2026-05-19)
+    DISPLAY_ROTATION:  "P144",   // clockwise degrees applied at render
+    // Notes
+    NOTES:             "P100",   // cataloguer's public prose
+  };
   const API_URL      = WIKIBASE_URL + "/w/api.php";
 
   // ── Researcher notes — PIN auth + localStorage ───────────────────────────
@@ -2619,7 +2671,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       panel.innerHTML = `
         <div class="rn-head">
           <span class="rn-label">researcher notes</span>
-          <button class="rn-lock-btn" id="rn-lock-btn" title="Unlock to add notes">${LOCK_SVG}</button>
+          <button class="rn-lock-btn" id="rn-lock-btn" title="Sign in to add a note (stored locally on this device, not encrypted)">${LOCK_SVG}</button>
         </div>
         <div class="rn-auth" id="rn-auth" style="display:none">
           <div class="rn-auth-step" id="rn-step-name">
@@ -2677,7 +2729,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
           <span class="rn-label">researcher notes</span>
           <span class="rn-who">${escapeHTML(researcher.name)}${researcher.role ? ` · ${escapeHTML(researcher.role)}` : ""}</span>
           ${rnRole() === "admin" ? `<button class="rn-allbtn${rnShowAll ? " on" : ""}" id="rn-allbtn" title="${rnShowAll ? "Showing every researcher's notes — click for yours only" : "Showing only your notes — click to see all researchers'"}">${rnShowAll ? "all" : "mine"}</button>` : ""}
-          <button class="rn-lock-btn" id="rn-lock-btn" title="Lock">${UNLOCK_SVG}</button>
+          <button class="rn-lock-btn" id="rn-lock-btn" title="Sign out (notes stay on this device)">${UNLOCK_SVG}</button>
         </div>
         ${noteRows ? `<div class="rn-list">${noteRows}</div>` : ""}
         <div class="rn-add">
@@ -3560,15 +3612,14 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     return [...map.values()].sort((a, b) => (a.id || "").localeCompare(b.id || ""));
   }
 
-  // "access copy" property — a publication's multi-page PDF. Minted by
-  // scripts/ingest_publication.py (P143, url datatype, created 2026-05-19).
-  const ACCESS_PID = "P143";
-
-  // "display rotation" property (P144, string, created 2026-05-19): clockwise
-  // degrees the stored image must be rotated for correct display (90/180/270;
-  // absent/0 = none). Applied at render as the base orientation; the explicit
-  // "bake" pass (later) flattens it into the files and clears the claim.
-  const ROTATE_PID = "P144";
+  // "access copy" (PROPERTIES.ACCESS_COPY = P143, url datatype, minted
+  // 2026-05-19 by scripts/ingest_publication.py): a publication's multi-page
+  // PDF.
+  // "display rotation" (PROPERTIES.DISPLAY_ROTATION = P144, string, minted
+  // 2026-05-19): clockwise degrees the stored image must be rotated for
+  // correct display (90/180/270; absent/0 = none). Applied at render as the
+  // base orientation; the explicit "bake" pass (later) flattens it into the
+  // files and clears the claim.
 
   // ── Curated lenses (exhibition mode) ─────────────────────────────────────
   // A curation = an authored selection: ordered items + per-item curator notes
@@ -3648,8 +3699,8 @@ WHERE {
   OPTIONAL { ?item wdt:P94 ?heldBy . ?heldBy rdfs:label ?heldByLabel . FILTER(LANG(?heldByLabel)="en") }
   OPTIONAL { ?item wdt:P99 ?archiveLink }
   OPTIONAL { ?item wdt:P142 ?location }
-  OPTIONAL { ?item wdt:${ACCESS_PID} ?accessCopy }
-  OPTIONAL { ?item wdt:${ROTATE_PID} ?rotation }
+  OPTIONAL { ?item wdt:${PROPERTIES.ACCESS_COPY} ?accessCopy }
+  OPTIONAL { ?item wdt:${PROPERTIES.DISPLAY_ROTATION} ?rotation }
 }`;
 
   async function loadFromWikibase() {
@@ -4322,7 +4373,7 @@ WHERE {
       const btn = document.getElementById("zoom-rotsave");
       btn.disabled = true; btn.textContent = "saving…";
       try {
-        await setStringClaim(it.qid, ROTATE_PID, net === 0 ? "" : String(net));
+        await setStringClaim(it.qid, PROPERTIES.DISPLAY_ROTATION, net === 0 ? "" : String(net));
         it.rotation = net;   // curRotItem() returns the state.items entry — persists
         hhToast(net === 0 ? "Rotation cleared · " + it.qid
                           : `Rotation ${net}° saved · ` + it.qid, "ok");
@@ -4429,23 +4480,26 @@ WHERE {
     }
     if (item.archiveLink) archRows.push(["Finding aid", `<a href="${escapeHTML(item.archiveLink)}" target="_blank" rel="noopener">${archiveLinkLabel(coll)}</a>`]);
 
+    // Inline-editable record-pane rows. Keys are the user-facing labels
+    // (which the picker matches against). PIDs reference PROPERTIES — the
+    // central registry near the top of this script (§11.2 LOW, 2026-05-22).
     const EDITABLE = canEditWikibase() ? {
-      "Notes":         { pid: "P100", key: "notes",       kind: "text" },
-      "Date":          { pid: "P82",  key: "date"        },
-      "Phase":         { pid: "P62",  key: "phase"       },
-      "Sheet":         { pid: "P86",  key: "setPosition", kind: "string" },
-      "Item type":     { pid: "P1",   key: "itemType"    },
-      "Drawing type":  { pid: "P88",  key: "drawTypes",  multi: true },
-      "Built":         { pid: "P92",  key: "builtStatus" },
-      "Areas":         { pid: "P87",  key: "areas",       multi: true },
-      "Category":      { pid: "P145", key: "categories",  multi: true },
-      "Built by":      { pid: "P140", key: "builtBy",     multi: true },
-      "Designed by":   { pid: "P141", key: "designedBy"  },
-      [creatorRowLabel]: { pid: "P80", key: "creator"    },
-      "Medium":        { pid: "P91",  key: "medium",      kind: "string" },
-      "Scale":         { pid: "P90",  key: "scale",       kind: "string" },
-      "Use":           { pid: "P89",  key: "use",         kind: "string" },
-      "Location":      { pid: "P142", key: "location",    kind: "string" },
+      "Notes":         { pid: PROPERTIES.NOTES,         key: "notes",       kind: "text" },
+      "Date":          { pid: PROPERTIES.DATE,          key: "date"        },
+      "Phase":         { pid: PROPERTIES.PHASE,         key: "phase"       },
+      "Sheet":         { pid: PROPERTIES.SET_POSITION,  key: "setPosition", kind: "string" },
+      "Item type":     { pid: PROPERTIES.ITEM_TYPE,     key: "itemType"    },
+      "Drawing type":  { pid: PROPERTIES.DRAWING_TYPE,  key: "drawTypes",   multi: true },
+      "Built":         { pid: PROPERTIES.BUILT_STATUS,  key: "builtStatus" },
+      "Areas":         { pid: PROPERTIES.AREA,          key: "areas",       multi: true },
+      "Category":      { pid: PROPERTIES.CATEGORY,      key: "categories",  multi: true },
+      "Built by":      { pid: PROPERTIES.BUILT_BY,      key: "builtBy",     multi: true },
+      "Designed by":   { pid: PROPERTIES.DESIGNED_BY,   key: "designedBy"  },
+      [creatorRowLabel]: { pid: PROPERTIES.CREATOR,     key: "creator"    },
+      "Medium":        { pid: PROPERTIES.MEDIUM,        key: "medium",      kind: "string" },
+      "Scale":         { pid: PROPERTIES.SCALE,         key: "scale",       kind: "string" },
+      "Use":           { pid: PROPERTIES.USE,           key: "use",         kind: "string" },
+      "Location":      { pid: PROPERTIES.LOCATION,      key: "location",    kind: "string" },
     } : {};
     const descHTML = descRows.map(([k,v]) => {
       const e = EDITABLE[k];
