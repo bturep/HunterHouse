@@ -1907,7 +1907,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.53";
+  const VERSION      = "v1.07-test.54";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3386,6 +3386,24 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     return "Archive record ↗";
   }
 
+  // Rights-row contact prose. Identical in both renderMeta (desktop) and
+  // renderMobSheet (mobile) — extracted here to keep them in lock-step
+  // when the wording changes (§11.3 narrow dedup, 2026-05-22).
+  function archiveContactText(coll) {
+    return archiveAbbrev(coll) === "CAA"
+      ? "Contact for permissions."
+      : "Contact the Hunter House Foundation.";
+  }
+  // Rights row HTML — assembles the rights-label + contact-note span.
+  function rightsRowHTML(rightsText, coll) {
+    return `${escapeHTML(rightsText)}<span class="rights-note">${escapeHTML(archiveContactText(coll))}</span>`;
+  }
+  // Finding-aid link HTML — single source of truth for the AtoM/etc.
+  // anchor (CAA items).
+  function findingAidHTML(archiveLink, coll) {
+    return `<a href="${escapeHTML(archiveLink)}" target="_blank" rel="noopener">${archiveLinkLabel(coll)}</a>`;
+  }
+
   // ── Mobile tab switching ──────────────────────────────────────────────────
   function switchMobileTab(pane) {
     document.querySelectorAll(".mtab").forEach(t =>
@@ -3476,12 +3494,10 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       archRows.push(["Location", item.location.split(/,\s*/).map(escapeHTML).join(" › ")]);
     }
     if (item.rights) {
-      const contact = archiveAbbrev(coll) === "CAA"
-        ? "Contact for permissions." : "Contact the Hunter House Foundation.";
-      archRows.push(["Rights", `${escapeHTML(item.rights)}<span class="rights-note">${escapeHTML(contact)}</span>`]);
+      archRows.push(["Rights", rightsRowHTML(item.rights, coll)]);
     }
     if (item.archiveLink) {
-      archRows.push(["Finding aid", `<a href="${escapeHTML(item.archiveLink)}" target="_blank" rel="noopener">${archiveLinkLabel(coll)}</a>`]);
+      archRows.push(["Finding aid", findingAidHTML(item.archiveLink, coll)]);
     }
 
     // Graph: path + siblings
@@ -4576,13 +4592,9 @@ WHERE {
       archRows.push(["Location", item.location ? `<span class="location-path">${crumbs}</span>` : EM]);
     }
     if (item.rights) {
-      const abbrev = archiveAbbrev(coll);
-      const contact = abbrev === "CAA"
-        ? "Contact for permissions."
-        : "Contact the Hunter House Foundation.";
-      archRows.push(["Rights", `${escapeHTML(item.rights)}<span class="rights-note">${escapeHTML(contact)}</span>`]);
+      archRows.push(["Rights", rightsRowHTML(item.rights, coll)]);
     }
-    if (item.archiveLink) archRows.push(["Finding aid", `<a href="${escapeHTML(item.archiveLink)}" target="_blank" rel="noopener">${archiveLinkLabel(coll)}</a>`]);
+    if (item.archiveLink) archRows.push(["Finding aid", findingAidHTML(item.archiveLink, coll)]);
 
     // Inline-editable record-pane rows. Keys are the user-facing labels
     // (which the picker matches against). PIDs reference PROPERTIES — the

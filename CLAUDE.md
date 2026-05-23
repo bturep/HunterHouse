@@ -671,3 +671,31 @@ Imports were already present in all three scripts (`subprocess`, `os`); zero new
 The two big severity rows (CRITICAL + HIGH) are both fully done. What remains in §11.3 is refactor-shaped, not security-shaped.
 
 **Version line: browse.html `v1.06.31` (LIVE, unchanged) · next.html `v1.07-test.53` (staging, unchanged).**
+
+---
+
+### 2026-05-22 — Final §11.3 sweep: Playwright + narrow dedup + sidecar verify (next.html v1.07-test.54)
+
+Closing out the audit. Three coupled changes.
+
+- **Playwright smoke tests delivered.** New `tests/` directory: `conftest.py` (session-scoped HTTP-server fixture; spins up an `http.server` on a random loopback port rooted at the repo so `next.html` loads with relative `fetch()` paths intact), `test_smoke.py` (three tests: catalogue-loads, search-and-select, mobile-shell), `README.md` (one-time `pip3 install pytest-playwright && playwright install chromium`), `requirements.txt`. Dev-only — explicitly **not** in the validate workflow (CI doesn't have Playwright browsers; SPARQL is network-dependent; smoke tests are for the maintainer's "did my refactor break something" moments). `.gitignore` extended for pytest/playwright caches. Test files delivered but not run from this session (install would touch the global Python environment); Brandon runs the install once.
+
+- **Narrow render-helper dedup.** Honest call: `renderMeta` (desktop) and `renderMobSheet` (mobile) have diverged in purpose — mobile is read-only public; desktop is admin-aware with active-state filter-buttons and EM placeholders. Forcing full `buildRows()` unification now would be a high-risk refactor for a "pays off when adding an editable field" maintainability gain. Instead, extracted three small helpers for the bits that are *literally* duplicated:
+  - `archiveContactText(coll)` — the "Contact for permissions." / "Contact the Hunter House Foundation." lookup
+  - `rightsRowHTML(rightsText, coll)` — the rights label + contact-note span assembly
+  - `findingAidHTML(archiveLink, coll)` — the AtoM `<a>` rendering
+  Both `renderMeta` and `renderMobSheet` now use these three helpers for their rights / finding-aid rows. Mobile and desktop wording stays in lock-step from here. The broader `buildRows()` unification is **deferred by design** (audit's "watch; refactor when triggered" framing applies).
+
+- **Verifier sidecar extension.** `scripts/verify_r2_links.py` now derives each catalogue item's sidecar URL and HEAD-checks it alongside the image/PDF claims. New flags: `--no-sidecars` (legacy mode), `--sidecars-only`. Default: both. Confirmed all 180 derived sidecar URLs return 200 — close-the-loop verification of today's §11.1 HIGH work.
+
+**Audit standing — every actionable §11 item is now resolved:**
+- ✅ §11.1 CRITICAL row (steps 1 + 2 + 3 + MEDIUM startswith)
+- ✅ §11.1 HIGH row (local backup + R2 mirror + per-ingest sidecar writes)
+- ✅ §11.2 row (CI validation + .env hygiene + dedup + PIDs + RN labels)
+- ✅ §11.3 image-pipeline integrity check + first finding fixed + sidecar verification
+- ✅ §11.3 Playwright smoke tests (delivered)
+- ◐ §11.3 `renderMeta`/`renderMobSheet` full unification: explicitly deferred (narrow dedup shipped instead)
+- §11.3 "state.curation checks at ~26 sites" — audit explicitly said don't refactor pre-emptively
+- §11.3 "HTML monolith approaching inflection" — not actionable yet (~5,700 lines, audit said worry at 7–8K)
+
+**Version line: browse.html `v1.06.31` (LIVE, unchanged) · next.html `v1.07-test.54` (staging).**
