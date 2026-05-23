@@ -416,10 +416,8 @@
   #info-pane .ap-body{margin-bottom:8px}
   .ip-note{
     font-family:var(--mono);font-size:11px;line-height:1.7;
-    color:var(--ink);background:var(--soft);border-left:2px solid var(--copper-deep);
-    padding:10px 12px;margin:14px 0 4px;
+    color:var(--ink);margin:8px 0 4px;
   }
-  html.dark .ip-note{background:#26231e}
   .ip-foot{
     font-family:var(--mono);font-size:10px;color:var(--hint);letter-spacing:0.04em;
     margin-top:22px;padding-top:12px;border-top:1px solid var(--rule);
@@ -2050,7 +2048,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.63";
+  const VERSION      = "v1.07-test.64";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
