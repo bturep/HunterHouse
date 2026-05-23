@@ -699,3 +699,41 @@ Closing out the audit. Three coupled changes.
 - §11.3 "HTML monolith approaching inflection" — not actionable yet (~5,700 lines, audit said worry at 7–8K)
 
 **Version line: browse.html `v1.06.31` (LIVE, unchanged) · next.html `v1.07-test.54` (staging).**
+
+---
+
+### 2026-05-22 — House cleanup + ARCHITECTURE.md rewrite (session close)
+
+The "tight under scrutiny" pass. After confirming each deletion via AskUserQuestion (per the global CLAUDE.md "ask before delete" rule), removed five unused files + one accidentally-tracked OS junk file + a stale remote branch, and rewrote ARCHITECTURE.md as a clean reviewer-facing doc.
+
+**Deletions (commit `08928cd`):**
+- `index-video.html` — earlier MP4-background splash variant; superseded by the 1.4 KB `index.html` thin redirect
+- `import-rn.html` — one-off researcher-notes import utility; no live refs
+- `swatches.html` — local colour-swatch dev page (was untracked)
+- `GES_intake.xlsx` — superseded by `EGC_intake.xlsx` (was untracked)
+- `Main_Page.wiki` — May-13 wikitext snapshot; same content now lives inside `WIKIBASE_MAINPAGE.md`
+- `.DS_Store` — macOS junk that had been tracked; removed + added to `.gitignore`
+- `scripts/make_ges_intake.py` → `scripts/archived/make_ges_intake_20260520.py` (rename + ARCHIVED header)
+- Stale remote branch `origin/refactor/browse-cleanup` deleted via `git push origin --delete`
+
+**ARCHITECTURE.md rewrite (`1c8803b`).** Replaced the chronological §11.5 "Resolved" appendix (which had grown messy through eight audit-response commits) with a clean §11 status where each audit item carries its resolution marker (✅ / ◐ / ⏸) alongside the original framing. Substantive refresh across §1–§10:
+- §1 TL;DR mentions CI + smoke tests + write-proxy auth model
+- §3 Repository layout drops the deleted orphan HTMLs; adds `tests/`, `.github/`, `scripts/_wikibase.py`, the preservation-pipeline scripts
+- §5 gains §5.3 "Metadata sidecars" covering the R2 preservation backup
+- §6 Write-path sequence diagram updated for per-startup token + four CSRF defences
+- §8 (new) "Quality + CI infrastructure" pulls all the validation / verification / smoke-test surface into one place
+- §9 git-repo stats refreshed (579 commits, stale branch gone, 14 tags, 1 contributor)
+- §10 framed clearly as observational; §11 is the actionable companion
+- §12 "where to start reading" extended to include `_wikibase.py` + smoke tests
+
+This is the version of ARCHITECTURE.md to send to a reviewer alongside the repo URL.
+
+**Tail-up commit (`ed559fb`).** Two stray edits (the `.DS_Store` gitignore rule + the archived script's ARCHIVED docstring header) didn't ride with `08928cd` due to a staging miss; landed cleanly in this follow-on.
+
+**Global ~/.claude/CLAUDE.md "Current versions" table** updated to reflect today's `next.html v1.07-test.54` test-line endpoint (was previously left at v1.06.31 with stale staging notes).
+
+---
+
+**Day total:** 14 commits today (audit response: 8 audit-fix commits + 1 data-fix + 2 cleanup + 2 doc + 1 tail-up). Both highest-severity audit rows (CRITICAL + HIGH) fully closed; every actionable §11 item resolved; the project is meaningfully tighter than it was at session start.
+
+**Final version line: browse.html `v1.06.31` (LIVE, unchanged all session) · next.html `v1.07-test.54` (staging).**
