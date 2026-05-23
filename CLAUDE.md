@@ -538,3 +538,20 @@ Three more audit items off the list.
 **Pending threads:** §11.1 CRITICAL step 3 and §11.1 HIGH part 2 remain the biggest open audit items. Today's 6-URL data fix added. §11.3 still has `renderMeta`/`renderMobSheet` duplication and the "no smoke tests" item.
 
 **Version line: browse.html `v1.06.31` (LIVE, unchanged) · next.html `v1.07-test.52` (staging).**
+
+---
+
+### 2026-05-22 — Fixed 6 dead P95 URLs surfaced by verifier (no version bump)
+
+Acted on the follow-up the verifier surfaced. New `scripts/fix_p95_legacy_urls.py` rewrote the 6 stale P95 claims (HH-HHC-0036 / 0037 / 0038 / 0039 / 0040 / 0066) from `HH-A-NNNN_*.tif` to `HH-HHC-NNNN_*.tif`. Script lives now at `scripts/archived/fix_p95_legacy_urls_20260522.py`.
+
+- **Safety pattern:** dry-run-first (default; `--execute` to write); pre-flight HEAD-check on every proposed new URL refused to write any rewrite where the new URL wasn't reachable on R2; create-then-remove per item (matches `setStringClaim` pattern in browse/next.html); built on `_wikibase.py`.
+- **Execution:** dry-run showed 6 of 6 safe (all new URLs HEAD-checked 200). `--execute` rewrote each item in a single round-trip (`wbcreateclaim` → `wbremoveclaims`). All 6 succeeded; 0 failures.
+- **One wrinkle.** Q425 (HH-HHC-0066) turned out to have a **pre-existing correct P95 claim** that wasn't visible to the initial SPARQL planning pass (SPARQL replication lag — same lag that made the verifier briefly show "404" after the writes had landed). My script created a duplicate of the correct URL. Cleaned up manually in a follow-up `wbremoveclaims` so Q425 ends with exactly one P95 claim, at the right URL. Documented in the archived script's docstring.
+- **Verification.** Post-fix re-run of `verify_r2_links.py` against all URL props: **354 / 354 URLs at 200, zero failures**. Image pipeline is now clean by the verifier's measure.
+
+**Pattern learned (for the next data-fix script):** the SPARQL endpoint is slightly stale — wbgetentities is real-time, SPARQL has a few-minutes lag. When the script's own SPARQL planning shows a single value but wbgetentities shows two, trust the API. A future version of `fix_*` scripts could pre-flight the entity via `wbgetentities` before SPARQL to detect this case.
+
+**Updated pending threads:** today's "fix 6 dead P95 URLs" follow-up — DONE. §11.1 CRITICAL step 3 and §11.1 HIGH part 2 still the biggest open audit items.
+
+**Version line: browse.html `v1.06.31` (LIVE, unchanged) · next.html `v1.07-test.52` (staging, unchanged).**
