@@ -458,6 +458,19 @@ def main():
             )
             print(f"     R2 uploaded · Wikibase {qid}")
         results.append((r["id"], qid))
+        # §11.1 HIGH part 2b — fail-safe metadata sidecar push to R2 for
+        # every item we touched this batch (both the "created" and
+        # "existed; desc updated" branches reach this line). A sidecar
+        # glitch never breaks the batch.
+        try:
+            subprocess.run(
+                ["python3", os.path.join(os.path.dirname(__file__),
+                                         "sync_one_metadata.py"),
+                 r["id"], "--execute", "--quiet"],
+                timeout=60, check=False,
+            )
+        except Exception as _e:
+            print(f"     ⚠ sidecar sync skipped (non-fatal): {_e}")
 
     shutil.rmtree(WORK, ignore_errors=True)
 
