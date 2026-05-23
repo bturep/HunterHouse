@@ -708,7 +708,13 @@
      (pointer events); the arrows nudge one slot. Hidden in every other mode
      so list layout is unchanged elsewhere. */
   .row .rf-reorder{display:none}
-  body.marks-only .row{grid-template-columns:34px 104px 1fr 50px}
+  /* Marks-only mode = drag-active mode → suppress text selection across
+     every row so a press-and-drag from anywhere never grabs a text range
+     (caret would compete with the drag pointer on mobile + desktop). */
+  body.marks-only .row{
+    grid-template-columns:34px 104px 1fr 50px;
+    user-select:none;-webkit-user-select:none;
+  }
   body.marks-only .row .rf-reorder{
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     gap:1px;user-select:none;-webkit-user-select:none;align-self:stretch;
@@ -1942,7 +1948,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.58";
+  const VERSION      = "v1.07-test.59";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2961,13 +2967,27 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   }
 
   // ── State ─────────────────────────────────────────────────────────────────
-  const marked = new Set();
+  // Marks are an ordered list (a curator's draft sequence), not a Set. Order
+  // is meaningful and user-controllable (drag handle + ↑/↓ in [only] mode).
+  const marked = [];
+  function marksHas(id)    { return marked.indexOf(id) !== -1; }
+  function marksAdd(id)    { if (!marksHas(id)) marked.push(id); }
+  function marksRemove(id) { const i = marked.indexOf(id); if (i !== -1) marked.splice(i, 1); }
+  function marksMove(id, newIdx) {
+    const i = marked.indexOf(id); if (i === -1) return;
+    const j = Math.max(0, Math.min(marked.length - 1, newIdx));
+    if (i === j) return;
+    marked.splice(i, 1); marked.splice(j, 0, id);
+  }
+  function marksClear()    { marked.length = 0; }
 
   // ── Researcher marks — per-researcher localStorage shortlist ──────────────
-  // hhf_marks = { [pin]: [archId, …] }. Mirrors the rnLoad/rnSave pattern.
+  // hhf_marks = { [pin]: [archId, …] }. Order in the array IS the curator's
+  // intended ordering (mirrors the rnLoad/rnSave pattern, but order-aware).
   // Marking is a Research capability: Public (locked) can't mark and the bar
-  // is hidden. The in-memory `marked` Set is the source of truth for rendering;
-  // it is hydrated from / written back to the active researcher's slot.
+  // is hidden. The in-memory `marked` array is the source of truth for
+  // rendering; it is hydrated from / written back to the active researcher's
+  // slot.
   function canMark()   { return rnRole() !== "public"; }
   function marksKey()  { const s = rnSession(); return s && s.pin; }
   function marksLoad() {
@@ -2979,14 +2999,24 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     const k = marksKey(); if (!k) return;
     try {
       const all = JSON.parse(localStorage.getItem("hhf_marks") || "{}");
-      all[k] = [...marked];
+      all[k] = marked.slice();
       localStorage.setItem("hhf_marks", JSON.stringify(all));
     } catch {}
   }
-  // Sync the in-memory set to the active researcher (empty for Public).
+  // Sync the in-memory list to the active researcher (empty for Public).
   function marksHydrate() {
-    marked.clear();
-    if (canMark()) marksLoad().forEach(id => marked.add(id));
+    marksClear();
+    if (canMark()) marksLoad().forEach(id => marksAdd(id));
+  }
+  // Move `id` to index `newIdx` (clamped); persist + re-render.
+  // Shared by nudge arrows and drag-drop.
+  function marksReorderTo(id, newIdx) {
+    if (!canMark() || !marksHas(id)) return;
+    const before = marked.indexOf(id);
+    marksMove(id, newIdx);
+    if (marked.indexOf(id) === before) return;   // no-op (clamped to same slot)
+    marksSave();
+    applyFilters(); renderList();
   }
 
   // ── Researcher "seen / reviewed" — same per-researcher pattern ────────────
@@ -3024,7 +3054,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     if (!canMark() || state.curation) { bar.hidden = true; bar.innerHTML = ""; return; }
     bar.hidden = false;
 
-    const n = marked.size;
+    const n = marked.length;
     if (!n) {
       bar.innerHTML =
         `<span class="mb-count"><span class="mb-dot"></span>marks</span>` +
@@ -3048,7 +3078,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     });
 
     bar.querySelector("#mb-export").addEventListener("click", async () => {
-      const ids = [...marked].sort().join("\n");
+      const ids = marked.slice().sort().join("\n");
       try {
         await navigator.clipboard.writeText(ids);
         hhToast(`${n} marked ID${n === 1 ? "" : "s"} copied`, "ok");
@@ -3064,7 +3094,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       e.preventDefault();
       clr.classList.add("holding");
       timer = setTimeout(() => {
-        marked.clear();
+        marksClear();
         state.filterMarkedOnly = false;
         marksSave();
         applyFilters(); renderList(); updateFilterBadge(); renderMarkBar();
@@ -3924,7 +3954,7 @@ WHERE {
     }
     const q = state.search.trim().toLowerCase();
     state.filtered = state.items.filter(it => {
-      if (state.filterMarkedOnly && !marked.has(it.id)) return false;
+      if (state.filterMarkedOnly && !marksHas(it.id)) return false;
       if (state.filterCollection.size && !state.filterCollection.has(archiveAbbrev(collectionOf(it)))) return false;
       if (state.filterArea.size && !(it.areas||[]).some(a => state.filterArea.has(a))) return false;
       if (state.filterType.size && !state.filterType.has(it.itemType)) return false;
@@ -3956,6 +3986,12 @@ WHERE {
       "year":  tailLast((a, b) => dir * dateKey(a).localeCompare(dateKey(b)) || (a.id||"").localeCompare(b.id||"")),
     };
     state.filtered.sort(comparators[state.sortCol] || comparators["year"]);
+    // [only] mode is the curator's draft sequence — show items in mark-order
+    // so dragging/nudging maps 1:1 to what the eye sees on screen.
+    if (state.filterMarkedOnly) {
+      const rank = new Map(marked.map((id, i) => [id, i]));
+      state.filtered.sort((a, b) => (rank.get(a.id) ?? 1e9) - (rank.get(b.id) ?? 1e9));
+    }
   }
 
   // ── Sort header UI ────────────────────────────────────────────────────────
@@ -4156,6 +4192,11 @@ WHERE {
     const container = $("#rows");
     container.innerHTML = "";
 
+    // Drives the leading reorder column + drag visuals. Single source of
+    // truth: any filter flip lands here before rows are drawn.
+    document.body.classList.toggle("marks-only",
+      !!state.filterMarkedOnly && canMark() && !state.curation);
+
     if (state.filtered.length === 0) {
       container.innerHTML = `<div class="empty">No items match</div>`;
       return;
@@ -4186,7 +4227,7 @@ WHERE {
         frag.appendChild(d);
       }
       const row = document.createElement("div");
-      row.className = "row" + (it.id === state.selectedId ? " sel" : "") + (marked.has(it.id) ? " marked" : "") + (seen.has(it.id) ? " seen" : "") + (noted.has(it.id) ? " has-note" : "") + (state.bulkSel.has(it.id) ? " bulk-sel" : "");
+      row.className = "row" + (it.id === state.selectedId ? " sel" : "") + (marksHas(it.id) ? " marked" : "") + (seen.has(it.id) ? " seen" : "") + (noted.has(it.id) ? " has-note" : "") + (state.bulkSel.has(it.id) ? " bulk-sel" : "");
       row.dataset.id = it.id;
       // In curation mode: replace [LS]/[D] tmark chip with the 01/02/03
       // sequence number reflecting the curator's authored order, and move
@@ -4202,7 +4243,18 @@ WHERE {
         idSlotHTML = `<span class="archid">${tmark ? `<span class="tmark pc-stone" data-type="${escapeHTML(tmark)}" title="${escapeHTML(it.itemType)}">${tmark}</span>` : ""}${displayId(it.id)}</span>`;
         phSlotHTML = escapeHTML(it.phase || "");
       }
+      const reorderHTML = (flags && state.filterMarkedOnly && !state.curation) ? (() => {
+        const pos = marked.indexOf(it.id);
+        const upDis = pos <= 0 ? " is-disabled" : "";
+        const dnDis = pos === -1 || pos >= marked.length - 1 ? " is-disabled" : "";
+        return `<span class="rf-reorder" aria-hidden="true">
+          <span class="rf-arrow rf-up${upDis}" data-nudge="up" title="Move up">▲</span>
+          <span class="rf-grip" data-grip="1" title="Drag to reorder">⋮⋮</span>
+          <span class="rf-arrow rf-dn${dnDis}" data-nudge="dn" title="Move down">▼</span>
+        </span>`;
+      })() : "";
       row.innerHTML = `
+        ${reorderHTML}
         <span class="col-id">
           ${idSlotHTML}
           ${flags ? `<span class="row-flags" aria-hidden="true">
@@ -4871,18 +4923,18 @@ WHERE {
   function toggleMark(id) {
     if (!id || !canMark()) return;          // Research/Admin only
     const wasOnly = state.filterMarkedOnly;
-    if (marked.has(id)) marked.delete(id); else marked.add(id);
+    if (marksHas(id)) marksRemove(id); else marksAdd(id);
     marksSave();                            // persist to this researcher's slot
     // An empty shortlist + "only" filter strands the list with no escape
     // (the bar's zero-state has no toggle) — drop the filter automatically.
-    if (state.filterMarkedOnly && marked.size === 0) state.filterMarkedOnly = false;
+    if (state.filterMarkedOnly && marked.length === 0) state.filterMarkedOnly = false;
     if (wasOnly) {
       // Re-filter: in only-mode an unmarked row must leave the list; if we
       // just exited only-mode the full list must come back.
       applyFilters(); renderList();
     } else {
       const row = document.querySelector(`.row[data-id="${CSS.escape(id)}"]`);
-      if (row) row.classList.toggle("marked", marked.has(id));
+      if (row) row.classList.toggle("marked", marksHas(id));
     }
     updateFilterBadge();
     renderMarkBar();
@@ -5566,9 +5618,81 @@ WHERE {
     document.getElementById("mob-about-close").addEventListener("click", closeMobAbout);
     document.getElementById("mob-about-continue").addEventListener("click", closeMobAbout);
 
+    // ── Drag-to-reorder marked rows (pointer events; touch + mouse) ────────
+    // Only active when body.marks-only AND the press starts on a .rf-grip.
+    // Active drag state lives in `drag`; cleared on pointerup/cancel.
+    const drag = { id: null, ptrId: null, lastOver: null, moved: false };
+    function clearDragHints() {
+      document.querySelectorAll(".row.drag-over-top, .row.drag-over-bot")
+        .forEach(r => r.classList.remove("drag-over-top", "drag-over-bot"));
+      drag.lastOver = null;
+    }
+    function endDrag(commit) {
+      if (drag.id == null) return;
+      const draggedRow = document.querySelector(`.row[data-id="${CSS.escape(drag.id)}"]`);
+      if (draggedRow) draggedRow.classList.remove("dragging");
+      const over = drag.lastOver;
+      const sourceId = drag.id;
+      drag.id = null; drag.ptrId = null; drag.lastOver = null; drag.moved = false;
+      clearDragHints();
+      if (!commit || !over) return;
+      const targetId = over.row.dataset.id;
+      if (!targetId || targetId === sourceId) return;
+      let targetIdx = marked.indexOf(targetId);
+      if (targetIdx === -1) return;
+      const sourceIdx = marked.indexOf(sourceId);
+      if (over.side === "bot") targetIdx += 1;
+      if (sourceIdx < targetIdx) targetIdx -= 1;
+      marksReorderTo(sourceId, targetIdx);
+    }
+    $("#rows").addEventListener("pointerdown", e => {
+      if (!document.body.classList.contains("marks-only")) return;
+      const grip = e.target.closest(".rf-grip");
+      if (!grip) return;
+      const row = e.target.closest(".row");
+      if (!row || !row.dataset.id) return;
+      e.preventDefault();   // suppress text-selection + native row-tap
+      drag.id = row.dataset.id;
+      drag.ptrId = e.pointerId;
+      drag.moved = false;
+      row.classList.add("dragging");
+      try { grip.setPointerCapture(e.pointerId); } catch {}
+    });
+    $("#rows").addEventListener("pointermove", e => {
+      if (drag.id == null || e.pointerId !== drag.ptrId) return;
+      drag.moved = true;
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      const row = el && el.closest && el.closest(".row");
+      if (!row || row.dataset.id === drag.id || !marksHas(row.dataset.id)) {
+        clearDragHints();
+        return;
+      }
+      const rect = row.getBoundingClientRect();
+      const side = (e.clientY < rect.top + rect.height / 2) ? "top" : "bot";
+      if (drag.lastOver && drag.lastOver.row === row && drag.lastOver.side === side) return;
+      clearDragHints();
+      row.classList.add(side === "top" ? "drag-over-top" : "drag-over-bot");
+      drag.lastOver = { row, side };
+    });
+    $("#rows").addEventListener("pointerup",     e => { if (e.pointerId === drag.ptrId) endDrag(true);  });
+    $("#rows").addEventListener("pointercancel", e => { if (e.pointerId === drag.ptrId) endDrag(false); });
+
     $("#rows").addEventListener("click", e => {
       const row = e.target.closest(".row");
       if (!row || !row.dataset.id) return;
+      // Nudge arrows (visible only in marks-only) — move one slot up / down
+      const nudge = e.target.closest(".rf-arrow");
+      if (nudge) {
+        e.stopPropagation();
+        if (nudge.classList.contains("is-disabled")) return;
+        const cur = marked.indexOf(row.dataset.id);
+        if (cur === -1) return;
+        marksReorderTo(row.dataset.id, cur + (nudge.dataset.nudge === "up" ? -1 : 1));
+        return;
+      }
+      // Grip click without drag (mouse-up at the same spot) — swallow so it
+      // doesn't fall through to row selection.
+      if (e.target.closest(".rf-grip")) { e.stopPropagation(); return; }
       if (e.target.closest(".rf-mark")) {   // clicking the orange dot unmarks it
         toggleMark(row.dataset.id);
         return;
