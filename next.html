@@ -382,20 +382,20 @@
      The old in-record bracket-style .rec-info CSS has been removed. */
 
   /* Info panel — overlays the record (right) panel entirely */
-  #info-pane{
+  #info-pane,#rn-help-pane{
     display:none;position:absolute;inset:0;z-index:20;overflow-y:auto;
     flex-direction:column;background:var(--bg);padding:18px 22px 36px;
   }
-  #info-pane.open{display:flex}
+  #info-pane.open,#rn-help-pane.open{display:flex}
   /* When the right panel is collapsed, the absolutely-positioned info overlay
      would otherwise squeeze into the 41px strip and show compressed text.
      Hide it while collapsed; it returns on re-expand if it was open. */
-  .panel-right.out #info-pane{display:none}
-  #info-pane-close{
+  .panel-right.out #info-pane,.panel-right.out #rn-help-pane{display:none}
+  #info-pane-close,#rn-help-close{
     position:absolute;top:8px;right:12px;background:none;border:0;cursor:pointer;
     font-size:18px;color:var(--hint);line-height:1;padding:4px 6px;
   }
-  #info-pane-close:hover{color:var(--ink)}
+  #info-pane-close:hover,#rn-help-close:hover{color:var(--ink)}
   .ip-inner{width:100%;max-width:420px;margin:0 auto}
   .ip-title{
     font-family:var(--mono);font-size:12px;letter-spacing:0.18em;
@@ -876,19 +876,28 @@
   }
   .meta-head .l{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
   .meta-head .r{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em;white-space:nowrap}
+  /* Right cluster of the Item-record bar. The two buttons inside are
+     researcher-only and reveal themselves when body.is-researcher is set. */
+  .meta-head-r{display:flex;align-items:center;gap:8px}
   /* Compose-mode toggle (researcher + admin only). Hidden by default and shown
      when body.is-researcher is set by reflectComposeRole(). Active state adds
      a slash through the eye to communicate "record hidden". */
-  .hh-compose-btn{
+  .hh-compose-btn,.hh-rnhelp-btn{
     display:none;background:none;border:0;padding:4px;margin:-4px;
     color:var(--muted);cursor:pointer;line-height:0;
     -webkit-tap-highlight-color:transparent;border-radius:3px;
   }
-  body.is-researcher .hh-compose-btn{display:inline-flex;align-items:center;justify-content:center}
-  .hh-compose-btn:hover{color:var(--ink)}
+  body.is-researcher .hh-compose-btn,
+  body.is-researcher .hh-rnhelp-btn{display:inline-flex;align-items:center;justify-content:center}
+  .hh-compose-btn:hover,.hh-rnhelp-btn:hover{color:var(--ink)}
   body.hh-compose .hh-compose-btn{color:var(--red-deep)}
   .hh-compose-btn .hh-eye-slash{display:none;stroke:var(--red-deep)}
   body.hh-compose .hh-compose-btn .hh-eye-slash{display:inline}
+  /* Researcher-help "?" — text glyph to mirror the global ? in the top bar. */
+  .hh-rnhelp-btn{
+    font-family:var(--mono);font-size:14px;font-weight:500;line-height:1;
+    width:22px;height:22px;padding:0;margin:0;
+  }
   /* When compose is on: hide everything in the record body except the notes
      panel; pull the notes panel up flush (drop its top border) since it's
      no longer "below" anything. Data footer also disappears — its links
@@ -1917,13 +1926,16 @@
       <div class="scroll-pip scroll-pip-r" id="meta-pip"></div>
       <div class="meta-head">
         <span class="l">Item record</span>
-        <button id="hh-compose-btn" class="hh-compose-btn" title="Compose mode — hide the record, keep notes" aria-label="Toggle compose mode">
-          <svg class="hh-eye" viewBox="0 0 16 12" width="15" height="11" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M1 6s2.6-4.5 7-4.5 7 4.5 7 4.5-2.6 4.5-7 4.5S1 6 1 6z"/>
-            <circle cx="8" cy="6" r="2"/>
-            <line class="hh-eye-slash" x1="2" y1="2" x2="14" y2="10"/>
-          </svg>
-        </button>
+        <span class="meta-head-r">
+          <button id="hh-rnhelp-btn" class="hh-rnhelp-btn" title="Researcher tools — what you can do" aria-label="Researcher help">?</button>
+          <button id="hh-compose-btn" class="hh-compose-btn" title="Compose mode — hide the record, keep notes" aria-label="Toggle compose mode">
+            <svg class="hh-eye" viewBox="0 0 16 12" width="15" height="11" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 6s2.6-4.5 7-4.5 7 4.5 7 4.5-2.6 4.5-7 4.5S1 6 1 6z"/>
+              <circle cx="8" cy="6" r="2"/>
+              <line class="hh-eye-slash" x1="2" y1="2" x2="14" y2="10"/>
+            </svg>
+          </button>
+        </span>
       </div>
       <div class="meta-body" id="meta-body">
         <div class="empty">Select an item from the list</div>
@@ -1937,6 +1949,10 @@
     <div id="info-pane" role="dialog" aria-modal="true" aria-label="About this archive and keyboard shortcuts">
       <button id="info-pane-close" aria-label="Close">×</button>
       <div class="ip-inner" id="ip-inner"></div>
+    </div>
+    <div id="rn-help-pane" role="dialog" aria-modal="true" aria-label="Researcher tools">
+      <button id="rn-help-close" aria-label="Close">×</button>
+      <div class="ip-inner" id="rn-help-inner"></div>
     </div>
   </div>
 
@@ -1980,7 +1996,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.60";
+  const VERSION      = "v1.07-test.61";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2858,6 +2874,9 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     if (btn) btn.title = composeIsOn()
       ? "Compose mode on — click to show the full record"
       : "Compose mode — hide the record, keep notes";
+    // Lock-out → close any open researcher help pane (button just disappeared).
+    if (!canMark() && rnHelpPane && rnHelpPane.classList.contains("open"))
+      rnHelpPane.classList.remove("open");
   }
   function toggleCompose() {
     if (!canMark()) return;
@@ -5810,7 +5829,7 @@ WHERE {
       if (e.key === "Escape" && inInput) { e.target.blur(); return; }
       if (e.key === "Escape") {
         if (state.bulkSel.size) { clearBulkSel(); return; }
-        closeAllDropdowns(); closeAboutPane(); closeInfoPane(); closePdf(); closeCuratorPane();
+        closeAllDropdowns(); closeAboutPane(); closeInfoPane(); closeRnHelpPane(); closePdf(); closeCuratorPane();
         const lp = document.getElementById("panel-left"), rp = document.getElementById("panel-right");
         if (lp && rp && lp.classList.contains("out") && rp.classList.contains("out")) document.getElementById("zoom-fs").click();
         return;
@@ -5877,21 +5896,135 @@ WHERE {
 
   // ── Info panel — system orientation + shortcuts, role-aware ──────────────
   const infoPane = document.getElementById("info-pane");
+  const rnHelpPane = document.getElementById("rn-help-pane");
+  // Two-tier ? system:
+  //   1. Top-bar ? (#rec-info)  → general usability + public shortcuts (this fn)
+  //   2. Record-pane ? (#hh-rnhelp-btn) → researcher tools + their shortcuts
+  // Researcher shortcuts deliberately live in the second tier — keeps this
+  // one approachable for first-time visitors.
   function renderInfoPane() {
-    const researcher = rnRole() !== "public";
     const keys = rows => `<div class="ip-keys">${rows.map(([k, d]) => `<b>${k}</b><span>${d}</span>`).join("")}</div>`;
-    let html = `
-      <p class="ip-grp">Navigate</p>
-      ${keys([["↑ ↓", "Previous / next item"], ["/", "Search"], ["Esc", "Close · exit zen"]])}
-      <p class="ip-grp">View</p>
-      ${keys([["F", "Fit image to frame"], ["1", "Actual size (1:1)"], ["+ &minus;", "Zoom in / out"], ["T", "Turn (rotate 90°)"], ["Z / &crarr;", "Zen — hide both panels"]])}`;
-    if (researcher) {
-      html += `<p class="ip-grp">Researcher</p>
-        ${keys([["M", "Mark / unmark (shortlist)"], ["R", "Reviewed / not reviewed"]])}`;
-    }
-    html += `<p class="ip-foot">Credits, rights &amp; data endpoints → the wordmark, top-left.</p>`;
+    const html = `
+      <p class="ip-grp">What this is</p>
+      <p class="ip-note">A live catalogue of the Richard Morrow Hunter architectural archive
+        (1970–2020). Drawings, photographs, publications, correspondence — organised by
+        the projects Hunter worked on across his career.</p>
+
+      <p class="ip-grp">Finding your way</p>
+      <p class="ip-note">The left pane lists every item. The centre stage shows the
+        selected drawing or photograph; the right pane shows its record. Use the sort
+        header (ID / Phase / Year) and the filter button to narrow down, or type in
+        the search bar to match anything — titles, IDs, item types, materials.</p>
+
+      <p class="ip-grp">Curated lenses</p>
+      <p class="ip-note">"Curated" entries in the filter panel open authored
+        selections — a curator's sequence of items with their own introduction and
+        notes. Inside one, normal sorting and filtering steps aside; click the exit
+        button on the intro card to return to the full catalogue.</p>
+
+      <p class="ip-grp">Reading the catalogue</p>
+      <p class="ip-note">Item IDs are <b>HH-COLLECTION-NUMBER</b> (HHC = Hunter House
+        Collection, CAA = Canadian Architectural Archives at UCalgary, EGC = Eric
+        Gesinger Collection). Click any chip — phase, area, item type — to filter
+        to that value. Click the wordmark (top-left) for credits, rights, and the
+        underlying Wikibase + SPARQL endpoints.</p>
+
+      <p class="ip-grp">Shortcuts</p>
+      ${keys([
+        ["↑ ↓",    "Previous / next item"],
+        ["/",      "Focus the search"],
+        ["F",      "Fit image to frame"],
+        ["1",      "Actual size (1:1)"],
+        ["+ &minus;", "Zoom in / out"],
+        ["T",      "Turn (rotate 90°)"],
+        ["Z / &crarr;", "Zen — hide both panels"],
+        ["Esc",    "Close · exit zen"],
+      ])}
+
+      <p class="ip-foot">Researchers: a second ? appears in the record bar with notes,
+        marking, and your own shortcuts.</p>`;
     document.getElementById("ip-inner").innerHTML = html;
   }
+
+  // Researcher help — opens from the ? button in the Item-record bar. Public
+  // never reaches this (the button is hidden when !body.is-researcher).
+  function renderRnHelpPane() {
+    const keys = rows => `<div class="ip-keys">${rows.map(([k, d]) => `<b>${k}</b><span>${d}</span>`).join("")}</div>`;
+    const html = `
+      <p class="ip-title">Researcher tools</p>
+
+      <p class="ip-grp">Marking — your working list</p>
+      <p class="ip-note">Items you mark are <b>your shortlist</b> — drafts of items
+        that might belong in a series. Click the small orange dot in a row's flag
+        strip, or press <b>M</b> with an item selected.
+        <br><br>
+        In the mark-bar above the list, <b>[only]</b> filters the view down to just
+        your marks. While you're in [only] mode, drag the <b>⋮⋮</b> grip on the left
+        of any row to reorder, or use <b>▲</b>/<b>▼</b> to nudge one slot. The
+        sequence you choose is yours to keep.</p>
+
+      <p class="ip-grp">Reviewed</p>
+      <p class="ip-note">Press <b>R</b> to mark an item as reviewed — the eye in
+        the row's flag strip lights up. Use it to track what you've already worked
+        through.</p>
+
+      <p class="ip-grp">Notes</p>
+      <p class="ip-note">Every item has a researcher-notes panel beneath the record.
+        Notes are <b>private to you</b> — other researchers don't see yours, and
+        you don't see theirs. (The site admin can toggle to see every researcher's
+        notes.)
+        <br><br>
+        Add a note with the <b>+</b> button beside "researcher notes." Click your
+        own note's text to edit it. Hold the <b>×</b> beside a note to delete it.
+        Marks, notes, and "reviewed" state live on this device — they survive
+        reloads and tab restarts.</p>
+
+      <p class="ip-grp">Compose mode</p>
+      <p class="ip-note">The 👁 eyeball at the right of the Item-record bar hides
+        the record and shows only your notes. Click again to bring the record back.
+        The setting follows you between items.</p>
+
+      <p class="ip-grp">Coming soon</p>
+      <p class="ip-note">
+        <b>Export</b> — save your notes + marks as a human-readable file to your
+        Desktop.<br>
+        <b>Import</b> — receive another researcher's file; nothing of yours is
+        ever overwritten (notes are merged additively, marks are appended).<br>
+        <b>Marked-first sort</b> — a sort option that puts your marks at the top
+        of the list in your chosen order.</p>
+
+      <p class="ip-grp">Shortcuts</p>
+      ${keys([
+        ["M",      "Mark / unmark this item"],
+        ["R",      "Reviewed / not reviewed"],
+        ["↑ ↓",   "Previous / next item"],
+        ["/",      "Focus the search"],
+        ["F",      "Fit image to frame"],
+        ["1",      "Actual size"],
+        ["+ &minus;", "Zoom in / out"],
+        ["T",      "Rotate image 90°"],
+        ["Z",      "Zen — hide both side panels"],
+        ["Esc",    "Close any open panel"],
+      ])}
+
+      <p class="ip-foot">Signed in until you close the tab. To switch researchers,
+        click the lock icon beside "researcher notes".</p>`;
+    document.getElementById("rn-help-inner").innerHTML = html;
+  }
+  function openRnHelpPane() {
+    if (!canMark()) return;
+    renderRnHelpPane();
+    const rightP = document.getElementById("panel-right");
+    if (rightP && rightP.classList.contains("out")) {
+      rightP.classList.remove("out");
+      syncFsBtn();
+    }
+    // Mutually exclusive with the global info pane.
+    infoPane.classList.remove("open");
+    rnHelpPane.classList.add("open");
+  }
+  function closeRnHelpPane()  { rnHelpPane.classList.remove("open"); }
+  function toggleRnHelpPane() { rnHelpPane.classList.contains("open") ? closeRnHelpPane() : openRnHelpPane(); }
   function openInfoPane()  {
     renderInfoPane();
     // The info pane lives inside #panel-right (position:absolute;inset:0)
@@ -5905,6 +6038,8 @@ WHERE {
       rightP.classList.remove("out");
       syncFsBtn();
     }
+    // Mutually exclusive with the researcher help pane.
+    if (rnHelpPane) rnHelpPane.classList.remove("open");
     infoPane.classList.add("open");
   }
   function closeInfoPane() { infoPane.classList.remove("open"); }
@@ -6056,6 +6191,10 @@ WHERE {
     });
     document.getElementById("rec-info").addEventListener("click", toggleInfoPane);
     document.getElementById("info-pane-close").addEventListener("click", closeInfoPane);
+    const rnHelpBtn   = document.getElementById("hh-rnhelp-btn");
+    const rnHelpClose = document.getElementById("rn-help-close");
+    if (rnHelpBtn)   rnHelpBtn.addEventListener("click", e => { e.stopPropagation(); toggleRnHelpPane(); });
+    if (rnHelpClose) rnHelpClose.addEventListener("click", closeRnHelpPane);
     document.getElementById("pdf-close").addEventListener("click", closePdf);
     document.getElementById("pdf-view").addEventListener("click", () => {
       const it = state.items.find(i => i.id === state.selectedId);
