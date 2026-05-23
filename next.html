@@ -1907,7 +1907,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.55";
+  const VERSION      = "v1.07-test.56";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3893,10 +3893,20 @@ WHERE {
     });
     const dir = state.sortDir === "asc" ? 1 : -1;
     const dateKey = it => it.date || "9999-99-99";
+    // Tail-collections sort to the bottom regardless of sort column or
+    // direction. EGC is Hunter's furniture work for Eric Gesinger — outside
+    // the dominant residential catalogue, so it reads as a footer block.
+    // Extend the Set if/when another satellite collection lands.
+    const TAIL_COLLECTIONS = new Set(["EGC"]);
+    const tailRank = it => TAIL_COLLECTIONS.has(archiveAbbrev(collectionOf(it))) ? 1 : 0;
+    const tailLast = cmp => (a, b) => {
+      const ra = tailRank(a), rb = tailRank(b);
+      return ra !== rb ? ra - rb : cmp(a, b);
+    };
     const comparators = {
-      "id":    (a, b) => dir * (a.id || "").localeCompare(b.id || ""),
-      "phase": (a, b) => dir * (a.phase||"").localeCompare(b.phase||"") || (a.id||"").localeCompare(b.id||""),
-      "year":  (a, b) => dir * dateKey(a).localeCompare(dateKey(b)) || (a.id||"").localeCompare(b.id||""),
+      "id":    tailLast((a, b) => dir * (a.id || "").localeCompare(b.id || "")),
+      "phase": tailLast((a, b) => dir * (a.phase||"").localeCompare(b.phase||"") || (a.id||"").localeCompare(b.id||"")),
+      "year":  tailLast((a, b) => dir * dateKey(a).localeCompare(dateKey(b)) || (a.id||"").localeCompare(b.id||"")),
     };
     state.filtered.sort(comparators[state.sortCol] || comparators["year"]);
   }
