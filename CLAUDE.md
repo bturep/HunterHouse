@@ -607,3 +607,33 @@ If you ever restart the proxy mid-session, the next ping flips `_proxyAuthentica
 **Pending threads:** unchanged from prior entries except §11.1 CRITICAL step 3 now resolved.
 
 **Version line: browse.html `v1.06.31` (LIVE, unchanged) · next.html `v1.07-test.53` (staging).**
+
+---
+
+### 2026-05-22 — R2 metadata sidecar mirror (§11.1 HIGH part 2a)
+
+`scripts/sync_metadata_to_r2.py` — rclone-based one-shot that takes the most recent local snapshot from `data/snapshots/wikibase_full_YYYYMMDD/` and pushes every JSON sidecar up to R2 in the layout the audit recommended.
+
+**R2 layout established today:**
+```
+{collection-folder}/metadata/{ARCH_ID}.json    catalogue items, sibling to intake/
+_wikibase/items/{Qnnn}.json                    referenced (vocab/people/institutions)
+_wikibase/properties/{Pnn}.json                property definitions
+_wikibase/_manifest.json                       snapshot manifest
+```
+
+Collection-folder map matches the existing image-tier layout (HHC → `hunter-house-collection`, CAA → `canadian-architecture-archive`, EGC → `eric-gesinger-collection`).
+
+**First run:**
+- 6 rclone jobs, all succeeded
+- 115 + 35 + 30 = 180 catalogue sidecars + 123 referenced + 29 properties + manifest
+- All sidecars HEAD 200 via the public CDN; sample fetch parses cleanly as JSON (Q369 with 18 claims)
+
+**Design notes:**
+- Kept this script separate from `backup_metadata.py`. `backup_metadata.py` is read-only against Wikibase + writes to local disk only (zero rclone dependency, zero R2 dependency). `sync_metadata_to_r2.py` is transport-only (local snapshot → R2). Either step can be retried/inspected without re-running the other.
+- Dry-run default; `--execute` writes; `--checksum` for paranoid mode (compare hashes instead of size+mtime).
+- Idempotent — rclone's default size+mtime comparison skips unchanged files. Re-running after a fresh `backup_metadata.py` only uploads what changed.
+
+**Remaining piece of §11.1 HIGH:** per-ingest sidecar writes — when `ingest_item.py` / `ingest_publication.py` / `batch_ingest_egc.py` create a new Wikibase item, also write its sidecar to R2 at the end. Next bundle.
+
+**Version line: browse.html `v1.06.31` (LIVE, unchanged) · next.html `v1.07-test.53` (staging, unchanged).**
