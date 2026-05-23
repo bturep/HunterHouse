@@ -17,3 +17,7 @@ __pycache__/
 # Per-run Wikibase metadata snapshots (scripts/backup_metadata.py output).
 # Local preservation only; commit selectively if you want a snapshot in git.
 data/snapshots/wikibase_full_*/
+
+# Per-run R2-link verifier reports (scripts/verify_r2_links.py --json).
+# Local audit artifacts; commit with `git add -f` if you want one pinned.
+data/snapshots/r2_verify_*.json

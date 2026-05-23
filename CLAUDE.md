@@ -515,3 +515,26 @@ Three more audit items off the list, all backend, no live-site touch.
 **Pending threads:** §11.1 CRITICAL step 3 (per-startup random secret + unlock UI) and §11.1 HIGH part 2 (R2 sidecar mirror + ingest-script patches) remain. §11.2 LOW items still pending: PIDs central dictionary, researcher-notes label honesty. §11.3 (bend-before-break) untouched. Original v1.07 pending threads (Curator Phase 2, Held-by, Phase rename, EGC photo ingest, Rotation Part 2) unchanged.
 
 **Version line: browse.html `v1.06.31` (LIVE, unchanged) · next.html `v1.07-test.51` (staging, unchanged).**
+
+---
+
+### 2026-05-22 — Verifier + RN-tooltip honesty + PROPERTIES dictionary (next.html v1.07-test.52)
+
+Three more audit items off the list.
+
+- **`scripts/verify_r2_links.py` — image-pipeline integrity check (§11.3).** Read-only. SPARQLs every URL claim (P95 master, P96 preview, P143 access copy) and HEAD-requests each against R2. First run today found **6 dead P95 master URLs** — `HH-HHC-0036`, `0037`, `0038`, `0039`, `0040`, `0066`. Silent legacy from the 2026-05-14 HH-A → HH-HHC rename migration: R2 files were renamed correctly, but the P95 claims on those 6 items still point at the old `HH-A-NNNN_*.tif` filenames. Verified by HEAD-probing one example: old name `HH-A-0071_East_Wing_Foundation_Plan_Hunter_Haus_2008-06-03.tif` returns 404; new name `HH-HHC-0036_East_Wing_Foundation_Plan_Hunter_Haus_2008-06-03.tif` returns 200 and `rclone ls` confirms the file exists. **Fix is a 6-claim P95 rewrite — not done in this session** (data migration, separate from verifier work). JSON reports under `data/snapshots/r2_verify_*.json` are gitignored. Suggested cadence: run before each session-end.
+
+- **RN tooltip honesty (§11.2 LOW).** Lock-icon tooltips in `next.html` updated to stop implying encryption. "Unlock to add notes" → "Sign in to add a note (stored locally on this device, not encrypted)". "Lock" → "Sign out (notes stay on this device)". `localStorage` storage shape unchanged. Two-line edit.
+
+- **PROPERTIES central dictionary (§11.2 LOW).** New top-of-script constant in `next.html` declares all 27 PIDs the application uses, grouped by concern (identifiers, dates, hierarchy, custody, attribution, classification, production, files, notes). Migrated: the whole `EDITABLE` map (16 entries), the two `setStringClaim`/SPARQL sites that used `ACCESS_PID`/`ROTATE_PID`, and the two catalogue-SPARQL `OPTIONAL` lines for those two. The two prior single-PID constants (`ACCESS_PID`, `ROTATE_PID`) removed. **Deliberately NOT migrated:** the rest of the catalogue SPARQL body (~25 `wdt:Pxx` literals in a template string) — audit explicitly recommended opportunistic migration to avoid a fragile big-bang rewrite. Future SPARQL touches can substitute in `${PROPERTIES.X}` since the query is already template-stringed. 21 `PROPERTIES.X` references now in `next.html`. Validate workflow green.
+
+**New pending follow-up (added today):**
+- **Fix 6 dead P95 URLs on HH-HHC-0036 / 0037 / 0038 / 0039 / 0040 / 0066.** Wikibase P95 still points at old `HH-A-NNNN` filenames; R2 has the renamed files. One small `wbcreateclaim`/`wbsetclaim` migration script using `_wikibase.py`, ~20 minutes. JSON detail at `data/snapshots/r2_verify_20260522.json` (run today, local-only).
+
+**Standing-rule notes:**
+- `scripts/verify_r2_links.py` is the canonical "did my ingest actually land?" check. Run after every ingest, and before session close.
+- `PROPERTIES.X` is now the right way to refer to a Wikibase property in `next.html` JS. The bare-PID strings in the catalogue SPARQL body are the only remaining holdouts — migrate opportunistically.
+
+**Pending threads:** §11.1 CRITICAL step 3 and §11.1 HIGH part 2 remain the biggest open audit items. Today's 6-URL data fix added. §11.3 still has `renderMeta`/`renderMobSheet` duplication and the "no smoke tests" item.
+
+**Version line: browse.html `v1.06.31` (LIVE, unchanged) · next.html `v1.07-test.52` (staging).**
