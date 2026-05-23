@@ -898,6 +898,59 @@
     font-family:var(--mono);font-size:14px;font-weight:500;line-height:1;
     width:22px;height:22px;padding:0;margin:0;
   }
+  /* Dirty counter — small badge next to the ? button. Sits inert when zero. */
+  .hh-dirty-badge{
+    display:none;font-family:var(--mono);font-size:9px;font-weight:600;
+    color:#fff;background:var(--red-deep);cursor:pointer;
+    padding:1px 5px;border-radius:8px;letter-spacing:0.02em;line-height:1.4;
+    min-width:14px;text-align:center;
+  }
+  .hh-dirty-badge:hover{opacity:.85}
+  body.is-researcher .hh-dirty-badge:not([hidden]){display:inline-block}
+  /* Export / import tools inside the researcher help pane. */
+  .hh-tool-row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+  .hh-tool-btn{
+    font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;
+    color:var(--ink);background:var(--bg);border:1px solid var(--rule);
+    padding:7px 12px;border-radius:2px;cursor:pointer;
+  }
+  .hh-tool-btn:hover{background:var(--soft);border-color:var(--ink)}
+  .hh-tool-status{
+    font-family:var(--mono);font-size:10px;color:var(--muted);
+    letter-spacing:0.04em;margin:8px 0 0;
+  }
+  /* Import preview dialog — centred modal, light overlay. */
+  .hh-import-dlg{
+    position:fixed;inset:0;background:rgba(30,28,26,.45);z-index:400;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .hh-import-card{
+    background:var(--bg);max-width:440px;width:100%;
+    border:1px solid var(--rule);border-radius:3px;box-shadow:0 8px 36px rgba(0,0,0,.16);
+    display:flex;flex-direction:column;
+  }
+  .hh-import-head{
+    font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.18em;
+    text-transform:uppercase;color:var(--ink);
+    padding:14px 18px;border-bottom:1px solid var(--rule-soft);
+  }
+  .hh-import-body{padding:14px 18px;font-family:var(--mono);font-size:11px;line-height:1.7;color:var(--ink)}
+  .hh-import-body p{margin:0 0 10px}
+  .hh-import-body .hh-i-when{color:var(--muted);font-size:10px;margin-left:6px}
+  .hh-import-body .hh-i-stats{list-style:none;padding:0;margin:0 0 10px}
+  .hh-import-body .hh-i-stats li{padding:5px 0;border-bottom:1px dashed var(--rule-soft)}
+  .hh-import-body .hh-i-stats li:last-child{border-bottom:0}
+  .hh-import-body .hh-i-stats span{color:var(--muted);font-size:10px}
+  .hh-import-body .hh-i-foot{font-size:10px;color:var(--muted);margin-top:8px}
+  .hh-import-acts{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px;border-top:1px solid var(--rule-soft)}
+  .hh-import-acts button{
+    font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;
+    padding:6px 14px;border-radius:2px;cursor:pointer;
+  }
+  .hh-i-cancel{background:var(--bg);color:var(--muted);border:1px solid var(--rule)}
+  .hh-i-cancel:hover{color:var(--ink);border-color:var(--ink)}
+  .hh-i-go{background:var(--ink);color:var(--bg);border:1px solid var(--ink)}
+  .hh-i-go:hover{opacity:.85}
   /* When compose is on: hide everything in the record body except the notes
      panel; pull the notes panel up flush (drop its top border) since it's
      no longer "below" anything. Data footer also disappears — its links
@@ -1927,6 +1980,7 @@
       <div class="meta-head">
         <span class="l">Item record</span>
         <span class="meta-head-r">
+          <span id="hh-dirty-badge" class="hh-dirty-badge" hidden></span>
           <button id="hh-rnhelp-btn" class="hh-rnhelp-btn" title="Researcher tools — what you can do" aria-label="Researcher help">?</button>
           <button id="hh-compose-btn" class="hh-compose-btn" title="Compose mode — hide the record, keep notes" aria-label="Toggle compose mode">
             <svg class="hh-eye" viewBox="0 0 16 12" width="15" height="11" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
@@ -1996,7 +2050,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.61";
+  const VERSION      = "v1.07-test.62";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2877,6 +2931,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     // Lock-out → close any open researcher help pane (button just disappeared).
     if (!canMark() && rnHelpPane && rnHelpPane.classList.contains("open"))
       rnHelpPane.classList.remove("open");
+    hhRenderDirtyBadge();
   }
   function toggleCompose() {
     if (!canMark()) return;
@@ -3012,6 +3067,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
           updated.unshift({ by: researcher.initials, date: rnDate(), text });
         }
         rnSave(archId, updated);
+        hhDirtyTouch();
         rnSyncRow(archId);
         textarea.value = "";
         renderRN(archId);
@@ -3038,6 +3094,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             const updated = rnLoad(archId);
             updated.splice(idx, 1);
             rnSave(archId, updated);
+            hhDirtyTouch();
             rnSyncRow(archId);
             renderRN(archId);
           }, 2000);
@@ -3103,7 +3160,209 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     marksMove(id, newIdx);
     if (marked.indexOf(id) === before) return;   // no-op (clamped to same slot)
     marksSave();
+    hhDirtyTouch();
     applyFilters(); renderList();
+  }
+
+  // ── Dirty counter — "unsaved since last export" ───────────────────────────
+  // Increments on every note/mark mutation by the active researcher; resets
+  // to 0 after a successful export. Drives the small N badge next to the
+  // researcher ? button. Per-pin, persisted across reloads.
+  function hhDirtyTouch(n) {
+    if (!canMark()) return;
+    const k = composeKey(); if (!k) return;
+    try {
+      const all = JSON.parse(localStorage.getItem("hhf_dirty") || "{}");
+      all[k] = (all[k] || 0) + (n || 1);
+      localStorage.setItem("hhf_dirty", JSON.stringify(all));
+    } catch {}
+    hhRenderDirtyBadge();
+  }
+  function hhDirtyCount() {
+    const k = composeKey(); if (!k) return 0;
+    try { return JSON.parse(localStorage.getItem("hhf_dirty") || "{}")[k] || 0; }
+    catch { return 0; }
+  }
+  function hhDirtyReset() {
+    const k = composeKey(); if (!k) return;
+    try {
+      const all = JSON.parse(localStorage.getItem("hhf_dirty") || "{}");
+      delete all[k];
+      localStorage.setItem("hhf_dirty", JSON.stringify(all));
+    } catch {}
+    hhRenderDirtyBadge();
+  }
+  function hhRenderDirtyBadge() {
+    const badge = document.getElementById("hh-dirty-badge");
+    if (!badge) return;
+    const n = canMark() ? hhDirtyCount() : 0;
+    badge.textContent = n > 0 ? String(n) : "";
+    badge.hidden = n === 0;
+    badge.title = n === 0
+      ? "All changes exported"
+      : `${n} unsaved change${n === 1 ? "" : "s"} since last export — click for tools`;
+  }
+
+  // ── Export / import (notes + marks) ───────────────────────────────────────
+  // Notes are scoped to the active researcher (by:initials match) so an
+  // export carries only that researcher's contributions. Marks are per-pin
+  // already, so the whole array exports as-is in mark-order.
+  function hhExportBuild() {
+    const s = rnSession(); if (!s) return null;
+    const myInitials = s.initials;
+    let rnAll = {}; try { rnAll = JSON.parse(localStorage.getItem("hhf_rn") || "{}"); } catch {}
+    const notes = {};
+    for (const [archId, arr] of Object.entries(rnAll)) {
+      const mine = (arr || []).filter(n => n && n.by === myInitials);
+      if (mine.length) notes[archId] = mine;
+    }
+    return {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      exporter: { pin: s.pin, initials: s.initials, name: s.name, role: s.role || "research" },
+      notes,
+      marks: marked.slice(),
+    };
+  }
+  function hhExportMarkdown(bundle) {
+    const lines = [];
+    const ex = bundle.exporter;
+    lines.push(`# ${ex.name} — researcher notes & marks`);
+    lines.push(`Exported ${bundle.exportedAt.slice(0, 10)} (${ex.initials})  `);
+    lines.push("");
+    const titleOf = id => {
+      const it = state.items.find(i => i.id === id);
+      return it ? it.title : "";
+    };
+    if (bundle.marks.length) {
+      lines.push(`## Marked items (in order)`);
+      lines.push("");
+      bundle.marks.forEach((id, i) => {
+        const t = titleOf(id);
+        lines.push(`${String(i + 1).padStart(2, "0")}. **${id}**${t ? " — " + t : ""}`);
+      });
+      lines.push("");
+    }
+    const noteIds = Object.keys(bundle.notes);
+    if (noteIds.length) {
+      lines.push(`## Notes`);
+      lines.push("");
+      noteIds.sort();
+      for (const id of noteIds) {
+        const t = titleOf(id);
+        lines.push(`### ${id}${t ? " — " + t : ""}`);
+        lines.push("");
+        for (const n of bundle.notes[id]) {
+          lines.push(`*${n.date} (${n.by})* — ${n.text}`);
+          lines.push("");
+        }
+      }
+    }
+    if (!bundle.marks.length && !noteIds.length) {
+      lines.push("_No marks or notes yet._");
+    }
+    return lines.join("\n");
+  }
+  function hhDownload(filename, mime, content) {
+    const blob = new Blob([content], { type: mime });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+  }
+  function hhExportRun() {
+    if (!canMark()) return;
+    const bundle = hhExportBuild(); if (!bundle) return;
+    const ex = bundle.exporter;
+    const stamp = bundle.exportedAt.slice(0, 10);   // YYYY-MM-DD
+    const base = `hhf-notes_${ex.initials}_${stamp}`;
+    hhDownload(`${base}.json`, "application/json", JSON.stringify(bundle, null, 2));
+    hhDownload(`${base}.md`,   "text/markdown",    hhExportMarkdown(bundle));
+    hhDirtyReset();
+    hhToast(`Exported ${bundle.marks.length} mark${bundle.marks.length === 1 ? "" : "s"} + ${
+      Object.values(bundle.notes).reduce((a, b) => a + b.length, 0)} note${
+      Object.values(bundle.notes).reduce((a, b) => a + b.length, 0) === 1 ? "" : "s"
+    }`, "ok");
+  }
+
+  // Import: read JSON, validate, show a preview dialog, additively merge on
+  // confirm. Notes dedupe on (by,date,text). Marks append (importer's tail
+  // entries land after the importer's current marks, preserving relative
+  // order). Seen is untouched. Never destructive.
+  function hhImportPick() {
+    if (!canMark()) return;
+    const inp = document.createElement("input");
+    inp.type = "file"; inp.accept = ".json,application/json";
+    inp.addEventListener("change", () => {
+      const f = inp.files && inp.files[0]; if (!f) return;
+      const r = new FileReader();
+      r.onload = () => { try { hhImportPreview(JSON.parse(r.result)); }
+                         catch { hhToast("not a valid export file", "err"); } };
+      r.readAsText(f);
+    });
+    inp.click();
+  }
+  function hhImportPreview(bundle) {
+    if (!bundle || bundle.version !== 1 || !bundle.exporter) { hhToast("unrecognised export format", "err"); return; }
+    // Compute merge stats without writing anything.
+    let rnAll = {}; try { rnAll = JSON.parse(localStorage.getItem("hhf_rn") || "{}"); } catch {}
+    let newNotes = 0, dupNotes = 0;
+    for (const [archId, arr] of Object.entries(bundle.notes || {})) {
+      const existing = rnAll[archId] || [];
+      const key = n => `${n.by}|${n.date}|${n.text}`;
+      const have = new Set(existing.map(key));
+      for (const n of arr) (have.has(key(n)) ? (dupNotes++) : (newNotes++));
+    }
+    const newMarks = (bundle.marks || []).filter(id => !marksHas(id)).length;
+    const ex = bundle.exporter;
+    const dlg = document.createElement("div");
+    dlg.className = "hh-import-dlg";
+    dlg.innerHTML = `
+      <div class="hh-import-card">
+        <div class="hh-import-head">Import notes & marks</div>
+        <div class="hh-import-body">
+          <p>From <b>${escapeHTML(ex.name)}</b> (${escapeHTML(ex.initials)})
+            <span class="hh-i-when">exported ${escapeHTML((bundle.exportedAt || "").slice(0, 10))}</span></p>
+          <ul class="hh-i-stats">
+            <li><b>${newNotes}</b> new notes${dupNotes ? ` <span>(${dupNotes} already present, will be skipped)</span>` : ""}</li>
+            <li><b>${newMarks}</b> new marks${(bundle.marks || []).length - newMarks ? ` <span>(${(bundle.marks || []).length - newMarks} already in your list)</span>` : ""}</li>
+          </ul>
+          <p class="hh-i-foot">Nothing of yours will be overwritten. Notes from this researcher's file are
+            added alongside your own; marks are appended to the tail of your current order.</p>
+        </div>
+        <div class="hh-import-acts">
+          <button class="hh-i-cancel">Cancel</button>
+          <button class="hh-i-go">Merge</button>
+        </div>
+      </div>`;
+    document.body.appendChild(dlg);
+    const close = () => dlg.remove();
+    dlg.addEventListener("click", e => { if (e.target === dlg) close(); });
+    dlg.querySelector(".hh-i-cancel").addEventListener("click", close);
+    dlg.querySelector(".hh-i-go").addEventListener("click", () => { hhImportCommit(bundle); close(); });
+  }
+  function hhImportCommit(bundle) {
+    let rnAll = {}; try { rnAll = JSON.parse(localStorage.getItem("hhf_rn") || "{}"); } catch {}
+    let addedNotes = 0;
+    for (const [archId, arr] of Object.entries(bundle.notes || {})) {
+      const existing = rnAll[archId] || [];
+      const key = n => `${n.by}|${n.date}|${n.text}`;
+      const have = new Set(existing.map(key));
+      for (const n of arr) if (!have.has(key(n))) { existing.unshift(n); addedNotes++; }
+      rnAll[archId] = existing;
+    }
+    try { localStorage.setItem("hhf_rn", JSON.stringify(rnAll)); } catch {}
+    let addedMarks = 0;
+    for (const id of (bundle.marks || [])) {
+      if (!marksHas(id)) { marksAdd(id); addedMarks++; }
+    }
+    marksSave();
+    // Re-render anything that depends on this state.
+    applyFilters(); renderList(); updateFilterBadge(); renderMarkBar();
+    const it = state.items.find(i => i.id === state.selectedId);
+    if (it) renderMeta(it);
+    hhToast(`Merged ${addedNotes} note${addedNotes === 1 ? "" : "s"} + ${addedMarks} mark${addedMarks === 1 ? "" : "s"}`, "ok");
   }
 
   // ── Researcher "seen / reviewed" — same per-researcher pattern ────────────
@@ -3153,7 +3412,8 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       `<span class="mb-count"><span class="mb-dot"></span>${n} marked</span>` +
       `<span class="mb-actions">` +
         `<button class="mb-btn mb-only${state.filterMarkedOnly ? " on" : ""}" id="mb-only" title="Show only marked items">only</button>` +
-        `<button class="mb-btn" id="mb-export" title="Copy marked archive IDs">export</button>` +
+        `<button class="mb-btn${state.sortMarksFirst ? " on" : ""}" id="mb-first" title="Put marked items at the top of the list (in your order)">first</button>` +
+        `<button class="mb-btn" id="mb-export" title="Copy marked archive IDs">copy</button>` +
         `<button class="mb-btn mb-clear" id="mb-clear" title="Hold to clear all marks">clear</button>` +
       `</span>`;
 
@@ -3162,6 +3422,11 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       applyFilters(); renderList(); updateFilterBadge(); renderMarkBar();
       if (state.filtered.length && !state.filtered.find(i => i.id === state.selectedId))
         selectItem(state.filtered[0].id);
+    });
+
+    bar.querySelector("#mb-first").addEventListener("click", () => {
+      state.sortMarksFirst = !state.sortMarksFirst;
+      applyFilters(); renderList(); renderMarkBar();
     });
 
     bar.querySelector("#mb-export").addEventListener("click", async () => {
@@ -3181,9 +3446,11 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       e.preventDefault();
       clr.classList.add("holding");
       timer = setTimeout(() => {
+        const n = marked.length;
         marksClear();
         state.filterMarkedOnly = false;
         marksSave();
+        if (n) hhDirtyTouch(n);
         applyFilters(); renderList(); updateFilterBadge(); renderMarkBar();
         hhToast("marks cleared");
       }, 1500);
@@ -3449,6 +3716,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     filterCreator: new Set(),
     filterBuiltStatus: new Set(),
     filterMarkedOnly: false,
+    sortMarksFirst: false,   // researcher-only: marked items at top in mark-order
     curations: [],      // available curated lenses (from curations/index.json)
     curation: null,     // active curation object, or null = normal archive mode
     bulkSel: new Set(), // archIds selected for bulk-edit (admin only)
@@ -4078,6 +4346,14 @@ WHERE {
     if (state.filterMarkedOnly) {
       const rank = new Map(marked.map((id, i) => [id, i]));
       state.filtered.sort((a, b) => (rank.get(a.id) ?? 1e9) - (rank.get(b.id) ?? 1e9));
+    } else if (state.sortMarksFirst && marked.length) {
+      // Marked first → partition: marked items in mark-order, then everything
+      // else in the previously-selected column sort. Researcher-only.
+      const rank = new Map(marked.map((id, i) => [id, i]));
+      const ms = [], rest = [];
+      for (const it of state.filtered) (rank.has(it.id) ? ms : rest).push(it);
+      ms.sort((a, b) => rank.get(a.id) - rank.get(b.id));
+      state.filtered = ms.concat(rest);
     }
   }
 
@@ -5012,6 +5288,7 @@ WHERE {
     const wasOnly = state.filterMarkedOnly;
     if (marksHas(id)) marksRemove(id); else marksAdd(id);
     marksSave();                            // persist to this researcher's slot
+    hhDirtyTouch();
     // An empty shortlist + "only" filter strands the list with no escape
     // (the bar's zero-state has no toggle) — drop the filter automatically.
     if (state.filterMarkedOnly && marked.length === 0) state.filterMarkedOnly = false;
@@ -5984,14 +6261,16 @@ WHERE {
         the record and shows only your notes. Click again to bring the record back.
         The setting follows you between items.</p>
 
-      <p class="ip-grp">Coming soon</p>
-      <p class="ip-note">
-        <b>Export</b> — save your notes + marks as a human-readable file to your
-        Desktop.<br>
-        <b>Import</b> — receive another researcher's file; nothing of yours is
-        ever overwritten (notes are merged additively, marks are appended).<br>
-        <b>Marked-first sort</b> — a sort option that puts your marks at the top
-        of the list in your chosen order.</p>
+      <p class="ip-grp">Export & import</p>
+      <p class="ip-note">Your marks and notes live on this device. <b>Export</b>
+        saves them as two files (JSON + Markdown) — share, archive, or move them
+        to another machine. <b>Import</b> reads someone else's JSON and merges
+        it additively into yours — nothing of yours is ever overwritten.</p>
+      <div class="hh-tool-row">
+        <button class="hh-tool-btn" id="hh-export-btn">Export notes &amp; marks</button>
+        <button class="hh-tool-btn" id="hh-import-btn">Import from file…</button>
+      </div>
+      <p id="hh-export-status" class="hh-tool-status"></p>
 
       <p class="ip-grp">Shortcuts</p>
       ${keys([
@@ -6010,6 +6289,18 @@ WHERE {
       <p class="ip-foot">Signed in until you close the tab. To switch researchers,
         click the lock icon beside "researcher notes".</p>`;
     document.getElementById("rn-help-inner").innerHTML = html;
+    // Wire export / import buttons that just got painted in.
+    const exBtn = document.getElementById("hh-export-btn");
+    const imBtn = document.getElementById("hh-import-btn");
+    const status = document.getElementById("hh-export-status");
+    if (exBtn) exBtn.addEventListener("click", hhExportRun);
+    if (imBtn) imBtn.addEventListener("click", hhImportPick);
+    if (status) {
+      const n = hhDirtyCount();
+      status.textContent = n
+        ? `${n} unsaved change${n === 1 ? "" : "s"} since your last export.`
+        : "All changes exported.";
+    }
   }
   function openRnHelpPane() {
     if (!canMark()) return;
@@ -6195,6 +6486,9 @@ WHERE {
     const rnHelpClose = document.getElementById("rn-help-close");
     if (rnHelpBtn)   rnHelpBtn.addEventListener("click", e => { e.stopPropagation(); toggleRnHelpPane(); });
     if (rnHelpClose) rnHelpClose.addEventListener("click", closeRnHelpPane);
+    // Clicking the dirty badge is the fastest path into the export button.
+    const dirtyBadge = document.getElementById("hh-dirty-badge");
+    if (dirtyBadge) dirtyBadge.addEventListener("click", e => { e.stopPropagation(); openRnHelpPane(); });
     document.getElementById("pdf-close").addEventListener("click", closePdf);
     document.getElementById("pdf-view").addEventListener("click", () => {
       const it = state.items.find(i => i.id === state.selectedId);
