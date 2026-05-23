@@ -1769,7 +1769,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06.31";
+  const VERSION      = "v1.06.32";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -5061,8 +5061,8 @@ WHERE {
         toggleAboutPane();
       }
     });
-    document.getElementById("mob-about-close").addEventListener("click", closeMobAbout);
-    document.getElementById("mob-about-continue").addEventListener("click", closeMobAbout);
+    // mob-about-close + mob-about-continue handlers moved into main()'s
+    // early-bind block so they survive a slow/failed SPARQL fetch on mobile.
 
     $("#rows").addEventListener("click", e => {
       const row = e.target.closest(".row");
@@ -5338,6 +5338,15 @@ WHERE {
       });
     }
     document.getElementById("about-pane-close").addEventListener("click", closeAboutPane);
+    // Mobile splash dismiss — bind EARLY (out of wireControls) so the
+    // Continue button is responsive before the SPARQL fetch resolves.
+    // wireControls runs post-SPARQL; on slow mobile networks visitors saw
+    // the splash but Continue did nothing because the handler hadn't been
+    // attached yet. Symptom: "stuck on splash".
+    const mobClose    = document.getElementById("mob-about-close");
+    const mobContinue = document.getElementById("mob-about-continue");
+    if (mobClose)    mobClose.addEventListener("click",    closeMobAbout);
+    if (mobContinue) mobContinue.addEventListener("click", closeMobAbout);
     // Continue-to-archive: the documented splash exit. Closes the about-pane
     // (clears body.hh-about-open + body.hh-splash) AND expands both side
     // panels so the visitor lands in the working configuration. After this,
