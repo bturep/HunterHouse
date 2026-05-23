@@ -2062,7 +2062,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.69";
+  const VERSION      = "v1.07-test.70";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6434,22 +6434,13 @@ WHERE {
 
       <p class="ip-grp">Export & import</p>
       <p class="ip-note">Your marks and notes live on this device. <b>Export to
-        file</b> saves them as a plain Markdown file you can read in any text
-        editor, archive, email, or move to another machine. <b>Import from file</b>
-        reads a Markdown file back in.
+        file</b> saves them as a plain Markdown file — keep it as a backup, or
+        open it in any text editor to read, edit, or add notes outside the app.
+        <b>Import from file</b> reads your file back in: notes for the items in
+        the file are replaced with what's in it (items you didn't include are
+        left alone), and your mark list is set to the file's order.
         <br><br>
-        The import is smart about <b>whose file it is</b>:
-        <br>
-        — If it's <b>your own file</b> (the initials match yours), your notes for
-        the items in the file are <i>replaced</i> with the file's versions — so
-        you can edit your .md in a text editor and reimport without duplication.
-        Items not in the file are untouched.
-        <br>
-        — If it's <b>someone else's file</b>, their notes are added <i>alongside</i>
-        yours; their marks are appended to your list. Nothing of yours is ever
-        overwritten.
-        <br><br>
-        Find the buttons below your researcher-notes panel.</p>
+        The buttons are below your researcher-notes panel.</p>
 
       <p class="ip-grp">Shortcuts</p>
       ${keys([
