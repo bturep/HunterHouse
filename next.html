@@ -876,6 +876,29 @@
   }
   .meta-head .l{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
   .meta-head .r{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em;white-space:nowrap}
+  /* Compose-mode toggle (researcher + admin only). Hidden by default and shown
+     when body.is-researcher is set by reflectComposeRole(). Active state adds
+     a slash through the eye to communicate "record hidden". */
+  .hh-compose-btn{
+    display:none;background:none;border:0;padding:4px;margin:-4px;
+    color:var(--muted);cursor:pointer;line-height:0;
+    -webkit-tap-highlight-color:transparent;border-radius:3px;
+  }
+  body.is-researcher .hh-compose-btn{display:inline-flex;align-items:center;justify-content:center}
+  .hh-compose-btn:hover{color:var(--ink)}
+  body.hh-compose .hh-compose-btn{color:var(--red-deep)}
+  .hh-compose-btn .hh-eye-slash{display:none;stroke:var(--red-deep)}
+  body.hh-compose .hh-compose-btn .hh-eye-slash{display:inline}
+  /* When compose is on: hide everything in the record body except the notes
+     panel; pull the notes panel up flush (drop its top border) since it's
+     no longer "below" anything. Data footer also disappears — its links
+     point into the hidden record. */
+  body.hh-compose #meta-body > *{display:none}
+  body.hh-compose #meta-body > #rn-panel{display:block;margin-top:0;border-top:0;padding-top:0}
+  body.hh-compose #data-footer{display:none}
+  /* Curation mode owns the record pane differently — suppress the toggle
+     there so it doesn't conflict with the curator card. */
+  body.hh-in-curation .hh-compose-btn{display:none}
   .meta-body{flex:1;overflow-y:auto;padding:22px 22px 32px;display:flex;flex-direction:column}
 
   .meta-title{font-size:21px;font-weight:500;color:var(--ink);letter-spacing:-0.015em;line-height:1.2;margin-bottom:8px}
@@ -1892,7 +1915,16 @@
     </button>
     <div class="panel-content">
       <div class="scroll-pip scroll-pip-r" id="meta-pip"></div>
-      <div class="meta-head"><span class="l">Item record</span></div>
+      <div class="meta-head">
+        <span class="l">Item record</span>
+        <button id="hh-compose-btn" class="hh-compose-btn" title="Compose mode — hide the record, keep notes" aria-label="Toggle compose mode">
+          <svg class="hh-eye" viewBox="0 0 16 12" width="15" height="11" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 6s2.6-4.5 7-4.5 7 4.5 7 4.5-2.6 4.5-7 4.5S1 6 1 6z"/>
+            <circle cx="8" cy="6" r="2"/>
+            <line class="hh-eye-slash" x1="2" y1="2" x2="14" y2="10"/>
+          </svg>
+        </button>
+      </div>
       <div class="meta-body" id="meta-body">
         <div class="empty">Select an item from the list</div>
       </div>
@@ -1948,7 +1980,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.59";
+  const VERSION      = "v1.07-test.60";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2798,6 +2830,41 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   const LOCK_SVG = `<svg width="10" height="12" viewBox="0 0 10 12" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="5.5" width="8" height="6" rx="1"/><path d="M3 5.5V3.8a2 2 0 0 1 4 0v1.7"/></svg>`;
   const UNLOCK_SVG = `<svg width="10" height="12" viewBox="0 0 10 12" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="5.5" width="8" height="6" rx="1"/><path d="M3 5.5V3.8a2 2 0 0 1 4 0V1.5"/></svg>`;
 
+  // ── Compose mode (researcher + admin) ─────────────────────────────────────
+  // body.hh-compose hides everything in the record pane except the notes
+  // panel. State persists per researcher in localStorage["hhf_compose"], so
+  // it survives reloads and item switches but resets on lock-out. Public
+  // users never see the toggle (body.is-researcher gates visibility).
+  function composeKey() { const s = rnSession(); return s && s.pin; }
+  function composeIsOn() {
+    if (!canMark()) return false;
+    const k = composeKey(); if (!k) return false;
+    try { return !!JSON.parse(localStorage.getItem("hhf_compose") || "{}")[k]; }
+    catch { return false; }
+  }
+  function composeSet(on) {
+    const k = composeKey(); if (!k) return;
+    try {
+      const all = JSON.parse(localStorage.getItem("hhf_compose") || "{}");
+      if (on) all[k] = 1; else delete all[k];
+      localStorage.setItem("hhf_compose", JSON.stringify(all));
+    } catch {}
+  }
+  // Toggle body classes for both role visibility and active state.
+  function reflectComposeRole() {
+    document.body.classList.toggle("is-researcher", canMark());
+    document.body.classList.toggle("hh-compose", composeIsOn());
+    const btn = document.getElementById("hh-compose-btn");
+    if (btn) btn.title = composeIsOn()
+      ? "Compose mode on — click to show the full record"
+      : "Compose mode — hide the record, keep notes";
+  }
+  function toggleCompose() {
+    if (!canMark()) return;
+    composeSet(!composeIsOn());
+    reflectComposeRole();
+  }
+
   // Re-render the whole record pane after an auth change (lock / unlock) so
   // admin affordances + proxy badge appear/disappear immediately.
   function rerenderRecord(archId) {
@@ -2805,6 +2872,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     // then re-render the list so marked dots + the bar reflect the new session.
     marksHydrate();
     seenHydrate();
+    reflectComposeRole();                              // role gate + restore state
     if (!canMark()) state.filterMarkedOnly = false;   // drop the filter on lock-out
     if (state.items.length) { applyFilters(); renderList(); updateFilterBadge(); }
     const it = state.items.find(i => i.id === archId);
@@ -5143,6 +5211,9 @@ WHERE {
       }
     });
 
+    const composeBtn = document.getElementById("hh-compose-btn");
+    if (composeBtn) composeBtn.addEventListener("click", e => { e.stopPropagation(); toggleCompose(); });
+
     document.addEventListener("click", closeAllDropdowns);
 
     $("#filter-toggle").addEventListener("click", e => {
@@ -6109,6 +6180,7 @@ WHERE {
 
       marksHydrate();   // restore this session's researcher marks (if unlocked)
       seenHydrate();
+      reflectComposeRole();   // gate the eyeball + apply persisted compose state
       await loadCurationIndex();   // populate [Curated] entry (tiny local JSON; no-op if absent)
       applyFilters();
       renderList();
