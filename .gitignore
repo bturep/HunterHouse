@@ -21,3 +21,9 @@ data/snapshots/wikibase_full_*/
 # Per-run R2-link verifier reports (scripts/verify_r2_links.py --json).
 # Local audit artifacts; commit with `git add -f` if you want one pinned.
 data/snapshots/r2_verify_*.json
+
+# Pytest / Playwright caches (tests/)
+.pytest_cache/
+tests/.pytest_cache/
+test-results/
+playwright-report/
