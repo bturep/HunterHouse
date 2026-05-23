@@ -698,6 +698,36 @@
   .row.seen .rf-seen{opacity:1;pointer-events:auto}
   .row .rf-seen:hover{color:var(--ink)}
 
+  /* Reorder controls — only visible when the list is filtered to marked-only.
+     A leading 34px column holds a ↑ / ⋮⋮ / ↓ stack. The grip initiates drag
+     (pointer events); the arrows nudge one slot. Hidden in every other mode
+     so list layout is unchanged elsewhere. */
+  .row .rf-reorder{display:none}
+  body.marks-only .row{grid-template-columns:34px 104px 1fr 50px}
+  body.marks-only .row .rf-reorder{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:1px;user-select:none;-webkit-user-select:none;align-self:stretch;
+    margin-left:-6px;padding:2px 0;
+  }
+  .row .rf-grip{
+    width:18px;height:14px;display:flex;align-items:center;justify-content:center;
+    color:var(--hint);cursor:grab;font-size:11px;line-height:1;
+    touch-action:none;-webkit-tap-highlight-color:transparent;
+  }
+  .row .rf-grip:hover{color:var(--ink)}
+  .row .rf-grip:active,.row.dragging .rf-grip{cursor:grabbing;color:var(--red-deep)}
+  .row .rf-arrow{
+    width:18px;height:11px;display:flex;align-items:center;justify-content:center;
+    color:var(--hint);cursor:pointer;font-size:10px;line-height:1;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .row .rf-arrow:hover{color:var(--ink)}
+  .row .rf-arrow.is-disabled{opacity:.25;pointer-events:none}
+  /* Drag visual states */
+  .row.dragging{opacity:.55}
+  .row.drag-over-top{box-shadow:inset 0 2px 0 var(--red-deep)}
+  .row.drag-over-bot{box-shadow:inset 0 -2px 0 var(--red-deep)}
+
   /* ── researcher marked bar (browse pane, research/admin only) ── */
   .mark-bar{
     display:flex;align-items:center;gap:12px;
@@ -1907,7 +1937,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.56";
+  const VERSION      = "v1.07-test.57";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -1987,6 +2017,7 @@
   // marking / selections only; absent/Public → read-only.
   const RPINS = {
     "203BTP": { name: "Brandon Poole", initials: "BP", qid: null, role: "admin" },
+    "203OJ":  { name: "Olivia Jol",    initials: "OJ", qid: null, role: "research" },
   };
   // Reverse lookup by lowercase name → entry (with pin attached)
   const RNAMES = Object.fromEntries(
@@ -2081,6 +2112,13 @@
   let _proxyOnline = true, _proxyAuthenticated = true;
   let _proxyLastPing = 0, _proxyTimer = null;
   function reflectProxyState() {
+    // Non-admins never see the badge — don't even create the DOM element.
+    if (!canEditWikibase()) {
+      document.body.classList.remove("hh-proxy-off");
+      const existing = document.getElementById("hh-proxy-badge");
+      if (existing) existing.remove();
+      return;
+    }
     let badge = document.getElementById("hh-proxy-badge");
     if (!badge) {
       badge = document.createElement("div");
