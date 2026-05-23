@@ -457,3 +457,21 @@ Working LINE: **NEXT**. Two-part change in one push: (A) re-tint the curator sur
 - **Did not touch** — `assets/verso.css` palette, any non-curator-mode behavior, the mobile sheet layout (the curator-note CSS override at `.mob-sheet-body .cur-note:first-child` was kept intact; the new header underline is dropped when the note is the sheet's opening element).
 
 **Version line: browse.html `v1.06.20` (LIVE, unchanged) · next.html `v1.07-test.51` (staging).**
+
+---
+
+### 2026-05-22 — Session close · ARCHITECTURE.md for external reviewer (browse.html v1.06.31 · next.html v1.07-test.51)
+
+**Session arc.** Three threads landed in one day:
+1. **Vellum curator-mode reskin** → next.html v1.07-test.50 (entry above).
+2. **ARCHITECTURE.md** — high-level brief for an external software engineer to inspect the live site. Single-file audit covering shell, JS module map, data layer (Wikibase SPARQL + R2), the local edit-proxy write path, runtime dependencies, git stats, observational risks, and a six-step "where to start reading" guide. Committed `eb97bcc`. Repo is public (`gh repo view` confirms `isPrivate:false`), so the reviewer needs nothing more than the URL: read access is already universal.
+3. **ARCHITECTURE.md §11 — To-do list** — separate deeper security + maintainability pass added by Brandon as `2393d19`. Catalogues actionable items in three buckets (Now / Soon / Bend-before-break) with file:line refs against `next.html` v1.07-test.51. **One CRITICAL** flagged: the edit-proxy CSRF surface (fallback secret = the hardcoded admin pin; `_cors` sets ACAO conditionally but `do_POST` never *rejects* mismatched Origins; `json.loads` without Content-Type check allows preflight-bypassing simple requests). Today's de-facto mitigation is Chrome Private Network Access; Safari/older Firefox aren't covered. Fix is ~2 hours of edit_proxy.py work. **HIGH:** no offsite Wikibase metadata backup (the R2-sidecar plan from Pending). These supersede the Pending list as the next-session priorities if Brandon is in a hardening mood.
+4. **Cognac palette + curator chrome restructure** → next.html v1.07-test.51 (entry above) — done by Brandon outside this conversation; pre-existing log entry left intact.
+
+**Version reconciliation.** Earlier session entries' trailers report browse.html as `v1.06.20` (LIVE, unchanged). The file is now `v1.06.31`. The 11 intervening patches landed via single-line commits between 2026-05-21 and 2026-05-22 (splash redesign with retracting top bar, brand rename HHFA → "Hunter House Archive", header geometry, title-case filter chips + row phase, EGC info corrections, removal of the Hunter House Foundation link from the about pane) — none with corresponding session-log entries. Not retroactively documenting per-patch; this note records the gap. Worth a quick "what's on live right now" eyeballing next session before next-line work resumes.
+
+**Global memory updated.** `~/.claude/CLAUDE.md` "Current versions" row for Hunter House site bumped `v1.05.00 → v1.06.31` (the table was two major versions stale). Note unfortunately can't be git-tracked from this repo since the global file lives outside it.
+
+**Pending threads** carried into the next session unchanged (Curator Phase 2, Held-by P94/P79, Phase rename, EGC photo ingest, Rotation Part 2, deferred structural items). ARCHITECTURE.md §11 is the new, more actionable companion list — distinct in intent (security/hygiene) from Pending (feature/data).
+
+**Version line: browse.html `v1.06.31` (LIVE) · next.html `v1.07-test.51` (staging).**
