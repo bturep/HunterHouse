@@ -2062,7 +2062,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.68";
+  const VERSION      = "v1.07-test.69";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3212,7 +3212,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       badge.hidden = n === 0;
       badge.title = n === 0
         ? "All changes exported"
-        : `${n} unsaved change${n === 1 ? "" : "s"} since last export — click for tools`;
+        : `${n} unsaved change${n === 1 ? "" : "s"} since last export — click to jump to Export`;
     }
     // Keep the rn-tools status line in lock-step.
     const status = document.getElementById("rn-tools-status");
@@ -3234,14 +3234,12 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     el.innerHTML = `
       <div class="rn-tools-head">researcher tools</div>
       <div class="rn-tools-row">
-        <button class="rn-tools-btn" id="rt-export-json">Export JSON</button>
-        <button class="rn-tools-btn" id="rt-export-md">Save Markdown copy</button>
-        <button class="rn-tools-btn" id="rt-import">Import…</button>
+        <button class="rn-tools-btn" id="rt-export">Export to file…</button>
+        <button class="rn-tools-btn" id="rt-import">Import from file…</button>
       </div>
       <p class="rn-tools-status" id="rn-tools-status"></p>`;
-    el.querySelector("#rt-export-json").addEventListener("click", hhExportJson);
-    el.querySelector("#rt-export-md"  ).addEventListener("click", hhExportMd);
-    el.querySelector("#rt-import"     ).addEventListener("click", hhImportPick);
+    el.querySelector("#rt-export").addEventListener("click", hhExportRun);
+    el.querySelector("#rt-import").addEventListener("click", hhImportPick);
     hhRenderDirtyBadge();
   }
 
@@ -3295,7 +3293,11 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         lines.push(`### ${id}${t ? " — " + t : ""}`);
         lines.push("");
         for (const n of bundle.notes[id]) {
-          lines.push(`*${n.date} (${n.by})* — ${n.text}`);
+          const noteLines = String(n.text).split(/\r?\n/);
+          lines.push(`*${n.date} (${n.by})* — ${noteLines[0]}`);
+          // Continuation lines get a 4-space indent so the parser can
+          // re-glue them. Edit them in any text editor; just keep the indent.
+          for (let i = 1; i < noteLines.length; i++) lines.push("    " + noteLines[i]);
           lines.push("");
         }
       }
@@ -3313,60 +3315,45 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     document.body.appendChild(a); a.click();
     setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
   }
-  // Split into two separate single-download actions. Some browsers (Safari
-  // in particular) throttle/prompt on back-to-back programmatic downloads,
-  // so the JSON-and-MD pair has to come from two distinct user clicks.
-  function hhExportBaseName(bundle) {
-    return `hhf-notes_${bundle.exporter.initials}_${bundle.exportedAt.slice(0, 10)}`;
-  }
-  function hhNoteTotal(bundle) {
-    return Object.values(bundle.notes).reduce((a, b) => a + b.length, 0);
-  }
-  // Canonical: the file used by Import. Resets the dirty counter on success.
-  function hhExportJson() {
+  // Single export action. Markdown is the canonical artifact — human-readable,
+  // editable in any text editor, and round-trippable through hhParseMarkdown
+  // on Import. No JSON path: one file format, one mental model.
+  function hhExportRun() {
     if (!canMark()) return;
     const bundle = hhExportBuild(); if (!bundle) return;
-    hhDownload(`${hhExportBaseName(bundle)}.json`, "application/json",
-               JSON.stringify(bundle, null, 2));
+    const base = `hhf-notes_${bundle.exporter.initials}_${bundle.exportedAt.slice(0, 10)}`;
+    hhDownload(`${base}.md`, "text/markdown", hhExportMarkdown(bundle));
     hhDirtyReset();
+    const noteN = Object.values(bundle.notes).reduce((a, b) => a + b.length, 0);
     hhToast(`Exported ${bundle.marks.length} mark${bundle.marks.length === 1 ? "" : "s"} + ${
-      hhNoteTotal(bundle)} note${hhNoteTotal(bundle) === 1 ? "" : "s"} (JSON)`, "ok");
-  }
-  // Optional: human-readable rendering. Doesn't reset the dirty counter
-  // because it isn't the canonical artifact — JSON is.
-  function hhExportMd() {
-    if (!canMark()) return;
-    const bundle = hhExportBuild(); if (!bundle) return;
-    hhDownload(`${hhExportBaseName(bundle)}.md`, "text/markdown",
-               hhExportMarkdown(bundle));
-    hhToast("Markdown copy saved (does not reset unsaved counter)", "ok");
+      noteN} note${noteN === 1 ? "" : "s"}`, "ok");
   }
 
-  // Import: read JSON or Markdown, validate, show a preview dialog, additively
-  // merge on confirm. Notes dedupe on (by,date,text). Marks append (importer
-  // tail lands after the importer's current marks, preserving relative order).
-  // Seen is untouched. Never destructive.
+  // Import: read a Markdown export, validate, show a preview dialog, then
+  // apply on confirm with semantics that depend on who wrote it:
+  //   • Same researcher (initials match)  → REPLACE my notes for items in
+  //     the file (other authors' notes on those items stay untouched);
+  //     REPLACE my mark order. So edit your .md in a text editor and
+  //     reimport — your edits stick, no duplication.
+  //   • Different researcher              → ADDITIVE merge. Their notes
+  //     join yours; their marks append to your tail. Nothing of yours is
+  //     ever overwritten.
+  // Seen is untouched in either direction.
   function hhImportPick() {
     if (!canMark()) return;
     const inp = document.createElement("input");
     inp.type = "file";
-    inp.accept = ".json,.md,.markdown,application/json,text/markdown";
+    inp.accept = ".md,.markdown,text/markdown";
     inp.addEventListener("change", () => {
       const f = inp.files && inp.files[0]; if (!f) return;
       const r = new FileReader();
       r.onload = () => {
-        const text = r.result || "";
-        const looksJson = /\.json$/i.test(f.name) || /^\s*\{/.test(text);
         let bundle = null;
-        try { bundle = looksJson ? JSON.parse(text) : hhParseMarkdown(text); }
+        try { bundle = hhParseMarkdown(r.result || ""); }
         catch { hhToast("couldn't read that file", "err"); return; }
-        if (!bundle) { hhToast("couldn't parse anything from this file", "err"); return; }
         const total = (bundle.marks ? bundle.marks.length : 0) +
                       Object.values(bundle.notes || {}).reduce((a, b) => a + b.length, 0);
-        if (!total && !looksJson) {
-          hhToast("the markdown didn't match the export format — nothing to merge", "err");
-          return;
-        }
+        if (!total) { hhToast("the markdown didn't match the export format — nothing to import", "err"); return; }
         hhImportPreview(bundle);
       };
       r.readAsText(f);
@@ -3374,16 +3361,18 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     inp.click();
   }
 
-  // Best-effort parser for the canonical Markdown that hhExportMarkdown writes.
+  // Parser for the canonical Markdown that hhExportMarkdown writes.
   // Recognises:
   //   # <Name> — researcher notes & marks
   //   Exported <YYYY-MM-DD> (<INITIALS>)
   //   ## Marked items (in order)     →  NN. **<ARCH-ID>** [— title]
-  //   ## Notes                       →  ### <ARCH-ID>     followed by
-  //                                     *<DATE> (<BY>)* — <text>
-  // Anything that doesn't match is silently skipped — by design (rather than
-  // misimport on edited markdown, do nothing). Multi-line note bodies and
-  // freely-formatted edits won't round-trip; use the JSON if that matters.
+  //   ## Notes                       →  ### <ARCH-ID>
+  //                                     *<DATE> (<BY>)* — <first line>
+  //                                         continuation line
+  //                                         continuation line
+  // 4-space-indented lines under a note are continuations of its body.
+  // Anything that doesn't match is silently skipped — by design (rather
+  // than misimport on edited markdown, do nothing).
   function hhParseMarkdown(text) {
     const lines = String(text).split(/\r?\n/);
     let exporterName = "", exporterInitials = "", exportedAt = new Date().toISOString();
@@ -3399,29 +3388,45 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     const notes = {};
     let mode = null;            // null | "marks" | "notes"
     let currentNoteId = null;
+    let pending = null;         // in-progress note collecting continuation lines
     const ARCHID = /\b([A-Z]{2,4}-[A-Z]{2,4}-\d{3,5})\b/;
+    const flush = () => {
+      if (pending && currentNoteId) {
+        if (!notes[currentNoteId]) notes[currentNoteId] = [];
+        notes[currentNoteId].push(pending);
+      }
+      pending = null;
+    };
     for (const raw of lines) {
       const ln = raw.trimEnd();
-      if (/^##\s+marked items/i.test(ln))  { mode = "marks"; currentNoteId = null; continue; }
-      if (/^##\s+notes\b/i.test(ln))       { mode = "notes"; currentNoteId = null; continue; }
-      if (/^##\s+/.test(ln))               { mode = null; currentNoteId = null; continue; }
+      if (/^##\s+marked items/i.test(ln))  { flush(); mode = "marks"; currentNoteId = null; continue; }
+      if (/^##\s+notes\b/i.test(ln))       { flush(); mode = "notes"; currentNoteId = null; continue; }
+      if (/^##\s+/.test(ln))               { flush(); mode = null; currentNoteId = null; continue; }
       if (mode === "marks") {
         const m = ln.match(ARCHID); if (m) marks.push(m[1]);
         continue;
       }
       if (mode === "notes") {
         if (/^###\s+/.test(ln)) {
+          flush();
           const idm = ln.match(ARCHID);
           currentNoteId = idm ? idm[1] : null;
-          if (currentNoteId && !notes[currentNoteId]) notes[currentNoteId] = [];
           continue;
         }
-        const n = ln.match(/^\*([\d.\-/]+)\s*\((\w+)\)\*\s+—\s+(.+)$/);
-        if (n && currentNoteId) {
-          notes[currentNoteId].push({ date: n[1], by: n[2], text: n[3] });
+        const start = ln.match(/^\*([\d.\-/]+)\s*\((\w+)\)\*\s+—\s+(.+)$/);
+        if (start && currentNoteId) {
+          flush();
+          pending = { date: start[1], by: start[2], text: start[3] };
+          continue;
         }
+        if (pending && /^(    |\t)/.test(raw)) {
+          pending.text += "\n" + raw.replace(/^(    |\t)/, "");
+          continue;
+        }
+        if (ln === "") { flush(); continue; }
       }
     }
+    flush();
     return {
       version: 1,
       exportedAt,
@@ -3432,64 +3437,101 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   }
   function hhImportPreview(bundle) {
     if (!bundle || bundle.version !== 1 || !bundle.exporter) { hhToast("unrecognised export format", "err"); return; }
-    // Compute merge stats without writing anything.
-    let rnAll = {}; try { rnAll = JSON.parse(localStorage.getItem("hhf_rn") || "{}"); } catch {}
-    let newNotes = 0, dupNotes = 0;
-    for (const [archId, arr] of Object.entries(bundle.notes || {})) {
-      const existing = rnAll[archId] || [];
-      const key = n => `${n.by}|${n.date}|${n.text}`;
-      const have = new Set(existing.map(key));
-      for (const n of arr) (have.has(key(n)) ? (dupNotes++) : (newNotes++));
-    }
-    const newMarks = (bundle.marks || []).filter(id => !marksHas(id)).length;
+    const s = rnSession();
+    const isOwn = !!(s && bundle.exporter && bundle.exporter.initials &&
+                     bundle.exporter.initials === s.initials);
     const ex = bundle.exporter;
+    const fileNoteCount = Object.values(bundle.notes || {}).reduce((a, b) => a + b.length, 0);
+    const fileNoteItems = Object.keys(bundle.notes || {}).length;
+    const fileMarkCount = (bundle.marks || []).length;
+    // Stats vary by mode.
+    let stats, foot, verb;
+    if (isOwn) {
+      verb = "Update";
+      stats = `
+        <li><b>${fileNoteCount}</b> note${fileNoteCount === 1 ? "" : "s"} across <b>${fileNoteItems}</b> item${fileNoteItems === 1 ? "" : "s"} — your notes for these items will be <b>replaced</b> with the file's versions</li>
+        <li><b>${fileMarkCount}</b> mark${fileMarkCount === 1 ? "" : "s"} — your mark list will be <b>replaced</b> with this order</li>`;
+      foot = "This is your own file. Notes from other researchers stay untouched. Items not mentioned in the file are unaffected.";
+    } else {
+      let rnAll = {}; try { rnAll = JSON.parse(localStorage.getItem("hhf_rn") || "{}"); } catch {}
+      let newNotes = 0, dupNotes = 0;
+      for (const [archId, arr] of Object.entries(bundle.notes || {})) {
+        const existing = rnAll[archId] || [];
+        const key = n => `${n.by}|${n.date}|${n.text}`;
+        const have = new Set(existing.map(key));
+        for (const n of arr) (have.has(key(n)) ? (dupNotes++) : (newNotes++));
+      }
+      const newMarks = (bundle.marks || []).filter(id => !marksHas(id)).length;
+      verb = "Merge";
+      stats = `
+        <li><b>${newNotes}</b> new note${newNotes === 1 ? "" : "s"}${dupNotes ? ` <span>(${dupNotes} already present, will be skipped)</span>` : ""}</li>
+        <li><b>${newMarks}</b> new mark${newMarks === 1 ? "" : "s"}${fileMarkCount - newMarks ? ` <span>(${fileMarkCount - newMarks} already in your list)</span>` : ""}</li>`;
+      foot = "Their notes are added alongside yours; their marks are appended to your list. Nothing of yours is overwritten.";
+    }
     const dlg = document.createElement("div");
     dlg.className = "hh-import-dlg";
     dlg.innerHTML = `
       <div class="hh-import-card">
-        <div class="hh-import-head">Import notes & marks</div>
+        <div class="hh-import-head">Import notes & marks${isOwn ? " — your file" : ""}</div>
         <div class="hh-import-body">
-          <p>From <b>${escapeHTML(ex.name)}</b> (${escapeHTML(ex.initials)})
+          <p>From <b>${escapeHTML(ex.name || "(unknown)")}</b>${ex.initials ? ` (${escapeHTML(ex.initials)})` : ""}
             <span class="hh-i-when">exported ${escapeHTML((bundle.exportedAt || "").slice(0, 10))}</span></p>
-          <ul class="hh-i-stats">
-            <li><b>${newNotes}</b> new notes${dupNotes ? ` <span>(${dupNotes} already present, will be skipped)</span>` : ""}</li>
-            <li><b>${newMarks}</b> new marks${(bundle.marks || []).length - newMarks ? ` <span>(${(bundle.marks || []).length - newMarks} already in your list)</span>` : ""}</li>
-          </ul>
-          <p class="hh-i-foot">Nothing of yours will be overwritten. Notes from this researcher's file are
-            added alongside your own; marks are appended to the tail of your current order.</p>
+          <ul class="hh-i-stats">${stats}</ul>
+          <p class="hh-i-foot">${foot}</p>
         </div>
         <div class="hh-import-acts">
           <button class="hh-i-cancel">Cancel</button>
-          <button class="hh-i-go">Merge</button>
+          <button class="hh-i-go">${verb}</button>
         </div>
       </div>`;
     document.body.appendChild(dlg);
     const close = () => dlg.remove();
     dlg.addEventListener("click", e => { if (e.target === dlg) close(); });
     dlg.querySelector(".hh-i-cancel").addEventListener("click", close);
-    dlg.querySelector(".hh-i-go").addEventListener("click", () => { hhImportCommit(bundle); close(); });
+    dlg.querySelector(".hh-i-go").addEventListener("click", () => { hhImportCommit(bundle, isOwn); close(); });
   }
-  function hhImportCommit(bundle) {
+  function hhImportCommit(bundle, isOwn) {
+    const s = rnSession();
     let rnAll = {}; try { rnAll = JSON.parse(localStorage.getItem("hhf_rn") || "{}"); } catch {}
-    let addedNotes = 0;
+    let changedNotes = 0;
     for (const [archId, arr] of Object.entries(bundle.notes || {})) {
-      const existing = rnAll[archId] || [];
-      const key = n => `${n.by}|${n.date}|${n.text}`;
-      const have = new Set(existing.map(key));
-      for (const n of arr) if (!have.has(key(n))) { existing.unshift(n); addedNotes++; }
-      rnAll[archId] = existing;
+      if (isOwn && s) {
+        // Replace MY notes for this item with the imported ones; keep others.
+        const existing = rnAll[archId] || [];
+        const others   = existing.filter(n => n.by !== s.initials);
+        rnAll[archId]  = arr.concat(others);
+        changedNotes  += arr.length;
+      } else {
+        const existing = rnAll[archId] || [];
+        const key = n => `${n.by}|${n.date}|${n.text}`;
+        const have = new Set(existing.map(key));
+        for (const n of arr) if (!have.has(key(n))) { existing.unshift(n); changedNotes++; }
+        rnAll[archId] = existing;
+      }
     }
     try { localStorage.setItem("hhf_rn", JSON.stringify(rnAll)); } catch {}
-    let addedMarks = 0;
-    for (const id of (bundle.marks || [])) {
-      if (!marksHas(id)) { marksAdd(id); addedMarks++; }
+    let markChanges = 0;
+    if (isOwn) {
+      // Replace the mark list with the file's order — only if the file has any.
+      if ((bundle.marks || []).length) {
+        const before = marked.slice();
+        marksClear();
+        bundle.marks.forEach(id => marksAdd(id));
+        markChanges = (marked.length !== before.length) ||
+                      marked.some((id, i) => id !== before[i]) ? marked.length : 0;
+      }
+    } else {
+      for (const id of (bundle.marks || [])) {
+        if (!marksHas(id)) { marksAdd(id); markChanges++; }
+      }
     }
     marksSave();
-    // Re-render anything that depends on this state.
     applyFilters(); renderList(); updateFilterBadge(); renderMarkBar();
     const it = state.items.find(i => i.id === state.selectedId);
     if (it) renderMeta(it);
-    hhToast(`Merged ${addedNotes} note${addedNotes === 1 ? "" : "s"} + ${addedMarks} mark${addedMarks === 1 ? "" : "s"}`, "ok");
+    hhToast(isOwn
+      ? `Updated from your file — ${changedNotes} note${changedNotes === 1 ? "" : "s"} · ${markChanges || 0} mark${markChanges === 1 ? "" : "s"}`
+      : `Merged ${changedNotes} note${changedNotes === 1 ? "" : "s"} · ${markChanges} mark${markChanges === 1 ? "" : "s"} from ${bundle.exporter.name}`, "ok");
   }
 
   // ── Researcher "seen / reviewed" — same per-researcher pattern ────────────
@@ -6391,13 +6433,21 @@ WHERE {
         The setting follows you between items.</p>
 
       <p class="ip-grp">Export & import</p>
-      <p class="ip-note">Your marks and notes live on this device. <b>Export JSON</b>
-        is the canonical save — share, archive, or move it to another machine.
-        <b>Save Markdown</b> is the human-readable version (and you can edit it
-        in any text editor — keep the section headers and the <i>*date (XX)* —
-        note</i> shape and Import will pick the changes back up). <b>Import</b>
-        reads either format and merges it additively into yours — nothing of
-        yours is ever overwritten.
+      <p class="ip-note">Your marks and notes live on this device. <b>Export to
+        file</b> saves them as a plain Markdown file you can read in any text
+        editor, archive, email, or move to another machine. <b>Import from file</b>
+        reads a Markdown file back in.
+        <br><br>
+        The import is smart about <b>whose file it is</b>:
+        <br>
+        — If it's <b>your own file</b> (the initials match yours), your notes for
+        the items in the file are <i>replaced</i> with the file's versions — so
+        you can edit your .md in a text editor and reimport without duplication.
+        Items not in the file are untouched.
+        <br>
+        — If it's <b>someone else's file</b>, their notes are added <i>alongside</i>
+        yours; their marks are appended to your list. Nothing of yours is ever
+        overwritten.
         <br><br>
         Find the buttons below your researcher-notes panel.</p>
 
@@ -6612,9 +6662,15 @@ WHERE {
     const rnHelpClose = document.getElementById("rn-help-close");
     if (rnHelpBtn)   rnHelpBtn.addEventListener("click", e => { e.stopPropagation(); toggleRnHelpPane(); });
     if (rnHelpClose) rnHelpClose.addEventListener("click", closeRnHelpPane);
-    // Clicking the dirty badge is the fastest path into the export button.
+    // Clicking the dirty badge scrolls to the rn-tools strip (where Export
+    // lives). The help pane has no buttons — just docs — so opening it from
+    // an unsaved-changes indicator would be a dead end.
     const dirtyBadge = document.getElementById("hh-dirty-badge");
-    if (dirtyBadge) dirtyBadge.addEventListener("click", e => { e.stopPropagation(); openRnHelpPane(); });
+    if (dirtyBadge) dirtyBadge.addEventListener("click", e => {
+      e.stopPropagation();
+      const tools = document.getElementById("rn-tools");
+      if (tools) tools.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
     document.getElementById("pdf-close").addEventListener("click", closePdf);
     document.getElementById("pdf-view").addEventListener("click", () => {
       const it = state.items.find(i => i.id === state.selectedId);
