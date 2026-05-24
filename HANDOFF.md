@@ -177,7 +177,7 @@ Documented in `CLAUDE.md` under "Staging / test page → Promotion (staging → 
 ```bash
 cp next.html browse.html
 # In browse.html, set VERSION to the real vMAJOR.SESSION.PATCH (live pattern).
-# (If verso.css was forked for this cycle) cp assets/verso.next.css assets/verso.css
+# (If light.css was forked for this cycle) cp assets/verso.next.css assets/light.css
 git tag vMAJOR.SESSION.00 && git push --tags
 # Re-sync next.html from the new browse.html for the next cycle:
 # bump VERSION to vMAJOR.(SESSION+1)-test.01.

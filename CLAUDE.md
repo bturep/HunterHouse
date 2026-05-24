@@ -93,8 +93,8 @@ HunterHouse/
 ├── browse.html             Live archive browser — SPARQL, filter, search
 ├── next.html               Staging copy of browse.html (v1.07-test.NN)
 ├── assets/
-│   ├── verso.css           Light design system (all pages)
-│   ├── inverse.css         Dark design system (4 reading pages only)
+│   ├── light.css           Light design system (all pages)
+│   ├── dark.css         Dark design system (4 reading pages only)
 │   ├── pdfjs/              Bundled PDF.js v5.7.284 (~5.7 MB; in-stage PDF reader)
 │   └── placeholders/       image-missing tiers for P96-less items
 ├── scripts/                Batch Wikibase + R2 scripts (see Scripts table)
@@ -109,10 +109,10 @@ HunterHouse/
 ## Design system
 
 Two CSS surfaces:
-- `verso.css` — light (ink on paper). All pages, especially header.
-- `inverse.css` — dark (cream on near-black). 4 reading pages only.
+- `light.css` — light (ink on paper). All pages, especially header.
+- `dark.css` — dark (cream on near-black). 4 reading pages only.
 
-**Key tokens — verso.css**
+**Key tokens — light.css**
 ```css
 --ink:#1e1c1a; --muted:#76726a; --hint:#a8a59c;
 --rule:#d6d2c8; --rule-soft:#e3dfd5; --soft:#ebe8df;
@@ -303,13 +303,13 @@ A live-stable + parallel-test setup, zero extra infra (plain GitHub Pages serves
 
 - Both on `main`. Pushing `next.html` redeploys but `browse.html` untouched, so **live visitors unaffected**.
 - `next.html` `VERSION = "v1.07-test.NN"` → `CACHE_KEY` (`hhf_v1.07-test.NN`) isolated from live (`hhf_v1.06.00`).
-- `next.html` must stay in repo root (relative `assets/…`). Shares `assets/verso.css` — inline `<style>` changes isolated, but `verso.css` edits leak to live. Fork to `assets/verso.next.css` only when a task needs CSS changes.
+- `next.html` must stay in repo root (relative `assets/…`). Shares `assets/light.css` — inline `<style>` changes isolated, but `light.css` edits leak to live. Fork to `assets/verso.next.css` only when a task needs CSS changes.
 - `index.html` splash + manifest `start_url` point at `browse.html`; installed PWA shows live. Test new version in the **phone browser** at the `next.html` URL.
 
 **Promotion (staging → live), when ready:**
 1. `cp next.html browse.html`
 2. In `browse.html`, set `VERSION` to the real version; update session log.
-3. (If `verso.css` was forked) `cp assets/verso.next.css assets/verso.css`.
+3. (If `light.css` was forked) `cp assets/verso.next.css assets/light.css`.
 4. Commit, `git tag vX.NN.00 && git push --tags`, push.
 5. Re-sync `next.html` from the new `browse.html` for the next cycle (bump VERSION to `vX.NN+1-test.01`).
 
