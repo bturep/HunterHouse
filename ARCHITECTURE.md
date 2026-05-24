@@ -2,7 +2,7 @@
 
 For a software engineer inspecting the live site. Scope = what `https://bturep.github.io/HunterHouse/` actually serves today, plus the repository state behind it.
 
-**Snapshot date:** 2026-05-22 (end-of-session). **Live:** `browse.html` `v1.06.31`. **Staging:** `next.html` `v1.07-test.54`.
+**Snapshot date:** 2026-05-24. **Live:** `browse.html` `v1.06.33`. **Staging:** `next.html` `v1.07-test.75`. Two small live hotfixes since the 2026-05-22 audit snapshot (mobile splash, hover-on-touch); the bulk of new work since then has been on the staging line and will ship at the next promotion. See §11.5 for the diff in one place.
 
 ---
 
@@ -400,6 +400,29 @@ File:line references below were originally captured against `next.html` `v1.07-t
 - **PDF.js v5.7.284.** No known CVEs against this patch version as of audit. Re-check on upgrade.
 - **R2 CORS allows `http://localhost` + `http://127.0.0.1`.** Fine — public read-only assets.
 - **GitHub Pages HTTPS.** Enforced by default. No `.env` / R2 keys / Wikibase password in git history.
+
+### 11.5 Since the audit (2026-05-22 → 2026-05-24)
+
+Two days of follow-on work. Most of it lives in `next.html` on the staging line and will arrive together at the next promotion; the two items marked *(live)* shipped as same-day fixes to `browse.html`.
+
+**Bug fixes — live.**
+- ✅ *(live)* **Mobile splash Continue handler was bound inside `wireControls()`** — i.e. after the `await loadFromWikibase()` block. On a slow mobile network the visitor saw the splash from first paint but tapping Continue did nothing until SPARQL returned. Moved the binding into `main()`'s early-bind block alongside the desktop about-pane handlers; no behaviour change to what the click does. `browse.html` v1.06.32, `next.html` v1.07-test.66.
+- ✅ *(live)* **`.row:hover` gated to real pointer devices.** On touch, `:hover` sticks after a tap because there's no "pointer left" event, so the tapped row kept the hover background until the next tap elsewhere. Wrapped in `@media (hover:hover) and (pointer:fine)`. `browse.html` v1.06.33, `next.html` v1.07-test.67.
+
+**Staging — researcher-tools surface.** A coherent layer of researcher-only UI is now in `next.html`, queued for the next promotion:
+- **Two-researcher RPINS.** Olivia Jol added at `203OJ` with `role: "research"`. The proxy badge (offline / needs-token banner) is now hard-gated to `body.is-admin` so researchers never see it.
+- **Marks are an ordered Array.** The in-memory `marked` Set was replaced with an Array + helpers (`marksHas/Add/Remove/Move/Clear`). Storage shape (`hhf_marks[pin] = [archId,…]`) is unchanged but the array's order is now meaningful: it IS the curator's intended sequence.
+- **Reorder UX.** In `[only]` mode each row gets a leading 34px column with ↑ / ⋮⋮ / ↓. Drag the grip (pointer events, touch + mouse) or click the arrows to nudge one slot. `applyFilters` re-sorts `state.filtered` by mark-order in `[only]` mode so dragging maps 1:1 to what's on screen. `body.marks-only .row` also has `user-select:none` to suppress text-selection during drag.
+- **"Marks first" sort.** New `[first]` toggle in the mark-bar. When on, `state.filtered` is partitioned: marked items at the top in mark-order, then the rest in the active column sort. Session-only.
+- **Researcher `?` help pane.** Second-tier info pane scoped to the right panel (sibling to `#info-pane`, same overlay pattern). The top-bar `?` was simultaneously rewritten — researcher shortcuts removed, replaced with five short orientation sections aimed at a first-time visitor. Mutually exclusive: opening either pane closes the other.
+- **Compose mode.** Eyeball button in the Item-record bar; `body.hh-compose` hides every direct child of `#meta-body` except `#rn-panel` (and the new `#rn-tools` strip). State persisted per-pin in `localStorage["hhf_compose"]`. Suppressed in curation mode.
+- **Admin "edit affordances off".** Pencil button in the same bar (admin-only). `body.admin-edits-off` hides `.hh-fedit`, flattens `.hh-editable` chrome, hides the proxy badge + bulk-bar, and gates `bulkSelectRow` to a no-op. The role stays admin underneath — this is purely a visibility layer for reading the record as a researcher would. Persisted per-pin in `localStorage["hhf_edits_off"]`.
+- **Aa text-size toggle.** Top-right cluster, between `?` and fullscreen. Toggles `html.text-lg`, which is keyed off ~196 generated CSS overrides — one per `font-size:Npx` declaration, bumped +1pt, respecting `@media` nesting. A pre-init script in `<head>` applies the class from `localStorage["hhf_text_lg"]` before first paint to avoid a flash.
+- **Click-to-confirm replaces press-and-hold.** Mark-bar `[clear]` and per-note `×` previously required a 1.5–2 s mouse hold. Single shared helper `hhClickToConfirm(btn, action, opts)` now arms the button on the first click (label swap to `"clear?"` / `"×?"`, `.hh-confirm` class, 3 s timer; click outside / Escape / timeout disarms) and commits on the second. Removes the old `.holding` keyframes and the touch-vs-mouse parity bug they hid.
+- **Export / import.** Markdown is the single canonical artifact (the prior JSON+MD split was confusing and triggered Safari's multi-download throttle). `Export to file…` writes one `.md`; `Import from file…` reads one. Multi-line notes survive round-trip via 4-space-indented continuation lines. Import is smart about whose file it is: same-researcher (initials match) → REPLACE my notes for items in the file; different researcher → additive merge. The unsaved-changes counter (`localStorage["hhf_dirty"][pin]`) is incremented on every relevant mutation and reset on a successful export; surfaces as a small badge next to the researcher `?`.
+- **Researcher tools strip** (`#rn-tools`) renders directly below the notes panel inside `#meta-body`, holding the Export / Import buttons + the dirty-status line. Replaced an earlier (worse) placement inside the help pane.
+
+**Data cleanup.** `scripts/remove_caa_use_q70.py` removed a misapplied `P89` (use) → `Q70` (design development) claim from 24 CAA drawings (`HH-CAA-0002` … `HH-CAA-0025`). Q70 is a project-phase value, not a use value — residue from an early ingest. Verified via direct entity API; SPARQL index lag was the only loose end and caught up cleanly.
 
 ---
 
