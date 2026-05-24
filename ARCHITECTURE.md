@@ -2,7 +2,7 @@
 
 For a software engineer inspecting the live site. Scope = what `https://bturep.github.io/HunterHouse/` actually serves today, plus the repository state behind it.
 
-**Snapshot date:** 2026-05-24. **Live:** `browse.html` `v1.06.33`. **Staging:** `next.html` `v1.07-test.75`.
+**Snapshot date:** 2026-05-24. **Live:** `browse.html` `v1.06.38`. **Staging:** `next.html` `v1.07-test.81`.
 
 ---
 
@@ -186,7 +186,8 @@ Laid out roughly in this order (approximate line ranges from `browse.html` v1.06
 
 ### 4.5 Caching strategy
 
-- **SPARQL response** is cached in `localStorage` under `CACHE_KEY = "hhf_" + VERSION`. Bumping `VERSION` is the entire cache-busting story. The maintainer manually bumps the patch in `VERSION` on every push.
+- **SPARQL response** is cached in `localStorage` under `CACHE_KEY = "hhf_" + VERSION`. Bumping `VERSION` is the entire cache-busting story. The maintainer bumps the patch in `VERSION` on every push; the CI workflow refuses pushes that change `browse.html` / `next.html` without bumping (see §8).
+- **Stale-cache fallback.** `loadFromWikibase()` retries the SPARQL fetch once after 800 ms (handles transient Wikibase Cloud blips); if both attempts fail it serves the most recent `localStorage` cache regardless of age rather than rendering an empty list. Returning visitors keep a usable catalogue through a Wikibase Cloud outage.
 - **Curator JSON** is fetched with `cache: "no-store"` and a `?v=${VERSION}` query string.
 - The service worker (`sw.js`) does **not** cache anything; it exists only to satisfy the PWA installability requirement.
 - Image caching relies on Cloudflare R2 + its CDN in front. R2 CORS allows `https://bturep.github.io`, `http://localhost`, `http://127.0.0.1` (GET/HEAD), 24 h max-age.
@@ -310,7 +311,7 @@ No analytics. No third-party JS. No advertising. No CDN-served JS libraries.
 | Layer | What | Where |
 |---|---|---|
 | CI | One GitHub Actions workflow runs on every push to `main` and on PRs | `.github/workflows/validate.yml` |
-| Validator | `node --check` on each inline `<script>` block in `browse.html` + `next.html`; `VERSION` regex match (live = `v\d+\.\d{2}\.\d{2}`, staging = `v\d+\.\d{2}-test\.\d{2}`); JSON parse on both manifests | `.github/scripts/validate.mjs` |
+| Validator | `node --check` on each inline `<script>` block in `browse.html` + `next.html`; `VERSION` regex match (live = `v\d+\.\d{2}\.\d{2}`, staging = `v\d+\.\d{2}-test\.\d{2}`); JSON parse on both manifests; and a "did you bump VERSION" check that compares each HTML against its prior state (CI uses `github.event.before`; locally falls back to `HEAD~1`) and fails if the file changed but `VERSION` didn't | `.github/scripts/validate.mjs` |
 | Gate | **No** — does not block the push. Emails the owner on a failed run | (model: "alert, don't block") |
 | Smoke tests | Three Playwright tests — catalogue loads via SPARQL, search→select→record-pane title renders, mobile shell at 375×812 | `tests/test_smoke.py` |
 | Local server fixture | Session-scoped `http.server` on a random loopback port rooted at the repo (so relative `fetch()` paths work) | `tests/conftest.py` |
@@ -355,7 +356,7 @@ No analytics. No third-party JS. No advertising. No CDN-served JS libraries.
 
 - **Public site is read-only.** No write path is exposed to the public.
 - **Admin writes** route through the local proxy with bot credentials never leaving the maintainer's machine. CSRF defences: per-startup random token, exact-match Origin allowlist, JSON-only Content-Type, constant-time secret compare. The browser's heartbeat (`/ping`) and the paste-form fallback handle proxy restarts cleanly. The hardcoded admin-PIN fallback that earlier doubled as the proxy secret is gone.
-- **No CSP header / meta tag** is set on `browse.html`. The site embeds Google Fonts and is itself the only script source, so impact is small, but a `Content-Security-Policy` would be cheap to add.
+- **CSP via `<meta http-equiv>`** on both HTMLs. `default-src 'self'`; whitelisted `connect-src` (Wikibase Cloud + loopback for the admin proxy), `img-src` (R2 host), `style-src` (Google Fonts), `font-src`; `object-src 'none'`; `base-uri 'self'`; `form-action 'self'`. `script-src` and `style-src` still need `'unsafe-inline'` because the page is a deliberate single-file SPA with inline `<script>` / `<style>` blocks — that limits CSP's strictest XSS guard, but the directives still block injection of remote scripts and unauthorised exfiltration channels. `frame-ancestors` is omitted because `<meta>` doesn't honour it; GitHub Pages doesn't let us set true HTTP headers.
 - **`RPINS` is shipped in cleartext** in the HTML (e.g. `"203BTP"` maps to admin). That's accepted because (a) it gates UI, not data, and (b) writes require the loopback proxy + the per-startup token + the bot credentials in `.env` that aren't in the repo. Worth flagging because it looks like a secret at first glance and isn't.
 - **Researcher notes are local-only and unencrypted.** `localStorage["hhf_rn"]` is per-device plaintext, scoped to a researcher's initials. The UI labels do not imply encryption.
 - **No credentials in git history.** `.env` and per-run snapshot directories are gitignored; history audit clean.
@@ -368,14 +369,25 @@ No analytics. No third-party JS. No advertising. No CDN-served JS libraries.
 
 ### Runtime risks
 
-- **No retry / backoff** on the SPARQL fetch. If `hunterhouse.wikibase.cloud` is slow or down, the page renders an empty list (the splash overlay covers this gracefully). The cached SPARQL response in `localStorage` is the fallback.
+- **SPARQL fetch** retries once with an 800 ms backoff (handles transient blips); if both attempts fail, `loadFromWikibase()` serves the most recent `localStorage` cache regardless of age rather than rendering empty. The splash overlay covers the brief gap on fresh visits where no cache exists yet.
 - **Single SPARQL query loads the entire catalogue** (currently ~180 items). Fine at this scale; will need pagination if it grows by ~1–2 orders of magnitude.
-- **Manual cache-bust.** If the maintainer forgets to bump `VERSION` before pushing, returning visitors hit a stale localStorage cache and the new SPARQL shape may not render correctly. The validate workflow catches `VERSION` shape but not "did you bump it".
+- **VERSION bump enforced in CI.** The validate workflow now refuses pushes that change `browse.html` / `next.html` without also changing `VERSION` (see §8). Forgetting to bump was the cache-stale foot-gun; the guard makes it loud.
 
 ### Browser support
 
 - Uses **CSS view transitions**, CSS custom properties, modern `flex/grid`, optional chaining, `async/await`. Safe on Chromium / Safari 17+ / Firefox 121+.
 - Mobile breakpoint is `(max-width:767px)`. Mobile is intentionally read-only on live `browse.html` (no admin UI, no PIN flow). iOS Safari is the primary mobile target. Touch-specific quirks are handled directly (e.g. `:hover` gated to real pointer devices, hold-to-confirm gestures have been replaced with click-to-confirm in staging).
+
+### Accessibility
+
+- **Keyboard focus** uses `:focus-visible` so the ring appears only on keyboard navigation, never on mouse clicks. Ring colour follows `currentColor` so it adapts to dark/light mode. Documented standing rule: don't add `outline:none` to buttons.
+- **Skip-to-catalogue link** is the first focusable element in `<body>` — visually hidden until keyboard focus reveals it (`.sr-only` / `.sr-only-focusable`). Mouse users never see it.
+- **Semantic landmarks**: `<header role="banner">` for the top bar, `<main>` for the shell, `<section aria-label="Browse items">` for the left panel, `<section aria-label="Item record">` for the right panel.
+- **Icon-only buttons** carry explicit `aria-label`s (search, fullscreen, zoom in/out/rotate, panel-hide, PDF close, sign-in/out, etc.); the SVGs inside them are `aria-hidden="true"` to prevent double-announcement. State-toggling buttons update `aria-label` + `aria-pressed` in step with their visual state.
+- **Toast region** (`#hh-toast`) is created with `role="status" aria-live="polite" aria-atomic="true"` so success / error feedback is announced to screen readers.
+- **Modal focus management.** A shared `modalOnOpen` / `modalOnClose` pair (a) stores the previously-focused element, (b) moves focus into the modal, (c) traps Tab / Shift-Tab cyclically inside the modal while it's open, and (d) restores the prior focus on close. Applied to the about-pane, info-pane, and researcher-help pane. Esc still dismisses.
+- **`prefers-reduced-motion`** is honoured globally — all animations / transitions clamp to ~0 ms when the OS preference is set.
+- Deliberate non-goals (per maintainer): no font-size / colour / contrast changes were made for accessibility. The visual design is treated as an architect-specified set of constraints; functional a11y (keyboard, ARIA, focus) was the scope.
 
 ---
 
