@@ -2312,7 +2312,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.77";
+  const VERSION      = "v1.07-test.78";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4688,6 +4688,9 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   // SPARQL query — single source of truth. index.html is currently a thin
   // redirect (no prefetch), so no sync needed. If splash-prefetch ever
   // returns to index.html, that copy must mirror this query exactly.
+  // CATALOGUE_QUERY uses interpolated PROPERTIES.* refs (not bare wdt:Pxx
+  // literals) so a PID rename or property mint in WIKIBASE.md flows through
+  // here automatically — no second source of truth to keep in sync.
   const CATALOGUE_QUERY = `
 PREFIX wdt: <https://hunterhouse.wikibase.cloud/prop/direct/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -4711,34 +4714,34 @@ SELECT ?item ?archId ?label ?img ?master
        ?heldBy ?heldByLabel
        ?archiveLink ?location ?accessCopy ?rotation
 WHERE {
-  ?item wdt:P2 ?archId .
-  OPTIONAL { ?item wdt:P96 ?img }   # loosened: stubs without a preview still appear in the list; renderImage shows 'No image yet' when item.image is null
+  ?item wdt:${PROPERTIES.ARCH_ID} ?archId .
+  OPTIONAL { ?item wdt:${PROPERTIES.PREVIEW_IMAGE} ?img }   # loosened: stubs without a preview still appear in the list; renderImage shows 'No image yet' when item.image is null
   ?item rdfs:label ?label . FILTER(LANG(?label)="en")
-  OPTIONAL { ?item wdt:P95 ?master }
-  OPTIONAL { ?item wdt:P82 ?d1 }
-  OPTIONAL { ?item wdt:P64 ?d2 }
-  OPTIONAL { ?item wdt:P118 ?d3 }
-  OPTIONAL { ?item wdt:P62 ?phase . ?phase rdfs:label ?phaseLabel . FILTER(LANG(?phaseLabel)="en") }
-  OPTIONAL { ?item wdt:P84 ?phase2 . ?phase2 rdfs:label ?phase2Label . FILTER(LANG(?phase2Label)="en") }
-  OPTIONAL { ?item wdt:P88 ?drawType . ?drawType rdfs:label ?drawTypeLabel . FILTER(LANG(?drawTypeLabel)="en") }
-  OPTIONAL { ?item wdt:P87 ?area . ?area rdfs:label ?areaLabel . FILTER(LANG(?areaLabel)="en") }
-  OPTIONAL { ?item wdt:P145 ?category . ?category rdfs:label ?categoryLabel . FILTER(LANG(?categoryLabel)="en") }
-  OPTIONAL { ?item wdt:P1 ?itype . ?itype rdfs:label ?itypeLabel . FILTER(LANG(?itypeLabel)="en") }
-  ?item wdt:P79 ?src .   # required: only items belonging to a source collection (excludes vocab/people/institutions that happen to carry a P2)
+  OPTIONAL { ?item wdt:${PROPERTIES.MASTER_IMAGE} ?master }
+  OPTIONAL { ?item wdt:${PROPERTIES.DATE} ?d1 }
+  OPTIONAL { ?item wdt:${PROPERTIES.DATE_ALT} ?d2 }
+  OPTIONAL { ?item wdt:${PROPERTIES.DATE_PUB} ?d3 }
+  OPTIONAL { ?item wdt:${PROPERTIES.PHASE} ?phase . ?phase rdfs:label ?phaseLabel . FILTER(LANG(?phaseLabel)="en") }
+  OPTIONAL { ?item wdt:${PROPERTIES.PHASE_ALT} ?phase2 . ?phase2 rdfs:label ?phase2Label . FILTER(LANG(?phase2Label)="en") }
+  OPTIONAL { ?item wdt:${PROPERTIES.DRAWING_TYPE} ?drawType . ?drawType rdfs:label ?drawTypeLabel . FILTER(LANG(?drawTypeLabel)="en") }
+  OPTIONAL { ?item wdt:${PROPERTIES.AREA} ?area . ?area rdfs:label ?areaLabel . FILTER(LANG(?areaLabel)="en") }
+  OPTIONAL { ?item wdt:${PROPERTIES.CATEGORY} ?category . ?category rdfs:label ?categoryLabel . FILTER(LANG(?categoryLabel)="en") }
+  OPTIONAL { ?item wdt:${PROPERTIES.ITEM_TYPE} ?itype . ?itype rdfs:label ?itypeLabel . FILTER(LANG(?itypeLabel)="en") }
+  ?item wdt:${PROPERTIES.SOURCE_COLLECTION} ?src .   # required: only items belonging to a source collection (excludes vocab/people/institutions that happen to carry an arch ID)
   OPTIONAL { ?src rdfs:label ?srcLabel . FILTER(LANG(?srcLabel)="en") }
-  OPTIONAL { ?item wdt:P80 ?creator . ?creator rdfs:label ?creatorLabel . FILTER(LANG(?creatorLabel)="en") }
-  OPTIONAL { ?item wdt:P140 ?builtBy . ?builtBy rdfs:label ?builtByLabel . FILTER(LANG(?builtByLabel)="en") }
-  OPTIONAL { ?item wdt:P141 ?designedBy . ?designedBy rdfs:label ?designedByLabel . FILTER(LANG(?designedByLabel)="en") }
-  OPTIONAL { ?item wdt:P89 ?use }
-  OPTIONAL { ?item wdt:P90 ?scale }
-  OPTIONAL { ?item wdt:P91 ?medium }
-  OPTIONAL { ?item wdt:P92 ?builtStatus . ?builtStatus rdfs:label ?builtStatusLabel . FILTER(LANG(?builtStatusLabel)="en") }
-  OPTIONAL { ?item wdt:P86 ?setPos }
-  OPTIONAL { ?item wdt:P100 ?notes }
-  OPTIONAL { ?item wdt:P93 ?rights . ?rights rdfs:label ?rightsLabel . FILTER(LANG(?rightsLabel)="en") }
-  OPTIONAL { ?item wdt:P94 ?heldBy . ?heldBy rdfs:label ?heldByLabel . FILTER(LANG(?heldByLabel)="en") }
-  OPTIONAL { ?item wdt:P99 ?archiveLink }
-  OPTIONAL { ?item wdt:P142 ?location }
+  OPTIONAL { ?item wdt:${PROPERTIES.CREATOR} ?creator . ?creator rdfs:label ?creatorLabel . FILTER(LANG(?creatorLabel)="en") }
+  OPTIONAL { ?item wdt:${PROPERTIES.BUILT_BY} ?builtBy . ?builtBy rdfs:label ?builtByLabel . FILTER(LANG(?builtByLabel)="en") }
+  OPTIONAL { ?item wdt:${PROPERTIES.DESIGNED_BY} ?designedBy . ?designedBy rdfs:label ?designedByLabel . FILTER(LANG(?designedByLabel)="en") }
+  OPTIONAL { ?item wdt:${PROPERTIES.USE} ?use }
+  OPTIONAL { ?item wdt:${PROPERTIES.SCALE} ?scale }
+  OPTIONAL { ?item wdt:${PROPERTIES.MEDIUM} ?medium }
+  OPTIONAL { ?item wdt:${PROPERTIES.BUILT_STATUS} ?builtStatus . ?builtStatus rdfs:label ?builtStatusLabel . FILTER(LANG(?builtStatusLabel)="en") }
+  OPTIONAL { ?item wdt:${PROPERTIES.SET_POSITION} ?setPos }
+  OPTIONAL { ?item wdt:${PROPERTIES.NOTES} ?notes }
+  OPTIONAL { ?item wdt:${PROPERTIES.RIGHTS} ?rights . ?rights rdfs:label ?rightsLabel . FILTER(LANG(?rightsLabel)="en") }
+  OPTIONAL { ?item wdt:${PROPERTIES.HELD_BY} ?heldBy . ?heldBy rdfs:label ?heldByLabel . FILTER(LANG(?heldByLabel)="en") }
+  OPTIONAL { ?item wdt:${PROPERTIES.ARCHIVE_LINK} ?archiveLink }
+  OPTIONAL { ?item wdt:${PROPERTIES.LOCATION} ?location }
   OPTIONAL { ?item wdt:${PROPERTIES.ACCESS_COPY} ?accessCopy }
   OPTIONAL { ?item wdt:${PROPERTIES.DISPLAY_ROTATION} ?rotation }
 }`;
