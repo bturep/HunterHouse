@@ -18,6 +18,7 @@
      paint instead of flashing visible-then-fading-out as the main JS init
      catches up. Mobile skips splash-mode (and thus this pre-init). -->
 <script>if(!matchMedia('(max-width:767px)').matches)document.documentElement.dataset.splashInit='1';</script>
+<script>try{if(localStorage.getItem('hhf_text_lg')==='1')document.documentElement.classList.add('text-lg');}catch(e){}</script>
 <style>
   html[data-splash-init="1"] body .markid{opacity:0}
   /* During splash the top bar retracts to the collapsed-pane width (28px)
@@ -62,6 +63,22 @@
     display:flex;align-items:center;justify-content:center;
   }
   .site-topright #rec-info:hover{opacity:0.5}
+  /* Aa text-size toggle. Two stacked glyphs — small + large; the un-active
+     size is dimmed so the icon always reads as "click for the OTHER size". */
+  .site-topright #text-toggle{
+    background:none;border:0;padding:0;cursor:pointer;color:var(--ink);
+    font-family:var(--mono);font-weight:500;line-height:1;
+    display:inline-flex;align-items:baseline;gap:1px;
+  }
+  .site-topright #text-toggle:hover{opacity:0.5}
+  .site-topright #text-toggle .aa-sm{font-size:10px}
+  .site-topright #text-toggle .aa-lg{font-size:14px}
+  /* When already large, dim the large glyph (next click → small). Default
+     is "small active" so the large is dim. */
+  .site-topright #text-toggle .aa-sm{opacity:1}
+  .site-topright #text-toggle .aa-lg{opacity:0.4}
+  html.text-lg .site-topright #text-toggle .aa-sm{opacity:0.4}
+  html.text-lg .site-topright #text-toggle .aa-lg{opacity:1}
   /* Hide-on-splash: while the about-pane is open the "?" disappears
      (the splash is the only navigation aid then). The data-splash-init
      pre-init also nullifies it on first paint, matching the .markid
@@ -1809,6 +1826,205 @@
   @media screen and (orientation:landscape) and (max-height:500px){
     #rotate-msg{display:flex}
   }
+
+  /* === text-lg overrides — +1pt bump on every font-size; toggled by html.text-lg === */
+  html.text-lg .site-topright #rec-info{font-size:15px}
+  html.text-lg #topright{font-size:11.5px}
+  html.text-lg .markid .name{font-size:12px}
+  html.text-lg .markid .name .dim{font-size:10px}
+  html.text-lg .tr-search-input{font-size:12px}
+  html.text-lg #about-pane-close{font-size:19px}
+  html.text-lg .ap-title{font-size:13px}
+  html.text-lg .ap-ver{font-size:11px}
+  html.text-lg .ap-section-head{font-size:10px}
+  html.text-lg .ap-body{font-size:12.5px}
+  html.text-lg .ap-credits{font-size:11.5px}
+  html.text-lg .ap-credits dt{font-size:10px}
+  html.text-lg #pdf-close{font-size:14px}
+  html.text-lg .pub-read{font-size:12px}
+  html.text-lg .cur-pane-close{font-size:19px}
+  html.text-lg .cur-continue{font-size:12px}
+  html.text-lg .cc-curator{font-size:10px}
+  html.text-lg .cur-leave{font-size:10px}
+  html.text-lg .cur-leave .cl-x{font-size:15px}
+  html.text-lg .cc-title{font-size:13px}
+  html.text-lg .cc-intro{font-size:12px}
+  html.text-lg .cur-note .cn-label{font-size:10.5px}
+  html.text-lg .cur-note .cn-text{font-size:13px}
+  html.text-lg .cur-note .cn-empty{font-size:12px}
+  html.text-lg .cur-next{font-size:11px}
+  html.text-lg #info-pane-close, html.text-lg #rn-help-close{font-size:19px}
+  html.text-lg .ip-title{font-size:13px}
+  html.text-lg .ip-grp{font-size:10px}
+  html.text-lg .ip-keys{font-size:12px}
+  html.text-lg .ip-note{font-size:12px}
+  html.text-lg .ip-foot{font-size:11px}
+  html.text-lg .fbtn .lbl{font-size:10px}
+  html.text-lg .fbtn .val{font-size:13px}
+  html.text-lg .fbtn .val .car{font-size:10px}
+  html.text-lg .fdrop li{font-size:12px}
+  html.text-lg .list-head .l{font-size:12px}
+  html.text-lg .list-head .l .filter-chevron{font-size:14px}
+  html.text-lg .sort-mini .sort-hd{font-size:10px}
+  html.text-lg .phase-divider{font-size:11px}
+  html.text-lg .sort-arrow{font-size:8px}
+  html.text-lg .filter-badge{font-size:10px}
+  html.text-lg .fp-lbl{font-size:10px}
+  html.text-lg .fp-chip{font-size:11px}
+  html.text-lg .fp-clear{font-size:10px}
+  html.text-lg .fp-show{font-size:10px}
+  html.text-lg .fp-info{font-size:12px}
+  html.text-lg .fpi-title{font-size:11px}
+  html.text-lg .fpi-body{font-size:12px}
+  html.text-lg .fpi-meta{font-size:10px}
+  html.text-lg .row .archid{font-size:12px}
+  html.text-lg .row .archid .tmark{font-size:9.5px}
+  html.text-lg body.hh-in-curation .row .archid.cur-seq{font-size:12px}
+  html.text-lg .row .title{font-size:14px}
+  html.text-lg .row .ph{font-size:10.5px}
+  html.text-lg .row .year{font-size:12px}
+  html.text-lg .row .rf-grip{font-size:12px}
+  html.text-lg .row .rf-arrow{font-size:11px}
+  html.text-lg .mark-bar{font-size:10px}
+  html.text-lg .bulk-bar{font-size:10px}
+  html.text-lg .image-stage .placeholder{font-size:11.5px}
+  html.text-lg .cur-pager{font-size:11px}
+  html.text-lg .zoom-ctl button#zoom-rotate{font-size:16px}
+  html.text-lg .zoom-ctl button#zoom-rotsave{font-size:11px}
+  html.text-lg .image-foot{font-size:11px}
+  html.text-lg .meta-head .l{font-size:12px}
+  html.text-lg .meta-head .r{font-size:11px}
+  html.text-lg .hh-rnhelp-btn{font-size:15px}
+  html.text-lg .hh-dirty-badge{font-size:10px}
+  html.text-lg .hh-import-head{font-size:12px}
+  html.text-lg .hh-import-body{font-size:12px}
+  html.text-lg .hh-import-body .hh-i-when{font-size:11px}
+  html.text-lg .hh-import-body .hh-i-stats span{font-size:11px}
+  html.text-lg .hh-import-body .hh-i-foot{font-size:11px}
+  html.text-lg .hh-import-acts button{font-size:11px}
+  html.text-lg .meta-title{font-size:22px}
+  html.text-lg .hh-saving{font-size:12px}
+  html.text-lg #hh-toast{font-size:13px}
+  html.text-lg .hh-fedit{font-size:12px}
+  html.text-lg .hh-pop{font-size:13px}
+  html.text-lg .bb-stage{font-size:12px}
+  html.text-lg .bb-stage-h{font-size:11px}
+  html.text-lg .bb-stage .bb-val{font-size:12px}
+  html.text-lg .bb-stage-id{font-size:11px}
+  html.text-lg .bb-foot button{font-size:10px}
+  html.text-lg .hh-pop-opt.cur::after{font-size:11px}
+  html.text-lg .hh-mint-btn{font-size:12px}
+  html.text-lg .hh-mint-confirm{font-size:12px}
+  html.text-lg .hh-mint-head{font-size:11px}
+  html.text-lg .hh-mint-row b{font-size:11px}
+  html.text-lg .hh-mint-row input{font-size:12px}
+  html.text-lg .hh-mint-foot button{font-size:10px}
+  html.text-lg .hh-pop-cancel{font-size:11px}
+  html.text-lg #hh-proxy-badge{font-size:12px}
+  html.text-lg #hh-proxy-badge .hh-tok-input{font-size:12px}
+  html.text-lg #hh-proxy-badge .hh-tok-btn{font-size:12px}
+  html.text-lg #hh-proxy-badge .hh-tok-hint{font-size:10px}
+  html.text-lg .meta-title-sub{font-size:14px}
+  html.text-lg .meta-orig{font-size:10.5px}
+  html.text-lg .meta-lede{font-size:14px}
+  html.text-lg .meta-section h3{font-size:10.5px}
+  html.text-lg .kv dt{font-size:10.5px}
+  html.text-lg .kv dd{font-size:13.5px}
+  html.text-lg .pill{font-size:11.5px}
+  html.text-lg .archid-mono{font-size:12px}
+  html.text-lg .rights-note{font-size:11.5px}
+  html.text-lg .location-path{font-size:12px}
+  html.text-lg .curator-note{font-size:13px}
+  html.text-lg .btn{font-size:12.5px}
+  html.text-lg .btn .ar{font-size:12px}
+  html.text-lg .graph-section h3{font-size:10.5px}
+  html.text-lg .graph-section h3 .ct{font-size:10px}
+  html.text-lg .graph-path{font-size:11px}
+  html.text-lg .graph-path .node .tick{font-size:10px}
+  html.text-lg .graph-path .node .rel{font-size:9.5px}
+  html.text-lg .graph-path .node .lbl{font-size:12.5px}
+  html.text-lg .graph-path .node.this .tick{font-size:12px}
+  html.text-lg .graph-siblings .lbl-row{font-size:9.5px}
+  html.text-lg .graph-siblings .sib{font-size:12px}
+  html.text-lg .graph-siblings .sib .id{font-size:10.5px}
+  html.text-lg .graph-siblings .sib .pos{font-size:10px}
+  html.text-lg .graph-actions a .top{font-size:9.5px}
+  html.text-lg .graph-actions a .bot{font-size:11.5px}
+  html.text-lg .graph-actions a .bot .ar{font-size:11px}
+  html.text-lg .graph-empty{font-size:11px}
+  html.text-lg .empty{font-size:12px}
+  html.text-lg .load-msg{font-size:12px}
+  html.text-lg .error-msg{font-size:12px}
+  html.text-lg #mob-about-close{font-size:19px}
+  html.text-lg .load-text{font-size:12px}
+  html.text-lg .rights-note{font-size:12px}
+  html.text-lg .pane-meta .meta-head .l{font-size:12px}
+  html.text-lg .pane-meta .meta-head .r{font-size:12px}
+  html.text-lg .pane-meta .meta-title{font-size:22px}
+  html.text-lg .pane-meta .meta-lede{font-size:12px}
+  html.text-lg .pane-meta .meta-section h3, html.text-lg .pane-meta .graph-section h3{font-size:10px}
+  html.text-lg .pane-meta .meta-section h3 .ct, html.text-lg .pane-meta .graph-section h3 .ct{font-size:10px}
+  html.text-lg .pane-meta .kv{font-size:12px}
+  html.text-lg .pane-meta .kv dt{font-size:12px}
+  html.text-lg .pane-meta .kv dd{font-size:12px}
+  html.text-lg .pane-meta .pill{font-size:12px}
+  html.text-lg .pane-meta .archid-mono{font-size:12px}
+  html.text-lg .pane-meta .location-path{font-size:12px}
+  html.text-lg .pane-meta .graph-path{font-size:12px}
+  html.text-lg .pane-meta .graph-path .node .rel{font-size:10px}
+  html.text-lg .pane-meta .graph-path .node .lbl{font-size:12px}
+  html.text-lg .pane-meta .graph-siblings .lbl-row{font-size:10px}
+  html.text-lg .pane-meta .graph-siblings .sib{font-size:12px}
+  html.text-lg .pane-meta .graph-siblings .sib .id, html.text-lg .pane-meta .graph-siblings .sib .t, html.text-lg .pane-meta .graph-siblings .sib .pos{font-size:12px}
+  html.text-lg .data-footer a{font-size:12px}
+  html.text-lg .pane-meta .curator-note{font-size:12px}
+  html.text-lg .rn-tools-head{font-size:10px}
+  html.text-lg .rn-tools-btn{font-size:10.5px}
+  html.text-lg .rn-tools-status{font-size:11px}
+  html.text-lg .rn-label{font-size:10px}
+  html.text-lg .rn-who{font-size:10px}
+  html.text-lg .rn-count{font-size:10px}
+  html.text-lg .rn-allbtn{font-size:10px}
+  html.text-lg .rn-auth-who{font-size:10px}
+  html.text-lg .rn-pin-input{font-size:11px}
+  html.text-lg .rn-pin-btn{font-size:14px}
+  html.text-lg .rn-pin-err{font-size:10px}
+  html.text-lg .rn-by{font-size:10px}
+  html.text-lg .rn-del{font-size:12px}
+  html.text-lg .rn-text{font-size:12px}
+  html.text-lg .rn-date{font-size:10px}
+  html.text-lg .rn-textarea{font-size:12px}
+  html.text-lg .rn-add-btn{font-size:10px}
+  html.text-lg .fp-lbl{font-size:10px}
+  html.text-lg .fp-chip{font-size:12px}
+  html.text-lg .fp-clear{font-size:10px}
+  html.text-lg .fp-show{font-size:10px}
+  html.text-lg #rotate-msg{font-size:12px}
+  @media (max-width:767px){
+  html.text-lg #list-ptr{font-size:10px}
+  html.text-lg .mob-sheet-body .pill{font-size:12px}
+  html.text-lg .mob-sheet-close{font-size:23px}
+  html.text-lg .mob-snav-btn{font-size:27px}
+  html.text-lg .mob-sheet-title{font-size:12px}
+  html.text-lg .mob-sheet-body .kv{font-size:12px}
+  html.text-lg .mob-sheet-body .kv dt{font-size:12px}
+  html.text-lg .mob-sheet-body .kv dd{font-size:12px}
+  html.text-lg .mob-sheet-scroll .meta-section h3, html.text-lg .mob-sheet-scroll .graph-section h3{font-size:10.5px}
+  html.text-lg .mob-sheet-scroll .meta-section h3 .ct, html.text-lg .mob-sheet-scroll .graph-section h3 .ct{font-size:10px}
+  html.text-lg .mob-sheet-scroll .graph-path{font-size:12px}
+  html.text-lg .mob-sheet-scroll .graph-path .tick{font-size:11px}
+  html.text-lg .mob-sheet-scroll .graph-path .rel{font-size:10px}
+  html.text-lg .mob-sheet-scroll .graph-path .lbl{font-size:12px}
+  html.text-lg .mob-sheet-scroll .graph-path .graph-empty{font-size:11px}
+  html.text-lg .mob-lb-close{font-size:21px}
+  html.text-lg .mob-lb-hint{font-size:11px}
+  html.text-lg .fp-search-prefix{font-size:12px}
+  html.text-lg .fp-search-input{font-size:14px}
+  html.text-lg #list-info{font-size:15px}
+  html.text-lg .fp-chip{font-size:12px}
+  html.text-lg .fp-search-input{font-size:12px}
+  }
+  
 </style>
 <script>
   /* PWA detect (still useful for the .pwa CSS overrides). Dark mode is
@@ -1850,6 +2066,12 @@
          #search-toggle and #fs-toggle; hidden while the about-pane is open
          and on first paint via data-splash-init (see the #rec-info rules). -->
     <button id="rec-info" title="About this archive &amp; shortcuts [?]" aria-label="Info">?</button>
+    <!-- Aa text-size toggle. Click flips html.text-lg (persisted to
+         localStorage["hhf_text_lg"]). The two glyphs animate in/out so the
+         active size is the bigger one in the icon. -->
+    <button class="theme-btn" id="text-toggle" title="Larger text" aria-label="Toggle larger text">
+      <span class="aa-sm">A</span><span class="aa-lg">A</span>
+    </button>
     <!-- fs-toggle LAST so flex-end (padding-right:0) lands its right edge at
          viewport_right - 28 — the inner edge of the collapsed right panel. -->
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
@@ -2062,7 +2284,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.71";
+  const VERSION      = "v1.07-test.72";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6648,6 +6870,24 @@ WHERE {
       }, 280);
     });
     document.getElementById("rec-info").addEventListener("click", toggleInfoPane);
+    // Aa text-size toggle. The pre-init script in <head> already applied
+    // html.text-lg from localStorage at first paint; this only wires the
+    // click + persistence.
+    const textBtn = document.getElementById("text-toggle");
+    if (textBtn) {
+      const syncTitle = () =>
+        textBtn.title = document.documentElement.classList.contains("text-lg")
+          ? "Smaller text" : "Larger text";
+      syncTitle();
+      textBtn.addEventListener("click", e => {
+        e.stopPropagation();
+        const html = document.documentElement;
+        const on = !html.classList.contains("text-lg");
+        html.classList.toggle("text-lg", on);
+        try { on ? localStorage.setItem("hhf_text_lg", "1") : localStorage.removeItem("hhf_text_lg"); } catch {}
+        syncTitle();
+      });
+    }
     document.getElementById("info-pane-close").addEventListener("click", closeInfoPane);
     const rnHelpBtn   = document.getElementById("hh-rnhelp-btn");
     const rnHelpClose = document.getElementById("rn-help-close");
