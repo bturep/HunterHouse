@@ -34,6 +34,7 @@ The complexity that exists is concentrated in (a) the single HTML file and (b) t
 | Data backend | Wikibase Cloud SPARQL: `https://hunterhouse.wikibase.cloud/query/sparql` |
 | Image / PDF / sidecar storage | Cloudflare R2, public bucket at `archive.hunterhousefoundation.com` |
 | Author / contributors | Solo: `bturep` (607 commits to date) |
+| Phase | **3-month pilot, researchers only.** Not yet a public-facing institutional archive — shared with a small group of trusted researchers while the archive and curator-lens functionality are built out |
 
 ---
 

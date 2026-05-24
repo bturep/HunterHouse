@@ -307,6 +307,7 @@ Decisions made deliberately, not by oversight. A successor seeing these might be
 
 **As of 2026-05-24:**
 
+- **Phase:** 3-month pilot, researchers only. The site is shared with a small group of trusted researchers, not the general public. Active work is on building out the archive and the curator-lens functionality. Feedback from pilot researchers informs subsequent iterations before a broader release.
 - **Live:** `browse.html` `v1.06.38`. Stable; serves the catalogue at the v1.06 feature level (role system, admin inline editing, in-stage PDF reader, display rotation, splash overhaul).
 - **Staging:** `next.html` `v1.07-test.81`. Substantially ahead of live; the next promotion lands compose mode, the researcher `?` help pane, marks-as-ordered-list with reorder UX + "marks first" sort, Markdown export/import with same-vs-other-researcher merge semantics, the admin "edit affordances off" toggle, the `Aa` text-size toggle, click-to-confirm in place of press-and-hold, a second researcher PIN (Olivia Jol), the full accessibility surface (focus rings, landmarks, ARIA labels, skip link, modal focus + trap, prefers-reduced-motion), and finished PROPERTIES interpolation in the catalogue SPARQL.
 - **Catalogue size:** ~180 items across HHC + CAA + EGC. FRH + IVH not yet started.
