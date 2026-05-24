@@ -2356,8 +2356,144 @@
 
 <script>
 
+  // ╔══════════════════════════════════════════════════════════════════════╗
+  // ║ CODE MAP — orient here first.                                        ║
+  // ║                                                                      ║
+  // ║ Audience: an AI agent (or human reviewer) opening this file cold.    ║
+  // ║ Optimised for fast orientation, not for prose readability.           ║
+  // ║                                                                      ║
+  // ║ What this file is. next.html is the staging copy of browse.html —    ║
+  // ║ same SPA, ahead on a parallel version line (vMAJOR.SESSION-test.NN). ║
+  // ║ The inline <script> below holds the application: ~4,800 lines of     ║
+  // ║ vanilla ES2020. No framework, no bundler — by design.                ║
+  // ║                                                                      ║
+  // ║ Read these too:                                                      ║
+  // ║   ARCHITECTURE.md  — system architecture (current, audit-grade)      ║
+  // ║   HANDOFF.md       — operational continuity (vendor accounts, etc.)  ║
+  // ║   CLAUDE.md        — day-to-day session log                          ║
+  // ║   WIKIBASE.md      — data contract (properties + Q-numbers)          ║
+  // ║                                                                      ║
+  // ║ ── Region map (line ranges drift; greps still work) ─────────────────║
+  // ║                                                                      ║
+  // ║   Config + central dicts                                             ║
+  // ║     VERSION / CACHE_KEY                       grep `const VERSION`   ║
+  // ║     PROPERTIES — 27 PIDs, single source       grep `const PROPERTIES`║
+  // ║     RPINS — researcher PIN table              grep `const RPINS`     ║
+  // ║     state / marked — module-scope mutables    grep `const state =`   ║
+  // ║                                                                      ║
+  // ║   Auth + roles                                                       ║
+  // ║     rnRole / canMark / canEditWikibase        grep `function rnRole` ║
+  // ║     reflectComposeRole — sets body.is-*       grep `reflectComposeRole`║
+  // ║                                                                      ║
+  // ║   Admin write path                                                   ║
+  // ║     proxyEdit + token + badge                 grep `function proxyEdit`║
+  // ║     openFieldPicker — admin inline editor     grep `function openFieldPicker`║
+  // ║     setSingleItemClaim / setStringClaim       grep `function setSingle`║
+  // ║     See also: scripts/edit_proxy.py, ARCHITECTURE.md §6              ║
+  // ║                                                                      ║
+  // ║   Researcher tools                                                   ║
+  // ║     renderRN — notes panel + PIN auth         grep `function renderRN`║
+  // ║     marks ordered array + helpers             grep `function marksHas`║
+  // ║     toggleMark / marksReorderTo               grep `function toggleMark`║
+  // ║     hhExportRun / hhImportPick — MD R/T        grep `function hhExportRun`║
+  // ║     hhDirtyTouch — counter                    grep `function hhDirtyTouch`║
+  // ║     compose mode + admin edits-off            grep `function toggleCompose`║
+  // ║     ? panes (global + researcher)             grep `function openInfoPane`║
+  // ║                                                                      ║
+  // ║   Data layer                                                         ║
+  // ║     sparqlQuery — retry + stale-cache         grep `async function sparqlQuery`║
+  // ║     loadFromWikibase                          grep `async function loadFromWikibase`║
+  // ║     CATALOGUE_QUERY — interp from PROPERTIES  grep `CATALOGUE_QUERY =`║
+  // ║                                                                      ║
+  // ║   Curator lenses                                                     ║
+  // ║     hhParseCurationMd — MD → bundle           grep `function hhParseCurationMd`║
+  // ║     openCuratorPane — threshold overlay       grep `function openCuratorPane`║
+  // ║     enterCuration / exitCuration              grep `function enterCuration`║
+  // ║     See also: curations/TEMPLATE.md (the file format)                ║
+  // ║                                                                      ║
+  // ║   Rendering                                                          ║
+  // ║     renderList — list rows + flags            grep `function renderList`║
+  // ║     renderImage — 3-tier R2 + placeholder     grep `function renderImage`║
+  // ║     renderMeta — record pane + EDITABLE       grep `function renderMeta`║
+  // ║     renderMobSheet — mobile equivalent        grep `function renderMobSheet`║
+  // ║     initPanZoom / fitToFrame                  grep `function initPanZoom`║
+  // ║                                                                      ║
+  // ║   Boot + wire                                                        ║
+  // ║     wireControls — event delegators + keys    grep `function wireControls`║
+  // ║     main — async boot sequence                grep `async function main`║
+  // ║                                                                      ║
+  // ║ ── Invariants — don't quietly break ─────────────────────────────────║
+  // ║                                                                      ║
+  // ║   • Bump VERSION on every push that changes this file. CI guard at  ║
+  // ║     .github/scripts/validate.mjs (check #4) refuses pushes that     ║
+  // ║     change browse.html / next.html without bumping.                  ║
+  // ║   • Image / PDF URLs come from Wikibase claims (P95/P96/P143).      ║
+  // ║     Never hardcode the R2 host into the page.                        ║
+  // ║   • RPINS gates UI affordances only. Writes require the local proxy ║
+  // ║     + .env (outside the repo). Don't treat RPINS entries as secrets.║
+  // ║   • body.is-researcher / body.is-admin gate role-aware affordances; ║
+  // ║     set by reflectComposeRole(). body.hh-compose / .admin-edits-off ║
+  // ║     / .marks-only / .hh-in-curation are the standing mode-gates.    ║
+  // ║   • Properties are referenced by NAME via PROPERTIES.X. Don't hard- ║
+  // ║     code P-numbers in JS or in CATALOGUE_QUERY — both interpolate.   ║
+  // ║   • Item IDs follow HH-{COLLECTION}-{NNNN}. Collections are HHC,    ║
+  // ║     CAA, EGC, FUL (others may join).                                 ║
+  // ║                                                                      ║
+  // ║ ── Deferred-by-design — don't "fix" without reading ─────────────────║
+  // ║                                                                      ║
+  // ║   • Single-file SPA. No framework, no bundler. Working as intended. ║
+  // ║   • Inline <script> + <style>. CSP keeps 'unsafe-inline' for both   ║
+  // ║     scripts and styles; other CSP directives still meaningfully     ║
+  // ║     restrict network exfiltration + remote-script injection.        ║
+  // ║   • Researcher notes are local-only + unencrypted. By design — a    ║
+  // ║     trusted-researcher honour-system model, not an ACL.              ║
+  // ║   • Wikibase Cloud is public-read. By design (citability + interop).║
+  // ║   • Mobile is read-only (no admin or write UI at <768px).            ║
+  // ║   • next.html ↔ browse.html duplication is the staging strategy.    ║
+  // ║   • PDF.js is vendored + patched at assets/pdfjs/web/viewer.mjs.    ║
+  // ║     Re-apply the HOSTED_VIEWER_ORIGINS patch on any PDF.js upgrade.  ║
+  // ║   • Accessibility: keyboard / ARIA / focus / motion done; font /    ║
+  // ║     colour / contrast deliberately NOT changed (architect-specified ║
+  // ║     visual constraint). See ARCHITECTURE.md §10 Accessibility.       ║
+  // ║                                                                      ║
+  // ║ ── Common-concern lookup ────────────────────────────────────────────║
+  // ║                                                                      ║
+  // ║   "How does a write actually reach Wikibase?"                        ║
+  // ║     proxyEdit() → POST localhost:8731/edit (token auth) →            ║
+  // ║     scripts/edit_proxy.py → MediaWiki action API. Bot creds in       ║
+  // ║     ~/Documents/hh-wikibase-migration/.env (outside the repo).      ║
+  // ║                                                                      ║
+  // ║   "Where does role gating happen?"                                   ║
+  // ║     rnRole() reads sessionStorage. canMark() / canEditWikibase()    ║
+  // ║     wrap it. reflectComposeRole() syncs body.is-researcher /        ║
+  // ║     body.is-admin classes; CSS + JS both key off them.               ║
+  // ║                                                                      ║
+  // ║   "Where do I add a new editable property?"                          ║
+  // ║     PROPERTIES dict (add the PID name → "Pxx"); EDITABLE map        ║
+  // ║     (add the rendering / editing entry); CATALOGUE_QUERY pulls it   ║
+  // ║     automatically via interpolation. WIKIBASE.md should also be    ║
+  // ║     updated to keep the contract doc in sync.                        ║
+  // ║                                                                      ║
+  // ║   "How does the curator lens load a selection?"                      ║
+  // ║     getCuration(slug) fetches curations/<slug>.md and parses via    ║
+  // ║     hhParseCurationMd. Format documented in curations/TEMPLATE.md.   ║
+  // ║                                                                      ║
+  // ║   "Why does the page do a hidden refit on splash dismiss?"           ║
+  // ║     body.refitting blanks #canvas during the 260 ms panel-width     ║
+  // ║     transition; setTimeout(280, fitToFrame) re-fits. Avoids the     ║
+  // ║     image-visibly-shrinks flash. ARCHITECTURE.md §4.2.               ║
+  // ║                                                                      ║
+  // ║   "Why is :hover wrapped in a media query?"                          ║
+  // ║     Touch devices don't fire "pointer left", so :hover sticks       ║
+  // ║     after a tap. .row:hover is gated to (hover:hover, pointer:fine).║
+  // ║     .sel handles the selected-row visual on touch.                   ║
+  // ║                                                                      ║
+  // ║ Line numbers above are intentionally absent — they drift. Grep for   ║
+  // ║ the function names; those are stable.                                ║
+  // ╚══════════════════════════════════════════════════════════════════════╝
+
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08-test.02";
+  const VERSION      = "v1.08-test.03";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
