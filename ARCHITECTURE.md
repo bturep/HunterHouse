@@ -2,7 +2,7 @@
 
 For a software engineer inspecting the live site. Scope = what `https://bturep.github.io/HunterHouse/` actually serves today, plus the repository state behind it.
 
-**Snapshot date:** 2026-05-24. **Live:** `browse.html` `v1.06.38`. **Staging:** `next.html` `v1.07-test.81`.
+**Snapshot date:** 2026-05-24. **Live:** `browse.html` `v1.07.00`. **Staging:** `next.html` `v1.08-test.01`.
 
 ---
 
@@ -207,9 +207,13 @@ Two interaction details worth knowing if you're touching CSS:
 
 ### 4.7 The staging line — `next.html`
 
-`next.html` is a near-duplicate of `browse.html` on a parallel version line (`v1.07-test.NN`), bumped per push and never edited from `browse.html`'s line. Shared `light.css`, separate inline CSS / JS in the HTML itself, separate `CACHE_KEY` so staging localStorage never collides with live.
+`next.html` is a near-duplicate of `browse.html` on a parallel version line (`v1.MAJOR.SESSION-test.NN`), bumped per push and never edited from `browse.html`'s line. Shared `light.css`, separate inline CSS / JS in the HTML itself, separate `CACHE_KEY` so staging localStorage never collides with live.
 
-`next.html` is currently materially ahead of live: a coherent researcher-tools surface in the right panel (compose-mode toggle and researcher `?` help pane in the Item-record bar; reorderable marks with drag handle + nudge arrows in `[only]` mode; "marks first" sort; per-researcher Markdown export / import below the notes panel with same-vs-other-researcher merge semantics; a dirty-changes counter), an admin-only "edit affordances off" toggle for reading the record as a researcher would without dropping the role, a global `Aa` text-size toggle (≈196 generated `font-size:Npx → +1px` overrides keyed on `html.text-lg`), and a second researcher PIN (`203OJ` Olivia Jol). All of this will land at the next live promotion under the standing promotion workflow: copy `next.html` → `browse.html`, bump the `VERSION` to a real `v1.MAJOR.SESSION.PATCH`, tag, push.
+The v1.07 promotion landed the researcher-tools surface (compose mode, the researcher `?` help pane, reorderable marks with drag-handle + nudge in `[only]` mode, "marks first" sort, per-researcher Markdown export / import below the notes panel with same-vs-other-researcher merge semantics, the dirty-changes counter, the admin "edit affordances off" toggle, the `Aa` text-size toggle, click-to-confirm in place of press-and-hold, a second researcher PIN, the accessibility surface, and the `PROPERTIES`-interpolated catalogue SPARQL). `next.html` is now at parity with `browse.html`, opening the v1.08 development line.
+
+**Curator lens** (Phase 1 — authored-selection overlays) is **dormant on live**: the JSON load is commented out in `browse.html`'s `main()` with a one-line note; the overlay / chip / threshold-card code is all present and inert. The lens is active in `next.html` for development and for sharing-with-friends evaluations. Promote later by uncommenting the one line.
+
+Promotion workflow when the next.html line gets materially ahead: copy `next.html` → `browse.html`, bump `VERSION` to a real `v1.MAJOR.SESSION.PATCH`, swap the staging icon / manifest / `<title>` references to their live counterparts, comment the curator load if it's still being held back, validate, tag `vMAJOR.SESSION.00`, push tags.
 
 ---
 
