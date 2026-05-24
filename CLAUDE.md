@@ -462,3 +462,33 @@ Twelve commits across one day. Browse.html (LIVE) untouched throughout (LINE: NE
 - **Per-item metadata sidecars** are now auto-written by every ingest script via the fail-safe `subprocess.run(...)` tail; no action needed on Brandon's part.
 
 **Version line at session close: browse.html `v1.06.31` (LIVE, unchanged all session) · next.html `v1.07-test.54` (staging).**
+
+---
+
+### 2026-05-24 — v1.07 promoted to live + post-cold-read remediation (browse.html v1.07.00 · next.html v1.08-test.01)
+
+**v1.07 promoted.** The full researcher-tools surface that had been accreting on the staging line for ~50 patches is now live. Compose mode (eyeball in the Item-record bar). Researcher `?` help pane (sibling overlay to the global `?`). Marks as an ordered candidate-list with drag-handle + nudge arrows in `[only]` mode + the "marks first" sort. Per-researcher Markdown export / import below the notes panel with same-vs-other-researcher merge semantics. Dirty-changes counter as a small red badge next to the researcher `?`. Admin "edit affordances off" pencil toggle (admin-only). `Aa` text-size toggle in the top-right cluster (`html.text-lg` keys ~196 generated `+1px` CSS overrides). Click-to-confirm in place of the old press-and-hold for `[clear]` and `×` deletes. Olivia Jol added as a second researcher PIN (`203OJ`). Full accessibility surface (`:focus-visible`, ARIA labels on icon buttons, semantic landmarks, skip-to-catalogue link, toast live region, modal focus management + Tab/Shift-Tab trap, `prefers-reduced-motion`). `CATALOGUE_QUERY` interpolation from the `PROPERTIES` central dict completed.
+
+**Curator lens held back from live.** The Phase 1 lens is dormant on `browse.html` — the `await loadCurationIndex();` line in `main()` is commented out with a one-line note. Overlay / chip / threshold-card code is all present and inert. Active in `next.html` for the pilot researchers to experience as a "what's coming" preview. Promotable later by uncommenting one line.
+
+**Live hotfixes that landed on browse before promotion** (so they're now subsumed): v1.06.32 mobile splash Continue handler bound before SPARQL (was inert on slow mobile); v1.06.33 `.row:hover` gated to real pointer devices (was sticking on touch). Both folded into the v1.07.00 surface.
+
+**Post-cold-read remediation** before the promotion: ARCHITECTURE.md commissioned an external-AI "cold read" of the doc, which surfaced a punch-list of audit-grade items. Closed 1–5 in priority order:
+1. CI VERSION-bump guard — `.github/scripts/validate.mjs` now refuses pushes that change `browse.html` or `next.html` without bumping `VERSION`. Compares working tree against `HH_PREVIOUS_SHA` (set in CI from `github.event.before` / `pull_request.base.sha`) and falls back to `HEAD~1` locally. Workflow checkout now uses `fetch-depth: 2`.
+2. SPARQL retry + stale-cache fallback — one retry with 800 ms backoff; if both attempts fail, `loadFromWikibase()` falls back to any cached items in `localStorage` regardless of the 2-hour freshness window.
+3. CSP via `<meta http-equiv>` on both HTMLs — `'unsafe-inline'` retained for script/style (single-file SPA constraint), but `connect-src` whitelisted to Wikibase Cloud + loopback, `img-src` to the R2 host, `object-src 'none'`. Validator updated to strip HTML comments before scanning for `<script>` (the CSP doc comment contained the literal string).
+4. `PROPERTIES → CATALOGUE_QUERY` migration finished in staging (the SPARQL body had still been using bare `wdt:Pxx` literals).
+5. a11y pass in three stages — A: `:focus-visible` + ARIA labels on icon-only buttons + `prefers-reduced-motion`. B: skip-to-catalogue link + semantic landmarks (`<header role="banner">`, `<main>`, `<section aria-label>`) + toast `aria-live` + modal `modalOnOpen` / `modalOnClose` open/close focus management. B+: focus trap inside modals on Tab / Shift-Tab. Explicit non-goal per Brandon: no font / colour / contrast changes; visual design treated as architect-specified constraint.
+
+**Documentation refresh.** ARCHITECTURE.md §10 audit bullets rewritten to reflect current state (no CSP → CSP-with-`'unsafe-inline'`; no retry → one-retry-plus-stale-fallback; manual cache-bust → CI-enforced); new §10 Accessibility subsection. New top-level **HANDOFF.md** drafted as a continuity-of-operations document with 35 `[TO COMPLETE]` placeholders for maintainer-only knowledge (vendor account specifics, recovery emails, secondary admins, contact list). §6.2 Wikibase-loss recovery procedure explicitly flagged as "not rehearsed end-to-end" with a TODO to dry-run it on a throwaway instance.
+
+**Aesthetic cleanup.** `assets/verso.css` → `assets/light.css`; `assets/inverse.css` → `assets/dark.css`. The bookbinding-conceit naming pair was honest at v1.0 but had become noise (only `verso` is print-shop vocabulary; pairing it with `inverse` was a hybrid that wasn't quite either metaphor). Light / dark are what the files are; the rename trims the metaphor without changing the styling. All HTML references + active docs updated; frozen `CLAUDE_archive_*.md` left intact.
+
+**Pilot phase framing** added to README, ARCHITECTURE §2, and HANDOFF §9: 3-month researcher-only pilot, not yet public-facing, building archive + curator lenses. Deliberately not added to this session log — it's standing context, not timeline.
+
+**Standing-rule changes that survive into v1.08:**
+- LINE: NEXT resumes on `next.html` v1.08-test.NN. Bump on every push, as usual.
+- Curator load remains commented out on `browse.html`. Don't uncomment without explicit decision.
+- HANDOFF.md placeholders will be filled in as Brandon gets to them; no auto-prompts.
+
+**Version line at session close: browse.html `v1.07.00` (LIVE, just promoted) · next.html `v1.08-test.01` (staging, at parity, v1.08 line opening).**
