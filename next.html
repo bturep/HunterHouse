@@ -2284,7 +2284,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.72";
+  const VERSION      = "v1.07-test.73";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3847,9 +3847,14 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       }, 1500);
     };
     const cancel = () => { clearTimeout(timer); timer = null; clr.classList.remove("holding"); };
-    clr.addEventListener("mousedown",  start);
-    clr.addEventListener("mouseup",    cancel);
-    clr.addEventListener("mouseleave", cancel);
+    clr.addEventListener("mousedown",   start);
+    clr.addEventListener("mouseup",     cancel);
+    clr.addEventListener("mouseleave",  cancel);
+    // Touch parity — mirrors the rn-del hold-to-delete bindings. Without
+    // these the clear button is inert on touch devices.
+    clr.addEventListener("touchstart",  start,  { passive: false });
+    clr.addEventListener("touchend",    cancel);
+    clr.addEventListener("touchcancel", cancel);
   }
 
   // ── Bulk-edit selection (admin) ────────────────────────────────────────────
