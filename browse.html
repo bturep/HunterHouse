@@ -48,6 +48,29 @@
   ::view-transition-group(hh-mark){animation-duration:900ms;animation-timing-function:cubic-bezier(.4,0,.2,1)}
 
   /* browse-surface overrides */
+  /* ── Accessibility: keyboard focus indicators ───────────────────────────
+     :focus-visible draws an outline only on keyboard navigation (Tab /
+     Shift-Tab) — never on mouse clicks (modern browsers gate :focus-visible
+     by input modality). Uses currentColor so the ring adapts to dark/light.
+     Don't add `outline:none` to buttons — it removes the keyboard ring.
+     Inputs use border-color change as their focus indicator (see verso.css). */
+  :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+  .row:focus-visible { outline-offset: -2px; }
+  /* Honour the user's reduced-motion preference. Suppresses the splash
+     view-transition + the panel-collapse refit animation; functional UI
+     state changes are unaffected. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
   html{background:#f3f1ec;height:100%}
   html,body{overflow:hidden}
   @keyframes page-in{from{opacity:0}to{opacity:1}}
@@ -1589,14 +1612,14 @@
          so the element must stay even if the desktop UI is hidden. -->
     <input id="search-input" class="tr-search-input" placeholder="" autocomplete="off">
     <span id="topright" title="About this archive"></span>
-    <button class="theme-btn" id="search-toggle" title="Search [/]"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="5.2" cy="5.2" r="3.5"/><line x1="7.8" y1="7.8" x2="12" y2="12"/></svg></button>
+    <button class="theme-btn" id="search-toggle" title="Search [/]" aria-label="Search"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="5.2" cy="5.2" r="3.5"/><line x1="7.8" y1="7.8" x2="12" y2="12"/></svg></button>
     <!-- Info ("?") button — opens the shortcuts/info pane. In-flow between
          #search-toggle and #fs-toggle; hidden while the about-pane is open
          and on first paint via data-splash-init (see the #rec-info rules). -->
     <button id="rec-info" title="About this archive &amp; shortcuts [?]" aria-label="Info">?</button>
     <!-- fs-toggle LAST so flex-end (padding-right:0) lands its right edge at
          viewport_right - 28 — the inner edge of the collapsed right panel. -->
-    <button class="theme-btn" id="fs-toggle" title="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
+    <button class="theme-btn" id="fs-toggle" title="Enter fullscreen" aria-label="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
   </div>
 </header>
 
@@ -1702,20 +1725,20 @@
       <iframe id="pdf-frame" title="Publication PDF" src="about:blank"></iframe>
     </div>
     <div class="image-foot">
-      <span class="foot-left"><button id="pdf-view" type="button" hidden>View PDF</button><button id="pdf-close" type="button" title="Close PDF" hidden>✕</button></span>
+      <span class="foot-left"><button id="pdf-view" type="button" hidden>View PDF</button><button id="pdf-close" type="button" title="Close PDF" aria-label="Close PDF" hidden>✕</button></span>
       <div class="zoom-ctl">
-        <button id="zoom-out" type="button" title="Zoom out [-]">−</button>
+        <button id="zoom-out" type="button" title="Zoom out [-]" aria-label="Zoom out">−</button>
         <span class="pct" id="zoom-pct">100%</span>
-        <button id="zoom-in" type="button" title="Zoom in [+]">+</button>
+        <button id="zoom-in" type="button" title="Zoom in [+]" aria-label="Zoom in">+</button>
         <span class="zoom-sep"></span>
         <button id="zoom-fit" type="button" title="Fit to frame [F]">FIT</button>
         <span class="zoom-sep"></span>
         <button id="zoom-1to1" type="button" title="1:1 — one screen pixel per image pixel [1]">1:1</button>
         <span class="zoom-sep"></span>
-        <button id="zoom-rotate" type="button" title="Rotate 90° [T]">↻</button>
+        <button id="zoom-rotate" type="button" title="Rotate 90° [T]" aria-label="Rotate image 90 degrees">↻</button>
         <button id="zoom-rotsave" type="button" title="Save this rotation to the record (admin)" hidden>⤓ save</button>
         <span class="zoom-sep"></span>
-        <button id="zoom-fs" type="button" title="Fullscreen — hide panels [Z]">
+        <button id="zoom-fs" type="button" title="Fullscreen — hide panels [Z]" aria-label="Hide both side panels">
           <svg id="fs-icon-expand" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8"/></svg>
           <svg id="fs-icon-collapse" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M4 1v3H1M8 1v3h3M8 11V8h3M4 11V8H1"/></svg>
         </button>
@@ -1783,7 +1806,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06.35";
+  const VERSION      = "v1.06.36";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2507,18 +2530,18 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       panel.innerHTML = `
         <div class="rn-head">
           <span class="rn-label">researcher notes</span>
-          <button class="rn-lock-btn" id="rn-lock-btn" title="Unlock to add notes">${LOCK_SVG}</button>
+          <button class="rn-lock-btn" id="rn-lock-btn" title="Unlock to add notes" aria-label="Sign in to add notes">${LOCK_SVG}</button>
         </div>
         <div class="rn-auth" id="rn-auth" style="display:none">
           <div class="rn-auth-step" id="rn-step-name">
             <input class="rn-pin-input" type="text" id="rn-name-input" placeholder="full name" autocomplete="off" spellcheck="false">
-            <button class="rn-pin-btn" id="rn-name-btn">→</button>
+            <button class="rn-pin-btn" id="rn-name-btn" aria-label="Continue">→</button>
             <span class="rn-pin-err" id="rn-name-err"></span>
           </div>
           <div class="rn-auth-step" id="rn-step-pin" style="display:none">
             <span class="rn-auth-who" id="rn-auth-who"></span>
             <input class="rn-pin-input rn-pin-sm" type="password" id="rn-pin-input" placeholder="pin" maxlength="12" autocomplete="off">
-            <button class="rn-pin-btn" id="rn-pin-btn">→</button>
+            <button class="rn-pin-btn" id="rn-pin-btn" aria-label="Continue">→</button>
             <span class="rn-pin-err" id="rn-pin-err"></span>
           </div>
         </div>
@@ -2565,7 +2588,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
           <span class="rn-label">researcher notes</span>
           <span class="rn-who">${escapeHTML(researcher.name)}${researcher.role ? ` · ${escapeHTML(researcher.role)}` : ""}</span>
           ${rnRole() === "admin" ? `<button class="rn-allbtn${rnShowAll ? " on" : ""}" id="rn-allbtn" title="${rnShowAll ? "Showing every researcher's notes — click for yours only" : "Showing only your notes — click to see all researchers'"}">${rnShowAll ? "all" : "mine"}</button>` : ""}
-          <button class="rn-lock-btn" id="rn-lock-btn" title="Lock">${UNLOCK_SVG}</button>
+          <button class="rn-lock-btn" id="rn-lock-btn" title="Lock" aria-label="Sign out">${UNLOCK_SVG}</button>
         </div>
         ${noteRows ? `<div class="rn-list">${noteRows}</div>` : ""}
         <div class="rn-add">
@@ -5440,6 +5463,8 @@ WHERE {
         const hidden = allHidden();
         pfsBtn.classList.toggle("fs-active", hidden);
         pfsBtn.title = hidden ? "Show panels [Z]" : "Fullscreen — hide panels [Z]";
+        pfsBtn.setAttribute("aria-label", hidden ? "Show both side panels" : "Hide both side panels");
+        pfsBtn.setAttribute("aria-pressed", hidden ? "true" : "false");
         pfsExp.style.display = hidden ? "none" : "";
         pfsCol.style.display = hidden ? ""     : "none";
       };
