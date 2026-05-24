@@ -2356,7 +2356,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.80";
+  const VERSION      = "v1.07-test.81";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2491,20 +2491,51 @@
 
   // ── Modal focus management — shared open/close helpers ───────────────────
   // Stores the element that held focus before the modal opened, moves focus
-  // into the modal, and restores the original element on close. Lets keyboard
-  // and screen-reader users land in the modal and return to where they came
-  // from when it dismisses. Per-modal state via WeakMap.
+  // into the modal, and restores the original element on close. Also traps
+  // Tab / Shift-Tab inside the modal while it is open — keyboard users can't
+  // accidentally tab out into the page underneath and lose the modal's
+  // context. Per-modal state via WeakMaps; the trap is removed on close.
+  const FOCUSABLE_SEL =
+    'button:not([disabled]):not([hidden]), [href], input:not([disabled]):not([type="hidden"]), ' +
+    'textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
   const _modalLastFocus = new WeakMap();
+  const _modalTraps     = new WeakMap();
+  function _trapFocusIn(modalEl) {
+    const handler = (e) => {
+      if (e.key !== "Tab") return;
+      // Recompute focusables on each Tab — modals can swap content (e.g. the
+      // researcher help pane re-renders its inner HTML on open).
+      const nodes = Array.from(modalEl.querySelectorAll(FOCUSABLE_SEL))
+        .filter(el => el.offsetParent !== null || el === document.activeElement);
+      if (!nodes.length) { e.preventDefault(); return; }
+      const first = nodes[0], last = nodes[nodes.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey && (active === first || !modalEl.contains(active))) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && (active === last || !modalEl.contains(active))) {
+        e.preventDefault(); first.focus();
+      }
+    };
+    modalEl.addEventListener("keydown", handler);
+    return () => modalEl.removeEventListener("keydown", handler);
+  }
   function modalOnOpen(modalEl) {
     if (!modalEl) return;
     _modalLastFocus.set(modalEl, document.activeElement);
-    const target = modalEl.querySelector('[autofocus], button:not([hidden]), [href], [tabindex]:not([tabindex="-1"])');
+    const target = modalEl.querySelector('[autofocus], ' + FOCUSABLE_SEL);
     if (target && typeof target.focus === "function") {
       requestAnimationFrame(() => target.focus());
     }
+    // Replace any previously-armed trap on the same modal (defensive — open
+    // shouldn't run twice without close, but if it does we'd otherwise leak).
+    const prevUntrap = _modalTraps.get(modalEl);
+    if (prevUntrap) prevUntrap();
+    _modalTraps.set(modalEl, _trapFocusIn(modalEl));
   }
   function modalOnClose(modalEl) {
     if (!modalEl) return;
+    const untrap = _modalTraps.get(modalEl);
+    if (untrap) { untrap(); _modalTraps.delete(modalEl); }
     const prev = _modalLastFocus.get(modalEl);
     _modalLastFocus.delete(modalEl);
     if (prev && typeof prev.focus === "function" && document.contains(prev)) {
