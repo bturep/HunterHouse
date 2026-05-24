@@ -10,6 +10,12 @@
 //        browse.html → vMAJOR.SESSION.PATCH  e.g. v1.06.31
 //        next.html   → vMAJOR.SESSION-test.NN  e.g. v1.07-test.51
 //   3. manifest.json and manifest.next.json parse as JSON.
+//   4. If browse.html or next.html changed since the previous push, its
+//      VERSION constant must have changed too — catches "forgot to bump"
+//      pushes that would otherwise leave returning visitors on a stale
+//      localStorage cache. Compares against $HH_PREVIOUS_SHA (set in CI
+//      from github.event.before / pull_request.base.sha) and falls back
+//      to HEAD~1 locally; skips with a notice if neither is available.
 //
 // Failure → exits non-zero. GitHub Actions then emails the repo owner on the
 // failed run, which is the audit's "alert without gating the push" model.
@@ -77,6 +83,62 @@ for (const file of MANIFESTS) {
     else                pass(`${file}: parses as JSON, start_url=${obj.start_url}`);
   } catch (e) {
     fail(`${file}: ${e.message}`);
+  }
+}
+
+// (4) VERSION-bump-on-substantive-change.
+// If browse.html or next.html changed since the previous push, its VERSION
+// must have changed too. Cheap guard against the "forgot to bump → returning
+// visitors hit stale localStorage" foot-gun. Skips silently if no previous
+// SHA is available (first-ever commit, or detached state with no parent).
+function git(args) {
+  try { return execFileSync("git", args, { stdio: ["pipe", "pipe", "pipe"] }).toString(); }
+  catch { return null; }
+}
+const ZERO_SHA = "0000000000000000000000000000000000000000";
+function previousSha() {
+  const env = process.env.HH_PREVIOUS_SHA;
+  if (env && env !== ZERO_SHA && /^[0-9a-f]{4,40}$/i.test(env)) return env;
+  const head1 = git(["rev-parse", "--verify", "HEAD~1"]);
+  return head1 ? head1.trim() : null;
+}
+const prevSha = previousSha();
+if (!prevSha) {
+  console.log("\n(VERSION-bump check skipped — no previous SHA available)");
+} else {
+  console.log(`\nVERSION-bump check (vs. ${prevSha.slice(0, 7)}):`);
+  for (const { file } of HTMLS) {
+    // Compare PREV against the working tree (no ..HEAD) so the same check
+    // catches uncommitted changes when run locally before a push. In CI,
+    // working tree == HEAD, so the result is identical.
+    const diff = git(["diff", "--name-only", prevSha, "--", file]);
+    if (diff === null) {
+      // git error (likely the prev SHA isn't in the local history). Skip
+      // rather than fail — the rest of the validator's coverage stands.
+      console.log(`  ${file}: (skipped — couldn't compare against ${prevSha.slice(0, 7)})`);
+      continue;
+    }
+    if (!diff.trim()) {
+      pass(`${file}: unchanged since ${prevSha.slice(0, 7)}`);
+      continue;
+    }
+    const oldContent = git(["show", `${prevSha}:${file}`]);
+    if (oldContent === null) {
+      // File didn't exist at that SHA (rare — net-new file). Treat as bumped.
+      pass(`${file}: new since ${prevSha.slice(0, 7)} (no prior VERSION to compare)`);
+      continue;
+    }
+    const oldVer = oldContent.match(VERSION_RE)?.[1];
+    const newVer = readFileSync(file, "utf8").match(VERSION_RE)?.[1];
+    if (!oldVer || !newVer) {
+      console.log(`  ${file}: (couldn't read VERSION on one side — skipped)`);
+      continue;
+    }
+    if (oldVer === newVer) {
+      fail(`${file}: changed but VERSION is still "${newVer}" — bump it before pushing`);
+    } else {
+      pass(`${file}: VERSION bumped ${oldVer} → ${newVer}`);
+    }
   }
 }
 

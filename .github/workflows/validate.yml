@@ -27,6 +27,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Need at least the previous commit to run the VERSION-bump check.
+          fetch-depth: 2
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -34,4 +37,8 @@ jobs:
           node-version: '20'
 
       - name: Validate HTML script blocks, VERSION constants, manifests
+        env:
+          # github.event.before is the previous SHA on push events;
+          # pull_request.base.sha is the merge base for PR events.
+          HH_PREVIOUS_SHA: ${{ github.event.before || github.event.pull_request.base.sha }}
         run: node .github/scripts/validate.mjs
