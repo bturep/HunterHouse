@@ -65,8 +65,8 @@ The complexity that exists is concentrated in (a) the single HTML file and (b) t
 
 | Path | Size | Notes |
 |---|---|---|
-| `assets/verso.css` | 244 lines | Light design tokens + base styles |
-| `assets/inverse.css` | 255 lines | Dark-mode token overrides (used only by the four reading pages) |
+| `assets/light.css` | 244 lines | Light design tokens + base styles |
+| `assets/dark.css` | 255 lines | Dark-mode token overrides (used only by the four reading pages) |
 | `assets/pdfjs/` | **5.7 MB** | **Vendored Mozilla PDF.js v5.7.284** (pruned). One file patched: `web/viewer.mjs` extends `HOSTED_VIEWER_ORIGINS` to allow `bturep.github.io` + `localhost` (re-apply on upgrade). One added file: `web/hh-pdfjs.css` themes the minimal toolbar |
 | `assets/placeholders/` | 192 KB | 3 JPEG tiers (`thumb`/`prev`/`large`) for items missing a preview image |
 | `assets/icon-*.png`, `Hunter.png`, `hunter-mark.png` | 3.3 MB combined | PWA icons + the title-bar wordmark + the bio-page portrait |
@@ -123,7 +123,7 @@ Three Playwright smoke tests + a session-scoped HTTP-server fixture + a README e
 Everything ships in one HTML document: head meta, two inline `<style>` blocks (one tiny paint-holdout, one large component sheet), `<body>` shell, and a single inline `<script>` block holding the entire application (~3,700 lines of JS, ~140 top-level functions, no modules, no classes, no framework).
 
 Loaded externally:
-- `assets/verso.css` (the only render-blocking stylesheet)
+- `assets/light.css` (the only render-blocking stylesheet)
 - Google Fonts (Inter Tight, JetBrains Mono) via stylesheet `<link>`
 - That's it.
 
@@ -195,8 +195,8 @@ Laid out roughly in this order (approximate line ranges from `browse.html` v1.06
 ### 4.6 Theming + interaction quirks
 
 Two CSS surfaces:
-- `verso.css` — light tokens, used everywhere.
-- `inverse.css` — dark overrides, **loaded only by the four reading pages**. `browse.html` itself does its dark mode entirely from inline rules toggled by `html.dark`.
+- `light.css` — light tokens, used everywhere.
+- `dark.css` — dark overrides, **loaded only by the four reading pages**. `browse.html` itself does its dark mode entirely from inline rules toggled by `html.dark`.
 
 Theme persists via `localStorage["hhf_theme_v2"]`. Default is dark.
 
@@ -206,7 +206,7 @@ Two interaction details worth knowing if you're touching CSS:
 
 ### 4.7 The staging line — `next.html`
 
-`next.html` is a near-duplicate of `browse.html` on a parallel version line (`v1.07-test.NN`), bumped per push and never edited from `browse.html`'s line. Shared `verso.css`, separate inline CSS / JS in the HTML itself, separate `CACHE_KEY` so staging localStorage never collides with live.
+`next.html` is a near-duplicate of `browse.html` on a parallel version line (`v1.07-test.NN`), bumped per push and never edited from `browse.html`'s line. Shared `light.css`, separate inline CSS / JS in the HTML itself, separate `CACHE_KEY` so staging localStorage never collides with live.
 
 `next.html` is currently materially ahead of live: a coherent researcher-tools surface in the right panel (compose-mode toggle and researcher `?` help pane in the Item-record bar; reorderable marks with drag handle + nudge arrows in `[only]` mode; "marks first" sort; per-researcher Markdown export / import below the notes panel with same-vs-other-researcher merge semantics; a dirty-changes counter), an admin-only "edit affordances off" toggle for reading the record as a researcher would without dropping the role, a global `Aa` text-size toggle (≈196 generated `font-size:Npx → +1px` overrides keyed on `html.text-lg`), and a second researcher PIN (`203OJ` Olivia Jol). All of this will land at the next live promotion under the standing promotion workflow: copy `next.html` → `browse.html`, bump the `VERSION` to a real `v1.MAJOR.SESSION.PATCH`, tag, push.
 
@@ -297,7 +297,7 @@ The other one-shot Python scripts in `scripts/` use the same credentials from `.
 
 | Origin | What | Why | Critical? |
 |---|---|---|---|
-| `bturep.github.io` | `browse.html`, `assets/verso.css`, `assets/pdfjs/*`, icons, placeholders | The site itself | Yes |
+| `bturep.github.io` | `browse.html`, `assets/light.css`, `assets/pdfjs/*`, icons, placeholders | The site itself | Yes |
 | `hunterhouse.wikibase.cloud` | `/query/sparql` (catalogue + per-item write echo) | Data layer | Yes |
 | `archive.hunterhousefoundation.com` (Cloudflare R2) | Image tiers + PDFs + metadata sidecars | Image / PDF bytes + preservation | Yes for media |
 | `fonts.googleapis.com` + `fonts.gstatic.com` | Inter Tight + JetBrains Mono | Typography | Falls back to system fonts if blocked |
@@ -346,7 +346,7 @@ No analytics. No third-party JS. No advertising. No CDN-served JS libraries.
 ### Architecture & maintainability
 
 - **Single-file SPA, ~5,530 lines (live) / ~7,130 lines (staging), ~140 top-level functions, no module boundaries.** Functions communicate through module-scope `let`s (`state`, `zoomState`, `_proxyOnline`, etc.). The script reads top-to-bottom; there is no entry-point indirection beyond `main()` and `wireControls()`. Comments are dense and current, but any one feature touches many call sites. Staging is materially larger than live; when the next promotion lands the live file will pick up most of that delta. The 7,133-line staging size hasn't hit the maintainer's "worry around 7–8 K" threshold yet.
-- **`next.html` is a near-duplicate of `browse.html`.** The staging strategy is "copy the file, version it, deploy alongside" rather than a branch / preview-env. It works on plain GitHub Pages with no extra infra, but doubles the surface area for the duration of a development cycle. `verso.css` is shared between live and staging.
+- **`next.html` is a near-duplicate of `browse.html`.** The staging strategy is "copy the file, version it, deploy alongside" rather than a branch / preview-env. It works on plain GitHub Pages with no extra infra, but doubles the surface area for the duration of a development cycle. `light.css` is shared between live and staging.
 - **`renderMeta` and `renderMobSheet` overlap but no longer literally duplicate.** The literally-duplicated bits (rights "Contact for…" prose, finding-aid `<a>` rendering, archive contact text) are extracted into shared helpers (`archiveContactText`, `rightsRowHTML`, `findingAidHTML`). The two render paths have otherwise diverged in purpose (mobile = read-only public; desktop = admin-aware with active-state filter-buttons + EM placeholders); a full `buildRows()` unification would be a high-risk refactor for a "pays off when adding an editable field" maintainability win, deferred until that pressure is concrete.
 - **No build step.** Easy to onboard, but no minification, no transpilation, no tree-shaking. The ~280 KB HTML payload is what visitors download (uncompressed; GitHub Pages serves it gzipped).
 - **`localStorage` is the only persistence layer in the browser.** Cache key is `"hhf_" + VERSION`. There is no migration story for stored shapes — a `VERSION` bump simply orphans the previous cache entry. The catalogue is re-fetched from SPARQL, so the cost is one extra round-trip per pushed version, not data loss.
