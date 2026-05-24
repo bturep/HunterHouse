@@ -221,7 +221,7 @@ Two guardrails inside the query:
 - `?item wdt:P79 ?src` is **required** so the result set excludes vocabulary items, people, and institutions that happen to carry an HH archive ID.
 - `?item wdt:P96 ?img` is **OPTIONAL** so stubs without a preview still appear in the list (rendered with a "No image yet" placeholder).
 
-Item identifiers follow `HH-{COLLECTION}-{NNNN}` (e.g. `HH-HHC-0044`, `HH-CAA-0028`, `HH-EGC-0001`). Property IDs are catalogued in `WIKIBASE.md`. In `next.html` a top-of-script `PROPERTIES = {…}` constant declares all 27 PIDs the application uses; the `EDITABLE` map and the `ACCESS_COPY` / `DISPLAY_ROTATION` call sites read from it. The catalogue SPARQL body itself still uses bare `wdt:Pxx` literals inside a template string — opportunistic migration in progress, not big-bang.
+Item identifiers follow `HH-{COLLECTION}-{NNNN}` (e.g. `HH-HHC-0044`, `HH-CAA-0028`, `HH-EGC-0001`). Property IDs are catalogued in `WIKIBASE.md`. In `next.html` a top-of-script `PROPERTIES = {…}` constant declares all 27 PIDs the application uses; the `EDITABLE` map, the per-claim write helpers, and the `CATALOGUE_QUERY` itself interpolate from it via template literals — so a PID rename or property mint in `WIKIBASE.md` has one place in the code to update. `browse.html` (the live line) still inlines bare `wdt:Pxx` literals in its SPARQL; the indirection lands at the next promotion.
 
 ### 5.2 Images — Cloudflare R2
 
