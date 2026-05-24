@@ -6,6 +6,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta name="theme-color" content="#1a1816">
 <meta name="color-scheme" content="dark light">
+<!-- CSP: defence-in-depth. Restricts where the browser may load resources
+     from. 'unsafe-inline' on script/style is required because the page is a
+     deliberate single-file SPA with inline <script> + <style> blocks; the
+     other directives still meaningfully block injection of remote scripts,
+     uncontrolled connect-src exfiltration, and framing of arbitrary URLs.
+     connect-src whitelists Wikibase Cloud (catalogue + writes) and loopback
+     (the admin edit-proxy at 127.0.0.1:8731). img-src adds the R2 host that
+     Wikibase URLs point at. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://archive.hunterhousefoundation.com; connect-src 'self' https://hunterhouse.wikibase.cloud http://127.0.0.1:* http://localhost:*; frame-src 'self'; worker-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'">
 <link rel="manifest" href="/HunterHouse/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1774,7 +1783,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06.34";
+  const VERSION      = "v1.06.35";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
