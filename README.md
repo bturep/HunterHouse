@@ -2,6 +2,10 @@
 
 A static site for the Hunter House Foundation, served from GitHub Pages. The information architecture mirrors the planned Foundation site at `hunterhousefoundation.com`; this implementation runs against the Wikibase at [hunterhouse.wikibase.cloud](https://hunterhouse.wikibase.cloud) as a working iteration.
 
+## Project phase
+
+**3-month pilot, researchers only.** The site is currently shared with a small group of trusted researchers, not the general public. Active work is on building out the archive and the curator-lens functionality. Feedback from pilot researchers will inform subsequent iterations before a broader release.
+
 ## Pages
 
 ```
