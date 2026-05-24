@@ -895,17 +895,30 @@
   /* Compose-mode toggle (researcher + admin only). Hidden by default and shown
      when body.is-researcher is set by reflectComposeRole(). Active state adds
      a slash through the eye to communicate "record hidden". */
-  .hh-compose-btn,.hh-rnhelp-btn{
+  .hh-compose-btn,.hh-rnhelp-btn,.hh-edits-btn{
     display:none;background:none;border:0;padding:4px;margin:-4px;
     color:var(--muted);cursor:pointer;line-height:0;
     -webkit-tap-highlight-color:transparent;border-radius:3px;
   }
   body.is-researcher .hh-compose-btn,
   body.is-researcher .hh-rnhelp-btn{display:inline-flex;align-items:center;justify-content:center}
-  .hh-compose-btn:hover,.hh-rnhelp-btn:hover{color:var(--ink)}
+  /* Edit-affordances toggle: admin only. */
+  body.is-admin .hh-edits-btn{display:inline-flex;align-items:center;justify-content:center}
+  .hh-compose-btn:hover,.hh-rnhelp-btn:hover,.hh-edits-btn:hover{color:var(--ink)}
   body.hh-compose .hh-compose-btn{color:var(--red-deep)}
   .hh-compose-btn .hh-eye-slash{display:none;stroke:var(--red-deep)}
   body.hh-compose .hh-compose-btn .hh-eye-slash{display:inline}
+  body.admin-edits-off .hh-edits-btn{color:var(--red-deep)}
+  .hh-edits-btn .hh-edits-slash{display:none;stroke:var(--red-deep)}
+  body.admin-edits-off .hh-edits-btn .hh-edits-slash{display:inline}
+  /* When admin edits are hidden: drop every admin-only affordance. The role
+     stays admin underneath — this is purely visual. */
+  body.admin-edits-off .hh-fedit{display:none}
+  body.admin-edits-off .hh-editable{cursor:default;border-bottom-color:transparent!important}
+  body.admin-edits-off #hh-proxy-badge{display:none!important}
+  body.admin-edits-off #bulk-bar{display:none!important}
+  body.admin-edits-off .row.bulk-sel{background:transparent}
+  body.admin-edits-off .row.bulk-sel::before{display:none}
   /* Researcher-help "?" — text glyph to mirror the global ? in the top bar. */
   .hh-rnhelp-btn{
     font-family:var(--mono);font-size:14px;font-weight:500;line-height:1;
@@ -2212,6 +2225,16 @@
         <span class="meta-head-r">
           <span id="hh-dirty-badge" class="hh-dirty-badge" hidden></span>
           <button id="hh-rnhelp-btn" class="hh-rnhelp-btn" title="Researcher tools — what you can do" aria-label="Researcher help">?</button>
+          <!-- Admin-only: hide every editing affordance while staying admin
+               underneath. Useful for reading the record as a researcher would
+               without losing the role. Slash appears when edits are hidden. -->
+          <button id="hh-edits-btn" class="hh-edits-btn" title="Hide editing affordances" aria-label="Toggle edit affordances">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11.3 2.7l2 2L5 13l-2.5.5L3 11z"/>
+              <path d="M10 4l2 2"/>
+              <line class="hh-edits-slash" x1="2.5" y1="2.5" x2="13.5" y2="13.5"/>
+            </svg>
+          </button>
           <button id="hh-compose-btn" class="hh-compose-btn" title="Compose mode — hide the record, keep notes" aria-label="Toggle compose mode">
             <svg class="hh-eye" viewBox="0 0 16 12" width="15" height="11" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
               <path d="M1 6s2.6-4.5 7-4.5 7 4.5 7 4.5-2.6 4.5-7 4.5S1 6 1 6z"/>
@@ -2280,7 +2303,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.74";
+  const VERSION      = "v1.07-test.75";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2599,6 +2622,7 @@
     h.classList.add("hh-editable");
     h.title = "Click to edit title (admin)";
     h.addEventListener("click", () => {
+      if (document.body.classList.contains("admin-edits-off")) return;
       if (h.querySelector("input")) return;
       const cur = item.title || "";
       h.innerHTML = `<input class="hh-edit-input" type="text">`;
@@ -3189,15 +3213,48 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   // Toggle body classes for both role visibility and active state.
   function reflectComposeRole() {
     document.body.classList.toggle("is-researcher", canMark());
+    document.body.classList.toggle("is-admin", canEditWikibase());
     document.body.classList.toggle("hh-compose", composeIsOn());
+    document.body.classList.toggle("admin-edits-off", adminEditsOff());
     const btn = document.getElementById("hh-compose-btn");
     if (btn) btn.title = composeIsOn()
       ? "Compose mode on — click to show the full record"
       : "Compose mode — hide the record, keep notes";
+    const ebtn = document.getElementById("hh-edits-btn");
+    if (ebtn) ebtn.title = adminEditsOff()
+      ? "Edit affordances hidden — click to show"
+      : "Hide editing affordances";
     // Lock-out → close any open researcher help pane (button just disappeared).
     if (!canMark() && rnHelpPane && rnHelpPane.classList.contains("open"))
       rnHelpPane.classList.remove("open");
     hhRenderDirtyBadge();
+  }
+
+  // ── Admin edits-off toggle ───────────────────────────────────────────────
+  // Lets the admin read the record as a researcher would, without losing
+  // the role. Persists per pin so toggling carries between reloads. State
+  // applies only when the user is admin; for everyone else the class isn't
+  // set (and the button isn't visible anyway).
+  function adminEditsOff() {
+    if (!canEditWikibase()) return false;
+    const k = composeKey(); if (!k) return false;
+    try { return !!JSON.parse(localStorage.getItem("hhf_edits_off") || "{}")[k]; }
+    catch { return false; }
+  }
+  function setAdminEditsOff(on) {
+    const k = composeKey(); if (!k) return;
+    try {
+      const all = JSON.parse(localStorage.getItem("hhf_edits_off") || "{}");
+      if (on) all[k] = 1; else delete all[k];
+      localStorage.setItem("hhf_edits_off", JSON.stringify(all));
+    } catch {}
+  }
+  function toggleAdminEdits() {
+    if (!canEditWikibase()) return;
+    setAdminEditsOff(!adminEditsOff());
+    // Clear any pending bulk selection — the strip's about to be hidden.
+    if (typeof clearBulkSel === "function") clearBulkSel();
+    reflectComposeRole();
   }
   function toggleCompose() {
     if (!canMark()) return;
@@ -3866,6 +3923,9 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
   // ── Bulk-edit selection (admin) ────────────────────────────────────────────
   function bulkSelectRow(id, e) {
+    // Respect the admin "edits-off" toggle — when admin has chosen to
+    // suppress editing affordances, Cmd-click on a row is a no-op.
+    if (document.body.classList.contains("admin-edits-off")) return;
     if (e.shiftKey && state.bulkAnchor) {
       const ids = state.filtered.map(i => i.id);
       const a = ids.indexOf(state.bulkAnchor);
@@ -5914,6 +5974,8 @@ WHERE {
 
     const composeBtn = document.getElementById("hh-compose-btn");
     if (composeBtn) composeBtn.addEventListener("click", e => { e.stopPropagation(); toggleCompose(); });
+    const editsBtn = document.getElementById("hh-edits-btn");
+    if (editsBtn) editsBtn.addEventListener("click", e => { e.stopPropagation(); toggleAdminEdits(); });
 
     document.addEventListener("click", closeAllDropdowns);
 
