@@ -56,10 +56,14 @@ for (const { file, versionRe, kind } of HTMLS) {
     pass(`${file}: VERSION ${vm[1]} (${kind})`);
   }
 
-  // (2) Each inline <script> block parses as JS
+  // (2) Each inline <script> block parses as JS.
+  // Strip HTML comments first so a comment that happens to contain the
+  // string "<script>" (e.g. CSP documentation prose) isn't mistaken for
+  // an opening tag.
+  const htmlNoComments = html.replace(/<!--[\s\S]*?-->/g, "");
   let block = 0, m;
   SCRIPT_BLOCK_RE.lastIndex = 0;
-  while ((m = SCRIPT_BLOCK_RE.exec(html)) !== null) {
+  while ((m = SCRIPT_BLOCK_RE.exec(htmlNoComments)) !== null) {
     block++;
     const code = m[1];
     if (!code.trim()) continue;
