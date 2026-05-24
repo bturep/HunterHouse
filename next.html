@@ -2303,7 +2303,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.75";
+  const VERSION      = "v1.07-test.76";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4564,10 +4564,24 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
   // ── Wikibase fetch layer ──────────────────────────────────────────────────
   async function sparqlQuery(q) {
+    // Two attempts with a short backoff. Wikibase Cloud occasionally
+    // returns a transient 5xx or a slow first response; a second try
+    // 800 ms later almost always succeeds. If both fail the caller
+    // (loadFromWikibase) falls back to any stale localStorage cache.
     const url = SPARQL_URL + "?query=" + encodeURIComponent(q) + "&format=json";
-    const res = await fetch(url, { headers: { Accept: "application/sparql-results+json" } });
-    if (!res.ok) throw new Error("SPARQL " + res.status);
-    return (await res.json()).results.bindings;
+    const opts = { headers: { Accept: "application/sparql-results+json" } };
+    let lastErr;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const res = await fetch(url, opts);
+        if (!res.ok) throw new Error("SPARQL " + res.status);
+        return (await res.json()).results.bindings;
+      } catch (e) {
+        lastErr = e;
+        if (attempt === 1) await new Promise(r => setTimeout(r, 800));
+      }
+    }
+    throw lastErr;
   }
 
   const CACHE_KEY = "hhf_" + VERSION;
@@ -4744,11 +4758,29 @@ WHERE {
       }
     } catch {}
 
-    // 3. Full fetch from Wikibase
-    const rows = await sparqlQuery(CATALOGUE_QUERY);
-    const items = processRows(rows);
-    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), items })); } catch {}
-    return items;
+    // 3. Full fetch from Wikibase, with stale-cache fallback.
+    // sparqlQuery already retries once; if both attempts fail, fall back
+    // to any cached copy on disk (even if older than the 2 h freshness
+    // window above) rather than rendering an empty list. Returning
+    // visitors get a usable catalogue during a Wikibase Cloud outage.
+    try {
+      const rows = await sparqlQuery(CATALOGUE_QUERY);
+      const items = processRows(rows);
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), items })); } catch {}
+      return items;
+    } catch (e) {
+      try {
+        const raw = localStorage.getItem(CACHE_KEY);
+        if (raw) {
+          const { items } = JSON.parse(raw);
+          if (items && items.length) {
+            console.warn("SPARQL fetch failed; serving stale localStorage cache:", e);
+            return items;
+          }
+        }
+      } catch {}
+      throw e;
+    }
   }
 
   // ── Filter + sort ─────────────────────────────────────────────────────────
