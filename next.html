@@ -2357,7 +2357,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08-test.01";
+  const VERSION      = "v1.08-test.02";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4786,11 +4786,115 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   }
   async function getCuration(slug) {
     if (curationCache[slug]) return curationCache[slug];
-    const r = await fetch(`curations/${encodeURIComponent(slug)}.json?v=${encodeURIComponent(VERSION)}`, { cache: "no-store" });
+    const r = await fetch(`curations/${encodeURIComponent(slug)}.md?v=${encodeURIComponent(VERSION)}`, { cache: "no-store" });
     if (!r.ok) throw new Error("curation not found");
-    const c = await r.json();
+    const c = hhParseCurationMd(await r.text(), slug);
     curationCache[slug] = c;
     return c;
+  }
+
+  // Parser for the canonical curator-selection Markdown. One file per curator,
+  // entirely human-authored — see curations/TEMPLATE.md for the shape. Strict
+  // about section names but lenient about everything else (anything the parser
+  // doesn't recognise is silently skipped, never misimported).
+  //
+  // Recognised structure:
+  //   # <Title>
+  //   > Curated by **<Name>** · <Role> · <Affiliation> · [<label>](<url>)
+  //   ## About this selection
+  //   <multi-paragraph intro prose>
+  //   ## About the curator
+  //   <multi-paragraph bio prose>
+  //   ## Selection
+  //   ### <ARCH-ID>
+  //   <per-item note; multi-paragraph OK>
+  //   ### <ARCH-ID>
+  //   <next item's note>
+  //
+  // Item order in the file IS the curator's intended sequence; `pos` is
+  // assigned implicitly (1, 2, 3…).
+  function hhParseCurationMd(text, slug) {
+    const lines = String(text).split(/\r?\n/);
+    const out = {
+      slug,
+      title: "",
+      intro: "",
+      curator: { name: "", role: "", affiliation: "", bio: "", url: "", url_label: "", qid: null },
+      items: [],
+    };
+    let mode = null;       // null | "intro" | "bio" | "selection"
+    let buf = [];
+    let currentItem = null;
+    const ARCHID = /\b([A-Z]{2,4}-[A-Z]{2,4}-\d{3,5})\b/;
+    const flush = () => buf.join("\n").trim().replace(/\n{3,}/g, "\n\n");
+    const closeMode = () => {
+      if (mode === "intro") out.intro = flush();
+      else if (mode === "bio") out.curator.bio = flush();
+      else if (mode === "selection" && currentItem) {
+        currentItem.note = flush();
+        out.items.push(currentItem);
+        currentItem = null;
+      }
+      buf = [];
+    };
+    for (const raw of lines) {
+      const ln = raw.trimEnd();
+      // First H1 → title. A SECOND H1 ends parsing — convention is that
+      // anything below a "# Notes" / "# Appendix" / etc. is non-content
+      // (e.g. instructions for the curator left in the file as reference).
+      const h1 = ln.match(/^#\s+(.+)$/);
+      if (h1) {
+        if (!out.title) { out.title = h1[1].trim(); continue; }
+        closeMode();
+        break;
+      }
+      // Blockquote byline (only honored before any H2)
+      const bq = ln.match(/^>\s*(.+)$/);
+      if (bq && mode === null) {
+        const inner = bq[1];
+        const nameM = inner.match(/\*\*([^*]+)\*\*/);
+        if (nameM) out.curator.name = nameM[1].trim();
+        const linkM = inner.match(/\[([^\]]+)\]\(([^)]+)\)/);
+        if (linkM) { out.curator.url_label = linkM[1]; out.curator.url = linkM[2]; }
+        // Plain tokens separated by · — drop the **name** and any [link](…) chunks
+        const stripped = inner
+          .replace(/^\s*Curated by\s*/i, "")
+          .replace(/\*\*[^*]+\*\*/, "")
+          .replace(/\[[^\]]+\]\([^)]+\)/g, "");
+        const plain = stripped.split(/\s*·\s*/).map(s => s.trim()).filter(Boolean);
+        if (plain[0]) out.curator.role = plain[0];
+        if (plain[1]) out.curator.affiliation = plain[1];
+        continue;
+      }
+      // H2 transitions a section
+      const h2 = ln.match(/^##\s+(.+)$/);
+      if (h2) {
+        closeMode();
+        const head = h2[1].toLowerCase();
+        if (/about\s+this\s+selection|^intro/.test(head))          mode = "intro";
+        else if (/about\s+the\s+curator|^curator$|^bio/.test(head)) mode = "bio";
+        else if (/^selection|^items|^list/.test(head))              mode = "selection";
+        else                                                        mode = null;
+        continue;
+      }
+      // In selection mode, H3 starts a new item
+      if (mode === "selection") {
+        const h3 = ln.match(/^###\s+/);
+        if (h3) {
+          if (currentItem) { currentItem.note = flush(); out.items.push(currentItem); }
+          buf = [];
+          const idM = ln.match(ARCHID);
+          currentItem = { id: idM ? idM[1] : null, pos: out.items.length + 1, note: "" };
+          continue;
+        }
+      }
+      // Accumulate prose for the active mode
+      if (mode) buf.push(raw);
+    }
+    closeMode();
+    // Drop items with no ID (defensive — a curator typing a non-ID heading)
+    out.items = out.items.filter(it => it.id);
+    return out;
   }
 
   // SPARQL query — single source of truth. index.html is currently a thin
