@@ -809,13 +809,6 @@
   .mark-bar .mb-btn.on{color:var(--ink)}
   .mark-bar .mb-btn.on::after{content:'';position:absolute;left:0;right:0;bottom:-3px;height:1px;background:var(--ink)}
   .mark-bar .mb-clear:hover{color:var(--red-deep)}
-  .mark-bar .mb-clear.holding{color:var(--red-deep)}
-  .mark-bar .mb-clear.holding::before{
-    content:'';position:absolute;left:-4px;right:-4px;top:-3px;bottom:-3px;
-    background:var(--red-tint);z-index:-1;border-radius:2px;
-    animation:mark-charge 1.5s linear forwards;
-  }
-  @keyframes mark-charge{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 
   /* ── image pane ── */
   .image-stage{
@@ -1703,9 +1696,12 @@
   .rn-list:not(.rn-list-locked) .rn-row:hover .rn-date{color:var(--red-deep);opacity:1}
   .rn-list:not(.rn-list-locked) .rn-text{cursor:pointer}
   .rn-row.editing .rn-text{text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px}
-  /* hold animation: × grows over 3 s */
-  .rn-del.holding{animation:rn-charge 2s linear forwards}
-  @keyframes rn-charge{0%{transform:scale(1);opacity:0.5}85%{transform:scale(1.5);opacity:0.9}100%{transform:scale(2);opacity:1}}
+  /* Click-to-confirm — armed state. Shared by .mark-bar .mb-clear and
+     .rn-del. The button briefly swaps its label to "<thing>?" and waits
+     ~3s for a second click before committing. */
+  .hh-confirm{color:var(--red-deep)!important}
+  .mark-bar .mb-clear.hh-confirm{font-weight:600}
+  .rn-del.hh-confirm{transform:scale(1.2);font-weight:700}
   .rn-text{font-size:11px;line-height:1.55;color:var(--ink);word-break:break-word}
   html.dark .rn-text{color:var(--inv-fg)}
   .rn-date{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.03em;white-space:nowrap;opacity:0.7}
@@ -2284,7 +2280,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.73";
+  const VERSION      = "v1.07-test.74";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2406,6 +2402,42 @@
     _hhToastEl.className = "show " + kind;
     clearTimeout(hhToast._t);
     hhToast._t = setTimeout(() => { _hhToastEl.className = ""; }, 3400);
+  }
+
+  // ── Click-to-confirm — shared two-step destructive-action helper ──────────
+  // Replaces the press-and-hold pattern. First click "arms" the button: its
+  // label swaps to `confirmLabel` and the .hh-confirm class is added. A
+  // second click inside `timeoutMs` commits via `action`. Click outside,
+  // press Escape, or wait the timeout → revert. Single source of behaviour
+  // for the mark-bar [clear] and the per-note × delete.
+  function hhClickToConfirm(btn, action, opts) {
+    opts = opts || {};
+    const confirmLabel = opts.confirmLabel || "confirm?";
+    const timeoutMs    = opts.timeoutMs    || 3000;
+    let armed = false, originalHTML = "", t = null, outsideHandler = null, keyHandler = null;
+    const disarm = () => {
+      if (!armed) return;
+      armed = false;
+      btn.classList.remove("hh-confirm");
+      btn.innerHTML = originalHTML;
+      if (t) { clearTimeout(t); t = null; }
+      if (outsideHandler) { document.removeEventListener("click", outsideHandler, true); outsideHandler = null; }
+      if (keyHandler)     { document.removeEventListener("keydown", keyHandler);          keyHandler = null; }
+    };
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (armed) { const a = action; disarm(); a(); return; }
+      armed = true;
+      originalHTML = btn.innerHTML;
+      btn.innerHTML = confirmLabel;
+      btn.classList.add("hh-confirm");
+      t = setTimeout(disarm, timeoutMs);
+      outsideHandler = ev => { if (!btn.contains(ev.target)) disarm(); };
+      keyHandler     = ev => { if (ev.key === "Escape") disarm(); };
+      document.addEventListener("click", outsideHandler, true);
+      document.addEventListener("keydown", keyHandler);
+    });
   }
   // ── Per-startup proxy token (audit §11.1 step 3, 2026-05-22) ────────────
   // The local proxy generates a fresh random token each time it starts
@@ -3319,27 +3351,17 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         });
         const del = row.querySelector(".rn-del");
         if (!del) return;
-        let timer = null;
-        const start = e => {
-          e.preventDefault();
-          del.classList.add("holding");
-          timer = setTimeout(() => {
-            const idx     = parseInt(row.dataset.idx);
-            const updated = rnLoad(archId);
-            updated.splice(idx, 1);
-            rnSave(archId, updated);
-            hhDirtyTouch();
-            rnSyncRow(archId);
-            renderRN(archId);
-          }, 2000);
-        };
-        const cancel = () => { clearTimeout(timer); timer = null; del.classList.remove("holding"); };
-        del.addEventListener("mousedown",   start);
-        del.addEventListener("mouseup",     cancel);
-        del.addEventListener("mouseleave",  cancel);
-        del.addEventListener("touchstart",  start,  { passive: false });
-        del.addEventListener("touchend",    cancel);
-        del.addEventListener("touchcancel", cancel);
+        del.title = "Delete note (click to confirm)";
+        // First click arms ("×?"); second commits.
+        hhClickToConfirm(del, () => {
+          const idx     = parseInt(row.dataset.idx);
+          const updated = rnLoad(archId);
+          updated.splice(idx, 1);
+          rnSave(archId, updated);
+          hhDirtyTouch();
+          rnSyncRow(archId);
+          renderRN(archId);
+        }, { confirmLabel: "×?" });
       });
     }
   }
@@ -3805,7 +3827,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         `<button class="mb-btn mb-only${state.filterMarkedOnly ? " on" : ""}" id="mb-only" title="Show only marked items">only</button>` +
         `<button class="mb-btn${state.sortMarksFirst ? " on" : ""}" id="mb-first" title="Put marked items at the top of the list (in your order)">first</button>` +
         `<button class="mb-btn" id="mb-export" title="Copy marked archive IDs">copy</button>` +
-        `<button class="mb-btn mb-clear" id="mb-clear" title="Hold to clear all marks">clear</button>` +
+        `<button class="mb-btn mb-clear" id="mb-clear" title="Clear all marks">clear</button>` +
       `</span>`;
 
     bar.querySelector("#mb-only").addEventListener("click", () => {
@@ -3830,31 +3852,16 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       }
     });
 
-    // Hold to clear — mirrors the rn-del hold-to-delete safety pattern.
-    const clr = bar.querySelector("#mb-clear");
-    let timer = null;
-    const start = e => {
-      e.preventDefault();
-      clr.classList.add("holding");
-      timer = setTimeout(() => {
-        const n = marked.length;
-        marksClear();
-        state.filterMarkedOnly = false;
-        marksSave();
-        if (n) hhDirtyTouch(n);
-        applyFilters(); renderList(); updateFilterBadge(); renderMarkBar();
-        hhToast("marks cleared");
-      }, 1500);
-    };
-    const cancel = () => { clearTimeout(timer); timer = null; clr.classList.remove("holding"); };
-    clr.addEventListener("mousedown",   start);
-    clr.addEventListener("mouseup",     cancel);
-    clr.addEventListener("mouseleave",  cancel);
-    // Touch parity — mirrors the rn-del hold-to-delete bindings. Without
-    // these the clear button is inert on touch devices.
-    clr.addEventListener("touchstart",  start,  { passive: false });
-    clr.addEventListener("touchend",    cancel);
-    clr.addEventListener("touchcancel", cancel);
+    // Click-to-confirm: first click arms ("clear?"), second commits.
+    hhClickToConfirm(bar.querySelector("#mb-clear"), () => {
+      const n = marked.length;
+      marksClear();
+      state.filterMarkedOnly = false;
+      marksSave();
+      if (n) hhDirtyTouch(n);
+      applyFilters(); renderList(); updateFilterBadge(); renderMarkBar();
+      hhToast("marks cleared");
+    }, { confirmLabel: "clear?" });
   }
 
   // ── Bulk-edit selection (admin) ────────────────────────────────────────────
