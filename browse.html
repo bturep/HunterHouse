@@ -59,6 +59,19 @@
     outline-offset: 2px;
   }
   .row:focus-visible { outline-offset: -2px; }
+  /* Screen-reader-only utility — visually hidden but reachable by AT and
+     by keyboard Tab. Reveals itself on :focus-visible (skip-to-content link). */
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  .sr-only-focusable:focus-visible {
+    position: fixed; top: 8px; left: 8px; width: auto; height: auto;
+    padding: 8px 12px; margin: 0; overflow: visible; clip: auto;
+    background: var(--ink); color: var(--bg);
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+    text-decoration: none; z-index: 1000;
+  }
   /* Honour the user's reduced-motion preference. Suppresses the splash
      view-transition + the panel-collapse refit animation; functional UI
      state changes are unaffected. */
@@ -1590,6 +1603,11 @@
 </head>
 <body class="loading">
 
+<!-- Skip link: the first focusable element on the page. Visually hidden
+     until keyboard focus reveals it. Lets keyboard / screen-reader users
+     jump past the top bar straight to the catalogue list. -->
+<a href="#panel-left" class="sr-only sr-only-focusable">Skip to catalogue</a>
+
 <div id="rotate-msg">
   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
   <span>Rotate to portrait</span>
@@ -1600,7 +1618,7 @@
   <button id="mobile-version" type="button" aria-label="About this archive">Hunter House Archive</button>
 </div>
 
-<header class="site-top" id="site-header">
+<header class="site-top" id="site-header" role="banner" aria-label="Site header">
   <a class="markid" href="index.html">
     <span class="name">Hunter House Archive</span>
   </a>
@@ -1651,7 +1669,7 @@
   </div>
 </div>
 
-<div class="shell">
+<main class="shell" id="main" aria-label="Hunter House Archive">
 
   <div class="mobile-tabs">
     <button class="mtab active" data-pane="list">List</button>
@@ -1659,7 +1677,7 @@
     <button class="mtab" data-pane="meta">Record</button>
   </div>
 
-  <div class="panel-left pane-list mobile-active" id="panel-left">
+  <section class="panel-left pane-list mobile-active" id="panel-left" tabindex="-1" aria-label="Browse items">
     <div class="panel-content">
       <div class="scroll-pip" id="list-pip"></div>
       <div class="list-head">
@@ -1680,9 +1698,9 @@
       </div>
     </div>
     <button class="panel-handle" id="left-handle" aria-label="Toggle browse panel">
-      <svg class="handle-chevron" width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,1 5,5 2,9"/></svg>
+      <svg class="handle-chevron" width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2,1 5,5 2,9"/></svg>
     </button>
-  </div>
+  </section>
 
   <section class="pane-image">
     <div id="about-pane" role="dialog" aria-modal="true" aria-label="About Hunter House Archive">
@@ -1751,7 +1769,7 @@
     </div>
   </section>
 
-  <div class="panel-right pane-meta" id="panel-right">
+  <section class="panel-right pane-meta" id="panel-right" aria-label="Item record">
     <button class="panel-handle" id="right-handle" aria-label="Toggle record panel">
       <svg class="handle-chevron" width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,1 5,5 2,9"/></svg>
     </button>
@@ -1771,7 +1789,7 @@
       <button id="info-pane-close" aria-label="Close">×</button>
       <div class="ip-inner" id="ip-inner"></div>
     </div>
-  </div>
+  </section>
 
   <div id="mob-sheet" class="mob-sheet">
     <div class="mob-sheet-bar" id="mob-sheet-bar">
@@ -1793,7 +1811,7 @@
     </div>
   </div>
 
-</div>
+</main>
 
 <div id="mob-lightbox" class="mob-lightbox">
   <button id="mob-lb-close" class="mob-lb-close" aria-label="Close">×</button>
@@ -1806,7 +1824,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.06.36";
+  const VERSION      = "v1.06.37";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -1870,11 +1888,42 @@
   const PROXY_URL = "http://127.0.0.1:8731";
   let _hhToastEl;
   function hhToast(msg, kind = "") {
-    if (!_hhToastEl) { _hhToastEl = document.createElement("div"); _hhToastEl.id = "hh-toast"; document.body.appendChild(_hhToastEl); }
+    if (!_hhToastEl) {
+      _hhToastEl = document.createElement("div");
+      _hhToastEl.id = "hh-toast";
+      // role="status" + aria-live="polite" + aria-atomic so screen readers
+      // announce success/error feedback without interrupting other speech.
+      _hhToastEl.setAttribute("role", "status");
+      _hhToastEl.setAttribute("aria-live", "polite");
+      _hhToastEl.setAttribute("aria-atomic", "true");
+      document.body.appendChild(_hhToastEl);
+    }
     _hhToastEl.textContent = msg;
     _hhToastEl.className = "show " + kind;
     clearTimeout(hhToast._t);
     hhToast._t = setTimeout(() => { _hhToastEl.className = ""; }, 3400);
+  }
+
+  // ── Modal focus management — shared open/close helpers ───────────────────
+  // Stores the element that held focus before the modal opened, moves focus
+  // into the modal, and restores the original element on close. Keyboard +
+  // screen-reader users land in the modal and return to where they came from.
+  const _modalLastFocus = new WeakMap();
+  function modalOnOpen(modalEl) {
+    if (!modalEl) return;
+    _modalLastFocus.set(modalEl, document.activeElement);
+    const target = modalEl.querySelector('[autofocus], button:not([hidden]), [href], [tabindex]:not([tabindex="-1"])');
+    if (target && typeof target.focus === "function") {
+      requestAnimationFrame(() => target.focus());
+    }
+  }
+  function modalOnClose(modalEl) {
+    if (!modalEl) return;
+    const prev = _modalLastFocus.get(modalEl);
+    _modalLastFocus.delete(modalEl);
+    if (prev && typeof prev.focus === "function" && document.contains(prev)) {
+      requestAnimationFrame(() => prev.focus());
+    }
   }
   // Relay one write through the local proxy. Throws on any failure.
   async function proxyEdit(params) {
@@ -5230,7 +5279,11 @@ WHERE {
   // body.hh-about-open is the single switch that drives both the about-
   // pane fade AND the header .markid fade-out (see CSS above) — keeps
   // the title swap coordinated as one transition.
-  function openAboutPane()  { aboutPane.classList.add("open");    document.body.classList.add("hh-about-open"); }
+  function openAboutPane()  {
+    aboutPane.classList.add("open");
+    document.body.classList.add("hh-about-open");
+    modalOnOpen(aboutPane);
+  }
   function closeAboutPane() {
     aboutPane.classList.remove("open");
     document.body.classList.remove("hh-about-open");
@@ -5238,6 +5291,7 @@ WHERE {
     // as the first about-pane is visible. Any dismissal — × or Continue —
     // ends it; subsequent HHFA opens are in-place and leave panels usable.
     document.body.classList.remove("hh-splash");
+    modalOnClose(aboutPane);
   }
   // Route through open/closeAboutPane so body.hh-about-open stays in sync
   // (a direct classList.toggle("open") would skip the body-class flip and
@@ -5278,8 +5332,9 @@ WHERE {
       syncFsBtn();
     }
     infoPane.classList.add("open");
+    modalOnOpen(infoPane);
   }
-  function closeInfoPane() { infoPane.classList.remove("open"); }
+  function closeInfoPane() { infoPane.classList.remove("open"); modalOnClose(infoPane); }
   function toggleInfoPane(){ infoPane.classList.contains("open") ? closeInfoPane() : openInfoPane(); }
 
   // ── Filter-panel collection ⓘ popover ──────────────────────────────────
