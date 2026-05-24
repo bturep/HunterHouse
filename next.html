@@ -39,7 +39,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/verso.css">
+<link rel="stylesheet" href="assets/light.css">
 <style>
   /* View transition: markid morphs from splash centre to browse corner */
   @view-transition{navigation:auto}
@@ -53,7 +53,7 @@
      Shift-Tab) — never on mouse clicks (modern browsers gate :focus-visible
      by input modality). Uses currentColor so the ring adapts to dark/light.
      Don't add `outline:none` to buttons — it removes the keyboard ring.
-     Inputs use border-color change as their focus indicator (see verso.css). */
+     Inputs use border-color change as their focus indicator (see light.css). */
   :focus-visible {
     outline: 2px solid currentColor;
     outline-offset: 2px;
@@ -321,7 +321,7 @@
   /* Curator's name highlight — used wherever the curator's name appears in
      the pane (title byline + every occurrence in the bio). Uses the same
      var(--red) token as the .pc-red chip in the BROWSE filter panel, so
-     chip-color and name-color stay in sync (auto-darkens via verso.css). */
+     chip-color and name-color stay in sync (auto-darkens via light.css). */
   .cur-name-c{color:var(--red)}
   /* Curated-mode chrome stripdown. Reason: in curation mode applyFilters
      early-returns (authored membership), sort is locked, search is inert,
@@ -1173,7 +1173,7 @@
   .kv dd a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
   .kv dd a:hover{border-bottom-color:var(--copper-deep)}
 
-  /* browse-local pill/archid (smaller than verso.css defaults) */
+  /* browse-local pill/archid (smaller than light.css defaults) */
   .pill{display:inline-flex;align-items:center;height:auto;padding:0;font-size:10.5px;margin:0 5px 3px 0;white-space:nowrap;background:none}
   .pill::before{content:"["}
   .pill::after{content:"]"}
@@ -1203,14 +1203,14 @@
   .pc-moss  {--pf:#386028}  /* olive — built status */
   .pc-indigo{--pf:var(--copper-deep)}
   .pc-denim {--pf:#283878}  /* navy — collection */
-  .pc-red   {--pf:var(--red)}  /* curators — softer sibling of the brighter .c-red used on HHFA pane (Hunter accent); var(--red) auto-darkens via verso.css */
+  .pc-red   {--pf:var(--red)}  /* curators — softer sibling of the brighter .c-red used on HHFA pane (Hunter accent); var(--red) auto-darkens via light.css */
   html.dark .pc-sage  {--pf:#c09858}
   html.dark .pc-stone {--pf:#b09870}
   html.dark .pc-slate {--pf:#7898b8}
   html.dark .pc-clay  {--pf:#a07898}
   html.dark .pc-moss  {--pf:#88a070}
   html.dark .pc-denim {--pf:#6890a8}
-  /* .pc-red uses var(--red), which already has a light/dark pair in verso.css. */
+  /* .pc-red uses var(--red), which already has a light/dark pair in light.css. */
 
   /* dark mode overrides for hardcoded colours */
   /* dark mode: image pane goes black, structural borders go black */
@@ -2356,7 +2356,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07-test.81";
+  const VERSION      = "v1.07-test.82";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.

@@ -1,7 +1,7 @@
 /* ─────────────────────────────────────────────────────────────
    Hunter House — Inverted reading layout (A2)
    Light Browse header above an ink page body.
-   Pairs with verso.css; loaded only on non-Browse pages.
+   Pairs with light.css; loaded only on non-Browse pages.
    ─────────────────────────────────────────────────────────── */
 
 :root{
@@ -29,7 +29,7 @@ body{
   background:var(--inv-bg);
 }
 
-/* Browse header retains its light styling; verso.css gives us .site-top,
+/* Browse header retains its light styling; light.css gives us .site-top,
    .markid, .site-nav, .site-topright — no overrides needed. */
 
 /* ── ink page body ──────────────────────────────────────────── */
