@@ -1430,6 +1430,15 @@
      shrinks down to the post-open size. */
   body.refitting #canvas{ visibility:hidden }
 
+  /* Mobile-only: keep .rows visible during loading so the inline
+     "Loading catalogue from Wikibase…" placeholder is shown. Desktop
+     relies on #load-screen inside .pane-image, which is display:none
+     on mobile — without this override the list pane is a black void
+     until SPARQL returns. */
+  @media (max-width:767px){
+    body.loading .rows{ visibility:visible }
+  }
+
   /* ── Mobile about overlay — fullscreen mirror of #about-pane ── */
   /* Mobile reuses every .ap-* class from the desktop about-pane (ap-title,
      ap-ver, ap-section, ap-body, ap-rule, ap-credits, ap-foot-row, cur-
@@ -2616,7 +2625,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08-test.04";
+  const VERSION      = "v1.08-test.05";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -5217,8 +5226,8 @@ WHERE {
   OPTIONAL { ?item wdt:${PROPERTIES.DISPLAY_ROTATION} ?rotation }
 }`;
 
-  async function loadFromWikibase() {
-    // 1. Check for splash-page prefetch (sessionStorage, 5 min TTL)
+  async function loadFromWikibase({ onRevalidated } = {}) {
+    // 1. Splash-page prefetch (sessionStorage, 5 min TTL) — used once.
     try {
       const pre = sessionStorage.getItem("hhf_prefetch");
       if (pre) {
@@ -5232,20 +5241,34 @@ WHERE {
       }
     } catch {}
 
-    // 2. Return localStorage cache if less than 2 hours old
+    // 2. Stale-while-revalidate. Any cached items (any age) are returned
+    // immediately for instant first paint; a background SPARQL fetch then
+    // refreshes localStorage and calls onRevalidated with fresh items so
+    // the UI can swap silently. Wikibase Cloud's SPARQL endpoint has a
+    // ~30-60 s cold start; returning visitors should never pay it.
     try {
       const raw = localStorage.getItem(CACHE_KEY);
       if (raw) {
-        const { ts, items } = JSON.parse(raw);
-        if (Date.now() - ts < 7200000) return items;
+        const { items } = JSON.parse(raw);
+        if (items && items.length) {
+          (async () => {
+            try {
+              const rows = await sparqlQuery(CATALOGUE_QUERY);
+              const fresh = processRows(rows);
+              try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), items: fresh })); } catch {}
+              if (onRevalidated) onRevalidated(fresh);
+            } catch (e) {
+              console.warn("Background revalidate failed; keeping cached items:", e);
+            }
+          })();
+          return items;
+        }
       }
     } catch {}
 
-    // 3. Full fetch from Wikibase, with stale-cache fallback.
-    // sparqlQuery already retries once; if both attempts fail, fall back
-    // to any cached copy on disk (even if older than the 2 h freshness
-    // window above) rather than rendering an empty list. Returning
-    // visitors get a usable catalogue during a Wikibase Cloud outage.
+    // 3. No cache — fetch fresh, with stale fallback. sparqlQuery already
+    // retries once; if both attempts fail, fall back to any cached copy
+    // even if it's stale, rather than rendering an empty list.
     try {
       const rows = await sparqlQuery(CATALOGUE_QUERY);
       const items = processRows(rows);
@@ -7614,7 +7637,20 @@ WHERE {
       () => updatePip("meta-body", "meta-pip"), { passive: true });
 
     try {
-      const items = await loadFromWikibase();
+      const items = await loadFromWikibase({
+        onRevalidated: (fresh) => {
+          if (!fresh || !fresh.length) return;
+          // Same list shape (overwhelmingly the common case) — swap refs
+          // silently to keep the user's scroll, selection, and any in-flight
+          // interaction untouched. Different shape (item added/removed) —
+          // re-derive filtered + redraw.
+          const sameShape =
+            fresh.length === state.items.length &&
+            fresh.every((it, i) => it.id === state.items[i]?.id);
+          state.items = fresh;
+          if (!sameShape) { applyFilters(); renderList(); }
+        }
+      });
       document.body.classList.remove("loading");
       if (!items.length) {
         $("#rows").innerHTML = `<div class="load-msg">No items with images found in Wikibase.</div>`;
