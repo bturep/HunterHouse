@@ -360,6 +360,99 @@
     --copper-pale:rgba(212,162,106,0.18);
   }
   html.dark body.hh-in-curation .curation-card{background:#2a2218}
+
+  /* ── Palette · CITRUS — saturated dark + electric blue link ── */
+  body.hh-in-curation.palette-citrus #curator-pane{
+    background:#ff6b2b;
+    --ink:#1a1816;
+    --muted:rgba(26,24,22,0.62);
+    --hint:rgba(26,24,22,0.4);
+    --rule:rgba(26,24,22,0.22);
+    --copper-deep:#1c4eff;
+    --copper-pale:rgba(28,78,255,0.2);
+    --red:#1a1816;
+  }
+  body.hh-in-curation.palette-citrus{
+    --bg:#fff0e2;
+    --soft:#f5e2cf;
+    --ink:#1a1816;
+    --muted:rgba(26,24,22,0.55);
+    --hint:rgba(26,24,22,0.32);
+    --rule:rgba(255,107,43,0.22);
+    --red:#ff6b2b;
+    --copper:#1c4eff;
+    --copper-deep:#0a3ce0;
+    --copper-pale:rgba(28,78,255,0.18);
+  }
+  html.dark body.hh-in-curation.palette-citrus{
+    --bg:#221208;
+    --soft:#2e1a10;
+    --ink:#fff0e2;
+    --muted:rgba(255,240,226,0.55);
+    --hint:rgba(255,240,226,0.32);
+    --rule:rgba(255,107,43,0.18);
+    --red:#ff6b2b;
+    --copper:#4d72ff;
+    --copper-deep:#7390ff;
+    --copper-pale:rgba(77,114,255,0.22);
+  }
+  html.dark body.hh-in-curation.palette-citrus .curation-card{background:#2e1a10}
+
+  /* ── Palette · PRESS — strict two-ink. Only orange + blue carry meaning. ── */
+  body.hh-in-curation.palette-press #curator-pane{
+    background:#ff6b2b;
+    --ink:#0e1844;
+    --muted:rgba(14,24,68,0.58);
+    --hint:rgba(14,24,68,0.34);
+    --rule:rgba(14,24,68,0.22);
+    --copper-deep:#0e1844;
+    --copper-pale:rgba(14,24,68,0.22);
+    --red:#0e1844;
+  }
+  body.hh-in-curation.palette-press{
+    --bg:#fdf3e6;
+    --soft:#f5e8d0;
+    --ink:#ff6b2b;        /* body text in orange — no neutrals */
+    --muted:rgba(255,107,43,0.65);
+    --hint:rgba(255,107,43,0.42);
+    --rule:rgba(255,107,43,0.22);
+    --red:#ff6b2b;
+    --copper:#0e1844;
+    --copper-deep:#0a3ce0;
+    --copper-pale:rgba(28,78,255,0.18);
+  }
+  html.dark body.hh-in-curation.palette-press{
+    --bg:#1a1612;
+    --soft:#221c14;
+    --ink:#ff6b2b;        /* body text in orange */
+    --muted:rgba(255,107,43,0.65);
+    --hint:rgba(255,107,43,0.42);
+    --rule:rgba(255,107,43,0.18);
+    --red:#ff6b2b;
+    --copper:#4d8aff;
+    --copper-deep:#6da0ff;
+    --copper-pale:rgba(77,138,255,0.2);
+  }
+  html.dark body.hh-in-curation.palette-press .curation-card{background:#221c14}
+
+  /* Grain overlay — printed feel for non-House curator palettes only.
+     Sits above page chrome but below modals; pointer-events:none so it's purely visual. */
+  body.hh-in-curation.palette-citrus::after,
+  body.hh-in-curation.palette-press::after{
+    content:'';
+    position:fixed; inset:0; pointer-events:none; z-index:9000;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='280' height='280'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' seed='4'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.06 0'/></filter><rect width='280' height='280' filter='url(%23n)'/></svg>");
+    mix-blend-mode:overlay;
+    opacity:0.9;
+  }
+  /* Light-mode variants want darker noise punched into the cream rather
+     than lifted whites */
+  html:not(.dark) body.hh-in-curation.palette-citrus::after,
+  html:not(.dark) body.hh-in-curation.palette-press::after{
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='280' height='280'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' seed='4'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.08 0'/></filter><rect width='280' height='280' filter='url(%23n)'/></svg>");
+    mix-blend-mode:multiply;
+  }
+
   /* Continuity column — a 2px copper hairline running down the left edge of
      the panel-left in curator mode. Solid copper at the top (under the
      curation card) fading to a softer tone down through the list. No
@@ -386,6 +479,36 @@
   .cur-continue::before{content:"[ ";color:var(--hint);opacity:.55}
   .cur-continue::after{content:" ]";color:var(--hint);opacity:.55}
   .cur-continue:hover{color:var(--copper-deep)}
+
+  /* Palette picker — sits on the splash foot row, opposite the Enter button.
+     Three named palettes (House / Citrus / Press); active one is bracketed,
+     matching the [ Enter Selection ] motif. Body class swap is the whole story. */
+  #curator-pane .cp-foot{
+    display:flex; justify-content:space-between; align-items:baseline;
+    gap:24px; margin-top:24px;
+  }
+  #curator-pane .cp-palette{
+    display:flex; align-items:baseline; gap:8px;
+    font-family:"JetBrains Mono","SF Mono",Menlo,monospace;
+    font-size:10px; letter-spacing:0.06em;
+  }
+  #curator-pane .cp-palette-label{
+    font-size:9px; letter-spacing:0.18em; text-transform:uppercase;
+    color:var(--hint); margin-right:4px;
+  }
+  #curator-pane .cp-pal{
+    background:none; border:0; padding:0; cursor:pointer;
+    font:inherit; letter-spacing:inherit;
+    color:var(--muted); transition:color 120ms ease;
+  }
+  #curator-pane .cp-pal:hover{ color:var(--ink); }
+  #curator-pane .cp-pal.active{
+    color:var(--ink);
+    position:relative;
+  }
+  #curator-pane .cp-pal.active::before{ content:'['; color:var(--hint); margin-right:4px; }
+  #curator-pane .cp-pal.active::after{  content:']'; color:var(--hint); margin-left:4px; }
+  #curator-pane .cp-pal-sep{ color:var(--hint); }
 
   /* Intro card — bigger than mark-bar, sits above the list in curation mode */
   .curation-card{padding:14px 20px 16px 28px;border-bottom:1px solid var(--rule);
@@ -2493,7 +2616,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08-test.03";
+  const VERSION      = "v1.08-test.04";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -5302,7 +5425,15 @@ WHERE {
       </div>` : ""}
       <hr class="ap-rule">
       <div class="ap-foot-row">
-        <div class="cur-actions">
+        <div class="cp-foot">
+          <div class="cp-palette" role="radiogroup" aria-label="Palette">
+            <span class="cp-palette-label">Palette</span>
+            <button type="button" data-palette="house"  class="cp-pal active">House</button>
+            <span class="cp-pal-sep">·</span>
+            <button type="button" data-palette="citrus" class="cp-pal">Citrus</button>
+            <span class="cp-pal-sep">·</span>
+            <button type="button" data-palette="press"  class="cp-pal">Press</button>
+          </div>
           <button class="cur-continue" id="cur-continue">Enter Selection →</button>
         </div>
       </div>`;
@@ -7522,6 +7653,35 @@ WHERE {
       document.body.classList.remove("loading");
       $("#rows").innerHTML = `<div class="error-msg">Error loading: ${escapeHTML(err.message)}</div>`;
     }
+  })();
+</script>
+<script>
+  // Curator-pane palette picker: body class swap + localStorage persistence.
+  // Three named palettes (house/citrus/press). Class lives on <body> from page
+  // load so the splash uses the saved palette on first paint; tokens only
+  // resolve when body.hh-in-curation is also present, so outside curator mode
+  // the archive looks identical regardless of saved choice.
+  (function(){
+    var PALETTES = ['house','citrus','press'];
+    var KEY = 'hh-curator-palette';
+    function apply(name){
+      if(PALETTES.indexOf(name) === -1) name = 'house';
+      PALETTES.forEach(function(p){ document.body.classList.remove('palette-'+p); });
+      document.body.classList.add('palette-'+name);
+      var btns = document.querySelectorAll('#curator-pane .cp-pal');
+      btns.forEach(function(b){
+        b.classList.toggle('active', b.getAttribute('data-palette') === name);
+      });
+      try { localStorage.setItem(KEY, name); } catch(e){}
+    }
+    var saved;
+    try { saved = localStorage.getItem(KEY); } catch(e){}
+    apply(saved || 'house');
+    document.addEventListener('click', function(e){
+      var btn = e.target.closest('#curator-pane .cp-pal');
+      if(!btn) return;
+      apply(btn.getAttribute('data-palette'));
+    });
   })();
 </script>
 <script>
