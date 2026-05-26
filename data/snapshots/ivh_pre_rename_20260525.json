@@ -1,0 +1,407 @@
+[
+  {
+    "desc": "photograph; IVH; HH-IVH-0001; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0001",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0001_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0001_HunterHouse_2024_prev.jpg",
+    "qid": "Q537"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0002; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0002",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0002_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0002_HunterHouse_2024_prev.jpg",
+    "qid": "Q538"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0003; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0003",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0003_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0003_HunterHouse_2024_prev.jpg",
+    "qid": "Q539"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0004; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0004",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0004_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0004_HunterHouse_2024_prev.jpg",
+    "qid": "Q540"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0005; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0005",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0005_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0005_HunterHouse_2024_prev.jpg",
+    "qid": "Q541"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0006; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0006",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0006_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0006_HunterHouse_2024_prev.jpg",
+    "qid": "Q542"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0007; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0007",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0007_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0007_HunterHouse_2024_prev.jpg",
+    "qid": "Q543"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0008; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0008",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0008_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0008_HunterHouse_2024_prev.jpg",
+    "qid": "Q544"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0009; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0009",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0009_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0009_HunterHouse_2024_prev.jpg",
+    "qid": "Q545"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0010; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0010",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0010_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0010_HunterHouse_2024_prev.jpg",
+    "qid": "Q546"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0011; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0011",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0011_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0011_HunterHouse_2024_prev.jpg",
+    "qid": "Q547"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0012; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0012",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0012_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0012_HunterHouse_2024_prev.jpg",
+    "qid": "Q548"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0013; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0013",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0013_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0013_HunterHouse_2024_prev.jpg",
+    "qid": "Q549"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0014; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0014",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0014_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0014_HunterHouse_2024_prev.jpg",
+    "qid": "Q550"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0015; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0015",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0015_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0015_HunterHouse_2024_prev.jpg",
+    "qid": "Q551"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0016; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0016",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0016_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0016_HunterHouse_2024_prev.jpg",
+    "qid": "Q552"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0017; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0017",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0017_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0017_HunterHouse_2024_prev.jpg",
+    "qid": "Q553"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0018; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0018",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0018_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0018_HunterHouse_2024_prev.jpg",
+    "qid": "Q554"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0019; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0019",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0019_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0019_HunterHouse_2024_prev.jpg",
+    "qid": "Q555"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0020; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0020",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0020_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0020_HunterHouse_2024_prev.jpg",
+    "qid": "Q556"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0021; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0021",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0021_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0021_HunterHouse_2024_prev.jpg",
+    "qid": "Q557"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0022; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0022",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0022_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0022_HunterHouse_2024_prev.jpg",
+    "qid": "Q558"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0023; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0023",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0023_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0023_HunterHouse_2024_prev.jpg",
+    "qid": "Q559"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0024; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0024",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0024_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0024_HunterHouse_2024_prev.jpg",
+    "qid": "Q560"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0025; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0025",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0025_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0025_HunterHouse_2024_prev.jpg",
+    "qid": "Q561"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0026; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0026",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0026_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0026_HunterHouse_2024_prev.jpg",
+    "qid": "Q562"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0027; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0027",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0027_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0027_HunterHouse_2024_prev.jpg",
+    "qid": "Q563"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0028; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0028",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0028_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0028_HunterHouse_2024_prev.jpg",
+    "qid": "Q564"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0029; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0029",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0029_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0029_HunterHouse_2024_prev.jpg",
+    "qid": "Q565"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0030; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0030",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0030_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0030_HunterHouse_2024_prev.jpg",
+    "qid": "Q566"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0031; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0031",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0031_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0031_HunterHouse_2024_prev.jpg",
+    "qid": "Q567"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0032; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0032",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0032_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0032_HunterHouse_2024_prev.jpg",
+    "qid": "Q568"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0033; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0033",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0033_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0033_HunterHouse_2024_prev.jpg",
+    "qid": "Q569"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0034; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0034",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0034_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0034_HunterHouse_2024_prev.jpg",
+    "qid": "Q570"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0035; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0035",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0035_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0035_HunterHouse_2024_prev.jpg",
+    "qid": "Q572"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0036; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0036",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0036_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0036_HunterHouse_2024_prev.jpg",
+    "qid": "Q573"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0037; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0037",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0037_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0037_HunterHouse_2024_prev.jpg",
+    "qid": "Q574"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0038; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0038",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0038_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0038_HunterHouse_2024_prev.jpg",
+    "qid": "Q575"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0039; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0039",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0039_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0039_HunterHouse_2024_prev.jpg",
+    "qid": "Q576"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0040; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0040",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0040_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0040_HunterHouse_2024_prev.jpg",
+    "qid": "Q577"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0041; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0041",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0041_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0041_HunterHouse_2024_prev.jpg",
+    "qid": "Q578"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0042; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0042",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0042_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0042_HunterHouse_2024_prev.jpg",
+    "qid": "Q579"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0043; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0043",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0043_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0043_HunterHouse_2024_prev.jpg",
+    "qid": "Q580"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0044; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0044",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0044_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0044_HunterHouse_2024_prev.jpg",
+    "qid": "Q581"
+  },
+  {
+    "desc": "photograph; IVH; HH-IVH-0045; 2024",
+    "label": "Hunter House",
+    "archId": "HH-IVH-0045",
+    "itype": "https://hunterhouse.wikibase.cloud/entity/Q89",
+    "master": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/masters/HH-IVH-0045_HunterHouse_2024.jpg",
+    "preview": "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IVH-0045_HunterHouse_2024_prev.jpg",
+    "qid": "Q582"
+  }
+]

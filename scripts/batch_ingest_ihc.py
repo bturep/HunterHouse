@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Batch ingest the Ivan Hunter Collection (IVH) — 45 print-final photographs of
+Batch ingest the Ivan Hunter Collection (IHC) — 45 print-final photographs of
 the Hunter Residence, photographed by Ivan Hunter on 2024-02-11.
 
 Source: /Volumes/Verbatim/203Goward Rd Photos/203Goward_print_finals/
@@ -27,7 +27,7 @@ _large.jpg tier to Desktop for eyeball review. `--execute` performs:
        - Fail-safe sync_one_metadata.py sidecar push to R2.
 
 Idempotency: items don't dedupe by P2 here — only run --execute once on a
-clean R2 IVH folder + empty Wikibase IVH set. Re-runs would create duplicate
+clean R2 IHC folder + empty Wikibase IHC set. Re-runs would create duplicate
 archive items.
 """
 
@@ -46,7 +46,7 @@ import requests  # noqa: E402  (SPARQL lookup for resume-skip; no creds needed)
 
 # ─────────────────────────── paths ──────────────────────────────────────────
 SRC_DIR = "/Volumes/Verbatim/203Goward Rd Photos/203Goward_print_finals"
-WORK    = "/tmp/hh_ivh_ingest"
+WORK    = "/tmp/hh_ihc_ingest"
 
 # ─────────────────────────── R2 ─────────────────────────────────────────────
 R2          = "hh-r2:hunter-house-archive"
@@ -97,7 +97,7 @@ SRC_NAME_RE = re.compile(r"^-(\d+)\.jpg$", re.IGNORECASE)
 
 
 def load_rows():
-    """Scan SRC_DIR for `-N.jpg`, sort by N (numeric), map to HH-IVH-NNNN."""
+    """Scan SRC_DIR for `-N.jpg`, sort by N (numeric), map to HH-IHC-NNNN."""
     sources = []
     for f in Path(SRC_DIR).iterdir():
         m = SRC_NAME_RE.match(f.name)
@@ -107,7 +107,7 @@ def load_rows():
     sources.sort(key=lambda t: t[0])
     rows = []
     for i, (n, path) in enumerate(sources, start=1):
-        arch_id = f"HH-IVH-{i:04d}"
+        arch_id = f"HH-IHC-{i:04d}"
         master_name = f"{arch_id}_{SLUG_BASE}.jpg"
         rows.append({
             "n":            n,
@@ -152,7 +152,7 @@ def build_item_claims(row):
 def description_for(row):
     # Include ID for Wikibase (label, description) uniqueness — all 45 share
     # the same label "Hunter House". Year suffix matches EGC pattern.
-    return f"photograph; IVH; {row['id']}; 2024"
+    return f"photograph; IHC; {row['id']}; 2024"
 
 
 def wb_create_item(wb, labels, descriptions, claims):
@@ -174,7 +174,7 @@ def wb_find_by_p2(wb, arch_id):
     """Return QID of an existing item with this P2 archive ID, else None.
 
     Uses SPARQL — wbsearchentities only matches against labels/aliases,
-    not statement string values, so for IVH (where every item shares the
+    not statement string values, so for IHC (where every item shares the
     label "Hunter House") wbsearchentities returns nothing useful.
     Same pattern as scripts/sync_one_metadata.py::qid_for.
     """
@@ -184,7 +184,7 @@ def wb_find_by_p2(wb, arch_id):
     )
     r = requests.get(_SPARQL_URL, params={"query": q, "format": "json"},
                      headers={"Accept": "application/sparql-results+json",
-                              "User-Agent": "HunterHouseBot/1.0 (batch_ingest_ivh)"},
+                              "User-Agent": "HunterHouseBot/1.0 (batch_ingest_ihc)"},
                      timeout=30)
     r.raise_for_status()
     rows = r.json()["results"]["bindings"]
@@ -202,7 +202,7 @@ def main():
     if not rows:
         raise SystemExit(f"No -N.jpg files found in {SRC_DIR}")
 
-    print(f"\n{'EXECUTE' if EXECUTE else 'DRY RUN'} — IVH batch ingest ({len(rows)} items)\n")
+    print(f"\n{'EXECUTE' if EXECUTE else 'DRY RUN'} — IHC batch ingest ({len(rows)} items)\n")
 
     # ── pre-flight
     expected = list(range(1, len(rows) + 1))
@@ -234,9 +234,9 @@ def main():
     print(f"\n── Wikibase claim shape (uniform across all 45) ──")
     sample = rows[0]
     print(f"  label:  {LABEL!r}")
-    print(f"  desc:   {description_for(sample)!r}    (varies by HH-IVH-NNNN)")
+    print(f"  desc:   {description_for(sample)!r}    (varies by HH-IHC-NNNN)")
     print(f"  P1  = {PHOTOGRAPH_QID}   (photograph)")
-    print(f"  P2  = HH-IVH-NNNN")
+    print(f"  P2  = HH-IHC-NNNN")
     print(f"  P79 = {SOURCE_COLLECTION_QID}  (Ivan Hunter Collection)")
     print(f"  P80 = {CREATOR_QID}  (Ivan Hunter)")
     print(f"  P82 = +{CAPTURE_DATE.strftime('%Y-%m-%d')}  precision /11 (day)")
@@ -253,7 +253,7 @@ def main():
         first = rows[0]
         out = os.path.join(WORK, f"{first['id']}_{SLUG_BASE}_large.jpg")
         sips_jpeg(first["source"], out, 3840, 85)
-        desktop = os.path.expanduser(f"~/Desktop/IVH_PREVIEW_{first['id']}.jpg")
+        desktop = os.path.expanduser(f"~/Desktop/IHC_PREVIEW_{first['id']}.jpg")
         shutil.copy(out, desktop)
         subprocess.run(["open", desktop], check=False)
         print(f"  Preview tier on Desktop: {desktop}")
@@ -262,7 +262,7 @@ def main():
 
     # ── EXECUTE ─────────────────────────────────────────────────────────────
     print("\n══════════════════ EXECUTE ══════════════════\n")
-    wb = WikibaseSession(user_agent="HunterHouseBot/1.0 (batch_ingest_ivh)")
+    wb = WikibaseSession(user_agent="HunterHouseBot/1.0 (batch_ingest_ihc)")
     print(f"  logged in to Wikibase")
 
     shutil.rmtree(WORK, ignore_errors=True)
