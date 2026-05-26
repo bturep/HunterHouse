@@ -48,7 +48,7 @@ For **bulk changes to many items at once**: use a SPARQL query to get the QIDs f
 | P2 | HH archive ID | String | `HH-A-0001` format. **Required on all items.** |
 | P62 | part of | Item | Project phase/set (primary). Link to a Q###. |
 | P64 | start date | Time | Drawing date (preferred over P82 when known precisely) |
-| P79 | source collection | Item | Q180=HHC · Q178=CAA · Q184=FUL · Q182=GES · Q181=FRH · Q183=IVH |
+| P79 | source collection | Item | Q180=HHC · Q178=CAA · Q184=FUL · Q182=EGC · Q181=FRH · Q183=IHC |
 | P80 | creator | Item | Q201=Richard Hunter · Q221=John Fulker · etc. |
 | P82 | date created | Time | Drawing date — use precision `/9` (year) or `/10` (month) |
 | P83 | date digitized | Time | Date scanned — **do not use for sorting/display**; 2026 dates are digitization, not creation |
@@ -158,7 +158,7 @@ For **bulk changes to many items at once**: use a SPARQL query to get the QIDs f
 | Q184 | FUL | John Fulker Collection | West Vancouver Museum | 9 |
 | Q182 | EGC | Eric Gesinger Collection | Eric Gesinger | 30 (drawings; photos pending) |
 | Q181 | FRH | Frances Hunter Collection | Frances Hunter | pending |
-| Q183 | IVH | Ivan Hunter Collection | Ivan Hunter | pending |
+| Q183 | IHC | Ivan Hunter Collection | Ivan Hunter | 45 (HH-IHC-0001..0045; ingested 2026-05-25) |
 
 ### Project phases / sets (P62 / P84)
 
@@ -377,7 +377,7 @@ SELECT ?item ?id ?notes WHERE {
 | FUL | 9 (full set) | 9 | partial | Fulker photographs |
 | GES | unknown | 0 | none | Furniture drawings; pending ingest |
 | FRH | unknown | 0 | none | Frances Hunter materials; pending |
-| IVH | unknown | 0 | none | Ivan Hunter photographs; pending |
+| IHC | 45 | 45 | complete (3 tiers + master JPG) | Ivan Hunter photographs of the Hunter Residence (2024-02-11); ingested 2026-05-25 |
 
 **Current Wikibase item count with P2 + P96:** 147 items shown in browse.html.
 
