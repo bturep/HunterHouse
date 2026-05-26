@@ -14,6 +14,7 @@ Collection folder map matches the existing image-tier layout:
     HHC → hunter-house-collection
     CAA → canadian-architecture-archive
     EGC → eric-gesinger-collection
+    IVH → ivan-hunter-collection
 
 Why this script exists separately from backup_metadata.py:
   - backup_metadata.py is read-only against Wikibase + writes to local
@@ -46,6 +47,7 @@ COLLECTION_FOLDER = {
     "HHC": "hunter-house-collection",
     "CAA": "canadian-architecture-archive",
     "EGC": "eric-gesinger-collection",
+    "IVH": "ivan-hunter-collection",
     # FUL items live inside HHC in the current archive shape; add here
     # if/when FUL gets its own R2 prefix.
 }
