@@ -2630,7 +2630,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08-test.06";
+  const VERSION      = "v1.08-test.07";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4612,6 +4612,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     "canadian architectural":     "CAA",
     "fulker":                     "FUL",
     "eric gesinger":              "EGC",
+    "ivan hunter":                "IHC",
   };
   // Per-collection blurbs shown in the filter-panel ⓘ popover. Stats and
   // counts are hand-maintained; refresh when collections grow.
@@ -4645,6 +4646,13 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       qid:   "Q184",
       stats: "Pending",
       custodian: "West Vancouver Museum",
+    },
+    IHC: {
+      title: "Ivan Hunter Collection",
+      body:  "Photographs of the Hunter Residence by Ivan Hunter, captured 2024-02-11 — the first photographic survey of the residence catalogued here.",
+      qid:   "Q183",
+      stats: "45 photographs",
+      custodian: "Hunter House Foundation",
     },
   };
   function archiveAbbrev(label) {
@@ -7225,9 +7233,10 @@ WHERE {
       <p class="ip-grp">Reading the catalogue</p>
       <p class="ip-note">Item IDs are <b>HH-COLLECTION-NUMBER</b> (HHC = Hunter House
         Collection, CAA = Canadian Architectural Archives at UCalgary, EGC = Eric
-        Gesinger Collection). Click any chip — phase, area, item type — to filter
-        to that value. Click the wordmark (top-left) for credits, rights, and the
-        underlying Wikibase + SPARQL endpoints.</p>
+        Gesinger Collection, IHC = Ivan Hunter Collection). Click any chip —
+        phase, area, item type — to filter to that value. Click the wordmark
+        (top-left) for credits, rights, and the underlying Wikibase + SPARQL
+        endpoints.</p>
 
       <p class="ip-grp">Shortcuts</p>
       ${keys([
