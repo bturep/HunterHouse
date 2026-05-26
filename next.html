@@ -28,7 +28,7 @@
      paint instead of flashing visible-then-fading-out as the main JS init
      catches up. Mobile skips splash-mode (and thus this pre-init). -->
 <script>if(!matchMedia('(max-width:767px)').matches)document.documentElement.dataset.splashInit='1';</script>
-<script>try{if(localStorage.getItem('hhf_text_lg')==='1')document.documentElement.classList.add('text-lg');}catch(e){}</script>
+<script>try{var _ts=localStorage.getItem('hhf_text_size')||(localStorage.getItem('hhf_text_lg')==='1'?'lg':'');if(_ts==='lg')document.documentElement.classList.add('text-lg');else if(_ts==='xl')document.documentElement.classList.add('text-xl');}catch(e){}</script>
 <!-- SPARQL warm-up. Wakes the Wikibase Cloud endpoint pool during HTML parse
      so the full CATALOGUE_QUERY fired by main() doesn't pay the ~30-60 s
      cold-start in series. Tiny LIMIT 1 query; fire-and-forget; we never
@@ -117,8 +117,10 @@
     display:flex;align-items:center;justify-content:center;
   }
   .site-topright #rec-info:hover{opacity:0.5}
-  /* Aa text-size toggle. Two stacked glyphs — small + large; the un-active
-     size is dimmed so the icon always reads as "click for the OTHER size". */
+  /* Aa text-size toggle. Three-state cycle: default → text-lg → text-xl →
+     default. Two glyphs (small + large) shift opacity to indicate the active
+     size; in xl mode both glyphs go full opacity + bolder + slightly larger
+     so the icon reads as "even bigger than lg". */
   .site-topright #text-toggle{
     background:none;border:0;padding:0;cursor:pointer;color:var(--ink);
     font-family:var(--mono);font-weight:500;line-height:1;
@@ -127,12 +129,15 @@
   .site-topright #text-toggle:hover{opacity:0.5}
   .site-topright #text-toggle .aa-sm{font-size:10px}
   .site-topright #text-toggle .aa-lg{font-size:14px}
-  /* When already large, dim the large glyph (next click → small). Default
-     is "small active" so the large is dim. */
+  /* Default (smallest active): small glyph full, large dim. */
   .site-topright #text-toggle .aa-sm{opacity:1}
   .site-topright #text-toggle .aa-lg{opacity:0.4}
+  /* text-lg: small dim, large full. */
   html.text-lg .site-topright #text-toggle .aa-sm{opacity:0.4}
   html.text-lg .site-topright #text-toggle .aa-lg{opacity:1}
+  /* text-xl: both full + slightly bolder + large bumped one px. */
+  html.text-xl .site-topright #text-toggle .aa-sm{opacity:1;font-weight:700}
+  html.text-xl .site-topright #text-toggle .aa-lg{opacity:1;font-weight:700;font-size:15px}
   /* Hide-on-splash: while the about-pane is open the "?" disappears
      (the splash is the only navigation aid then). The data-splash-init
      pre-init also nullifies it on first paint, matching the .markid
@@ -2219,6 +2224,203 @@
   html.text-lg .fp-chip{font-size:12px}
   html.text-lg .fp-search-input{font-size:12px}
   }
+  /* === text-xl overrides — +1px on top of text-lg (so +2px total from base); toggled by html.text-xl === */
+  html.text-xl .site-topright #rec-info{font-size:16px}
+  html.text-xl #topright{font-size:12.5px}
+  html.text-xl .markid .name{font-size:13px}
+  html.text-xl .markid .name .dim{font-size:11px}
+  html.text-xl .tr-search-input{font-size:13px}
+  html.text-xl #about-pane-close{font-size:20px}
+  html.text-xl .ap-title{font-size:14px}
+  html.text-xl .ap-ver{font-size:12px}
+  html.text-xl .ap-section-head{font-size:11px}
+  html.text-xl .ap-body{font-size:13.5px}
+  html.text-xl .ap-credits{font-size:12.5px}
+  html.text-xl .ap-credits dt{font-size:11px}
+  html.text-xl #pdf-close{font-size:15px}
+  html.text-xl .pub-read{font-size:13px}
+  html.text-xl .cur-pane-close{font-size:20px}
+  html.text-xl .cur-continue{font-size:13px}
+  html.text-xl .cc-curator{font-size:11px}
+  html.text-xl .cur-leave{font-size:11px}
+  html.text-xl .cur-leave .cl-x{font-size:16px}
+  html.text-xl .cc-title{font-size:14px}
+  html.text-xl .cc-intro{font-size:13px}
+  html.text-xl .cur-note .cn-label{font-size:11.5px}
+  html.text-xl .cur-note .cn-text{font-size:14px}
+  html.text-xl .cur-note .cn-empty{font-size:13px}
+  html.text-xl .cur-next{font-size:12px}
+  html.text-xl #info-pane-close, html.text-xl #rn-help-close{font-size:20px}
+  html.text-xl .ip-title{font-size:14px}
+  html.text-xl .ip-grp{font-size:11px}
+  html.text-xl .ip-keys{font-size:13px}
+  html.text-xl .ip-note{font-size:13px}
+  html.text-xl .ip-foot{font-size:12px}
+  html.text-xl .fbtn .lbl{font-size:11px}
+  html.text-xl .fbtn .val{font-size:14px}
+  html.text-xl .fbtn .val .car{font-size:11px}
+  html.text-xl .fdrop li{font-size:13px}
+  html.text-xl .list-head .l{font-size:13px}
+  html.text-xl .list-head .l .filter-chevron{font-size:15px}
+  html.text-xl .sort-mini .sort-hd{font-size:11px}
+  html.text-xl .phase-divider{font-size:12px}
+  html.text-xl .sort-arrow{font-size:9px}
+  html.text-xl .filter-badge{font-size:11px}
+  html.text-xl .fp-lbl{font-size:11px}
+  html.text-xl .fp-chip{font-size:12px}
+  html.text-xl .fp-clear{font-size:11px}
+  html.text-xl .fp-show{font-size:11px}
+  html.text-xl .fp-info{font-size:13px}
+  html.text-xl .fpi-title{font-size:12px}
+  html.text-xl .fpi-body{font-size:13px}
+  html.text-xl .fpi-meta{font-size:11px}
+  html.text-xl .row .archid{font-size:13px}
+  html.text-xl .row .archid .tmark{font-size:10.5px}
+  html.text-xl body.hh-in-curation .row .archid.cur-seq{font-size:13px}
+  html.text-xl .row .title{font-size:15px}
+  html.text-xl .row .ph{font-size:11.5px}
+  html.text-xl .row .year{font-size:13px}
+  html.text-xl .row .rf-grip{font-size:13px}
+  html.text-xl .row .rf-arrow{font-size:12px}
+  html.text-xl .mark-bar{font-size:11px}
+  html.text-xl .bulk-bar{font-size:11px}
+  html.text-xl .image-stage .placeholder{font-size:12.5px}
+  html.text-xl .cur-pager{font-size:12px}
+  html.text-xl .zoom-ctl button#zoom-rotate{font-size:17px}
+  html.text-xl .zoom-ctl button#zoom-rotsave{font-size:12px}
+  html.text-xl .image-foot{font-size:12px}
+  html.text-xl .meta-head .l{font-size:13px}
+  html.text-xl .meta-head .r{font-size:12px}
+  html.text-xl .hh-rnhelp-btn{font-size:16px}
+  html.text-xl .hh-dirty-badge{font-size:11px}
+  html.text-xl .hh-import-head{font-size:13px}
+  html.text-xl .hh-import-body{font-size:13px}
+  html.text-xl .hh-import-body .hh-i-when{font-size:12px}
+  html.text-xl .hh-import-body .hh-i-stats span{font-size:12px}
+  html.text-xl .hh-import-body .hh-i-foot{font-size:12px}
+  html.text-xl .hh-import-acts button{font-size:12px}
+  html.text-xl .meta-title{font-size:23px}
+  html.text-xl .hh-saving{font-size:13px}
+  html.text-xl #hh-toast{font-size:14px}
+  html.text-xl .hh-fedit{font-size:13px}
+  html.text-xl .hh-pop{font-size:14px}
+  html.text-xl .bb-stage{font-size:13px}
+  html.text-xl .bb-stage-h{font-size:12px}
+  html.text-xl .bb-stage .bb-val{font-size:13px}
+  html.text-xl .bb-stage-id{font-size:12px}
+  html.text-xl .bb-foot button{font-size:11px}
+  html.text-xl .hh-pop-opt.cur::after{font-size:12px}
+  html.text-xl .hh-mint-btn{font-size:13px}
+  html.text-xl .hh-mint-confirm{font-size:13px}
+  html.text-xl .hh-mint-head{font-size:12px}
+  html.text-xl .hh-mint-row b{font-size:12px}
+  html.text-xl .hh-mint-row input{font-size:13px}
+  html.text-xl .hh-mint-foot button{font-size:11px}
+  html.text-xl .hh-pop-cancel{font-size:12px}
+  html.text-xl #hh-proxy-badge{font-size:13px}
+  html.text-xl #hh-proxy-badge .hh-tok-input{font-size:13px}
+  html.text-xl #hh-proxy-badge .hh-tok-btn{font-size:13px}
+  html.text-xl #hh-proxy-badge .hh-tok-hint{font-size:11px}
+  html.text-xl .meta-title-sub{font-size:15px}
+  html.text-xl .meta-orig{font-size:11.5px}
+  html.text-xl .meta-lede{font-size:15px}
+  html.text-xl .meta-section h3{font-size:11.5px}
+  html.text-xl .kv dt{font-size:11.5px}
+  html.text-xl .kv dd{font-size:14.5px}
+  html.text-xl .pill{font-size:12.5px}
+  html.text-xl .archid-mono{font-size:13px}
+  html.text-xl .rights-note{font-size:12.5px}
+  html.text-xl .location-path{font-size:13px}
+  html.text-xl .curator-note{font-size:14px}
+  html.text-xl .btn{font-size:13.5px}
+  html.text-xl .btn .ar{font-size:13px}
+  html.text-xl .graph-section h3{font-size:11.5px}
+  html.text-xl .graph-section h3 .ct{font-size:11px}
+  html.text-xl .graph-path{font-size:12px}
+  html.text-xl .graph-path .node .tick{font-size:11px}
+  html.text-xl .graph-path .node .rel{font-size:10.5px}
+  html.text-xl .graph-path .node .lbl{font-size:13.5px}
+  html.text-xl .graph-path .node.this .tick{font-size:13px}
+  html.text-xl .graph-siblings .lbl-row{font-size:10.5px}
+  html.text-xl .graph-siblings .sib{font-size:13px}
+  html.text-xl .graph-siblings .sib .id{font-size:11.5px}
+  html.text-xl .graph-siblings .sib .pos{font-size:11px}
+  html.text-xl .graph-actions a .top{font-size:10.5px}
+  html.text-xl .graph-actions a .bot{font-size:12.5px}
+  html.text-xl .graph-actions a .bot .ar{font-size:12px}
+  html.text-xl .graph-empty{font-size:12px}
+  html.text-xl .empty{font-size:13px}
+  html.text-xl .load-msg{font-size:13px}
+  html.text-xl .error-msg{font-size:13px}
+  html.text-xl #mob-about-close{font-size:20px}
+  html.text-xl .load-text{font-size:13px}
+  html.text-xl .rights-note{font-size:13px}
+  html.text-xl .pane-meta .meta-head .l{font-size:13px}
+  html.text-xl .pane-meta .meta-head .r{font-size:13px}
+  html.text-xl .pane-meta .meta-title{font-size:23px}
+  html.text-xl .pane-meta .meta-lede{font-size:13px}
+  html.text-xl .pane-meta .meta-section h3, html.text-xl .pane-meta .graph-section h3{font-size:11px}
+  html.text-xl .pane-meta .meta-section h3 .ct, html.text-xl .pane-meta .graph-section h3 .ct{font-size:11px}
+  html.text-xl .pane-meta .kv{font-size:13px}
+  html.text-xl .pane-meta .kv dt{font-size:13px}
+  html.text-xl .pane-meta .kv dd{font-size:13px}
+  html.text-xl .pane-meta .pill{font-size:13px}
+  html.text-xl .pane-meta .archid-mono{font-size:13px}
+  html.text-xl .pane-meta .location-path{font-size:13px}
+  html.text-xl .pane-meta .graph-path{font-size:13px}
+  html.text-xl .pane-meta .graph-path .node .rel{font-size:11px}
+  html.text-xl .pane-meta .graph-path .node .lbl{font-size:13px}
+  html.text-xl .pane-meta .graph-siblings .lbl-row{font-size:11px}
+  html.text-xl .pane-meta .graph-siblings .sib{font-size:13px}
+  html.text-xl .pane-meta .graph-siblings .sib .id, html.text-xl .pane-meta .graph-siblings .sib .t, html.text-xl .pane-meta .graph-siblings .sib .pos{font-size:13px}
+  html.text-xl .data-footer a{font-size:13px}
+  html.text-xl .pane-meta .curator-note{font-size:13px}
+  html.text-xl .rn-tools-head{font-size:11px}
+  html.text-xl .rn-tools-btn{font-size:11.5px}
+  html.text-xl .rn-tools-status{font-size:12px}
+  html.text-xl .rn-label{font-size:11px}
+  html.text-xl .rn-who{font-size:11px}
+  html.text-xl .rn-count{font-size:11px}
+  html.text-xl .rn-allbtn{font-size:11px}
+  html.text-xl .rn-auth-who{font-size:11px}
+  html.text-xl .rn-pin-input{font-size:12px}
+  html.text-xl .rn-pin-btn{font-size:15px}
+  html.text-xl .rn-pin-err{font-size:11px}
+  html.text-xl .rn-by{font-size:11px}
+  html.text-xl .rn-del{font-size:13px}
+  html.text-xl .rn-text{font-size:13px}
+  html.text-xl .rn-date{font-size:11px}
+  html.text-xl .rn-textarea{font-size:13px}
+  html.text-xl .rn-add-btn{font-size:11px}
+  html.text-xl .fp-lbl{font-size:11px}
+  html.text-xl .fp-chip{font-size:13px}
+  html.text-xl .fp-clear{font-size:11px}
+  html.text-xl .fp-show{font-size:11px}
+  html.text-xl #rotate-msg{font-size:13px}
+  @media (max-width:767px){
+  html.text-xl #list-ptr{font-size:11px}
+  html.text-xl .mob-sheet-body .pill{font-size:13px}
+  html.text-xl .mob-sheet-close{font-size:24px}
+  html.text-xl .mob-snav-btn{font-size:28px}
+  html.text-xl .mob-sheet-title{font-size:13px}
+  html.text-xl .mob-sheet-body .kv{font-size:13px}
+  html.text-xl .mob-sheet-body .kv dt{font-size:13px}
+  html.text-xl .mob-sheet-body .kv dd{font-size:13px}
+  html.text-xl .mob-sheet-scroll .meta-section h3, html.text-xl .mob-sheet-scroll .graph-section h3{font-size:11.5px}
+  html.text-xl .mob-sheet-scroll .meta-section h3 .ct, html.text-xl .mob-sheet-scroll .graph-section h3 .ct{font-size:11px}
+  html.text-xl .mob-sheet-scroll .graph-path{font-size:13px}
+  html.text-xl .mob-sheet-scroll .graph-path .tick{font-size:12px}
+  html.text-xl .mob-sheet-scroll .graph-path .rel{font-size:11px}
+  html.text-xl .mob-sheet-scroll .graph-path .lbl{font-size:13px}
+  html.text-xl .mob-sheet-scroll .graph-path .graph-empty{font-size:12px}
+  html.text-xl .mob-lb-close{font-size:22px}
+  html.text-xl .mob-lb-hint{font-size:12px}
+  html.text-xl .fp-search-prefix{font-size:13px}
+  html.text-xl .fp-search-input{font-size:15px}
+  html.text-xl #list-info{font-size:16px}
+  html.text-xl .fp-chip{font-size:13px}
+  html.text-xl .fp-search-input{font-size:13px}
+  }
   
 </style>
 <script>
@@ -2266,10 +2468,12 @@
          #search-toggle and #fs-toggle; hidden while the about-pane is open
          and on first paint via data-splash-init (see the #rec-info rules). -->
     <button id="rec-info" title="About this archive &amp; shortcuts [?]" aria-label="Info">?</button>
-    <!-- Aa text-size toggle. Click flips html.text-lg (persisted to
-         localStorage["hhf_text_lg"]). The two glyphs animate in/out so the
-         active size is the bigger one in the icon. -->
-    <button class="theme-btn" id="text-toggle" title="Larger text" aria-label="Toggle larger text">
+    <!-- Aa text-size toggle. Click cycles 3 states: default → text-lg →
+         text-xl → default. Persisted to localStorage["hhf_text_size"]
+         ("" | "lg" | "xl"). The two glyphs shift opacity / weight to indicate
+         the active size. Legacy "hhf_text_lg" key is read once at pre-init
+         for backward-compat. -->
+    <button class="theme-btn" id="text-toggle" title="Larger text" aria-label="Cycle text size">
       <span class="aa-sm">A</span><span class="aa-lg">A</span>
     </button>
     <!-- fs-toggle LAST so flex-end (padding-right:0) lands its right edge at
@@ -7511,21 +7715,32 @@ WHERE {
       }, 280);
     });
     document.getElementById("rec-info").addEventListener("click", toggleInfoPane);
-    // Aa text-size toggle. The pre-init script in <head> already applied
-    // html.text-lg from localStorage at first paint; this only wires the
-    // click + persistence.
+    // Aa text-size toggle. Three-state cycle: "" → "lg" → "xl" → "". The
+    // pre-init script in <head> already applied the right class at first
+    // paint (reading new "hhf_text_size" with fallback to legacy "hhf_text_lg"
+    // = "1" → "lg"); this only wires the click + persistence.
     const textBtn = document.getElementById("text-toggle");
     if (textBtn) {
-      const syncTitle = () =>
-        textBtn.title = document.documentElement.classList.contains("text-lg")
-          ? "Smaller text" : "Larger text";
+      const html = document.documentElement;
+      const getState = () =>
+        html.classList.contains("text-xl") ? "xl"
+        : html.classList.contains("text-lg") ? "lg"
+        : "";
+      const TITLES = { "": "Larger text", "lg": "Even larger text", "xl": "Reset text size" };
+      const syncTitle = () => { textBtn.title = TITLES[getState()]; };
       syncTitle();
       textBtn.addEventListener("click", e => {
         e.stopPropagation();
-        const html = document.documentElement;
-        const on = !html.classList.contains("text-lg");
-        html.classList.toggle("text-lg", on);
-        try { on ? localStorage.setItem("hhf_text_lg", "1") : localStorage.removeItem("hhf_text_lg"); } catch {}
+        const cur = getState();
+        const next = cur === "" ? "lg" : cur === "lg" ? "xl" : "";
+        html.classList.toggle("text-lg", next === "lg");
+        html.classList.toggle("text-xl", next === "xl");
+        try {
+          if (next) localStorage.setItem("hhf_text_size", next);
+          else      localStorage.removeItem("hhf_text_size");
+          // Legacy key cleanup — first write of new key clears the old one.
+          localStorage.removeItem("hhf_text_lg");
+        } catch {}
         syncTitle();
       });
     }
