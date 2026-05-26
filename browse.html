@@ -29,6 +29,11 @@
      catches up. Mobile skips splash-mode (and thus this pre-init). -->
 <script>if(!matchMedia('(max-width:767px)').matches)document.documentElement.dataset.splashInit='1';</script>
 <script>try{if(localStorage.getItem('hhf_text_lg')==='1')document.documentElement.classList.add('text-lg');}catch(e){}</script>
+<!-- SPARQL warm-up. Wakes the Wikibase Cloud endpoint pool during HTML parse
+     so the full CATALOGUE_QUERY fired by main() doesn't pay the ~30-60 s
+     cold-start in series. Tiny LIMIT 1 query; fire-and-forget; we never
+     read the response. CSP connect-src whitelist already covers this URL. -->
+<script>try{fetch("https://hunterhouse.wikibase.cloud/query/sparql?query=SELECT%20%2A%20WHERE%20%7B%20%3Fs%20%3Fp%20%3Fo%20%7D%20LIMIT%201&format=json",{headers:{Accept:"application/sparql-results+json"}}).catch(function(){});}catch(e){}</script>
 <style>
   html[data-splash-init="1"] body .markid{opacity:0}
   /* During splash the top bar retracts to the collapsed-pane width (28px)
@@ -2366,7 +2371,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07.01";
+  const VERSION      = "v1.07.02";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2789,14 +2794,14 @@
   //   P1  (item type) → only classes used by real archive items (~6 media types)
   //   P62 (phase)     → the phase items themselves (~38)
   //   default         → values already in use for that property
-  const ARCHIVE_PFX = '("HH-HHC-","HH-CAA-","HH-FUL-","HH-EGC-","HH-FRH-","HH-IVH-")';
+  const ARCHIVE_PFX = '("HH-HHC-","HH-CAA-","HH-FUL-","HH-EGC-","HH-FRH-","HH-IHC-")';
   function vocabQuery(pid) {
     const P = `PREFIX wdt: <https://hunterhouse.wikibase.cloud/prop/direct/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 `;
     if (pid === "P1")
       return P + `SELECT DISTINCT ?v ?l WHERE { ?i wdt:P2 ?id .
-        FILTER(STRSTARTS(?id,"HH-HHC-")||STRSTARTS(?id,"HH-CAA-")||STRSTARTS(?id,"HH-FUL-")||STRSTARTS(?id,"HH-EGC-")||STRSTARTS(?id,"HH-FRH-")||STRSTARTS(?id,"HH-IVH-"))
+        FILTER(STRSTARTS(?id,"HH-HHC-")||STRSTARTS(?id,"HH-CAA-")||STRSTARTS(?id,"HH-FUL-")||STRSTARTS(?id,"HH-EGC-")||STRSTARTS(?id,"HH-FRH-")||STRSTARTS(?id,"HH-IHC-"))
         ?i wdt:P1 ?v . ?v rdfs:label ?l . FILTER(LANG(?l)="en") } ORDER BY ?l`;
     if (pid === "P62")
       return P + `SELECT ?v ?l WHERE { ?v wdt:P2 ?id . FILTER(STRSTARTS(?id,"HH-PH-")) .
