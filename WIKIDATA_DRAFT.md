@@ -1,7 +1,19 @@
 # Wikidata items — Hunter House Foundation
 
-Three items to create, in order. Create items 1 and 2 first, note their Q-numbers,
-then fill in the placeholders in item 3 before submitting.
+**Status: ✅ COMPLETE (2026-05-27).** All three items created manually via
+the Wikidata web UI (QuickStatements path abandoned due to autoconfirmed gate
+not auto-promoting despite meeting both thresholds). Q-numbers below.
+P139 back-references written to our local Wikibase via
+`/tmp/add_wikidata_qids.py` (one-off, not committed).
+
+| Item | Wikidata QID | Our Wikibase QID |
+|---|---|---|
+| Richard Morrow Hunter (person) | [Q139959908](https://www.wikidata.org/wiki/Q139959908) | Q201 |
+| Canadian Architectural Archives (institution) | [Q139959993](https://www.wikidata.org/wiki/Q139959993) | Q116 |
+| Richard Hunter fonds (archival fonds) | [Q139960001](https://www.wikidata.org/wiki/Q139960001) | — (no local item) |
+
+Original draft batches preserved below as a record of what was created and
+for reference if more items are added later.
 
 Submit via QuickStatements: https://www.wikidata.org/wiki/Special:QuickStatements
 Or one at a time via: https://www.wikidata.org/wiki/Special:NewItem
@@ -13,15 +25,17 @@ Or one at a time via: https://www.wikidata.org/wiki/Special:NewItem
 ```
 CREATE
 LAST|Len|"Richard Morrow Hunter"
-LAST|Den|"Canadian architect; designer of the Hunter Residence, Victoria, British Columbia (1923?–2023)"
+LAST|Den|"Canadian architect; designer of the Hunter Residence, Victoria, British Columbia (1930–2023)"
 LAST|P31|Q5
 LAST|P21|Q6581097
 LAST|P106|Q42973
 LAST|P19|Q40278
+LAST|P569|+1930-11-04T00:00:00Z/11
 LAST|P570|+2023-01-14T00:00:00Z/11
 LAST|P27|Q16
 LAST|P69|Q736674
 LAST|P69|Q1075124
+LAST|P737|Q5604
 LAST|P737|Q553804
 LAST|P737|Q76730
 LAST|P737|Q315963
@@ -36,10 +50,12 @@ LAST|P973|"https://searcharchives.ucalgary.ca/richard-hunter-accession"
 | P21 Q6581097 | sex or gender: male |
 | P106 Q42973 | occupation: architect |
 | P19 Q40278 | place of birth: Phoenix, Arizona |
+| P569 +1930-11-04/11 | date of birth: 4 November 1930 |
 | P570 +2023-01-14/11 | date of death: 14 January 2023 |
 | P27 Q16 | country of citizenship: Canada |
 | P69 Q736674 | educated at: University of Colorado Boulder |
 | P69 Q1075124 | educated at: University of Oklahoma |
+| P737 Q5604 | influenced by: Frank Lloyd Wright |
 | P737 Q553804 | influenced by: Bruce Goff |
 | P737 Q76730 | influenced by: Erich Mendelsohn |
 | P737 Q315963 | influenced by: Gary Snyder |
