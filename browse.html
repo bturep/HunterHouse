@@ -1373,22 +1373,24 @@
     .load-mark{animation:none;opacity:0.18}
   }
 
-  /* PWA standalone: top of the body fades from pure black (matching the iOS
-     status bar) into the regular dark surface. Without this the seam between
-     the (un-themable) status bar and the app body is visible. .site-top is
-     made transparent in the same context so the body gradient shows through
-     the header strip. html.is-pwa is set by an early inline <script> for
-     iOS Safari < 16.4 (navigator.standalone path) and from the media query
-     for Android Chrome / modern iOS — covers both. */
-  html.is-pwa.dark body{
+  /* PWA standalone: a fixed black-to-dark-grey strip at the top of the
+     viewport masks the seam between the (un-themable) iOS status bar (always
+     #000 with black-translucent) and the app body (#1a1816). Implemented as
+     a position:fixed pseudo-element rather than background-attachment:fixed
+     on body — the latter caused iOS Safari PWA to white-screen in v1.07.07.
+     html.is-pwa is set by an early inline <script> covering both the
+     navigator.standalone (iOS Safari < 16.4) and (display-mode: standalone)
+     paths. */
+  html.is-pwa.dark body::before{
+    content:"";position:fixed;top:0;left:0;right:0;height:160px;
     background:linear-gradient(to bottom,
       #000 0,
-      #000 32px,
-      #1a1816 144px,
+      #000 36px,
+      #1a1816 140px,
       #1a1816 100%);
-    background-attachment:fixed;
+    z-index:0;pointer-events:none;
   }
-  html.is-pwa.dark .site-top{background:transparent}
+  html.is-pwa.dark .site-top{background:transparent;position:relative;z-index:1}
   .load-text{
     font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:0.14em;text-transform:uppercase;text-align:center;
@@ -2392,7 +2394,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07.07";
+  const VERSION      = "v1.07.08";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
