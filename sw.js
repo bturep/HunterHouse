@@ -16,7 +16,7 @@
 // next activation. Do this any time the shell layout, asset list, or the
 // caching policy itself changes.
 
-const CACHE_NAME = 'hh-shell-v2';
+const CACHE_NAME = 'hh-shell-v3';
 
 const PRECACHE = [
   '/HunterHouse/',
@@ -82,15 +82,23 @@ self.addEventListener('fetch', (event) => {
       const cached = await cache.match(req);
 
       if (isHTML) {
-        // Stale-while-revalidate: return cache immediately if any, refresh
-        // it in the background. No cache yet → wait on the network.
-        const networkP = fetch(req)
-          .then((res) => {
-            if (res && res.ok) cache.put(req, res.clone());
-            return res;
-          })
-          .catch(() => cached);
-        return cached || networkP;
+        // Stale-while-revalidate. With cache present: paint cached, refresh
+        // in background, swallow network errors so a flaky tab doesn't
+        // surface broken responses. With no cache: return the raw network
+        // promise so a failure throws to the browser (offline page) rather
+        // than resolving to `undefined` and crashing respondWith — the
+        // latter is what caused the iOS PWA white-screen after a
+        // CACHE_NAME bump (the new cache had nothing yet for HTML).
+        if (cached) {
+          fetch(req)
+            .then((res) => { if (res && res.ok) cache.put(req, res.clone()); })
+            .catch(() => {});
+          return cached;
+        }
+        return fetch(req).then((res) => {
+          if (res && res.ok) cache.put(req, res.clone());
+          return res;
+        });
       }
 
       // Static assets — cache-first. Fall back to network and populate cache
