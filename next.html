@@ -2834,7 +2834,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08-test.07";
+  const VERSION      = "v1.08-test.08";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4579,7 +4579,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     { label: "Set Date",             pid: "P82",  key: "date",       kind: "date",   op: "set" },
     { label: "Set Medium",           pid: "P91",  key: "medium",     kind: "string", op: "set" },
     { label: "Set Scale",            pid: "P90",  key: "scale",      kind: "string", op: "set" },
-    { label: "Set Use",              pid: "P89",  key: "use",        kind: "string", op: "set" },
+    { label: "Set Use",              pid: "P89",  key: "use",        kind: "single", op: "set" },
     { label: "Set Location",         pid: "P142", key: "location",   kind: "string", op: "set" },
     { label: "Set Sheet",            pid: "P86",  key: "setPosition",kind: "string", op: "set" },
     { label: "Set Notes",            pid: "P100", key: "notes",      kind: "text",   op: "set" },
@@ -5218,7 +5218,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
           creator:          r.creatorLabel?.value || null,
           builtBy:          [],   // multi: accumulated below
           designedBy:       r.designedByLabel?.value || null,
-          use:              r.use?.value || null,
+          use:              r.useLabel?.value || null,
           scale:            r.scale?.value || null,
           medium:           r.medium?.value || null,
           builtStatus:      r.builtStatusLabel?.value || null,
@@ -5404,7 +5404,7 @@ SELECT ?item ?archId ?label ?img ?master
        ?creator ?creatorLabel
        ?builtBy ?builtByLabel
        ?designedBy ?designedByLabel
-       ?use ?scale ?medium
+       ?use ?useLabel ?scale ?medium
        ?builtStatus ?builtStatusLabel
        ?setPos ?notes
        ?rights ?rightsLabel
@@ -5429,7 +5429,7 @@ WHERE {
   OPTIONAL { ?item wdt:${PROPERTIES.CREATOR} ?creator . ?creator rdfs:label ?creatorLabel . FILTER(LANG(?creatorLabel)="en") }
   OPTIONAL { ?item wdt:${PROPERTIES.BUILT_BY} ?builtBy . ?builtBy rdfs:label ?builtByLabel . FILTER(LANG(?builtByLabel)="en") }
   OPTIONAL { ?item wdt:${PROPERTIES.DESIGNED_BY} ?designedBy . ?designedBy rdfs:label ?designedByLabel . FILTER(LANG(?designedByLabel)="en") }
-  OPTIONAL { ?item wdt:${PROPERTIES.USE} ?use }
+  OPTIONAL { ?item wdt:${PROPERTIES.USE} ?use . ?use rdfs:label ?useLabel . FILTER(LANG(?useLabel)="en") }
   OPTIONAL { ?item wdt:${PROPERTIES.SCALE} ?scale }
   OPTIONAL { ?item wdt:${PROPERTIES.MEDIUM} ?medium }
   OPTIONAL { ?item wdt:${PROPERTIES.BUILT_STATUS} ?builtStatus . ?builtStatus rdfs:label ?builtStatusLabel . FILTER(LANG(?builtStatusLabel)="en") }
@@ -6312,7 +6312,7 @@ WHERE {
       [creatorRowLabel]: { pid: PROPERTIES.CREATOR,     key: "creator"    },
       "Medium":        { pid: PROPERTIES.MEDIUM,        key: "medium",      kind: "string" },
       "Scale":         { pid: PROPERTIES.SCALE,         key: "scale",       kind: "string" },
-      "Use":           { pid: PROPERTIES.USE,           key: "use",         kind: "string" },
+      "Use":           { pid: PROPERTIES.USE,           key: "use"         },
       "Location":      { pid: PROPERTIES.LOCATION,      key: "location",    kind: "string" },
     } : {};
     const descHTML = descRows.map(([k,v]) => {
