@@ -617,6 +617,8 @@
     font-family:var(--mono);font-size:11px;line-height:1.7;
     color:var(--ink);margin:8px 0 4px;
   }
+  .ip-note a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
+  .ip-note a:hover{border-bottom-color:var(--copper-deep)}
   .ip-foot{
     font-family:var(--mono);font-size:10px;color:var(--hint);letter-spacing:0.04em;
     margin-top:22px;padding-top:12px;border-top:1px solid var(--rule);
@@ -2492,9 +2494,6 @@
       <p class="ap-body"><strong>A project supported by the Hunter House Foundation</strong> — an initiative dedicated to the stewardship of the residence and architectural archive of architect <span class="c-hunter">Richard Morrow Hunter</span> (1930–2023).</p>
       <p class="ap-body ap-addr">203 Goward Road, Saanich, British Columbia</p>
     </div>
-    <div class="ap-section">
-      <p class="ap-body"><a href="https://hunterhouse.wikibase.cloud/wiki/Main_Page" target="_blank" rel="noopener">Wikibase Main Page — archive structure, rights &amp; endpoints ↗</a></p>
-    </div>
     <hr class="ap-rule">
     <div class="ap-foot-row">
       <dl class="ap-credits">
@@ -2554,9 +2553,6 @@
         <div class="ap-section">
           <p class="ap-body"><strong>A project supported by the Hunter House Foundation</strong> — an initiative dedicated to the stewardship of the residence and architectural archive of architect <span class="c-hunter">Richard Morrow Hunter</span> (1930–2023).</p>
           <p class="ap-body ap-addr">203 Goward Road, Saanich, British Columbia</p>
-        </div>
-        <div class="ap-section">
-          <p class="ap-body"><a href="https://hunterhouse.wikibase.cloud/wiki/Main_Page" target="_blank" rel="noopener">Wikibase Main Page — archive structure, rights &amp; endpoints ↗</a></p>
         </div>
         <hr class="ap-rule">
         <div class="ap-foot-row">
@@ -2834,7 +2830,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08-test.08";
+  const VERSION      = "v1.08-test.09";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7439,8 +7435,7 @@ WHERE {
         Collection, CAA = Canadian Architectural Archives at UCalgary, EGC = Eric
         Gesinger Collection, IHC = Ivan Hunter Collection). Click any chip —
         phase, area, item type — to filter to that value. Click the wordmark
-        (top-left) for credits, rights, and the underlying Wikibase + SPARQL
-        endpoints.</p>
+        (top-left) for credits and project info.</p>
 
       <p class="ip-grp">Shortcuts</p>
       ${keys([
@@ -7453,6 +7448,9 @@ WHERE {
         ["Z / &crarr;", "Zen — hide both panels"],
         ["Esc",    "Close · exit zen"],
       ])}
+
+      <p class="ip-grp">Platform</p>
+      <p class="ip-note"><a href="https://hunterhouse.wikibase.cloud/wiki/Main_Page" target="_blank" rel="noopener">Wikibase Main Page — archive structure, rights &amp; endpoints ↗</a></p>
 
       <p class="ip-foot">Researchers: a second ? appears in the record bar with notes,
         marking, and your own shortcuts.</p>`;
