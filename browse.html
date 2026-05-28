@@ -1359,11 +1359,33 @@
   }
   html.dark #load-screen{background:#242220}
   body.loading #load-screen{display:flex}
+  @keyframes hh-pulse-mark{0%,100%{opacity:0.08}50%{opacity:0.34}}
   .load-mark{
     width:60px;height:60px;opacity:0.15;margin-bottom:22px;
     display:block;flex-shrink:0;pointer-events:none;
+    animation:hh-pulse-mark 2.6s ease-in-out infinite;
   }
   html.dark .load-mark{filter:invert(1)}
+  @media (prefers-reduced-motion: reduce){
+    .load-mark{animation:none;opacity:0.18}
+  }
+
+  /* PWA standalone: top of the body fades from pure black (matching the iOS
+     status bar) into the regular dark surface. Without this the seam between
+     the (un-themable) status bar and the app body is visible. .site-top is
+     made transparent in the same context so the body gradient shows through
+     the header strip. */
+  @media (display-mode: standalone){
+    html.dark body{
+      background:linear-gradient(to bottom,
+        #000 0,
+        #000 32px,
+        #1a1816 144px,
+        #1a1816 100%);
+      background-attachment:fixed;
+    }
+    html.dark .site-top{background:transparent}
+  }
   .load-text{
     font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:0.14em;text-transform:uppercase;text-align:center;
@@ -2367,7 +2389,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07.05";
+  const VERSION      = "v1.07.06";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
