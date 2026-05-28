@@ -1,117 +1,40 @@
-// Hunter House Foundation Archive — shell-caching service worker.
+// Hunter House Foundation Archive — KILL-SWITCH service worker.
 //
-// Strategy:
-//   • Precache the static shell on install (HTML, CSS, icons, manifest) so a
-//     cold offline visit still paints.
-//   • Stale-while-revalidate for HTML — cached copy paints instantly, fresh
-//     copy is fetched in the background and overwrites the cache for the
-//     next visit. A visitor on stale HTML is one visit behind a hotfix; the
-//     savings on cold mobile loads outweighs the one-visit lag.
-//   • Cache-first for /assets/* — CSS / icons / PDF.js bundle rarely change;
-//     when they do, bumping CACHE_NAME below nukes the old cache wholesale.
-//   • Network-only for everything off-origin (Wikibase Cloud SPARQL, R2
-//     images). Those layers manage their own caching.
+// Replaces the prior shell-caching SW after v2/v3 deployments left iOS
+// PWA installs in a broken state (white-screen on launch). This SW does
+// the following on install/activate:
+//   • Clears every cache this origin holds (any CACHE_NAME, past or present).
+//   • Unregisters itself so subsequent fetches go directly to the network.
+//   • Force-reloads every currently-open client window — so a stuck PWA
+//     tab recovers in-place once the new SW activates.
+// It has NO fetch handler — without one, the browser fetches directly
+// from the network as if there were no SW. That's the safe default while
+// the site stabilises.
 //
-// Bump CACHE_NAME (the trailing -vN) to invalidate every cached asset on
-// next activation. Do this any time the shell layout, asset list, or the
-// caching policy itself changes.
+// The inline `navigator.serviceWorker.register(...)` calls in
+// browse.html / next.html have been commented out alongside this push
+// so we don't re-register on next load. Once we've confirmed the site
+// is healthy, a future commit can reintroduce caching with a fresh
+// SW under a different filename (e.g. sw-v2.js) and a fresh registration.
 
-const CACHE_NAME = 'hh-shell-v3';
-
-const PRECACHE = [
-  '/HunterHouse/',
-  '/HunterHouse/browse.html',
-  '/HunterHouse/next.html',
-  '/HunterHouse/index.html',
-  '/HunterHouse/manifest.json',
-  '/HunterHouse/manifest.next.json',
-  '/HunterHouse/assets/light.css',
-  '/HunterHouse/assets/dark.css',
-  '/HunterHouse/assets/hunter-mark.png',
-  '/HunterHouse/assets/icon-180.png',
-  '/HunterHouse/assets/icon-192.png',
-  '/HunterHouse/assets/icon-512.png',
-];
-
-self.addEventListener('install', (event) => {
-  self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) =>
-      // addAll is all-or-nothing; fall back to per-URL adds so one 404 in the
-      // precache list never aborts the install.
-      cache.addAll(PRECACHE).catch(() =>
-        Promise.all(
-          PRECACHE.map((url) => cache.add(url).catch(() => {}))
-        )
-      )
-    )
-  );
-});
+self.addEventListener('install', () => self.skipWaiting());
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(
-        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
-      ))
-      .then(() => self.clients.claim())
-  );
+  event.waitUntil((async () => {
+    try {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => caches.delete(k)));
+    } catch (e) { /* ignore */ }
+    try {
+      await self.registration.unregister();
+    } catch (e) { /* ignore */ }
+    try {
+      const clients = await self.clients.matchAll({ type: 'window' });
+      clients.forEach((client) => {
+        try { client.navigate(client.url); } catch (e) { /* ignore */ }
+      });
+    } catch (e) { /* ignore */ }
+  })());
 });
 
-self.addEventListener('fetch', (event) => {
-  const req = event.request;
-  const url = new URL(req.url);
-
-  // Same-origin GETs only. Off-origin (Wikibase, R2) and non-GET (POST writes
-  // via the edit proxy in dev) bypass the SW entirely.
-  if (req.method !== 'GET') return;
-  if (url.origin !== self.location.origin) return;
-
-  // Range requests (PDF.js streams large PDFs with HTTP Range headers) must
-  // hit the network — the Cache API can't satisfy partial-content requests.
-  if (req.headers.get('range')) return;
-
-  const isHTML =
-    req.mode === 'navigate' ||
-    req.destination === 'document' ||
-    url.pathname.endsWith('.html') ||
-    url.pathname.endsWith('/');
-
-  event.respondWith(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      const cached = await cache.match(req);
-
-      if (isHTML) {
-        // Stale-while-revalidate. With cache present: paint cached, refresh
-        // in background, swallow network errors so a flaky tab doesn't
-        // surface broken responses. With no cache: return the raw network
-        // promise so a failure throws to the browser (offline page) rather
-        // than resolving to `undefined` and crashing respondWith — the
-        // latter is what caused the iOS PWA white-screen after a
-        // CACHE_NAME bump (the new cache had nothing yet for HTML).
-        if (cached) {
-          fetch(req)
-            .then((res) => { if (res && res.ok) cache.put(req, res.clone()); })
-            .catch(() => {});
-          return cached;
-        }
-        return fetch(req).then((res) => {
-          if (res && res.ok) cache.put(req, res.clone());
-          return res;
-        });
-      }
-
-      // Static assets — cache-first. Fall back to network and populate cache
-      // on first request.
-      if (cached) return cached;
-      try {
-        const res = await fetch(req);
-        if (res && res.ok) cache.put(req, res.clone());
-        return res;
-      } catch (e) {
-        // Offline + uncached: let the browser do its thing.
-        return cached || Response.error();
-      }
-    })
-  );
-});
+// No fetch handler — browser handles network directly.
