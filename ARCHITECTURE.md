@@ -100,7 +100,7 @@ Each of the three ingest scripts calls `sync_one_metadata.py` fail-safe at the e
 - `verify_r2_links.py` — read-only; SPARQLs every image / PDF URL claim AND every derived sidecar URL, HEAD-checks each. Run before each session-end as a cheap integrity check. Its first run surfaced six dead `P95` URLs from an earlier rename migration; all 354 URL claims + 180 sidecar URLs now return 200.
 
 **One-off maintenance** (most are completed migrations kept for reference; candidates for `scripts/archived/` when next touched)
-`patch_dates.py`, `clean_titles.py`, `strip_counter_brackets.py`, `recolor_previews.py`, `fix_caa_scheme_split.py`, `renumber_caa.py`, `renumber_caa_25_32.py`, `regen_previews.py`, `regen_icons.py`, `rotate_images.py`, `remove_caa_use_q70.py`.
+`patch_dates.py`, `clean_titles.py`, `strip_counter_brackets.py`, `recolor_previews.py`, `fix_caa_scheme_split.py`, `regen_previews.py`, `regen_icons.py`, `rotate_images.py`, `remove_caa_use_q70.py`.
 
 **`scripts/archived/`** — completed one-shot migrations + `make_ges_intake.py` superseded by `batch_ingest_egc.py`.
 
