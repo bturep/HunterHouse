@@ -29,9 +29,6 @@
      catches up. Mobile skips splash-mode (and thus this pre-init). -->
 <script>if(!matchMedia('(max-width:767px)').matches)document.documentElement.dataset.splashInit='1';</script>
 <script>try{if(localStorage.getItem('hhf_text_lg')==='1')document.documentElement.classList.add('text-lg');}catch(e){}</script>
-<!-- PWA detect: iOS Safari < 16.4 doesn't match (display-mode: standalone),
-     so also set html.is-pwa from navigator.standalone. CSS keys off the class. -->
-<script>try{if(navigator.standalone===true||matchMedia('(display-mode: standalone)').matches)document.documentElement.classList.add('is-pwa');}catch(e){}</script>
 <!-- SPARQL warm-up. Wakes the Wikibase Cloud endpoint pool during HTML parse
      so the full CATALOGUE_QUERY fired by main() doesn't pay the ~30-60 s
      cold-start in series. Tiny LIMIT 1 query; fire-and-forget; we never
@@ -1362,35 +1359,11 @@
   }
   html.dark #load-screen{background:#242220}
   body.loading #load-screen{display:flex}
-  @keyframes hh-pulse-mark{0%,100%{opacity:0.08}50%{opacity:0.34}}
   .load-mark{
     width:60px;height:60px;opacity:0.15;margin-bottom:22px;
     display:block;flex-shrink:0;pointer-events:none;
-    animation:hh-pulse-mark 2.6s ease-in-out infinite;
   }
   html.dark .load-mark{filter:invert(1)}
-  @media (prefers-reduced-motion: reduce){
-    .load-mark{animation:none;opacity:0.18}
-  }
-
-  /* PWA standalone: a fixed black-to-dark-grey strip at the top of the
-     viewport masks the seam between the (un-themable) iOS status bar (always
-     #000 with black-translucent) and the app body (#1a1816). Implemented as
-     a position:fixed pseudo-element rather than background-attachment:fixed
-     on body — the latter caused iOS Safari PWA to white-screen in v1.07.07.
-     html.is-pwa is set by an early inline script (see <head>) covering
-     both the navigator.standalone (iOS Safari < 16.4) and
-     (display-mode: standalone) paths. */
-  html.is-pwa.dark body::before{
-    content:"";position:fixed;top:0;left:0;right:0;height:160px;
-    background:linear-gradient(to bottom,
-      #000 0,
-      #000 36px,
-      #1a1816 140px,
-      #1a1816 100%);
-    z-index:0;pointer-events:none;
-  }
-  html.is-pwa.dark .site-top{background:transparent;position:relative;z-index:1}
   .load-text{
     font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:0.14em;text-transform:uppercase;text-align:center;
@@ -2394,7 +2367,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07.09";
+  const VERSION      = "v1.07.10";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7366,18 +7339,7 @@ WHERE {
   if (screen.orientation && screen.orientation.lock) {
     screen.orientation.lock('portrait').catch(() => {});
   }
-  // Service worker registration is intentionally disabled. sw.js was replaced
-  // with a kill-switch (clears caches + unregisters itself) to recover from
-  // a broken v2/v3 shell-cache deployment that white-screened iOS PWA
-  // installs. Once the site has stabilised on every client, a future
-  // commit can reintroduce shell caching under a fresh filename
-  // (e.g. sw-v2.js) and re-register here.
-  if('serviceWorker' in navigator) {
-    // Run the kill-switch one more time on legacy installs that still
-    // think they should run a SW: registers sw.js so the SW runtime
-    // gets the kill-switch handlers, which clear caches and unregister.
-    navigator.serviceWorker.register('/HunterHouse/sw.js').catch(() => {});
-  }
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('/HunterHouse/sw.js');
 </script>
 
 </body>
