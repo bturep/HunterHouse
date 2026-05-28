@@ -29,6 +29,9 @@
      catches up. Mobile skips splash-mode (and thus this pre-init). -->
 <script>if(!matchMedia('(max-width:767px)').matches)document.documentElement.dataset.splashInit='1';</script>
 <script>try{var _ts=localStorage.getItem('hhf_text_size')||(localStorage.getItem('hhf_text_lg')==='1'?'lg':'');if(_ts==='lg')document.documentElement.classList.add('text-lg');else if(_ts==='xl')document.documentElement.classList.add('text-xl');}catch(e){}</script>
+<!-- PWA detect: iOS Safari < 16.4 doesn't match (display-mode: standalone),
+     so also set html.is-pwa from navigator.standalone. CSS keys off the class. -->
+<script>try{if(navigator.standalone===true||matchMedia('(display-mode: standalone)').matches)document.documentElement.classList.add('is-pwa');}catch(e){}</script>
 <!-- SPARQL warm-up. Wakes the Wikibase Cloud endpoint pool during HTML parse
      so the full CATALOGUE_QUERY fired by main() doesn't pay the ~30-60 s
      cold-start in series. Tiny LIMIT 1 query; fire-and-forget; we never
@@ -1502,18 +1505,18 @@
      status bar) into the regular dark surface. Without this the seam between
      the (un-themable) status bar and the app body is visible. .site-top is
      made transparent in the same context so the body gradient shows through
-     the header strip. */
-  @media (display-mode: standalone){
-    html.dark body{
-      background:linear-gradient(to bottom,
-        #000 0,
-        #000 32px,
-        #1a1816 144px,
-        #1a1816 100%);
-      background-attachment:fixed;
-    }
-    html.dark .site-top{background:transparent}
+     the header strip. html.is-pwa is set by an early inline <script> for
+     iOS Safari < 16.4 (navigator.standalone path) and from the media query
+     for Android Chrome / modern iOS — covers both. */
+  html.is-pwa.dark body{
+    background:linear-gradient(to bottom,
+      #000 0,
+      #000 32px,
+      #1a1816 144px,
+      #1a1816 100%);
+    background-attachment:fixed;
   }
+  html.is-pwa.dark .site-top{background:transparent}
   .load-text{
     font-family:var(--mono);font-size:11px;color:var(--muted);
     letter-spacing:0.14em;text-transform:uppercase;text-align:center;
@@ -2852,7 +2855,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08-test.10";
+  const VERSION      = "v1.08-test.11";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
