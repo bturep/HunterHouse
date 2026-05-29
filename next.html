@@ -1442,15 +1442,6 @@
      shrinks down to the post-open size. */
   body.refitting #canvas{ visibility:hidden }
 
-  /* Mobile-only: keep .rows visible during loading so the inline
-     "Loading catalogue from Wikibase…" placeholder is shown. Desktop
-     relies on #load-screen inside .pane-image, which is display:none
-     on mobile — without this override the list pane is a black void
-     until SPARQL returns. */
-  @media (max-width:767px){
-    body.loading .rows{ visibility:visible }
-  }
-
   /* ── Mobile about overlay — fullscreen mirror of #about-pane ── */
   /* Mobile reuses every .ap-* class from the desktop about-pane (ap-title,
      ap-ver, ap-section, ap-body, ap-rule, ap-credits, ap-foot-row, cur-
@@ -1480,8 +1471,14 @@
      this is what makes the splash actually dismissable on iOS Safari. */
   #mob-about-continue{padding:12px 10px;margin:-12px -10px}
 
+  /* Body-level fixed overlay so it shows on both desktop and mobile.
+     Sits below the splash (#about-pane z:15, #mob-about z:300) but above
+     normal app content. Was previously position:absolute inside .pane-image,
+     which is display:none on mobile — meaning mobile saw no loading state
+     at all (and there had to be a second inline .load-msg in #rows to
+     compensate). Now there's just one loading indicator everywhere. */
   #load-screen{
-    display:none;position:absolute;inset:0;z-index:10;
+    display:none;position:fixed;inset:0;z-index:12;
     flex-direction:column;align-items:center;justify-content:center;
     background:var(--soft);
   }
@@ -2515,6 +2512,11 @@
   </div>
 </div>
 
+<div id="load-screen">
+  <img class="load-mark" src="assets/hunter-mark.png" alt="">
+  <span class="load-text">Loading Archive Data from Wikibase<span class="load-dots"></span></span>
+</div>
+
 <main class="shell" id="main" aria-label="Hunter House Archive">
 
   <div class="mobile-tabs">
@@ -2541,9 +2543,7 @@
       <div class="bulk-bar" id="bulk-bar" hidden></div>
       <div class="curation-card" id="curation-card" hidden></div>
       <div id="list-ptr" aria-hidden="true">Pull to reset</div>
-      <div class="rows" id="rows">
-        <div class="load-msg">Loading catalogue from Wikibase…</div>
-      </div>
+      <div class="rows" id="rows"></div>
     </div>
     <button class="panel-handle" id="left-handle" aria-label="Toggle browse panel">
       <svg class="handle-chevron" width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2,1 5,5 2,9"/></svg>
@@ -2573,10 +2573,6 @@
           </div>
         </div>
       </div>
-    </div>
-    <div id="load-screen">
-      <img class="load-mark" src="assets/hunter-mark.png" alt="">
-      <span class="load-text">Loading Archive Data from Wikibase<span class="load-dots"></span></span>
     </div>
     <div class="image-stage" id="stage">
       <div class="canvas" id="canvas">
@@ -2836,7 +2832,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08-test.16";
+  const VERSION      = "v1.08-test.17";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
