@@ -77,7 +77,7 @@ Two JSON files. `index.json` lists available curators (one entry today, `brandon
 
 ### `scripts/` — Python tooling, not shipped to the browser
 
-21 scripts in `scripts/`, plus an `archived/` subdirectory of completed one-shot migrations. Run from the maintainer's laptop against Wikibase + R2. Credentials read from `~/Documents/hh-wikibase-migration/.env` (outside the repo).
+22 scripts in `scripts/`, plus an `archived/` subdirectory of completed one-shot migrations. Run from the maintainer's laptop against Wikibase + R2. Credentials read from `~/Documents/hh-wikibase-migration/.env` (outside the repo).
 
 **Shared infrastructure**
 - `_wikibase.py` — `load_env()` + `WikibaseSession` class (login + CSRF + retry-on-stale-token). Imported by every script that writes to Wikibase. Extracted from copy-pasted boilerplate that previously lived in 11 scripts; two callers (`patch_dates.py`, `mint_property.py`) have been migrated, the rest follow opportunistically when touched.
@@ -99,6 +99,9 @@ Each of the three ingest scripts calls `sync_one_metadata.py` fail-safe at the e
 - `sync_one_metadata.py` — single-item version; called fail-safe from each ingest script
 - `verify_r2_links.py` — read-only; SPARQLs every image / PDF URL claim AND every derived sidecar URL, HEAD-checks each. Run before each session-end as a cheap integrity check. Its first run surfaced six dead `P95` URLs from an earlier rename migration; all 354 URL claims + 180 sidecar URLs now return 200.
 
+**Resilience**
+- `build_catalogue_snapshot.py` — builds the static catalogue snapshot the browser reads when SPARQL is slow or down (see §5.5). Reads `CATALOGUE_QUERY` *live out of `next.html`* and resolves its `${PROPERTIES.*}` placeholders, so the snapshot query can't drift from the browser's — there is one catalogue query in the repo, not two. Writes `catalogue.json` (raw SPARQL bindings, consumed by `processRows` unchanged) + `catalogue.csv` (flat human export) and rclone-pushes both to R2 `/catalogue/`. Read-only on Wikibase; the only write is the R2 push. Dry-run default, `--execute` to push. Run at session-end whenever catalogue data changed (deliberately manual, no CI — keeps long-lived R2 write keys out of GitHub Actions).
+
 **One-off maintenance** (most are completed migrations kept for reference; candidates for `scripts/archived/` when next touched)
 `patch_dates.py`, `clean_titles.py`, `strip_counter_brackets.py`, `recolor_previews.py`, `fix_caa_scheme_split.py`, `regen_previews.py`, `regen_icons.py`, `rotate_images.py`, `remove_caa_use_q70.py`.
 
@@ -113,7 +116,7 @@ Three Playwright smoke tests + a session-scoped HTTP-server fixture + a README e
 
 ### `data/`
 - `curations/` — old, now under `curations/` at root (this dir holds snapshot artifacts)
-- `snapshots/` — gitignored; `wikibase_full_YYYYMMDD/` (metadata dumps) and `r2_verify_*.json` (verifier reports) land here for local preservation
+- `snapshots/` — gitignored; `wikibase_full_YYYYMMDD/` (metadata dumps), `r2_verify_*.json` (verifier reports), and `catalogue/` (the `catalogue.json` / `.csv` staging area before the R2 push) land here. All local-only; the canonical copies live on R2
 
 ---
 
@@ -188,7 +191,13 @@ Laid out roughly in this order (approximate line ranges from `browse.html` v1.06
 ### 4.5 Caching strategy
 
 - **SPARQL response** is cached in `localStorage` under `CACHE_KEY = "hhf_" + VERSION`. Bumping `VERSION` is the entire cache-busting story. The maintainer bumps the patch in `VERSION` on every push; the CI workflow refuses pushes that change `browse.html` / `next.html` without bumping (see §8).
-- **Stale-cache fallback.** `loadFromWikibase()` retries the SPARQL fetch once after 800 ms (handles transient Wikibase Cloud blips); if both attempts fail it serves the most recent `localStorage` cache regardless of age rather than rendering an empty list. Returning visitors keep a usable catalogue through a Wikibase Cloud outage.
+- **The load ladder — `loadFromWikibase()`.** *(Staging: `next.html` ≥ v1.08-test.21; promotes to live next cycle. Live `browse.html` still uses the two-tier form described in the note below.)* Stale-while-revalidate over a four-tier ladder, with a shared `revalidate()` helper that always re-fetches live Wikibase in the background and swaps the result in silently:
+  1. **Splash prefetch** (sessionStorage, 5-min TTL) — used once if present.
+  2. **Returning visitor** → instant paint from the `localStorage` cache (no network), then revalidate. Never pays Wikibase Cloud's ~30–60 s SPARQL cold start.
+  3. **First-time visitor** (no cache yet) → instant paint from the **static R2 catalogue snapshot** (CDN, tens of ms; see §5.5) instead of waiting out the cold start, then revalidate and swap. This tier is also the first-timer's Wikibase-outage rescue: if revalidation fails, they simply keep the snapshot.
+  4. **No snapshot either** (rare) → live SPARQL direct (`sparqlQuery` retries once after 800 ms), with a final stale-`localStorage` net so the list is never empty.
+  The invariant across all tiers: **Wikibase remains the source of truth.** Whatever is painted first (localStorage or snapshot) is corrected to live data by the background revalidate within seconds. The R2 snapshot is only ever the *fastest available first paint*, never authoritative.
+  - *Live `browse.html` (pre-promotion) form:* SPARQL-first, with a single stale-`localStorage` fallback if both fetch attempts fail — so returning visitors survive an outage but a first-time visitor during one sees an empty list. The R2-snapshot tier closes exactly that gap.
 - **Curator JSON** is fetched with `cache: "no-store"` and a `?v=${VERSION}` query string.
 - The service worker (`sw.js`) does **not** cache anything; it exists only to satisfy the PWA installability requirement.
 - Image caching relies on Cloudflare R2 + its CDN in front. R2 CORS allows `https://bturep.github.io`, `http://localhost`, `http://127.0.0.1` (GET/HEAD), 24 h max-age.
@@ -265,6 +274,25 @@ If the Wikibase Cloud instance is ever lost, the entire archive is recoverable f
 
 Editorial overlays loaded as static JSON from `/curations/`. Schema documented in `curations/brandon-poole.json`. Selection, order, and per-item notes are encoded in the JSON; the browser merges them with the catalogue items at render time and locks sort/filter while a curation is active.
 
+### 5.5 Catalogue snapshot — static read fallback on R2
+
+*(Staging: `next.html` ≥ v1.08-test.21; promotes to live next cycle.)*
+
+Wikibase SPARQL is the one live, non-static dependency in the read path — and the only single point of failure for *reading* the catalogue. The catalogue snapshot removes it from the critical path for first paint and provides an outage fallback that works for **every** visitor, not just returning ones with a `localStorage` cache.
+
+```
+archive.hunterhousefoundation.com/catalogue/catalogue.json   ← what the browser reads
+archive.hunterhousefoundation.com/catalogue/catalogue.csv    ← human export (not read by the site)
+```
+
+- **`catalogue.json`** is the raw SPARQL bindings (the exact `results.bindings` shape `sparqlQuery()` returns) wrapped with a small header (`generated`, `item_count`, `binding_count`, `bindings`). The browser feeds `bindings` straight into the same `processRows()` the live path uses, so the snapshot can never drift in *shape* from a live load — it is the same code path, just a different transport. `fetchSnapshot()` is the consuming helper; the load ladder (§4.5, tier 3) calls it.
+- **`catalogue.csv`** is a flattened one-row-per-item export (multi-value fields joined with `"; "`). For archivist hand-off / spreadsheet use only; the site never reads it.
+- **How it stays in sync — by construction, not by discipline.** `build_catalogue_snapshot.py` reads `CATALOGUE_QUERY` *out of `next.html` at build time* and resolves the `${PROPERTIES.*}` placeholders to PIDs. There is no second copy of the query in the codebase, so the snapshot query and the browser query cannot diverge. (The script hard-errors if the markers move or a placeholder is unresolved, rather than silently shipping a wrong fallback.)
+- **Freshness vs. truth.** The snapshot is only as current as the last `--execute` (deliberately a manual session-end step — see §3 / §8). That staleness is harmless precisely because Wikibase stays the source of truth: the background revalidate corrects any first-paint snapshot to live data within seconds. The snapshot exists to make the slow/absent case fast and survivable, not to replace Wikibase.
+- **It lives on the same CDN as the images** (R2), so the realistic outage — Wikibase down, GitHub Pages + R2 up — leaves the archive fully browsable. CORS already allows `bturep.github.io`; the R2 host is whitelisted in the `connect-src` CSP directive so the `fetch()` is permitted.
+
+Distinct from the §5.3 metadata sidecars: those are per-item `wbgetentities` dumps for *disaster recovery* (rebuild Wikibase via `wbeditentity`). The catalogue snapshot is one consolidated, browser-shaped file for *runtime read resilience*. Different shape, different job.
+
 ---
 
 ## 6. Write path — `scripts/edit_proxy.py`
@@ -304,7 +332,7 @@ The other one-shot Python scripts in `scripts/` use the same credentials from `.
 |---|---|---|---|
 | `bturep.github.io` | `browse.html`, `assets/light.css`, `assets/pdfjs/*`, icons, placeholders | The site itself | Yes |
 | `hunterhouse.wikibase.cloud` | `/query/sparql` (catalogue + per-item write echo) | Data layer | Yes |
-| `archive.hunterhousefoundation.com` (Cloudflare R2) | Image tiers + PDFs + metadata sidecars | Image / PDF bytes + preservation | Yes for media |
+| `archive.hunterhousefoundation.com` (Cloudflare R2) | Image tiers + PDFs + metadata sidecars + catalogue snapshot (§5.5) | Image / PDF bytes + preservation + read-fallback when SPARQL is down | Yes for media; the catalogue snapshot makes it the read fallback too |
 | `fonts.googleapis.com` + `fonts.gstatic.com` | Inter Tight + JetBrains Mono | Typography | Falls back to system fonts if blocked |
 
 No analytics. No third-party JS. No advertising. No CDN-served JS libraries.
@@ -322,6 +350,7 @@ No analytics. No third-party JS. No advertising. No CDN-served JS libraries.
 | Local server fixture | Session-scoped `http.server` on a random loopback port rooted at the repo (so relative `fetch()` paths work) | `tests/conftest.py` |
 | Smoke-test cadence | Maintainer's local use; not in CI (would need Playwright browsers + tolerance for SPARQL flakiness) | `pytest tests/` |
 | Integrity check | `scripts/verify_r2_links.py` — SPARQLs every URL claim (`P95` / `P96` / `P143`) AND every derived sidecar URL; HEAD-checks each. Read-only, no creds. Suggested cadence: before each session-end | |
+| Read-resilience refresh | `scripts/build_catalogue_snapshot.py --execute` — rebuilds the R2 catalogue snapshot (§5.5). Cadence: session-end whenever catalogue data changed. Manual by design (no CI) so R2 write keys stay off GitHub | |
 | Pre-push validation locally | `node .github/scripts/validate.mjs` runs in ~1 s; same checks as CI | |
 
 ---
@@ -374,8 +403,8 @@ No analytics. No third-party JS. No advertising. No CDN-served JS libraries.
 
 ### Runtime risks
 
-- **SPARQL fetch** retries once with an 800 ms backoff (handles transient blips); if both attempts fail, `loadFromWikibase()` serves the most recent `localStorage` cache regardless of age rather than rendering empty. The splash overlay covers the brief gap on fresh visits where no cache exists yet.
-- **Single SPARQL query loads the entire catalogue** (currently ~180 items). Fine at this scale; will need pagination if it grows by ~1–2 orders of magnitude.
+- **SPARQL fetch** retries once with an 800 ms backoff (handles transient blips). On live `browse.html`, if both attempts fail `loadFromWikibase()` serves the most recent `localStorage` cache regardless of age rather than rendering empty — which rescues returning visitors but leaves a first-time visitor during an outage with an empty list. **Staging (`next.html` ≥ v1.08-test.21) closes that gap**: SPARQL is no longer on the critical path for first paint, and a first-time visitor falls back to the static R2 catalogue snapshot (§5.5). Once that promotes, Wikibase SPARQL being down degrades the site to "last-snapshot data, silently refreshed when SPARQL returns" rather than "broken for new visitors."
+- **Single SPARQL query loads the entire catalogue** (currently ~225 items). Fine at this scale; will need pagination if it grows by ~1–2 orders of magnitude. The R2 snapshot is the same single-payload shape and would need the same treatment.
 - **VERSION bump enforced in CI.** The validate workflow now refuses pushes that change `browse.html` / `next.html` without also changing `VERSION` (see §8). Forgetting to bump was the cache-stale foot-gun; the guard makes it loud.
 
 ### Browser support
