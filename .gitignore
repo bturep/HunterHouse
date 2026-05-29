@@ -25,6 +25,10 @@ data/snapshots/wikibase_full_*/
 # Local audit artifacts; commit with `git add -f` if you want one pinned.
 data/snapshots/r2_verify_*.json
 
+# Catalogue-snapshot build output (scripts/build_catalogue_snapshot.py).
+# The canonical copy lives on R2; this dir is just the local staging area.
+data/snapshots/catalogue/
+
 # Pytest / Playwright caches (tests/)
 .pytest_cache/
 tests/.pytest_cache/

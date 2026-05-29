@@ -14,7 +14,7 @@
      connect-src whitelists Wikibase Cloud (catalogue + writes) and loopback
      (the admin edit-proxy at 127.0.0.1:8731). img-src adds the R2 host that
      Wikibase URLs point at. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://archive.hunterhousefoundation.com; connect-src 'self' https://hunterhouse.wikibase.cloud http://127.0.0.1:* http://localhost:*; frame-src 'self'; worker-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://archive.hunterhousefoundation.com; connect-src 'self' https://hunterhouse.wikibase.cloud https://archive.hunterhousefoundation.com http://127.0.0.1:* http://localhost:*; frame-src 'self'; worker-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'">
 <link rel="manifest" href="/HunterHouse/manifest.next.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -2782,7 +2782,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08-test.19";
+  const VERSION      = "v1.08-test.20";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -2801,6 +2801,14 @@
   }
   const WIKIBASE_URL = "https://hunterhouse.wikibase.cloud";
   const SPARQL_URL   = WIKIBASE_URL + "/query/sparql";
+  // Static catalogue snapshot on R2 (Cloudflare) — the resilience fallback
+  // when SPARQL is unreachable. Built + pushed by
+  // scripts/build_catalogue_snapshot.py; holds the same SPARQL bindings the
+  // live query returns, so processRows() consumes it unchanged. Lives on the
+  // same always-up CDN as the images, so the archive stays browsable for
+  // EVERYONE (not just returning visitors with a localStorage cache) during a
+  // Wikibase outage. Allowed in the CSP connect-src.
+  const SNAPSHOT_URL = "https://archive.hunterhousefoundation.com/catalogue/catalogue.json";
 
   // ── Wikibase property identifiers — single source of truth ──────────────
   // Audit §11.2 LOW (introduced 2026-05-22, test.52): PIDs were previously
@@ -5144,6 +5152,21 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     return [...map.values()].sort((a, b) => (a.id || "").localeCompare(b.id || ""));
   }
 
+  // Fetch the static catalogue snapshot from R2 and run it through the same
+  // processRows() the live SPARQL path uses, so the result is identical in
+  // shape to a live load. This is the outage fallback for visitors with no
+  // usable localStorage cache (notably first-time visitors): the snapshot
+  // lives on the always-up CDN, so the archive stays browsable even when
+  // Wikibase is fully down. Throws on network/parse error so the caller can
+  // fall through to its last resort.
+  async function fetchSnapshot() {
+    const res = await fetch(SNAPSHOT_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("snapshot " + res.status);
+    const snap = await res.json();
+    const rows = Array.isArray(snap) ? snap : (snap.bindings || []);
+    return processRows(rows);
+  }
+
   // "access copy" (PROPERTIES.ACCESS_COPY = P143, url datatype, minted
   // 2026-05-19 by scripts/ingest_publication.py): a publication's multi-page
   // PDF.
@@ -5382,15 +5405,19 @@ WHERE {
       }
     } catch {}
 
-    // 3. No cache — fetch fresh, with stale fallback. sparqlQuery already
-    // retries once; if both attempts fail, fall back to any cached copy
-    // even if it's stale, rather than rendering an empty list.
+    // 3. No cache — fetch fresh, with a two-tier fallback. sparqlQuery
+    // already retries once; if both attempts fail we fall back rather than
+    // render an empty list:
+    //   3a. any stale localStorage copy (rescues returning visitors), then
+    //   3b. the static R2 snapshot (rescues first-time visitors too — the
+    //       real resilience win, since it needs no prior cache).
     try {
       const rows = await sparqlQuery(CATALOGUE_QUERY);
       const items = processRows(rows);
       try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), items })); } catch {}
       return items;
     } catch (e) {
+      // 3a. stale localStorage
       try {
         const raw = localStorage.getItem(CACHE_KEY);
         if (raw) {
@@ -5401,6 +5428,18 @@ WHERE {
           }
         }
       } catch {}
+      // 3b. R2 snapshot — the always-up CDN fallback. Cache it under
+      // CACHE_KEY so the next load paints instantly and revalidates.
+      try {
+        const items = await fetchSnapshot();
+        if (items && items.length) {
+          console.warn("SPARQL + cache unavailable; serving R2 catalogue snapshot:", e);
+          try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), items })); } catch {}
+          return items;
+        }
+      } catch (snapErr) {
+        console.warn("R2 snapshot fallback also failed:", snapErr);
+      }
       throw e;
     }
   }
