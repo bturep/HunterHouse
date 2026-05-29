@@ -2016,9 +2016,12 @@
     .fp-search-input{font-size:11px;letter-spacing:0.02em}
   }
 
-  /* Portrait lock: show rotate prompt on landscape phones — except in the
-     lightbox, where landscape is intentional for wide architectural drawings
-     (elevations, sections). body.mob-lb-active is toggled by open/closeLightbox. */
+  /* Portrait lock: show rotate prompt on landscape phones — except in
+     image-fullscreen mode (mob-sheet-img-expanded, toggled by tapping the
+     image in the bottom sheet) where landscape is intentional for wide
+     architectural drawings (elevations, sections). body.mob-fullscreen is
+     toggled by toggleImgExpand (and defensively by open/closeLightbox in
+     case that dead-code path is ever wired up). */
   #rotate-msg{
     display:none;position:fixed;inset:0;z-index:99999;
     background:#000;color:rgba(243,241,236,0.7);
@@ -2029,7 +2032,7 @@
   #rotate-msg svg{opacity:0.45}
   @media screen and (orientation:landscape) and (max-height:500px){
     #rotate-msg{display:flex}
-    body.mob-lb-active #rotate-msg{display:none}
+    body.mob-fullscreen #rotate-msg{display:none}
   }
 
   /* === text-lg overrides — +1pt bump on every font-size; toggled by html.text-lg === */
@@ -2833,7 +2836,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08-test.15";
+  const VERSION      = "v1.08-test.16";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4919,6 +4922,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
   function mobHideSheet() {
     document.getElementById("mob-sheet").classList.remove("mob-sheet-open", "mob-sheet-img-expanded");
+    document.body.classList.remove("mob-fullscreen");
     const scroll = document.getElementById("mob-sheet-scroll");
     if (scroll) scroll.scrollTop = 0;
   }
@@ -5117,7 +5121,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     const lb = document.getElementById("mob-lightbox");
     const img = document.getElementById("mob-lb-img");
     lb.classList.add("mob-lb-open");
-    document.body.classList.add("mob-lb-active");
+    document.body.classList.add("mob-fullscreen");
     img.alt = alt || "";
     img.onload = lbFit;
     if (img.complete && img.src === src) { lbFit(); }
@@ -5130,7 +5134,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   function closeLightbox() {
     lbOpen = false;
     document.getElementById("mob-lightbox").classList.remove("mob-lb-open");
-    document.body.classList.remove("mob-lb-active");
+    document.body.classList.remove("mob-fullscreen");
   }
 
   // ── Collapsible panel toggle ──────────────────────────────────────────────
@@ -6792,6 +6796,7 @@ WHERE {
       const sheet = document.getElementById("mob-sheet");
       if (sheet.classList.contains("mob-sheet-img-expanded")) {
         sheet.classList.remove("mob-sheet-img-expanded");
+        document.body.classList.remove("mob-fullscreen");
       } else {
         mobHideSheet();
       }
@@ -6837,6 +6842,7 @@ WHERE {
       if (swipeConsumedClick) { swipeConsumedClick = false; return; }
       const sheet = document.getElementById("mob-sheet");
       const expanded = sheet.classList.toggle("mob-sheet-img-expanded");
+      document.body.classList.toggle("mob-fullscreen", expanded);
       if (!expanded) pzReset();
     };
     document.getElementById("mob-sheet-img")?.addEventListener("click", toggleImgExpand);
