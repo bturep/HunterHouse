@@ -2782,7 +2782,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08-test.20";
+  const VERSION      = "v1.08-test.21";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -5366,6 +5366,24 @@ WHERE {
 }`;
 
   async function loadFromWikibase({ onRevalidated } = {}) {
+    // Background revalidation against live Wikibase SPARQL — the authoritative
+    // source of truth. Every instant-paint path below calls this, so whatever
+    // we paint first (localStorage or the R2 snapshot) is corrected to live
+    // data within seconds. If SPARQL is down, this fails silently and the
+    // visitor simply keeps whatever was painted — that's the resilience case.
+    const revalidate = () => {
+      (async () => {
+        try {
+          const rows = await sparqlQuery(CATALOGUE_QUERY);
+          const fresh = processRows(rows);
+          try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), items: fresh })); } catch {}
+          if (onRevalidated) onRevalidated(fresh);
+        } catch (e) {
+          console.warn("Background revalidate failed; keeping displayed items:", e);
+        }
+      })();
+    };
+
     // 1. Splash-page prefetch (sessionStorage, 5 min TTL) — used once.
     try {
       const pre = sessionStorage.getItem("hhf_prefetch");
@@ -5380,44 +5398,44 @@ WHERE {
       }
     } catch {}
 
-    // 2. Stale-while-revalidate. Any cached items (any age) are returned
-    // immediately for instant first paint; a background SPARQL fetch then
-    // refreshes localStorage and calls onRevalidated with fresh items so
-    // the UI can swap silently. Wikibase Cloud's SPARQL endpoint has a
-    // ~30-60 s cold start; returning visitors should never pay it.
+    // 2. Returning visitor — instant paint from the localStorage cache (no
+    // network), then revalidate. Wikibase Cloud's SPARQL endpoint has a
+    // ~30-60 s cold start; a returning visitor should never wait on it.
     try {
       const raw = localStorage.getItem(CACHE_KEY);
       if (raw) {
         const { items } = JSON.parse(raw);
-        if (items && items.length) {
-          (async () => {
-            try {
-              const rows = await sparqlQuery(CATALOGUE_QUERY);
-              const fresh = processRows(rows);
-              try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), items: fresh })); } catch {}
-              if (onRevalidated) onRevalidated(fresh);
-            } catch (e) {
-              console.warn("Background revalidate failed; keeping cached items:", e);
-            }
-          })();
-          return items;
-        }
+        if (items && items.length) { revalidate(); return items; }
       }
     } catch {}
 
-    // 3. No cache — fetch fresh, with a two-tier fallback. sparqlQuery
-    // already retries once; if both attempts fail we fall back rather than
-    // render an empty list:
-    //   3a. any stale localStorage copy (rescues returning visitors), then
-    //   3b. the static R2 snapshot (rescues first-time visitors too — the
-    //       real resilience win, since it needs no prior cache).
+    // 3. First-time visitor — no localStorage yet. Paint instantly from the
+    // static R2 snapshot (Cloudflare CDN, ~tens of ms) rather than making
+    // them sit through the SPARQL cold start, then revalidate to live data
+    // and swap. Same stale-while-revalidate contract as step 2: the snapshot
+    // is only the *fastest available first paint*, never the source of truth.
+    // This is also the Wikibase-outage rescue for first-timers — if the
+    // revalidate fails, they keep the snapshot and the archive stays usable.
+    try {
+      const items = await fetchSnapshot();
+      if (items && items.length) {
+        try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), items })); } catch {}
+        revalidate();
+        return items;
+      }
+    } catch (e) {
+      console.warn("R2 snapshot unavailable; going straight to live SPARQL:", e);
+    }
+
+    // 4. No snapshot either (rare) — fetch live SPARQL directly, paying the
+    // cold start, with a final stale-localStorage net so we never render an
+    // empty list. sparqlQuery already retries once internally.
     try {
       const rows = await sparqlQuery(CATALOGUE_QUERY);
       const items = processRows(rows);
       try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), items })); } catch {}
       return items;
     } catch (e) {
-      // 3a. stale localStorage
       try {
         const raw = localStorage.getItem(CACHE_KEY);
         if (raw) {
@@ -5428,18 +5446,6 @@ WHERE {
           }
         }
       } catch {}
-      // 3b. R2 snapshot — the always-up CDN fallback. Cache it under
-      // CACHE_KEY so the next load paints instantly and revalidates.
-      try {
-        const items = await fetchSnapshot();
-        if (items && items.length) {
-          console.warn("SPARQL + cache unavailable; serving R2 catalogue snapshot:", e);
-          try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), items })); } catch {}
-          return items;
-        }
-      } catch (snapErr) {
-        console.warn("R2 snapshot fallback also failed:", snapErr);
-      }
       throw e;
     }
   }

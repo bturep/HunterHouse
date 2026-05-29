@@ -27,13 +27,13 @@ Two artifacts, same data:
     with "; ". Human-readable export (open in Excel / hand to an
     archivist). NOT consumed by the site.
 
-⚠ SYNC NOTE — single most important maintenance fact:
-  CATALOGUE_QUERY below must mirror next.html's CATALOGUE_QUERY (same
-  name, ~line 5290). They are two copies of one contract. If you add a
-  field to the SPARQL in next.html, add it here too, or the snapshot
-  fallback will silently lack that field. Same discipline as the old
-  index.html prefetch-sync rule. (A future validate.mjs check could
-  diff the two; not wired yet.)
+Lockstep, by construction:
+  There is no second copy of the query to keep in sync. This script reads
+  next.html's CATALOGUE_QUERY at runtime and resolves its ${PROPERTIES.X}
+  placeholders to PIDs (see load_catalogue_query) — so the snapshot's
+  query IS the browser's query. Add a field to next.html's SPARQL and the
+  snapshot picks it up on the next build automatically. (Override the
+  source page with --query-from if you ever need to build from browse.html.)
 
 Read-only against Wikibase (public SPARQL, no bot credentials). The only
 write is the rclone push to R2, which needs the `hh-r2` remote (already
@@ -56,6 +56,7 @@ import datetime as dt
 import io
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -76,64 +77,56 @@ R2_CDN_BASE = "https://archive.hunterhousefoundation.com"
 
 DEFAULT_OUT = "data/snapshots/catalogue"
 
-# ── CATALOGUE_QUERY ──────────────────────────────────────────────────────
-# MUST mirror next.html's CATALOGUE_QUERY (see SYNC NOTE in the docstring).
-# PIDs are spelled out here (next.html interpolates them from PROPERTIES);
-# the resolved query is identical.
-CATALOGUE_QUERY = """
-PREFIX wdt: <https://hunterhouse.wikibase.cloud/prop/direct/>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX wikibase: <http://wikiba.se/ontology#>
-PREFIX bd: <http://www.bigdata.com/rdf#>
-SELECT ?item ?archId ?label ?img ?master
-       ?d1 ?d2 ?d3
-       ?phase ?phaseLabel ?phase2 ?phase2Label
-       ?drawType ?drawTypeLabel
-       ?area ?areaLabel
-       ?category ?categoryLabel
-       ?itype ?itypeLabel
-       ?src ?srcLabel
-       ?creator ?creatorLabel
-       ?builtBy ?builtByLabel
-       ?designedBy ?designedByLabel
-       ?use ?useLabel ?scale ?medium
-       ?builtStatus ?builtStatusLabel
-       ?setPos ?notes
-       ?rights ?rightsLabel
-       ?heldBy ?heldByLabel
-       ?archiveLink ?location ?accessCopy ?rotation
-WHERE {
-  ?item wdt:P2 ?archId .
-  OPTIONAL { ?item wdt:P96 ?img }
-  ?item rdfs:label ?label . FILTER(LANG(?label)="en")
-  OPTIONAL { ?item wdt:P95 ?master }
-  OPTIONAL { ?item wdt:P82 ?d1 }
-  OPTIONAL { ?item wdt:P64 ?d2 }
-  OPTIONAL { ?item wdt:P118 ?d3 }
-  OPTIONAL { ?item wdt:P62 ?phase . ?phase rdfs:label ?phaseLabel . FILTER(LANG(?phaseLabel)="en") }
-  OPTIONAL { ?item wdt:P84 ?phase2 . ?phase2 rdfs:label ?phase2Label . FILTER(LANG(?phase2Label)="en") }
-  OPTIONAL { ?item wdt:P88 ?drawType . ?drawType rdfs:label ?drawTypeLabel . FILTER(LANG(?drawTypeLabel)="en") }
-  OPTIONAL { ?item wdt:P87 ?area . ?area rdfs:label ?areaLabel . FILTER(LANG(?areaLabel)="en") }
-  OPTIONAL { ?item wdt:P145 ?category . ?category rdfs:label ?categoryLabel . FILTER(LANG(?categoryLabel)="en") }
-  OPTIONAL { ?item wdt:P1 ?itype . ?itype rdfs:label ?itypeLabel . FILTER(LANG(?itypeLabel)="en") }
-  ?item wdt:P79 ?src .
-  OPTIONAL { ?src rdfs:label ?srcLabel . FILTER(LANG(?srcLabel)="en") }
-  OPTIONAL { ?item wdt:P80 ?creator . ?creator rdfs:label ?creatorLabel . FILTER(LANG(?creatorLabel)="en") }
-  OPTIONAL { ?item wdt:P140 ?builtBy . ?builtBy rdfs:label ?builtByLabel . FILTER(LANG(?builtByLabel)="en") }
-  OPTIONAL { ?item wdt:P141 ?designedBy . ?designedBy rdfs:label ?designedByLabel . FILTER(LANG(?designedByLabel)="en") }
-  OPTIONAL { ?item wdt:P89 ?use . ?use rdfs:label ?useLabel . FILTER(LANG(?useLabel)="en") }
-  OPTIONAL { ?item wdt:P90 ?scale }
-  OPTIONAL { ?item wdt:P91 ?medium }
-  OPTIONAL { ?item wdt:P92 ?builtStatus . ?builtStatus rdfs:label ?builtStatusLabel . FILTER(LANG(?builtStatusLabel)="en") }
-  OPTIONAL { ?item wdt:P86 ?setPos }
-  OPTIONAL { ?item wdt:P100 ?notes }
-  OPTIONAL { ?item wdt:P93 ?rights . ?rights rdfs:label ?rightsLabel . FILTER(LANG(?rightsLabel)="en") }
-  OPTIONAL { ?item wdt:P94 ?heldBy . ?heldBy rdfs:label ?heldByLabel . FILTER(LANG(?heldByLabel)="en") }
-  OPTIONAL { ?item wdt:P99 ?archiveLink }
-  OPTIONAL { ?item wdt:P142 ?location }
-  OPTIONAL { ?item wdt:P143 ?accessCopy }
-  OPTIONAL { ?item wdt:P144 ?rotation }
-}"""
+# The query is read directly from next.html at runtime (see
+# load_catalogue_query) — not duplicated here. That is the lockstep
+# guarantee: there is exactly ONE catalogue query in the codebase, the
+# one the browser runs, and this script resolves the same text. It is
+# impossible for the snapshot's query to drift from the live query,
+# because there is no second copy to drift.
+REPO_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
+DEFAULT_QUERY_SOURCE = os.path.join(REPO_ROOT, "next.html")
+
+
+def load_catalogue_query(html_path):
+    """Extract CATALOGUE_QUERY from an HTML page and resolve its
+    ${PROPERTIES.X} placeholders to literal PIDs, yielding the exact SPARQL
+    the browser sends. Single source of truth — see the note above.
+
+    Hard-errors (rather than falling back to a stale embedded copy) if the
+    markers can't be found or a placeholder is unresolved: a silently-wrong
+    query would poison the fallback, which is worse than no snapshot.
+    """
+    try:
+        with open(html_path, encoding="utf-8") as f:
+            html = f.read()
+    except OSError as e:
+        sys.exit(f"✗ can't read query source {html_path}: {e}")
+
+    pm = re.search(r"const PROPERTIES\s*=\s*\{(.*?)\}\s*;", html, re.S)
+    if not pm:
+        sys.exit(f"✗ couldn't find the PROPERTIES dict in {html_path} — did the markers change?")
+    props = dict(re.findall(r'(\w+)\s*:\s*"(P\d+)"', pm.group(1)))
+    if not props:
+        sys.exit(f"✗ PROPERTIES dict in {html_path} parsed empty")
+
+    qm = re.search(r"const CATALOGUE_QUERY\s*=\s*`(.*?)`", html, re.S)
+    if not qm:
+        sys.exit(f"✗ couldn't find CATALOGUE_QUERY in {html_path} — did the markers change?")
+    query = qm.group(1)
+
+    def resolve(m):
+        name = m.group(1)
+        pid = props.get(name)
+        if pid is None:
+            sys.exit(f"✗ CATALOGUE_QUERY references PROPERTIES.{name}, absent from the PROPERTIES dict")
+        return pid
+
+    query = re.sub(r"\$\{PROPERTIES\.(\w+)\}", resolve, query)
+    leftover = re.findall(r"\$\{[^}]+\}", query)
+    if leftover:
+        sys.exit(f"✗ unresolved interpolation(s) in CATALOGUE_QUERY: {leftover} "
+                 "(this script only knows how to resolve ${PROPERTIES.*})")
+    return query
 
 
 def sparql(query):
@@ -266,13 +259,17 @@ def main():
     ap.add_argument("--execute", action="store_true", help="actually push to R2 (default: dry-run)")
     ap.add_argument("--no-csv", action="store_true", help="skip the human-readable CSV export")
     ap.add_argument("--out", default=DEFAULT_OUT, help=f"local output dir (default: {DEFAULT_OUT})")
+    ap.add_argument("--query-from", default=DEFAULT_QUERY_SOURCE,
+                    help=f"HTML page to read CATALOGUE_QUERY from (default: {DEFAULT_QUERY_SOURCE})")
     args = ap.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
 
+    query = load_catalogue_query(args.query_from)
+    print(f"Query read from {os.path.relpath(args.query_from, REPO_ROOT)} (single source of truth)")
     print("Fetching catalogue from Wikibase SPARQL …")
     try:
-        bindings = sparql(CATALOGUE_QUERY)
+        bindings = sparql(query)
     except Exception as e:
         sys.exit(f"✗ SPARQL fetch failed: {e}")
 
@@ -287,7 +284,7 @@ def main():
         "item_count": n_items,
         "binding_count": len(bindings),
         "note": "Fallback catalogue snapshot. Browser feeds `bindings` to processRows(). "
-                "Mirror of next.html CATALOGUE_QUERY — see build_catalogue_snapshot.py SYNC NOTE.",
+                "Query read live from next.html — no second copy, cannot drift.",
         "bindings": bindings,
     }
 
