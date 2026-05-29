@@ -1589,9 +1589,9 @@
     .mob-sheet-close{
       position:absolute;right:4px;top:50%;transform:translateY(-50%);
       background:none;border:none;
-      width:44px;height:44px;
+      width:48px;height:48px;
       display:flex;align-items:center;justify-content:center;
-      font-family:var(--mono);font-size:22px;line-height:1;
+      font-family:var(--mono);font-size:30px;line-height:1;
       color:var(--hint);cursor:pointer;
     }
     .mob-sheet-close:active{color:var(--ink)}
@@ -1601,9 +1601,9 @@
     }
     .mob-snav-btn{
       background:none;border:none;
-      width:44px;height:44px;
+      width:48px;height:48px;
       display:flex;align-items:center;justify-content:center;
-      font-size:26px;color:var(--muted);cursor:pointer;line-height:1;
+      font-size:34px;color:var(--muted);cursor:pointer;line-height:1;
     }
     .mob-snav-btn:active{color:var(--ink)}
     .mob-snav-btn:disabled{opacity:0.25;pointer-events:none}
@@ -1687,9 +1687,9 @@
     .mob-lightbox.mob-lb-open{transform:translateY(0)}
     .mob-lb-close{
       position:absolute;top:14px;right:14px;z-index:10;
-      background:rgba(0,0,0,0.55);border:none;border-radius:6px;
+      background:rgba(0,0,0,0.55);border:none;border-radius:8px;
       color:rgba(255,255,255,0.85);font-family:var(--mono);
-      font-size:20px;line-height:1;padding:4px 11px;cursor:pointer;
+      font-size:28px;line-height:1;padding:8px 16px;cursor:pointer;
     }
     .mob-lb-close:active{color:#fff}
     .mob-lb-stage{
@@ -2016,7 +2016,9 @@
     .fp-search-input{font-size:11px;letter-spacing:0.02em}
   }
 
-  /* Portrait lock: show rotate prompt on landscape phones */
+  /* Portrait lock: show rotate prompt on landscape phones — except in the
+     lightbox, where landscape is intentional for wide architectural drawings
+     (elevations, sections). body.mob-lb-active is toggled by open/closeLightbox. */
   #rotate-msg{
     display:none;position:fixed;inset:0;z-index:99999;
     background:#000;color:rgba(243,241,236,0.7);
@@ -2027,6 +2029,7 @@
   #rotate-msg svg{opacity:0.45}
   @media screen and (orientation:landscape) and (max-height:500px){
     #rotate-msg{display:flex}
+    body.mob-lb-active #rotate-msg{display:none}
   }
 
   /* === text-lg overrides — +1pt bump on every font-size; toggled by html.text-lg === */
@@ -2830,7 +2833,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08-test.14";
+  const VERSION      = "v1.08-test.15";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -5114,6 +5117,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     const lb = document.getElementById("mob-lightbox");
     const img = document.getElementById("mob-lb-img");
     lb.classList.add("mob-lb-open");
+    document.body.classList.add("mob-lb-active");
     img.alt = alt || "";
     img.onload = lbFit;
     if (img.complete && img.src === src) { lbFit(); }
@@ -5126,6 +5130,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   function closeLightbox() {
     lbOpen = false;
     document.getElementById("mob-lightbox").classList.remove("mob-lb-open");
+    document.body.classList.remove("mob-lb-active");
   }
 
   // ── Collapsible panel toggle ──────────────────────────────────────────────
