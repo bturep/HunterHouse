@@ -2782,7 +2782,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08-test.18";
+  const VERSION      = "v1.08-test.19";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4846,7 +4846,17 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   // Finding-aid link HTML — single source of truth for the AtoM/etc.
   // anchor (CAA items).
   function findingAidHTML(archiveLink, coll) {
-    return `<a href="${escapeHTML(archiveLink)}" target="_blank" rel="noopener">${archiveLinkLabel(coll)}</a>`;
+    // Reject any non-http(s) protocol — escapeHTML escapes characters, not
+    // schemes, so a 'javascript:' or 'data:' URI in Wikibase data would
+    // otherwise render as a clickable link. Defensive (Wikibase content is
+    // project-controlled), but cheap.
+    let safe = "";
+    try {
+      const u = new URL(archiveLink);
+      if (u.protocol === "http:" || u.protocol === "https:") safe = archiveLink;
+    } catch { /* malformed URL — fall through to empty link */ }
+    if (!safe) return "";
+    return `<a href="${escapeHTML(safe)}" target="_blank" rel="noopener">${archiveLinkLabel(coll)}</a>`;
   }
 
   // ── Mobile tab switching ──────────────────────────────────────────────────
