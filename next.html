@@ -14,7 +14,7 @@
      connect-src whitelists Wikibase Cloud (catalogue + writes) and loopback
      (the admin edit-proxy at 127.0.0.1:8731). img-src adds the R2 host that
      Wikibase URLs point at. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://archive.hunterhousefoundation.com; connect-src 'self' https://hunterhouse.wikibase.cloud https://archive.hunterhousefoundation.com http://127.0.0.1:* http://localhost:*; frame-src 'self'; worker-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://archive.hunterhousefoundation.com; connect-src 'self' https://hunterhouse.wikibase.cloud https://archive.hunterhousefoundation.com https://hhf-r2-browser.brandon-628.workers.dev http://127.0.0.1:* http://localhost:*; frame-src 'self'; worker-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'">
 <link rel="manifest" href="/HunterHouse/manifest.next.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -2468,6 +2468,93 @@
   .tl-pop-src a:hover{border-bottom-color:var(--tl-amber)}
   .tl-pop-key{color:var(--tl-amber);flex-shrink:0}
 
+  /* Archive files browser (read-only R2 tree). Researcher-gated overlay;
+     always-dark surface with pinned tokens so it reads the same in either app
+     theme. Toolbar button hidden unless body.is-research. */
+  .site-topright #files-toggle{display:none}
+  body.is-research .site-topright #files-toggle{
+    display:flex;align-items:center;justify-content:center;
+    background:none;border:0;border-radius:0;padding:0;cursor:pointer;color:var(--ink);
+  }
+  .site-topright #files-toggle svg{display:block;pointer-events:none}
+  .site-topright #files-toggle:hover{opacity:0.5}
+  html[data-splash-init="1"] body .site-top #files-toggle{display:none}
+
+  #files-pane{
+    display:none;position:fixed;inset:0;z-index:400;
+    flex-direction:column;background:#1a1816;
+    --f-ink:#f0ede6; --f-muted:#9a958b; --f-hint:#6c675f;
+    --f-rule:rgba(240,237,230,0.14); --f-row:rgba(240,237,230,0.03);
+    --f-accent:#c9a44e; --f-link:#e4a47e;
+  }
+  body.files-open{overflow:hidden}
+  body.files-open #files-pane{display:flex}
+
+  .files-head{
+    display:flex;align-items:flex-start;justify-content:space-between;gap:24px;
+    padding:24px 34px 18px;flex-shrink:0;border-bottom:1px solid var(--f-rule);
+  }
+  .files-eyebrow{
+    font-family:var(--mono);font-size:9px;letter-spacing:0.22em;text-transform:uppercase;
+    color:var(--f-muted);margin:0 0 10px;
+  }
+  .files-title{
+    font-family:var(--sans);font-weight:300;font-size:23px;letter-spacing:0.005em;
+    color:var(--f-ink);margin:0;line-height:1.1;
+  }
+  .files-head-r{display:flex;align-items:center;gap:20px;flex-shrink:0;padding-top:4px}
+  .files-caption{
+    font-family:var(--mono);font-size:10px;letter-spacing:0.06em;color:var(--f-muted);
+    text-align:right;white-space:nowrap;margin:0;
+  }
+  .files-close{
+    background:none;border:0;cursor:pointer;color:var(--f-hint);
+    font-size:20px;line-height:1;padding:2px 4px;
+  }
+  .files-close:hover{color:var(--f-ink)}
+
+  .files-crumbs{
+    flex-shrink:0;display:flex;flex-wrap:wrap;align-items:center;gap:2px;
+    padding:12px 34px;border-bottom:1px solid var(--f-rule);
+    font-family:var(--mono);font-size:10.5px;letter-spacing:0.03em;
+  }
+  .files-crumb{background:none;border:0;cursor:pointer;color:var(--f-link);padding:2px 4px;font:inherit}
+  .files-crumb:hover{color:var(--f-ink)}
+  .files-crumb.cur{color:var(--f-muted);cursor:default;pointer-events:none}
+  .files-crumb-sep{color:var(--f-hint);padding:0 1px}
+
+  .files-body{flex:1;overflow-y:auto;padding:8px 0 24px}
+  .files-row{
+    display:flex;align-items:center;gap:12px;
+    padding:9px 34px;border-bottom:1px solid rgba(240,237,230,0.05);
+    font-family:var(--mono);font-size:11.5px;color:var(--f-ink);
+  }
+  .files-row.folder{cursor:pointer}
+  .files-row.folder:hover{background:var(--f-row)}
+  .files-row .f-ico{flex-shrink:0;width:15px;display:flex;color:var(--f-muted)}
+  .files-row.folder .f-ico{color:var(--f-accent)}
+  .files-row .f-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .files-row .f-size{flex-shrink:0;color:var(--f-hint);font-size:10px;letter-spacing:0.04em;min-width:64px;text-align:right}
+  .files-row .f-dl{
+    flex-shrink:0;font-family:var(--mono);font-size:10px;letter-spacing:0.06em;
+    color:var(--f-link);text-decoration:none;border:0;background:none;cursor:pointer;
+    padding:2px 6px;text-transform:uppercase;
+  }
+  .files-row .f-dl:hover{color:var(--f-ink)}
+  .files-msg{font-family:var(--mono);font-size:11px;color:var(--f-muted);padding:22px 34px;letter-spacing:0.03em}
+  .files-msg.error{color:var(--f-link)}
+  .files-more{
+    display:block;margin:14px 34px 0;font-family:var(--mono);font-size:10.5px;
+    letter-spacing:0.06em;color:var(--f-link);background:none;border:1px solid var(--f-rule);
+    border-radius:2px;padding:8px 12px;cursor:pointer;
+  }
+  .files-more:hover{color:var(--f-ink);border-color:var(--f-link)}
+
+  .files-foot{
+    flex-shrink:0;padding:11px 34px;border-top:1px solid var(--f-rule);
+    font-family:var(--mono);font-size:9.5px;letter-spacing:0.04em;color:var(--f-hint);
+  }
+
 </style>
 <script>
   /* PWA detect (still useful for the .pwa CSS overrides). Dark mode is
@@ -2561,6 +2648,28 @@
 </div>
 <div class="tl-tip" id="tl-tip" role="status" aria-live="polite"></div>
 <div class="tl-pop" id="tl-pop" role="dialog" aria-label="Event detail"></div>
+
+<!-- ── Archive files browser (read-only R2 bucket tree) ──────────────────
+     Researcher-only overlay. Lazy-loads one folder level at a time from the
+     read-only listing Worker (R2_LIST_API). Files link to their existing
+     public download URL on the archive domain. No write path exists. -->
+<div id="files-pane" role="dialog" aria-modal="true" aria-label="Archive files">
+  <div class="files-head">
+    <div class="files-head-l">
+      <p class="files-eyebrow">Hunter House Archive · Files</p>
+      <h1 class="files-title">Archive bucket</h1>
+    </div>
+    <div class="files-head-r">
+      <p class="files-caption" id="files-caption">read-only · downloads only</p>
+      <button class="files-close" id="files-close" aria-label="Close files">×</button>
+    </div>
+  </div>
+  <div class="files-crumbs" id="files-crumbs"></div>
+  <div class="files-body" id="files-body"></div>
+  <div class="files-foot">
+    <span class="files-foot-note">Read-only view of the preservation bucket. Files download from the public archive domain; nothing here can move, rename, or delete an object.</span>
+  </div>
+</div>
 
 
 <div id="mob-about" role="dialog" aria-modal="true" aria-label="About Hunter House Archive">
@@ -7657,6 +7766,114 @@ WHERE {
     document.getElementById("timeline-close").addEventListener("click", tlClose);
     // outside-click on the stage closes the popover (marks stopPropagation)
     document.getElementById("tl-stage").addEventListener("mousedown", tlHidePop);
+
+    // ── Archive files browser (read-only R2 tree) ────────────────────────
+    // Researcher-only. Lazy-loads ONE folder level per navigation from the
+    // read-only listing Worker; files link to their public download URL. No
+    // write/move/delete path here or in the Worker. Wired in wireControls()
+    // scope alongside its fb* helpers (same scope lesson as the timeline btns).
+    const R2_LIST_API    = "https://hhf-r2-browser.brandon-628.workers.dev/list";
+    const R2_PUBLIC_BASE = "https://archive.hunterhousefoundation.com";
+    const _fb = { prefix: "", cursor: null };
+    function fbFmtSize(n){
+      if (n == null) return "";
+      if (n < 1024) return n + " B";
+      if (n < 1048576) return (n / 1024).toFixed(0) + " KB";
+      if (n < 1073741824) return (n / 1048576).toFixed(1) + " MB";
+      return (n / 1073741824).toFixed(2) + " GB";
+    }
+    const FB_FOLDER_ICO = '<svg width="14" height="13" viewBox="0 0 14 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M1 3.2V11h12V4.5H6.5L5 3.2H1z"/></svg>';
+    const FB_FILE_ICO   = '<svg width="12" height="13" viewBox="0 0 12 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"><path d="M2 1h5l3 3v8H2z"/><path d="M7 1v3h3"/></svg>';
+    function fbRenderCrumbs(){
+      const bar = document.getElementById("files-crumbs");
+      const parts = _fb.prefix ? _fb.prefix.replace(/\/$/, "").split("/") : [];
+      let html = '<button class="files-crumb' + (_fb.prefix ? "" : " cur") + '" data-prefix="">bucket</button>';
+      let acc = "";
+      parts.forEach((p, i) => {
+        acc += p + "/";
+        const isLast = i === parts.length - 1;
+        html += '<span class="files-crumb-sep">/</span>' +
+          '<button class="files-crumb' + (isLast ? " cur" : "") + '" data-prefix="' + escapeHTML(acc) + '">' + escapeHTML(p) + '</button>';
+      });
+      bar.innerHTML = html;
+    }
+    function fbRenderRows(data, append){
+      const body = document.getElementById("files-body");
+      if (!append) body.innerHTML = "";
+      const frag = document.createDocumentFragment();
+      for (const f of (data.folders || [])){
+        const row = document.createElement("div");
+        row.className = "files-row folder";
+        row.innerHTML = '<span class="f-ico">' + FB_FOLDER_ICO + '</span>' +
+          '<span class="f-name">' + escapeHTML(f.name) + '/</span>' +
+          '<span class="f-size"></span><span class="f-dl"></span>';
+        row.addEventListener("click", () => fbNavigate(f.key));
+        frag.appendChild(row);
+      }
+      for (const f of (data.files || [])){
+        const row = document.createElement("div");
+        row.className = "files-row file";
+        const url = R2_PUBLIC_BASE + "/" + f.key.split("/").map(encodeURIComponent).join("/");
+        row.innerHTML = '<span class="f-ico">' + FB_FILE_ICO + '</span>' +
+          '<span class="f-name" title="' + escapeHTML(f.name) + '">' + escapeHTML(f.name) + '</span>' +
+          '<span class="f-size">' + fbFmtSize(f.size) + '</span>' +
+          '<a class="f-dl" href="' + url + '" target="_blank" rel="noopener" download>↓ get</a>';
+        frag.appendChild(row);
+      }
+      body.appendChild(frag);
+      if (!append && !(data.folders||[]).length && !(data.files||[]).length){
+        body.innerHTML = '<div class="files-msg">Empty folder.</div>';
+      }
+      const oldMore = document.getElementById("files-more-btn");
+      if (oldMore) oldMore.remove();
+      if (data.truncated && data.cursor){
+        _fb.cursor = data.cursor;
+        const more = document.createElement("button");
+        more.id = "files-more-btn"; more.className = "files-more";
+        more.textContent = "Load more…";
+        more.addEventListener("click", () => fbLoad(_fb.prefix, true));
+        body.appendChild(more);
+      } else { _fb.cursor = null; }
+    }
+    async function fbLoad(prefix, append){
+      const body = document.getElementById("files-body");
+      if (!append) body.innerHTML = '<div class="files-msg">Loading…</div>';
+      try {
+        const u = new URL(R2_LIST_API);
+        u.searchParams.set("prefix", prefix);
+        if (append && _fb.cursor) u.searchParams.set("cursor", _fb.cursor);
+        const res = await fetch(u, { headers: { "Accept": "application/json" } });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error + (data.detail ? " — " + data.detail : ""));
+        fbRenderRows(data, append);
+      } catch (err) {
+        body.innerHTML = '<div class="files-msg error">Couldn’t load listing: ' + escapeHTML(err.message) + '</div>';
+      }
+    }
+    function fbNavigate(prefix){
+      _fb.prefix = prefix || "";
+      _fb.cursor = null;
+      fbRenderCrumbs();
+      document.getElementById("files-body").scrollTop = 0;
+      fbLoad(_fb.prefix, false);
+    }
+    function fbOpen(){
+      if (!canMark()) return;   // researchers + admin only
+      document.body.classList.add("files-open");
+      fbNavigate(_fb.prefix);
+    }
+    function fbClose(){ document.body.classList.remove("files-open"); }
+    function fbOnEsc(){
+      if (!document.body.classList.contains("files-open")) return false;
+      fbClose(); return true;
+    }
+    document.getElementById("files-toggle").addEventListener("click", fbOpen);
+    document.getElementById("files-close").addEventListener("click", fbClose);
+    document.getElementById("files-crumbs").addEventListener("click", e => {
+      const c = e.target.closest(".files-crumb");
+      if (c && !c.classList.contains("cur")) fbNavigate(c.dataset.prefix);
+    });
+    window.__fbOnEsc = fbOnEsc;   // exposed to the global keydown handler (other scope)
     window.addEventListener("resize", () => {
       if (!document.body.classList.contains("tl-open")) return;
       clearTimeout(_tlResizeT);
