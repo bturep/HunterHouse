@@ -715,7 +715,6 @@
   .sort-mini .sort-hd[data-sort-col="phase"]{margin-left:8px}
   .sort-mini .sort-hd[data-sort-col="year"]{width:50px;justify-content:flex-end}
   .rows{flex:1;overflow-y:auto;display:flex;flex-direction:column;scrollbar-width:none}
-  #list-ptr{display:none}
   .rows::-webkit-scrollbar{display:none}
   .meta-body{scrollbar-width:none}
   .meta-body::-webkit-scrollbar{display:none}
@@ -1528,19 +1527,6 @@
     }
     .rows{background:var(--soft);position:relative;z-index:1}
     html.dark .rows{background:#0f0e0d}
-    /* Pull-to-refresh indicator — sits in the black gap that opens between
-       the list-head and the list as it is pulled down. top + height are
-       set in JS to track that gap; the gap shows .panel-left's black, so
-       the type stays light in both themes. */
-    #list-ptr{
-      display:flex;align-items:center;justify-content:center;
-      position:absolute;left:0;right:0;top:0;height:0;z-index:0;
-      overflow:hidden;
-      font-family:var(--mono);font-size:9px;font-weight:500;
-      letter-spacing:0.2em;text-transform:uppercase;
-      color:rgba(240,237,230,0.45);opacity:0;pointer-events:none;
-    }
-    #list-ptr.armed{color:rgba(240,237,230,0.95)}
 
     .pane-image{display:none!important}
     .panel-right{display:none!important}
@@ -2168,7 +2154,6 @@
   html.text-lg .fp-show{font-size:10px}
   html.text-lg #rotate-msg{font-size:12px}
   @media (max-width:767px){
-  html.text-lg #list-ptr{font-size:10px}
   html.text-lg .mob-sheet-body .pill{font-size:12px}
   html.text-lg .mob-sheet-close{font-size:23px}
   html.text-lg .mob-snav-btn{font-size:27px}
@@ -2363,7 +2348,6 @@
   html.text-xl .fp-show{font-size:11px}
   html.text-xl #rotate-msg{font-size:13px}
   @media (max-width:767px){
-  html.text-xl #list-ptr{font-size:11px}
   html.text-xl .mob-sheet-body .pill{font-size:13px}
   html.text-xl .mob-sheet-close{font-size:24px}
   html.text-xl .mob-snav-btn{font-size:28px}
@@ -2630,7 +2614,6 @@
       <div class="mark-bar" id="mark-bar" hidden></div>
       <div class="bulk-bar" id="bulk-bar" hidden></div>
       <div class="curation-card" id="curation-card" hidden></div>
-      <div id="list-ptr" aria-hidden="true">Pull to reset</div>
       <div class="rows" id="rows"></div>
     </div>
     <button class="panel-handle" id="left-handle" aria-label="Toggle browse panel">
@@ -2912,7 +2895,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08-test.22";
+  const VERSION      = "v1.08-test.23";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7110,55 +7093,6 @@ WHERE {
     document.getElementById("cp-prev")?.addEventListener("click", () => selectAdjacent(-1));
     document.getElementById("cp-next")?.addEventListener("click", () => selectAdjacent(+1));
     document.getElementById("cur-leave")?.addEventListener("click", exitCuration);
-
-    // Pull-to-refresh: a downward drag at the top of the list resets the
-    // whole page (location.reload). Mobile only.
-    if (window.matchMedia("(max-width:767px)").matches) {
-      const ptrRows = document.getElementById("rows");
-      const ptrEl   = document.getElementById("list-ptr");
-      if (ptrRows && ptrEl) {
-        const PTR_TRIGGER = 80;          // pull distance (px) that arms the reset
-        let ptrStartY = 0, ptrDist = 0, ptrTracking = false;
-        const drawPtr = () => {
-          ptrRows.style.transform = ptrDist ? `translateY(${ptrDist}px)` : "";
-          const armed = ptrDist >= PTR_TRIGGER;
-          ptrEl.style.height  = ptrDist + "px";        // fills the opening gap
-          ptrEl.style.opacity = ptrDist ? Math.min(1, ptrDist / PTR_TRIGGER) : 0;
-          ptrEl.classList.toggle("armed", armed);
-          ptrEl.textContent = armed ? "Release to reset" : "Pull to reset";
-        };
-        ptrRows.addEventListener("touchstart", e => {
-          ptrTracking = e.touches.length === 1 && ptrRows.scrollTop <= 0;
-          ptrStartY = e.touches[0].clientY;
-          ptrDist = 0;
-          ptrRows.style.transition = ""; ptrEl.style.transition = "";
-          ptrEl.style.top = ptrRows.offsetTop + "px";  // align with the list's top edge
-        }, { passive: true });
-        ptrRows.addEventListener("touchmove", e => {
-          if (!ptrTracking) return;
-          const dy = e.touches[0].clientY - ptrStartY;
-          if (dy <= 0 || ptrRows.scrollTop > 0) {     // a scroll, not a pull
-            if (ptrDist) { ptrDist = 0; drawPtr(); }
-            ptrTracking = ptrRows.scrollTop <= 0 && dy > 0;
-            return;
-          }
-          e.preventDefault();                          // own the gesture
-          ptrDist = Math.min(150, dy * 0.5);            // damped follow
-          drawPtr();
-        }, { passive: false });
-        ptrRows.addEventListener("touchend", () => {
-          if (!ptrTracking) return;
-          ptrTracking = false;
-          if (ptrDist >= PTR_TRIGGER) { location.reload(); return; }
-          ptrDist = 0;
-          ptrRows.style.transition = "transform .25s ease";
-          ptrRows.style.transform  = "";
-          ptrEl.style.transition = "height .25s ease, opacity .2s ease";
-          ptrEl.style.height  = "0px";
-          ptrEl.style.opacity = 0;
-        }, { passive: true });
-      }
-    }
 
     // Version displays (ap-ver / mob-about-ver are already painted at script
     // parse time — see the block right after VERSION_DISPLAY — so no late
