@@ -1,0 +1,11 @@
+name = "hhf-r2-browser"
+main = "src/worker.js"
+compatibility_date = "2026-05-01"
+
+# Bind the existing archive bucket. "BUCKET" is the name the Worker code uses
+# (env.BUCKET.list). bucket_name is the real R2 bucket. The binding grants this
+# Worker read+write to the bucket at the platform level, but the code only ever
+# calls .list() — see the no-writes note at the top of src/worker.js.
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "hunter-house-archive"
