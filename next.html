@@ -2384,7 +2384,106 @@
   html.text-xl .fp-chip{font-size:13px}
   html.text-xl .fp-search-input{font-size:13px}
   }
-  
+
+  /* ══ Chronology timeline viewer ══════════════════════════════════════════
+     An always-dark immersive overlay. It pins its OWN dark tokens (--tl-*)
+     rather than reading the app theme, so the loved thread colours render
+     identically whether the site is in light or dark mode — the same trick
+     #curator-pane uses. Fonts are the shared site tokens (--sans Inter Tight,
+     --mono JetBrains Mono), so the type stays tight to the rest of the SPA. */
+  .site-topright #timeline-toggle{
+    background:none;border:0;border-radius:0;padding:0;cursor:pointer;color:var(--ink);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .site-topright #timeline-toggle svg{display:block;pointer-events:none}
+  .site-topright #timeline-toggle:hover{opacity:0.5}
+  html[data-splash-init="1"] body .site-top #timeline-toggle{display:none}
+
+  #timeline-pane{
+    display:none;position:fixed;inset:0;z-index:400;
+    flex-direction:column;background:#1a1816;
+    --tl-ink:#f0ede6; --tl-muted:#9a958b; --tl-hint:#6c675f;
+    --tl-rule:rgba(240,237,230,0.14); --tl-plate:#2b2723; --tl-amber:#e4a47e;
+  }
+  body.tl-open{overflow:hidden}
+  body.tl-open #timeline-pane{display:flex}
+
+  /* Masthead — eyebrow + title left, mono caption + close right. */
+  .tl-head{
+    display:flex;align-items:flex-start;justify-content:space-between;gap:24px;
+    padding:24px 34px 18px;flex-shrink:0;border-bottom:1px solid var(--tl-rule);
+  }
+  .tl-head-l{min-width:0}
+  .tl-eyebrow{
+    font-family:var(--mono);font-size:9px;letter-spacing:0.22em;text-transform:uppercase;
+    color:var(--tl-muted);margin:0 0 10px;
+  }
+  .tl-title{
+    font-family:var(--sans);font-weight:300;font-size:23px;letter-spacing:0.005em;
+    color:var(--tl-ink);margin:0;line-height:1.1;
+  }
+  .tl-title .tl-ph{color:var(--tl-hint)}     /* placeholder copy reads as muted */
+  .tl-head-r{display:flex;align-items:center;gap:20px;flex-shrink:0;padding-top:4px}
+  .tl-caption{
+    font-family:var(--mono);font-size:10px;letter-spacing:0.06em;color:var(--tl-muted);
+    text-align:right;white-space:nowrap;margin:0;
+  }
+  .tl-close{
+    background:none;border:0;cursor:pointer;color:var(--tl-hint);
+    font-size:20px;line-height:1;padding:2px 4px;
+  }
+  .tl-close:hover{color:var(--tl-ink)}
+
+  /* Scroll stage — the one place that scrolls; holds the inline SVG. */
+  .tl-stage{flex:1;overflow-x:auto;overflow-y:hidden;background:#242220;position:relative}
+  .tl-stage svg{display:block;height:100%}
+  .tl-stage::-webkit-scrollbar{height:9px}
+  .tl-stage::-webkit-scrollbar-thumb{background:rgba(240,237,230,0.18);border-radius:5px}
+  .tl-stage::-webkit-scrollbar-track{background:transparent}
+
+  /* Bottom caption strip. */
+  .tl-foot{
+    flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:22px;
+    padding:11px 34px;border-top:1px solid var(--tl-rule);
+    font-family:var(--mono);font-size:9.5px;letter-spacing:0.04em;color:var(--tl-hint);
+  }
+  .tl-foot-note{min-width:0}
+  .tl-legend{display:flex;align-items:center;gap:18px;flex-shrink:0}
+  .tl-leg{display:flex;align-items:center;gap:7px;white-space:nowrap}
+  .tl-leg svg{display:block;flex-shrink:0}
+
+  /* Hover tooltip. */
+  .tl-tip{
+    position:fixed;z-index:420;pointer-events:none;display:none;
+    background:var(--tl-plate);border:1px solid var(--tl-rule);padding:6px 9px;
+    font-family:var(--mono);font-size:10px;line-height:1.55;color:var(--tl-ink);
+    max-width:260px;white-space:pre-line;
+  }
+  .tl-tip .tl-tip-thread{display:block;letter-spacing:0.12em;text-transform:uppercase;font-size:8.5px;margin-bottom:2px}
+
+  /* Click popover. */
+  .tl-pop{
+    position:fixed;z-index:430;display:none;width:300px;box-sizing:border-box;
+    background:var(--tl-plate);border:1px solid var(--tl-rule);
+    box-shadow:0 10px 34px rgba(0,0,0,0.5);padding:18px 18px 15px;
+  }
+  .tl-pop-close{
+    position:absolute;top:6px;right:9px;background:none;border:0;cursor:pointer;
+    color:var(--tl-hint);font-size:15px;line-height:1;padding:2px;
+  }
+  .tl-pop-close:hover{color:var(--tl-ink)}
+  .tl-pop-thread{font-family:var(--mono);font-size:8.5px;letter-spacing:0.2em;text-transform:uppercase;margin:0 0 10px}
+  .tl-pop-date{font-family:var(--mono);font-size:10px;letter-spacing:0.04em;color:var(--tl-muted);margin:0 0 7px}
+  .tl-pop-title{font-family:var(--sans);font-weight:400;font-size:15px;line-height:1.3;color:var(--tl-ink);margin:0 0 11px}
+  .tl-pop-note{font-family:var(--sans);font-size:12px;line-height:1.6;color:var(--tl-muted);margin:0 0 14px}
+  .tl-pop-src{
+    font-family:var(--mono);font-size:9.5px;letter-spacing:0.04em;color:var(--tl-hint);
+    border-top:1px solid var(--tl-rule);padding-top:10px;display:flex;justify-content:space-between;gap:12px;align-items:baseline;
+  }
+  .tl-pop-src a{color:var(--tl-amber);text-decoration:none;border-bottom:1px solid rgba(228,164,126,0.32)}
+  .tl-pop-src a:hover{border-bottom-color:var(--tl-amber)}
+  .tl-pop-key{color:var(--tl-amber);flex-shrink:0}
+
 </style>
 <script>
   /* PWA detect (still useful for the .pwa CSS overrides). Dark mode is
@@ -2427,6 +2526,12 @@
     <input id="search-input" class="tr-search-input" placeholder="" autocomplete="off">
     <span id="topright" title="About this archive"></span>
     <button class="theme-btn" id="search-toggle" title="Search [/]" aria-label="Search"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="5.2" cy="5.2" r="3.5"/><line x1="7.8" y1="7.8" x2="12" y2="12"/></svg></button>
+    <!-- Timeline button — opens the chronology viewer (#timeline-pane).
+         In-flow between #search-toggle and #rec-info; hidden during splash
+         via data-splash-init like the other right-hand controls. The glyph
+         is a small dual-spine mark (two stacked ticked lines) echoing the
+         timeline's two tracks. -->
+    <button class="theme-btn" id="timeline-toggle" title="Chronology" aria-label="Open chronology timeline"><svg width="14" height="13" viewBox="0 0 14 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><line x1="1" y1="4" x2="13" y2="4"/><line x1="1" y1="9" x2="13" y2="9"/><line x1="4.5" y1="2.5" x2="4.5" y2="5.5"/><line x1="9.5" y1="7.5" x2="9.5" y2="10.5"/></svg></button>
     <!-- Info ("?") button — opens the shortcuts/info pane. In-flow between
          #search-toggle and #fs-toggle; hidden while the about-pane is open
          and on first paint via data-splash-init (see the #rec-info rules). -->
@@ -2444,6 +2549,31 @@
     <button class="theme-btn" id="fs-toggle" title="Enter fullscreen" aria-label="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
   </div>
 </header>
+
+<!-- ── Chronology timeline viewer ─────────────────────────────────────────
+     A self-contained, always-dark immersive overlay (its own fixed surface
+     above the browse shell, like #mob-about). The dual-spine SVG is built
+     lazily on first open by buildTimeline(); #tl-tip / #tl-pop are the hover
+     tooltip + click popover. Prose here is placeholder pending Brandon's copy. -->
+<div id="timeline-pane" role="dialog" aria-modal="true" aria-label="Hunter chronology timeline">
+  <div class="tl-head">
+    <div class="tl-head-l">
+      <p class="tl-eyebrow">Hunter House Archive · Chronology</p>
+      <h1 class="tl-title"><span class="tl-ph">[ Timeline title — placeholder ]</span></h1>
+    </div>
+    <div class="tl-head-r">
+      <p class="tl-caption" id="tl-caption">1930 — 2023</p>
+      <button class="tl-close" id="timeline-close" aria-label="Close timeline">×</button>
+    </div>
+  </div>
+  <div class="tl-stage" id="tl-stage"></div>
+  <div class="tl-foot">
+    <span class="tl-foot-note">[ Placeholder — a short description of the view goes here. ]</span>
+    <span class="tl-legend" id="tl-legend"></span>
+  </div>
+</div>
+<div class="tl-tip" id="tl-tip" role="status" aria-live="polite"></div>
+<div class="tl-pop" id="tl-pop" role="dialog" aria-label="Event detail"></div>
 
 
 <div id="mob-about" role="dialog" aria-modal="true" aria-label="About Hunter House Archive">
@@ -2782,7 +2912,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08-test.21";
+  const VERSION      = "v1.08-test.22";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7172,11 +7302,431 @@ WHERE {
     });
 
 
+    // ╔══════════════════════════════════════════════════════════════════════╗
+    // ║  CHRONOLOGY TIMELINE  (#timeline-pane)        grep `function buildTimeline`║
+    // ║                                                                      ║
+    // ║  A self-contained dual-spine timeline: Hunter's life ABOVE a centre  ║
+    // ║  axis, the house's record BELOW it. One inline SVG on a horizontally ║
+    // ║  scrolling stage. Three tiers of emphasis keep it calm:              ║
+    // ║    • key events  → a label "card" (plate + year + title + stem)      ║
+    // ║    • spans       → a capsule riding the spine + a light label        ║
+    // ║    • minor points→ a bare dot/diamond, details on hover              ║
+    // ║  Anti-collision: cards + span-labels for each track are lane-packed  ║
+    // ║  in a single pass; minor dots are exempt. Build is lazy (first open) ║
+    // ║  and re-runs on resize. Prose (title, footer, notes) is placeholder. ║
+    // ║                                                                      ║
+    // ║  Data is the TL_EVENTS array below — transcribed from the 2026-05-28 ║
+    // ║  source audit. archive/arch marks are catalogue-derived (hollow,     ║
+    // ║  dates to confirm vs the live Wikibase); audited marks are solid.    ║
+    // ╚══════════════════════════════════════════════════════════════════════╝
+
+    // Thread colours — pulled straight from the dark palette so they cohere
+    // with the rest of the SPA. The HOUSE track always renders gold.
+    const TL_COLORS = {
+      life:'#f0ede6', practice:'#7aaa98', zen:'#d59b5c',
+      art:'#c4826e', writing:'#6f93c9', house:'#c9a44e'
+    };
+    const TL_THREAD_LABEL = {
+      life:'Life', practice:'Practice', zen:'Zen & Travel',
+      art:'Art', writing:'Writing', house:'House'
+    };
+    // Pinned dark tokens for the SVG interior (CSS vars don't reach SVG fills).
+    const TL_BG='#242220', TL_PLATE='#2b2723', TL_INK='#f0ede6',
+          TL_TITLE_Q='#cfcabf', TL_MUTED='#9a958b', TL_HINT='#6c675f',
+          TL_RULE='rgba(240,237,230,0.13)', TL_AMBER='#e4a47e', TL_GOLD='#c9a44e';
+    const TL_NOTE = "[ Note — placeholder. A short editorial annotation for this event will go here. ]";
+
+    // track defaults to "hunter"; track:"house" puts the event on the lower
+    // spine and forces gold. y2 = a span. key = a card. archive = hollow.
+    const TL_EVENTS = [
+      // ── Ric Hunter — the life ──────────────────────────────────────────
+      { y:1930,           thread:'life',     key:true,  short:'Born',                     title:'Born, Phoenix AZ',                                       date:'4 Nov 1930',     place:'Phoenix, Arizona',          wd:'Q139959908', note:TL_NOTE },
+      { y:1955,           thread:'writing',  key:true,  short:'Mendelsohn Portfolio',     title:'Eric Mendelsohn Portfolio',                              date:'1955',           place:null,                        src:'FH09',      note:TL_NOTE },
+      { y:1958,           thread:'practice',            short:'Graduates, U. Oklahoma',   title:'Graduates, University of Oklahoma',                      date:'1958',           place:'Norman, Oklahoma',          src:'FH09',      note:TL_NOTE },
+      { y:1958,           thread:'zen',      key:true,  short:'First trip to Japan',      title:'First trip to Japan — Zen at Daitoku-ji, Kyoto',         date:'1958',           place:'Kyoto, Japan',              src:'FH09',      note:TL_NOTE },
+      { y:1959, y2:1961,  thread:'practice',            short:'Welton Becket Assoc.',     title:'Welton Becket Assoc., San Francisco — SFO airport',      date:'1959–61',        place:'San Francisco',             src:'FH09',      note:TL_NOTE },
+      { y:1961, y2:1962,  thread:'practice',            short:'Fairbanks Airport (unbuilt)', title:"Fairbanks Int'l Airport, unbuilt",                    date:'1961–62',        place:'Fairbanks, Alaska',         src:'FH15',      note:TL_NOTE },
+      { y:1962, y2:1964,  thread:'zen',                 short:'Lives in Kyoto',           title:'Lives in Kyoto',                                         date:'1962–64',        place:'Kyoto, Japan',              src:'FH09',      note:TL_NOTE },
+      { y:1964, y2:1968,  thread:'practice',            short:'Architect, Fairbanks',     title:'Architect in Fairbanks, Alaska',                         date:'1964–68',        place:'Fairbanks, Alaska',         src:'FH09',      note:TL_NOTE },
+      { y:1966,           thread:'writing',             short:'Concise History of East Asia', title:'A Concise History of East Asia — photographs',       date:'1966',           place:null,                        src:'FH09',      note:TL_NOTE },
+      { y:1968,           thread:'life',                short:'Moves to Victoria',        title:'Moves to Victoria, B.C.',                                date:'1968',           place:'Victoria, B.C.',            src:'FH09',      note:TL_NOTE },
+      { y:1969, y2:1974,  thread:'practice',            short:'Private practice I',       title:'Private practice I, Victoria — Mt. Baldy Zen master plan', date:'1969–74',       place:'Victoria, B.C.',            src:'FH09',      note:TL_NOTE },
+      { y:1974,           thread:'life',                short:'Canadian citizenship',     title:'Canadian citizenship',                                   date:'1974',           place:null,                        src:'FH09',      note:TL_NOTE },
+      { y:1974,           thread:'art',                 short:'In Praise of Hands',       title:'In Praise of Hands, Toronto — chemigraphy',              date:'1974',           place:'Toronto',                   src:'FH09',      note:TL_NOTE },
+      { y:1974, y2:1981,  thread:'practice',            short:'B.C. Government',          title:'Design architect, B.C. Government',                      date:'1974–81',        place:'Victoria, B.C.',            src:'FH08',      note:TL_NOTE },
+      { y:1975,           thread:'zen',      key:true,  short:'Hosts Sasaki Roshi',       title:'Hosts Sasaki Roshi, two talks at 203 Goward',            date:'10–11 Jun 1975', place:'203 Goward Rd · UVic',      src:'FH07',      note:TL_NOTE },
+      { y:1976,           thread:'art',                 short:'Habitat UN, Vancouver',    title:'Habitat UN Conference, Vancouver',                       date:'1976',           place:'Vancouver',                 src:'FH09',      note:TL_NOTE },
+      { y:1977,           thread:'art',                 short:'Fiberworks, Cleveland',    title:'Fiberworks, Cleveland Museum of Art',                    date:'1977',           place:'Cleveland',                 src:'FH09',      note:TL_NOTE },
+      { y:1978,           thread:'practice',            short:'Skeenaview, Terrace',      title:'Skeenaview Care Home, Terrace',                          date:'1978',           place:'Terrace, B.C.',             src:'FH15',      note:TL_NOTE },
+      { y:1980,           thread:'practice',            short:'100 Mile House',           title:'100 Mile House care facility',                           date:'1980',           place:'100 Mile House, B.C.',      src:'FH15',      note:TL_NOTE },
+      { y:1981, y2:1982,  thread:'zen',      key:true,  short:'Ten-month family journey', title:'Ten-month family journey: Japan → China → India → Egypt → England', date:'1981–82', place:null,                  src:'FH08',      note:TL_NOTE },
+      { y:1981, y2:1986,  thread:'practice',            short:'Private practice II',      title:'Private practice II, Victoria',                          date:'1981–86',        place:'Victoria, B.C.',            src:'FH08',      note:TL_NOTE },
+      { y:1983,           thread:'practice',            short:'Vietnamese Buddhist plan', title:'Vietnamese Buddhist community master plan, Vancouver',   date:'1983',           place:'Vancouver',                 src:'FH08',      note:TL_NOTE },
+      { y:1984,           thread:'practice',            short:'Lady Minto Hospital',      title:'Lady Minto Hospital, Ganges',                            date:'1984',           place:'Ganges, Salt Spring I.',    src:'FH15',      note:TL_NOTE },
+      { y:1986,           thread:'writing',  key:true,  archive:true, short:'Hunter portfolio published', title:'Hunter portfolio published',               date:'1986',           place:null,                        src:'HH-HHC-0115', note:TL_NOTE },
+      { y:1986,           thread:'art',      key:true,  short:'Music for Solo Performer', title:'Performs in Lucier’s "Music for Solo Performer", UVic', date:'14 Nov 1986', place:'University of Victoria',     src:'FH12',      note:TL_NOTE },
+      { y:1988,           thread:'practice', key:true,  archive:true, short:'The "Pumple letter"', title:'Disowns client alterations — the "Pumple letter"', date:'11 Oct 1988', place:null,                  src:'CAA 2021.01', note:TL_NOTE },
+      { y:2005, y2:2006,  thread:'writing',             short:'Mendelsohn sketches essay', title:'"On the Early Sketches of Eric Mendelsohn"',            date:'2005–06',        place:null,                        src:'Structurist (pending)', note:TL_NOTE },
+      { y:2023,           thread:'life',     key:true,  short:'Dies in Victoria',         title:'Dies in Victoria',                                       date:'14 Jan 2023',    place:'Victoria, B.C.',            wd:'Q139959908', note:TL_NOTE },
+      // ── Hunter House — 203 Goward Rd (all gold) ────────────────────────
+      { y:1970, y2:1973,  track:'house',     key:true,  short:'Designs & builds the Residence', title:'Designs & builds the Hunter Residence, 203 Goward Rd', date:'1970–73', place:'203 Goward Rd, Saanich', src:'Wikibase Q234', audited:true, note:TL_NOTE },
+      { y:1970, y2:1971,  track:'house',     archive:true, short:'Residence Photographs', title:'Hunter Residence Photographs',                           date:'1970–71',        place:null,                        src:'CAA',       note:TL_NOTE },
+      { y:1974, y2:1991,  track:'house',     archive:true, short:'Atrium & Interior Garden', title:'Atrium & Interior Garden work',                       date:'1974–91',        place:null,                        src:'HHC',       confirm:true, note:TL_NOTE },
+      { y:1977, y2:1985,  track:'house',     archive:true, short:'East Wing Addition',    title:'East Wing Addition',                                     date:'1977–85',        place:null,                        src:'HHC',       confirm:true, note:TL_NOTE },
+      { y:1992,           track:'house',     archive:true, short:'Colour Studies',        title:'Colour Studies for Hunter House',                        date:'1992',           place:null,                        src:'CAA',       note:TL_NOTE },
+      { y:2015, y2:2018,  track:'house',     archive:true, short:'Dining Room Addition',  title:'Dining Room Addition',                                   date:'2015–18',        place:null,                        src:'EGC',       confirm:true, note:TL_NOTE },
+      { y:2020,           track:'house',                short:'Final drawings',           title:'Final drawings for the residence',                       date:'2020',           place:null,                        src:'Wikibase Q234', audited:true, note:TL_NOTE },
+      { y:2024,           track:'house',     archive:true, short:'Ivan Hunter survey',    title:'Ivan Hunter photographic survey',                        date:'2024',           place:null,                        src:'IHC',       note:TL_NOTE }
+    ];
+
+    const TL_NS = "http://www.w3.org/2000/svg";
+    function tlNode(tag, attrs){
+      const n = document.createElementNS(TL_NS, tag);
+      if (attrs) for (const k in attrs) n.setAttribute(k, attrs[k]);
+      return n;
+    }
+    let _tlMeasure;
+    function tlTextW(txt, weight, size, fam){
+      if (!_tlMeasure) _tlMeasure = document.createElement("canvas").getContext("2d");
+      _tlMeasure.font = weight + " " + size + 'px ' + fam;
+      return _tlMeasure.measureText(txt).width;
+    }
+    const TL_SANS = '"Inter Tight",sans-serif', TL_MONO = '"JetBrains Mono",monospace';
+    function tlColor(e){ return TL_COLORS[e.track === "house" ? "house" : e.thread]; }
+    function tlSrcLink(e){
+      if (e.wd) return { label:"Wikidata · " + e.wd, href:"https://www.wikidata.org/wiki/" + e.wd };
+      const s = e.src || "";
+      if (/^HH-[A-Z]+-\d+$/.test(s)) return { label:s, href:"browse.html?id=" + encodeURIComponent(s) };
+      const wb = s.match(/Q(\d+)/);
+      if (/Wikibase/i.test(s) && wb) return { label:s, href:"https://hunterhouse.wikibase.cloud/wiki/Item:Q" + wb[1] };
+      return { label:s || "—", href:null };
+    }
+
+    // Single-pass lane packing. items: [{x0,x1,...}] sorted by centre; each is
+    // assigned the lowest lane whose existing spans don't overlap its extent.
+    function tlPackLanes(items){
+      items.sort((a,b) => (a.x0 + a.x1) - (b.x0 + b.x1));
+      const lanes = [];   // lanes[L] = array of [x0,x1] already placed
+      const GAP = 8;      // min horizontal breathing room between neighbours
+      for (const it of items){
+        const a = it.x0 - GAP, b = it.x1 + GAP;
+        let L = 0;
+        for (; L < lanes.length; L++){
+          if (lanes[L].every(s => b < s[0] || a > s[1])) break;
+        }
+        if (L === lanes.length) lanes.push([]);
+        lanes[L].push([a, b]);
+        it.lane = L;
+      }
+      return lanes.length;
+    }
+
+    let _tlBuilt = false, _tlResizeT = null;
+    function buildTimeline(){
+      const stage = document.getElementById("tl-stage");
+      if (!stage) return;
+      const H  = stage.clientHeight;
+      const vw = stage.clientWidth;
+      if (!H || !vw) return;     // pane not laid out yet
+      stage.innerHTML = "";
+
+      // ── Horizontal "spread" scale: width-per-year ∝ event density ───────
+      const Y0 = 1928, Y1 = 2026, PADL = 122, PADR = 90, BASE = 15, SPREAD = 12;
+      const density = {};
+      for (let y = Y0; y <= Y1; y++) density[y] = 0;
+      for (const e of TL_EVENTS){
+        const b = e.y2 || e.y;
+        for (let y = e.y; y <= b; y++) if (density[y] != null) density[y]++;
+      }
+      const cum = {}; let acc = PADL;
+      for (let y = Y0; y <= Y1; y++){ cum[y] = acc; acc += BASE + density[y] * SPREAD; }
+      cum[Y1 + 1] = acc;
+      // Scale the content band up so the canvas is at least ~2.05× the viewport.
+      let scale = 1;
+      const rawSpan = acc - PADL;
+      if (PADL + rawSpan + PADR < vw * 2.05) scale = (vw * 2.05 - PADL - PADR) / rawSpan;
+      const xOf = (yr) => {
+        const f = Math.max(Y0, Math.min(Y1, Math.floor(yr))), fr = yr - f;
+        const x0 = cum[f], x1 = cum[f + 1];
+        return PADL + ((x0 - PADL) + (x1 - x0) * fr) * scale;
+      };
+      const contentW = xOf(Y1 + 1) + PADR;
+
+      const cy     = Math.round(H / 2);
+      const GUT    = 21;                       // half the gutter between spines
+      const lifeY  = cy - GUT, houseY = cy + GUT;
+
+      const svg = tlNode("svg", { width:contentW, height:H, viewBox:"0 0 " + contentW + " " + H });
+
+      // ── Layer 1: decade gridlines ───────────────────────────────────────
+      const gGrid = tlNode("g"); svg.appendChild(gGrid);
+      const decades = [];
+      for (let d = 1930; d <= 2020; d += 10) decades.push(d);
+      decades.push(2023);
+      for (const d of decades){
+        const x = xOf(d);
+        gGrid.appendChild(tlNode("line", { x1:x, y1:30, x2:x, y2:H - 30, stroke:TL_RULE, "stroke-width":1 }));
+      }
+      // decade labels live IN the gutter on bg "pills" so the line reads through
+      const gPill = tlNode("g"); svg.appendChild(gPill);
+      for (const d of decades){
+        const x = xOf(d), lab = String(d), w = tlTextW(lab, 400, 9, TL_MONO) + 8;
+        gPill.appendChild(tlNode("rect", { x:x - w / 2, y:cy - 8, width:w, height:16, fill:TL_BG }));
+        const t = tlNode("text", { x:x, y:cy + 3.2, "text-anchor":"middle",
+          "font-family":TL_MONO, "font-size":9, "letter-spacing":"0.04em", fill:TL_HINT });
+        t.textContent = lab; gPill.appendChild(t);
+      }
+
+      // ── Layer 2: build seam (1970–1973) ─────────────────────────────────
+      const sx0 = xOf(1970), sx1 = xOf(1973);
+      svg.appendChild(tlNode("rect", { x:sx0, y:14, width:Math.max(2, sx1 - sx0), height:H - 28, fill:TL_GOLD, "fill-opacity":0.07 }));
+      svg.appendChild(tlNode("line", { x1:sx0, y1:14, x2:sx0, y2:H - 14, stroke:TL_GOLD, "stroke-opacity":0.3, "stroke-width":1 }));
+      svg.appendChild(tlNode("line", { x1:sx1, y1:14, x2:sx1, y2:H - 14, stroke:TL_GOLD, "stroke-opacity":0.3, "stroke-width":1 }));
+      const seamFlag = tlNode("text", { x:(sx0 + sx1) / 2, y:26, "text-anchor":"middle",
+        "font-family":TL_MONO, "font-size":8, "letter-spacing":"0.14em", fill:TL_GOLD });
+      seamFlag.textContent = "⌂ BUILT";
+      svg.appendChild(seamFlag);
+
+      // ── Layer 3: spines + track captions ────────────────────────────────
+      svg.appendChild(tlNode("line", { x1:PADL - 14, y1:lifeY,  x2:contentW - 20, y2:lifeY,  stroke:"rgba(240,237,230,0.34)", "stroke-width":1.5 }));
+      svg.appendChild(tlNode("line", { x1:PADL - 14, y1:houseY, x2:contentW - 20, y2:houseY, stroke:"rgba(201,164,78,0.5)",   "stroke-width":1.5 }));
+      const cap = (x, y, l1, l2, c1) => {
+        const t1 = tlNode("text", { x:x, y:y, "font-family":TL_MONO, "font-size":9, "letter-spacing":"0.16em", fill:c1, "font-weight":500 });
+        t1.textContent = l1; svg.appendChild(t1);
+        const t2 = tlNode("text", { x:x, y:y + 13, "font-family":TL_MONO, "font-size":8, "letter-spacing":"0.04em", fill:TL_MUTED });
+        t2.textContent = l2; svg.appendChild(t2);
+      };
+      cap(14, lifeY - 6,  "RIC HUNTER",   "the life · 1930–2023", TL_INK);
+      cap(14, houseY - 6, "HUNTER HOUSE", "203 Goward Rd",        TL_GOLD);
+
+      // Layers built after marks so labels sit on top.
+      const gSpan = tlNode("g"); svg.appendChild(gSpan);   // capsules (on spine)
+      const gMark = tlNode("g"); svg.appendChild(gMark);   // dots / diamonds
+      const gStem = tlNode("g"); svg.appendChild(gStem);   // connector stems
+      const gCard = tlNode("g"); svg.appendChild(gCard);   // cards + light labels
+
+      const reg = [];   // per-event refs for hover highlight
+      // ── Capsules first (so dots/labels overlay) ─────────────────────────
+      for (const e of TL_EVENTS){
+        if (e.y2 == null) continue;
+        const c = tlColor(e), spineY = e.track === "house" ? houseY : lifeY;
+        const x = xOf(e.y), w = Math.max(7, xOf(e.y2) - x);
+        const op = (e.archive || e.arch) ? 0.16 : (e.key ? 0.4 : 0.28);
+        const cap = tlNode("rect", { x:x, y:spineY - 6.5, width:w, height:13, rx:6.5,
+          fill:c, "fill-opacity":op, stroke:c, "stroke-opacity":0.5, "stroke-width":1, cursor:"pointer" });
+        gSpan.appendChild(cap);
+        tlWire(cap, e, c);
+      }
+
+      // ── Build the labelled-item set (cards + light span-labels) ─────────
+      const lifeItems = [], houseItems = [];
+      for (const e of TL_EVENTS){
+        const isSpan = e.y2 != null, isKey = !!e.key;
+        // minor single-year point → no persistent label (dot only)
+        if (!isSpan && !isKey) continue;
+        const card = isKey;                       // cards for key; light labels for non-key spans
+        const padX = card ? 9 : 1;
+        const wYear  = tlTextW(e.date || String(e.y), 500, 9, TL_MONO);
+        const wTitle = tlTextW(e.short, card ? 500 : 400, 11, TL_SANS);
+        const w = Math.max(wYear, wTitle) + padX * 2;
+        // anchor x: point-cards centre on the dot; spans centre on their midpoint
+        const ax = isSpan ? (xOf(e.y) + xOf(e.y2)) / 2 : xOf(e.y);
+        const it = { e, card, w, ax, x0:ax - w / 2, x1:ax + w / 2, isSpan };
+        (e.track === "house" ? houseItems : lifeItems).push(it);
+      }
+      tlPackLanes(lifeItems);
+      tlPackLanes(houseItems);
+
+      const LANE = 34, GAPSPINE = 15, CARD_H = 31, LABEL_H = 24;
+      function placeLabel(it, up){
+        const e = it.e, c = tlColor(e);
+        const h = it.card ? CARD_H : LABEL_H;
+        const spineY = up ? lifeY : houseY;
+        // bottom (up) or top (down) of the slot for this lane
+        const slotEdge = up ? (spineY - GAPSPINE - it.lane * LANE)
+                            : (spineY + GAPSPINE + it.lane * LANE);
+        const topY = up ? (slotEdge - h) : slotEdge;
+        const x = it.x0;
+        const g = tlNode("g", { cursor:"pointer" });
+        let plate = null;
+        if (it.card){
+          plate = tlNode("rect", { x:x, y:topY, width:it.w, height:h, rx:3,
+            fill:TL_PLATE, stroke:c, "stroke-width":1, "stroke-opacity":0.85 });
+          g.appendChild(plate);
+        }
+        const tx = it.card ? (x + it.w / 2) : (it.x0 + it.w / 2);
+        const yearY  = topY + (it.card ? 13 : 10);
+        const titleY = topY + (it.card ? 25 : 21);
+        const yt = tlNode("text", { x:tx, y:yearY, "text-anchor":"middle",
+          "font-family":TL_MONO, "font-size":9, "letter-spacing":"0.04em", fill:c, "font-weight":500 });
+        yt.textContent = e.date || String(e.y); g.appendChild(yt);
+        const tt = tlNode("text", { x:tx, y:titleY, "text-anchor":"middle",
+          "font-family":TL_SANS, "font-size":11, fill:it.card ? TL_INK : TL_TITLE_Q, "font-weight":it.card ? 500 : 400 });
+        tt.textContent = e.short; g.appendChild(tt);
+        gCard.appendChild(g);
+
+        // connector stem from spine to the card/label edge
+        const stemX = Math.max(it.x0 + 6, Math.min(it.ax, it.x1 - 6));
+        const stemTop = up ? (topY + h) : spineY;
+        const stemBot = up ? spineY : topY;
+        gStem.appendChild(tlNode("line", { x1:stemX, y1:stemTop, x2:stemX, y2:stemBot,
+          stroke:c, "stroke-opacity":0.45, "stroke-width":1 }));
+
+        tlWire(g, e, c, plate, tt);
+      }
+      lifeItems.forEach(it => placeLabel(it, true));
+      houseItems.forEach(it => placeLabel(it, false));
+
+      // ── Dots / diamonds on the spine (every event) ──────────────────────
+      for (const e of TL_EVENTS){
+        const c = tlColor(e), spineY = e.track === "house" ? houseY : lifeY, x = xOf(e.y);
+        let mark;
+        if (e.archive || e.arch){
+          // hollow diamond — "catalogue-derived, date to confirm"
+          const s = e.key ? 5.5 : 4.5;
+          mark = tlNode("rect", { x:x - s, y:spineY - s, width:s * 2, height:s * 2,
+            transform:"rotate(45 " + x + " " + spineY + ")",
+            fill:TL_BG, stroke:c, "stroke-width":1.5, cursor:"pointer" });
+        } else {
+          const r = e.key ? 5 : 4;
+          mark = tlNode("circle", { cx:x, cy:spineY, r:r, fill:c, stroke:TL_BG, "stroke-width":2, cursor:"pointer" });
+        }
+        gMark.appendChild(mark);
+        // attach to the same registry entry as the card (if any)
+        const entry = reg.find(z => z.e === e);
+        if (entry) entry.dot = mark; else reg.push({ e, dot:mark, plate:null, title:null });
+        tlWire(mark, e, c);
+      }
+
+      // bind hover/click highlight across all elements of an event
+      function tlWire(el, e, c, plate, titleEl){
+        let entry = reg.find(z => z.e === e);
+        if (!entry){ entry = { e, dot:null, plate:null, title:null }; reg.push(entry); }
+        if (plate)   entry.plate = plate;
+        if (titleEl) entry.title = titleEl;
+        el.addEventListener("mouseenter", ev => { tlHighlight(e, true); tlShowTip(e, c, ev); });
+        el.addEventListener("mousemove", ev => tlMoveTip(ev));
+        el.addEventListener("mouseleave", () => { if (!el.dataset.tlActive) tlHighlight(e, false); tlHideTip(); });
+        el.addEventListener("click", ev => { ev.stopPropagation(); tlShowPop(e, c, ev); });
+      }
+      stage.appendChild(svg);
+      _tlState.reg = reg;
+
+      // ── Footer legend ───────────────────────────────────────────────────
+      const legend = document.getElementById("tl-legend");
+      if (legend) legend.innerHTML =
+        '<span class="tl-leg"><svg width="11" height="11"><circle cx="5.5" cy="5.5" r="3.5" fill="#9a958b"/></svg>audited fact</span>' +
+        '<span class="tl-leg"><svg width="11" height="11"><rect x="2.2" y="2.2" width="6.6" height="6.6" transform="rotate(45 5.5 5.5)" fill="#242220" stroke="#9a958b" stroke-width="1.4"/></svg>catalogue-derived · dates to confirm</span>';
+
+      _tlBuilt = true;
+    }
+
+    // ── Highlight (hover / active) ────────────────────────────────────────
+    const _tlState = { reg:[], activeEl:null, activeEvent:null };
+    function tlHighlight(e, on){
+      const entry = (_tlState.reg || []).find(z => z.e === e);
+      if (!entry) return;
+      const c = tlColor(e);
+      if (entry.dot){
+        if (entry.dot.tagName === "circle") entry.dot.setAttribute("r", on ? (e.key ? 6.5 : 5.5) : (e.key ? 5 : 4));
+      }
+      if (entry.plate) entry.plate.setAttribute("fill", on ? "#3a352f" : TL_PLATE);
+      if (entry.title) entry.title.setAttribute("fill", on ? "#ffffff" : TL_INK);
+    }
+
+    // ── Tooltip ───────────────────────────────────────────────────────────
+    function tlShowTip(e, c, ev){
+      const tip = document.getElementById("tl-tip");
+      const thread = e.track === "house" ? "House" : (TL_THREAD_LABEL[e.thread] || "");
+      tip.innerHTML = '<span class="tl-tip-thread" style="color:' + c + '">' +
+        thread + "</span>" + escapeHTML(e.date || String(e.y)) + "\n" + escapeHTML(e.title);
+      tip.style.display = "block";
+      tlMoveTip(ev);
+    }
+    function tlMoveTip(ev){
+      const tip = document.getElementById("tl-tip");
+      if (tip.style.display !== "block") return;
+      const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+      let x = ev.clientX + pad, y = ev.clientY + pad;
+      if (x + w > innerWidth - 8)  x = ev.clientX - w - pad;
+      if (y + h > innerHeight - 8) y = ev.clientY - h - pad;
+      tip.style.left = x + "px"; tip.style.top = y + "px";
+    }
+    function tlHideTip(){ const t = document.getElementById("tl-tip"); if (t) t.style.display = "none"; }
+
+    // ── Popover ───────────────────────────────────────────────────────────
+    function tlShowPop(e, c, ev){
+      tlHideTip();
+      tlHidePop();               // fully reset any previously-active mark first
+      const pop = document.getElementById("tl-pop");
+      const thread = e.track === "house" ? "House" : (TL_THREAD_LABEL[e.thread] || "");
+      const link = tlSrcLink(e);
+      const dateLine = [e.date || String(e.y), e.place].filter(Boolean).join(" · ");
+      const srcHTML = link.href
+        ? '<a href="' + link.href + '" target="_blank" rel="noopener">' + escapeHTML(link.label) + " ↗</a>"
+        : '<span>' + escapeHTML(link.label) + "</span>";
+      pop.innerHTML =
+        '<button class="tl-pop-close" aria-label="Close">×</button>' +
+        '<p class="tl-pop-thread" style="color:' + c + '">' + thread + (e.audited ? " · audited" : (e.confirm ? " · date to confirm" : "")) + "</p>" +
+        '<p class="tl-pop-date">' + escapeHTML(dateLine) + "</p>" +
+        '<p class="tl-pop-title">' + escapeHTML(e.title) + "</p>" +
+        '<p class="tl-pop-note">' + escapeHTML(e.note || TL_NOTE) + "</p>" +
+        '<div class="tl-pop-src"><span>Source · ' + srcHTML + "</span>" +
+          (e.key ? '<span class="tl-pop-key">key event</span>' : "") + "</div>";
+      pop.querySelector(".tl-pop-close").addEventListener("click", tlHidePop);
+      pop.style.display = "block";
+      // position near cursor, clamped
+      const w = pop.offsetWidth, h = pop.offsetHeight, pad = 12;
+      let x = ev.clientX + pad, y = ev.clientY + pad;
+      if (x + w > innerWidth - 8)  x = Math.max(8, ev.clientX - w - pad);
+      if (y + h > innerHeight - 8) y = Math.max(8, innerHeight - h - 8);
+      pop.style.left = x + "px"; pop.style.top = y + "px";
+      // amber active outline on the clicked mark
+      const tgt = ev.currentTarget || ev.target;
+      if (tgt){ tgt.dataset.tlActive = "1"; tgt.setAttribute("stroke", TL_AMBER);
+        if (tgt.tagName === "circle") tgt.setAttribute("stroke-width", "2.5");
+        _tlState.activeEl = tgt; _tlState.activeEvent = e; }
+    }
+    function tlHidePop(){
+      const pop = document.getElementById("tl-pop");
+      if (pop) pop.style.display = "none";
+      if (_tlState.activeEl){
+        const el = _tlState.activeEl; delete el.dataset.tlActive;
+        if (el.tagName === "circle"){ el.setAttribute("stroke", TL_BG); el.setAttribute("stroke-width", "2"); }
+        _tlState.activeEl = null;
+      }
+      if (_tlState.activeEvent){ tlHighlight(_tlState.activeEvent, false); _tlState.activeEvent = null; }
+    }
+
+    // ── Open / close / esc / resize ───────────────────────────────────────
+    function tlOpen(){
+      document.body.classList.add("tl-open");
+      const cap = document.getElementById("tl-caption");
+      if (cap) cap.textContent = "1930 — 2023 · " + TL_EVENTS.length + " events";
+      requestAnimationFrame(buildTimeline);
+      const st = document.getElementById("tl-stage"); if (st) st.scrollLeft = 0;
+    }
+    function tlClose(){ tlHidePop(); tlHideTip(); document.body.classList.remove("tl-open"); }
+    function tlOnEsc(){
+      if (!document.body.classList.contains("tl-open")) return false;
+      const pop = document.getElementById("tl-pop");
+      if (pop && pop.style.display === "block"){ tlHidePop(); return true; }
+      tlClose(); return true;
+    }
+    // outside-click on the stage closes the popover (marks stopPropagation)
+    document.getElementById("tl-stage").addEventListener("mousedown", tlHidePop);
+    window.addEventListener("resize", () => {
+      if (!document.body.classList.contains("tl-open")) return;
+      clearTimeout(_tlResizeT);
+      _tlResizeT = setTimeout(buildTimeline, 160);
+    });
+
     document.addEventListener("keydown", e => {
       const inInput = e.target.matches("input, select, textarea");
       if (e.key === "/" && !inInput) { e.preventDefault(); openSearch(); return; }
       if (e.key === "Escape" && inInput) { e.target.blur(); return; }
       if (e.key === "Escape") {
+        if (tlOnEsc()) return;   // timeline popover, then the timeline pane
         if (state.bulkSel.size) { clearBulkSel(); return; }
         closeAllDropdowns(); closeAboutPane(); closeInfoPane(); closeRnHelpPane(); closePdf(); closeCuratorPane();
         const lp = document.getElementById("panel-left"), rp = document.getElementById("panel-right");
@@ -7559,6 +8109,8 @@ WHERE {
       }, 280);
     });
     document.getElementById("rec-info").addEventListener("click", toggleInfoPane);
+    document.getElementById("timeline-toggle").addEventListener("click", tlOpen);
+    document.getElementById("timeline-close").addEventListener("click", tlClose);
     // Aa text-size toggle. Three-state cycle: "" → "lg" → "xl" → "". The
     // pre-init script in <head> already applied the right class at first
     // paint (reading new "hhf_text_size" with fallback to legacy "hhf_text_lg"
