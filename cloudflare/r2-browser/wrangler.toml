@@ -2,10 +2,17 @@ name = "hhf-r2-browser"
 main = "src/worker.js"
 compatibility_date = "2026-05-01"
 
-# Bind the existing archive bucket. "BUCKET" is the name the Worker code uses
-# (env.BUCKET.list). bucket_name is the real R2 bucket. The binding grants this
-# Worker read+write to the bucket at the platform level, but the code only ever
-# calls .list() — see the no-writes note at the top of src/worker.js.
-[[r2_buckets]]
-binding = "BUCKET"
-bucket_name = "hunter-house-archive"
+# Deployed in Brandon's own Cloudflare account (has Workers rights). The bucket
+# lives in the Foundation account, reached cross-account over the R2 S3 API —
+# see src/worker.js. No native R2 binding (those are same-account only).
+account_id = "628a738b1d9d965f53070f1729bcf596"
+
+# Non-secret config. R2_ACCOUNT_ID is the Foundation account that owns the
+# bucket (its R2 S3 endpoint is <id>.r2.cloudflarestorage.com).
+[vars]
+R2_ACCOUNT_ID = "3f5df2ae1dd448bc55f9009a92e91f12"
+R2_BUCKET = "hunter-house-archive"
+
+# Secrets (NOT stored here) — set once after deploy with a READ-ONLY R2 token:
+#   npx wrangler secret put R2_ACCESS_KEY_ID
+#   npx wrangler secret put R2_SECRET_ACCESS_KEY
