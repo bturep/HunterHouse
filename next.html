@@ -2532,8 +2532,14 @@
   }
   .files-row.folder{cursor:pointer}
   .files-row.folder:hover{background:var(--f-row)}
-  .files-row .f-ico{flex-shrink:0;width:15px;display:flex;color:var(--f-muted)}
+  .files-row .f-ico{flex-shrink:0;width:38px;display:flex;align-items:center;justify-content:center;color:var(--f-muted)}
   .files-row.folder .f-ico{color:var(--f-accent)}
+  /* Inline thumbnail for image files (lazy-loaded from the thumbs/ tier;
+     falls back to the generic file icon on 404 via the JS error handler). */
+  .files-row .f-ico img.f-thumb{
+    width:34px;height:34px;object-fit:cover;border-radius:2px;
+    background:rgba(240,237,230,0.05);display:block;
+  }
   .files-row .f-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .files-row .f-size{flex-shrink:0;color:var(--f-hint);font-size:10px;letter-spacing:0.04em;min-width:64px;text-align:right}
   .files-row .f-dl{
@@ -7785,6 +7791,23 @@ WHERE {
     }
     const FB_FOLDER_ICO = '<svg width="14" height="13" viewBox="0 0 14 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M1 3.2V11h12V4.5H6.5L5 3.2H1z"/></svg>';
     const FB_FILE_ICO   = '<svg width="12" height="13" viewBox="0 0 12 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"><path d="M2 1h5l3 3v8H2z"/><path d="M7 1v3h3"/></svg>';
+    // Derive a lightweight thumbnail URL for image files. Web images (jpg/png/…)
+    // and TIF masters map to the thumbs/ tier (folder + _thumb.jpg suffix) per
+    // the R2 naming convention; if that derived URL 404s, the <img> error handler
+    // restores the generic icon. Non-images (pdf/json/xlsx/…) return null.
+    function fbThumb(key, name){
+      const ext = (name.toLowerCase().split(".").pop() || "");
+      const web = ["jpg","jpeg","png","gif","webp","avif"].includes(ext);
+      const tif = ["tif","tiff"].includes(ext);
+      if (!web && !tif) return null;
+      let t = key
+        .replace(/\/(masters|previews|large)\//, "/thumbs/")
+        .replace(/_(prev|large)\.(jpe?g|png)$/i, "_thumb.jpg")
+        .replace(/\.(tiff?)$/i, "_thumb.jpg");
+      // already a web image in no convention we recognise → use itself downscaled
+      if (t === key && !web) return null;
+      return R2_PUBLIC_BASE + "/" + t.split("/").map(encodeURIComponent).join("/");
+    }
     function fbRenderCrumbs(){
       const bar = document.getElementById("files-crumbs");
       const parts = _fb.prefix ? _fb.prefix.replace(/\/$/, "").split("/") : [];
@@ -7819,6 +7842,15 @@ WHERE {
           '<span class="f-name" title="' + escapeHTML(f.name) + '">' + escapeHTML(f.name) + '</span>' +
           '<span class="f-size">' + fbFmtSize(f.size) + '</span>' +
           '<a class="f-dl" href="' + url + '" target="_blank" rel="noopener" download>↓ get</a>';
+        const thumb = fbThumb(f.key, f.name);
+        if (thumb){
+          const ico = row.querySelector(".f-ico");
+          const img = document.createElement("img");
+          img.className = "f-thumb"; img.loading = "lazy"; img.alt = "";
+          img.addEventListener("error", () => { ico.innerHTML = FB_FILE_ICO; }, { once: true });
+          img.src = thumb;
+          ico.innerHTML = ""; ico.appendChild(img);
+        }
         frag.appendChild(row);
       }
       body.appendChild(frag);
