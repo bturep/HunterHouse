@@ -2895,7 +2895,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08-test.23";
+  const VERSION      = "v1.08-test.24";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7647,6 +7647,11 @@ WHERE {
       if (pop && pop.style.display === "block"){ tlHidePop(); return true; }
       tlClose(); return true;
     }
+    // Timeline open/close buttons. Wired HERE, inside wireControls(), so they
+    // share scope with the tl* functions declared above — main()'s setup block
+    // cannot see them (that scope split caused a boot-aborting ReferenceError).
+    document.getElementById("timeline-toggle").addEventListener("click", tlOpen);
+    document.getElementById("timeline-close").addEventListener("click", tlClose);
     // outside-click on the stage closes the popover (marks stopPropagation)
     document.getElementById("tl-stage").addEventListener("mousedown", tlHidePop);
     window.addEventListener("resize", () => {
@@ -8043,8 +8048,6 @@ WHERE {
       }, 280);
     });
     document.getElementById("rec-info").addEventListener("click", toggleInfoPane);
-    document.getElementById("timeline-toggle").addEventListener("click", tlOpen);
-    document.getElementById("timeline-close").addEventListener("click", tlClose);
     // Aa text-size toggle. Three-state cycle: "" → "lg" → "xl" → "". The
     // pre-init script in <head> already applied the right class at first
     // paint (reading new "hhf_text_size" with fallback to legacy "hhf_text_lg"
