@@ -62,6 +62,25 @@ curl -s "https://hhf-r2-browser.<subdomain>.workers.dev/list?prefix=" \
 # → JSON with the 7 top-level collection folders
 ```
 
+## Hidden folders (researcher-facing filtering)
+
+The browser is researcher-facing, so website assets and internal
+preservation/plumbing folders are filtered out **server-side** (see
+`isHiddenKey` in `src/worker.js`). Hidden folders are dropped from every
+listing AND can't be reached by hitting `/list?prefix=…` directly — the guard
+returns an empty result for any hidden prefix. The rules:
+
+- `HIDDEN_PREFIXES` — whole subtrees hidden from the bucket root:
+  `web/` (now deleted), `_wikibase/`, `catalogue/`.
+- `HIDDEN_SEGMENTS` — folder names hidden at any depth: `metadata`, `intake`.
+- Any path segment starting with `_` is treated as internal — covers
+  `_wikibase` and the `_pre-deskew_…` master-backup folders, plus any future
+  underscore-prefixed working folder, automatically.
+
+Researchers therefore see only the four archive collections and their image
+tiers (`masters`, `large`, `previews`, `thumbs`, `pdf`). To hide/reveal
+something, edit those two lists and `wrangler deploy`.
+
 ## Config
 
 - `wrangler.toml` `[vars]`: `R2_ACCOUNT_ID` (Foundation acct that owns the
