@@ -41,6 +41,26 @@ function corsHeaders(origin) {
   };
 }
 
+// ── Folders researchers must not see ────────────────────────────────────────
+// The browser is researcher-facing; these are website assets and internal
+// preservation/plumbing folders, not archive content. Hiding happens HERE
+// (server side, not just in the client) so they are filtered out of every
+// listing AND cannot be reached by hitting /list?prefix=… directly.
+//
+//   HIDDEN_PREFIXES — whole subtrees hidden from the bucket root
+//   HIDDEN_SEGMENTS — folder names hidden wherever they appear (any depth)
+//   plus: any path segment starting with "_" is treated as internal
+//         (covers _wikibase and the _pre-deskew_… master-backup folders, and
+//          any future underscore-prefixed working folder, for free).
+const HIDDEN_PREFIXES = ["web/", "_wikibase/", "catalogue/"];
+const HIDDEN_SEGMENTS = new Set(["metadata", "intake"]);
+
+function isHiddenKey(key) {
+  if (HIDDEN_PREFIXES.some((p) => key === p || key.startsWith(p))) return true;
+  return key.split("/").filter(Boolean)
+    .some((seg) => HIDDEN_SEGMENTS.has(seg) || seg.startsWith("_"));
+}
+
 // ── AWS SigV4 (minimal, GET-only, empty body) via Web Crypto ────────────────
 const enc = new TextEncoder();
 function hex(buf) {
@@ -152,6 +172,14 @@ export default {
     const prefix = url.searchParams.get("prefix") || "";
     const cursor = url.searchParams.get("cursor") || "";
 
+    // Refuse to drill into a hidden folder even if asked directly.
+    if (prefix && isHiddenKey(prefix)) {
+      return new Response(
+        JSON.stringify({ prefix, folders: [], files: [], truncated: false, cursor: null }),
+        { headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=60", ...cors } }
+      );
+    }
+
     let res, xml;
     try {
       res = await signedR2List(env, prefix, cursor);
@@ -166,6 +194,9 @@ export default {
     }
 
     const parsed = parseListXml(xml, prefix);
+    // Drop hidden folders/files from the listing the researcher receives.
+    parsed.folders = parsed.folders.filter((f) => !isHiddenKey(f.key));
+    parsed.files = parsed.files.filter((f) => !isHiddenKey(f.key));
     return new Response(JSON.stringify({ prefix, ...parsed }), {
       headers: {
         "Content-Type": "application/json",
