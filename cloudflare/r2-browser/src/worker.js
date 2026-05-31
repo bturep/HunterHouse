@@ -49,13 +49,20 @@ function corsHeaders(origin) {
 //
 //   HIDDEN_PREFIXES — whole subtrees hidden from the bucket root
 //   HIDDEN_SEGMENTS — folder names hidden wherever they appear (any depth)
+//   HIDDEN_FILES    — individual object keys hidden (exact match)
 //   plus: any path segment starting with "_" is treated as internal
 //         (covers _wikibase and the _pre-deskew_… master-backup folders, and
 //          any future underscore-prefixed working folder, for free).
-const HIDDEN_PREFIXES = ["web/", "_wikibase/", "catalogue/"];
+//
+// NOTE on catalogue/: the folder is intentionally VISIBLE because catalogue.csv
+// is the public, human-readable finding aid. Only catalogue.json (raw SPARQL
+// plumbing the app uses as an offline fallback) is hidden, via HIDDEN_FILES.
+const HIDDEN_PREFIXES = ["web/", "_wikibase/"];
 const HIDDEN_SEGMENTS = new Set(["metadata", "intake"]);
+const HIDDEN_FILES = new Set(["catalogue/catalogue.json"]);
 
 function isHiddenKey(key) {
+  if (HIDDEN_FILES.has(key)) return true;
   if (HIDDEN_PREFIXES.some((p) => key === p || key.startsWith(p))) return true;
   return key.split("/").filter(Boolean)
     .some((seg) => HIDDEN_SEGMENTS.has(seg) || seg.startsWith("_"));
