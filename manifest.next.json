@@ -1,10 +1,10 @@
 {
   "name": "Hunter House Archive — Next",
   "short_name": "HH Next",
-  "id": "/HunterHouse/next.html",
+  "id": "./next.html",
   "description": "Staging build of the Hunter House Archive",
-  "start_url": "/HunterHouse/next.html",
-  "scope": "/HunterHouse/",
+  "start_url": "./next.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#1a1816",
