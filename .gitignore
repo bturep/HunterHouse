@@ -1,3 +1,10 @@
+# Working-memory + handoff docs — moved to the PRIVATE repo
+# bturep/HunterHouse-private (2026-06-02) and symlinked back into this dir so
+# CLAUDE.md still loads at session start. Never publish these in the public repo.
+CLAUDE.md
+HANDOFF.md
+CLAUDE_archive_*.md
+
 # macOS / editor junk
 .DS_Store
 
