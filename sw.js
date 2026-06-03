@@ -16,21 +16,21 @@
 // next activation. Do this any time the shell layout, asset list, or the
 // caching policy itself changes.
 
-const CACHE_NAME = 'hh-shell-v3';
+const CACHE_NAME = 'hh-shell-v4';
 
 const PRECACHE = [
-  '/HunterHouse/',
-  '/HunterHouse/browse.html',
-  '/HunterHouse/next.html',
-  '/HunterHouse/index.html',
-  '/HunterHouse/manifest.json',
-  '/HunterHouse/manifest.next.json',
-  '/HunterHouse/assets/light.css',
-  '/HunterHouse/assets/dark.css',
-  '/HunterHouse/assets/hunter-mark.png',
-  '/HunterHouse/assets/icon-180.png',
-  '/HunterHouse/assets/icon-192.png',
-  '/HunterHouse/assets/icon-512.png',
+  './',
+  './browse.html',
+  './next.html',
+  './index.html',
+  './manifest.json',
+  './manifest.next.json',
+  './assets/light.css',
+  './assets/dark.css',
+  './assets/hunter-mark.png',
+  './assets/icon-180.png',
+  './assets/icon-192.png',
+  './assets/icon-512.png',
 ];
 
 self.addEventListener('install', (event) => {

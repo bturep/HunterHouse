@@ -15,12 +15,12 @@
      (the admin edit-proxy at 127.0.0.1:8731). img-src adds the R2 host that
      Wikibase URLs point at. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://archive.hunterhousefoundation.com; connect-src 'self' https://hunterhouse.wikibase.cloud http://127.0.0.1:* http://localhost:*; frame-src 'self'; worker-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'">
-<link rel="manifest" href="/HunterHouse/manifest.json">
+<link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="HH Archive">
-<link rel="apple-touch-icon" href="/HunterHouse/assets/icon-180.png">
-<link rel="icon" type="image/png" href="/HunterHouse/assets/icon-192.png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="icon" type="image/png" href="assets/icon-192.png">
 <!-- Paint holdout: sets dark bg before render-blocking external CSS resolves -->
 <style>html{background:#1a1816}</style>
 <!-- Splash-mode pre-init: if this load will fire splash-mode (desktop), mark
@@ -2367,7 +2367,7 @@
 <script>
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.07.11";
+  const VERSION      = "v1.07.12";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7339,7 +7339,7 @@ WHERE {
   if (screen.orientation && screen.orientation.lock) {
     screen.orientation.lock('portrait').catch(() => {});
   }
-  if('serviceWorker' in navigator) navigator.serviceWorker.register('/HunterHouse/sw.js');
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
 
 </body>
