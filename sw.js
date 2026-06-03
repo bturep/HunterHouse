@@ -16,7 +16,7 @@
 // next activation. Do this any time the shell layout, asset list, or the
 // caching policy itself changes.
 
-const CACHE_NAME = 'hh-shell-v2';
+const CACHE_NAME = 'hh-shell-v3';
 
 const PRECACHE = [
   '/HunterHouse/',
