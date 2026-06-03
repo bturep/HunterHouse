@@ -89,6 +89,17 @@
     margin-top:12px;font-family:var(--mono);font-size:10px;
     letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);
   }
+  .status{
+    margin-top:30px;max-width:520px;
+    display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+    font-size:13px;line-height:1.5;letter-spacing:-0.005em;color:var(--muted);
+  }
+  .status .tag{
+    font-family:var(--mono);font-size:9.5px;letter-spacing:0.16em;text-transform:uppercase;
+    color:var(--amber);border:1px solid var(--amber);border-radius:1px;
+    padding:3px 8px;white-space:nowrap;flex-shrink:0;
+  }
+  .status code{font-family:var(--mono);font-size:12px;color:var(--soft)}
   .foot{
     display:flex;flex-wrap:wrap;gap:18px 40px;
     border-top:1px solid var(--rule);padding-top:18px;
@@ -169,6 +180,7 @@
       <p class="deck">Stewarding the residence and architectural archive of <b>Richard Morrow Hunter</b> (1930&ndash;2023) &mdash; an openly catalogued, queryable record of a life&rsquo;s practice.</p>
       <a class="enter" href="browse.html">Enter the archive <span class="ar">&rarr;</span></a>
       <span class="enter-sub">A research tool &middot; best on a desktop browser</span>
+      <p class="status"><span class="tag">Under construction</span> Site in active development; the public pages are still being authored. The live entry point is the archive &mdash; a <code>Wikibase</code> knowledge graph queried over <code>SPARQL</code>, with tiered image derivatives served from <code>Cloudflare&nbsp;R2</code>.</p>
     </div>
     <div class="foot">
       <div><div class="pr">Founding Steward</div><div class="nm">Floyd Marinescu</div></div>
