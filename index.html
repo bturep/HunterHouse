@@ -1,28 +1,156 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Hunter House Foundation Archive</title>
+<title>Hunter House Foundation</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#1a1816">
-<!-- PWA hookups kept here so installs originating at /HunterHouse/ still
-     wire up to the manifest. start_url in the manifest still points at
-     browse.html, so the installed PWA opens straight into the archive. -->
+<meta name="description" content="The Hunter House Foundation stewards the residence and architectural archive of architect Richard Morrow Hunter (1930–2023) at 203 Goward Road, Saanich, British Columbia — an openly catalogued, queryable archive. A work in progress.">
+
+<!-- Open Graph / social + crawler hints -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Hunter House Foundation">
+<meta property="og:title" content="Hunter House Foundation">
+<meta property="og:description" content="Stewarding the residence and architectural archive of Richard Morrow Hunter (1930–2023). An openly catalogued, queryable archive — a work in progress.">
+<meta property="og:image" content="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg">
+<meta property="og:url" content="https://bturep.github.io/HunterHouse/">
+<link rel="canonical" href="https://bturep.github.io/HunterHouse/">
+
 <link rel="manifest" href="/HunterHouse/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="HH Archive">
+<meta name="apple-mobile-web-app-title" content="Hunter House">
 <link rel="apple-touch-icon" href="/HunterHouse/assets/icon-180.png">
-<!-- Dark canvas before any other style resolves; the visitor never sees
-     white between landing here and browse.html's first paint. -->
-<style>html,body{background:#1a1816;margin:0;height:100%}</style>
-<link rel="canonical" href="browse.html">
-<!-- Immediate JS redirect (preserves any URL hash); meta-refresh is the
-     no-JS fallback. browse.html now acts as its own opener: on load it
-     collapses both panels and opens the HHFA about-pane as a soft splash. -->
-<script>window.location.replace('browse.html' + window.location.hash);</script>
-<meta http-equiv="refresh" content="0; url=browse.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/light.css">
+<link rel="stylesheet" href="assets/dark.css">
+<style>
+  /* Landing-only additions. Everything else borrows the shared editorial
+     kit from light.css (header) + dark.css (.page-body/.titleblock/.sec/
+     .plate/.people/.placeholder/.next-link). */
+
+  /* Hero plate spans the full content column rather than the 720px text
+     measure — it is the one full-width visual on the page. */
+  .hero-plate{margin:8px 0 96px}
+  .hero-plate img{
+    width:100%;height:auto;display:block;
+    border:1px solid var(--inv-rule);
+    box-shadow:0 18px 48px -22px rgba(0,0,0,0.7);
+  }
+  .hero-plate .pcap{
+    display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:baseline;
+    padding-top:14px;
+    font-family:var(--mono);font-size:11px;color:var(--inv-muted);letter-spacing:0.04em;
+  }
+  .hero-plate .pcap .id{color:var(--amber);font-weight:500}
+  .hero-plate .pcap .ti{font-family:var(--sans);font-size:13.5px;color:var(--inv-fg);letter-spacing:-0.005em}
+  .hero-plate .pcap .ti em{font-style:italic;color:var(--inv-muted)}
+  .hero-plate .pcap .yr{text-align:right;font-variant-numeric:tabular-nums}
+
+  /* Primary action — crossing the threshold from the site into the tool.
+     Cream fill on the ink body so it reads as the one call to action. */
+  .enter-cta{
+    display:inline-flex;align-items:baseline;gap:14px;margin-top:28px;
+    font-family:var(--sans);font-size:17px;letter-spacing:-0.008em;font-weight:500;
+    color:var(--inv-bg);background:var(--plate);text-decoration:none;
+    padding:13px 24px;border:1px solid var(--plate);border-radius:1px;
+    transition:background .15s ease,border-color .15s ease,color .15s ease;
+  }
+  .enter-cta:hover{background:var(--amber);border-color:var(--amber);color:var(--inv-bg)}
+  .enter-cta .ar{font-family:var(--mono);color:inherit}
+  .enter-sub{
+    display:block;margin-top:10px;font-family:var(--mono);font-size:10.5px;
+    color:var(--inv-muted);letter-spacing:0.06em;text-transform:uppercase;font-weight:400;
+  }
+
+  @media (max-width:760px){
+    .hero-plate{margin:4px 0 56px}
+    .hero-plate .pcap{grid-template-columns:1fr;gap:4px}
+    .hero-plate .pcap .yr{text-align:left}
+  }
+</style>
+<script>
+  (function(){
+    if(localStorage.getItem('hhf_theme')==='dark')document.documentElement.classList.add('dark');
+    document.addEventListener('DOMContentLoaded',function(){
+      var btn=document.getElementById('theme-toggle');
+      if(!btn)return;
+      btn.addEventListener('click',function(){
+        var dark=document.documentElement.classList.toggle('dark');
+        localStorage.setItem('hhf_theme',dark?'dark':'light');
+      });
+    });
+  })();
+</script>
 </head>
-<body></body>
+<body>
+
+<header class="site-top">
+  <div class="markid">
+    <span class="name">Hunter House <span class="dim">Foundation</span></span>
+  </div>
+  <nav class="site-nav">
+    <a href="richard-hunter.html">Hunter</a>
+    <a href="the-house.html">House</a>
+    <a href="archive.html">Archive</a>
+    <a href="about.html">About</a>
+  </nav>
+  <div class="site-topright"><button class="theme-btn" id="theme-toggle" title="Toggle dark mode">◑</button></div>
+</header>
+
+<main class="page-body">
+
+  <div class="titleblock">
+    <h1>Hunter House<br>Foundation</h1>
+    <p class="deck">An initiative dedicated to the stewardship of the residence and architectural archive of architect <b>Richard Morrow Hunter</b> (1930&ndash;2023). 203 Goward Road, Saanich, British Columbia.</p>
+  </div>
+
+  <figure class="hero-plate">
+    <img src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg"
+         alt="Coloured pencil study, Scheme II, for the Hunter Residence — Richard Hunter, 1985"
+         loading="eager" decoding="async">
+    <figcaption class="pcap">
+      <span class="id">HH-CAA-0018</span>
+      <span class="ti">Scheme&nbsp;II &mdash; coloured pencil studies</span>
+      <span class="yr">1985</span>
+    </figcaption>
+  </figure>
+
+  <div class="sec">
+    <div class="label first">Status</div>
+    <div class="c">
+      <div class="placeholder"><span class="lbl">Work in progress</span> This site is being assembled. The archive itself is live and growing; the surrounding pages &mdash; Hunter, the House, and the Foundation&rsquo;s mandate &mdash; are still being written.</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="label">The archive</div>
+    <div class="c">
+      <p class="lede">A structured catalogue of the drawings, photographs, correspondence, and related materials of Richard Hunter&rsquo;s practice.</p>
+      <p>Materials are drawn from six source collections and held on Wikibase &mdash; the open structured-data platform that underlies Wikidata &mdash; openly queryable through SPARQL and a JSON API. The browser is a working research tool: filter by collection, date, area, or project phase, read each item&rsquo;s record, and view high-resolution scans.</p>
+      <a class="enter-cta" href="browse.html">Enter the archive <span class="ar">&rarr;</span></a>
+      <span class="enter-sub">A separate research tool &middot; best on a desktop browser</span>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="label">Foundation</div>
+    <div class="c">
+      <div class="people">
+        <div class="p"><span class="role">Founding steward</span><div><div class="name">Floyd Marinescu</div><div class="bio">Established the Foundation with Olivia Jol on acquiring the Hunter Residence in 2023; directs long-range planning and stewardship of the property.</div></div></div>
+        <div class="p"><span class="role">Founding steward</span><div><div class="name">Olivia Jol</div><div class="bio">Established the Foundation with Floyd Marinescu in 2023; art historian by training, guiding the design and studio program.</div></div></div>
+        <div class="p"><span class="role">Project lead</span><div><div class="name">Brandon Poole</div><div class="bio">Architect and researcher; oversees the cataloguing program, the Wikibase archive, and this site. Based in Victoria.</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="next-link">
+    <div class="l">Read</div>
+    <a href="richard-hunter.html">Richard Hunter<span class="ar">&rarr;</span></a>
+  </div>
+
+</main>
+<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/HunterHouse/sw.js');</script>
+</body>
 </html>
