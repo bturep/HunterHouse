@@ -4,153 +4,191 @@
 <meta charset="utf-8">
 <title>Hunter House Foundation</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="The Hunter House Foundation stewards the residence and architectural archive of architect Richard Morrow Hunter (1930–2023) at 203 Goward Road, Saanich, British Columbia — an openly catalogued, queryable archive. A work in progress.">
+<meta name="description" content="The Hunter House Foundation stewards the residence and architectural archive of architect Richard Morrow Hunter (1930–2023) at 203 Goward Road, Saanich, British Columbia — an openly catalogued, queryable archive.">
+<meta name="theme-color" content="#1e1c1a">
 
 <!-- Open Graph / social + crawler hints -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Hunter House Foundation">
 <meta property="og:title" content="Hunter House Foundation">
-<meta property="og:description" content="Stewarding the residence and architectural archive of Richard Morrow Hunter (1930–2023). An openly catalogued, queryable archive — a work in progress.">
+<meta property="og:description" content="Stewarding the residence and architectural archive of Richard Morrow Hunter (1930–2023). An openly catalogued, queryable archive.">
 <meta property="og:image" content="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg">
 <meta property="og:url" content="https://bturep.github.io/HunterHouse/">
 <link rel="canonical" href="https://bturep.github.io/HunterHouse/">
 
-<link rel="manifest" href="/HunterHouse/manifest.json">
+<link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Hunter House">
-<link rel="apple-touch-icon" href="/HunterHouse/assets/icon-180.png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="icon" type="image/png" href="assets/icon-192.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/light.css">
-<link rel="stylesheet" href="assets/dark.css">
 <style>
-  /* Landing-only additions. Everything else borrows the shared editorial
-     kit from light.css (header) + dark.css (.page-body/.titleblock/.sec/
-     .plate/.people/.placeholder/.next-link). */
+  :root{
+    --bg:#1e1c1a; --fg:#f3f1ec;
+    --muted:rgba(243,241,236,0.55); --soft:rgba(243,241,236,0.85);
+    --rule:rgba(243,241,236,0.18); --rule-strong:rgba(243,241,236,0.40);
+    --amber:#e4a47e; --plate:#f0e9d8;
+    --sans:"Inter Tight",-apple-system,Helvetica,Arial,sans-serif;
+    --mono:"JetBrains Mono","SF Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:var(--sans);background:var(--bg);color:var(--fg);
+    -webkit-font-smoothing:antialiased;font-feature-settings:"ss01","cv11";
+    overflow:hidden;
+  }
+  .page{
+    min-height:100vh;display:grid;
+    grid-template-columns:minmax(0,1fr) 40%;
+  }
 
-  /* Hero plate spans the full content column rather than the 720px text
-     measure — it is the one full-width visual on the page. */
-  .hero-plate{margin:8px 0 96px}
-  .hero-plate img{
-    width:100%;height:auto;display:block;
-    border:1px solid var(--inv-rule);
-    box-shadow:0 18px 48px -22px rgba(0,0,0,0.7);
+  /* ── left: identity + threshold ── */
+  .left{
+    display:flex;flex-direction:column;
+    padding:48px 56px 44px;position:relative;
   }
-  .hero-plate .pcap{
-    display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:baseline;
-    padding-top:14px;
-    font-family:var(--mono);font-size:11px;color:var(--inv-muted);letter-spacing:0.04em;
+  .stamp{
+    display:flex;justify-content:space-between;align-items:baseline;gap:24px;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:0.2em;
+    text-transform:uppercase;color:var(--muted);
   }
-  .hero-plate .pcap .id{color:var(--amber);font-weight:500}
-  .hero-plate .pcap .ti{font-family:var(--sans);font-size:13.5px;color:var(--inv-fg);letter-spacing:-0.005em}
-  .hero-plate .pcap .ti em{font-style:italic;color:var(--inv-muted)}
-  .hero-plate .pcap .yr{text-align:right;font-variant-numeric:tabular-nums}
-
-  /* Primary action — crossing the threshold from the site into the tool.
-     Cream fill on the ink body so it reads as the one call to action. */
-  .enter-cta{
-    display:inline-flex;align-items:baseline;gap:14px;margin-top:28px;
-    font-family:var(--sans);font-size:17px;letter-spacing:-0.008em;font-weight:500;
-    color:var(--inv-bg);background:var(--plate);text-decoration:none;
-    padding:13px 24px;border:1px solid var(--plate);border-radius:1px;
-    transition:background .15s ease,border-color .15s ease,color .15s ease;
+  .stamp .dot{color:var(--amber)}
+  .core{flex:1;display:flex;flex-direction:column;justify-content:center;padding:32px 0}
+  .eyebrow{
+    font-family:var(--mono);font-size:11px;letter-spacing:0.22em;
+    text-transform:uppercase;color:var(--amber);margin-bottom:30px;
+    display:flex;align-items:center;gap:14px;
   }
-  .enter-cta:hover{background:var(--amber);border-color:var(--amber);color:var(--inv-bg)}
-  .enter-cta .ar{font-family:var(--mono);color:inherit}
+  .eyebrow::before{content:"";width:46px;height:1px;background:var(--amber);flex-shrink:0}
+  h1{
+    font-weight:200;font-size:clamp(64px,9vw,140px);line-height:0.9;
+    letter-spacing:-0.05em;margin-bottom:30px;
+  }
+  h1 em{font-style:normal;display:block;color:var(--fg)}
+  .deck{
+    font-size:21px;line-height:1.45;font-weight:300;letter-spacing:-0.012em;
+    color:var(--soft);max-width:520px;margin-bottom:44px;
+  }
+  .deck b{color:var(--fg);font-weight:400}
+  .enter{
+    display:inline-flex;align-items:baseline;gap:16px;align-self:flex-start;
+    font-family:var(--sans);font-size:17px;font-weight:500;letter-spacing:-0.008em;
+    color:var(--bg);background:var(--plate);text-decoration:none;white-space:nowrap;
+    padding:15px 26px;border:1px solid var(--plate);border-radius:1px;
+    transition:background .15s ease,border-color .15s ease;
+  }
+  .enter .ar{font-family:var(--mono)}
+  .enter:hover{background:var(--amber);border-color:var(--amber)}
+  .enter:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
   .enter-sub{
-    display:block;margin-top:10px;font-family:var(--mono);font-size:10.5px;
-    color:var(--inv-muted);letter-spacing:0.06em;text-transform:uppercase;font-weight:400;
+    margin-top:12px;font-family:var(--mono);font-size:10px;
+    letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);
+  }
+  .foot{
+    display:flex;flex-wrap:wrap;gap:18px 40px;
+    border-top:1px solid var(--rule);padding-top:18px;
+  }
+  .foot .pr{font-family:var(--mono);font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;white-space:nowrap}
+  .foot .nm{font-size:13px;font-weight:500;letter-spacing:-0.005em;white-space:nowrap}
+
+  /* ── right: the drawing, bleeding off-edge ── */
+  .right{position:relative;background:#201d1a;overflow:hidden}
+  .ph-fallback{
+    position:absolute;inset:0;z-index:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;
+    background-image:repeating-linear-gradient(135deg,rgba(243,241,236,0.03) 0 10px,rgba(243,241,236,0.06) 10px 11px);
+    font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);
+  }
+  .ph-fallback .k{color:var(--amber)}
+  .right img{
+    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    object-position:center;z-index:1;font-size:0;color:transparent;
+  }
+  .right::after{
+    content:"";position:absolute;inset:0;z-index:2;
+    background:linear-gradient(90deg,rgba(30,28,26,0.55) 0%,rgba(30,28,26,0) 22%);
+    pointer-events:none;
+  }
+  .pcap{
+    position:absolute;left:0;right:0;bottom:0;z-index:3;
+    display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:baseline;
+    padding:18px 22px;background:linear-gradient(0deg,rgba(20,18,16,0.86),rgba(20,18,16,0));
+    font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;color:rgba(243,241,236,0.7);
+  }
+  .pcap .id{color:var(--amber);font-weight:500}
+  .pcap .ti{font-family:var(--sans);font-size:13px;color:var(--fg);letter-spacing:-0.005em}
+  .pcap .yr{font-variant-numeric:tabular-nums}
+
+  /* ── tablet ── */
+  @media (max-width:1080px){
+    .left{padding:40px 40px 36px}
+    .deck{font-size:19px;margin-bottom:36px}
+    .eyebrow{margin-bottom:24px}
+    h1{margin-bottom:26px}
   }
 
-  @media (max-width:760px){
-    .hero-plate{margin:4px 0 56px}
-    .hero-plate .pcap{grid-template-columns:1fr;gap:4px}
-    .hero-plate .pcap .yr{text-align:left}
+  /* ── mobile: stack, drawing as a top band, page scrolls ── */
+  @media (max-width:780px){
+    body{overflow:auto}
+    .page{grid-template-columns:1fr;min-height:100vh;height:auto}
+    .right{order:-1;height:40vh;min-height:260px}
+    .right::after{background:linear-gradient(0deg,rgba(30,28,26,0.55) 0%,rgba(30,28,26,0) 30%)}
+    .left{padding:32px 24px 40px;min-height:60vh}
+    .core{padding:28px 0 34px}
+    .stamp{flex-direction:column;gap:5px}
+    h1{font-size:clamp(56px,16vw,104px);margin-bottom:24px}
+    .deck{font-size:17px;margin-bottom:32px;max-width:none}
+    .eyebrow{margin-bottom:20px}
+  }
+  @media (max-width:430px){
+    h1{font-size:clamp(46px,15vw,72px)}
+    .eyebrow{font-size:10px;letter-spacing:0.16em}
+    .eyebrow::before{width:30px}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .enter{transition:none}
   }
 </style>
-<script>
-  (function(){
-    if(localStorage.getItem('hhf_theme')==='dark')document.documentElement.classList.add('dark');
-    document.addEventListener('DOMContentLoaded',function(){
-      var btn=document.getElementById('theme-toggle');
-      if(!btn)return;
-      btn.addEventListener('click',function(){
-        var dark=document.documentElement.classList.toggle('dark');
-        localStorage.setItem('hhf_theme',dark?'dark':'light');
-      });
-    });
-  })();
-</script>
 </head>
 <body>
-
-<header class="site-top">
-  <div class="markid">
-    <span class="name">Hunter House <span class="dim">Foundation</span></span>
+<div class="page">
+  <div class="left">
+    <div class="stamp">
+      <span>Hunter House <span class="dot">Foundation</span></span>
+      <span>203 Goward Road &middot; Saanich BC</span>
+    </div>
+    <div class="core">
+      <div class="eyebrow">The Archive of Richard Morrow Hunter</div>
+      <h1>Hunter<em>House</em></h1>
+      <p class="deck">Stewarding the residence and architectural archive of <b>Richard Morrow Hunter</b> (1930&ndash;2023) &mdash; an openly catalogued, queryable record of a life&rsquo;s practice.</p>
+      <a class="enter" href="browse.html">Enter the archive <span class="ar">&rarr;</span></a>
+      <span class="enter-sub">A research tool &middot; best on a desktop browser</span>
+    </div>
+    <div class="foot">
+      <div><div class="pr">Founding Steward</div><div class="nm">Floyd Marinescu</div></div>
+      <div><div class="pr">Founding Steward</div><div class="nm">Olivia Jol</div></div>
+      <div><div class="pr">Project Lead</div><div class="nm">Brandon Poole</div></div>
+    </div>
   </div>
-  <nav class="site-nav">
-    <a href="richard-hunter.html">Hunter</a>
-    <a href="the-house.html">House</a>
-    <a href="archive.html">Archive</a>
-    <a href="about.html">About</a>
-  </nav>
-  <div class="site-topright"><button class="theme-btn" id="theme-toggle" title="Toggle dark mode">◑</button></div>
-</header>
-
-<main class="page-body">
-
-  <div class="titleblock">
-    <h1>Hunter House<br>Foundation</h1>
-    <p class="deck">An initiative dedicated to the stewardship of the residence and architectural archive of architect <b>Richard Morrow Hunter</b> (1930&ndash;2023). 203 Goward Road, Saanich, British Columbia.</p>
-  </div>
-
-  <figure class="hero-plate">
-    <img src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg"
-         alt="Coloured pencil study, Scheme II, for the Hunter Residence — Richard Hunter, 1985"
-         loading="eager" decoding="async">
-    <figcaption class="pcap">
+  <div class="right">
+    <div class="ph-fallback"><span class="k">Drawing</span><span>HH-CAA-0018</span></div>
+    <img onerror="this.style.visibility='hidden'" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg" alt="Coloured pencil study, Scheme II, Hunter Residence, 1985">
+    <div class="pcap">
       <span class="id">HH-CAA-0018</span>
       <span class="ti">Scheme&nbsp;II &mdash; coloured pencil studies</span>
       <span class="yr">1985</span>
-    </figcaption>
-  </figure>
-
-  <div class="sec">
-    <div class="label first">Status</div>
-    <div class="c">
-      <div class="placeholder"><span class="lbl">Work in progress</span> This site is being assembled. The archive itself is live and growing; the surrounding pages &mdash; Hunter, the House, and the Foundation&rsquo;s mandate &mdash; are still being written.</div>
     </div>
   </div>
-
-  <div class="sec">
-    <div class="label">The archive</div>
-    <div class="c">
-      <p class="lede">A structured catalogue of the drawings, photographs, correspondence, and related materials of Richard Hunter&rsquo;s practice.</p>
-      <p>Materials are drawn from six source collections and held on Wikibase &mdash; the open structured-data platform that underlies Wikidata &mdash; openly queryable through SPARQL and a JSON API. The browser is a working research tool: filter by collection, date, area, or project phase, read each item&rsquo;s record, and view high-resolution scans.</p>
-      <a class="enter-cta" href="browse.html">Enter the archive <span class="ar">&rarr;</span></a>
-      <span class="enter-sub">A separate research tool &middot; best on a desktop browser</span>
-    </div>
-  </div>
-
-  <div class="sec">
-    <div class="label">Foundation</div>
-    <div class="c">
-      <div class="people">
-        <div class="p"><span class="role">Founding steward</span><div><div class="name">Floyd Marinescu</div><div class="bio">Established the Foundation with Olivia Jol on acquiring the Hunter Residence in 2023; directs long-range planning and stewardship of the property.</div></div></div>
-        <div class="p"><span class="role">Founding steward</span><div><div class="name">Olivia Jol</div><div class="bio">Established the Foundation with Floyd Marinescu in 2023; art historian by training, guiding the design and studio program.</div></div></div>
-        <div class="p"><span class="role">Project lead</span><div><div class="name">Brandon Poole</div><div class="bio">Architect and researcher; oversees the cataloguing program, the Wikibase archive, and this site. Based in Victoria.</div></div></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="next-link">
-    <div class="l">Read</div>
-    <a href="richard-hunter.html">Richard Hunter<span class="ar">&rarr;</span></a>
-  </div>
-
-</main>
-<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/HunterHouse/sw.js');</script>
+</div>
+<!-- PWA: register the shell service worker so the landing page is installable
+     and the offline shell caches from the front door. Relative path keeps the
+     scope correct under /HunterHouse/ and survives the future domain switch. -->
+<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
 </body>
 </html>
