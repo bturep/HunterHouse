@@ -3014,7 +3014,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08-test.27";
+  const VERSION      = "v1.08-test.28";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -8494,7 +8494,7 @@ WHERE {
       updateFilterBadge();
       initPanZoom();
 
-      const defaultItem = state.filtered.find(i => i.id === "HH-CAA-0028") || state.filtered[0];
+      const defaultItem = state.filtered.find(i => i.id === "HH-CAA-0018") || state.filtered[0];
       const target = urlId && state.filtered.find(i => i.id === urlId)
         ? urlId
         : defaultItem?.id;
