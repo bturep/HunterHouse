@@ -167,7 +167,7 @@
   .foot{
     max-width:760px;
     margin:0 auto;
-    padding:30px 28px calc(env(safe-area-inset-bottom) + 44px);
+    padding:30px 28px 14px;
     display:flex;flex-wrap:wrap;gap:12px 20px;
     align-items:baseline;justify-content:center;text-align:center;
     font-size:11px;letter-spacing:.2em;text-transform:uppercase;
@@ -180,6 +180,18 @@
   }
   .foot a:hover{color:var(--fg);border-color:var(--line);}
   .foot .sep{opacity:.4;}
+
+  /* Richard Hunter architect's stamp — centred sign-off, extra bottom room so
+     the footer clears Safari's bottom toolbar and the page scrolls a touch past. */
+  .endmark{
+    display:flex;justify-content:center;
+    padding:6px 28px calc(env(safe-area-inset-bottom) + 76px);
+  }
+  .sigil{
+    width:112px;max-width:40%;height:auto;
+    opacity:.42;filter:invert(1);
+    -webkit-user-select:none;user-select:none;pointer-events:none;
+  }
 
   /* PhotoSwipe theming + hide the zoom button (pinch / double-tap zoom instead) */
   .pswp{--pswp-bg:#0d0c0b;--pswp-placeholder-bg:#211f1c;}
@@ -209,6 +221,10 @@
   <span class="sep" aria-hidden="true">&middot;</span>
   <a href="browse.html">Enter the full archive &rarr;</a>
 </footer>
+
+<div class="endmark">
+  <img class="sigil" src="assets/hunter-mark.png" alt="Richard Hunter, Architect — emblem" width="112" height="113">
+</div>
 
 <script type="module">
 import PhotoSwipeLightbox from './assets/photoswipe/photoswipe-lightbox.esm.js';
