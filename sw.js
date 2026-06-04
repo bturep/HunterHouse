@@ -16,7 +16,7 @@
 // next activation. Do this any time the shell layout, asset list, or the
 // caching policy itself changes.
 
-const CACHE_NAME = 'hh-shell-v7';
+const CACHE_NAME = 'hh-shell-v8';
 
 const PRECACHE = [
   './',
