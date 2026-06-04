@@ -162,21 +162,25 @@
     color:var(--muted);white-space:nowrap;
   }
 
-  /* Richard Hunter architect's stamp — the sign-off, and the link into the
-     archive. Extra bottom room so it clears Safari's toolbar and scrolls past. */
-  .endmark{
-    display:flex;justify-content:center;
-    padding:46px 28px calc(env(safe-area-inset-bottom) + 80px);
+  /* ---------- footer — Richard Hunter mark (links to the archive) + address ---------- */
+  .foot{
+    text-align:center;
+    padding:52px 28px calc(env(safe-area-inset-bottom) + 56px);
   }
-  .endlink{display:inline-flex;line-height:0;border-radius:2px;}
-  .endlink:focus-visible{outline:2px solid var(--muted);outline-offset:8px;}
-  .sigil{
-    width:clamp(132px, 34vw, 156px);height:auto;
-    opacity:.42;filter:invert(1);
-    transition:opacity .18s ease;
+  .foot .mark-link{display:inline-block;line-height:0;border-radius:2px;}
+  .foot .mark-link:focus-visible{outline:2px solid var(--muted);outline-offset:8px;}
+  .foot .mark{
+    width:148px;height:auto;display:block;margin:0 auto;
+    opacity:.9;filter:invert(1);transition:opacity .18s ease;
     -webkit-user-select:none;user-select:none;
   }
-  .endlink:hover .sigil{opacity:.72;}
+  .foot .mark-link:hover .mark{opacity:1;}
+  .foot .foot-meta{
+    margin:24px 0 0;
+    font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--muted);line-height:1.9;
+  }
+  .foot .foot-meta .sub{display:block;opacity:.7;letter-spacing:.22em;}
 
   /* PhotoSwipe theming + hide the zoom button (pinch / double-tap zoom instead) */
   .pswp{--pswp-bg:#0d0c0b;--pswp-placeholder-bg:#211f1c;}
@@ -201,11 +205,15 @@
 
 <main class="reel" id="reel"></main>
 
-<div class="endmark">
-  <a class="endlink" href="browse.html" aria-label="Enter the full archive">
-    <img class="sigil" src="assets/hunter-mark.png" alt="Richard Hunter, Architect — emblem" width="140" height="141">
+<footer class="foot">
+  <a class="mark-link" href="browse.html" aria-label="Enter the full archive">
+    <img class="mark" src="assets/hunter-mark.png" alt="Richard Hunter, Architect — emblem" width="148" height="149">
   </a>
-</div>
+  <p class="foot-meta">
+    203 Goward Road &middot; Saanich
+    <span class="sub">Victoria, British Columbia</span>
+  </p>
+</footer>
 
 <script type="module">
 import PhotoSwipeLightbox from './assets/photoswipe/photoswipe-lightbox.esm.js';
