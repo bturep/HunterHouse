@@ -43,7 +43,7 @@ Hunter was a scholar of the German architect [[Erich Mendelsohn]], particularly 
 Hunter's work was included in the exhibition ''From the Ground, Into the Light: Organic Architecture of the Islands, 1950–2000'' at the Wentworth Villa Architectural Heritage Museum, Victoria, British Columbia (27 June – 12 October 2024).<ref name="segger" />
 
 == Archive ==
-Hunter's papers are held as the Richard Hunter fonds at the [[Canadian Architectural Archives]], University of Calgary (reference CA ACU CAA F0076). The fonds comprises some 344 architectural drawings, photographs, presentation panels, and textual records documenting his student work at the University of Oklahoma and his practice in California, Alaska, and British Columbia.<ref name="caa" />
+Hunter's papers are held as the Richard Hunter fonds at the [[Canadian Architectural Archives]], University of Calgary (reference CA ACU CAA F0076). The fonds comprises some 344 architectural drawings, photographs, presentation panels, and textual records documenting his student work at the University of Oklahoma and his practice in California, Alaska, and British Columbia.<ref name="caa" /> A further group of his correspondence and architectural drawings, dating from 1972 to 1974, is held at the [[Getty Research Institute]] in Los Angeles as a described component of the Erich and Luise Mendelsohn papers.<ref name="getty-hunter">{{cite web |title=Richard Hunter (architect) correspondence and architectural drawings, 1972–1974 |website=Getty Research Institute |id=Erich and Luise Mendelsohn papers, Accession no. 880406 |url=https://www.getty.edu/research/collections/component/10VEEN |access-date=4 June 2026}}</ref>
 
 == Death ==
 Hunter died in Victoria, British Columbia, on 14 January 2023.<ref name="segger" />
@@ -76,6 +76,7 @@ Hunter died in Victoria, British Columbia, on 14 January 2023.<ref name="segger"
 | 6 | *Renegades*, Univ. Oklahoma Press, 2020, p. 228 + Plate 37 | ✅ | 🟢 Peer-reviewed press — Hunter interviewed + house illustrated |
 | 7 | "Mendelsohn Symposium," *Urban Realm*, 15 Oct 2004 (urbanrealm.com/news/287) | ✅ live URL | 🟢 minor — peer recognition |
 | 8 | Exhibition, *From the Ground, Into the Light*, 2024 | ✅ (via Segger) | 🟡 Recent exhibition recognition |
+| 9 | Getty component — "Richard Hunter (architect) correspondence and architectural drawings, 1972–1974" (getty.edu/research/collections/component/10VEEN; in Mendelsohn papers, Acc. 880406) | ✅ live URL | 🟢 **Second major institution holding his architectural drawings** (Getty + CAA) — strengthens archival notability |
 
 ### Open / optional (none block submission)
 - [ ] **1995 Montreal exhibition** ("Maison d'Être" / "The Architect's Dwelling: A
