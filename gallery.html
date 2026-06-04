@@ -170,6 +170,24 @@
     color:var(--muted);white-space:nowrap;
   }
 
+  /* ---------- footer (discreet links back into the site) ---------- */
+  .foot{
+    max-width:760px;
+    margin:0 auto;
+    padding:30px 28px calc(env(safe-area-inset-bottom) + 44px);
+    display:flex;flex-wrap:wrap;gap:12px 20px;
+    align-items:baseline;justify-content:center;text-align:center;
+    font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--muted);
+  }
+  .foot a{
+    color:var(--muted);text-decoration:none;
+    border-bottom:1px solid transparent;padding-bottom:2px;
+    transition:color .15s ease,border-color .15s ease;
+  }
+  .foot a:hover{color:var(--fg);border-color:var(--line);}
+  .foot .sep{opacity:.4;}
+
   /* ---------- lightbox ---------- */
   .lb{position:fixed;inset:0;background:#0d0c0b;display:none;z-index:50;touch-action:pan-y;}
   .lb.open{display:block;}
@@ -203,6 +221,12 @@
 </section>
 
 <main class="reel" id="reel"></main>
+
+<footer class="foot">
+  <a href="index.html">Hunter House Foundation</a>
+  <span class="sep" aria-hidden="true">&middot;</span>
+  <a href="browse.html">Enter the full archive &rarr;</a>
+</footer>
 
 <div class="lb" id="lb" aria-hidden="true">
   <div class="lb-top">
