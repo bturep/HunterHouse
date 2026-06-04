@@ -161,6 +161,9 @@
     font-size:11px;letter-spacing:.26em;text-transform:uppercase;
     color:var(--muted);white-space:nowrap;
   }
+  /* closing rule after the last drawing — matches the divider's line */
+  .endrule{max-width:760px;margin:0 auto;padding:42px 28px 30px;}
+  .endrule::before{content:"";display:block;height:1px;background:var(--line);}
 
   /* ---------- footer — Richard Hunter mark (links to the archive) + address ---------- */
   .foot{
@@ -288,6 +291,11 @@ SLIDES.forEach((p,i)=>{
   reel.appendChild(btn);
   io.observe(img);
 });
+
+// closing rule after the last drawing (matches the section divider's line)
+const endrule = document.createElement('div');
+endrule.className = 'endrule';
+reel.appendChild(endrule);
 
 /* fullscreen viewer — swipe between images, pinch / double-tap to zoom,
    rotation handled by PhotoSwipe. Self-hosted, no external dependency. */
