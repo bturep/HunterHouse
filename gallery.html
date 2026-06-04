@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The House — Hunter House Foundation</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="A visual walk through the Hunter Residence at 203 Goward Road, Saanich, British Columbia — photographs and original drawings from the Hunter House Foundation archive.">
+<meta name="theme-color" content="#1e1c1a">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Hunter House Foundation">
+<meta property="og:title" content="The House — Hunter House Foundation">
+<meta property="og:description" content="A visual walk through Richard Hunter's residence at 203 Goward Road, Saanich — photographs and original drawings.">
+<meta property="og:image" content="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0003_HunterHouse_2024_prev.jpg">
+<meta property="og:url" content="https://www.hunterhousefoundation.com/gallery.html">
+<link rel="canonical" href="https://www.hunterhousefoundation.com/gallery.html">
+
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="icon" type="image/png" href="assets/icon-192.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1e1c1a; --fg:#f3f1ec;
+    --muted:rgba(243,241,236,0.55); --soft:rgba(243,241,236,0.85);
+    --rule:rgba(243,241,236,0.18);
+    --amber:#e4a47e; --plate:#f0e9d8;
+    --sans:"Inter Tight",-apple-system,Helvetica,Arial,sans-serif;
+    --mono:"JetBrains Mono","SF Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--sans);background:var(--bg);color:var(--fg);
+    -webkit-font-smoothing:antialiased;font-feature-settings:"ss01","cv11";
+  }
+
+  /* ── top stamp (matches index) ── */
+  .stamp{
+    display:flex;justify-content:space-between;align-items:baseline;gap:24px;
+    padding:30px clamp(24px,5vw,56px) 0;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:0.2em;
+    text-transform:uppercase;color:var(--muted);
+  }
+  .stamp a{color:var(--muted);text-decoration:none}
+  .stamp a:hover{color:var(--amber)}
+  .stamp .dot{color:var(--amber)}
+
+  /* ── intro ── */
+  .intro{padding:clamp(48px,9vh,104px) clamp(24px,5vw,56px) clamp(40px,7vh,80px);max-width:920px}
+  .eyebrow{
+    font-family:var(--mono);font-size:11px;letter-spacing:0.22em;
+    text-transform:uppercase;color:var(--amber);margin-bottom:26px;
+    display:flex;align-items:center;gap:14px;
+  }
+  .eyebrow::before{content:"";width:46px;height:1px;background:var(--amber);flex-shrink:0}
+  h1{font-weight:200;font-size:clamp(54px,8vw,116px);line-height:0.92;letter-spacing:-0.05em;margin-bottom:26px}
+  .deck{font-size:20px;line-height:1.45;font-weight:300;letter-spacing:-0.012em;color:var(--soft);max-width:600px}
+  .deck b{color:var(--fg);font-weight:400}
+
+  /* ── gallery ── */
+  .gal{padding:0 clamp(16px,4vw,56px) clamp(60px,12vh,140px)}
+  .shot{margin:0 auto clamp(40px,7vh,104px);max-width:1180px}
+  .frame{position:relative;display:flex;justify-content:center;background:#201d1a;overflow:hidden}
+  .frame img{display:block;max-width:100%;max-height:88vh;width:auto;height:auto}
+  .frame .full{
+    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    opacity:0;transition:opacity .55s ease;
+  }
+  .frame .full.ready{opacity:1}
+  .frame .thumb{filter:saturate(0.96)}
+  .tag{
+    margin-top:11px;font-family:var(--mono);font-size:10px;letter-spacing:0.16em;
+    text-transform:uppercase;color:var(--muted);text-align:center;
+  }
+
+  /* ── footer ── */
+  .foot{
+    border-top:1px solid var(--rule);margin:0 clamp(24px,5vw,56px);
+    padding:34px 0 56px;display:flex;flex-wrap:wrap;gap:18px 28px;
+    align-items:baseline;justify-content:space-between;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:0.12em;
+    text-transform:uppercase;color:var(--muted);
+  }
+  .foot a{color:var(--soft);text-decoration:none;border-bottom:1px solid var(--rule);padding-bottom:2px}
+  .foot a:hover{color:var(--amber);border-color:var(--amber)}
+
+  @media (max-width:780px){
+    h1{font-size:clamp(46px,14vw,84px)}
+    .deck{font-size:17px}
+    .shot{margin-bottom:clamp(28px,5vh,56px)}
+    .frame img{max-height:82vh}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .frame .full{transition:none}
+  }
+</style>
+</head>
+<body>
+  <div class="stamp">
+    <span>Hunter House <span class="dot">Foundation</span></span>
+    <span><a href="index.html">&larr; Home</a></span>
+  </div>
+
+  <header class="intro">
+    <div class="eyebrow">The Hunter Residence</div>
+    <h1>The House</h1>
+    <p class="deck">A walk through the home <b>Richard Hunter</b> designed and built for himself at 203&nbsp;Goward&nbsp;Road, Saanich &mdash; photographed in 2024, closing with his original 1970 scheme drawings.</p>
+  </header>
+
+  <main class="gal">
+      <figure class="shot">
+        <div class="frame">
+          <img class="thumb" src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0003_HunterHouse_2024_thumb.jpg" alt="" aria-hidden="true">
+          <img class="full" data-src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0003_HunterHouse_2024_prev.jpg" data-large="https://archive.hunterhousefoundation.com/ivan-hunter-collection/large/HH-IHC-0003_HunterHouse_2024_large.jpg" alt="The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0003)">
+        </div>
+        <figcaption class="tag">HH-IHC-0003</figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="frame">
+          <img class="thumb" src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0008_HunterHouse_2024_thumb.jpg" alt="" aria-hidden="true">
+          <img class="full" data-src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0008_HunterHouse_2024_prev.jpg" data-large="https://archive.hunterhousefoundation.com/ivan-hunter-collection/large/HH-IHC-0008_HunterHouse_2024_large.jpg" alt="The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0008)">
+        </div>
+        <figcaption class="tag">HH-IHC-0008</figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="frame">
+          <img class="thumb" src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0009_HunterHouse_2024_thumb.jpg" alt="" aria-hidden="true">
+          <img class="full" data-src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0009_HunterHouse_2024_prev.jpg" data-large="https://archive.hunterhousefoundation.com/ivan-hunter-collection/large/HH-IHC-0009_HunterHouse_2024_large.jpg" alt="The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0009)">
+        </div>
+        <figcaption class="tag">HH-IHC-0009</figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="frame">
+          <img class="thumb" src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0015_HunterHouse_2024_thumb.jpg" alt="" aria-hidden="true">
+          <img class="full" data-src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0015_HunterHouse_2024_prev.jpg" data-large="https://archive.hunterhousefoundation.com/ivan-hunter-collection/large/HH-IHC-0015_HunterHouse_2024_large.jpg" alt="The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0015)">
+        </div>
+        <figcaption class="tag">HH-IHC-0015</figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="frame">
+          <img class="thumb" src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0016_HunterHouse_2024_thumb.jpg" alt="" aria-hidden="true">
+          <img class="full" data-src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0016_HunterHouse_2024_prev.jpg" data-large="https://archive.hunterhousefoundation.com/ivan-hunter-collection/large/HH-IHC-0016_HunterHouse_2024_large.jpg" alt="The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0016)">
+        </div>
+        <figcaption class="tag">HH-IHC-0016</figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="frame">
+          <img class="thumb" src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0017_HunterHouse_2024_thumb.jpg" alt="" aria-hidden="true">
+          <img class="full" data-src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0017_HunterHouse_2024_prev.jpg" data-large="https://archive.hunterhousefoundation.com/ivan-hunter-collection/large/HH-IHC-0017_HunterHouse_2024_large.jpg" alt="The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0017)">
+        </div>
+        <figcaption class="tag">HH-IHC-0017</figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="frame">
+          <img class="thumb" src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0018_HunterHouse_2024_thumb.jpg" alt="" aria-hidden="true">
+          <img class="full" data-src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0018_HunterHouse_2024_prev.jpg" data-large="https://archive.hunterhousefoundation.com/ivan-hunter-collection/large/HH-IHC-0018_HunterHouse_2024_large.jpg" alt="The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0018)">
+        </div>
+        <figcaption class="tag">HH-IHC-0018</figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="frame">
+          <img class="thumb" src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0028_HunterHouse_2024_thumb.jpg" alt="" aria-hidden="true">
+          <img class="full" data-src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0028_HunterHouse_2024_prev.jpg" data-large="https://archive.hunterhousefoundation.com/ivan-hunter-collection/large/HH-IHC-0028_HunterHouse_2024_large.jpg" alt="The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0028)">
+        </div>
+        <figcaption class="tag">HH-IHC-0028</figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="frame">
+          <img class="thumb" src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0029_HunterHouse_2024_thumb.jpg" alt="" aria-hidden="true">
+          <img class="full" data-src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0029_HunterHouse_2024_prev.jpg" data-large="https://archive.hunterhousefoundation.com/ivan-hunter-collection/large/HH-IHC-0029_HunterHouse_2024_large.jpg" alt="The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0029)">
+        </div>
+        <figcaption class="tag">HH-IHC-0029</figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="frame">
+          <img class="thumb" src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0030_HunterHouse_2024_thumb.jpg" alt="" aria-hidden="true">
+          <img class="full" data-src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0030_HunterHouse_2024_prev.jpg" data-large="https://archive.hunterhousefoundation.com/ivan-hunter-collection/large/HH-IHC-0030_HunterHouse_2024_large.jpg" alt="The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0030)">
+        </div>
+        <figcaption class="tag">HH-IHC-0030</figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="frame">
+          <img class="thumb" src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0034_HunterHouse_2024_thumb.jpg" alt="" aria-hidden="true">
+          <img class="full" data-src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0034_HunterHouse_2024_prev.jpg" data-large="https://archive.hunterhousefoundation.com/ivan-hunter-collection/large/HH-IHC-0034_HunterHouse_2024_large.jpg" alt="The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0034)">
+        </div>
+        <figcaption class="tag">HH-IHC-0034</figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="frame">
+          <img class="thumb" src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0036_HunterHouse_2024_thumb.jpg" alt="" aria-hidden="true">
+          <img class="full" data-src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0036_HunterHouse_2024_prev.jpg" data-large="https://archive.hunterhousefoundation.com/ivan-hunter-collection/large/HH-IHC-0036_HunterHouse_2024_large.jpg" alt="The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0036)">
+        </div>
+        <figcaption class="tag">HH-IHC-0036</figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="frame">
+          <img class="thumb" src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0037_HunterHouse_2024_thumb.jpg" alt="" aria-hidden="true">
+          <img class="full" data-src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0037_HunterHouse_2024_prev.jpg" data-large="https://archive.hunterhousefoundation.com/ivan-hunter-collection/large/HH-IHC-0037_HunterHouse_2024_large.jpg" alt="The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0037)">
+        </div>
+        <figcaption class="tag">HH-IHC-0037</figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="frame">
+          <img class="thumb" src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0038_HunterHouse_2024_thumb.jpg" alt="" aria-hidden="true">
+          <img class="full" data-src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" data-large="https://archive.hunterhousefoundation.com/ivan-hunter-collection/large/HH-IHC-0038_HunterHouse_2024_large.jpg" alt="The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0038)">
+        </div>
+        <figcaption class="tag">HH-IHC-0038</figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="frame">
+          <img class="thumb" src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0039_HunterHouse_2024_thumb.jpg" alt="" aria-hidden="true">
+          <img class="full" data-src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0039_HunterHouse_2024_prev.jpg" data-large="https://archive.hunterhousefoundation.com/ivan-hunter-collection/large/HH-IHC-0039_HunterHouse_2024_large.jpg" alt="The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0039)">
+        </div>
+        <figcaption class="tag">HH-IHC-0039</figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="frame">
+          <img class="thumb" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/thumbs/HH-CAA-0007_OG_Build_1970_Scheme_1_1of3_1970-08-25_thumb.jpg" alt="" aria-hidden="true">
+          <img class="full" data-src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0007_OG_Build_1970_Scheme_1_1of3_1970-08-25_prev.jpg" data-large="https://archive.hunterhousefoundation.com/canadian-architecture-archive/large/HH-CAA-0007_OG_Build_1970_Scheme_1_1of3_1970-08-25_large.jpg" alt="Original 1970 build, Scheme 1 — ground plan. Richard Hunter, 1970 (HH-CAA-0007)">
+        </div>
+        <figcaption class="tag">HH-CAA-0007</figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="frame">
+          <img class="thumb" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/thumbs/HH-CAA-0008_OG_Build_1970_Scheme_1_2of3_1970-08-25_thumb.jpg" alt="" aria-hidden="true">
+          <img class="full" data-src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0008_OG_Build_1970_Scheme_1_2of3_1970-08-25_prev.jpg" data-large="https://archive.hunterhousefoundation.com/canadian-architecture-archive/large/HH-CAA-0008_OG_Build_1970_Scheme_1_2of3_1970-08-25_large.jpg" alt="Original 1970 build, Scheme 1 — sheet 2. Richard Hunter, 1970 (HH-CAA-0008)">
+        </div>
+        <figcaption class="tag">HH-CAA-0008</figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="frame">
+          <img class="thumb" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/thumbs/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_thumb.jpg" alt="" aria-hidden="true">
+          <img class="full" data-src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg" data-large="https://archive.hunterhousefoundation.com/canadian-architecture-archive/large/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_large.jpg" alt="Scheme II coloured pencil studies, house, studio and garden. Richard Hunter, 1985 (HH-CAA-0018)">
+        </div>
+        <figcaption class="tag">HH-CAA-0018</figcaption>
+      </figure>
+  </main>
+
+  <footer class="foot">
+    <span>203 Goward Road &middot; Saanich BC</span>
+    <span><a href="browse.html">Enter the full archive &rarr;</a></span>
+  </footer>
+
+<script>
+  // Staged load: thumb paints instantly (it's the in-flow layout image);
+  // the 2000px preview is fetched lazily as each frame nears the viewport and
+  // fades in over the thumb. Keeps 18 images fast on first paint.
+  (function(){
+    var fulls = document.querySelectorAll('.full[data-src]');
+    function reveal(img){
+      var hi = new Image();
+      hi.onload = function(){ img.src = img.dataset.src; img.classList.add('ready'); };
+      hi.src = img.dataset.src;
+    }
+    if('IntersectionObserver' in window){
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if(e.isIntersecting){ reveal(e.target); io.unobserve(e.target); }
+        });
+      }, {rootMargin:'600px 0px'});
+      fulls.forEach(function(img){ io.observe(img); });
+    } else {
+      fulls.forEach(reveal);
+    }
+  })();
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
