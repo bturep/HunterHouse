@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1c1a18">
+<meta name="theme-color" content="#1a1816">
 <title>Hunter House</title>
 
 <!-- Re-added on import (Claude Design drops these): share/crawler + PWA metadata -->
@@ -24,17 +24,19 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/photoswipe/photoswipe.css">
 <style>
-  :root{
-    --bg:#1c1a18;
-    --bg2:#211f1c;
-    --fg:#f2ede4;
-    --muted:#9c958a;
-    --line:#322f2b;
-    --serif:"Spectral",Georgia,"Times New Roman",serif;
-    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  :root{                                /* browse.html dark palette + type */
+    --bg:#1a1816;
+    --bg2:#201e1a;
+    --fg:#f0ede6;
+    --muted:rgba(240,237,230,0.52);
+    --hint:rgba(240,237,230,0.32);
+    --line:rgba(240,237,230,0.13);
+    --accent:#c4826e;
+    --sans:"Inter Tight",-apple-system,Helvetica,Arial,sans-serif;
+    --mono:"JetBrains Mono","SF Mono",Menlo,monospace;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
@@ -66,8 +68,8 @@
   .hero-scrim{
     position:absolute;inset:0;
     background:
-      linear-gradient(180deg, rgba(20,18,16,.40) 0%, rgba(20,18,16,0) 22%),
-      linear-gradient(0deg, rgba(18,16,14,.92) 0%, rgba(18,16,14,.55) 24%, rgba(18,16,14,0) 52%);
+      linear-gradient(180deg, rgba(26,24,22,.40) 0%, rgba(26,24,22,0) 22%),
+      linear-gradient(0deg, rgba(26,24,22,.94) 0%, rgba(26,24,22,.55) 24%, rgba(26,24,22,0) 52%);
   }
   .plate{
     position:absolute;
@@ -77,30 +79,31 @@
     text-align:center;
   }
   .plate h1{
-    margin:.34em 0 0;
-    font-family:var(--serif);
+    margin:0;
+    font-family:var(--sans);
     font-weight:300;
-    font-size:clamp(46px,15vw,76px);
-    line-height:.96;
-    letter-spacing:.005em;
-    color:#fbf7f0;
+    font-size:clamp(34px,8.5vw,54px);
+    line-height:1.02;
+    letter-spacing:-0.03em;
+    color:var(--fg);
   }
   .rule{
-    width:34px;height:1px;
-    background:var(--muted);
-    opacity:.55;
-    margin:20px auto 16px;
+    width:30px;height:1px;
+    background:var(--accent);
+    opacity:.85;
+    margin:18px auto 16px;
   }
   .meta{
+    font-family:var(--mono);
     margin:0;
-    font-size:12.5px;
-    letter-spacing:.14em;
+    font-size:11px;
+    letter-spacing:.18em;
     text-transform:uppercase;
-    color:#cabfae;
-    line-height:1.7;
+    color:rgba(240,237,230,0.64);
+    line-height:1.85;
   }
   .meta span{display:block;}
-  .meta .sub{color:var(--muted);font-size:11px;letter-spacing:.16em;}
+  .meta .sub{color:var(--muted);font-size:10px;letter-spacing:.2em;}
   .cue{
     position:absolute;
     left:50%;transform:translateX(-50%);
@@ -137,15 +140,6 @@
   }
   .shot img.loaded{opacity:1;}
   .shot:active{filter:brightness(.84);}
-  .shot .idx{
-    position:absolute;
-    top:12px;left:14px;
-    font-size:11px;letter-spacing:.16em;
-    color:#f3eee4;
-    text-shadow:0 1px 6px rgba(0,0,0,.6);
-    font-variant-numeric:tabular-nums;
-    pointer-events:none;
-  }
 
   /* drawings divider */
   .divider{
@@ -158,6 +152,7 @@
     content:"";flex:1;height:1px;background:var(--line);
   }
   .divider span{
+    font-family:var(--mono);
     font-size:11px;letter-spacing:.26em;text-transform:uppercase;
     color:var(--muted);white-space:nowrap;
   }
@@ -184,6 +179,7 @@
   }
   .foot .mark-link:hover .mark{opacity:.92;}
   .foot .foot-meta{
+    font-family:var(--mono);
     margin:24px 0 0;
     font-size:11px;letter-spacing:.2em;text-transform:uppercase;
     color:var(--muted);line-height:1.9;
@@ -287,11 +283,7 @@ SLIDES.forEach((p,i)=>{
   img.dataset.full = p.f;
   img.src = p.t;                    // quick thumbnail
   img.addEventListener('load', ()=>img.classList.add('loaded'));
-  const idx = document.createElement('span');
-  idx.className='idx';
-  idx.textContent = String(i+1).padStart(2,'0');
   btn.appendChild(img);
-  btn.appendChild(idx);
   btn.addEventListener('click', ()=>lightbox.loadAndOpen(i));
   reel.appendChild(btn);
   io.observe(img);
