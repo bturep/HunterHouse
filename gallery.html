@@ -25,6 +25,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/photoswipe/photoswipe.css">
 <style>
   :root{
     --bg:#1c1a18;
@@ -74,14 +75,6 @@
     bottom:calc(env(safe-area-inset-bottom) + 84px);
     padding:0 28px;
     text-align:center;
-  }
-  .eyebrow{
-    margin:0;
-    font-size:11.5px;
-    letter-spacing:.34em;
-    text-transform:uppercase;
-    color:var(--muted);
-    font-weight:500;
   }
   .plate h1{
     margin:.34em 0 0;
@@ -133,7 +126,7 @@
     width:100%;
     padding:0;border:0;
     background:var(--bg2);
-    cursor:pointer;
+    cursor:zoom-in;
     overflow:hidden;
   }
   .shot + .shot{ margin-top:5px; }
@@ -188,20 +181,8 @@
   .foot a:hover{color:var(--fg);border-color:var(--line);}
   .foot .sep{opacity:.4;}
 
-  /* ---------- lightbox ---------- */
-  .lb{position:fixed;inset:0;background:#0d0c0b;display:none;z-index:50;touch-action:pan-y;}
-  .lb.open{display:block;}
-  .lb-track{position:absolute;inset:0;display:flex;transition:transform .32s cubic-bezier(.22,.61,.36,1);will-change:transform;}
-  .lb-track.dragging{transition:none;}
-  .lb-slide{flex:0 0 100%;height:100%;display:flex;align-items:center;justify-content:center;padding:0 12px;}
-  .lb-slide img{max-width:100%;max-height:100%;object-fit:contain;display:block;}
-  .lb-top{position:absolute;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top) + 14px) 18px 14px;display:flex;align-items:center;justify-content:space-between;z-index:2;background:linear-gradient(#0d0c0bcc,#0d0c0b00);pointer-events:none;}
-  .lb-count{font-size:12px;letter-spacing:.14em;color:#d8d2c8;font-variant-numeric:tabular-nums;}
-  .lb-close{pointer-events:auto;background:none;border:none;color:#d8d2c8;font-size:26px;line-height:1;padding:4px 8px;cursor:pointer;}
-  .lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:none;border:none;color:#fff;font-size:40px;line-height:1;padding:18px;cursor:pointer;opacity:.55;display:none;z-index:2;}
-  .lb-nav:hover{opacity:1;}
-  .lb-prev{left:4px;} .lb-next{right:4px;}
-  @media(hover:hover) and (min-width:760px){ .lb-nav{display:block;} }
+  /* PhotoSwipe theming to match the dark surface */
+  .pswp{--pswp-bg:#0d0c0b;--pswp-placeholder-bg:#211f1c;}
 </style>
 </head>
 <body>
@@ -228,47 +209,44 @@
   <a href="browse.html">Enter the full archive &rarr;</a>
 </footer>
 
-<div class="lb" id="lb" aria-hidden="true">
-  <div class="lb-top">
-    <span class="lb-count" id="count"></span>
-    <button class="lb-close" id="close" aria-label="Close">&times;</button>
-  </div>
-  <button class="lb-nav lb-prev" id="prev" aria-label="Previous">&#8249;</button>
-  <button class="lb-nav lb-next" id="next" aria-label="Next">&#8250;</button>
-  <div class="lb-track" id="track"></div>
-</div>
+<script type="module">
+import PhotoSwipeLightbox from './assets/photoswipe/photoswipe-lightbox.esm.js';
 
-<script>
-const ARCHIVE = "https://archive.hunterhousefoundation.com";
-const IHC = "ivan-hunter-collection";
-const IDS = ["0003","0006","0008","0009","0015","0016","0017","0018","0024","0028","0029","0030","0036","0037","0038","0039"];
-const photos = IDS.map(id => ({
-  thumb: `${ARCHIVE}/${IHC}/thumbs/HH-IHC-${id}_HunterHouse_2024_thumb.jpg`,
-  full:  `${ARCHIVE}/${IHC}/previews/HH-IHC-${id}_HunterHouse_2024_prev.jpg`
-}));
-const DRAW_START = photos.length;
-const CAA = "canadian-architecture-archive";
-const DRAWINGS = [
-  "HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01",
-  "HH-CAA-0007_OG_Build_1970_Scheme_1_1of3_1970-08-25"
+// Each slide carries its real preview pixel size so PhotoSwipe zooms accurately.
+const A = "https://archive.hunterhousefoundation.com";
+const SLIDES = [
+  {id:"HH-IHC-0003", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0003_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0003_HunterHouse_2024_prev.jpg", w:2000, h:1869, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0003)"},
+  {id:"HH-IHC-0006", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0006_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0006_HunterHouse_2024_prev.jpg", w:2000, h:936, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0006)"},
+  {id:"HH-IHC-0008", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0008_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0008_HunterHouse_2024_prev.jpg", w:1486, h:2000, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0008)"},
+  {id:"HH-IHC-0009", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0009_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0009_HunterHouse_2024_prev.jpg", w:2000, h:840, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0009)"},
+  {id:"HH-IHC-0015", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0015_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0015_HunterHouse_2024_prev.jpg", w:1425, h:2000, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0015)"},
+  {id:"HH-IHC-0016", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0016_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0016_HunterHouse_2024_prev.jpg", w:1630, h:2000, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0016)"},
+  {id:"HH-IHC-0017", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0017_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0017_HunterHouse_2024_prev.jpg", w:1392, h:2000, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0017)"},
+  {id:"HH-IHC-0018", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0018_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0018_HunterHouse_2024_prev.jpg", w:2000, h:1333, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0018)"},
+  {id:"HH-IHC-0024", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0024_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0024_HunterHouse_2024_prev.jpg", w:2000, h:1391, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0024)"},
+  {id:"HH-IHC-0028", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0028_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0028_HunterHouse_2024_prev.jpg", w:2000, h:991, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0028)"},
+  {id:"HH-IHC-0029", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0029_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0029_HunterHouse_2024_prev.jpg", w:2000, h:799, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0029)"},
+  {id:"HH-IHC-0030", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0030_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0030_HunterHouse_2024_prev.jpg", w:2000, h:1312, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0030)"},
+  {id:"HH-IHC-0036", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0036_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0036_HunterHouse_2024_prev.jpg", w:2000, h:1016, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0036)"},
+  {id:"HH-IHC-0037", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0037_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0037_HunterHouse_2024_prev.jpg", w:2000, h:1229, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0037)"},
+  {id:"HH-IHC-0038", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0038_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg", w:2000, h:1734, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0038)"},
+  {id:"HH-IHC-0039", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0039_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0039_HunterHouse_2024_prev.jpg", w:2000, h:1333, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0039)"},
+  {id:"HH-CAA-0018", t:"https://archive.hunterhousefoundation.com/canadian-architecture-archive/thumbs/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_thumb.jpg", f:"https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg", w:2000, h:1995, alt:"Scheme II coloured pencil studies — house, studio and garden. Richard Hunter, 1985 (HH-CAA-0018)"},
+  {id:"HH-CAA-0007", t:"https://archive.hunterhousefoundation.com/canadian-architecture-archive/thumbs/HH-CAA-0007_OG_Build_1970_Scheme_1_1of3_1970-08-25_thumb.jpg", f:"https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0007_OG_Build_1970_Scheme_1_1of3_1970-08-25_prev.jpg", w:2000, h:1352, alt:"Original 1970 build, Scheme 1 — ground plan. Richard Hunter, 1970 (HH-CAA-0007)"}
 ];
-DRAWINGS.forEach(name => photos.push({
-  thumb: `${ARCHIVE}/${CAA}/thumbs/${name}_thumb.jpg`,
-  full:  `${ARCHIVE}/${CAA}/previews/${name}_prev.jpg`
-}));
+const DRAW_START = 16;
 
 /* hero */
 const hero = document.getElementById('hero');
 hero.addEventListener('load', ()=>hero.classList.add('loaded'));
-hero.src = photos[0].full;
+hero.src = SLIDES[0].f;
 
-/* reel — full-bleed photos at native aspect, sharpening as you scroll */
+/* reel — thumbnails that sharpen to the preview as you scroll */
 const reel = document.getElementById('reel');
 const io = new IntersectionObserver((entries)=>{
   entries.forEach(e=>{
     if(!e.isIntersecting) return;
-    const img = e.target;
-    const full = img.dataset.full;
+    const img = e.target, full = img.dataset.full;
     if(full && img.dataset.up!=='1'){
       img.dataset.up='1';
       const hi = new Image();
@@ -279,7 +257,7 @@ const io = new IntersectionObserver((entries)=>{
   });
 }, {rootMargin:"600px 0px"});
 
-photos.forEach((p,i)=>{
+SLIDES.forEach((p,i)=>{
   if(i===DRAW_START){
     const d = document.createElement('div');
     d.className='divider';
@@ -288,128 +266,38 @@ photos.forEach((p,i)=>{
   }
   const btn = document.createElement('button');
   btn.className='shot';
-  btn.setAttribute('aria-label', `Photo ${i+1}`);
+  btn.type='button';
+  btn.setAttribute('aria-label', `Open image ${i+1}: ${p.id}`);
   const img = document.createElement('img');
   img.decoding='async';
-  img.dataset.full=p.full;
-  img.src=p.thumb;                 // quick placeholder
+  img.alt = p.alt;
+  img.dataset.full = p.f;
+  img.src = p.t;                    // quick thumbnail
   img.addEventListener('load', ()=>img.classList.add('loaded'));
   const idx = document.createElement('span');
   idx.className='idx';
   idx.textContent = String(i+1).padStart(2,'0');
   btn.appendChild(img);
   btn.appendChild(idx);
-  btn.addEventListener('click', ()=>open(i));
+  btn.addEventListener('click', ()=>lightbox.loadAndOpen(i));
   reel.appendChild(btn);
   io.observe(img);
 });
 
-/* ---------- lightbox ---------- */
-const lb = document.getElementById('lb');
-const track = document.getElementById('track');
-const count = document.getElementById('count');
-let cur = 0, built = false;
-
-function buildSlides(){
-  if(built) return;
-  photos.forEach((p)=>{
-    const s = document.createElement('div');
-    s.className='lb-slide';
-    const img = document.createElement('img');
-    img.src = p.thumb;
-    img.dataset.full = p.full;
-    img.alt = '';
-    s.appendChild(img);
-    track.appendChild(s);
-  });
-  built = true;
-}
-function loadNear(){
-  [...track.children].forEach((s,i)=>{
-    const img = s.firstChild;
-    if(Math.abs(i-cur)<=1 && img.dataset.full){
-      const full = img.dataset.full;
-      delete img.dataset.full;
-      const hi = new Image();
-      hi.onload = ()=>{ img.src = full; };
-      hi.src = full;
-    }
-  });
-}
-function setPos(animate){
-  track.classList.toggle('dragging', !animate);
-  track.style.transform = `translateX(${-cur*100}%)`;
-  count.textContent = `${cur+1} / ${photos.length}`;
-}
-function open(i){
-  buildSlides();
-  cur = i;
-  lb.classList.add('open');
-  lb.setAttribute('aria-hidden','false');
-  document.body.style.overflow='hidden';
-  setPos(false);
-  requestAnimationFrame(()=>track.classList.remove('dragging'));
-  loadNear();
-}
-function close(){
-  lb.classList.remove('open');
-  lb.setAttribute('aria-hidden','true');
-  document.body.style.overflow='';
-}
-function go(d){
-  cur = Math.min(photos.length-1, Math.max(0, cur+d));
-  setPos(true);
-  loadNear();
-}
-document.getElementById('close').addEventListener('click', close);
-document.getElementById('prev').addEventListener('click', ()=>go(-1));
-document.getElementById('next').addEventListener('click', ()=>go(1));
-
-// Swipe to advance. Axis-locked: once a gesture is judged horizontal we own it
-// (preventDefault stops the browser from scrolling/refreshing mid-swipe); a
-// vertical gesture is left alone. touchmove is non-passive so preventDefault works.
-let x0=0, y0=0, dx=0, dragging=false, axis=null;
-track.addEventListener('touchstart', e=>{
-  x0=e.touches[0].clientX; y0=e.touches[0].clientY;
-  dx=0; dragging=true; axis=null;
-  track.classList.add('dragging');
-}, {passive:true});
-track.addEventListener('touchmove', e=>{
-  if(!dragging) return;
-  dx = e.touches[0].clientX - x0;
-  const dy = e.touches[0].clientY - y0;
-  if(axis===null && (Math.abs(dx)>8 || Math.abs(dy)>8))
-    axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
-  if(axis!=='x') return;            // vertical (or undecided) — don't grab it
-  e.preventDefault();              // horizontal swipe is ours
-  const w = lb.clientWidth;
-  let off = -cur*w + dx;
-  if((cur===0 && dx>0) || (cur===photos.length-1 && dx<0)) off = -cur*w + dx*0.35;
-  track.style.transform = `translateX(${off}px)`;
-}, {passive:false});
-track.addEventListener('touchend', ()=>{
-  if(!dragging) return;
-  dragging=false;
-  if(axis!=='x'){ setPos(false); return; }   // not a horizontal swipe — re-snap, no animation
-  const w = lb.clientWidth;
-  if(dx < -w*0.18) cur = Math.min(photos.length-1, cur+1);
-  else if(dx > w*0.18) cur = Math.max(0, cur-1);
-  setPos(true);
-  loadNear();
+/* fullscreen viewer — swipe between images, pinch / double-tap to zoom,
+   rotation handled by PhotoSwipe. Self-hosted, no external dependency. */
+const lightbox = new PhotoSwipeLightbox({
+  dataSource: SLIDES.map(s=>({src:s.f, msrc:s.t, width:s.w, height:s.h, alt:s.alt})),
+  pswpModule: () => import('./assets/photoswipe/photoswipe.esm.js'),
+  bgOpacity: 1,
+  initialZoomLevel: 'fit',
+  secondaryZoomLevel: 2.2,
+  maxZoomLevel: 4,
+  wheelToZoom: true,
+  loop: false,
+  pinchToClose: false
 });
-
-window.addEventListener('keydown', e=>{
-  if(!lb.classList.contains('open')) return;
-  if(e.key==='Escape') close();
-  else if(e.key==='ArrowRight') go(1);
-  else if(e.key==='ArrowLeft') go(-1);
-});
-
-// Keep the current slide centred across orientation changes / viewport resizes.
-// setPos(false) re-applies a percentage transform, so it's correct at any width.
-function recenter(){ if(lb.classList.contains('open')) setPos(false); }
-window.addEventListener('resize', recenter);
-window.addEventListener('orientationchange', ()=>setTimeout(recenter, 80));
+lightbox.init();
 </script>
 
 <!-- PWA: register the shell service worker (re-added on import). -->
