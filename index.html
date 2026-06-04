@@ -112,6 +112,14 @@
     color:var(--muted);line-height:1.55;max-width:440px;
   }
   .status-note b{color:var(--soft);font-weight:500}
+  .sigil{
+    align-self:center;
+    width:118px;max-width:46%;height:auto;
+    margin:36px 0 2px;
+    opacity:.46;
+    filter:invert(1);
+    -webkit-user-select:none;user-select:none;pointer-events:none;
+  }
 
   /* ── right: the drawing, bleeding off-edge ── */
   .right{position:relative;background:#201d1a;overflow:hidden}
@@ -152,10 +160,10 @@
   /* ── mobile: stack, drawing as a top band, page scrolls ── */
   @media (max-width:780px){
     body{overflow:auto}
-    .page{grid-template-columns:1fr;min-height:100vh;height:auto}
+    .page{grid-template-columns:1fr;min-height:100dvh;height:auto}
     .right{order:-1;height:40vh;min-height:260px}
     .right::after{background:linear-gradient(0deg,rgba(30,28,26,0.55) 0%,rgba(30,28,26,0) 30%)}
-    .left{padding:32px 24px 40px;min-height:60vh}
+    .left{padding:32px 24px calc(env(safe-area-inset-bottom) + 92px);min-height:60vh}
     .core{padding:28px 0 34px}
     .stamp{flex-direction:column;gap:5px}
     h1{font-size:clamp(56px,16vw,104px);margin-bottom:24px}
@@ -191,6 +199,7 @@
     <div class="status">
       <span class="status-note">The full public site is still being written.</span>
     </div>
+    <img class="sigil" src="assets/hunter-mark.png" alt="Richard Hunter, Architect — emblem" width="118" height="119">
   </div>
   <div class="right">
     <div class="ph-fallback"><span class="k">Drawing</span><span>HH-CAA-0007</span></div>
