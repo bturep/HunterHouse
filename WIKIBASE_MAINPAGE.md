@@ -66,7 +66,7 @@ Roll back with: edit the page text back to a prior revision's content (history i
 5. **"Six source collections" de-determined.** Brandon: more collections will come. Page
    now says "a growing set of source collections; more are expected as material is
    processed." Don't reintroduce a hard count.
-6. **Source-collections table** shows *live catalogued counts* (HHC 114, CAA 35, others
+6. **Source-collections table** shows *live catalogued counts* (HHC 115, CAA 35, EGC 30, IHC 45; others
    pending), not physical-accession extents. The CAA physical accession figures (2019.61 —
    344 drawings / 62 photographs / 0.22 linear m. textual / 1955–2010) are kept inline in
    the intro paragraph instead.
@@ -104,16 +104,16 @@ Not yet in Wikibase: a dedicated "Hunter House Foundation" org item (use Q187 in
 | Work | 22 | `HH-W-1` (unpadded) |
 | Phase | 38 | `HH-PH-23` (unpadded) |
 | Area | 36 | `HH-A-1` (unpadded) |
-| Archive Item | 149 | `HH-HHC-0004` / `HH-CAA-0002` (**4-digit padded — the real scheme**) |
+| Archive Item | 225 | `HH-HHC-0004` / `HH-CAA-0002` (**4-digit padded — the real scheme**) |
 | Person | 33 | `HH-P-1` (unpadded) |
 | Event | 5 | `HH-E-8` (unpadded) |
 | Institution | 20 | `HH-I-1` (unpadded) |
 | Building | 3 | `HH-B-1` (unpadded) |
 | Place | — | no P2 (Wikidata-linked) |
 
-- Archive items by source collection: **HHC 114** (110 with preview image) · **CAA 35**
-  (35 with image). Other four collections: 0 catalogued yet.
-- ~485 total entity items; only 306 carry any P2. ~150 are the browse.html-visible
+- Archive items by source collection: **HHC 115** · **CAA 35** · **EGC 30** · **IHC 45** = 225 archive items.
+  Remaining collections (Fulker, Frances Hunter): 0 catalogued yet.
+- ~485 total entity items; only 382 carry any P2. ~225 are the browse.html-visible
   archive items (P2 + P96).
 - `wdt:` prefix on this instance = `https://hunterhouse.wikibase.cloud/prop/direct/`
   (NOT the wikidata.org default — SPARQL fails silently/0-results without the explicit
@@ -180,13 +180,15 @@ print(r["edit"]["result"], "rev", r["edit"].get("newrevid"), "was", r["edit"].ge
 
 ## Change log
 
+- **2026-06-04** — Synced mirror to live (now rev 5217). Drift-audit corrections: archive items 149→225, HHC 114→115, EGC (30) + IHC (45) marked Catalogued, web-rendered URL → www.hunterhousefoundation.com. Embedded wikitext refreshed verbatim; prose counts updated.
+
 - **2026-05-17** — Created this continuity file. Page at rev 4439. Session work:
   reframed Main Page from biography → technical data-model entry point (rev 4438),
   then dropped ID-prefix column + de-determined collection count (rev 4439).
 
 ---
 
-## Canonical current wikitext (= live rev 4439 — verbatim)
+## Canonical current wikitext (= live rev 5217 — verbatim)
 
 Everything between the fences is the exact page source. Keep this updated to match the
 live page whenever you publish.
@@ -237,13 +239,13 @@ The archive draws on a growing set of source collections; more are expected as m
 {| class="wikitable" style="font-size:0.95em;"
 ! Collection !! Custodian !! Catalogued here !! Status
 |-
-| '''[[Item:Q180|Hunter House Collection]]''' || [[Item:Q187|Hunter House Stewardship Project]] || 114 archive items || Primary collection
+| '''[[Item:Q180|Hunter House Collection]]''' || [[Item:Q187|Hunter House Stewardship Project]] || 115 archive items || Primary collection
 |-
-| '''[[Item:Q182|Eric Gesinger Collection]]''' || [[Item:Q209|Eric Gesinger]] || — || Pending processing
+| '''[[Item:Q182|Eric Gesinger Collection]]''' || [[Item:Q209|Eric Gesinger]] || 30 archive items || Catalogued
 |-
 | '''[[Item:Q181|Frances Hunter Collection]]''' || [[Item:Q202|Frances Hunter]] || — || Pending processing
 |-
-| '''[[Item:Q183|Ivan Hunter Collection]]''' || [[Item:Q203|Ivan Hunter]] || — || Pending processing
+| '''[[Item:Q183|Ivan Hunter Collection]]''' || [[Item:Q203|Ivan Hunter]] || 45 archive items || Catalogued
 |}
 
 = Data model =
@@ -259,7 +261,7 @@ The archive is organized into nine Item Types, each with its own controlled voca
 |-
 | '''Area''' || Named architectural sub-parts of a Work — wings, rooms, towers, gardens, decks, built features || 36
 |-
-| '''Archive Item''' || The primary materials, sub-typed by medium: drawing, photograph, engineering document, land survey, permit set, ephemera || 149
+| '''Archive Item''' || The primary materials, sub-typed by medium: drawing, photograph, engineering document, land survey, permit set, ephemera || 225
 |-
 | '''Person''' || Individuals connected to Hunter's practice and to the archive || 33
 |-
@@ -280,6 +282,6 @@ Structured metadata: [https://creativecommons.org/publicdomain/zero/1.0/ CC0], p
 
 * '''Browse''' — [[Special:AllPages]] · [[Special:ListProperties]] · [[Special:Search]]
 * '''Query''' — [https://hunterhouse.wikibase.cloud/query SPARQL endpoint]
-* '''Web-rendered view''' — [https://bturep.github.io/HunterHouse/ bturep.github.io/HunterHouse], a queried front end over this Wikibase. The Foundation's public-facing site will be at hunterhousefoundation.com.
+* '''Web-rendered view''' — [https://www.hunterhousefoundation.com/ www.hunterhousefoundation.com], a queried front end over this Wikibase.
 * '''Source''' — [https://github.com/bturep/HunterHouse github.com/bturep/HunterHouse]
 ```

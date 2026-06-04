@@ -26,6 +26,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 const ALLOW_ORIGINS = new Set([
+  "https://www.hunterhousefoundation.com",
   "https://bturep.github.io",
   "http://localhost:8777",
   "http://127.0.0.1:8777",
