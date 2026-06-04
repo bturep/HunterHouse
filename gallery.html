@@ -181,14 +181,15 @@
   .foot a:hover{color:var(--fg);border-color:var(--line);}
   .foot .sep{opacity:.4;}
 
-  /* PhotoSwipe theming to match the dark surface */
+  /* PhotoSwipe theming + hide the zoom button (pinch / double-tap zoom instead) */
   .pswp{--pswp-bg:#0d0c0b;--pswp-placeholder-bg:#211f1c;}
+  .pswp__button--zoom{display:none!important;}
 </style>
 </head>
 <body>
 
 <section class="hero">
-  <img class="hero-img" id="hero" alt="The Hunter Residence, 203 Goward Road">
+  <img class="hero-img" id="hero" alt="The Hunter Residence, 203 Goward Road at dusk">
   <div class="hero-scrim"></div>
   <div class="plate">
     <h1>Hunter House</h1>
@@ -213,10 +214,7 @@
 import PhotoSwipeLightbox from './assets/photoswipe/photoswipe-lightbox.esm.js';
 
 // Each slide carries its real preview pixel size so PhotoSwipe zooms accurately.
-const A = "https://archive.hunterhousefoundation.com";
 const SLIDES = [
-  {id:"HH-IHC-0003", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0003_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0003_HunterHouse_2024_prev.jpg", w:2000, h:1869, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0003)"},
-  {id:"HH-IHC-0006", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0006_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0006_HunterHouse_2024_prev.jpg", w:2000, h:936, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0006)"},
   {id:"HH-IHC-0008", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0008_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0008_HunterHouse_2024_prev.jpg", w:1486, h:2000, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0008)"},
   {id:"HH-IHC-0009", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0009_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0009_HunterHouse_2024_prev.jpg", w:2000, h:840, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0009)"},
   {id:"HH-IHC-0015", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0015_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0015_HunterHouse_2024_prev.jpg", w:1425, h:2000, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0015)"},
@@ -229,17 +227,19 @@ const SLIDES = [
   {id:"HH-IHC-0030", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0030_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0030_HunterHouse_2024_prev.jpg", w:2000, h:1312, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0030)"},
   {id:"HH-IHC-0036", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0036_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0036_HunterHouse_2024_prev.jpg", w:2000, h:1016, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0036)"},
   {id:"HH-IHC-0037", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0037_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0037_HunterHouse_2024_prev.jpg", w:2000, h:1229, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0037)"},
-  {id:"HH-IHC-0038", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0038_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg", w:2000, h:1734, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0038)"},
   {id:"HH-IHC-0039", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0039_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0039_HunterHouse_2024_prev.jpg", w:2000, h:1333, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0039)"},
+  {id:"HH-IHC-0038", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0038_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg", w:2000, h:1734, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0038)"},
+  {id:"HH-IHC-0003", t:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/thumbs/HH-IHC-0003_HunterHouse_2024_thumb.jpg", f:"https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0003_HunterHouse_2024_prev.jpg", w:2000, h:1869, alt:"The Hunter Residence, 203 Goward Road, Saanich — photograph (HH-IHC-0003)"},
   {id:"HH-CAA-0018", t:"https://archive.hunterhousefoundation.com/canadian-architecture-archive/thumbs/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_thumb.jpg", f:"https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg", w:2000, h:1995, alt:"Scheme II coloured pencil studies — house, studio and garden. Richard Hunter, 1985 (HH-CAA-0018)"},
   {id:"HH-CAA-0007", t:"https://archive.hunterhousefoundation.com/canadian-architecture-archive/thumbs/HH-CAA-0007_OG_Build_1970_Scheme_1_1of3_1970-08-25_thumb.jpg", f:"https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0007_OG_Build_1970_Scheme_1_1of3_1970-08-25_prev.jpg", w:2000, h:1352, alt:"Original 1970 build, Scheme 1 — ground plan. Richard Hunter, 1970 (HH-CAA-0007)"}
 ];
-const DRAW_START = 16;
+const DRAW_START = 15;
+const HERO_SRC = "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0003_HunterHouse_2024_prev.jpg";
 
-/* hero */
+/* hero — pinned to the IHC-0003 exterior (independent of reel order) */
 const hero = document.getElementById('hero');
 hero.addEventListener('load', ()=>hero.classList.add('loaded'));
-hero.src = SLIDES[0].f;
+hero.src = HERO_SRC;
 
 /* reel — thumbnails that sharpen to the preview as you scroll */
 const reel = document.getElementById('reel');
