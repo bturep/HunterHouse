@@ -53,15 +53,17 @@ ALLOWED_ACTIONS = {
     "wbeditentity",   # admins can mint new vocab/person items via the picker (mint-new affordance)
 }
 # Origins allowed to call this proxy from the browser.
-# - Production: exact match on the live custom domain
-#   https://www.hunterhousefoundation.com, plus the legacy GitHub Pages origin
-#   https://bturep.github.io (Pages still serves the repo there). No subdomain
-#   extension, no custom port.
+# - Production: exact match on the live custom domain https://hunterhouse.org
+#   (canonical as of 2026-06-05), the previous canonical
+#   https://www.hunterhousefoundation.com (now 301-redirects to .org, kept for
+#   safety), plus the legacy GitHub Pages origin https://bturep.github.io (Pages
+#   still serves the repo there). No subdomain extension, no custom port.
 # - Local dev: any port on http(s)://localhost or http(s)://127.0.0.1.
 #   Attacker control of those hosts implies box compromise — different
 #   threat model — so port flexibility is fine here.
 # The match is performed by origin_allowed() below, not by string prefix.
 ALLOWED_REMOTE_ORIGINS = frozenset({
+    "https://hunterhouse.org",
     "https://www.hunterhousefoundation.com",
     "https://bturep.github.io",
 })
