@@ -3019,7 +3019,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.02";
+  const VERSION      = "v1.09-test.03";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6889,13 +6889,16 @@ WHERE {
       closeAllDropdowns();
     });
 
-    // ⓘ next to each Collection chip — pop a per-collection blurb.
-    panel.querySelectorAll(".fp-info").forEach(btn =>
-      btn.addEventListener("click", e => {
-        e.stopPropagation();
-        openCollectionInfo(btn.dataset.collInfo, btn);
-      })
-    );
+    // ⓘ next to each Collection chip — show a per-collection blurb on HOVER
+    // (closes on hover-out, after a short grace so the pointer can travel into
+    // the popover to use its links). Click is kept as a touch fallback, since
+    // hover never fires on touch devices.
+    panel.querySelectorAll(".fp-info").forEach(btn => {
+      const open = () => { clearTimeout(_fpiCloseT); openCollectionInfo(btn.dataset.collInfo, btn); };
+      btn.addEventListener("mouseenter", open);
+      btn.addEventListener("mouseleave", scheduleCloseCollectionInfo);
+      btn.addEventListener("click", e => { e.stopPropagation(); open(); });
+    });
 
     [
       ["collection",  state.filterCollection  ],
@@ -8237,20 +8240,25 @@ WHERE {
   function toggleInfoPane(){ infoPane.classList.contains("open") ? closeInfoPane() : openInfoPane(); }
 
   // ── Filter-panel collection ⓘ popover ──────────────────────────────────
+  let _fpiCloseT;
+  function scheduleCloseCollectionInfo() {
+    clearTimeout(_fpiCloseT);
+    _fpiCloseT = setTimeout(closeCollectionInfo, 220);
+  }
   function openCollectionInfo(abbrev, anchor) {
     const info = COLLECTION_INFO[abbrev];
     if (!info) return;
+    clearTimeout(_fpiCloseT);
     let pop = document.getElementById("fp-info-pop");
     if (!pop) {
       pop = document.createElement("div");
       pop.id = "fp-info-pop";
       pop.hidden = true;
+      // Keep open while the pointer is over the popover itself (so its links are
+      // reachable); close shortly after it leaves.
+      pop.addEventListener("mouseenter", () => clearTimeout(_fpiCloseT));
+      pop.addEventListener("mouseleave", scheduleCloseCollectionInfo);
       document.body.appendChild(pop);
-    }
-    // Toggle off if clicking the same ⓘ while open
-    if (!pop.hidden && pop.dataset.anchor === abbrev) {
-      closeCollectionInfo();
-      return;
     }
     const qidUrl = `https://hunterhouse.wikibase.cloud/wiki/Item:${info.qid}`;
     pop.innerHTML = `
