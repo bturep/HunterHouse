@@ -27,10 +27,10 @@ enabled = true
 # Writes are best-effort: with this binding absent the endpoints still function
 # (they just record to Workers Logs only), so the site never breaks on it.
 #
-# ⚠ ENABLE-ONCE: Analytics Engine must be turned on for the account before this
-# binding will deploy — one click at
-#   https://dash.cloudflare.com/628a738b1d9d965f53070f1729bcf596/workers/analytics-engine
-# Then UNCOMMENT the three lines below and re-run `npx wrangler deploy`.
-# [[analytics_engine_datasets]]
-# binding = "AE"
-# dataset = "hhf_archive_events"
+# Analytics Engine enabled on the account 2026-06-06; dataset created in the
+# dashboard as "Hunter_House_Archive". The binding name MUST stay "AE" — the
+# Worker reads env.AE (src/worker.js). The dataset name is arbitrary and just
+# needs to match the dashboard dataset.
+[[analytics_engine_datasets]]
+binding = "AE"
+dataset = "Hunter_House_Archive"
