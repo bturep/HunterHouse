@@ -43,15 +43,15 @@ honours Do-Not-Track / Global-Privacy-Control. Each hit:
 - `console.log`s a structured line → **Workers Logs** (dashboard → this Worker →
   Logs) and `wrangler tail`. Works on any plan.
 - best-effort writes one point to **Workers Analytics Engine** (dataset
-  `hhf_archive_events`; column map in `src/worker.js`).
+  `Hunter_House_Archive`; column map in `src/worker.js`).
 
-**Enable-once for the Analytics Engine sink** (the `console.log` path needs
-nothing): Analytics Engine is gated behind an account toggle. Turn it on at
-`https://dash.cloudflare.com/628a738b1d9d965f53070f1729bcf596/workers/analytics-engine`,
-then **uncomment the `[[analytics_engine_datasets]]` block in `wrangler.toml`**
-and `npx wrangler deploy`. Query later via the Analytics Engine SQL API. Until
-then the binding is commented out so deploys succeed, and usage is still visible
-in Workers Logs.
+**Analytics Engine — enabled 2026-06-06.** AE is on for the account and the
+dataset `Hunter_House_Archive` exists (created in the dashboard); the
+`[[analytics_engine_datasets]]` binding in `wrangler.toml` is live (`binding =
+"AE"`, the name the Worker reads via `env.AE`). Query via the Analytics Engine
+SQL API. The `console.log` → Workers Logs path runs regardless, so usage is
+visible there too. If the binding is ever removed the endpoints still function —
+they just stop writing data points.
 
 ## STATUS (2026-05-30): uploaded but NOT yet live — two setup steps remain
 
