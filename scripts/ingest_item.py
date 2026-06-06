@@ -331,6 +331,20 @@ def main():
     except Exception as _e:
         print(f"  ⚠ sidecar sync skipped (non-fatal): {_e}")
 
+    # Generate the static permalink page archive/<ID>.html (best-effort). The
+    # Wikibase Query Service lags item creation by up to a minute, so if the new
+    # item isn't queryable yet the page lands on the next run — re-run
+    # `python3 scripts/build_item_pages.py` (also the session-end step that
+    # picks up ANY catalogue change, edits included). Fail-safe like the sidecar.
+    try:
+        subprocess.run(
+            ["python3", os.path.join(os.path.dirname(__file__),
+                                     "build_item_pages.py"), "--one", ARCH_ID],
+            timeout=120, check=False,
+        )
+    except Exception as _e:
+        print(f"  ⚠ permalink page generation skipped (non-fatal): {_e}")
+
     shutil.rmtree(work, ignore_errors=True)
 
 
