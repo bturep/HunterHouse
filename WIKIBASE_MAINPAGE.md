@@ -50,7 +50,7 @@ Roll back with: edit the page text back to a prior revision's content (history i
    was removed at Brandon's request (belongs on the Foundation site). Its old `<div>` was
    also malformed (`style=` missing opening quote) — moot now, but note if it ever returns.
 2. **"Hunter House Foundation" is NOT an item.** The Wikibase models the organisational
-   steward as **Q187 "Hunter House Stewardship Project"**. Use Q187; do not invent/link a
+   steward as **Q187 "Hunter House Foundation"**. Use Q187; do not invent/link a
    "Hunter House Foundation" item. This also keeps Foundation branding off the technical page.
 3. **CAA disambiguation:** the institution/repository is **Q178** (`archive`,
    "institutional archive at the University of Calgary"). **Q116** is a *different* item
@@ -84,7 +84,7 @@ Roll back with: edit the page text back to a prior revision's content (history i
 | Frances Hunter (person; old page said "Frances Mead Hunter") | **Q202** | human |
 | Eric Gesinger | **Q209** | human |
 | Ivan Hunter | **Q203** | human |
-| Hunter House Stewardship Project (the org steward) | **Q187** | stewardship project |
+| Hunter House Foundation (the org steward) | **Q187** | stewardship project |
 | Richard Hunter fonds (fonds-level item) | **Q179** | archival collection (fonds) |
 | Canadian Architectural Archives — repository/institution | **Q178** | archive |
 | Canadian Architectural Archives — *do not use as repo* | Q116 | rights/permission item, same label |
@@ -172,7 +172,7 @@ print(r["edit"]["result"], "rev", r["edit"].get("newrevid"), "was", r["edit"].ge
   needs the RAD/custody caveat noted in CLAUDE.md (series currently encodes physical
   custody, not creator function — deferred archival-standards item).
 - If a real "Hunter House Foundation" org item is ever created in the Wikibase, revisit
-  decision #2 (currently routed to Q187 Stewardship Project).
+  decision #2 (currently routed to Q187 Hunter House Foundation).
 - Other four collections (Fulker / Gesinger / Frances / Ivan) show "—" / pending — update
   counts here and on the page when any are catalogued.
 
@@ -180,6 +180,7 @@ print(r["edit"]["result"], "rev", r["edit"].get("newrevid"), "was", r["edit"].ge
 
 ## Change log
 
+- **2026-06-06** — Synced mirror to live (now rev 5222). Renamed the org steward **Q187** label "Hunter House Stewardship Project" → **"Hunter House Foundation"** (no separate Foundation item existed; Q187 stays an *instance of* the "stewardship project" class Q7 — name vs type). Main_Page display text updated to match (2× piped link + "the stewardship project itself" → "the Foundation itself"). Mirror prose/notes updated; the lowercase "stewardship project" in the Q187 reference table (the class) and "separate stewardship" (generic) left intact.
 - **2026-06-06** — Synced mirror to live (now rev 5219). Web-rendered URL updated to the canonical bare apex **hunterhouse.org** (was www.hunterhousefoundation.com), completing the 2026-06-05 domain cutover for this page; prose reference updated to match. Edit made manually in the Wikibase UI (bot CLI path blocked by macOS TCC on `~/Documents/.env`).
 - **2026-06-04** — Synced mirror to live (now rev 5217). Drift-audit corrections: archive items 149→225, HHC 114→115, EGC (30) + IHC (45) marked Catalogued, web-rendered URL → www.hunterhousefoundation.com. Embedded wikitext refreshed verbatim; prose counts updated.
 
@@ -201,7 +202,7 @@ __NOTOC__
 
 = About =
 
-This Wikibase is the structured record of the architectural archive catalogued by the [[Item:Q187|Hunter House Stewardship Project]]: the drawings, photographs, surveys, permits, and related materials documenting the design and continuous revision of the [[Item:Q234|Hunter Residence]] at 203 Goward Road, Prospect Lake, Saanich, British Columbia, together with the broader body of work by [[Item:Q201|Richard Morrow Hunter]]. Biographical and narrative context is maintained separately on the Foundation's public site; this instance is the data layer.
+This Wikibase is the structured record of the architectural archive catalogued by the [[Item:Q187|Hunter House Foundation]]: the drawings, photographs, surveys, permits, and related materials documenting the design and continuous revision of the [[Item:Q234|Hunter Residence]] at 203 Goward Road, Prospect Lake, Saanich, British Columbia, together with the broader body of work by [[Item:Q201|Richard Morrow Hunter]]. Biographical and narrative context is maintained separately on the Foundation's public site; this instance is the data layer.
 
 It is an open-data archive built on [https://wikiba.se/ Wikibase], the knowledge-graph software underlying [https://www.wikidata.org/ Wikidata]. Items are persistent and individually addressable by URI; statements are typed [https://www.w3.org/TR/rdf11-concepts/ RDF triples] carrying qualifiers, references, and ranks; the catalogue is [https://www.w3.org/TR/sparql11-query/ SPARQL]-queryable and federable against external [https://www.w3.org/wiki/LinkedData Linked Open Data] endpoints. Archival description follows [https://www.wikidata.org/wiki/Wikidata:GLAM GLAM] conventions and the [https://github.com/CCA-Public/digital-archives-manual Canadian Centre for Architecture's Digital Archives Manual], with multi-level arrangement at fonds, series, file, and item. Items are aligned to external identifiers (Q-IDs) for cross-catalogue reconciliation.
 
@@ -240,7 +241,7 @@ The archive draws on a growing set of source collections; more are expected as m
 {| class="wikitable" style="font-size:0.95em;"
 ! Collection !! Custodian !! Catalogued here !! Status
 |-
-| '''[[Item:Q180|Hunter House Collection]]''' || [[Item:Q187|Hunter House Stewardship Project]] || 115 archive items || Primary collection
+| '''[[Item:Q180|Hunter House Collection]]''' || [[Item:Q187|Hunter House Foundation]] || 115 archive items || Primary collection
 |-
 | '''[[Item:Q182|Eric Gesinger Collection]]''' || [[Item:Q209|Eric Gesinger]] || 30 archive items || Catalogued
 |-
@@ -268,7 +269,7 @@ The archive is organized into nine Item Types, each with its own controlled voca
 |-
 | '''Event''' || Dated occurrences — exhibitions, sojourns, interviews, site visits, screenings || 5
 |-
-| '''Institution''' || Source repositories, covenant holders, educational and religious bodies, the stewardship project itself || 20
+| '''Institution''' || Source repositories, covenant holders, educational and religious bodies, the Foundation itself || 20
 |-
 | '''Building''' || Discrete physical structures designed by others that Hunter renovated or added to || 3
 |-
