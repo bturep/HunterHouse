@@ -36,7 +36,7 @@ Roll back with: edit the page text back to a prior revision's content (history i
 
 - **Technical / data-model entry point.** Not a biography. Hunter-the-person narrative,
   "character of the record", and "design arcs" were deliberately removed — that material
-  lives on the Foundation's public site (hunterhousefoundation.com), not here.
+  lives on the Foundation's public site (hunterhouse.org), not here.
 - This Wikibase page is **the data layer**: what the archive *is* structurally, how it is
   arranged, what the item model is, rights, and endpoints.
 - Source text for the technical framing was lifted from `browse.html`'s about-pane
@@ -180,6 +180,7 @@ print(r["edit"]["result"], "rev", r["edit"].get("newrevid"), "was", r["edit"].ge
 
 ## Change log
 
+- **2026-06-06** — Synced mirror to live (now rev 5219). Web-rendered URL updated to the canonical bare apex **hunterhouse.org** (was www.hunterhousefoundation.com), completing the 2026-06-05 domain cutover for this page; prose reference updated to match. Edit made manually in the Wikibase UI (bot CLI path blocked by macOS TCC on `~/Documents/.env`).
 - **2026-06-04** — Synced mirror to live (now rev 5217). Drift-audit corrections: archive items 149→225, HHC 114→115, EGC (30) + IHC (45) marked Catalogued, web-rendered URL → www.hunterhousefoundation.com. Embedded wikitext refreshed verbatim; prose counts updated.
 
 - **2026-05-17** — Created this continuity file. Page at rev 4439. Session work:
@@ -282,6 +283,6 @@ Structured metadata: [https://creativecommons.org/publicdomain/zero/1.0/ CC0], p
 
 * '''Browse''' — [[Special:AllPages]] · [[Special:ListProperties]] · [[Special:Search]]
 * '''Query''' — [https://hunterhouse.wikibase.cloud/query SPARQL endpoint]
-* '''Web-rendered view''' — [https://www.hunterhousefoundation.com/ www.hunterhousefoundation.com], a queried front end over this Wikibase.
+* '''Web-rendered view''' — [https://hunterhouse.org/ hunterhouse.org], a queried front end over this Wikibase.
 * '''Source''' — [https://github.com/bturep/HunterHouse github.com/bturep/HunterHouse]
 ```
