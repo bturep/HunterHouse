@@ -12,17 +12,41 @@
 // the Worker calls the R2 S3 endpoint cross-account, signed with a READ-ONLY R2
 // API token supplied as Worker secrets.
 //
-// Downloads do NOT pass through this Worker — each file links to its public URL
-// https://archive.hunterhousefoundation.com/<key>, served by the R2 custom
-// domain. This Worker is purely a directory index.
+// As of 2026-06-06 this Worker also carries two tiny, cookieless analytics
+// endpoints so the Foundation can see how the archive is used WITHOUT handing
+// the data to a third party or needing Cloudflare-dashboard access in Floyd's
+// account (everything stays in Brandon's own account, like the listing does):
+//
+//   GET  /dl?key=<bucket-key>   — logs a download, then 302-redirects to the
+//                                 file's public URL. The browser ends up at the
+//                                 same archive.hunterhousefoundation.com/<key>
+//                                 it would have hit directly, so behaviour is
+//                                 unchanged — we just get to count it.
+//   POST /event                 — a fire-and-forget usage beacon from the SPA
+//                                 (item views, searches, tool opens). text/plain
+//                                 body so it stays a CORS-simple request.
+//
+// Both write to Workers Analytics Engine (best-effort) AND console.log a
+// structured line (visible in Workers Logs / `wrangler tail`) so usage is
+// observable even before the Analytics Engine SQL API is wired. No cookies, no
+// identifiers, no stored IPs — only coarse country, added at the edge.
 //
 // Config:
 //   vars    R2_ACCOUNT_ID, R2_BUCKET                (wrangler.toml [vars])
 //   secrets R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY  (wrangler secret put)
+//   binding AE  → Analytics Engine dataset           (wrangler.toml; optional —
+//                 writes are best-effort, the endpoints work without it)
 //
-// Endpoint: GET /list?prefix=<key-prefix>&cursor=<continuation-token>
-//   → { prefix, folders:[{type,key,name}],
-//       files:[{type,key,name,size,uploaded}], truncated, cursor }
+// Endpoints:
+//   GET  /list?prefix=<key-prefix>&cursor=<continuation-token>
+//        → { prefix, folders:[…], files:[…], truncated, cursor }
+//   GET  /dl?key=<bucket-key>     → 302 to the public archive URL (logged)
+//   POST /event   {t,id,q,n,p}    → 204 (logged)
+//
+// Analytics Engine column map (one dataset, flexible schema):
+//   blob1 event type   blob2 item id   blob3 collection (HHC/CAA/EGC/IHC/…)
+//   blob4 detail (search query | download tier)   blob5 country   blob6 page|referrer
+//   double1 count (search result count, or 1 per download)   index1 collection|type
 // ─────────────────────────────────────────────────────────────────────────
 
 const ALLOW_ORIGINS = new Set([
@@ -37,7 +61,7 @@ function corsHeaders(origin) {
   const allow = ALLOW_ORIGINS.has(origin) ? origin : "https://bturep.github.io";
   return {
     "Access-Control-Allow-Origin": allow,
-    "Access-Control-Allow-Methods": "GET, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     "Vary": "Origin",
   };
@@ -68,6 +92,68 @@ function isHiddenKey(key) {
   if (HIDDEN_PREFIXES.some((p) => key === p || key.startsWith(p))) return true;
   return key.split("/").filter(Boolean)
     .some((seg) => HIDDEN_SEGMENTS.has(seg) || seg.startsWith("_"));
+}
+
+// ── Cookieless usage analytics (download redirect + event beacon) ───────────
+const PUBLIC_BASE = "https://archive.hunterhousefoundation.com";
+// Whitelisted beacon event types — anything else is dropped, so the endpoint
+// can't be turned into an arbitrary data sink.
+const EVENT_TYPES = new Set([
+  "view", "search", "search0", "deeplink",
+  "collection", "curation", "timeline", "files",
+]);
+// Collection code from an archive id, e.g. "HH-CAA-0018" → "CAA".
+function collectionOf(id) {
+  const m = /^HH-([A-Za-z]+)-/.exec(id || "");
+  return m ? m[1] : "";
+}
+// Best-effort Analytics Engine write — a no-op (never throws) if the binding
+// isn't present, so the endpoints keep working on any plan.
+function writePoint(env, blobs, doubles, index) {
+  try {
+    if (env.AE && env.AE.writeDataPoint) {
+      env.AE.writeDataPoint({ blobs, doubles, indexes: index ? [index] : [] });
+    }
+  } catch (_) { /* analytics must never break a request */ }
+}
+
+async function recordEvent(request, env, origin) {
+  // Only accept beacons from our own pages — keeps random POSTers out.
+  if (!ALLOW_ORIGINS.has(origin)) return;
+  let body;
+  try { body = JSON.parse((await request.text()) || "{}"); } catch (_) { return; }
+  const t = String(body.t || "");
+  if (!EVENT_TYPES.has(t)) return;
+  const id   = String(body.id || "").slice(0, 40);
+  const q    = String(body.q  || "").slice(0, 80);
+  const n    = Number.isFinite(+body.n) ? +body.n : 0;
+  const page = String(body.p  || "").slice(0, 60);
+  const country = (request.cf && request.cf.country) || "";
+  const coll = collectionOf(id);
+  console.log(JSON.stringify({ ev: t, id, coll, q, n, country, page }));
+  writePoint(env, [t, id, coll, q, country, page], [n], coll || t);
+}
+
+function downloadRedirect(request, env, url, cors) {
+  const key = url.searchParams.get("key") || "";
+  // Bucket-relative keys only — reject absolute URLs, protocol-relative,
+  // path traversal, and anything the listing hides.
+  if (!key || /^https?:|^\/\/|:\/\/|\.\./.test(key) || isHiddenKey(key)) {
+    return new Response("Bad key", { status: 400, headers: cors });
+  }
+  const coll = key.split("/")[0] || "";
+  const tier = key.split("/")[1] || "";   // masters/previews/large/thumbs/pdf
+  const country = (request.cf && request.cf.country) || "";
+  const ref = (request.headers.get("Referer") || "").slice(0, 80);
+  console.log(JSON.stringify({ ev: "download", coll, tier, key, country, ref }));
+  writePoint(env, ["download", "", coll, tier, country, ref], [1], coll || "download");
+  const target = PUBLIC_BASE + "/" + key.split("/").map(encodeURIComponent).join("/");
+  return new Response(null, {
+    status: 302,
+    // no-store so every click re-hits the Worker and is counted (a cached
+    // redirect would silently undercount repeat downloads).
+    headers: { "Location": target, "Cache-Control": "no-store", ...cors },
+  });
 }
 
 // ── AWS SigV4 (minimal, GET-only, empty body) via Web Crypto ────────────────
@@ -164,11 +250,27 @@ export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
     const cors = corsHeaders(origin);
+    const url = new URL(request.url);
 
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
-    if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405, headers: cors });
 
-    const url = new URL(request.url);
+    // ── Usage beacon (POST) ──────────────────────────────────────────────
+    if (url.pathname === "/event") {
+      if (request.method !== "POST")
+        return new Response("Method Not Allowed", { status: 405, headers: cors });
+      await recordEvent(request, env, origin);
+      return new Response(null, { status: 204, headers: cors });
+    }
+
+    // ── Tracked download → 302 to the public file ────────────────────────
+    if (url.pathname === "/dl") {
+      if (request.method !== "GET")
+        return new Response("Method Not Allowed", { status: 405, headers: cors });
+      return downloadRedirect(request, env, url, cors);
+    }
+
+    // ── Directory listing (the original purpose) ─────────────────────────
+    if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405, headers: cors });
     if (url.pathname !== "/list") return new Response("Not Found", { status: 404, headers: cors });
 
     if (!env.R2_ACCESS_KEY_ID || !env.R2_SECRET_ACCESS_KEY) {

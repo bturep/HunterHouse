@@ -17,13 +17,41 @@ is deployed in **Brandon's own account** (`628a…`, full Workers rights) and
 reaches the bucket cross-account over the signed S3 endpoint with a **read-only
 R2 token**.
 
-## Endpoint
+## Endpoints
 
 ```
-GET /list?prefix=<key-prefix>&cursor=<continuation-token>
+GET  /list?prefix=<key-prefix>&cursor=<continuation-token>
 → { prefix, folders:[{type,key,name}], files:[{type,key,name,size,uploaded}],
     truncated, cursor }
+
+GET  /dl?key=<bucket-key>      → 302 to https://archive.hunterhousefoundation.com/<key>
+                                 (logs a download first; behaviour unchanged for
+                                 the visitor — same file, we just count it)
+
+POST /event   {t,id,q,n,p}     → 204  (cookieless usage beacon from the SPA:
+                                 item views, searches, deep-links, tool opens)
 ```
+
+### Cookieless usage analytics (added 2026-06-06)
+
+`/dl` and `/event` let the Foundation see how the archive is used **without a
+third-party tracker and without needing dashboard access in Floyd's account** —
+everything stays in Brandon's own account, like the listing does. No cookies, no
+identifiers, no stored IPs; only coarse country (added at the edge). The SPA
+honours Do-Not-Track / Global-Privacy-Control. Each hit:
+
+- `console.log`s a structured line → **Workers Logs** (dashboard → this Worker →
+  Logs) and `wrangler tail`. Works on any plan.
+- best-effort writes one point to **Workers Analytics Engine** (dataset
+  `hhf_archive_events`; column map in `src/worker.js`).
+
+**Enable-once for the Analytics Engine sink** (the `console.log` path needs
+nothing): Analytics Engine is gated behind an account toggle. Turn it on at
+`https://dash.cloudflare.com/628a738b1d9d965f53070f1729bcf596/workers/analytics-engine`,
+then **uncomment the `[[analytics_engine_datasets]]` block in `wrangler.toml`**
+and `npx wrangler deploy`. Query later via the Analytics Engine SQL API. Until
+then the binding is commented out so deploys succeed, and usage is still visible
+in Workers Logs.
 
 ## STATUS (2026-05-30): uploaded but NOT yet live — two setup steps remain
 

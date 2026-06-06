@@ -16,3 +16,21 @@ R2_BUCKET = "hunter-house-archive"
 # Secrets (NOT stored here) — set once after deploy with a READ-ONLY R2 token:
 #   npx wrangler secret put R2_ACCESS_KEY_ID
 #   npx wrangler secret put R2_SECRET_ACCESS_KEY
+
+# Workers Logs — structured console.log lines from /dl and /event are queryable
+# in the dashboard (Workers & Pages → this Worker → Logs) and `wrangler tail`.
+[observability]
+enabled = true
+
+# Cookieless usage analytics sink. Each /dl and /event hit writes one data point
+# (column map in src/worker.js). Query later via the Analytics Engine SQL API.
+# Writes are best-effort: with this binding absent the endpoints still function
+# (they just record to Workers Logs only), so the site never breaks on it.
+#
+# ⚠ ENABLE-ONCE: Analytics Engine must be turned on for the account before this
+# binding will deploy — one click at
+#   https://dash.cloudflare.com/628a738b1d9d965f53070f1729bcf596/workers/analytics-engine
+# Then UNCOMMENT the three lines below and re-run `npx wrangler deploy`.
+# [[analytics_engine_datasets]]
+# binding = "AE"
+# dataset = "hhf_archive_events"

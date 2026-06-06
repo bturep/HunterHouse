@@ -1,0 +1,6 @@
+# Hunter House Foundation — https://hunterhouse.org
+# The whole site is public and meant to be found. Crawl freely.
+User-agent: *
+Allow: /
+
+Sitemap: https://hunterhouse.org/sitemap.xml
