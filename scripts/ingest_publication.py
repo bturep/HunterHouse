@@ -345,6 +345,16 @@ def main():
     except Exception as _e:
         print(f"  ⚠ sidecar sync skipped (non-fatal): {_e}")
 
+    # Static permalink page (best-effort; WDQS lag → re-run build_item_pages.py).
+    try:
+        subprocess.run(
+            ["python3", os.path.join(os.path.dirname(__file__),
+                                     "build_item_pages.py"), "--one", ARCH_ID],
+            timeout=120, check=False,
+        )
+    except Exception as _e:
+        print(f"  ⚠ permalink page generation skipped (non-fatal): {_e}")
+
     shutil.rmtree(work, ignore_errors=True)
 
 
