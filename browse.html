@@ -3025,7 +3025,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08.01";
+  const VERSION      = "v1.08.02";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3067,8 +3067,21 @@
   const TELEMETRY_OK = !(navigator.doNotTrack === "1" ||
                          window.doNotTrack === "1" ||
                          navigator.globalPrivacyControl === true);
+  // Per-device opt-out: visiting any analytics page with ?noanalytics=1 sets a
+  // local flag so THIS browser never sends analytics again (?noanalytics=0
+  // clears it). Lets the maintainer exclude their own devices — covers both the
+  // event beacons and tracked downloads. No IP, no server state.
+  const ANALYTICS_OPTOUT_KEY = "hhf_analytics_optout";
+  try {
+    const _na = new URLSearchParams(location.search).get("noanalytics");
+    if (_na === "1") { localStorage.setItem(ANALYTICS_OPTOUT_KEY, "1"); setTimeout(() => hhToast("Analytics off for this device"), 600); }
+    else if (_na === "0") { localStorage.removeItem(ANALYTICS_OPTOUT_KEY); setTimeout(() => hhToast("Analytics re-enabled for this device"), 600); }
+  } catch (_) {}
+  function analyticsOptedOut() {
+    try { return localStorage.getItem(ANALYTICS_OPTOUT_KEY) === "1"; } catch (_) { return false; }
+  }
   function hhTrack(t, data) {
-    if (!TELEMETRY_OK || !navigator.sendBeacon) return;
+    if (!TELEMETRY_OK || analyticsOptedOut() || !navigator.sendBeacon) return;
     try {
       const payload = Object.assign(
         { t, p: (location.pathname.split("/").pop() || "browse.html") }, data || {});
@@ -3083,7 +3096,7 @@
   // downloads exactly as before, we just get to count it). Non-archive URLs and
   // empty values pass straight through untouched.
   function trackedDl(u) {
-    if (!u || u.indexOf(R2_ARCHIVE_BASE) !== 0) return u;
+    if (!u || u.indexOf(R2_ARCHIVE_BASE) !== 0 || analyticsOptedOut()) return u;
     try {
       const key = decodeURIComponent(u.slice(R2_ARCHIVE_BASE.length));
       return ANALYTICS_BASE + "/dl?key=" + encodeURIComponent(key);
