@@ -1,0 +1,65 @@
+# Monthly analytics rollup.
+#
+# Cloudflare Analytics Engine only retains raw data points for ~90 days. This
+# workflow snapshots each completed month's aggregates into a permanent file in
+# the repo (data/analytics/<YYYY-MM>.json + monthly-summary.csv), so the
+# long-term usage history survives even after the raw points expire.
+#
+# Runs on the 1st of each month (rolls up the prior month). Can also be run
+# manually from the Actions tab (optionally for a specific past month).
+#
+# Needs one repo secret: CF_ANALYTICS_TOKEN — a Cloudflare API token scoped
+# "Account Analytics: Read" on the account that owns the dataset (628a…). It is
+# read-only: it cannot touch R2, DNS, Workers, or anything else.
+name: analytics-rollup
+
+on:
+  schedule:
+    - cron: '0 6 1 * *'    # 06:00 UTC on the 1st → previous calendar month
+  workflow_dispatch:
+    inputs:
+      month:
+        description: 'Month to roll up (YYYY-MM). Blank = previous calendar month.'
+        required: false
+        default: ''
+
+permissions:
+  contents: write           # to commit the rollup file back to the repo
+
+jobs:
+  rollup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install deps
+        run: pip install requests
+
+      - name: Run rollup
+        env:
+          CF_ANALYTICS_TOKEN: ${{ secrets.CF_ANALYTICS_TOKEN }}
+          INPUT_MONTH: ${{ github.event.inputs.month }}
+        run: |
+          if [ -n "$INPUT_MONTH" ]; then
+            python3 scripts/rollup_analytics.py --month "$INPUT_MONTH"
+          else
+            python3 scripts/rollup_analytics.py
+          fi
+
+      - name: Commit rollup
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/analytics
+          if git diff --cached --quiet; then
+            echo "No analytics changes to commit."
+          else
+            git commit -m "chore: monthly analytics rollup"
+            git push
+          fi

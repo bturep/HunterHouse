@@ -1,0 +1,76 @@
+{
+  "period": "2026-06",
+  "dataset": "Hunter_House_Archive",
+  "totals": {
+    "events": 18,
+    "views": 12,
+    "searches": 1,
+    "zero_result_searches": 1,
+    "downloads": 2
+  },
+  "events_by_type": {
+    "search0": 1,
+    "view": 12,
+    "search": 1,
+    "deeplink": 2,
+    "download": 2
+  },
+  "top_items": [
+    {
+      "id": "HH-CAA-0018",
+      "views": 5
+    },
+    {
+      "id": "HH-HHC-0066",
+      "views": 2
+    },
+    {
+      "id": "HH-EGC-0018",
+      "views": 1
+    },
+    {
+      "id": "HH-EGC-0005",
+      "views": 1
+    },
+    {
+      "id": "HH-CAA-0002",
+      "views": 1
+    },
+    {
+      "id": "HH-EGC-0022",
+      "views": 1
+    },
+    {
+      "id": "HH-IHC-0006",
+      "views": 1
+    }
+  ],
+  "top_searches": [
+    {
+      "q": "floor plan",
+      "n": 1
+    }
+  ],
+  "zero_result_searches": [
+    {
+      "q": "nonexistent thing",
+      "n": 1
+    }
+  ],
+  "downloads_by_collection": [
+    {
+      "collection": "ivan-hunter-collection",
+      "n": 1
+    },
+    {
+      "collection": "eric-gesinger-collection",
+      "n": 1
+    }
+  ],
+  "by_country": [
+    {
+      "country": "CA",
+      "n": 18
+    }
+  ]
+}
