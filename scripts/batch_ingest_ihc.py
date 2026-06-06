@@ -313,6 +313,17 @@ def main():
 
     shutil.rmtree(WORK, ignore_errors=True)
 
+    # Static permalink pages (best-effort, full rebuild). WDQS lags batch
+    # creation; re-run `python3 scripts/build_item_pages.py` if items are missing
+    # (also the session-end step that syncs ANY catalogue change, edits included).
+    try:
+        subprocess.run(
+            ["python3", os.path.join(os.path.dirname(__file__), "build_item_pages.py")],
+            timeout=300, check=False,
+        )
+    except Exception as _e:
+        print(f"  ⚠ permalink page generation skipped (non-fatal): {_e}")
+
     print(f"\n══════════════════ DONE ══════════════════")
     for arch_id, qid in results:
         print(f"  {arch_id}  {qid}  https://hunterhouse.wikibase.cloud/wiki/Item:{qid}")
