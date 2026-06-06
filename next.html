@@ -224,6 +224,9 @@
     margin-bottom:4px;
   }
   .ap-ver{font-family:var(--mono);font-size:10px;color:var(--hint);letter-spacing:0.06em;margin-bottom:32px}
+  .ap-priv{font-size:10px;line-height:1.55;color:var(--hint);letter-spacing:0.03em;margin-top:20px}
+  .ap-priv a{color:var(--muted);border-bottom:1px solid var(--rule)}
+  .ap-priv a:hover{color:var(--ink)}
   .ap-section{margin-bottom:24px}
   .ap-section-head{
     font-family:var(--mono);font-size:9px;letter-spacing:0.22em;text-transform:uppercase;
@@ -2700,6 +2703,7 @@
         <button class="cur-continue" id="mob-about-continue">Continue to archive →</button>
       </div>
     </div>
+    <p class="ap-priv">Usage is measured anonymously to help us catalogue what people look for — no cookies, no IP addresses, no third-party trackers. <a href="about.html#privacy">More&nbsp;→</a></p>
   </div>
 </div>
 
@@ -3014,7 +3018,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08-test.29";
+  const VERSION      = "v1.08-test.30";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3041,6 +3045,60 @@
   // EVERYONE (not just returning visitors with a localStorage cache) during a
   // Wikibase outage. Allowed in the CSP connect-src.
   const SNAPSHOT_URL = "https://archive.hunterhousefoundation.com/catalogue/catalogue.json";
+
+  // ── Cookieless usage analytics ──────────────────────────────────────────
+  // Fire-and-forget beacons to our own Worker (the same one that lists the R2
+  // bucket), which records to Workers Logs + Analytics Engine — all in
+  // Brandon's own Cloudflare account, no third party. We store NO cookies, NO
+  // identifiers, and NO IP (coarse country is added at the edge, server-side).
+  // Tracked: item views, searches (incl. zero-result), deep-links, and tool
+  // opens. Downloads are counted server-side via the /dl redirect (trackedDl
+  // below), so there's no separate download beacon. Browser Do-Not-Track and
+  // Global-Privacy-Control are honoured — set either and nothing is sent.
+  const ANALYTICS_BASE = "https://hhf-r2-browser.brandon-628.workers.dev";
+  const R2_ARCHIVE_BASE = "https://archive.hunterhousefoundation.com/";
+  const TELEMETRY_OK = !(navigator.doNotTrack === "1" ||
+                         window.doNotTrack === "1" ||
+                         navigator.globalPrivacyControl === true);
+  function hhTrack(t, data) {
+    if (!TELEMETRY_OK || !navigator.sendBeacon) return;
+    try {
+      const payload = Object.assign(
+        { t, p: (location.pathname.split("/").pop() || "browse.html") }, data || {});
+      // text/plain Blob keeps this a CORS-simple request (no preflight, which
+      // sendBeacon can't do); the Worker parses the body as JSON text.
+      navigator.sendBeacon(ANALYTICS_BASE + "/event",
+        new Blob([JSON.stringify(payload)], { type: "text/plain" }));
+    } catch (_) { /* telemetry must never break the app */ }
+  }
+  // Route a public R2 archive URL through the Worker's /dl, which logs the hit
+  // then 302s to the very same file (behaviour unchanged — image opens / PDF
+  // downloads exactly as before, we just get to count it). Non-archive URLs and
+  // empty values pass straight through untouched.
+  function trackedDl(u) {
+    if (!u || u.indexOf(R2_ARCHIVE_BASE) !== 0) return u;
+    try {
+      const key = decodeURIComponent(u.slice(R2_ARCHIVE_BASE.length));
+      return ANALYTICS_BASE + "/dl?key=" + encodeURIComponent(key);
+    } catch (_) { return u; }
+  }
+  // Debounced view/search beacons so holding ↑/↓ or fast typing logs only the
+  // item/term actually landed on, not every transient frame.
+  let _hhViewT = null, _hhLastView = null, _hhSearchT = null;
+  function trackView(id) {
+    if (!id || id === _hhLastView) return;
+    clearTimeout(_hhViewT);
+    _hhViewT = setTimeout(() => { _hhLastView = id; hhTrack("view", { id }); }, 650);
+  }
+  function trackSearch() {
+    clearTimeout(_hhSearchT);
+    _hhSearchT = setTimeout(() => {
+      const q = (state.search || "").trim();
+      if (!q) return;
+      const n = (state.filtered || []).length;
+      hhTrack(n ? "search" : "search0", { q: q.slice(0, 80), n });
+    }, 900);
+  }
 
   // ── Wikibase property identifiers — single source of truth ──────────────
   // Audit §11.2 LOW (introduced 2026-05-22, test.52): PIDs were previously
@@ -5859,6 +5917,7 @@ WHERE {
 
   function enterCuration(c) {
     state.curation = c;
+    hhTrack("curation", { id: (c && c.slug) || "" });
     closeCuratorPane();
     // Body-level flag drives the CSS chrome stripdown (browse-bar, search,
     // [?] info button, data-footer) — see the body.hh-in-curation rules.
@@ -6079,7 +6138,7 @@ WHERE {
     }
 
     const dlBtn = $("#if-full");
-    dlBtn.href = item.master || url;
+    dlBtn.href = trackedDl(item.master || url);
     dlBtn.style.visibility = item.master ? "" : "hidden";
 
     // Derive thumb and large URLs from the _prev.jpg P96 URL
@@ -6641,6 +6700,7 @@ WHERE {
     renderImage(item);
     renderMeta(item);
     updateCurPager();
+    trackView(id);
 
     const url = new URL(location.href);
     url.searchParams.set("id", id);
@@ -6879,6 +6939,7 @@ WHERE {
       if (!state.filtered.find(i => i.id === state.selectedId) && state.filtered.length) {
         selectItem(state.filtered[0].id, { scrollIntoView:false });
       }
+      trackSearch();
     });
 
     const composeBtn = document.getElementById("hh-compose-btn");
@@ -7753,6 +7814,7 @@ WHERE {
 
     // ── Open / close / esc / resize ───────────────────────────────────────
     function tlOpen(){
+      hhTrack("timeline", {});
       document.body.classList.add("tl-open");
       const cap = document.getElementById("tl-caption");
       if (cap) cap.textContent = "1930 — 2023 · " + TL_EVENTS.length + " events";
@@ -7841,7 +7903,7 @@ WHERE {
         row.innerHTML = '<span class="f-ico">' + FB_FILE_ICO + '</span>' +
           '<span class="f-name" title="' + escapeHTML(f.name) + '">' + escapeHTML(f.name) + '</span>' +
           '<span class="f-size">' + fbFmtSize(f.size) + '</span>' +
-          '<a class="f-dl" href="' + url + '" target="_blank" rel="noopener" download>↓ get</a>';
+          '<a class="f-dl" href="' + trackedDl(url) + '" target="_blank" rel="noopener" download>↓ get</a>';
         const thumb = fbThumb(f.key, f.name);
         if (thumb){
           const ico = row.querySelector(".f-ico");
@@ -7892,6 +7954,7 @@ WHERE {
     }
     function fbOpen(){
       if (!canMark()) return;   // researchers + admin only
+      hhTrack("files", {});
       document.body.classList.add("files-open");
       fbNavigate(_fb.prefix);
     }
@@ -8248,7 +8311,7 @@ WHERE {
     if (el("pdf-close")) el("pdf-close").hidden = !pdfMode;
     if (el("pdf-dl")) {
       el("pdf-dl").hidden = !hasPdf;
-      el("pdf-dl").href   = hasPdf ? item.accessCopy : "#";
+      el("pdf-dl").href   = hasPdf ? trackedDl(item.accessCopy) : "#";
     }
     if (el("if-full"))   el("if-full").hidden   = hasPdf;
   }
@@ -8499,6 +8562,9 @@ WHERE {
         ? urlId
         : defaultItem?.id;
       if (target) selectItem(target, { scrollIntoView: true, tap: !!urlId });
+      // Distinct from an in-session view: someone arrived straight at an item
+      // via a shared / external deep-link.
+      if (urlId && target === urlId) hhTrack("deeplink", { id: urlId });
 
     } catch (err) {
       console.error(err);

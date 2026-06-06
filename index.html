@@ -16,6 +16,35 @@
 <meta property="og:url" content="https://hunterhouse.org/">
 <link rel="canonical" href="https://hunterhouse.org/">
 
+<!-- Structured data: tells crawlers what this site IS and links the Foundation
+     to Richard Hunter's Wikidata item (Q139959908). -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://hunterhouse.org/#foundation",
+      "name": "Hunter House Foundation",
+      "url": "https://hunterhouse.org/",
+      "description": "Stewards the residence and architectural archive of architect Richard Morrow Hunter (1930–2023) at 203 Goward Road, Saanich, British Columbia — an openly catalogued, queryable archive.",
+      "knowsAbout": {
+        "@type": "Person",
+        "name": "Richard Morrow Hunter",
+        "sameAs": "https://www.wikidata.org/wiki/Q139959908"
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://hunterhouse.org/#website",
+      "url": "https://hunterhouse.org/",
+      "name": "Hunter House Foundation",
+      "publisher": { "@id": "https://hunterhouse.org/#foundation" }
+    }
+  ]
+}
+</script>
+
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
