@@ -61,6 +61,7 @@ COLLECTION_FOLDER = {
     "HHC": "hunter-house-collection",
     "CAA": "canadian-architecture-archive",
     "EGC": "eric-gesinger-collection",
+    "IHC": "ivan-hunter-collection",
 }
 
 
