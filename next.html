@@ -2710,6 +2710,10 @@
 
   /* ── RECORD ────────────────────────────────────────────────────────────── */
   #bd-record{ padding:16px; gap:16px; }
+  /* Don't let the flex column shrink the image stage (its 60vh inner scroll +
+     overflow:hidden would otherwise be clipped to a sliver). Children keep their
+     content height; the record view itself scrolls. */
+  #bd-record > *{ flex:0 0 auto; }
   .bd-btn{
     display:inline-flex; align-items:center; justify-content:center; gap:10px;
     min-height:64px; padding:14px 22px;
@@ -3367,7 +3371,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.04";
+  const VERSION      = "v1.09-test.05";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9049,7 +9053,11 @@ WHERE {
     }
   }
   async function bdStartRecording() {
+    // Immediate feedback — on a real device getUserMedia blocks on the
+    // permission prompt, and silence here reads as "the button did nothing".
+    bd$("bd-rec-indicator").textContent = "Requesting the microphone…";
     try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error("no getUserMedia");
       const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
       const AC = window.AudioContext || window.webkitAudioContext;
       const ac = new AC();
@@ -9060,9 +9068,12 @@ WHERE {
       // mic is the fidelity ceiling; WAV prevents FURTHER loss — it adds nothing.
       if (ac.audioWorklet) {
         await ac.audioWorklet.addModule("assets/baden/pcm-worklet.js");
-        const node = new AudioWorkletNode(ac, "pcm-capture", { numberOfInputs: 1, numberOfOutputs: 0, channelCount: 1 });
+        // One (silent) output, connected to destination, so the graph keeps
+        // pulling process() — see the worklet file for why. Input is captured,
+        // not passed through, so nothing is heard.
+        const node = new AudioWorkletNode(ac, "pcm-capture", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1], channelCount: 1 });
         node.port.onmessage = e => { chunks.push(e.data); session.length += e.data.length; };
-        srcNode.connect(node); session.node = node;
+        srcNode.connect(node); node.connect(ac.destination); session.node = node;
       } else {
         const node = ac.createScriptProcessor(4096, 1, 1);
         node.onaudioprocess = e => { const f = new Float32Array(e.inputBuffer.getChannelData(0)); chunks.push(f); session.length += f.length; };
