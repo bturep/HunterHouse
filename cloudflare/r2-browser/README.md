@@ -30,7 +30,36 @@ GET  /dl?key=<bucket-key>      → 302 to https://archive.hunterhousefoundation.
 
 POST /event   {t,id,q,n,p}     → 204  (cookieless usage beacon from the SPA:
                                  item views, searches, deep-links, tool opens)
+
+POST /api/notes                → 201  (Baden-mode notes → R2; see below)
 ```
+
+### Baden-mode notes (added 2026-06-11)
+
+`POST /api/notes` receives Mowry Baden's annotations from the viewing room
+(`?for=baden`) and writes them to R2, **byte-exact, no transcode**. Two shapes:
+
+- **text** — `Content-Type: application/json`, body = the note + metadata →
+  stored at `baden-notes/<item_id>/<created>.json`.
+- **audio** — `multipart/form-data` with `meta` (JSON sidecar) + `audio` (the WAV
+  blob) → stored at `baden-notes/<item_id>/<file>.wav` plus `<file>.wav.json`.
+  The WAV is an uncompressed 24-bit mono PCM **preservation master**.
+
+Only our own origins may POST (origin-checked). `item_id` must match
+`HH-<COLL>-<n>`. Transcription happens **downstream on the server**, not here.
+
+**Storage = a native R2 binding (`NOTES_BUCKET`)**, which is write-capable —
+unlike the cross-account read-only S3 keys used for `/list`. Native bindings are
+same-account only, so the notes bucket lives in **Brandon's own account** and is
+**separate from the archive bucket**, which therefore stays read-only end-to-end.
+
+One-time setup before notes can be received:
+```bash
+npx wrangler r2 bucket create hhf-baden-notes   # the NOTES_BUCKET in wrangler.toml
+npx wrangler deploy
+```
+Until deployed, the app saves notes on the iPad and queues them; they upload as
+soon as the Worker is live (nothing is lost).
 
 ### Cookieless usage analytics (added 2026-06-06)
 

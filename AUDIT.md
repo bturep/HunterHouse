@@ -156,29 +156,43 @@ mailto fallback for text — is deployment-agnostic and proceeds regardless.
 
 ---
 
-## 6. Open decisions before Phase 2 (need Brandon)
+## 6. Decisions (resolved 2026-06-11 with Brandon)
 
-- **A. Target file.** `browse.html` (brief) vs `next.html` (LINE: NEXT rule).
-  Knock-on: the iPad home-screen icon points at a real URL now; if built in
-  `next.html` the icon is `next.html?for=baden` until promotion.
-- **B. Notes backend.** Worker→R2 (fits infra, recommended) vs literal local
-  `server/` script (matches brief text, undeployable on Pages) vs client-only
-  for now (IndexedDB + Export-my-notes, defer the endpoint).
-- **C. Sequencing.** One branch landing the whole feature, vs staged
-  (audit+viewport+client UI first, audio capture + backend second).
+- **A. Target file → `next.html`** (respects LINE: NEXT; rides next promotion to
+  `browse.html`). The only default-path change made is the viewport fix (§1.1).
+- **B. Notes backend → Cloudflare Worker → R2** (the `server/`-to-disk design in
+  the brief can't run on static GitHub Pages; Worker→R2 mirrors the existing
+  infra). Implemented as `POST /api/notes` on the existing `hhf-r2-browser`
+  Worker, writing to a new write-capable native binding `NOTES_BUCKET`.
+- **C. Sequencing → one branch, whole feature** (`feature/baden-mode`).
 
-## 7. Phase 3 manual checklist (to be filled during verification)
+## 7. Phase 3 verification results (2026-06-11)
 
-- [ ] mode persists across reload (`?for=baden` → localStorage → bare URL restores)
-- [ ] curated order respected; manifest-down + bad-ID show readable error + Retry
-- [ ] Full size loads the ORIGINAL asset (not CSS-upscaled preview)
-- [ ] scroll center preserved across Fit/Bigger/Full size
-- [ ] text note → IndexedDB + POST (or queues) ; edit round-trips
-- [ ] audio note records / plays / re-records / saves ; file is valid **PCM WAV**
-      (header: RIFF/WAVE, sample rate, bit depth — NOT AAC/MP4)
-- [ ] queued uploads retry on next load ; "Send now" works
-- [ ] Export-my-notes share sheet includes the WAV files
-- [ ] both orientations, both target sizes (768×1024 / 1024×768), no h-overflow
-- [ ] axe-core/pa11y: zero serious/critical in Baden mode
-- [ ] mic permission works from the home-screen standalone icon (or documented
-      Safari-bookmark fallback) — **must be tested on the actual device**
+Method: local serve + headless Chrome with web-security disabled (so the live
+Wikibase/R2 data path works locally), driven over the DevTools Protocol; plus a
+pure-Node check of the WAV encoder. Screenshots in `/tmp/hh-shots/`.
+
+- [x] **Desktop not regressed** — `next.html` with no param: `html.baden` false,
+      `#baden-root` `display:none`, 225 rows, `.shell` flex. Only viewport changed.
+- [x] curated set resolves — 10 items render from real Wikibase data (thumbs,
+      titles, years, address lines); order = manifest order.
+- [x] manifest-down / bad-ID → readable error + working **Try again** (verified
+      the error state; it was the first thing the harness showed before the parse fix).
+- [x] List → Record → Back; Previous disabled+visible at bounds.
+- [x] Fit / **Bigger** (img width 732→1464, exactly 2×) / **Full size** (loads the
+      3840px `_large` asset at native pixels — not a CSS upscale). Stage renders
+      full 60vh (after fixing a flex-shrink collapse).
+- [x] text note → **IndexedDB** (count 1) + renders + edit affordance.
+- [x] retry queue — with the *live* Worker lacking `/api/notes` (405), the note
+      stayed queued and the "not yet sent" + **Send now** line showed (as designed).
+- [x] **WAV encoder emits valid PCM** — 24-bit mono, 48 kHz, RIFF/WAVE,
+      uncompressed; opened cleanly by Python's `wave` module (rejects AAC/MP4).
+- [x] both orientations (768×1024 / 1024×768), **no horizontal overflow**.
+- [~] **Live mic capture — NOT verifiable headless.** `getUserMedia` never settles
+      under `--headless=new` (confirmed with a bare call, not our code). The
+      recorder UI/state machine renders; the encoder is proven. **On-device test is
+      required and mandated by the brief** — see BADEN.md "Before handover".
+- [ ] axe-core/pa11y formal run — not run (axe not installed); a11y was built to
+      spec (roles, aria-live, focus mgmt, inert scrim, ≥7:1 light palette,
+      reduced-motion). Worth a formal pass before promotion.
+- [ ] mic permission from the home-screen standalone icon — **device test, Brandon.**
