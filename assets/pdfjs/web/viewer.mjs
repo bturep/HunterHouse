@@ -19496,7 +19496,10 @@ const PDFViewerApplication = {
 initCom(PDFViewerApplication);
 PDFPrintServiceFactory.initGlobals(PDFViewerApplication);
 {
-  const HOSTED_VIEWER_ORIGINS = new Set(["null", "http://mozilla.github.io", "https://mozilla.github.io", "https://bturep.github.io", "http://localhost", "http://127.0.0.1"]);
+  // HH PATCH: keep these origins in sync with the live domains — re-apply on any PDF.js upgrade.
+  // (Added hunterhouse.org + www.hunterhousefoundation.com after the 2026-06 domain cutover;
+  //  without them validateFileURL throws "file origin does not match viewer's" and the in-stage reader breaks.)
+  const HOSTED_VIEWER_ORIGINS = new Set(["null", "http://mozilla.github.io", "https://mozilla.github.io", "https://bturep.github.io", "https://hunterhouse.org", "https://www.hunterhousefoundation.com", "http://localhost", "http://127.0.0.1"]);
   var validateFileURL = function (file) {
     if (!file) {
       return;
