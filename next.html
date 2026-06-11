@@ -3371,7 +3371,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.05";
+  const VERSION      = "v1.09-test.06";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3442,7 +3442,7 @@
   // downloads exactly as before, we just get to count it). Non-archive URLs and
   // empty values pass straight through untouched.
   function trackedDl(u) {
-    if (!u || u.indexOf(R2_ARCHIVE_BASE) !== 0 || analyticsOptedOut()) return u;
+    if (!u || u.indexOf(R2_ARCHIVE_BASE) !== 0 || !TELEMETRY_OK || analyticsOptedOut()) return u;
     try {
       const key = decodeURIComponent(u.slice(R2_ARCHIVE_BASE.length));
       return ANALYTICS_BASE + "/dl?key=" + encodeURIComponent(key);
@@ -8738,6 +8738,10 @@ WHERE {
     audio: null,      // shared <audio> for playback
     rec: null,        // live recording session
     NOTES_API: ANALYTICS_BASE + "/api/notes",
+    // Optional shared secret for the notes write path. Empty by default (origin-
+    // gated only). To enable: set this AND `wrangler secret put NOTES_TOKEN` on the
+    // Worker to the same value. Deterrence against URL-scraping bots, not strong auth.
+    NOTES_TOKEN: "",
     AUTHOR: "Mowry Baden",
     EXPORT_EMAIL: "archive@hunterhousefoundation.com",
   };
@@ -9164,13 +9168,16 @@ WHERE {
   async function bdSendNote(n) {
     try {
       let res;
+      // Send the optional shared secret when configured (do NOT set Content-Type
+      // on the multipart path — fetch must add its own boundary).
+      const tok = BADEN.NOTES_TOKEN ? { "X-Notes-Token": BADEN.NOTES_TOKEN } : {};
       if (n.kind === "text") {
-        res = await fetch(BADEN.NOTES_API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(bdSidecar(n)) });
+        res = await fetch(BADEN.NOTES_API, { method: "POST", headers: { "Content-Type": "application/json", ...tok }, body: JSON.stringify(bdSidecar(n)) });
       } else {
         const fd = new FormData();
         fd.append("meta", JSON.stringify(bdSidecar(n)));
         fd.append("audio", n.blob, n.filename);
-        res = await fetch(BADEN.NOTES_API, { method: "POST", body: fd });
+        res = await fetch(BADEN.NOTES_API, { method: "POST", headers: tok, body: fd });
       }
       if (!res.ok) throw new Error("POST " + res.status);
       n.sent = true; if (BADEN.db) await bdPut(n);
