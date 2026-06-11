@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <title>Hunter House Archive — NEXT</title>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<!-- maximum-scale removed 2026-06-11 (Baden mode / AUDIT.md §1.1): it blocked
+     iPadOS pinch-zoom + system "Larger Text" (WCAG 1.4.4). Affects all visitors. -->
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#1a1816">
 <meta name="color-scheme" content="dark light">
 <!-- CSP: defence-in-depth. Restricts where the browser may load resources
@@ -14,7 +16,7 @@
      connect-src whitelists Wikibase Cloud (catalogue + writes) and loopback
      (the admin edit-proxy at 127.0.0.1:8731). img-src adds the R2 host that
      Wikibase URLs point at. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://archive.hunterhousefoundation.com; connect-src 'self' https://hunterhouse.wikibase.cloud https://archive.hunterhousefoundation.com https://hhf-r2-browser.brandon-628.workers.dev http://127.0.0.1:* http://localhost:*; frame-src 'self'; worker-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://archive.hunterhousefoundation.com; connect-src 'self' https://hunterhouse.wikibase.cloud https://archive.hunterhousefoundation.com https://hhf-r2-browser.brandon-628.workers.dev http://127.0.0.1:* http://localhost:*; media-src 'self' blob:; frame-src 'self'; worker-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'">
 <link rel="manifest" href="manifest.next.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -23,6 +25,37 @@
 <link rel="icon" type="image/png" href="assets/icon-192-next.png">
 <!-- Paint holdout: sets dark bg before render-blocking external CSS resolves -->
 <style>html{background:#1a1816}</style>
+<!-- ════════════════════════════════════════════════════════════════════════
+     BADEN MODE — entry + persistence (Mowry Baden viewing room).
+     Runs in <head> so html.baden is set before first paint → the desktop SPA
+     shell never flashes. ?for=baden persists the mode in localStorage so the
+     bare URL (a home-screen icon) restores it with zero input; ?for=off clears.
+     This is a COURTESY-PRIVATE url, NOT security — nothing secret lives behind
+     it. The actual Baden UI is built later (grep `function badenInit`); this
+     just decides the mode + flips the class + picks the saved theme/size early.
+     ════════════════════════════════════════════════════════════════════════ -->
+<script>
+  window.HH_BADEN = (function () {
+    var on = false;
+    try {
+      var f = new URLSearchParams(location.search).get("for");
+      if (f === "baden") { localStorage.setItem("hhf_for_baden", "1"); on = true; }
+      else if (f === "off") { localStorage.removeItem("hhf_for_baden"); on = false; }
+      else { on = localStorage.getItem("hhf_for_baden") === "1"; }
+    } catch (e) { /* private mode / disabled storage → mode off, harmless */ }
+    if (on) {
+      var r = document.documentElement;
+      r.classList.add("baden");
+      // First-paint theme + text size (light high-contrast default), so the
+      // viewing room opens in the saved appearance with no flash.
+      try {
+        if (localStorage.getItem("hhf_baden_theme") === "dark") r.classList.add("baden-dark");
+        if (localStorage.getItem("hhf_baden_text") === "lg")    r.classList.add("baden-lg");
+      } catch (e) {}
+    }
+    return on;
+  })();
+</script>
 <!-- Splash-mode pre-init: if this load will fire splash-mode (desktop), mark
      body so the header .markid renders at opacity:0 from the very first
      paint instead of flashing visible-then-fading-out as the main JS init
@@ -2576,8 +2609,323 @@
     }catch(e){}
   })();
 </script>
+<!-- ════════════════════════════════════════════════════════════════════════
+     BADEN MODE — design system (the "viewing room" for Mowry Baden).
+     Fully isolated: every rule is scoped under html.baden, and html.baden hides
+     the entire desktop SPA shell. So this block CANNOT affect ordinary visitors
+     — remove the ?for=baden flag and the page is pixel-identical to before.
+
+     Constraints encoded here (brief / AUDIT.md): single column, one view at a
+     time; ≥64px tap targets, ≥16px gaps; 22px serif base (26px via AA toggle);
+     light high-contrast default (body ≥7:1) + dark toggle; no hover-only
+     affordances; prefers-reduced-motion honoured; nothing auto-advances.
+     ════════════════════════════════════════════════════════════════════════ -->
+<style id="baden-css">
+  /* When Baden mode is on, the desktop application is removed from the page
+     entirely (display:none — not just hidden) so none of its handlers, layout,
+     or scroll containers interfere. #baden-root is the only thing shown. */
+  html.baden body > .site-top,
+  html.baden body > .shell,
+  html.baden body > #load-screen,
+  html.baden body > .mobile-tabbar,
+  html.baden body > #rotate-msg { display:none !important; }
+  html.baden, html.baden body { overflow:hidden; height:100%; }
+
+  /* Palette — light is the default (high contrast); .baden-dark overrides. */
+  html.baden {
+    --bd-bg:#f4f1ea; --bd-surface:#fffdf8; --bd-ink:#1b1815; --bd-ink-soft:#3a352f;
+    --bd-line:#cdc6b8; --bd-accent:#7a3522; --bd-accent-ink:#6e2f1e;
+    --bd-btn:#26221d; --bd-btn-ink:#fbf8f1; --bd-btn-line:#26221d;
+    --bd-rec:#8b3a2a; --bd-disabled-bg:#e7e3da; --bd-disabled-ink:#8c867a;
+    --bd-shadow:0 2px 0 rgba(0,0,0,.04);
+    --bd-fs:22px;
+  }
+  html.baden.baden-dark {
+    --bd-bg:#161412; --bd-surface:#211e19; --bd-ink:#f3efe6; --bd-ink-soft:#d3ccbe;
+    --bd-line:#3b362e; --bd-accent:#e3a684; --bd-accent-ink:#e9b496;
+    --bd-btn:#efeae0; --bd-btn-ink:#1a1714; --bd-btn-line:#efeae0;
+    --bd-rec:#e8a78f; --bd-disabled-bg:#2a2620; --bd-disabled-ink:#6b655a;
+    --bd-shadow:none;
+  }
+  html.baden.baden-lg { --bd-fs:26px; }
+
+  #baden-root{
+    position:fixed; inset:0; z-index:2147483000;
+    display:none; flex-direction:column;
+    background:var(--bd-bg); color:var(--bd-ink);
+    font-family:"Iowan Old Style", Georgia, "Times New Roman", serif;
+    font-size:var(--bd-fs); line-height:1.5;
+    -webkit-text-size-adjust:100%;
+    /* Safe-area padding so nothing hides under the iPad status bar / home bar. */
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    overflow:hidden;
+  }
+  html.baden #baden-root{ display:flex; }
+  #baden-root *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  /* ── Header ─────────────────────────────────────────────────────────────── */
+  .bd-head{
+    flex:0 0 auto; display:flex; align-items:center; gap:12px;
+    padding:16px 20px; border-bottom:2px solid var(--bd-line);
+    background:var(--bd-surface);
+  }
+  .bd-head h1{
+    margin:0; flex:1 1 auto; font-size:.86em; font-weight:600; letter-spacing:.01em;
+    color:var(--bd-ink); line-height:1.25;
+  }
+  .bd-head .bd-tool{
+    flex:0 0 auto; min-width:64px; min-height:64px;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-family:"JetBrains Mono", ui-monospace, monospace; font-size:18px; font-weight:600;
+    background:transparent; color:var(--bd-ink); border:2px solid var(--bd-line);
+    border-radius:14px; cursor:pointer;
+  }
+  .bd-head .bd-tool:active{ background:var(--bd-line); }
+
+  /* ── Views (one at a time) ─────────────────────────────────────────────── */
+  .bd-view{ flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch; display:none; }
+  html.baden #baden-root[data-view="list"]   #bd-list  { display:block; }
+  html.baden #baden-root[data-view="record"] #bd-record{ display:flex; flex-direction:column; }
+
+  /* ── LIST ──────────────────────────────────────────────────────────────── */
+  #bd-list{ padding:16px; }
+  .bd-item{
+    display:flex; align-items:stretch; gap:16px; width:100%;
+    min-height:104px; margin:0 0 16px 0; padding:14px;
+    text-align:left; background:var(--bd-surface); color:var(--bd-ink);
+    border:2px solid var(--bd-line); border-radius:16px; cursor:pointer;
+    box-shadow:var(--bd-shadow);
+  }
+  .bd-item:active{ border-color:var(--bd-accent); }
+  .bd-item-thumb{
+    flex:0 0 96px; width:96px; height:auto; align-self:center;
+    background:var(--bd-disabled-bg); border-radius:10px; object-fit:cover;
+    aspect-ratio:1/1;
+  }
+  .bd-item-body{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; justify-content:center; gap:4px; }
+  .bd-item-id{ font-family:"JetBrains Mono", ui-monospace, monospace; font-size:.62em; letter-spacing:.06em; color:var(--bd-accent-ink); }
+  .bd-item-title{ font-size:1em; font-weight:600; line-height:1.3; }
+  .bd-item-year{ font-size:.72em; color:var(--bd-ink-soft); }
+  .bd-item-addr{ font-size:.78em; color:var(--bd-ink-soft); font-style:italic; line-height:1.4; margin-top:2px; }
+
+  /* ── RECORD ────────────────────────────────────────────────────────────── */
+  #bd-record{ padding:16px; gap:16px; }
+  .bd-btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    min-height:64px; padding:14px 22px;
+    font-family:inherit; font-size:.86em; font-weight:600; line-height:1.2;
+    background:var(--bd-btn); color:var(--bd-btn-ink);
+    border:2px solid var(--bd-btn-line); border-radius:14px; cursor:pointer;
+    text-decoration:none;
+  }
+  .bd-btn:active{ transform:translateY(1px); }
+  .bd-btn.bd-ghost{ background:transparent; color:var(--bd-ink); border-color:var(--bd-line); }
+  .bd-btn.bd-wide{ width:100%; }
+  .bd-btn[disabled],.bd-btn[aria-disabled="true"]{
+    background:var(--bd-disabled-bg); color:var(--bd-disabled-ink);
+    border-color:var(--bd-disabled-bg); cursor:default; pointer-events:none; opacity:1;
+  }
+  .bd-back{ align-self:flex-start; }
+
+  /* Image stage — native-scroll pan, NO custom drag handlers (tremor-safe). */
+  .bd-stage{
+    position:relative; width:100%; background:var(--bd-surface);
+    border:2px solid var(--bd-line); border-radius:16px; overflow:hidden;
+  }
+  .bd-scroll{
+    width:100%; height:60vh; min-height:280px;
+    overflow:auto; -webkit-overflow-scrolling:touch;
+    touch-action:auto; /* native momentum + pinch fallback; never `none` */
+    display:flex; align-items:center; justify-content:center;
+    background:var(--bd-surface);
+  }
+  .bd-scroll img{ display:block; max-width:100%; height:auto; user-select:none; -webkit-user-drag:none; }
+  .bd-scroll.bd-full{ align-items:flex-start; justify-content:flex-start; }
+  .bd-scroll.bd-full img{ max-width:none; } /* full-size = native pixels, scroll to pan */
+  .bd-stage-load{
+    position:absolute; inset:0; display:none; align-items:center; justify-content:center;
+    background:color-mix(in srgb, var(--bd-surface) 82%, transparent);
+    font-size:.8em; color:var(--bd-ink-soft);
+  }
+  .bd-stage.is-loading .bd-stage-load{ display:flex; }
+  .bd-caption{ font-size:.72em; color:var(--bd-ink-soft); text-align:center; }
+
+  .bd-zoom{ display:flex; gap:16px; }
+  .bd-zoom .bd-btn{ flex:1 1 0; padding:14px 8px; }
+  .bd-zoom .bd-btn[aria-pressed="true"]{ outline:3px solid var(--bd-accent); outline-offset:-3px; }
+  .bd-nav{ display:flex; gap:16px; }
+  .bd-nav .bd-btn{ flex:1 1 0; }
+
+  .bd-rec-meta{ border-top:2px solid var(--bd-line); padding-top:16px; }
+  .bd-rec-id{ font-family:"JetBrains Mono", ui-monospace, monospace; font-size:.62em; letter-spacing:.06em; color:var(--bd-accent-ink); }
+  .bd-rec-title{ font-size:1.1em; font-weight:600; line-height:1.3; margin:4px 0; }
+  .bd-rec-sub{ font-size:.78em; color:var(--bd-ink-soft); }
+  .bd-rec-addr{ font-size:.82em; color:var(--bd-ink-soft); font-style:italic; margin-top:8px; line-height:1.45; }
+
+  /* Saved notes */
+  .bd-notes{ display:flex; flex-direction:column; gap:14px; }
+  .bd-note{
+    background:var(--bd-surface); border:2px solid var(--bd-line);
+    border-radius:14px; padding:16px;
+  }
+  .bd-note-date{ font-size:.64em; color:var(--bd-ink-soft); font-family:"JetBrains Mono", ui-monospace, monospace; letter-spacing:.04em; }
+  .bd-note-text{ font-size:.92em; line-height:1.5; margin:8px 0 12px; white-space:pre-wrap; }
+  .bd-note-audio{ display:flex; align-items:center; gap:14px; margin:10px 0; }
+  .bd-note-dur{ font-size:.74em; color:var(--bd-ink-soft); font-family:"JetBrains Mono", ui-monospace, monospace; }
+  .bd-note-actions{ display:flex; gap:12px; flex-wrap:wrap; }
+  .bd-note-actions .bd-btn{ min-height:64px; }
+  .bd-note-status{ font-size:.62em; color:var(--bd-ink-soft); margin-top:8px; }
+  .bd-note-status.sent{ color:var(--bd-accent-ink); }
+
+  /* ── Sheets (full-screen overlays; inert scrim; Done-only dismiss) ──────── */
+  .bd-sheet{
+    position:fixed; inset:0; z-index:2147483600; display:none;
+    flex-direction:column; background:var(--bd-bg); color:var(--bd-ink);
+    padding:env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 16px);
+    overflow-y:auto;
+  }
+  .bd-sheet.open{ display:flex; }
+  .bd-sheet-head{ padding:16px 4px; border-bottom:2px solid var(--bd-line); }
+  .bd-sheet-id{ font-family:"JetBrains Mono", ui-monospace, monospace; font-size:.6em; letter-spacing:.06em; color:var(--bd-accent-ink); }
+  .bd-sheet-title{ font-size:1em; font-weight:600; margin-top:4px; line-height:1.3; }
+  .bd-sheet-body{ flex:1 1 auto; display:flex; flex-direction:column; gap:18px; padding:20px 4px; }
+  .bd-sheet-foot{ flex:0 0 auto; display:flex; flex-direction:column; gap:14px; padding-top:8px; }
+  .bd-choice-grid{ display:flex; flex-direction:column; gap:18px; flex:1 1 auto; justify-content:center; }
+  .bd-choice-grid .bd-btn{ min-height:120px; font-size:1em; }
+  .bd-hint{ font-size:.76em; color:var(--bd-ink-soft); line-height:1.5; }
+  .bd-area{
+    width:100%; min-height:38vh; padding:16px; resize:none;
+    font-family:inherit; font-size:1em; line-height:1.5;
+    background:var(--bd-surface); color:var(--bd-ink);
+    border:2px solid var(--bd-line); border-radius:14px;
+  }
+
+  /* Recorder */
+  .bd-rec-stage{ flex:1 1 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px; text-align:center; }
+  .bd-rec-time{ font-family:"JetBrains Mono", ui-monospace, monospace; font-size:2.6em; font-weight:600; letter-spacing:.02em; }
+  .bd-rec-dot{ width:22px; height:22px; border-radius:50%; background:var(--bd-rec); display:inline-block; vertical-align:middle; margin-right:12px; }
+  .bd-rec-indicator{ font-size:.82em; color:var(--bd-rec); font-weight:600; min-height:1.4em; }
+  @media (prefers-reduced-motion:no-preference){
+    .bd-recording .bd-rec-dot{ animation:bd-pulse 1.4s ease-in-out infinite; }
+  }
+  @keyframes bd-pulse{ 0%,100%{opacity:1} 50%{opacity:.25} }
+
+  .bd-state{ flex:1 1 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; padding:32px; text-align:center; }
+  .bd-state p{ margin:0; font-size:1em; line-height:1.5; max-width:30ch; }
+  .bd-sync{ flex:0 0 auto; display:none; align-items:center; gap:14px; padding:12px 20px; border-top:2px solid var(--bd-line); background:var(--bd-surface); font-size:.7em; color:var(--bd-ink-soft); }
+  html.baden #baden-root.has-queue .bd-sync{ display:flex; }
+  .bd-sync .bd-btn{ min-height:64px; margin-left:auto; padding:12px 18px; }
+
+  /* Honour reduced motion everywhere in the room. */
+  @media (prefers-reduced-motion:reduce){
+    #baden-root *, .bd-sheet *{ transition:none !important; animation:none !important; }
+  }
+</style>
 </head>
 <body class="loading">
+<!-- ════════════════════════════════════════════════════════════════════════
+     BADEN MODE — markup (built/populated by `function badenInit`). Present in
+     the DOM always, but only shown when html.baden is set (?for=baden). The
+     desktop SPA shell follows below, untouched. -->
+<div id="baden-root" data-view="loading" aria-label="Selected for Mowry Baden — Hunter House Archive">
+  <header class="bd-head">
+    <h1>Selected for Mowry&nbsp;Baden — Hunter House Archive</h1>
+    <button class="bd-tool" id="bd-text"  type="button" aria-label="Larger text"        title="Larger text">A+</button>
+    <button class="bd-tool" id="bd-theme" type="button" aria-label="Switch light or dark" title="Light / dark">◐</button>
+    <button class="bd-tool" id="bd-help-btn" type="button" aria-label="Help">?</button>
+  </header>
+
+  <!-- LIST -->
+  <div class="bd-view" id="bd-list" role="list" aria-label="Selected items"></div>
+
+  <!-- RECORD -->
+  <div class="bd-view" id="bd-record">
+    <button class="bd-btn bd-ghost bd-wide bd-back" id="bd-back" type="button">← Back to list</button>
+    <div class="bd-stage" id="bd-stage">
+      <div class="bd-scroll" id="bd-scroll"><img id="bd-img" alt=""></div>
+      <div class="bd-stage-load" aria-hidden="true">Loading full-size image…</div>
+    </div>
+    <p class="bd-caption" id="bd-caption" aria-live="polite"></p>
+    <div class="bd-zoom" role="group" aria-label="Image size">
+      <button class="bd-btn" id="bd-fit"      type="button" aria-pressed="true">Fit</button>
+      <button class="bd-btn" id="bd-bigger"   type="button" aria-pressed="false">Bigger</button>
+      <button class="bd-btn" id="bd-fullsize" type="button" aria-pressed="false">Full size</button>
+    </div>
+    <div class="bd-nav" role="group" aria-label="Move through the selection">
+      <button class="bd-btn bd-ghost" id="bd-prev" type="button">← Previous</button>
+      <button class="bd-btn bd-ghost" id="bd-next" type="button">Next →</button>
+    </div>
+    <div class="bd-rec-meta" id="bd-rec-meta"></div>
+    <div class="bd-notes" id="bd-notes" aria-label="Notes on this item"></div>
+    <button class="bd-btn bd-wide bd-addnote" id="bd-addnote" type="button">＋ Add a note</button>
+  </div>
+
+  <!-- loading / error state (toggled by JS) -->
+  <div class="bd-state" id="bd-state" role="status" aria-live="polite" style="display:none"></div>
+
+  <!-- unsent-notes status line -->
+  <div class="bd-sync" id="bd-sync">
+    <span id="bd-sync-text" aria-live="polite">Saved on this iPad, not yet sent.</span>
+    <button class="bd-btn bd-ghost" id="bd-sendnow" type="button">Send now</button>
+  </div>
+</div>
+
+<!-- Add-a-note: choice sheet (Speak / Type, equal prominence) -->
+<div class="bd-sheet" id="bd-choice" role="dialog" aria-modal="true" aria-labelledby="bd-choice-title">
+  <div class="bd-sheet-head"><div class="bd-sheet-id" id="bd-choice-id"></div><div class="bd-sheet-title" id="bd-choice-title">Add a note</div></div>
+  <div class="bd-sheet-body"><div class="bd-choice-grid">
+    <button class="bd-btn bd-wide" id="bd-choose-speak" type="button">🎙&nbsp; Speak a note</button>
+    <button class="bd-btn bd-wide" id="bd-choose-type"  type="button">⌨&nbsp; Type a note</button>
+  </div></div>
+  <div class="bd-sheet-foot"><button class="bd-btn bd-ghost bd-wide" id="bd-choice-cancel" type="button">Cancel</button></div>
+</div>
+
+<!-- Type a note -->
+<div class="bd-sheet" id="bd-type" role="dialog" aria-modal="true" aria-labelledby="bd-type-title">
+  <div class="bd-sheet-head"><div class="bd-sheet-id" id="bd-type-id"></div><div class="bd-sheet-title" id="bd-type-title"></div></div>
+  <div class="bd-sheet-body">
+    <textarea class="bd-area" id="bd-type-area" placeholder="Write your note…" aria-label="Your note"></textarea>
+    <p class="bd-hint">Tip: tap the microphone key on the on-screen keyboard to speak instead of type.</p>
+  </div>
+  <div class="bd-sheet-foot">
+    <button class="bd-btn bd-wide" id="bd-type-save" type="button">Save note</button>
+    <button class="bd-btn bd-ghost bd-wide" id="bd-type-cancel" type="button">Cancel</button>
+  </div>
+</div>
+
+<!-- Speak a note (archival-grade WAV capture) -->
+<div class="bd-sheet" id="bd-speak" role="dialog" aria-modal="true" aria-labelledby="bd-speak-title">
+  <div class="bd-sheet-head"><div class="bd-sheet-id" id="bd-speak-id"></div><div class="bd-sheet-title" id="bd-speak-title"></div></div>
+  <div class="bd-sheet-body">
+    <div class="bd-rec-stage">
+      <div class="bd-rec-indicator" id="bd-rec-indicator">&nbsp;</div>
+      <div class="bd-rec-time" id="bd-rec-time">0:00</div>
+    </div>
+  </div>
+  <div class="bd-sheet-foot" id="bd-speak-foot"></div>
+</div>
+
+<!-- Help -->
+<div class="bd-sheet" id="bd-help" role="dialog" aria-modal="true" aria-labelledby="bd-help-title">
+  <div class="bd-sheet-head"><div class="bd-sheet-title" id="bd-help-title">How to use this</div></div>
+  <div class="bd-sheet-body">
+    <p class="bd-hint" style="font-size:.92em;color:var(--bd-ink)">
+      <strong>Open an item.</strong> Tap any card in the list to see the drawing or photograph.</p>
+    <p class="bd-hint" style="font-size:.92em;color:var(--bd-ink)">
+      <strong>Make it bigger.</strong> Under the image, tap <em>Fit</em>, <em>Bigger</em>, or <em>Full size</em>. With Full size you can drag the image to look around. You can also pinch to zoom.</p>
+    <p class="bd-hint" style="font-size:.92em;color:var(--bd-ink)">
+      <strong>Move along.</strong> Use <em>Previous</em> and <em>Next</em> to walk through the selection, or <em>Back to list</em> to choose another.</p>
+    <p class="bd-hint" style="font-size:.92em;color:var(--bd-ink)">
+      <strong>Leave a note.</strong> Tap <em>Add a note</em>, then choose <em>Speak a note</em> or <em>Type a note</em> — both work the same; use whichever suits you. If you type, you can tap the microphone key on the keyboard to dictate.</p>
+    <p class="bd-hint" style="font-size:.92em;color:var(--bd-ink)">
+      <strong>Send your notes.</strong> Notes save on this iPad straight away. Use <em>Export my notes</em> below to send them on (AirDrop, Files, or Mail).</p>
+  </div>
+  <div class="bd-sheet-foot">
+    <button class="bd-btn bd-wide" id="bd-export" type="button">Export my notes</button>
+    <button class="bd-btn bd-ghost bd-wide" id="bd-help-done" type="button">Done</button>
+  </div>
+</div>
+
 
 <!-- Skip link: the first focusable element on the page. Visually hidden
      until keyboard focus reveals it. Lets keyboard / screen-reader users
@@ -8362,6 +8710,566 @@ WHERE {
     if (el("if-full"))   el("if-full").hidden   = hasPdf;
   }
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // BADEN MODE — the viewing room for Mowry Baden.
+  //
+  // A parallel rendering path, gated by ?for=baden (window.HH_BADEN). It REUSES
+  // state.items — the exact same Wikibase / R2-resilience data the desktop tool
+  // loads — so there is no second data path to drift, and the desktop tool is
+  // untouched. main() loads the catalogue as normal, then (if HH_BADEN) hands
+  // off to badenInit() and returns before any desktop render runs.
+  //
+  // Design rules (brief / AUDIT.md): tremor-safe — large discrete targets, no
+  // precision gestures, pointer-up firing, one view at a time, nothing auto-
+  // advances. Notes are accession material: WAV is the preservation master,
+  // IndexedDB is a cache (Safari ITP can evict it), the server (Worker→R2) is
+  // custody. No client-side transcription — that happens server-side downstream.
+  // ══════════════════════════════════════════════════════════════════════════
+  const BADEN = {
+    manifest: [],     // [{ id, address }] from curation/baden.json (order = walk)
+    seq: [],          // resolved [{ item, address }] in curated order
+    idx: 0,           // current position in seq
+    cur: null,        // current item object
+    db: null,         // IndexedDB handle
+    audio: null,      // shared <audio> for playback
+    rec: null,        // live recording session
+    NOTES_API: ANALYTICS_BASE + "/api/notes",
+    AUTHOR: "Mowry Baden",
+    EXPORT_EMAIL: "archive@hunterhousefoundation.com",
+  };
+  const bd$ = id => document.getElementById(id);
+  const bdRoot = () => bd$("baden-root");
+  const bdUID = () => (crypto.randomUUID ? crypto.randomUUID()
+                       : "n-" + Date.now().toString(36) + "-" + Math.floor(Math.random() * 1e9).toString(36));
+
+  // Image-tier URLs — same derivation the desktop renderImage uses (next.html
+  // §renderImage). `image` is the _prev.jpg (P96). Full-size displays the
+  // _large (3840px) JPEG, NOT item.master: masters are often TIF and won't
+  // render in an <img>. _large is a real higher-res asset (never a CSS upscale
+  // of the preview — brief §Image stage), so it satisfies "native pixels".
+  const bdLargeUrl = it => it.image
+    ? it.image.replace(/\/previews\//, "/large/").replace(/_prev\.jpg$/, "_large.jpg")
+    : null;
+
+  // ── IndexedDB (text notes + audio blobs together; brief §Persistence) ──────
+  function bdOpenDB() {
+    return new Promise((resolve, reject) => {
+      let req;
+      try { req = indexedDB.open("hhf_baden", 1); }
+      catch (e) { return reject(e); }
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains("notes")) {
+          const os = db.createObjectStore("notes", { keyPath: "id" });
+          os.createIndex("by_item", "item_id", { unique: false });
+          os.createIndex("by_sent", "sent", { unique: false });
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror   = () => reject(req.error);
+    });
+  }
+  function bdTx(mode) { return BADEN.db.transaction("notes", mode).objectStore("notes"); }
+  function bdPut(rec) {
+    return new Promise((res, rej) => { const r = bdTx("readwrite").put(rec); r.onsuccess = () => res(rec); r.onerror = () => rej(r.error); });
+  }
+  function bdAll() {
+    return new Promise((res, rej) => { const r = bdTx("readonly").getAll(); r.onsuccess = () => res(r.result || []); r.onerror = () => rej(r.error); });
+  }
+  function bdNotesFor(itemId) {
+    return new Promise((res, rej) => {
+      const out = [], r = bdTx("readonly").index("by_item").openCursor(IDBKeyRange.only(itemId));
+      r.onsuccess = e => { const c = e.target.result; if (c) { out.push(c.value); c.continue(); } else res(out.sort((a, b) => a.created.localeCompare(b.created))); };
+      r.onerror = () => rej(r.error);
+    });
+  }
+
+  // ── Manifest (human-editable; tolerates // and /* */ comments) ─────────────
+  async function bdLoadManifest() {
+    const res = await fetch("curation/baden.json", { cache: "no-store" });
+    if (!res.ok) throw new Error("manifest " + res.status);
+    let txt = await res.text();
+    // Strip /* block */ comments, then whole-line // comments. Line-start only,
+    // so URLs ("https://…") inside quoted string values are never touched.
+    txt = txt.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+    const data = JSON.parse(txt);
+    const arr = Array.isArray(data) ? data : (data.items || []);
+    return arr.filter(e => e && e.id).map(e => ({ id: String(e.id).trim(), address: e.address ? String(e.address) : "" }));
+  }
+
+  // ── Loading / error states ────────────────────────────────────────────────
+  function bdShowState(html) {
+    bdRoot().setAttribute("data-view", "loading");
+    const s = bd$("bd-state"); s.innerHTML = html; s.style.display = "flex";
+  }
+  function bdHideState() { bd$("bd-state").style.display = "none"; }
+  function bdError(msg, retry) {
+    bdRoot().setAttribute("data-view", "error");
+    const s = bd$("bd-state");
+    s.innerHTML = `<p>${escapeHTML(msg)}</p>`;
+    const btn = document.createElement("button");
+    btn.className = "bd-btn bd-wide"; btn.type = "button"; btn.textContent = "Try again";
+    btn.addEventListener("pointerup", () => { if (retry) retry(); });
+    s.appendChild(btn); s.style.display = "flex";
+  }
+
+  // ── Entry point — called from main() once state.items is ready ─────────────
+  async function badenInit() {
+    document.title = "Selected for Mowry Baden — Hunter House Archive";
+    bdShowState(`<p>Loading the selection…</p>`);
+    try { BADEN.db = await bdOpenDB(); } catch (e) { console.warn("IndexedDB unavailable", e); }
+    bdWireBaden();
+    bdApplyTheme(); bdApplyTextSize();
+    await bdResolveAndRender();
+    bdRetryQueue();   // fire-and-forget: push anything that didn't send last time
+  }
+
+  async function bdResolveAndRender() {
+    try {
+      BADEN.manifest = await bdLoadManifest();
+    } catch (e) {
+      bdError("The selection could not be loaded. Please check the connection and try again.", bdResolveAndRender);
+      return;
+    }
+    const byId = new Map(state.items.map(i => [i.id, i]));
+    const missing = [];
+    BADEN.seq = BADEN.manifest.map(m => {
+      const item = byId.get(m.id);
+      if (!item) { missing.push(m.id); return null; }
+      return { item, address: m.address };
+    }).filter(Boolean);
+    if (missing.length) console.warn("Baden: curated IDs not in catalogue:", missing.join(", "));
+    if (!BADEN.seq.length) {
+      bdError("None of the selected items could be found in the archive yet. Please try again.", bdResolveAndRender);
+      return;
+    }
+    bdHideState();
+    bdRenderList();
+    bdRoot().setAttribute("data-view", "list");
+  }
+
+  // ── LIST ────────────────────────────────────────────────────────────────
+  function bdRenderList() {
+    const list = bd$("bd-list");
+    list.innerHTML = "";
+    BADEN.seq.forEach((entry, i) => {
+      const it = entry.item;
+      const thumb = it.image ? it.image.replace(/\/previews\//, "/thumbs/").replace(/_prev\.jpg$/, "_thumb.jpg") : "";
+      const b = document.createElement("button");
+      b.className = "bd-item"; b.type = "button"; b.setAttribute("role", "listitem");
+      b.innerHTML =
+        (thumb ? `<img class="bd-item-thumb" src="${escapeHTML(thumb)}" alt="" loading="lazy">`
+               : `<span class="bd-item-thumb" aria-hidden="true"></span>`) +
+        `<span class="bd-item-body">` +
+          `<span class="bd-item-id">${displayId(it.id)}</span>` +
+          `<span class="bd-item-title">${formatTitle(it.title)}</span>` +
+          (it.date ? `<span class="bd-item-year">${escapeHTML((it.date || "").slice(0, 4))}</span>` : "") +
+          (entry.address ? `<span class="bd-item-addr">${escapeHTML(entry.address)}</span>` : "") +
+        `</span>`;
+      b.addEventListener("pointerup", () => bdOpenRecord(i));
+      list.appendChild(b);
+    });
+  }
+
+  // ── RECORD ────────────────────────────────────────────────────────────────
+  async function bdOpenRecord(i) {
+    BADEN.idx = Math.max(0, Math.min(i, BADEN.seq.length - 1));
+    BADEN.cur = BADEN.seq[BADEN.idx].item;
+    const it = BADEN.cur, entry = BADEN.seq[BADEN.idx];
+
+    // Image — start at Fit on the preview tier.
+    const img = bd$("bd-img");
+    img.dataset.tier = "prev";
+    img.style.transform = it.rotation ? `rotate(${it.rotation}deg)` : "";
+    img.alt = it.title ? `${it.id} — ${it.title.replace(/\s*\[.*\]\s*$/, "")}` : it.id;
+    if (it.image) { img.src = it.image; img.style.display = ""; }
+    else { img.removeAttribute("src"); img.style.display = "none"; }
+    bd$("bd-stage").classList.remove("is-loading");
+    bdSetZoom("fit");
+
+    // Meta
+    const yr = (it.date || "").slice(0, 4);
+    bd$("bd-rec-meta").innerHTML =
+      `<div class="bd-rec-id">${displayId(it.id)}</div>` +
+      `<div class="bd-rec-title">${formatTitle(it.title)}</div>` +
+      `<div class="bd-rec-sub">${[yr, it.itemType, it.sourceCollection].filter(Boolean).map(escapeHTML).join(" · ")}</div>` +
+      (entry.address ? `<div class="bd-rec-addr">${escapeHTML(entry.address)}</div>` : "");
+
+    // Nav bounds — disabled states visible, not hidden.
+    bdSetDisabled(bd$("bd-prev"), BADEN.idx === 0);
+    bdSetDisabled(bd$("bd-next"), BADEN.idx === BADEN.seq.length - 1);
+
+    await bdRenderNotes();
+    bdRoot().setAttribute("data-view", "record");
+    bd$("bd-record").scrollTop = 0;
+    bd$("bd-back").focus();
+  }
+  function bdSetDisabled(btn, on) {
+    btn.toggleAttribute("disabled", on);
+    btn.setAttribute("aria-disabled", on ? "true" : "false");
+  }
+  function bdStep(delta) {
+    const n = BADEN.idx + delta;
+    if (n >= 0 && n < BADEN.seq.length) bdOpenRecord(n);
+  }
+
+  // Image stage — Fit / Bigger / Full size. Native-scroll pan only.
+  function bdSetZoom(mode) {
+    const it = BADEN.cur; if (!it || !it.image) return;
+    const scroll = bd$("bd-scroll"), img = bd$("bd-img"), stage = bd$("bd-stage");
+    // Preserve the fractional scroll center across the size change.
+    const pcx = scroll.scrollWidth  ? (scroll.scrollLeft + scroll.clientWidth  / 2) / scroll.scrollWidth  : 0.5;
+    const pcy = scroll.scrollHeight ? (scroll.scrollTop  + scroll.clientHeight / 2) / scroll.scrollHeight : 0.5;
+    const caption = { fit: "Fit — the whole sheet", bigger: "Bigger — drag to look around", full: "Full size — original resolution; drag to look around" };
+    const apply = () => {
+      scroll.classList.toggle("bd-full", mode === "full");
+      if (mode === "fit")         { img.style.width = ""; img.style.maxWidth = "100%"; }
+      else if (mode === "bigger") { img.style.maxWidth = "none"; img.style.width = (scroll.clientWidth * 2) + "px"; }
+      else                        { img.style.maxWidth = "none"; img.style.width = "auto"; }
+      ["fit", "bigger", "full"].forEach(m =>
+        bd$("bd-" + (m === "full" ? "fullsize" : m)).setAttribute("aria-pressed", m === mode ? "true" : "false"));
+      bd$("bd-caption").textContent = caption[mode];
+      requestAnimationFrame(() => {
+        scroll.scrollLeft = Math.max(0, pcx * scroll.scrollWidth  - scroll.clientWidth  / 2);
+        scroll.scrollTop  = Math.max(0, pcy * scroll.scrollHeight - scroll.clientHeight / 2);
+      });
+    };
+    const largeUrl = bdLargeUrl(it);
+    if (mode !== "fit" && largeUrl && img.dataset.tier !== "large") {
+      stage.classList.add("is-loading");
+      const pre = new Image();
+      pre.onload  = () => { img.src = largeUrl; img.dataset.tier = "large"; stage.classList.remove("is-loading"); apply(); };
+      pre.onerror = () => { stage.classList.remove("is-loading"); apply(); };   // keep preview
+      pre.src = largeUrl;
+    } else if (mode === "fit" && img.dataset.tier !== "prev") {
+      img.src = it.image; img.dataset.tier = "prev"; apply();
+    } else { apply(); }
+  }
+
+  // ── Notes: render + edit ───────────────────────────────────────────────────
+  async function bdRenderNotes() {
+    const wrap = bd$("bd-notes"); wrap.innerHTML = "";
+    if (!BADEN.db) return;
+    let notes = [];
+    try { notes = await bdNotesFor(BADEN.cur.id); } catch (e) { return; }
+    notes.forEach(n => wrap.appendChild(bdNoteEl(n)));
+    bdUpdateSyncLine();
+  }
+  function bdFmtDate(iso) {
+    try { return new Date(iso).toLocaleString(undefined, { year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }); }
+    catch (e) { return iso; }
+  }
+  function bdNoteEl(n) {
+    const el = document.createElement("div"); el.className = "bd-note";
+    const status = n.sent ? `<div class="bd-note-status sent">Sent to the archive</div>`
+                          : `<div class="bd-note-status">Saved on this iPad — not yet sent</div>`;
+    if (n.kind === "text") {
+      el.innerHTML =
+        `<div class="bd-note-date">${escapeHTML(bdFmtDate(n.modified || n.created))}</div>` +
+        `<div class="bd-note-text">${escapeHTML(n.text)}</div>` +
+        `<div class="bd-note-actions"><button class="bd-btn bd-ghost" type="button">Edit</button></div>` + status;
+      el.querySelector("button").addEventListener("pointerup", () => bdOpenType(n));
+    } else {
+      el.innerHTML =
+        `<div class="bd-note-date">${escapeHTML(bdFmtDate(n.created))}</div>` +
+        `<div class="bd-note-audio"><button class="bd-btn" type="button">▶ Play</button>` +
+        `<span class="bd-note-dur">${bdClock(n.duration)}</span></div>` + status;
+      const btn = el.querySelector("button");
+      btn.addEventListener("pointerup", () => bdPlayBlob(n.blob, btn));
+    }
+    return el;
+  }
+  function bdClock(sec) { sec = Math.round(sec || 0); return Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0"); }
+  function bdPlayBlob(blob, btn) {
+    if (!blob) return;
+    if (BADEN.audio) { BADEN.audio.pause(); if (BADEN.audio._btn) BADEN.audio._btn.textContent = "▶ Play"; }
+    const a = new Audio(URL.createObjectURL(blob)); a._btn = btn; BADEN.audio = a;
+    btn.textContent = "❚❚ Playing…";
+    a.onended = () => { btn.textContent = "▶ Play"; URL.revokeObjectURL(a.src); };
+    a.play().catch(() => { btn.textContent = "▶ Play"; });
+  }
+
+  // ── Add-a-note flow ─────────────────────────────────────────────────────────
+  function bdItemTag(el) {
+    bd$(el + "-id").textContent = displayId(BADEN.cur.id);
+    const t = bd$(el + "-title"); if (t) t.innerHTML = formatTitle(BADEN.cur.title);
+  }
+  function bdOpenChoice() {
+    bd$("bd-choice-id").textContent = displayId(BADEN.cur.id);
+    bd$("bd-choice-title").innerHTML = formatTitle(BADEN.cur.title);
+    bdOpenSheet("bd-choice");
+  }
+  // Type ----------------------------------------------------------------------
+  function bdOpenType(existing) {
+    BADEN.editing = existing || null;
+    bdItemTag("bd-type");
+    const area = bd$("bd-type-area");
+    area.value = existing ? existing.text : "";
+    bdOpenSheet("bd-type");
+    setTimeout(() => area.focus(), 60);
+  }
+  async function bdSaveType() {
+    const text = bd$("bd-type-area").value.trim();
+    if (!text) { bdCloseSheet("bd-type"); return; }
+    const now = new Date().toISOString();
+    let rec;
+    if (BADEN.editing) {
+      rec = { ...BADEN.editing, text, modified: now, sent: false };
+    } else {
+      rec = { id: bdUID(), kind: "text", item_id: BADEN.cur.id, text, created: now, modified: now, author: BADEN.AUTHOR, sent: false };
+    }
+    BADEN.editing = null;
+    try { if (BADEN.db) await bdPut(rec); } catch (e) { console.warn("IDB put failed", e); }
+    bdCloseSheet("bd-type");
+    await bdRenderNotes();
+    bdSendNote(rec);   // best-effort; queues on failure
+  }
+  // Speak ---------------------------------------------------------------------
+  function bdOpenSpeak() {
+    bdItemTag("bd-speak");
+    BADEN.rec = null;
+    bd$("bd-rec-time").textContent = "0:00";
+    bd$("bd-rec-indicator").innerHTML = "&nbsp;";
+    bdSpeakButtons("idle");
+    bdOpenSheet("bd-speak");
+  }
+  function bdSpeakButtons(stateName) {
+    const foot = bd$("bd-speak-foot"); foot.innerHTML = "";
+    const mk = (id, label, ghost) => { const b = document.createElement("button"); b.id = id; b.type = "button"; b.className = "bd-btn bd-wide" + (ghost ? " bd-ghost" : ""); b.textContent = label; foot.appendChild(b); return b; };
+    if (stateName === "idle") {
+      mk("bd-rec-start", "● Start recording").addEventListener("pointerup", bdStartRecording);
+      mk("bd-rec-cancel", "Cancel", true).addEventListener("pointerup", () => bdCloseSpeak());
+    } else if (stateName === "recording") {
+      mk("bd-rec-stop", "■ Stop").addEventListener("pointerup", bdStopRecording);
+    } else { // reviewed
+      mk("bd-rec-play", "▶ Play").addEventListener("pointerup", bdReviewPlay);
+      mk("bd-rec-redo", "↻ Re-record", true).addEventListener("pointerup", () => { bdDiscardTake(); bdStartRecording(); });
+      mk("bd-rec-save", "Save note").addEventListener("pointerup", bdSaveSpeak);
+      mk("bd-rec-cancel2", "Cancel", true).addEventListener("pointerup", () => bdCloseSpeak());
+    }
+  }
+  async function bdStartRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
+      const AC = window.AudioContext || window.webkitAudioContext;
+      const ac = new AC();
+      if (ac.state === "suspended") await ac.resume();
+      const srcNode = ac.createMediaStreamSource(stream);
+      const chunks = []; const session = { stream, ac, srcNode, chunks, length: 0, sampleRate: ac.sampleRate, t0: performance.now() };
+      // Raw PCM via AudioWorklet (preferred), ScriptProcessor fallback. The iPad
+      // mic is the fidelity ceiling; WAV prevents FURTHER loss — it adds nothing.
+      if (ac.audioWorklet) {
+        await ac.audioWorklet.addModule("assets/baden/pcm-worklet.js");
+        const node = new AudioWorkletNode(ac, "pcm-capture", { numberOfInputs: 1, numberOfOutputs: 0, channelCount: 1 });
+        node.port.onmessage = e => { chunks.push(e.data); session.length += e.data.length; };
+        srcNode.connect(node); session.node = node;
+      } else {
+        const node = ac.createScriptProcessor(4096, 1, 1);
+        node.onaudioprocess = e => { const f = new Float32Array(e.inputBuffer.getChannelData(0)); chunks.push(f); session.length += f.length; };
+        srcNode.connect(node); node.connect(ac.destination); session.node = node;
+      }
+      BADEN.rec = session;
+      bdRoot().classList.add("bd-recording"); bd$("bd-speak").classList.add("bd-recording");
+      bd$("bd-rec-indicator").innerHTML = `<span class="bd-rec-dot"></span>Recording`;
+      bdSpeakButtons("recording");
+      session.timer = setInterval(() => { bd$("bd-rec-time").textContent = bdClock((performance.now() - session.t0) / 1000); }, 250);
+    } catch (e) {
+      console.warn("getUserMedia failed", e);
+      bd$("bd-rec-indicator").textContent = "Microphone unavailable. See the setup note, or type a note instead.";
+    }
+  }
+  function bdStopRecording() {
+    const s = BADEN.rec; if (!s) return;
+    clearInterval(s.timer);
+    try { s.node.disconnect(); s.srcNode.disconnect(); } catch (e) {}
+    s.stream.getTracks().forEach(t => t.stop());
+    s.duration = (performance.now() - s.t0) / 1000;
+    s.blob = bdEncodeWAV(s.chunks, s.length, s.sampleRate, 24);
+    try { s.ac.close(); } catch (e) {}
+    bd$("bd-speak").classList.remove("bd-recording"); bdRoot().classList.remove("bd-recording");
+    bd$("bd-rec-indicator").textContent = "Recorded — review, re-record, or save.";
+    bdSpeakButtons("reviewed");
+  }
+  function bdReviewPlay() {
+    const s = BADEN.rec; if (!s || !s.blob) return;
+    bdPlayBlob(s.blob, bd$("bd-rec-play"));
+  }
+  function bdDiscardTake() { BADEN.rec = { ...(BADEN.rec || {}), blob: null }; }
+  async function bdSaveSpeak() {
+    const s = BADEN.rec; if (!s || !s.blob) { bdCloseSpeak(); return; }
+    const created = new Date().toISOString();
+    const safeStamp = created.replace(/[:.]/g, "-");
+    const rec = {
+      id: bdUID(), kind: "audio", item_id: BADEN.cur.id, created,
+      duration: s.duration, sample_rate: s.sampleRate, bit_depth: 24,
+      device_hint: bdDeviceHint(), author: BADEN.AUTHOR,
+      filename: `MBN_${BADEN.cur.id}_${safeStamp}.wav`, blob: s.blob, sent: false,
+    };
+    try { if (BADEN.db) await bdPut(rec); } catch (e) { console.warn("IDB put failed", e); }
+    BADEN.rec = null;
+    bdCloseSpeak();
+    await bdRenderNotes();
+    bdSendNote(rec);
+  }
+  function bdCloseSpeak() {
+    const s = BADEN.rec;
+    if (s && s.stream) { try { clearInterval(s.timer); s.node.disconnect(); s.srcNode.disconnect(); s.stream.getTracks().forEach(t => t.stop()); s.ac.close(); } catch (e) {} }
+    bdRoot().classList.remove("bd-recording");
+    BADEN.rec = null;
+    bdCloseSheet("bd-speak");
+  }
+  function bdDeviceHint() {
+    const m = (navigator.userAgent.match(/iPad|iPhone|iPod|Macintosh|Android/) || ["device"])[0];
+    return m + " built-in microphone";
+  }
+
+  // WAV encoder — uncompressed PCM, mono, native rate, 24-bit. This is the
+  // preservation master; derivatives are made downstream, never at ingest.
+  function bdEncodeWAV(chunks, total, rate, bits) {
+    const bytes = bits / 8, dataLen = total * bytes;
+    const buf = new ArrayBuffer(44 + dataLen), dv = new DataView(buf);
+    const ws = (o, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
+    ws(0, "RIFF"); dv.setUint32(4, 36 + dataLen, true); ws(8, "WAVE");
+    ws(12, "fmt "); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true);   // PCM
+    dv.setUint16(22, 1, true); dv.setUint32(24, rate, true);                  // mono
+    dv.setUint32(28, rate * bytes, true); dv.setUint16(32, bytes, true); dv.setUint16(34, bits, true);
+    ws(36, "data"); dv.setUint32(40, dataLen, true);
+    let off = 44;
+    for (const f of chunks) for (let i = 0; i < f.length; i++) {
+      const x = Math.max(-1, Math.min(1, f[i]));
+      if (bits === 16) { dv.setInt16(off, x < 0 ? x * 0x8000 : x * 0x7FFF, true); off += 2; }
+      else { const v = Math.round(x < 0 ? x * 0x800000 : x * 0x7FFFFF); dv.setUint8(off, v & 0xFF); dv.setUint8(off + 1, (v >> 8) & 0xFF); dv.setUint8(off + 2, (v >> 16) & 0xFF); off += 3; }
+    }
+    return new Blob([buf], { type: "audio/wav" });
+  }
+
+  // ── Server sync (Worker → R2) + retry queue ────────────────────────────────
+  function bdSidecar(n) {
+    return { item_id: n.item_id, created: n.created, author: n.author,
+             kind: n.kind, ...(n.kind === "audio"
+               ? { duration: n.duration, sample_rate: n.sample_rate, bit_depth: n.bit_depth, device_hint: n.device_hint, filename: n.filename }
+               : { text: n.text, modified: n.modified }) };
+  }
+  async function bdSendNote(n) {
+    try {
+      let res;
+      if (n.kind === "text") {
+        res = await fetch(BADEN.NOTES_API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(bdSidecar(n)) });
+      } else {
+        const fd = new FormData();
+        fd.append("meta", JSON.stringify(bdSidecar(n)));
+        fd.append("audio", n.blob, n.filename);
+        res = await fetch(BADEN.NOTES_API, { method: "POST", body: fd });
+      }
+      if (!res.ok) throw new Error("POST " + res.status);
+      n.sent = true; if (BADEN.db) await bdPut(n);
+    } catch (e) {
+      console.warn("note send queued:", e.message);   // stays sent:false → retried
+    }
+    if (BADEN.cur && n.item_id === BADEN.cur.id) await bdRenderNotes();
+    bdUpdateSyncLine();
+  }
+  async function bdRetryQueue() {
+    if (!BADEN.db) return;
+    let all = []; try { all = await bdAll(); } catch (e) { return; }
+    const pending = all.filter(n => !n.sent);
+    for (const n of pending) await bdSendNote(n);
+    bdUpdateSyncLine();
+  }
+  async function bdUpdateSyncLine() {
+    if (!BADEN.db) return;
+    let all = []; try { all = await bdAll(); } catch (e) { return; }
+    const pending = all.filter(n => !n.sent).length;
+    bdRoot().classList.toggle("has-queue", pending > 0);
+    if (pending > 0) bd$("bd-sync-text").textContent =
+      `${pending} note${pending > 1 ? "s" : ""} saved on this iPad, not yet sent.`;
+  }
+
+  // ── Export my notes (Web Share with files; mailto fallback for text) ───────
+  async function bdExport() {
+    let all = []; try { all = BADEN.db ? await bdAll() : []; } catch (e) {}
+    if (!all.length) { alert("There are no notes to export yet."); return; }
+    const files = [];
+    const textLines = [];
+    all.forEach(n => {
+      if (n.kind === "audio" && n.blob) files.push(new File([n.blob], n.filename, { type: "audio/wav" }));
+      else if (n.kind === "text") textLines.push(`[${n.item_id}] ${bdFmtDate(n.modified || n.created)}\n${n.text}\n`);
+    });
+    if (textLines.length) files.push(new File([textLines.join("\n")], "Mowry-Baden-notes.txt", { type: "text/plain" }));
+    try {
+      if (navigator.canShare && navigator.canShare({ files })) {
+        await navigator.share({ files, title: "Mowry Baden — notes on the Hunter House Archive" });
+        return;
+      }
+    } catch (e) { if (e && e.name === "AbortError") return; }
+    // Fallback: text via mailto (audio can't ride mailto — tell the reader).
+    const body = textLines.length ? textLines.join("\n") : "(Audio notes cannot be sent by email — use a device that supports the share sheet.)";
+    location.href = `mailto:${BADEN.EXPORT_EMAIL}?subject=${encodeURIComponent("Mowry Baden — archive notes")}&body=${encodeURIComponent(body)}`;
+  }
+
+  // ── Sheets: open/close, focus, inert scrim, Escape (keyboard) ──────────────
+  function bdOpenSheet(id) {
+    BADEN._lastFocus = document.activeElement;
+    const sh = bd$(id); sh.classList.add("open");
+    bdRoot().setAttribute("aria-hidden", "true");
+    const f = sh.querySelector("button, textarea, [tabindex]"); if (f) f.focus();
+    sh._esc = e => { if (e.key === "Escape") { e.preventDefault(); bdCloseSheet(id); } };
+    document.addEventListener("keydown", sh._esc);
+  }
+  function bdCloseSheet(id) {
+    const sh = bd$(id); sh.classList.remove("open");
+    if (sh._esc) { document.removeEventListener("keydown", sh._esc); sh._esc = null; }
+    bdRoot().removeAttribute("aria-hidden");
+    if (BADEN._lastFocus && BADEN._lastFocus.focus) BADEN._lastFocus.focus();
+  }
+
+  // ── Theme + text-size (both persisted) ─────────────────────────────────────
+  function bdApplyTheme() {
+    const dark = document.documentElement.classList.contains("baden-dark");
+    bd$("bd-theme").setAttribute("aria-pressed", dark ? "true" : "false");
+    const tc = document.querySelector('meta[name="theme-color"]');
+    if (tc) tc.setAttribute("content", dark ? "#161412" : "#f4f1ea");
+  }
+  function bdToggleTheme() {
+    const dark = document.documentElement.classList.toggle("baden-dark");
+    try { localStorage.setItem("hhf_baden_theme", dark ? "dark" : "light"); } catch (e) {}
+    bdApplyTheme();
+  }
+  function bdApplyTextSize() {
+    const lg = document.documentElement.classList.contains("baden-lg");
+    bd$("bd-text").setAttribute("aria-pressed", lg ? "true" : "false");
+    bd$("bd-text").textContent = lg ? "A−" : "A+";
+  }
+  function bdToggleTextSize() {
+    const lg = document.documentElement.classList.toggle("baden-lg");
+    try { localStorage.setItem("hhf_baden_text", lg ? "lg" : "base"); } catch (e) {}
+    bdApplyTextSize();
+  }
+
+  // ── Wire all Baden controls (pointer-up; one-time) ─────────────────────────
+  function bdWireBaden() {
+    if (BADEN._wired) return; BADEN._wired = true;
+    const up = (id, fn) => { const e = bd$(id); if (e) e.addEventListener("pointerup", fn); };
+    up("bd-back",    () => bdRoot().setAttribute("data-view", "list"));
+    up("bd-prev",    () => bdStep(-1));
+    up("bd-next",    () => bdStep(1));
+    up("bd-fit",     () => bdSetZoom("fit"));
+    up("bd-bigger",  () => bdSetZoom("bigger"));
+    up("bd-fullsize",() => bdSetZoom("full"));
+    up("bd-addnote", () => bdOpenChoice());
+    up("bd-choose-speak", () => { bdCloseSheet("bd-choice"); bdOpenSpeak(); });
+    up("bd-choose-type",  () => { bdCloseSheet("bd-choice"); bdOpenType(null); });
+    up("bd-choice-cancel",() => bdCloseSheet("bd-choice"));
+    up("bd-type-save",   () => bdSaveType());
+    up("bd-type-cancel", () => { BADEN.editing = null; bdCloseSheet("bd-type"); });
+    up("bd-help-btn",  () => bdOpenSheet("bd-help"));
+    up("bd-help-done", () => bdCloseSheet("bd-help"));
+    up("bd-export",    () => bdExport());
+    up("bd-theme",     () => bdToggleTheme());
+    up("bd-text",      () => bdToggleTextSize());
+    up("bd-sendnow",   () => bdRetryQueue());
+  }
+
   // ── Main (async load) ─────────────────────────────────────────────────────
   (async function main() {
     const mobileVersionBtn = document.getElementById("mobile-version");
@@ -8578,11 +9486,16 @@ WHERE {
       });
       document.body.classList.remove("loading");
       if (!items.length) {
+        if (window.HH_BADEN) { bdError("The archive could not be reached. Please try again.", () => location.reload()); return; }
         $("#rows").innerHTML = `<div class="load-msg">No items with images found in Wikibase.</div>`;
         return;
       }
 
       state.items = items;
+
+      // BADEN MODE: data is ready — hand off to the viewing room and stop here,
+      // so none of the desktop render/wire below runs. Same state.items, no fork.
+      if (window.HH_BADEN) { await badenInit(); return; }
 
       const params  = new URLSearchParams(location.search);
       const urlSort = params.get("sort");
@@ -8615,6 +9528,7 @@ WHERE {
     } catch (err) {
       console.error(err);
       document.body.classList.remove("loading");
+      if (window.HH_BADEN) { bdError("Something went wrong loading the archive. Please try again.", () => location.reload()); return; }
       $("#rows").innerHTML = `<div class="error-msg">Error loading: ${escapeHTML(err.message)}</div>`;
     }
   })();
@@ -8649,7 +9563,9 @@ WHERE {
   })();
 </script>
 <script>
-  if (screen.orientation && screen.orientation.lock) {
+  // Baden mode must work in both orientations (WCAG 1.3.4 / AUDIT.md §1.2) —
+  // skip the portrait lock entirely when it's active.
+  if (!window.HH_BADEN && screen.orientation && screen.orientation.lock) {
     screen.orientation.lock('portrait').catch(() => {});
   }
   if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');

@@ -42,6 +42,8 @@
 //        → { prefix, folders:[…], files:[…], truncated, cursor }
 //   GET  /dl?key=<bucket-key>     → 302 to the public archive URL (logged)
 //   POST /event   {t,id,q,n,p}    → 204 (logged)
+//   POST /api/notes               → 201; Baden-mode note → R2 (env.NOTES_BUCKET).
+//        JSON body = text note; multipart (meta + audio) = WAV master + sidecar.
 //
 // Analytics Engine column map (one dataset, flexible schema):
 //   blob1 event type   blob2 item id   blob3 collection (HHC/CAA/EGC/IHC/…)
@@ -132,6 +134,70 @@ async function recordEvent(request, env, origin) {
   const coll = collectionOf(id);
   console.log(JSON.stringify({ ev: t, id, coll, q, n, country, page }));
   writePoint(env, [t, id, coll, q, country, page], [n], coll || t);
+}
+
+// ── Baden-mode notes (POST /api/notes) ──────────────────────────────────────
+// Accession material — Mowry Baden's annotations over the Hunter record. Stored
+// BYTE-EXACT in R2; never transcoded here. WAV is the preservation master;
+// transcription (e.g. Whisper) happens downstream, server-side, not in the app.
+//
+// Storage is a native R2 binding (env.NOTES_BUCKET) — same-account, so it can
+// WRITE (the listing path uses cross-account READ-ONLY S3 keys and cannot). The
+// notes bucket is separate from the archive bucket, so the archive itself stays
+// read-only end-to-end. Layout:
+//   baden-notes/<item_id>/<file>.wav         the audio master (audio note)
+//   baden-notes/<item_id>/<file>.wav.json    its sidecar metadata
+//   baden-notes/<item_id>/<created>.json     a text note (full payload)
+const VALID_ITEM = /^HH-[A-Za-z]+-\d+$/;
+const safeName = (s) => String(s || "").replace(/[^A-Za-z0-9._-]/g, "_").slice(0, 120);
+
+async function saveNote(request, env, origin, cors) {
+  const J = (obj, status) => new Response(JSON.stringify(obj), {
+    status: status || 200, headers: { "Content-Type": "application/json", ...cors },
+  });
+  if (!ALLOW_ORIGINS.has(origin)) return new Response("Forbidden", { status: 403, headers: cors });
+  if (!env.NOTES_BUCKET) return J({ error: "notes storage not configured" }, 500);
+
+  const ct = request.headers.get("Content-Type") || "";
+  try {
+    if (ct.includes("application/json")) {
+      const meta = await request.json();
+      if (!VALID_ITEM.test(meta.item_id || "")) return J({ error: "bad item_id" }, 400);
+      const stamp = safeName(meta.created || new Date().toISOString());
+      const key = `baden-notes/${meta.item_id}/${stamp}.json`;
+      await env.NOTES_BUCKET.put(key, JSON.stringify(meta), {
+        httpMetadata: { contentType: "application/json" },
+        customMetadata: { author: safeName(meta.author), item: meta.item_id, kind: "text" },
+      });
+      console.log(JSON.stringify({ ev: "note", kind: "text", item: meta.item_id, key }));
+      return J({ ok: true, key }, 201);
+    }
+
+    if (ct.includes("multipart/form-data")) {
+      const form = await request.formData();
+      let meta = {};
+      try { meta = JSON.parse(form.get("meta") || "{}"); } catch (_) {}
+      const audio = form.get("audio");
+      if (!VALID_ITEM.test(meta.item_id || "")) return J({ error: "bad item_id" }, 400);
+      if (!audio || typeof audio.arrayBuffer !== "function") return J({ error: "no audio" }, 400);
+      const base = safeName(meta.filename || `MBN_${meta.item_id}_${Date.now()}.wav`);
+      const wavKey = `baden-notes/${meta.item_id}/${base}`;
+      const bytes = await audio.arrayBuffer();   // byte-exact, no transcode
+      await env.NOTES_BUCKET.put(wavKey, bytes, {
+        httpMetadata: { contentType: "audio/wav" },
+        customMetadata: { author: safeName(meta.author), item: meta.item_id, kind: "audio" },
+      });
+      await env.NOTES_BUCKET.put(wavKey + ".json", JSON.stringify(meta), {
+        httpMetadata: { contentType: "application/json" },
+      });
+      console.log(JSON.stringify({ ev: "note", kind: "audio", item: meta.item_id, key: wavKey, bytes: bytes.byteLength }));
+      return J({ ok: true, key: wavKey }, 201);
+    }
+
+    return J({ error: "unsupported content-type" }, 415);
+  } catch (err) {
+    return J({ error: "save failed", detail: String(err) }, 500);
+  }
 }
 
 function downloadRedirect(request, env, url, cors) {
@@ -260,6 +326,13 @@ export default {
         return new Response("Method Not Allowed", { status: 405, headers: cors });
       await recordEvent(request, env, origin);
       return new Response(null, { status: 204, headers: cors });
+    }
+
+    // ── Baden-mode notes → write to R2 (audio WAV + JSON sidecar, or text) ─
+    if (url.pathname === "/api/notes") {
+      if (request.method !== "POST")
+        return new Response("Method Not Allowed", { status: 405, headers: cors });
+      return saveNote(request, env, origin, cors);
     }
 
     // ── Tracked download → 302 to the public file ────────────────────────

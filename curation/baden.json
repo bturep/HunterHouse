@@ -1,0 +1,32 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   curation/baden.json — the items shown in "Selected for Mowry Baden"
+   (browse.html / next.html ?for=baden).
+
+   SCHEMA — an ordered JSON array. Array order IS the browsing order.
+     {
+       "id":      "HH-CAA-0007",   // archive identifier, exactly as catalogued
+       "address": "A short line…"  // OPTIONAL — a note from the project lead to
+                                    // Mowry about why this item is here. 1–2
+                                    // sentences. Shown under the item and on the
+                                    // record. Omit or leave "" for none.
+     }
+
+   EDITING — this file is meant to be hand-edited. Add / remove / reorder freely.
+   // line comments and /* block */ comments are allowed (stripped on load).
+   IDs that aren't in the catalogue are skipped (logged to the console); if none
+   resolve, the viewing room shows a readable error with a Retry button.
+
+   The "address" lines below are PLACEHOLDERS — replace with real words to Mowry.
+   ───────────────────────────────────────────────────────────────────────── */
+[
+  { "id": "HH-CAA-0007", "address": "Where it begins — the 1970 ground plan: a square house gathered around a circular hearth. I wanted you to see the first idea whole." },
+  { "id": "HH-CAA-0008", "address": "The same scheme worked further. Notice how the geometry starts to negotiate with the site." },
+  { "id": "HH-CAA-0018", "address": "Fifteen years on, Scheme II in coloured pencil (1985). The drawing itself becomes a thing to look at." },
+  { "id": "HH-CAA-0019", "address": "Colour studies, 1992 — the first of three. Hunter testing how light would land inside." },
+  { "id": "HH-CAA-0020", "address": "The second colour study. We straightened these scans this spring; the originals had drifted off-level." },
+  { "id": "HH-CAA-0021", "address": "And the third. Read them as a set." },
+  { "id": "HH-EGC-0001", "address": "From the furniture: Hunter's drawings for Eric Gesinger's commissions. The house extended to the things inside it." },
+  { "id": "HH-HHC-0112", "address": "The Covenant site plan, annotated — the land and its terms, drawn." },
+  { "id": "HH-IHC-0003", "address": "The house as it stands now, at dusk — photographed by Ivan Hunter, 2024." },
+  { "id": "HH-IHC-0015", "address": "An interior, same visit. I thought you'd want to stand inside it for a moment." }
+]
