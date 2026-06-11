@@ -15,7 +15,7 @@
      (the admin edit-proxy at 127.0.0.1:8731). img-src adds the R2 host that
      Wikibase URLs point at. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://archive.hunterhousefoundation.com; connect-src 'self' https://hunterhouse.wikibase.cloud https://archive.hunterhousefoundation.com https://hhf-r2-browser.brandon-628.workers.dev http://127.0.0.1:* http://localhost:*; frame-src 'self'; worker-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'">
-<link rel="manifest" href="manifest.next.json">
+<link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="HH Next">
@@ -3025,7 +3025,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08.02";
+  const VERSION      = "v1.08.03";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3096,7 +3096,7 @@
   // downloads exactly as before, we just get to count it). Non-archive URLs and
   // empty values pass straight through untouched.
   function trackedDl(u) {
-    if (!u || u.indexOf(R2_ARCHIVE_BASE) !== 0 || analyticsOptedOut()) return u;
+    if (!u || u.indexOf(R2_ARCHIVE_BASE) !== 0 || !TELEMETRY_OK || analyticsOptedOut()) return u;
     try {
       const key = decodeURIComponent(u.slice(R2_ARCHIVE_BASE.length));
       return ANALYTICS_BASE + "/dl?key=" + encodeURIComponent(key);

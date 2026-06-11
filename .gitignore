@@ -9,6 +9,10 @@ SYNC-MAP.md
 # macOS / editor junk
 .DS_Store
 
+# Local Claude Code runtime artifacts — transient session locks/state, never publish
+.claude/*.lock
+.claude/settings.local.json
+
 # Python
 __pycache__/
 *.pyc

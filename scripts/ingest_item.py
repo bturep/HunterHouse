@@ -32,7 +32,8 @@ import requests
 # ─────────────────────────── CONFIG (edit per item) ─────────────────────────
 SOURCE        = "/Users/brandonpoole/Pictures/RichardHunterPortfolio19860013.tif"
 ARCH_ID       = "HH-HHC-0112"
-QID_OVERWRITE = "Q463"               # set to None to CREATE a fresh item instead
+QID_OVERWRITE = None                 # set to a QID to wbeditentity clear:1 (overwrite); None = CREATE fresh.
+                                     # SAFE RESTING STATE IS None — a stale QID here means a bare --execute wipes that item.
 
 TITLE         = "Covenant Site Plan with Annotations"
 DESCRIPTION   = "land survey; HHC; 2006"
