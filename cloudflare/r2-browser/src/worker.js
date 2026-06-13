@@ -42,6 +42,8 @@
 //        → { prefix, folders:[…], files:[…], truncated, cursor }
 //   GET  /dl?key=<bucket-key>     → 302 to the public archive URL (logged)
 //   POST /event   {t,id,q,n,p}    → 204 (logged)
+//   POST /api/notes               → 201; Baden-mode note → R2 (env.NOTES_BUCKET).
+//        JSON body = text note; multipart (meta + audio) = WAV master + sidecar.
 //
 // Analytics Engine column map (one dataset, flexible schema):
 //   blob1 event type   blob2 item id   blob3 collection (HHC/CAA/EGC/IHC/…)
@@ -132,6 +134,112 @@ async function recordEvent(request, env, origin) {
   const coll = collectionOf(id);
   console.log(JSON.stringify({ ev: t, id, coll, q, n, country, page }));
   writePoint(env, [t, id, coll, q, country, page], [n], coll || t);
+}
+
+// ── Baden-mode notes (POST /api/notes) ──────────────────────────────────────
+// Accession material — Mowry Baden's annotations over the Hunter record. Stored
+// BYTE-EXACT in R2; never transcoded here. WAV is the preservation master;
+// transcription (e.g. Whisper) happens downstream, server-side, not in the app.
+//
+// Storage is a native R2 binding (env.NOTES_BUCKET) — same-account, so it can
+// WRITE (the listing path uses cross-account READ-ONLY S3 keys and cannot). The
+// notes bucket is separate from the archive bucket, so the archive itself stays
+// read-only end-to-end. Layout:
+//   baden-notes/<item_id>/<file>.wav         the audio master (audio note)
+//   baden-notes/<item_id>/<file>.wav.json    its sidecar metadata
+//   baden-notes/<item_id>/<created>.json     a text note (full payload)
+const VALID_ITEM = /^HH-[A-Za-z]+-\d+$/;
+const safeName = (s) => String(s || "").replace(/[^A-Za-z0-9._-]/g, "_").slice(0, 120);
+
+// Abuse limits on the write path. These are the REAL defence: the Origin gate in
+// saveNote is browser-only and forgeable (any curl can spoof it), so a hard size
+// ceiling + a WAV-shape check are what keep this from being an unbounded R2 write.
+const MAX_AUDIO_BYTES = 64 * 1024 * 1024;   // ~7 min of 24-bit mono 48k WAV
+const MAX_META_BYTES  = 64 * 1024;          // text note / sidecar JSON ceiling
+
+// Constant-time string compare (Workers has no timingSafeEqual).
+function ctEq(a, b) {
+  a = String(a == null ? "" : a); b = String(b == null ? "" : b);
+  if (a.length !== b.length) return false;
+  let d = 0;
+  for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return d === 0;
+}
+
+// RIFF....WAVE magic so the "preservation master" can't be arbitrary binary.
+function isWav(buf) {
+  if (!buf || buf.byteLength < 12) return false;
+  const v = new Uint8Array(buf, 0, 12);
+  return v[0] === 0x52 && v[1] === 0x49 && v[2] === 0x46 && v[3] === 0x46 &&  // "RIFF"
+         v[8] === 0x57 && v[9] === 0x41 && v[10] === 0x56 && v[11] === 0x45;   // "WAVE"
+}
+
+async function saveNote(request, env, origin, cors) {
+  const J = (obj, status) => new Response(JSON.stringify(obj), {
+    status: status || 200, headers: { "Content-Type": "application/json", ...cors },
+  });
+  if (!ALLOW_ORIGINS.has(origin)) return new Response("Forbidden", { status: 403, headers: cors });
+  if (!env.NOTES_BUCKET) return J({ error: "notes storage not configured" }, 503);
+
+  // Optional shared-secret deterrence: enforced ONLY when the NOTES_TOKEN secret
+  // is configured, so writes keep working before it's set. It ships in client JS
+  // (BADEN.NOTES_TOKEN), so it raises the bar against URL-scraping bots — it is
+  // not strong auth. To enable: `wrangler secret put NOTES_TOKEN` + set the same
+  // value on the client. A forgeable Origin header is never authentication.
+  if (env.NOTES_TOKEN && !ctEq(request.headers.get("X-Notes-Token"), env.NOTES_TOKEN))
+    return new Response("Forbidden", { status: 403, headers: cors });
+
+  // Reject oversized bodies up front (before reading/buffering them).
+  if (parseInt(request.headers.get("Content-Length") || "0", 10) > MAX_AUDIO_BYTES)
+    return J({ error: "too large" }, 413);
+
+  const ct = request.headers.get("Content-Type") || "";
+  try {
+    if (ct.includes("application/json")) {
+      const meta = await request.json();
+      if (!VALID_ITEM.test(meta.item_id || "")) return J({ error: "bad item_id" }, 400);
+      const body = JSON.stringify(meta);
+      if (body.length > MAX_META_BYTES) return J({ error: "too large" }, 413);
+      const stamp = safeName(meta.created || new Date().toISOString());
+      const key = `baden-notes/${meta.item_id}/${stamp}.json`;
+      await env.NOTES_BUCKET.put(key, body, {
+        httpMetadata: { contentType: "application/json" },
+        customMetadata: { author: safeName(meta.author), item: meta.item_id, kind: "text" },
+      });
+      console.log(JSON.stringify({ ev: "note", kind: "text", item: meta.item_id, key }));
+      return J({ ok: true, key }, 201);
+    }
+
+    if (ct.includes("multipart/form-data")) {
+      const form = await request.formData();
+      let meta = {};
+      try { meta = JSON.parse(form.get("meta") || "{}"); } catch (_) {}
+      const audio = form.get("audio");
+      if (!VALID_ITEM.test(meta.item_id || "")) return J({ error: "bad item_id" }, 400);
+      if (JSON.stringify(meta).length > MAX_META_BYTES) return J({ error: "meta too large" }, 413);
+      if (!audio || typeof audio.arrayBuffer !== "function") return J({ error: "no audio" }, 400);
+      // safeName can empty-out an all-symbol filename; fall back so we never write a bare dir key.
+      const base = safeName(meta.filename) || safeName(`MBN_${meta.item_id}_${Date.now()}.wav`);
+      const wavKey = `baden-notes/${meta.item_id}/${base}`;
+      const bytes = await audio.arrayBuffer();   // byte-exact, no transcode
+      if (bytes.byteLength > MAX_AUDIO_BYTES) return J({ error: "audio too large" }, 413);
+      if (!isWav(bytes)) return J({ error: "not a WAV" }, 415);
+      await env.NOTES_BUCKET.put(wavKey, bytes, {
+        httpMetadata: { contentType: "audio/wav" },
+        customMetadata: { author: safeName(meta.author), item: meta.item_id, kind: "audio" },
+      });
+      await env.NOTES_BUCKET.put(wavKey + ".json", JSON.stringify(meta), {
+        httpMetadata: { contentType: "application/json" },
+      });
+      console.log(JSON.stringify({ ev: "note", kind: "audio", item: meta.item_id, key: wavKey, bytes: bytes.byteLength }));
+      return J({ ok: true, key: wavKey }, 201);
+    }
+
+    return J({ error: "unsupported content-type" }, 415);
+  } catch (err) {
+    console.error("saveNote error:", String(err));   // log server-side; don't leak internals
+    return J({ error: "save failed" }, 500);
+  }
 }
 
 function downloadRedirect(request, env, url, cors) {
@@ -260,6 +368,13 @@ export default {
         return new Response("Method Not Allowed", { status: 405, headers: cors });
       await recordEvent(request, env, origin);
       return new Response(null, { status: 204, headers: cors });
+    }
+
+    // ── Baden-mode notes → write to R2 (audio WAV + JSON sidecar, or text) ─
+    if (url.pathname === "/api/notes") {
+      if (request.method !== "POST")
+        return new Response("Method Not Allowed", { status: 405, headers: cors });
+      return saveNote(request, env, origin, cors);
     }
 
     // ── Tracked download → 302 to the public file ────────────────────────
