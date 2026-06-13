@@ -34,3 +34,14 @@ enabled = true
 [[analytics_engine_datasets]]
 binding = "AE"
 dataset = "Hunter_House_Archive"
+
+# Baden-mode notes storage (POST /api/notes). A NATIVE R2 binding — native
+# bindings are same-account only, so this bucket must live in THIS (Brandon's)
+# account, not the Foundation account. It is write-capable (unlike the read-only
+# S3 keys used for the cross-account listing) and is SEPARATE from the archive
+# bucket, so the archive itself stays read-only end-to-end.
+#   Create once:  npx wrangler r2 bucket create hhf-baden-notes
+# Notes are accession material staged here for pickup into the archive proper.
+[[r2_buckets]]
+binding = "NOTES_BUCKET"
+bucket_name = "hhf-baden-notes"
