@@ -2744,8 +2744,11 @@
     background:var(--bd-surface);
   }
   .bd-scroll img{ display:block; max-width:100%; height:auto; user-select:none; -webkit-user-drag:none; }
-  .bd-scroll.bd-full{ align-items:flex-start; justify-content:flex-start; }
-  .bd-scroll.bd-full img{ max-width:none; } /* full-size = native pixels, scroll to pan */
+  /* Pan layout — used by Bigger + Full size. MUST be flex-start, not center:
+     a flex child wider than the scroll box, when centred, lands at a negative
+     offset that overflow:auto can't scroll back to → the left/top is unreachable. */
+  .bd-scroll.bd-pan{ align-items:flex-start; justify-content:flex-start; }
+  .bd-scroll.bd-pan img{ max-width:none; } /* native/enlarged pixels, scroll to pan */
   .bd-stage-load{
     position:absolute; inset:0; display:none; align-items:center; justify-content:center;
     background:color-mix(in srgb, var(--bd-surface) 82%, transparent);
@@ -3371,7 +3374,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.08";
+  const VERSION      = "v1.09-test.09";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -8933,10 +8936,12 @@ WHERE {
     const pcy = scroll.scrollHeight ? (scroll.scrollTop  + scroll.clientHeight / 2) / scroll.scrollHeight : 0.5;
     const caption = { fit: "Fit — the whole sheet", bigger: "Bigger — drag to look around", full: "Full size — original resolution; drag to look around" };
     const apply = () => {
-      scroll.classList.toggle("bd-full", mode === "full");
-      if (mode === "fit")         { img.style.width = ""; img.style.maxWidth = "100%"; }
-      else if (mode === "bigger") { img.style.maxWidth = "none"; img.style.width = (scroll.clientWidth * 2) + "px"; }
-      else                        { img.style.maxWidth = "none"; img.style.width = "auto"; }
+      // Anything bigger than Fit overflows → use the flex-start pan layout so the
+      // whole image stays scroll-reachable (centring strands the left/top edge).
+      scroll.classList.toggle("bd-pan", mode !== "fit");
+      if (mode === "fit")         { img.style.width = ""; img.style.maxWidth = "100%"; img.style.maxHeight = "100%"; }  // true contain — whole sheet, any orientation
+      else if (mode === "bigger") { img.style.maxWidth = "none"; img.style.maxHeight = "none"; img.style.width = (scroll.clientWidth * 2) + "px"; }
+      else                        { img.style.maxWidth = "none"; img.style.maxHeight = "none"; img.style.width = "auto"; }
       ["fit", "bigger", "full"].forEach(m =>
         bd$("bd-" + (m === "full" ? "fullsize" : m)).setAttribute("aria-pressed", m === mode ? "true" : "false"));
       bd$("bd-caption").textContent = caption[mode];
