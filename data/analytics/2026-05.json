@@ -1,0 +1,17 @@
+{
+  "period": "2026-05",
+  "dataset": "Hunter_House_Archive",
+  "totals": {
+    "events": 0,
+    "views": 0,
+    "searches": 0,
+    "zero_result_searches": 0,
+    "downloads": 0
+  },
+  "events_by_type": {},
+  "top_items": [],
+  "top_searches": [],
+  "zero_result_searches": [],
+  "downloads_by_collection": [],
+  "by_country": []
+}
