@@ -3371,7 +3371,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.07";
+  const VERSION      = "v1.09-test.08";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -8744,7 +8744,9 @@ WHERE {
     // bots, not strong auth — the real defences are the Worker's size caps + WAV check.
     NOTES_TOKEN: "35686d20565759d8bd90fcf8f8e1351d9c04971e7a82da73",
     AUTHOR: "Mowry Baden",
-    EXPORT_EMAIL: "archive@hunterhousefoundation.com",
+    // Where "Export my notes" mailto-fallback drafts are addressed. Must be a real,
+    // monitored mailbox — no @hunterhousefoundation.com boxes exist (2026-06-12).
+    EXPORT_EMAIL: "brandon@turepoole.work",
   };
   const bd$ = id => document.getElementById(id);
   const bdRoot = () => bd$("baden-root");
