@@ -3371,7 +3371,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.06";
+  const VERSION      = "v1.09-test.07";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -8738,10 +8738,11 @@ WHERE {
     audio: null,      // shared <audio> for playback
     rec: null,        // live recording session
     NOTES_API: ANALYTICS_BASE + "/api/notes",
-    // Optional shared secret for the notes write path. Empty by default (origin-
-    // gated only). To enable: set this AND `wrangler secret put NOTES_TOKEN` on the
-    // Worker to the same value. Deterrence against URL-scraping bots, not strong auth.
-    NOTES_TOKEN: "",
+    // Shared secret for the notes write path — must match the Worker's NOTES_TOKEN
+    // secret (set 2026-06-12; rotate with `wrangler secret put NOTES_TOKEN` + update
+    // here). It ships in this public file by design: deterrence against URL-scraping
+    // bots, not strong auth — the real defences are the Worker's size caps + WAV check.
+    NOTES_TOKEN: "35686d20565759d8bd90fcf8f8e1351d9c04971e7a82da73",
     AUTHOR: "Mowry Baden",
     EXPORT_EMAIL: "archive@hunterhousefoundation.com",
   };
