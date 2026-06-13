@@ -1,18 +1,18 @@
 # Hunter House Foundation Archive — architecture brief
 
-For a software engineer inspecting the live site. Scope = what `https://bturep.github.io/HunterHouse/` actually serves today, plus the repository state behind it.
+For a software engineer inspecting the live site. Scope = what `https://hunterhouse.org/` actually serves today, plus the repository state behind it.
 
-**Snapshot date:** 2026-05-24. **Live:** `browse.html` `v1.07.00`. **Staging:** `next.html` `v1.08-test.01`.
+**Snapshot date:** 2026-06-11. **Live:** `browse.html` `v1.08.03`. **Staging:** `next.html` `v1.09-test.06`.
 
 ---
 
 ## 1. TL;DR
 
-A **single-page, zero-build static site** served from GitHub Pages. The catalogue browser is one ~280 KB HTML file (`browse.html`, ~5,530 lines) containing inline CSS and vanilla ES2020 JavaScript. It reads its data at runtime from a public **Wikibase Cloud** instance via **SPARQL over HTTPS**, and loads images from a public **Cloudflare R2** bucket (URLs are stored as values inside Wikibase, not hard-coded). There is no framework, no bundler, no package manager.
+A **single-page, zero-build static site** served from GitHub Pages at `hunterhouse.org`. The catalogue browser is one ~455 KB HTML file (`browse.html`, ~8,650 lines) containing inline CSS and vanilla ES2020 JavaScript. It reads its data at runtime from a public **Wikibase Cloud** instance via **SPARQL over HTTPS** (with a static **Cloudflare R2** catalogue snapshot as a fast first-paint + outage fallback, §5.5), and loads images from the same public R2 bucket (URLs are stored as values inside Wikibase, not hard-coded). There is no framework, no bundler, no package manager.
 
 There is a small Python tooling fleet under `scripts/` for ingest, batch migrations, the local admin write-proxy, and the metadata-preservation pipeline. There is a one-job GitHub Actions workflow that validates every push (JS syntax + `VERSION` pattern + manifest JSON). There are three Playwright smoke tests under `tests/` for the maintainer's local use. Admin writes happen only on the maintainer's own laptop, via a Python HTTP proxy on `localhost:8731` that holds the Wikibase bot credentials server-side and authenticates with a per-startup random token.
 
-The complexity that exists is concentrated in (a) the single HTML file and (b) the data model in Wikibase. A `next.html` staging duplicate runs a development line ahead of live; today it is materially further ahead than usual, carrying a coherent researcher-tools surface that will land at the next promotion (see §4.7).
+The complexity that exists is concentrated in (a) the single HTML file and (b) the data model in Wikibase. A `next.html` staging duplicate runs a development line ahead of live; today it carries a chronology **timeline viewer** and the **curator lens**, both gated off on live and active in staging for development (see §4.7).
 
 ---
 
@@ -20,7 +20,7 @@ The complexity that exists is concentrated in (a) the single HTML file and (b) t
 
 | | |
 |---|---|
-| Live URL | `https://bturep.github.io/HunterHouse/` (PWA `start_url` → `browse.html`) |
+| Live URL | `https://hunterhouse.org/` (PWA `start_url` → `browse.html`; `www.hunterhousefoundation.com` + the old `bturep.github.io/HunterHouse/` 301-redirect here) |
 | Repo | `github.com/bturep/HunterHouse` (default branch `main`, **public**) |
 | Hosting | GitHub Pages, default config — push to `main` ⇒ live in ~30 s |
 | Languages | HTML, CSS, vanilla JS (no TypeScript, no JSX); Python 3 for offline scripts |
@@ -30,7 +30,7 @@ The complexity that exists is concentrated in (a) the single HTML file and (b) t
 | Tests | Dev-only Playwright smoke tests under `tests/` (3 tests). One-time setup; not in CI. |
 | External runtime deps | Google Fonts (Inter Tight, JetBrains Mono); bundled PDF.js (vendored, not CDN) |
 | Browser support target | Modern evergreen (uses CSS view transitions, `matchMedia`, ES2020); iOS Safari is the primary mobile target |
-| PWA | Yes — minimal `manifest.json` + no-op `sw.js` (no offline cache) |
+| PWA | Yes — `manifest.json` + `sw.js` that precaches the app shell (cache-first assets, stale-while-revalidate HTML; `CACHE_NAME` bumped on shell changes) |
 | Data backend | Wikibase Cloud SPARQL: `https://hunterhouse.wikibase.cloud/query/sparql` |
 | Image / PDF / sidecar storage | Cloudflare R2, public bucket at `archive.hunterhousefoundation.com` |
 | Author / contributors | Solo: `bturep` (607 commits to date) |
@@ -45,8 +45,8 @@ The complexity that exists is concentrated in (a) the single HTML file and (b) t
 | File | Lines | Role |
 |---|---|---|
 | `index.html` | ~200 | Real crawlable landing page (split-layout front door; was a redirect until the 2026-06 domain cutover) |
-| `browse.html` | **5,534** | **The archive browser.** Single-file SPA |
-| `next.html` | 7,133 | Staging copy of `browse.html`; same origin, different filename, independent version line (`v1.09-test.NN`) |
+| `browse.html` | **8,646** | **The archive browser.** Single-file SPA |
+| `next.html` | 9,586 | Staging copy of `browse.html`; same origin, different filename, independent version line (`v1.09-test.NN`) |
 | `gallery.html` | ~400 | Standalone visual house tour (PhotoSwipe lightbox); browse.html dark palette |
 | `richard-hunter.html` | ~210 | Biography page (schema.org Person + sameAs Wikidata) |
 | `the-house.html` | ~230 | Narrative page |
@@ -62,8 +62,8 @@ The complexity that exists is concentrated in (a) the single HTML file and (b) t
 - `WIKIBASE.md` — Wikibase property + QID reference (the data contract; updated as new properties are minted)
 - `WIKIBASE_MAINPAGE.md` — working-notes file for the Wikibase Main Page wikitext
 - `WIKIDATA_DRAFT.md` — three Wikidata items drafted for submission (Hunter person, CAA institution, Hunter fonds); pending
-- `CLAUDE.md` + four `CLAUDE_archive_v1.0{2,5,6,7}.md` — solo-dev working memory + frozen historical logs (not loaded by any HTML; zero runtime cost)
-- `EGC_intake.xlsx` — current intake spreadsheet for the Eric Gesinger Collection photographs (drawings already ingested)
+- `CLAUDE.md` + six `CLAUDE_archive_v1.0{2,5,6,7,7-audit,8}.md` — solo-dev working memory + frozen historical logs. **Moved to the private repo `bturep/HunterHouse-private` (2026-06-02) and symlinked back in; gitignored + untracked in this public repo.** Not loaded by any HTML; zero runtime cost
+- `BADEN.md` + `AUDIT.md` — handover + Phase-1 audit for the "Baden mode" iPad viewing room (built on the `feature/baden-mode` branch; not on `main`/live)
 
 ### `assets/`
 
@@ -71,7 +71,7 @@ The complexity that exists is concentrated in (a) the single HTML file and (b) t
 |---|---|---|
 | `assets/light.css` | 244 lines | Light design tokens + base styles |
 | `assets/dark.css` | 255 lines | Dark-mode token overrides (used only by the four reading pages) |
-| `assets/pdfjs/` | **5.7 MB** | **Vendored Mozilla PDF.js v5.7.284** (pruned). One file patched: `web/viewer.mjs` extends `HOSTED_VIEWER_ORIGINS` to allow `bturep.github.io` + `localhost` (re-apply on upgrade). One added file: `web/hh-pdfjs.css` themes the minimal toolbar |
+| `assets/pdfjs/` | **5.7 MB** | **Vendored Mozilla PDF.js v5.7.284** (pruned). One file patched: `web/viewer.mjs` extends `HOSTED_VIEWER_ORIGINS` to allow `hunterhouse.org` + `www.hunterhousefoundation.com` + `bturep.github.io` + `localhost` (**re-apply on upgrade AND on any new domain — a missed origin throws "file origin does not match viewer's" and breaks the in-stage reader**). One added file: `web/hh-pdfjs.css` themes the minimal toolbar |
 | `assets/placeholders/` | 192 KB | 3 JPEG tiers (`thumb`/`prev`/`large`) for items missing a preview image |
 | `assets/icon-*.png`, `Hunter.png`, `hunter-mark.png` | 3.3 MB combined | PWA icons + the title-bar wordmark + the bio-page portrait |
 
@@ -80,7 +80,7 @@ Two JSON files. `index.json` lists available curators (one entry today, `brandon
 
 ### `scripts/` — Python tooling, not shipped to the browser
 
-22 scripts in `scripts/`, plus an `archived/` subdirectory of completed one-shot migrations. Run from the maintainer's laptop against Wikibase + R2. Credentials read from `~/Documents/hh-wikibase-migration/.env` (outside the repo).
+~Two dozen scripts in `scripts/`, plus an `archived/` subdirectory of completed one-shot migrations. Run from the maintainer's laptop against Wikibase + R2. Credentials read from `~/Documents/hh-wikibase-migration/.env` (outside the repo).
 
 **Shared infrastructure**
 - `_wikibase.py` — `load_env()` + `WikibaseSession` class (login + CSRF + retry-on-stale-token). Imported by every script that writes to Wikibase. Extracted from copy-pasted boilerplate that previously lived in 11 scripts; two callers (`patch_dates.py`, `mint_property.py`) have been migrated, the rest follow opportunistically when touched.
@@ -108,8 +108,11 @@ Each ingest script calls `sync_one_metadata.py` fail-safe at the end of every su
 **Resilience**
 - `build_catalogue_snapshot.py` — builds the static catalogue snapshot the browser reads when SPARQL is slow or down (see §5.5). Reads `CATALOGUE_QUERY` *live out of `next.html`* and resolves its `${PROPERTIES.*}` placeholders, so the snapshot query can't drift from the browser's — there is one catalogue query in the repo, not two. Writes `catalogue.json` (raw SPARQL bindings, consumed by `processRows` unchanged) + `catalogue.csv` (flat human export) and rclone-pushes both to R2 `/catalogue/`. Read-only on Wikibase; the only write is the R2 push. Dry-run default, `--execute` to push. Run at session-end whenever catalogue data changed (deliberately manual, no CI — keeps long-lived R2 write keys out of GitHub Actions).
 
+**Analytics permanence**
+- `rollup_analytics.py` — Cloudflare Analytics Engine only keeps raw points ~90 days; this snapshots each calendar month's aggregates to `data/analytics/<YYYY-MM>.json` (totals, top items, top searches incl. zero-result, downloads by collection, coarse country) + rebuilds `monthly-summary.csv` from all the JSONs (self-healing). Queries the AE SQL API; read-only token (`CF_ANALYTICS_TOKEN` env / repo secret, or local wrangler OAuth). Runs monthly via `.github/workflows/rollup-analytics.yml` (cron) + `workflow_dispatch`.
+
 **One-off maintenance** (most are completed migrations kept for reference; candidates for `scripts/archived/` when next touched)
-`patch_dates.py`, `clean_titles.py`, `strip_counter_brackets.py`, `recolor_previews.py`, `fix_caa_scheme_split.py`, `regen_previews.py`, `regen_icons.py`, `rotate_images.py`, `remove_caa_use_q70.py`.
+`patch_dates.py`, `clean_titles.py`, `strip_counter_brackets.py`, `recolor_previews.py`, `fix_caa_scheme_split.py`, `regen_previews.py`, `regen_icons.py`, `remove_caa_use_q70.py`. (`rotate_images.py` was retired to `scripts/archived/` 2026-06-11 — it re-encoded master TIFs in place with no backup and ran on import; the P144 CSS rotation is the non-destructive display-orientation path.)
 
 **`scripts/archived/`** — completed one-shot migrations + `make_ges_intake.py` superseded by `batch_ingest_egc.py`.
 
@@ -165,7 +168,7 @@ Panel collapse is driven by `.panel-left.out` / `.panel-right.out` and an animat
 
 ### 4.4 Application JS — what's in there
 
-Laid out roughly in this order (approximate line ranges from `browse.html` v1.06.33):
+Laid out roughly in this order (the line ranges below are **indicative of structure, not exact** — they were captured at `browse.html` v1.06.33 and have drifted with later versions; grep the named functions to locate them):
 
 | Concern | Approx. lines | Key functions / state |
 |---|---|---|
@@ -197,16 +200,15 @@ Laid out roughly in this order (approximate line ranges from `browse.html` v1.06
 ### 4.5 Caching strategy
 
 - **SPARQL response** is cached in `localStorage` under `CACHE_KEY = "hhf_" + VERSION`. Bumping `VERSION` is the entire cache-busting story. The maintainer bumps the patch in `VERSION` on every push; the CI workflow refuses pushes that change `browse.html` / `next.html` without bumping (see §8).
-- **The load ladder — `loadFromWikibase()`.** *(Staging: `next.html` ≥ v1.08-test.21; promotes to live next cycle. Live `browse.html` still uses the two-tier form described in the note below.)* Stale-while-revalidate over a four-tier ladder, with a shared `revalidate()` helper that always re-fetches live Wikibase in the background and swaps the result in silently:
+- **The load ladder — `loadFromWikibase()`.** *(Live since the v1.08 promotion, 2026-06-06 — on both `browse.html` and `next.html`.)* Stale-while-revalidate over a four-tier ladder, with a shared `revalidate()` helper that always re-fetches live Wikibase in the background and swaps the result in silently:
   1. **Splash prefetch** (sessionStorage, 5-min TTL) — used once if present.
   2. **Returning visitor** → instant paint from the `localStorage` cache (no network), then revalidate. Never pays Wikibase Cloud's ~30–60 s SPARQL cold start.
   3. **First-time visitor** (no cache yet) → instant paint from the **static R2 catalogue snapshot** (CDN, tens of ms; see §5.5) instead of waiting out the cold start, then revalidate and swap. This tier is also the first-timer's Wikibase-outage rescue: if revalidation fails, they simply keep the snapshot.
   4. **No snapshot either** (rare) → live SPARQL direct (`sparqlQuery` retries once after 800 ms), with a final stale-`localStorage` net so the list is never empty.
   The invariant across all tiers: **Wikibase remains the source of truth.** Whatever is painted first (localStorage or snapshot) is corrected to live data by the background revalidate within seconds. The R2 snapshot is only ever the *fastest available first paint*, never authoritative.
-  - *Live `browse.html` (pre-promotion) form:* SPARQL-first, with a single stale-`localStorage` fallback if both fetch attempts fail — so returning visitors survive an outage but a first-time visitor during one sees an empty list. The R2-snapshot tier closes exactly that gap.
 - **Curator JSON** is fetched with `cache: "no-store"` and a `?v=${VERSION}` query string.
-- The service worker (`sw.js`) does **not** cache anything; it exists only to satisfy the PWA installability requirement.
-- Image caching relies on Cloudflare R2 + its CDN in front. R2 CORS allows `https://bturep.github.io`, `http://localhost`, `http://127.0.0.1` (GET/HEAD), 24 h max-age.
+- The service worker (`sw.js`) precaches the **app shell** (the HTML pages, manifests, CSS, icons, the PDF.js viewer) under a versioned `CACHE_NAME`: cache-first for `assets/*`, stale-while-revalidate for HTML, network-only (no caching) for off-origin SPARQL + R2. Bump `CACHE_NAME` (currently `hh-shell-v24`) on any shell/asset change — it nukes the old cache wholesale on activation. (⚠ Because `viewer.mjs` is cache-first under `assets/*`, a patch to it **requires** a `CACHE_NAME` bump or returning visitors keep the old copy.)
+- Image caching relies on Cloudflare R2 + its CDN in front. R2 bucket CORS allows `https://hunterhouse.org`, `https://www.hunterhousefoundation.com`, `https://bturep.github.io`, `http://localhost`, `http://127.0.0.1` (GET/HEAD), 24 h max-age. **The R2 *bucket* CORS allowlist is a dashboard setting (not in the repo) — it must be extended by hand whenever a new live origin is added, separately from Wikibase CORS; a missed origin silently breaks the snapshot `fetch()` and the in-stage PDF reader on the new domain (plain `<img>` is unaffected, which is why such a gap hides).
 
 ### 4.6 Theming + interaction quirks
 
@@ -224,11 +226,11 @@ Two interaction details worth knowing if you're touching CSS:
 
 `next.html` is a near-duplicate of `browse.html` on a parallel version line (`v1.MAJOR.SESSION-test.NN`), bumped per push and never edited from `browse.html`'s line. Shared `light.css`, separate inline CSS / JS in the HTML itself, separate `CACHE_KEY` so staging localStorage never collides with live.
 
-The v1.07 promotion landed the researcher-tools surface (compose mode, the researcher `?` help pane, reorderable marks with drag-handle + nudge in `[only]` mode, "marks first" sort, per-researcher Markdown export / import below the notes panel with same-vs-other-researcher merge semantics, the dirty-changes counter, the admin "edit affordances off" toggle, the `Aa` text-size toggle, click-to-confirm in place of press-and-hold, a second researcher PIN, the accessibility surface, and the `PROPERTIES`-interpolated catalogue SPARQL). `next.html` is now at parity with `browse.html`, opening the v1.08 development line.
+The v1.07 promotion landed the researcher-tools surface (compose mode, the researcher `?` help pane, reorderable marks with drag-handle + nudge in `[only]` mode, "marks first" sort, per-researcher Markdown export / import below the notes panel with same-vs-other-researcher merge semantics, the dirty-changes counter, the admin "edit affordances off" toggle, the `Aa` text-size toggle, click-to-confirm in place of press-and-hold, a second researcher PIN, the accessibility surface, and the `PROPERTIES`-interpolated catalogue SPARQL). The **v1.08 promotion** (2026-06-06) then landed the Wikibase-down resilience (the four-tier ladder + R2 snapshot, §4.5/§5.5), the cookieless first-party analytics + download tracking (§7), and the researcher R2 Files browser. Staging (`next.html`, the v1.09 line) currently runs ahead carrying the chronology **timeline viewer** and the **curator lens** — both gated off on live (see below).
 
-**Curator lens** (Phase 1 — authored-selection overlays) is **dormant on live**: the JSON load is commented out in `browse.html`'s `main()` with a one-line note; the overlay / chip / threshold-card code is all present and inert. The lens is active in `next.html` for development and for sharing-with-friends evaluations. Promote later by uncommenting the one line.
+**Curator lens** (Phase 1 — authored-selection overlays) is **dormant on live**: the JSON load is commented out in `browse.html`'s `main()` with a one-line note; the overlay / chip / threshold-card code is all present and inert. The **timeline viewer** is likewise **gated off on live** via a CSS rule that hides `#timeline-toggle` (hidden, *not* deleted — the boot-time wiring references the element, so removing it would throw and abort boot). Both are active in `next.html` for development. Promote each by, respectively, uncommenting the curator load and deleting the timeline `LIVE GATE` CSS rule.
 
-Promotion workflow when the next.html line gets materially ahead: copy `next.html` → `browse.html`, bump `VERSION` to a real `v1.MAJOR.SESSION.PATCH`, swap the staging icon / manifest / `<title>` references to their live counterparts, comment the curator load if it's still being held back, validate, tag `vMAJOR.SESSION.00`, push tags.
+Promotion workflow when the next.html line gets materially ahead: copy `next.html` → `browse.html`, bump `VERSION` to a real `v1.MAJOR.SESSION.PATCH`, **swap the manifest link `manifest.next.json` → `manifest.json`** (a missed swap ships the staging PWA identity to live installs — this bit once), swap the staging icon / `<title>` references to their live counterparts, re-apply the curator + timeline live gates if they're still held back, validate, tag `vMAJOR.SESSION.00`, push tags.
 
 ---
 
@@ -242,7 +244,7 @@ Two guardrails inside the query:
 - `?item wdt:P79 ?src` is **required** so the result set excludes vocabulary items, people, and institutions that happen to carry an HH archive ID.
 - `?item wdt:P96 ?img` is **OPTIONAL** so stubs without a preview still appear in the list (rendered with a "No image yet" placeholder).
 
-Item identifiers follow `HH-{COLLECTION}-{NNNN}` (e.g. `HH-HHC-0044`, `HH-CAA-0028`, `HH-EGC-0001`). Property IDs are catalogued in `WIKIBASE.md`. In `next.html` a top-of-script `PROPERTIES = {…}` constant declares all 27 PIDs the application uses; the `EDITABLE` map, the per-claim write helpers, and the `CATALOGUE_QUERY` itself interpolate from it via template literals — so a PID rename or property mint in `WIKIBASE.md` has one place in the code to update. `browse.html` (the live line) still inlines bare `wdt:Pxx` literals in its SPARQL; the indirection lands at the next promotion.
+Item identifiers follow `HH-{COLLECTION}-{NNNN}` (e.g. `HH-HHC-0044`, `HH-CAA-0028`, `HH-EGC-0001`). Property IDs are catalogued in `WIKIBASE.md`. A top-of-script `PROPERTIES = {…}` constant declares all the PIDs the application uses; the `EDITABLE` map, the per-claim write helpers, and the `CATALOGUE_QUERY` itself interpolate from it via template literals — so a PID rename or property mint in `WIKIBASE.md` has one place in the code to update. This indirection is live on **both** `browse.html` and `next.html` (it landed in the v1.07 promotion).
 
 ### 5.2 Images — Cloudflare R2
 
@@ -282,7 +284,7 @@ Editorial overlays loaded as static JSON from `/curations/`. Schema documented i
 
 ### 5.5 Catalogue snapshot — static read fallback on R2
 
-*(Staging: `next.html` ≥ v1.08-test.21; promotes to live next cycle.)*
+*(Live since the v1.08 promotion, 2026-06-06.)*
 
 Wikibase SPARQL is the one live, non-static dependency in the read path — and the only single point of failure for *reading* the catalogue. The catalogue snapshot removes it from the critical path for first paint and provides an outage fallback that works for **every** visitor, not just returning ones with a `localStorage` cache.
 
@@ -295,7 +297,7 @@ archive.hunterhousefoundation.com/catalogue/catalogue.csv    ← human export (n
 - **`catalogue.csv`** is a flattened one-row-per-item export (multi-value fields joined with `"; "`). For archivist hand-off / spreadsheet use only; the site never reads it.
 - **How it stays in sync — by construction, not by discipline.** `build_catalogue_snapshot.py` reads `CATALOGUE_QUERY` *out of `next.html` at build time* and resolves the `${PROPERTIES.*}` placeholders to PIDs. There is no second copy of the query in the codebase, so the snapshot query and the browser query cannot diverge. (The script hard-errors if the markers move or a placeholder is unresolved, rather than silently shipping a wrong fallback.)
 - **Freshness vs. truth.** The snapshot is only as current as the last `--execute` (deliberately a manual session-end step — see §3 / §8). That staleness is harmless precisely because Wikibase stays the source of truth: the background revalidate corrects any first-paint snapshot to live data within seconds. The snapshot exists to make the slow/absent case fast and survivable, not to replace Wikibase.
-- **It lives on the same CDN as the images** (R2), so the realistic outage — Wikibase down, GitHub Pages + R2 up — leaves the archive fully browsable. CORS already allows `bturep.github.io`; the R2 host is whitelisted in the `connect-src` CSP directive so the `fetch()` is permitted.
+- **It lives on the same CDN as the images** (R2), so the realistic outage — Wikibase down, GitHub Pages + R2 up — leaves the archive fully browsable. The R2 bucket CORS allowlist includes `hunterhouse.org` + `www.hunterhousefoundation.com` (added at the domain cutover), and the R2 host is whitelisted in the `connect-src` CSP directive so the `fetch()` is permitted.
 
 Distinct from the §5.3 metadata sidecars: those are per-item `wbgetentities` dumps for *disaster recovery* (rebuild Wikibase via `wbeditentity`). The catalogue snapshot is one consolidated, browser-shaped file for *runtime read resilience*. Different shape, different job.
 
@@ -322,7 +324,7 @@ ui updates optimistically  ←JSON──
 ```
 
 - **Listen**: `127.0.0.1:8731` (loopback only, never bound to LAN).
-- **Allowed origins**: `https://bturep.github.io` (exact), `http(s)://localhost`, `http(s)://127.0.0.1` (any port). Host matching uses `urlparse`, not `startswith`.
+- **Allowed origins**: `https://hunterhouse.org`, `https://www.hunterhousefoundation.com`, `https://bturep.github.io` (exact), `http(s)://localhost`, `http(s)://127.0.0.1` (any port). Host matching uses `urlparse`, not `startswith`.
 - **Allowed Wikibase actions**: `wbsetlabel`, `wbsetdescription`, `wbsetaliases`, `wbcreateclaim`, `wbsetclaim`, `wbremoveclaims`, `wbeditentity`.
 - **Auth**: per-startup random token (`secrets.token_urlsafe(24)`), printed to the proxy's stdout banner. The admin pastes it into `next.html`'s badge UI once per proxy-restart; `localStorage["hhf_proxy_token"]` carries it. `EDIT_PROXY_SECRET` in `.env` overrides for power users but loses the rotation benefit.
 - **Token validation** via `/ping?secret=…` returns `{authenticated: bool}` so the browser can verify a pasted token without a real write.
@@ -353,7 +355,7 @@ The other one-shot Python scripts in `scripts/` use the same credentials from `.
 | CI | One GitHub Actions workflow runs on every push to `main` and on PRs | `.github/workflows/validate.yml` |
 | Validator | `node --check` on each inline `<script>` block in `browse.html` + `next.html`; `VERSION` regex match (live = `v\d+\.\d{2}\.\d{2}`, staging = `v\d+\.\d{2}-test\.\d{2}`); JSON parse on both manifests; and a "did you bump VERSION" check that compares each HTML against its prior state (CI uses `github.event.before`; locally falls back to `HEAD~1`) and fails if the file changed but `VERSION` didn't | `.github/scripts/validate.mjs` |
 | Gate | **No** — does not block the push. Emails the owner on a failed run | (model: "alert, don't block") |
-| Smoke tests | Three Playwright tests — catalogue loads via SPARQL, search→select→record-pane title renders, mobile shell at 375×812 | `tests/test_smoke.py` |
+| Smoke tests | Three Playwright tests — catalogue loads via SPARQL, search→select→record-pane title renders, mobile shell at 375×812. **⚠ Currently stale** (a renamed mobile selector + the random-port test server tripping the bare-localhost CORS rule mean they need a refresh to pass) — they're dev-only and not in CI, so this went unnoticed | `tests/test_smoke.py` |
 | Local server fixture | Session-scoped `http.server` on a random loopback port rooted at the repo (so relative `fetch()` paths work) | `tests/conftest.py` |
 | Smoke-test cadence | Maintainer's local use; not in CI (would need Playwright browsers + tolerance for SPARQL flakiness) | `pytest tests/` |
 | Integrity check | `scripts/verify_r2_links.py` — SPARQLs every URL claim (`P95` / `P96` / `P143`) AND every derived sidecar URL; HEAD-checks each. Read-only, no creds. Suggested cadence: before each session-end | |
@@ -366,17 +368,17 @@ The other one-shot Python scripts in `scripts/` use the same credentials from `.
 
 | | |
 |---|---|
-| Commits on `main` | **607** |
-| First commit | `2026-05-12` (`8261c57` "Add files via upload") |
-| Latest commit | `2026-05-24` |
-| Contributors | **1** — `bturep` (`brandonturepoole@gmail.com`) |
-| Tags | 14 — `v0.6`, `v0.7`, `v1.0`, `v1.01.00`, `v1.1.1`, `v1.02.00`, `v1.02.18`, `v1.03.00`, `v1.03.01`, `v1.03.08`, `v1.03.28`, `v1.04.00`, `v1.05.00`, `v1.06.00`. Tags are cut at SESSION milestones; patch-level bumps (e.g. `v1.06.33`) are commit-version-bumps but not separate tags. |
-| Branches (local) | `main`, `v1.04` |
-| Branches (remote) | `origin/main`, `origin/v1.04` |
+| Commits on `main` | **675** |
+| First commit | `2026-05-12` ("Add files via upload"; SHAs were rewritten in the 2026-06-02 history scrub) |
+| Latest commit | `2026-06-11` |
+| Contributors | **1** — `bturep` |
+| Tags | 16 — `v0.6`, `v0.7`, `v1.0`, `v1.01.00`, `v1.1.1`, `v1.02.00`, `v1.02.18`, `v1.03.00`, `v1.03.01`, `v1.03.08`, `v1.03.28`, `v1.04.00`, `v1.05.00`, `v1.06.00`, `v1.07.00`, `v1.08.00`. Tags are cut at SESSION milestones; patch-level bumps (e.g. `v1.08.03`) are commit-version-bumps but not separate tags. |
+| Branches (local) | `main`, `v1.04`, `feature/baden-mode`, `feature/researcher-notes-export` |
+| Branches (remote) | `origin/main`, `origin/v1.04`, `origin/feature/baden-mode`, `origin/feature/researcher-notes-export` |
 | Versioning | `vMAJOR.SESSION.PATCH`, two-digit zero-padded. `SESSION` rolls per work-day; `PATCH` rolls per push |
-| Working-copy size | 150 MB |
-| `.git` size | 136 MB (history is heavy with binary churn — TIF intake, PDFs, large PNGs committed over time) |
-| `.gitignore` | Excludes `__pycache__/`, `*.pyc`, Excel lock files, `.env*` (with a `!.env.example` allowance), `data/snapshots/wikibase_full_*/`, `data/snapshots/r2_verify_*.json`, `.DS_Store`, pytest/playwright caches |
+| Working-copy size | 129 MB |
+| `.git` size | 111 MB (was 136 MB; the 2026-06-02 `git-filter-repo` scrub dropped a ~98 MB splash MP4 + working-memory docs from history. Still heavy with binary churn — TIF intake, PDFs, large PNGs) |
+| `.gitignore` | Excludes the (private-repo) working-memory docs, `__pycache__/`, `*.pyc`, Excel lock files, `.claude/*.lock` + `.claude/settings.local.json`, `.env*` (with a `!.env.example` allowance), `data/snapshots/wikibase_full_*/`, `data/snapshots/r2_verify_*.json`, `.DS_Store`, pytest/playwright caches |
 | Remote | `git@github.com:bturep/HunterHouse.git` |
 | Hosting | GitHub Pages, default config. CI lives under `.github/`; no other workflow files |
 
@@ -386,10 +388,10 @@ The other one-shot Python scripts in `scripts/` use the same credentials from `.
 
 ### Architecture & maintainability
 
-- **Single-file SPA, ~5,530 lines (live) / ~7,130 lines (staging), ~140 top-level functions, no module boundaries.** Functions communicate through module-scope `let`s (`state`, `zoomState`, `_proxyOnline`, etc.). The script reads top-to-bottom; there is no entry-point indirection beyond `main()` and `wireControls()`. Comments are dense and current, but any one feature touches many call sites. Staging is materially larger than live; when the next promotion lands the live file will pick up most of that delta. The 7,133-line staging size hasn't hit the maintainer's "worry around 7–8 K" threshold yet.
+- **Single-file SPA, ~8,650 lines (live) / ~9,590 lines (staging), ~140+ top-level functions, no module boundaries.** Functions communicate through module-scope `let`s (`state`, `zoomState`, `_proxyOnline`, etc.). The script reads top-to-bottom; there is no entry-point indirection beyond `main()` and `wireControls()`. Comments are dense and current, but any one feature touches many call sites. Staging is larger than live (it carries the timeline + curator code). Both files have now passed the maintainer's old "worry around 7–8 K lines" threshold — a structural split (or at least extracting the timeline/PDF/zoom engines) is the natural next maintainability investment, deferred while the feature surface is still moving.
 - **`next.html` is a near-duplicate of `browse.html`.** The staging strategy is "copy the file, version it, deploy alongside" rather than a branch / preview-env. It works on plain GitHub Pages with no extra infra, but doubles the surface area for the duration of a development cycle. `light.css` is shared between live and staging.
 - **`renderMeta` and `renderMobSheet` overlap but no longer literally duplicate.** The literally-duplicated bits (rights "Contact for…" prose, finding-aid `<a>` rendering, archive contact text) are extracted into shared helpers (`archiveContactText`, `rightsRowHTML`, `findingAidHTML`). The two render paths have otherwise diverged in purpose (mobile = read-only public; desktop = admin-aware with active-state filter-buttons + EM placeholders); a full `buildRows()` unification would be a high-risk refactor for a "pays off when adding an editable field" maintainability win, deferred until that pressure is concrete.
-- **No build step.** Easy to onboard, but no minification, no transpilation, no tree-shaking. The ~280 KB HTML payload is what visitors download (uncompressed; GitHub Pages serves it gzipped).
+- **No build step.** Easy to onboard, but no minification, no transpilation, no tree-shaking. The ~455 KB HTML payload is what visitors download (uncompressed; GitHub Pages serves it gzipped).
 - **`localStorage` is the only persistence layer in the browser.** Cache key is `"hhf_" + VERSION`. There is no migration story for stored shapes — a `VERSION` bump simply orphans the previous cache entry. The catalogue is re-fetched from SPARQL, so the cost is one extra round-trip per pushed version, not data loss.
 - **`state.curation` checks scattered through render code (~26 sites).** Not a refactor target until a second curation-mode emerges; pre-emptive abstraction would be premature.
 
@@ -405,12 +407,12 @@ The other one-shot Python scripts in `scripts/` use the same credentials from `.
 
 ### Repository hygiene
 
-- **`.git` is 136 MB on a 150 MB working tree.** History contains large binaries (early TIF intake, PDFs, large PNGs). A reviewer cloning shallow is fine; full clones are heavier than the runtime surface suggests.
+- **`.git` is 111 MB on a 129 MB working tree.** History still contains large binaries (early TIF intake, PDFs, large PNGs) even after the 2026-06-02 scrub. A reviewer cloning shallow is fine; full clones are heavier than the runtime surface suggests.
 - **Solo-author project**: no review pipeline, no `CODEOWNERS`, no PR template. Every push goes straight to `main`. The validate workflow + Playwright smoke tests are the only programmatic safety nets.
 
 ### Runtime risks
 
-- **SPARQL fetch** retries once with an 800 ms backoff (handles transient blips). On live `browse.html`, if both attempts fail `loadFromWikibase()` serves the most recent `localStorage` cache regardless of age rather than rendering empty — which rescues returning visitors but leaves a first-time visitor during an outage with an empty list. **Staging (`next.html` ≥ v1.08-test.21) closes that gap**: SPARQL is no longer on the critical path for first paint, and a first-time visitor falls back to the static R2 catalogue snapshot (§5.5). Once that promotes, Wikibase SPARQL being down degrades the site to "last-snapshot data, silently refreshed when SPARQL returns" rather than "broken for new visitors."
+- **SPARQL fetch** retries once with an 800 ms backoff (handles transient blips). SPARQL is **no longer on the critical path for first paint** (live since v1.08): a returning visitor paints from `localStorage` and a first-time visitor from the static R2 catalogue snapshot (§5.5), each then revalidating against live Wikibase in the background. So Wikibase SPARQL being down now degrades the site to "last-snapshot data, silently refreshed when SPARQL returns" rather than "broken for new visitors." (Neither fetch currently carries an `AbortSignal.timeout`, so a *stalled* — vs. failed — connection can hang first paint; a known low-severity gap.)
 - **Single SPARQL query loads the entire catalogue** (currently ~225 items). Fine at this scale; will need pagination if it grows by ~1–2 orders of magnitude. The R2 snapshot is the same single-payload shape and would need the same treatment.
 - **VERSION bump enforced in CI.** The validate workflow now refuses pushes that change `browse.html` / `next.html` without also changing `VERSION` (see §8). Forgetting to bump was the cache-stale foot-gun; the guard makes it loud.
 
