@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Timeline — Hunter Site</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="helix-kit.css">
+<style>
+  /* Verso tokens — the archive's exact palette (assets/light.css, dark mode),
+     so the timeline reads as the same product. Overrides helix-kit's :root. */
+  :root{
+    --bg:#242220; --ink:#f0ede6;
+    --muted:rgba(240,237,230,0.52); --hint:rgba(240,237,230,0.32);
+    --rule:rgba(240,237,230,0.13); --rule-soft:rgba(240,237,230,0.08);
+    --soft:#26231e; --paper:#201e1a;
+    --red:#c4826e; --red-pale:rgba(196,130,110,0.18);
+    --copper:#7aaa98; --copper-deep:#9dc2b2; --copper-pale:rgba(122,170,152,0.2);
+  }
+  html,body{overflow:hidden;background:var(--bg);margin:0}
+  #bg{position:fixed;inset:0;background:var(--bg);z-index:-1}
+  #tlwrap{position:fixed;inset:0}
+  svg#tl{position:absolute;inset:0;width:100%;height:100%;display:block}
+  /* shape line */
+  #shape{fill:none;stroke:#d9d3c6;stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round;opacity:.5}
+  #closure{fill:none;stroke:#d9d3c6;stroke-width:1.5;stroke-linecap:round}
+  .ev-range{fill:none;stroke-width:4.5;stroke-linecap:round;opacity:.55}
+  .ev-dot{stroke:var(--bg);stroke-width:1.4;cursor:pointer;transition:r .15s}
+  .ev-dot.key{stroke-width:1.8}
+  .ev-dot:hover{r:7}
+  .ev-dot.sel{stroke:var(--ink);stroke-width:2}
+  .tick-line{stroke:rgba(240,237,230,0.11);stroke-width:1}
+  .tick-txt{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;fill:var(--muted)}
+  .ev-lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.02em;fill:var(--ink);opacity:0;transition:opacity .2s}
+  .ev-lab.show{opacity:.9}
+
+  /* chrome */
+  .tl-eyebrow{position:fixed;top:24px;left:30px;z-index:5;font-family:var(--mono);font-size:10px;
+    letter-spacing:.3em;text-transform:uppercase;color:var(--gold)}
+  .tl-eyebrow .sub{display:block;color:var(--hint);font-size:8.5px;letter-spacing:.16em;margin-top:5px}
+
+  /* shape switch */
+  .modes{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:6;display:flex;gap:6px;
+    background:rgba(20,18,16,0.8);border:1px solid var(--rule);border-radius:24px;padding:5px;backdrop-filter:blur(6px)}
+  .modes button{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+    background:none;border:0;border-radius:18px;padding:8px 16px;cursor:pointer;transition:color .15s,background .15s}
+  .modes button:hover{color:var(--ink)}
+  .modes button.on{color:var(--scene);background:var(--gold)}
+
+  /* legend — a quiet mono stamp block, like the archive's labelled sections */
+  .legend{position:fixed;top:24px;right:28px;z-index:5;display:flex;flex-direction:column;gap:7px;
+    font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;color:var(--muted);align-items:flex-end}
+  .lg-hd{font-size:8px;letter-spacing:.24em;text-transform:uppercase;color:var(--hint);font-weight:500;
+    padding-bottom:8px;margin-bottom:1px;border-bottom:1px solid var(--rule)}
+  .legend .lg{display:flex;align-items:center;gap:9px;justify-content:flex-end;cursor:pointer;opacity:.92;transition:opacity .15s}
+  .legend .lg:hover{opacity:1}
+  .legend .lg.off{opacity:.28}
+  .legend .lg i{width:7px;height:7px;border-radius:50%;flex:none}
+  .legend .lg b{font-weight:400;text-transform:uppercase;letter-spacing:.18em}
+
+  /* detail — no panel: the record sits straight on the background in the
+     bottom-left corner, like a caption. A faint text-shadow keeps it legible
+     over any timeline lines that pass beneath. */
+  .card{position:fixed;left:30px;bottom:30px;z-index:7;width:300px;max-width:40vw;
+    padding:0;text-shadow:0 1px 10px rgba(20,18,16,0.6),0 0 2px rgba(20,18,16,0.5);
+    opacity:0;transform:translateY(8px);transition:opacity .26s,transform .26s;pointer-events:none}
+  .card.on{opacity:1;transform:none;pointer-events:auto}
+  .card .cx{display:none}
+  /* type — mirrors the item-record panel: ONE sans element (the title), mono
+     for everything else, terracotta mono for archive ids. */
+  .card .k{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+  .card .k span[style]{font-weight:500}
+  .card .k .sep{color:var(--rule);margin:0 .5em}
+  .card h2{font-family:var(--sans);font-size:16px;font-weight:500;line-height:1.22;letter-spacing:-.012em;margin:0 0 9px;color:var(--ink)}
+  .card p{font-family:var(--mono);font-size:11px;line-height:1.62;color:var(--ink);margin:0;letter-spacing:.02em}
+  /* meta — key/value rows in the record-pane idiom (mono, lowercase keys,
+     terracotta archive id; no stamps, no brackets) */
+  .card .ev-kv{margin-top:13px;font-family:var(--mono);font-size:11px;line-height:1.5}
+  .card .ev-kv .row{display:grid;grid-template-columns:52px 1fr;gap:8px;padding:2px 0;align-items:baseline}
+  .card .ev-kv .k2{font-size:11px;letter-spacing:.04em;text-transform:lowercase;color:var(--muted);text-align:right}
+  .card .ev-kv .k2::after{content:":";color:var(--hint);margin-left:2px}
+  .card .ev-kv .v{font-size:11px;letter-spacing:.02em;color:var(--ink)}
+  .card .ev-kv .v.archid{color:var(--red);letter-spacing:.04em}
+
+  .tl-hint{position:fixed;bottom:30px;right:30px;z-index:5;font-family:var(--mono);font-size:9px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--hint);transition:opacity .3s}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+
+<div id="tlwrap">
+  <svg id="tl"><g id="ticks"></g><path id="closure"></path><g id="ranges"></g><path id="shape"></path><g id="events"></g><g id="labels"></g></svg>
+</div>
+
+<div class="legend" id="legend"><div class="lg-hd">Threads</div></div>
+
+<div class="card" id="card"></div>
+<div class="tl-hint" id="hint">Click an event</div>
+
+<script src="site-geo.js"></script>
+<script src="../events-data.js"></script>
+<script src="timeline.js"></script>
+</body>
+</html>

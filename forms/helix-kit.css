@@ -1,0 +1,79 @@
+/* ============================================================
+   helix-kit — the shared visual language of "A Life, and a House".
+   Lifted verbatim from Timeline Helix.html so these forms read as
+   the same family: warm-dark ground, fine ink rules, glowing beads
+   stroked in the thread colours, gold for the house, mono labels.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root{
+  --scene:#141210; --ink:#f0ede6; --muted:#9a958b; --hint:#6c675f;
+  --rule:rgba(240,237,230,0.14); --rule-soft:rgba(240,237,230,0.07);
+  --gold:#c9a44e;
+  --sans:"Inter Tight",-apple-system,Helvetica,Arial,sans-serif;
+  --mono:"JetBrains Mono","SF Mono",Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:var(--sans);color:var(--ink);
+  background:radial-gradient(ellipse 90% 90% at 50% 46%, #221f19 0%, #181513 50%, #0e0d0b 100%)}
+
+/* fixed-aspect stage: keeps the diagram's geometry true at any size */
+.stage{position:absolute;inset:0;margin:auto;max-width:100%;max-height:100%}
+.stage svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.overlay{position:absolute;inset:0;pointer-events:none}
+.overlay > *{position:absolute}
+
+/* ---- beads (events) : the helix's exact bead ---- */
+.bead{width:13px;height:13px;margin:-6.5px 0 0 -6.5px;border-radius:50%;border:2px solid;cursor:pointer;
+  pointer-events:auto;box-shadow:0 0 10px rgba(0,0,0,0.5);transition:transform .12s}
+.bead.key{width:17px;height:17px;margin:-8.5px 0 0 -8.5px;box-shadow:0 0 16px currentColor}
+.bead.arch{border-style:dashed;background:var(--scene)!important}
+.bead:hover{transform:scale(1.45)}
+.bead.sel{box-shadow:0 0 0 3px var(--scene),0 0 0 5px currentColor,0 0 22px currentColor}
+
+.blab{font-family:var(--mono);font-size:10.5px;letter-spacing:.02em;white-space:nowrap;
+  transform:translateY(-50%);pointer-events:none;opacity:.62;transition:opacity .15s}
+.blab.left{transform:translate(-100%,-50%)}
+.blab.hot{opacity:1}
+
+/* ---- site-feature markers (used by the plan) ---- */
+.feat{pointer-events:auto;cursor:pointer}
+.featlab{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--ink);
+  white-space:nowrap;pointer-events:none;transform:translateY(-50%)}
+.featlab.left{transform:translate(-100%,-50%)}
+.featlab b{display:block;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--hint);font-weight:500;margin-bottom:2px}
+
+/* ---- HUD : mast, legend, detail, hint — verbatim feel ---- */
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:4;
+  background:radial-gradient(ellipse 82% 80% at 50% 50%, transparent 56%, rgba(14,13,11,0.72) 100%)}
+.hud{position:fixed;inset:0;pointer-events:none;z-index:10}
+.mast{position:absolute;top:24px;left:30px}
+.mast .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--hint)}
+.mast h1{font-size:20px;font-weight:300;letter-spacing:-.01em;margin:7px 0 0}
+.mast h1 b{font-weight:600}
+.formtag{position:absolute;top:24px;right:30px;text-align:right;font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--muted)}
+.formtag b{color:var(--ink)}
+.formtag .sub{font-size:9px;letter-spacing:.2em;color:var(--hint);margin-top:4px}
+
+.legend{position:absolute;bottom:30px;right:30px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.95}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:8px;vertical-align:-1px;border:1.5px solid}
+.legend .sq{border-radius:1px}
+
+.detail{position:absolute;left:30px;bottom:34px;width:340px;pointer-events:auto;
+  background:rgba(26,23,20,0.86);border:1px solid var(--rule);border-radius:5px;padding:20px 22px 18px;
+  backdrop-filter:blur(6px);box-shadow:0 20px 50px rgba(0,0,0,0.5);
+  opacity:0;transform:translateY(10px);transition:opacity .24s,transform .24s}
+.detail.show{opacity:1;transform:none}
+.detail .dx{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--muted);font-size:19px;cursor:pointer;line-height:1}
+.detail .dx:hover{color:var(--ink)}
+.detail .d-kind{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;margin-bottom:8px}
+.detail .d-date{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:6px}
+.detail .d-title{font-size:23px;font-weight:300;line-height:1.18;letter-spacing:-.015em;margin-bottom:10px}
+.detail .d-note{font-size:13px;line-height:1.6;color:var(--muted)}
+.detail .d-src{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;color:var(--hint);margin-top:13px;border-top:1px solid var(--rule);padding-top:10px}
+.detail .d-src a{color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(201,164,78,.3)}
+
+.hint{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--hint);opacity:.85;transition:opacity .4s}
+.hint b{color:var(--muted);font-weight:500}
