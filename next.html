@@ -2828,6 +2828,127 @@
     #baden-root *, .bd-sheet *{ transition:none !important; animation:none !important; }
   }
 </style>
+<!-- @site-map supplemental: lens palette, switching wordmark, divider, old-timeline gate -->
+<style>
+  :root{--lens-archive:#c4826e;--lens-map:#7aaa98;--lens-tl:#c6a24f}
+  #archive-toggle{color:var(--lens-archive)}
+  #map-toggle{color:var(--lens-map)}
+  #tl-toggle{color:var(--lens-tl)}
+  .site-topright .lens{opacity:.46;transition:opacity .15s ease}
+  .site-topright .lens:hover{opacity:1}
+  .site-topright .lens.cur{opacity:1}
+  .tr-div{width:1px;height:15px;align-self:center;background:var(--rule);flex:none}
+  /* switching wordmark (mk-home button replaces the plain .markid link) */
+  .markid{display:flex;align-items:baseline;gap:9px;text-decoration:none;color:inherit;cursor:pointer}
+  .mk-home{display:flex;align-items:baseline;gap:9px;background:none;border:0;padding:0;margin:0;text-decoration:none;color:inherit;cursor:pointer}
+  .mk-static,.mk-page{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:inherit;line-height:1}
+  .mk-home:hover .mk-page{opacity:.55}
+  html.text-lg .mk-static,html.text-lg .mk-page{font-size:12px}
+  html.text-xl .mk-static,html.text-xl .mk-page{font-size:13px}
+  /* LIVE GATE: old dual-spine timeline retired from the UI (new lens timeline replaces it).
+     Button + #timeline-pane code stay in the DOM so boot-time wiring never throws. */
+  .site-topright #timeline-toggle{display:none!important}
+</style>
+<!-- @site-map: full-screen interactive site model, opened from the header map button -->
+<style>
+  #map-toggle svg{display:block}
+  #map-toggle.on{color:var(--red)}
+  #site-overlay{position:fixed;z-index:1200;background:#242220;overflow:hidden;
+    top:41px;left:0;width:100vw;height:calc(100vh - 82px);
+    opacity:0;visibility:hidden;pointer-events:none;
+    transition:opacity .42s ease}
+  #site-overlay.preload{visibility:visible}            /* render the held map invisibly so opening is instant */
+  #site-overlay.show{opacity:1;visibility:visible;pointer-events:auto}
+  #site-overlay iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+  /* in site mode: a left-anchored SITE PLAN breadcrumb + tools after the wordmark
+     (positioned by JS so it never recentres), and ? + × on the right */
+  #site-titlebar{position:absolute;left:250px;top:50%;transform:translateY(-50%);z-index:2;
+    display:flex;align-items:center;gap:11px;opacity:0;pointer-events:none;transition:opacity .26s ease;white-space:nowrap}
+  body.site-mode #site-titlebar{opacity:1;pointer-events:auto}
+  .sp-lead{font-family:var(--mono);font-size:13px;color:var(--rule);line-height:1}
+  .sp-crumb{background:none;border:0;cursor:pointer;padding:0;
+    font-family:var(--mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink)}
+  .sp-crumb:hover{opacity:.55}
+  .sp-place{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .sp-place:empty{display:none}
+  .sp-place::before{content:"/";margin-right:9px;color:var(--rule)}
+  .sp-tools{display:flex;align-items:center;gap:4px;border-left:1px solid var(--rule);padding-left:11px;margin-left:2px}
+  .sp-ic{background:none;border:0;cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center;padding:3px 4px;border-radius:3px}
+  .sp-ic:hover{color:var(--ink);background:rgba(0,0,0,0.05)}
+  .sp-ic.on{color:var(--red)}
+  #sp-help{display:none;background:none;border:0;cursor:pointer;color:var(--ink);font-family:var(--mono);font-size:14px;font-weight:500;line-height:1;align-items:center;justify-content:center;padding:0}
+  #sp-help:hover{opacity:.5}
+  body.site-mode #sp-help{display:flex}
+  #site-close{display:none;align-items:center;justify-content:center}
+  body.site-mode #site-close{display:flex}
+  /* In a view the top-right keeps the full nav+utility cluster — only the
+     archive-specific search (and the hidden version stamp) is dropped. */
+  body.site-mode #search-input,body.site-mode #search-toggle,body.site-mode #topright,
+  body.tl-mode #search-input,body.tl-mode #search-toggle,body.tl-mode #topright{display:none!important}
+  /* the about/info pane lifts above the view overlays, below the 41px header */
+  body.site-mode #about-pane,body.tl-mode #about-pane{position:fixed;top:41px;left:0;right:0;bottom:0;z-index:1500}
+  /* timeline overlay (parallel to the map) */
+  /* a parent-level dark backdrop behind BOTH overlays — guarantees the white browse
+     stage can never show through a transparent iframe during the hand-off */
+  #view-backdrop{position:fixed;top:41px;left:0;width:100vw;height:calc(100vh - 82px);z-index:1100;
+    background:#242220;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .3s ease}
+  body.site-mode #view-backdrop,body.tl-mode #view-backdrop{opacity:1;visibility:visible}
+  @media (max-width:767px){ #view-backdrop{top:0;height:100vh} #view-toolbar{display:none!important} }
+  #timeline-overlay{position:fixed;z-index:1300;background:#242220;overflow:hidden;top:41px;left:0;width:100vw;height:calc(100vh - 82px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .42s ease}
+  #timeline-overlay.preload{visibility:visible}
+  #timeline-overlay.show{opacity:1;visibility:visible;pointer-events:auto}
+  #timeline-overlay iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+  /* two-view header: Site plan ⇄ Timeline crumbs + per-view tools */
+  body.tl-mode #site-titlebar{opacity:1;pointer-events:auto}
+  body.tl-mode #site-close{display:flex}
+  .sp-mid{font-family:var(--mono);font-size:11px;color:var(--rule);line-height:1}
+
+  /* top-centre global view switcher — fixed, identical on every view (incl. archive) */
+  #view-switch{position:fixed;top:0;left:50%;transform:translateX(-50%);height:41px;z-index:1450;
+    display:flex;align-items:center;gap:11px;font-family:var(--mono);pointer-events:none}
+  body.loading #view-switch,body.hh-splash #view-switch{display:none}
+  #view-switch .vs{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--hint);background:none;border:0;padding:4px 2px;cursor:pointer;pointer-events:auto;transition:color .16s}
+  #view-switch .vs:hover{color:var(--ink)}
+  #view-switch .vs-sep{color:var(--rule);font-size:10px;pointer-events:none}
+  /* active lens lit (bright ink) vs the others (dim hint) — scoped under #view-switch so it outranks `#view-switch .vs` */
+  #view-switch #vs-archive{color:var(--ink)}
+  body.site-mode #view-switch #vs-archive,body.tl-mode #view-switch #vs-archive{color:var(--hint)}
+  body.site-mode #view-switch #vs-map,body.tl-mode #view-switch #vs-tl{color:var(--ink)}
+
+  /* bottom contextual toolbar — a full-width bar matching the archive's image-foot */
+  #view-toolbar{position:fixed;bottom:0;left:0;width:100vw;height:41px;box-sizing:border-box;z-index:1450;
+    display:none;align-items:center;justify-content:center;gap:0;
+    border-top:1px solid var(--rule);background:var(--bg)}
+  body.site-mode #view-toolbar,body.tl-mode #view-toolbar{display:flex}
+  #view-toolbar .vt-group{display:none;align-items:center;gap:2px}
+  body.site-mode #map-tools{display:flex}
+  body.tl-mode #tl-tools{display:flex}
+  #view-toolbar .sp-ic{display:flex;align-items:center;justify-content:center;width:34px;height:30px;
+    border-radius:5px;color:var(--muted);background:none;border:0;cursor:pointer;transition:color .15s,background .15s}
+  #view-toolbar .sp-ic:hover{color:var(--ink);background:rgba(240,237,230,0.06)}
+  #view-toolbar .sp-ic.on{color:var(--ink);background:var(--copper-pale)}
+  /* Ring / Line / Column use the archive's bracket button form (matching
+     .pub-read / .fp-chip) — dim brackets, label takes the colour, no filled pill */
+  #view-toolbar .tl-mode-btn{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.02em;text-transform:capitalize;
+    color:var(--muted);background:none;border:0;border-radius:0;cursor:pointer;padding:6px 8px;line-height:1.6;transition:color .12s,opacity .12s}
+  #view-toolbar .tl-mode-btn::before{content:"[ ";color:var(--hint);opacity:.55}
+  #view-toolbar .tl-mode-btn::after{content:" ]";color:var(--hint);opacity:.55}
+  #view-toolbar .tl-mode-btn:hover{color:var(--ink);opacity:1;background:none}
+  #view-toolbar .tl-mode-btn.on{color:var(--ink);font-weight:500;background:none}
+  /* (view-mode top-right visibility is handled in the rule above) */
+  /* site-plan help popover (above the map overlay) */
+  #site-help{position:fixed;top:48px;right:14px;z-index:1300;width:228px;
+    background:var(--bg);border:1px solid var(--rule);border-radius:6px;padding:13px 15px;
+    font-family:var(--mono);box-shadow:0 14px 34px rgba(0,0,0,.28)}
+  #site-help[hidden]{display:none}
+  #site-help h4{margin:0 0 9px;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  #site-help .sh-row{display:flex;align-items:baseline;gap:10px;font-size:10.5px;color:var(--ink);padding:4px 0;letter-spacing:.02em}
+  #site-help .sh-k{color:var(--muted);width:54px;flex:none;text-transform:uppercase;letter-spacing:.1em;font-size:8.5px}
+  #site-help .sh-sep{border-top:1px solid var(--rule);margin:8px 0}
+  #site-help .sh-tip{font-size:9.5px;color:var(--muted);line-height:1.65}
+  @media (max-width:767px){ #site-overlay{top:0;height:100vh} #timeline-overlay{top:0;height:100vh} }
+</style>
 </head>
 <body class="loading">
 <!-- ════════════════════════════════════════════════════════════════════════
@@ -2950,11 +3071,31 @@
 </div>
 
 <header class="site-top" id="site-header" role="banner" aria-label="Site header">
-  <a class="markid" href="index.html">
-    <span class="name">Hunter House Archive</span>
-  </a>
+  <div class="markid" id="markid">
+    <button class="mk-home" id="mk-home" type="button" aria-label="About this archive">
+      <span class="mk-static">Hunter House</span>
+      <span class="mk-page" id="mk-page">Archive</span>
+    </button>
+  </div>
   <div class="header-search"></div>
+  <!-- bottom-centre contextual tools, mirroring the archive's image-foot bar -->
+  <div id="view-toolbar">
+    <span class="vt-group" id="map-tools">
+      <button id="sp-north" class="sp-ic" title="North up" aria-label="North up"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M7 1.5 L10 12 L7 9.2 L4 12 Z"/></svg></button>
+      <button id="sp-fit" class="sp-ic" title="Whole site" aria-label="Fit to whole site"><svg width="14" height="14" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4.5V2h2.5M11 4.5V2H8.5M2 8.5V11h2.5M11 8.5V11H8.5"/></svg></button>
+      <button id="sp-3d" class="sp-ic" title="Plan / 3D" aria-label="Toggle plan and 3D"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" aria-hidden="true"><path d="M7 1.4 L12.2 4.3 V9.7 L7 12.6 L1.8 9.7 V4.3 Z"/><path d="M7 7 L12.2 4.3 M7 7 V12.6 M7 7 L1.8 4.3"/></svg></button>
+    </span>
+    <span class="vt-group" id="tl-tools">
+      <button class="tl-mode-btn on" data-shape="ring">Ring</button>
+      <button class="tl-mode-btn" data-shape="line">Line</button>
+      <button class="tl-mode-btn" data-shape="column">Column</button>
+    </span>
+  </div>
   <div class="site-topright">
+      <button id="archive-toggle" class="theme-btn lens" title="Archive" aria-label="Archive"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="4.5" x2="13" y2="4.5"/><line x1="3" y1="8" x2="13" y2="8"/><line x1="3" y1="11.5" x2="13" y2="11.5"/></svg></button>
+      <button id="map-toggle" class="theme-btn lens" title="Site plan" aria-label="Site plan"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2.2 1.7 4v9.8L6 12l4 1.8 4.3-1.8V2.2L10 4 6 2.2z"/><path d="M6 2.2V12M10 4v9.8"/></svg></button>
+      <button id="tl-toggle" class="theme-btn lens" title="Timeline" aria-label="Timeline"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6"/><circle cx="8" cy="2.6" r="1.15" fill="currentColor" stroke="none"/></svg></button>
+    <span class="tr-div" aria-hidden="true"></span>
     <!-- Desktop search: the input is normally collapsed (max-width:0) and
          expands when #search-toggle is clicked or the / shortcut fires.
          Mobile's filter-panel search also proxies values into this input,
@@ -3374,7 +3515,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.09";
+  const VERSION      = "v1.09-test.10";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -8449,6 +8590,7 @@ WHERE {
     if (aboutPane.classList.contains("open")) closeAboutPane();
     else openAboutPane();
   }
+  try { window.hhAbout = toggleAboutPane; } catch (e) {}
 
   // ── Info panel — system orientation + shortcuts, role-aware ──────────────
   const infoPane = document.getElementById("info-pane");
@@ -9595,6 +9737,143 @@ WHERE {
     screen.orientation.lock('portrait').catch(() => {});
   }
   if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
+
+<!-- ── Site Map + Timeline lens (grafted from Browse + Site.html handoff) ── -->
+<div id="view-backdrop"></div>
+<div id="site-overlay" aria-hidden="true">
+  <iframe id="site-frame" title="Interactive site model" src="about:blank" allow="fullscreen"></iframe>
+</div>
+<div id="timeline-overlay" aria-hidden="true">
+  <iframe id="tl-frame" title="Timeline" src="about:blank"></iframe>
+</div>
+<div id="site-help" hidden>
+  <h4>Site plan</h4>
+  <div class="sh-row"><span class="sh-k">North</span>Reset rotation, north up</div>
+  <div class="sh-row"><span class="sh-k">Whole</span>Frame the whole site</div>
+  <div class="sh-row"><span class="sh-k">Plan/3D</span>Flat plan or tilted view</div>
+  <div class="sh-sep"></div>
+  <div class="sh-tip">Drag to orbit, scroll to zoom.</div>
+</div>
+
+<script>
+  /* @site-map wiring: the map preloads invisibly at the plan view. The header map
+     button retracts the side panels and fades the map straight in (full-bleed) over
+     the same duration — no holding screen, no zoom. */
+  (function(){
+    var mapBtn=document.getElementById('map-toggle'),
+        tlBtn=document.getElementById('tl-toggle'),
+        mapOv=document.getElementById('site-overlay'),
+        tlOv=document.getElementById('timeline-overlay'),
+        mapFrame=document.getElementById('site-frame'),
+        tlFrame=document.getElementById('tl-frame'),
+        exit=document.getElementById('site-close'),
+        place=document.getElementById('sp-place'),
+        viewStack=[],        // back-stack of views, most-recent last (archive = empty)
+        prevL=false, prevR=false;
+    function lp(){return document.getElementById('panel-left');}
+    function rp(){return document.getElementById('panel-right');}
+    function inMap(){ return document.body.classList.contains('site-mode'); }
+    function inTL(){ return document.body.classList.contains('tl-mode'); }
+    function anyMode(){ return inMap()||inTL(); }
+    function anchorTitle(){ var mk=document.querySelector('.markid'), tb=document.getElementById('site-titlebar'); if(mk&&tb) tb.style.left=Math.round(mk.getBoundingClientRect().right+16)+'px'; }
+    // light the active view label beside the wordmark; dim the other two
+    function updateMark(){ var cur=inMap()?'map':(inTL()?'tl':'archive');
+      var page=document.getElementById('mk-page'); if(page)page.textContent=(cur==='map'?'Site Plan':(cur==='tl'?'Timeline':'Archive'));
+      var mh=document.getElementById('mk-home'); if(mh)mh.style.color='var(--lens-'+cur+')';   // wordmark takes the active lens colour
+      var lens={archive:'archive-toggle',map:'map-toggle',tl:'tl-toggle'};
+      ['archive-toggle','map-toggle','tl-toggle'].forEach(function(id){ var el=document.getElementById(id); if(el)el.classList.toggle('cur',lens[cur]===id); }); }
+
+    // preload both views invisibly so switching is instant
+    mapFrame.src='forms/explore-3d.html?intro=0&v=sphere4'; mapOv.classList.add('preload');
+    tlFrame.src='forms/timeline.html'; tlOv.classList.add('preload');
+
+    function showView(which, handoff){              // 'map' | 'tl' — render a view (no history bookkeeping)
+      if(!anyMode()){ var L=lp(), R=rp(); prevL=L&&L.classList.contains('out'); prevR=R&&R.classList.contains('out'); }
+      var L2=lp(), R2=rp(); if(L2)L2.classList.add('out'); if(R2)R2.classList.add('out');   // panels retract
+      if(which==='map'){
+        mapOv.style.zIndex='1300'; tlOv.style.zIndex='1200';   // incoming on top
+        document.body.classList.add('site-mode'); document.body.classList.remove('tl-mode');
+        mapOv.classList.remove('preload'); mapOv.classList.add('show'); mapOv.setAttribute('aria-hidden','false');
+        setTimeout(function(){ if(!inTL()){ tlOv.classList.remove('show'); tlOv.setAttribute('aria-hidden','true'); tlOv.classList.add('preload'); } },470);   // hide outgoing AFTER incoming is opaque
+      } else {
+        document.body.classList.add('tl-mode'); document.body.classList.remove('site-mode');
+        tlOv.classList.remove('preload'); tlOv.classList.add('show'); tlOv.setAttribute('aria-hidden','false');
+        if(handoff){
+          // OPAQUE cross-dissolve (no transparent iframes — white-proof): the timeline
+          // sits UNDER the map; the opaque map fades out on top over the whole gesture,
+          // revealing the opaque timeline morphing the loop into the ring beneath it.
+          tlOv.style.zIndex='1200'; mapOv.style.zIndex='1300';
+          try{ tlFrame.contentWindow.postMessage({type:'kinhin-handoff', pts:handoff.pts, w:handoff.w, h:handoff.h},'*'); }catch(e){}
+          mapOv.style.transition='opacity 2.4s cubic-bezier(.16,.74,.3,1)'; void mapOv.offsetWidth; mapOv.style.opacity='0';   // ease-OUT: the site plan starts dissolving the instant you click
+          setTimeout(function(){ if(!inMap()){ mapOv.classList.remove('show'); mapOv.setAttribute('aria-hidden','true'); mapOv.classList.add('preload'); mapOv.style.transition=''; mapOv.style.opacity=''; } }, 2500);
+        } else {
+          tlOv.style.zIndex='1300'; mapOv.style.zIndex='1200';   // crumb switch — quick crossfade, timeline on top
+          try{ tlFrame.contentWindow.postMessage({type:'tl-reset'},'*'); }catch(e){}
+          setTimeout(function(){ if(!inMap()){ mapOv.classList.remove('show'); mapOv.setAttribute('aria-hidden','true'); mapOv.classList.add('preload'); } },470);
+        }
+        document.querySelectorAll('#tl-tools .tl-mode-btn').forEach(function(x){ x.classList.toggle('on',x.dataset.shape==='ring'); });
+      }
+      anchorTitle();
+      updateMark();
+    }
+    function close(){
+      if(!anyMode())return;
+      viewStack=[];
+      var L=lp(), R=rp(); if(L&&!prevL)L.classList.remove('out'); if(R&&!prevR)R.classList.remove('out');   // restore panels
+      document.body.classList.remove('site-mode'); document.body.classList.remove('tl-mode');
+      updateMark();
+      mapOv.classList.remove('show'); tlOv.classList.remove('show');
+      mapOv.setAttribute('aria-hidden','true'); tlOv.setAttribute('aria-hidden','true');
+      var help=document.getElementById('site-help'); if(help)help.hidden=true;
+      setTimeout(function(){ if(!anyMode()){ mapOv.classList.add('preload'); tlOv.classList.add('preload'); } }, 540);
+    }
+    // navigate to a view, recording the one we leave on the back-stack (deduped by recency)
+    function navTo(which, handoff){
+      if(!anyMode()){ viewStack=[]; }
+      else { var cur=inMap()?'map':'tl'; if(cur!==which){ viewStack=viewStack.filter(function(v){return v!==cur&&v!==which;}); viewStack.push(cur); } }
+      showView(which, handoff);
+    }
+    // back/exit: pop to the previous view; if none, all the way out to the archive
+    function back(){ if(viewStack.length){ showView(viewStack.pop(), null); } else { close(); } }
+    // entry buttons + top-centre switcher + exit
+    mapBtn.addEventListener('click',function(){ if(!inMap())navTo('map'); });
+    tlBtn.addEventListener('click',function(){ if(!inTL())navTo('tl'); });
+    var archiveBtn=document.getElementById('archive-toggle');
+    if(archiveBtn)archiveBtn.addEventListener('click',function(){ if(anyMode())close(); });
+    // ? in a view: the usage pane lives in the archive's right panel (hidden
+    // under the overlay here), so route it to the about/info overlay instead
+    var recInfo=document.getElementById('rec-info');
+    if(recInfo)recInfo.addEventListener('click',function(ev){ if(anyMode()&&window.hhAbout){ ev.preventDefault(); ev.stopImmediatePropagation(); window.hhAbout(); } }, true);
+    updateMark();
+    if(exit)exit.addEventListener('click',back);
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&anyMode())back(); });
+
+    // tools → drive the active iframe
+    function mmsg(t){ try{ mapFrame.contentWindow.postMessage({type:t},'*'); }catch(e){} }
+    function tmsg(shape){ try{ tlFrame.contentWindow.postMessage({type:'tl-shape',shape:shape},'*'); }catch(e){} }
+    var b3=document.getElementById('sp-3d');
+    var bN=document.getElementById('sp-north'), bF=document.getElementById('sp-fit');
+    if(bN)bN.addEventListener('click',function(){ mmsg('site-north'); });
+    if(bF)bF.addEventListener('click',function(){ mmsg('site-fit'); if(b3)b3.classList.remove('on'); });
+    if(b3)b3.addEventListener('click',function(){ mmsg('site-plan'); b3.classList.toggle('on'); });
+    document.querySelectorAll('#tl-tools .tl-mode-btn').forEach(function(b){ b.addEventListener('click',function(){ tmsg(b.dataset.shape);
+      document.querySelectorAll('#tl-tools .tl-mode-btn').forEach(function(x){ x.classList.toggle('on',x===b); }); }); });
+
+    // messages from the iframes
+    window.addEventListener('message',function(e){ var d=e&&e.data; if(!d||typeof d!=='object')return;
+      if(d.type==='site-place'&&place){ place.textContent=d.label||''; }
+      else if(d.type==='site-close'){ close(); }
+      else if(d.type==='open-timeline'){ navTo('tl', d.handoff); }   // kinhin trail clicked in the map — push map, carry screen points
+    });
+    // The page name (top-left) always opens the about/info overlay — the click
+    // falls through to the about-pane toggle bound in main(), on every view
+    // (the overlay lifts above the map/timeline; see CSS). No view-close here.
+    // ? help popover (map view only)
+    var bHelp=document.getElementById('sp-help'), help=document.getElementById('site-help');
+    if(bHelp)bHelp.addEventListener('click',function(ev){ ev.stopPropagation(); if(help)help.hidden=!help.hidden; });
+    document.addEventListener('click',function(e){ if(help&&!help.hidden&&e.target!==bHelp&&!help.contains(e.target)&&!(bHelp&&bHelp.contains(e.target))) help.hidden=true; });
+  })();
 </script>
 
 </body>
