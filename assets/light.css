@@ -58,6 +58,9 @@ a{color:inherit}
 .markid{display:flex;align-items:baseline;gap:12px}
 .markid .name{font-size:13px;font-weight:500;letter-spacing:-0.005em;white-space:nowrap}
 .markid .name .dim{color:var(--muted);font-weight:400}
+/* wordmark-as-home-link: kill the default anchor underline/colour, dim on hover */
+a.markid{text-decoration:none;color:inherit;transition:opacity .16s ease}
+a.markid:hover{opacity:.6}
 .site-nav{
   display:flex;gap:0;justify-content:center;
   font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.18em;text-transform:uppercase;
