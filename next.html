@@ -2840,9 +2840,12 @@
   .tr-div{width:1px;height:15px;align-self:center;background:var(--rule);flex:none}
   /* switching wordmark (mk-home button replaces the plain .markid link) */
   .markid{display:flex;align-items:baseline;gap:9px;text-decoration:none;color:inherit;cursor:pointer}
-  .mk-home{display:flex;align-items:baseline;gap:9px;background:none;border:0;padding:0;margin:0;text-decoration:none;color:inherit;cursor:pointer}
+  /* gap matches the internal word-space so "HUNTER HOUSE ARCHIVE" reads as one
+     continuous wordmark, not "HUNTER HOUSE" with a detached trailing label */
+  .mk-home{display:flex;align-items:baseline;gap:0.42em;background:none;border:0;padding:0;margin:0;text-decoration:none;color:inherit;cursor:pointer}
   .mk-static,.mk-page{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:inherit;line-height:1}
-  .mk-home:hover .mk-page{opacity:.55}
+  /* hover dims the whole wordmark as one link (was: only the trailing .mk-page) */
+  .mk-home:hover{opacity:.55}
   html.text-lg .mk-static,html.text-lg .mk-page{font-size:12px}
   html.text-xl .mk-static,html.text-xl .mk-page{font-size:13px}
   /* LIVE GATE: old dual-spine timeline retired from the UI (new lens timeline replaces it).
@@ -2898,6 +2901,19 @@
   #timeline-overlay.preload{visibility:visible}
   #timeline-overlay.show{opacity:1;visibility:visible;pointer-events:auto}
   #timeline-overlay iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+  /* Lens views keep the archive's collapsed side panels showing at the edges
+     (present but locked) so the shell framing reads continuously across
+     Archive / Site Plan / Timeline. The overlays + backdrop inset by the 28px
+     handle width on each side — exactly where the image stage sits in the
+     archive's viewer mode. Desktop only; on mobile the side panels don't exist. */
+  @media (min-width:768px){
+    body.site-mode #site-overlay, body.site-mode #timeline-overlay, body.site-mode #view-backdrop,
+    body.tl-mode #site-overlay,   body.tl-mode #timeline-overlay,   body.tl-mode #view-backdrop{
+      left:28px; width:calc(100vw - 56px);
+    }
+    /* panels are locked while a lens view is open: visible at the edge, inert */
+    body.site-mode .panel-handle, body.tl-mode .panel-handle{pointer-events:none}
+  }
   /* two-view header: Site plan ⇄ Timeline crumbs + per-view tools */
   body.tl-mode #site-titlebar{opacity:1;pointer-events:auto}
   body.tl-mode #site-close{display:flex}
@@ -3515,7 +3531,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.10";
+  const VERSION      = "v1.09-test.11";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -5841,6 +5857,9 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
   // ── Collapsible panel toggle ──────────────────────────────────────────────
   function togglePanel(side) {
+    // Locked while a lens view (Site Plan / Timeline) is open — the panels stay
+    // collapsed at the edges for continuity but can't be expanded over the overlay.
+    if (document.body.classList.contains("site-mode") || document.body.classList.contains("tl-mode")) return;
     document.getElementById("panel-" + side).classList.toggle("out");
   }
 
