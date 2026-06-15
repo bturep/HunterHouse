@@ -704,11 +704,10 @@
   .panel-left{border-right:1px solid var(--rule)}
   .panel-right{border-left:1px solid var(--rule)}
   .panel-left.out,.panel-right.out{width:28px}
-  /* While the about-pane is open, the side panels dim back so attention
-     reads to the HHFA card sitting on top of them. Pointer-events stay
-     enabled (the existing panel-lock + close handlers already gate input). */
-  body.hh-about-open .panel-left,
-  body.hh-about-open .panel-right{opacity:0.3}
+  /* The about-pane overlays the centre stage only; the side panels stay fully
+     present and in position behind it. (They used to dim to opacity:0.3 — removed
+     so the list/record stay readable and the panels don't appear to recede when
+     the wordmark is clicked.) */
   .panel-content{flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;position:relative}
   .panel-left.out .panel-content,.panel-right.out .panel-content{max-width:0}
 
@@ -3531,7 +3530,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.11";
+  const VERSION      = "v1.09-test.12";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9808,33 +9807,42 @@ WHERE {
     tlFrame.src='forms/timeline.html'; tlOv.classList.add('preload');
 
     function showView(which, handoff){              // 'map' | 'tl' — render a view (no history bookkeeping)
-      if(!anyMode()){ var L=lp(), R=rp(); prevL=L&&L.classList.contains('out'); prevR=R&&R.classList.contains('out'); }
-      var L2=lp(), R2=rp(); if(L2)L2.classList.add('out'); if(R2)R2.classList.add('out');   // panels retract
-      if(which==='map'){
-        mapOv.style.zIndex='1300'; tlOv.style.zIndex='1200';   // incoming on top
-        document.body.classList.add('site-mode'); document.body.classList.remove('tl-mode');
-        mapOv.classList.remove('preload'); mapOv.classList.add('show'); mapOv.setAttribute('aria-hidden','false');
-        setTimeout(function(){ if(!inTL()){ tlOv.classList.remove('show'); tlOv.setAttribute('aria-hidden','true'); tlOv.classList.add('preload'); } },470);   // hide outgoing AFTER incoming is opaque
-      } else {
-        document.body.classList.add('tl-mode'); document.body.classList.remove('site-mode');
-        tlOv.classList.remove('preload'); tlOv.classList.add('show'); tlOv.setAttribute('aria-hidden','false');
-        if(handoff){
-          // OPAQUE cross-dissolve (no transparent iframes — white-proof): the timeline
-          // sits UNDER the map; the opaque map fades out on top over the whole gesture,
-          // revealing the opaque timeline morphing the loop into the ring beneath it.
-          tlOv.style.zIndex='1200'; mapOv.style.zIndex='1300';
-          try{ tlFrame.contentWindow.postMessage({type:'kinhin-handoff', pts:handoff.pts, w:handoff.w, h:handoff.h},'*'); }catch(e){}
-          mapOv.style.transition='opacity 2.4s cubic-bezier(.16,.74,.3,1)'; void mapOv.offsetWidth; mapOv.style.opacity='0';   // ease-OUT: the site plan starts dissolving the instant you click
-          setTimeout(function(){ if(!inMap()){ mapOv.classList.remove('show'); mapOv.setAttribute('aria-hidden','true'); mapOv.classList.add('preload'); mapOv.style.transition=''; mapOv.style.opacity=''; } }, 2500);
+      var entering = !anyMode();
+      if(entering){ var L=lp(), R=rp(); prevL=L&&L.classList.contains('out'); prevR=R&&R.classList.contains('out'); }
+      var L2=lp(), R2=rp(); if(L2)L2.classList.add('out'); if(R2)R2.classList.add('out');   // panels wipe closed (260ms width transition)
+      function reveal(){
+        if(which==='map'){
+          mapOv.style.zIndex='1300'; tlOv.style.zIndex='1200';   // incoming on top
+          document.body.classList.add('site-mode'); document.body.classList.remove('tl-mode');
+          mapOv.classList.remove('preload'); mapOv.classList.add('show'); mapOv.setAttribute('aria-hidden','false');
+          setTimeout(function(){ if(!inTL()){ tlOv.classList.remove('show'); tlOv.setAttribute('aria-hidden','true'); tlOv.classList.add('preload'); } },470);   // hide outgoing AFTER incoming is opaque
         } else {
-          tlOv.style.zIndex='1300'; mapOv.style.zIndex='1200';   // crumb switch — quick crossfade, timeline on top
-          try{ tlFrame.contentWindow.postMessage({type:'tl-reset'},'*'); }catch(e){}
-          setTimeout(function(){ if(!inMap()){ mapOv.classList.remove('show'); mapOv.setAttribute('aria-hidden','true'); mapOv.classList.add('preload'); } },470);
+          document.body.classList.add('tl-mode'); document.body.classList.remove('site-mode');
+          tlOv.classList.remove('preload'); tlOv.classList.add('show'); tlOv.setAttribute('aria-hidden','false');
+          if(handoff){
+            // OPAQUE cross-dissolve (no transparent iframes — white-proof): the timeline
+            // sits UNDER the map; the opaque map fades out on top over the whole gesture,
+            // revealing the opaque timeline morphing the loop into the ring beneath it.
+            tlOv.style.zIndex='1200'; mapOv.style.zIndex='1300';
+            try{ tlFrame.contentWindow.postMessage({type:'kinhin-handoff', pts:handoff.pts, w:handoff.w, h:handoff.h},'*'); }catch(e){}
+            mapOv.style.transition='opacity 2.4s cubic-bezier(.16,.74,.3,1)'; void mapOv.offsetWidth; mapOv.style.opacity='0';   // ease-OUT: the site plan starts dissolving the instant you click
+            setTimeout(function(){ if(!inMap()){ mapOv.classList.remove('show'); mapOv.setAttribute('aria-hidden','true'); mapOv.classList.add('preload'); mapOv.style.transition=''; mapOv.style.opacity=''; } }, 2500);
+          } else {
+            tlOv.style.zIndex='1300'; mapOv.style.zIndex='1200';   // crumb switch — quick crossfade, timeline on top
+            try{ tlFrame.contentWindow.postMessage({type:'tl-reset'},'*'); }catch(e){}
+            setTimeout(function(){ if(!inMap()){ mapOv.classList.remove('show'); mapOv.setAttribute('aria-hidden','true'); mapOv.classList.add('preload'); } },470);
+          }
+          document.querySelectorAll('#tl-tools .tl-mode-btn').forEach(function(x){ x.classList.toggle('on',x.dataset.shape==='ring'); });
         }
-        document.querySelectorAll('#tl-tools .tl-mode-btn').forEach(function(x){ x.classList.toggle('on',x.dataset.shape==='ring'); });
+        anchorTitle();
+        updateMark();
       }
-      anchorTitle();
-      updateMark();
+      // Entering from the archive with a panel still open: let the panels WIPE
+      // closed first (the same 260ms width motion as the fullscreen image button),
+      // THEN open the view in the cleared centre — not a simultaneous cross-fade.
+      // Switching between lenses (already collapsed) reveals immediately.
+      if(entering && (!prevL || !prevR)) setTimeout(reveal, 280);
+      else reveal();
     }
     function close(){
       if(!anyMode())return;
