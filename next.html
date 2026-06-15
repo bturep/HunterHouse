@@ -2858,7 +2858,9 @@
   #site-overlay{position:fixed;z-index:1200;background:#242220;overflow:hidden;
     top:41px;left:0;width:100vw;height:calc(100vh - 82px);
     opacity:0;visibility:hidden;pointer-events:none;
-    transition:opacity .42s ease}
+    /* opacity duration + easing matched to the panel width transition (260ms)
+       so the centre cross-dissolve runs in lockstep with the panels */
+    transition:opacity 260ms cubic-bezier(0.4,0,0.2,1)}
   #site-overlay.preload{visibility:visible}            /* render the held map invisibly so opening is instant */
   #site-overlay.show{opacity:1;visibility:visible;pointer-events:auto}
   #site-overlay iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
@@ -2893,10 +2895,10 @@
   /* a parent-level dark backdrop behind BOTH overlays — guarantees the white browse
      stage can never show through a transparent iframe during the hand-off */
   #view-backdrop{position:fixed;top:41px;left:0;width:100vw;height:calc(100vh - 82px);z-index:1100;
-    background:#242220;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .3s ease}
+    background:#242220;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 260ms cubic-bezier(0.4,0,0.2,1)}
   body.site-mode #view-backdrop,body.tl-mode #view-backdrop{opacity:1;visibility:visible}
   @media (max-width:767px){ #view-backdrop{top:0;height:100vh} #view-toolbar{display:none!important} }
-  #timeline-overlay{position:fixed;z-index:1300;background:#242220;overflow:hidden;top:41px;left:0;width:100vw;height:calc(100vh - 82px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .42s ease}
+  #timeline-overlay{position:fixed;z-index:1300;background:#242220;overflow:hidden;top:41px;left:0;width:100vw;height:calc(100vh - 82px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity 260ms cubic-bezier(0.4,0,0.2,1)}
   #timeline-overlay.preload{visibility:visible}
   #timeline-overlay.show{opacity:1;visibility:visible;pointer-events:auto}
   #timeline-overlay iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
@@ -3530,7 +3532,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.12";
+  const VERSION      = "v1.09-test.13";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9837,12 +9839,11 @@ WHERE {
         anchorTitle();
         updateMark();
       }
-      // Entering from the archive with a panel still open: let the panels WIPE
-      // closed first (the same 260ms width motion as the fullscreen image button),
-      // THEN open the view in the cleared centre — not a simultaneous cross-fade.
-      // Switching between lenses (already collapsed) reveals immediately.
-      if(entering && (!prevL || !prevR)) setTimeout(reveal, 280);
-      else reveal();
+      // Concurrent cross-dissolve: the panels retract while the centre fades
+      // between archive and lens over the SAME 260ms (overlay/backdrop opacity
+      // durations are matched to the panel width transition in CSS), so the
+      // whole gesture reads as one synchronized motion in and out.
+      reveal();
     }
     function close(){
       if(!anyMode())return;
