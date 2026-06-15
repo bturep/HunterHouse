@@ -2862,7 +2862,11 @@
        so the centre cross-dissolve runs in lockstep with the panels */
     transition:opacity 260ms cubic-bezier(0.4,0,0.2,1)}
   #site-overlay.preload{visibility:visible}            /* render the held map invisibly so opening is instant */
-  #site-overlay.show{opacity:1;visibility:visible;pointer-events:auto}
+  /* Fade-IN uses an ease-in (slow build) so the centre stays clear while the
+     panels do their full 260ms retraction — the lens only turns opaque as they
+     settle, so the retraction reads at the same speed as the (unmasked)
+     extension. Fade-OUT keeps the base curve above — that's the exit motion. */
+  #site-overlay.show{opacity:1;visibility:visible;pointer-events:auto;transition:opacity 260ms cubic-bezier(0.55,0,0.8,0.35)}
   #site-overlay iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
   /* in site mode: a left-anchored SITE PLAN breadcrumb + tools after the wordmark
      (positioned by JS so it never recentres), and ? + × on the right */
@@ -2896,11 +2900,11 @@
      stage can never show through a transparent iframe during the hand-off */
   #view-backdrop{position:fixed;top:41px;left:0;width:100vw;height:calc(100vh - 82px);z-index:1100;
     background:#242220;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 260ms cubic-bezier(0.4,0,0.2,1)}
-  body.site-mode #view-backdrop,body.tl-mode #view-backdrop{opacity:1;visibility:visible}
+  body.site-mode #view-backdrop,body.tl-mode #view-backdrop{opacity:1;visibility:visible;transition:opacity 260ms cubic-bezier(0.55,0,0.8,0.35)}
   @media (max-width:767px){ #view-backdrop{top:0;height:100vh} #view-toolbar{display:none!important} }
   #timeline-overlay{position:fixed;z-index:1300;background:#242220;overflow:hidden;top:41px;left:0;width:100vw;height:calc(100vh - 82px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity 260ms cubic-bezier(0.4,0,0.2,1)}
   #timeline-overlay.preload{visibility:visible}
-  #timeline-overlay.show{opacity:1;visibility:visible;pointer-events:auto}
+  #timeline-overlay.show{opacity:1;visibility:visible;pointer-events:auto;transition:opacity 260ms cubic-bezier(0.55,0,0.8,0.35)}
   #timeline-overlay iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
   /* Lens views keep the archive's collapsed side panels showing at the edges
      (present but locked) so the shell framing reads continuously across
@@ -3532,7 +3536,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.13";
+  const VERSION      = "v1.09-test.14";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
