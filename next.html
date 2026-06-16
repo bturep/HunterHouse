@@ -709,7 +709,11 @@
      so the list/record stay readable and the panels don't appear to recede when
      the wordmark is clicked.) */
   .panel-content{flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;position:relative}
-  .panel-left.out .panel-content,.panel-right.out .panel-content{max-width:0}
+  /* On collapse, defer the hard max-width:0 until AFTER the 260ms width wipe so the
+     content shrinks/clips WITH the frame (the same motion that reveals it on expand)
+     instead of snapping away instantly; only the final 28px sliver is then cleaned
+     up. On expand, .out is removed → base (no delay) → content reveals via flex-grow. */
+  .panel-left.out .panel-content,.panel-right.out .panel-content{max-width:0;transition:max-width 0s 260ms}
 
   /* ── panel edge handle ── */
   .panel-handle{
@@ -3543,7 +3547,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.15";
+  const VERSION      = "v1.09-test.16";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
