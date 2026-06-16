@@ -130,18 +130,18 @@
   // ---------- materials ----------
   const mat={
     contour:new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.15,vertexColors:true,depthTest:false,depthWrite:false}),
-    lot:    new THREE.LineBasicMaterial({color:0xc4826e,transparent:true,opacity:.62}),
-    cov:    new THREE.LineBasicMaterial({color:0xa78bbf,transparent:true,opacity:.5}),
+    lot:    new THREE.LineBasicMaterial({color:0xc4826e,transparent:true,opacity:.9}),
+    cov:    new THREE.LineBasicMaterial({color:0xa78bbf,transparent:true,opacity:.85}),
     house:  new THREE.LineBasicMaterial({color:0xe6c067,transparent:true,opacity:1}),
-    lake:   new THREE.LineBasicMaterial({color:0x7ba0d6,transparent:true,opacity:.6}),
-    lakeFill:new THREE.MeshBasicMaterial({color:0x3a5680,transparent:true,opacity:.45,side:THREE.DoubleSide,depthWrite:false}),
-    stream: new THREE.LineBasicMaterial({color:0x6f93c9,transparent:true,opacity:.4}),
-    northL: new THREE.LineBasicMaterial({color:0x9a958b,transparent:true,opacity:.5}),
-    corr:   new THREE.LineBasicMaterial({color:0xc9a44e,transparent:true,opacity:.3}),
-    rock:   new THREE.LineBasicMaterial({color:0x9a958b,transparent:true,opacity:.42}),
-    path:   new THREE.LineBasicMaterial({color:0xb9b3a8,transparent:true,opacity:.38}),
-    tree:   new THREE.LineBasicMaterial({color:0x7aaa98,transparent:true,opacity:.55}),
-    trunk:  new THREE.LineBasicMaterial({color:0x7aaa98,transparent:true,opacity:.8}),
+    lake:   new THREE.LineBasicMaterial({color:0x7ba0d6,transparent:true,opacity:.85}),
+    lakeFill:new THREE.MeshBasicMaterial({color:0x3a5680,transparent:true,opacity:.6,side:THREE.DoubleSide,depthWrite:false}),
+    stream: new THREE.LineBasicMaterial({color:0x6f93c9,transparent:true,opacity:.75}),
+    northL: new THREE.LineBasicMaterial({color:0x9a958b,transparent:true,opacity:.75}),
+    corr:   new THREE.LineBasicMaterial({color:0xc9a44e,transparent:true,opacity:.6}),
+    rock:   new THREE.LineBasicMaterial({color:0x9a958b,transparent:true,opacity:.68}),
+    path:   new THREE.LineBasicMaterial({color:0xb9b3a8,transparent:true,opacity:.68}),
+    tree:   new THREE.LineBasicMaterial({color:0x7aaa98,transparent:true,opacity:.82}),
+    trunk:  new THREE.LineBasicMaterial({color:0x7aaa98,transparent:true,opacity:.95}),
   };
 
   // ---------- fig "unseen ocean": contour vertex swell ----------
