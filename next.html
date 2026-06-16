@@ -2894,13 +2894,20 @@
   body.site-mode #search-input,body.site-mode #search-toggle,body.site-mode #topright,
   body.tl-mode #search-input,body.tl-mode #search-toggle,body.tl-mode #topright{display:none!important}
   /* the about/info pane lifts above the view overlays, below the 41px header */
-  body.site-mode #about-pane,body.tl-mode #about-pane{position:fixed;top:41px;left:0;right:0;bottom:0;z-index:1500}
+  /* In a lens the about-pane is fixed, but inset by the 28px handle width so the
+     side panels stay visible at the edges (matches the lens overlays). */
+  body.site-mode #about-pane,body.tl-mode #about-pane{position:fixed;top:41px;left:28px;right:28px;bottom:0;z-index:1500}
+  @media (max-width:767px){ body.site-mode #about-pane,body.tl-mode #about-pane{left:0;right:0} }
   /* timeline overlay (parallel to the map) */
   /* a parent-level dark backdrop behind BOTH overlays — guarantees the white browse
      stage can never show through a transparent iframe during the hand-off */
   #view-backdrop{position:fixed;top:41px;left:0;width:100vw;height:calc(100vh - 82px);z-index:1100;
     background:#242220;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 260ms cubic-bezier(0.4,0,0.2,1)}
   body.site-mode #view-backdrop,body.tl-mode #view-backdrop{opacity:1;visibility:visible;transition:opacity 260ms cubic-bezier(0.55,0,0.8,0.35)}
+  /* Closing: fade the backdrop out (standard curve) WHILE the mode class stays on
+     so the overlay keeps its inset and the panels show through as they extend —
+     the mirror of the opening (see close()'s deferred mode-class teardown). */
+  body.site-mode.view-exiting #view-backdrop,body.tl-mode.view-exiting #view-backdrop{opacity:0;transition:opacity 260ms cubic-bezier(0.4,0,0.2,1)}
   @media (max-width:767px){ #view-backdrop{top:0;height:100vh} #view-toolbar{display:none!important} }
   #timeline-overlay{position:fixed;z-index:1300;background:#242220;overflow:hidden;top:41px;left:0;width:100vw;height:calc(100vh - 82px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity 260ms cubic-bezier(0.4,0,0.2,1)}
   #timeline-overlay.preload{visibility:visible}
@@ -3536,7 +3543,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.14";
+  const VERSION      = "v1.09-test.15";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9794,7 +9801,8 @@ WHERE {
         exit=document.getElementById('site-close'),
         place=document.getElementById('sp-place'),
         viewStack=[],        // back-stack of views, most-recent last (archive = empty)
-        prevL=false, prevR=false;
+        prevL=false, prevR=false,
+        closeTimer=null;     // pending exit-teardown (cancelled if a view re-opens mid-close)
     function lp(){return document.getElementById('panel-left');}
     function rp(){return document.getElementById('panel-right');}
     function inMap(){ return document.body.classList.contains('site-mode'); }
@@ -9813,6 +9821,8 @@ WHERE {
     tlFrame.src='forms/timeline.html'; tlOv.classList.add('preload');
 
     function showView(which, handoff){              // 'map' | 'tl' — render a view (no history bookkeeping)
+      if(closeTimer){ clearTimeout(closeTimer); closeTimer=null; }   // re-opening mid-close: cancel the pending teardown
+      document.body.classList.remove('view-exiting');
       var entering = !anyMode();
       if(entering){ var L=lp(), R=rp(); prevL=L&&L.classList.contains('out'); prevR=R&&R.classList.contains('out'); }
       var L2=lp(), R2=rp(); if(L2)L2.classList.add('out'); if(R2)R2.classList.add('out');   // panels wipe closed (260ms width transition)
@@ -9852,13 +9862,22 @@ WHERE {
     function close(){
       if(!anyMode())return;
       viewStack=[];
-      var L=lp(), R=rp(); if(L&&!prevL)L.classList.remove('out'); if(R&&!prevR)R.classList.remove('out');   // restore panels
-      document.body.classList.remove('site-mode'); document.body.classList.remove('tl-mode');
-      updateMark();
-      mapOv.classList.remove('show'); tlOv.classList.remove('show');
-      mapOv.setAttribute('aria-hidden','true'); tlOv.setAttribute('aria-hidden','true');
+      // Mirror the opening: keep the view layer INSET (mode class stays on) while
+      // the panels extend back and the overlay + backdrop fade out, so the panels
+      // show through the clearing centre at the edges — not hidden by a full-bleed
+      // snap. The mode class (inset / toolbar / mark) is torn down only AFTER the
+      // fade completes.
+      var L=lp(), R=rp(); if(L&&!prevL)L.classList.remove('out'); if(R&&!prevR)R.classList.remove('out');   // panels extend back (260ms)
+      mapOv.classList.remove('show'); tlOv.classList.remove('show');           // overlay fades out, inset kept
+      document.body.classList.add('view-exiting');                            // backdrop fades out, inset preserved
       var help=document.getElementById('site-help'); if(help)help.hidden=true;
-      setTimeout(function(){ if(!anyMode()){ mapOv.classList.add('preload'); tlOv.classList.add('preload'); } }, 540);
+      closeTimer=setTimeout(function(){
+        closeTimer=null;
+        document.body.classList.remove('site-mode','tl-mode','view-exiting');
+        updateMark();
+        mapOv.setAttribute('aria-hidden','true'); tlOv.setAttribute('aria-hidden','true');
+        if(!anyMode()){ mapOv.classList.add('preload'); tlOv.classList.add('preload'); }
+      }, 300);
     }
     // navigate to a view, recording the one we leave on the back-stack (deduped by recency)
     function navTo(which, handoff){
