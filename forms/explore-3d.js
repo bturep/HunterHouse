@@ -129,7 +129,7 @@
 
   // ---------- materials ----------
   const mat={
-    contour:new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.26,vertexColors:true,depthTest:false,depthWrite:false}),
+    contour:new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.20,vertexColors:true,depthTest:false,depthWrite:false}),
     lot:    new THREE.LineBasicMaterial({color:0xc4826e,transparent:true,opacity:.62}),
     cov:    new THREE.LineBasicMaterial({color:0xa78bbf,transparent:true,opacity:.5}),
     house:  new THREE.LineBasicMaterial({color:0xe6c067,transparent:true,opacity:1}),
@@ -1021,9 +1021,9 @@
     OVR.dist=Math.min(controls.maxDistance,Math.max(controls.minDistance,d));
     OVR.tar.set(cx,OVR.tar.y,cz);
   }
-  fitOverview(1.22);
+  fitOverview(1.4);
   if(mode==='overview' && !introActive) applyPose(OVR);
-  addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); composer.setSize(innerWidth,innerHeight); var ov=(mode==='overview'&&!introActive&&!flying); fitOverview(1.22); if(ov)applyPose(OVR); });
+  addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); composer.setSize(innerWidth,innerHeight); var ov=(mode==='overview'&&!introActive&&!flying); fitOverview(1.4); if(ov)applyPose(OVR); });
   (function loop(){ requestAnimationFrame(loop);
     if(introActive){ const s=Math.sin(INTRO.tilt),c=Math.cos(INTRO.tilt);
       const dir=new THREE.Vector3(s*Math.sin(introAz),c,s*Math.cos(introAz));
