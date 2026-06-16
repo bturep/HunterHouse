@@ -995,6 +995,11 @@
       }
     };
   })();
+  // Star sphere removed (per design): the build above still computes SPHERE_R/SPHERE_C
+  // (the camera framing below needs SPHERE_C), but the visible globe + starfield + the
+  // occluder ground are torn straight back out via the author's teardown switch, so the
+  // site plan sits on the plain #242220 background — matching the image-viewer stage.
+  if(window.__sphereFx) window.__sphereFx.remove();
 
   // Default framing: size the globe's circle to span the viewport top→bottom (max coverage).
   // Start framing: show the FULL map, tight to the left/right edges (the sphere is
