@@ -3550,7 +3550,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.23";
+  const VERSION      = "v1.09-test.24";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9824,7 +9824,7 @@ WHERE {
       ['archive-toggle','map-toggle','tl-toggle'].forEach(function(id){ var el=document.getElementById(id); if(el)el.classList.toggle('cur',lens[cur]===id); }); }
 
     // preload both views invisibly so switching is instant
-    mapFrame.src='forms/explore-3d.html?intro=0&v=sphere9'; mapOv.classList.add('preload');
+    mapFrame.src='forms/explore-3d.html?intro=0&v=sphere10'; mapOv.classList.add('preload');
     tlFrame.src='forms/timeline.html'; tlOv.classList.add('preload');
 
     function showView(which, handoff){              // 'map' | 'tl' — render a view (no history bookkeeping)
