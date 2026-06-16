@@ -380,6 +380,8 @@
   body.hh-in-curation #search-input,
   body.hh-in-curation #search-toggle,
   body.hh-in-curation #rec-info,
+  body.hh-in-curation #map-toggle,
+  body.hh-in-curation #tl-toggle,
   body.hh-in-curation #data-footer{display:none !important}
   /* Curation mode rewarms the surfaces and link accent toward the cognac
      threshold while leaving --red (the Hunter name-accent) untouched —
@@ -624,7 +626,13 @@
   /* When the right panel is collapsed, the absolutely-positioned info overlay
      would otherwise squeeze into the 41px strip and show compressed text.
      Hide it while collapsed; it returns on re-expand if it was open. */
-  .panel-right.out #info-pane,.panel-right.out #rn-help-pane{display:none}
+  .panel-right.out #rn-help-pane{display:none}
+  /* Keep the info-pane visible (clipping with the frame) while the panel slides
+     closed, then hide it — so the lens ? pane wipes shut like the panel content. */
+  .panel-right.out #info-pane{visibility:hidden;transition:visibility 0s 260ms}
+  /* Lens ? info: the right panel slides open ABOVE the lens overlay to show the
+     page-specific help (same open/close as the archive ? pane). */
+  body.lens-info #panel-right{z-index:1550}
   #info-pane-close,#rn-help-close{
     position:absolute;top:8px;right:12px;background:none;border:0;cursor:pointer;
     font-size:18px;color:var(--hint);line-height:1;padding:4px 6px;
@@ -3550,7 +3558,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.27";
+  const VERSION      = "v1.09-test.28";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -8556,6 +8564,7 @@ WHERE {
       if (e.key === "/" && !inInput) { e.preventDefault(); openSearch(); return; }
       if (e.key === "Escape" && inInput) { e.target.blur(); return; }
       if (e.key === "Escape") {
+        if (document.body.classList.contains("lens-info")) { closeInfoPane(); return; }   // close the lens ? pane first, stay in the view
         if (tlOnEsc()) return;   // timeline popover, then the timeline pane
         if (window.__fbOnEsc && window.__fbOnEsc()) return;   // files browser pane
         if (state.bulkSel.size) { clearBulkSel(); return; }
@@ -8766,14 +8775,61 @@ WHERE {
   }
   function closeRnHelpPane()  { rnHelpPane.classList.remove("open"); modalOnClose(rnHelpPane); }
   function toggleRnHelpPane() { rnHelpPane.classList.contains("open") ? closeRnHelpPane() : openRnHelpPane(); }
+  // Lens (Site Plan / Timeline) ? content — page-specific help, shown in the SAME
+  // right-panel ? pane as the archive, using the same ip-* typography family.
+  function renderLensInfo(which){
+    const SITEPLAN = `
+      <p class="ip-title">Site plan</p>
+      <p class="ip-grp">What this is</p>
+      <p class="ip-note">A measured three-dimensional model of the Hunter property at
+        203 Goward Road — the surveyed land contours floated at their true elevations,
+        with the residence, the parcel boundary and the landscape drawn on top. The
+        flat overhead reading is home; drag to tilt the terrain into relief.</p>
+      <p class="ip-grp">Moving around</p>
+      <p class="ip-note">Drag to orbit, scroll to zoom. In the toolbar below —
+        <b>North</b> returns the plan to survey-north-up, <b>Whole</b> frames the whole
+        site, and <b>Plan / 3D</b> switches between the flat plan and the tilted view.</p>
+      <p class="ip-grp">Reading the drawing</p>
+      <p class="ip-note">The bright copper outline is the <b>property boundary</b>; the
+        gold figure at the centre is the <b>house</b>. Softer lines mark the
+        <b>covenant</b> area, <b>streams</b>, <b>paths</b> and <b>tree</b> cover, and the
+        blue body at lower-left is <b>Prospect Lake</b>. The faint grey field is the
+        one-foot <b>contour survey</b> — the closer the lines, the steeper the ground.</p>
+      <p class="ip-foot">The land climbs from the lake (0&nbsp;m) to roughly 41&nbsp;m on
+        the house knoll.</p>`;
+    const TIMELINE = `
+      <p class="ip-title">Timeline</p>
+      <p class="ip-grp">What this is</p>
+      <p class="ip-note">A chronology of the Hunter house and the life around it — the
+        events, drawings and phases of the archive set against the years they belong
+        to. Two threads run together: a life, and the house it left behind.</p>
+      <p class="ip-grp">Reading it</p>
+      <p class="ip-note">Each marker is a moment on the line; click one to open its
+        card with the date, what it was, and a way back into the archive. The
+        <b>Threads</b> key (top-right) names the strands the markers belong to.</p>
+      <p class="ip-grp">Shapes</p>
+      <p class="ip-note">The control at the bottom bends the same chronology into three
+        readings — <b>Ring</b> (a closed loop, the whole span at once), <b>Line</b>
+        (left to right through time), and <b>Column</b> (top to bottom). The events
+        don't change, only the way time is drawn.</p>
+      <p class="ip-foot">Click any event for its record; click again, or press Esc, to
+        step back.</p>`;
+    document.getElementById("ip-inner").innerHTML = which === "map" ? SITEPLAN : TIMELINE;
+  }
+
+  let _lensInfoCloseT;
   function openInfoPane()  {
-    renderInfoPane();
-    // The info pane lives inside #panel-right (position:absolute;inset:0)
-    // and is force-hidden when that panel is collapsed
-    // (.panel-right.out #info-pane{display:none}). The "?" trigger now
-    // lives in the top bar, so it's clickable even when the panel is
-    // collapsed — expand the panel first so the pane is actually visible,
-    // and resync the bottom-bar fullscreen icon to match.
+    clearTimeout(_lensInfoCloseT);
+    // In a lens (Site Plan / Timeline) the ? shows page-specific help and the panel
+    // must ride ABOVE the lens overlay (body.lens-info); in the archive it shows the
+    // catalogue info as before.
+    const lens = document.body.classList.contains("site-mode") ? "map"
+               : document.body.classList.contains("tl-mode")   ? "tl"  : null;
+    if (lens) { renderLensInfo(lens); document.body.classList.add("lens-info"); }
+    else      { renderInfoPane(); }
+    // The info pane lives inside #panel-right (position:absolute;inset:0), force-hidden
+    // when collapsed. The "?" trigger is in the top bar, so expand the panel first so
+    // the pane is visible (same slide as opening the panel), and resync the fs icon.
     const rightP = document.getElementById("panel-right");
     if (rightP && rightP.classList.contains("out")) {
       rightP.classList.remove("out");
@@ -8784,7 +8840,26 @@ WHERE {
     infoPane.classList.add("open");
     modalOnOpen(infoPane);
   }
-  function closeInfoPane() { infoPane.classList.remove("open"); modalOnClose(infoPane); }
+  function closeInfoPane() {
+    if (document.body.classList.contains("lens-info")) {
+      // Lens: slide the panel back shut (the info-pane clips with it), then drop the
+      // raised z + hide the pane once the slide finishes — the mirror of opening.
+      const rightP = document.getElementById("panel-right");
+      if (rightP) rightP.classList.add("out");
+      modalOnClose(infoPane);
+      clearTimeout(_lensInfoCloseT);
+      _lensInfoCloseT = setTimeout(() => {
+        infoPane.classList.remove("open");
+        document.body.classList.remove("lens-info");
+      }, 300);
+    } else {
+      infoPane.classList.remove("open");
+      modalOnClose(infoPane);
+    }
+  }
+  // The lens controller calls this when a lens closes/switches: tear the ? pane down
+  // synchronously (the panels themselves are animated by the lens open/close).
+  try { window.hhCloseLensInfo = function(){ clearTimeout(_lensInfoCloseT); document.body.classList.remove("lens-info"); infoPane.classList.remove("open"); }; } catch(e){}
   function toggleInfoPane(){ infoPane.classList.contains("open") ? closeInfoPane() : openInfoPane(); }
 
   // ── Filter-panel collection ⓘ popover ──────────────────────────────────
@@ -9830,6 +9905,7 @@ WHERE {
     function showView(which, handoff){              // 'map' | 'tl' — render a view (no history bookkeeping)
       if(closeTimer){ clearTimeout(closeTimer); closeTimer=null; }   // re-opening mid-close: cancel the pending teardown
       document.body.classList.remove('view-exiting');
+      if(window.hhCloseLensInfo) window.hhCloseLensInfo();           // drop any open ? pane when switching lenses
       var entering = !anyMode();
       if(entering){ var L=lp(), R=rp(); prevL=L&&L.classList.contains('out'); prevR=R&&R.classList.contains('out'); }
       var L2=lp(), R2=rp(); if(L2)L2.classList.add('out'); if(R2)R2.classList.add('out');   // panels wipe closed (260ms width transition)
@@ -9868,6 +9944,7 @@ WHERE {
     }
     function close(){
       if(!anyMode())return;
+      if(window.hhCloseLensInfo) window.hhCloseLensInfo();   // drop any open ? pane on exit
       viewStack=[];
       // Mirror the opening: keep the view layer INSET (mode class stays on) while
       // the panels extend back and the overlay + backdrop fade out, so the panels
@@ -9899,13 +9976,11 @@ WHERE {
     tlBtn.addEventListener('click',function(){ if(!inTL())navTo('tl'); });
     var archiveBtn=document.getElementById('archive-toggle');
     if(archiveBtn)archiveBtn.addEventListener('click',function(){ if(anyMode())close(); });
-    // ? in a view: the usage pane lives in the archive's right panel (hidden
-    // under the overlay here), so route it to the about/info overlay instead
-    var recInfo=document.getElementById('rec-info');
-    if(recInfo)recInfo.addEventListener('click',function(ev){ if(anyMode()&&window.hhAbout){ ev.preventDefault(); ev.stopImmediatePropagation(); window.hhAbout(); } }, true);
+    // ? in a view: the right panel now rides above the overlay (body.lens-info), so the
+    // normal toggleInfoPane handler shows the page-specific Site Plan / Timeline help.
     updateMark();
     if(exit)exit.addEventListener('click',back);
-    document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&anyMode())back(); });
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&anyMode()){ if(document.body.classList.contains('lens-info'))return; back(); } });
 
     // tools → drive the active iframe
     function mmsg(t){ try{ mapFrame.contentWindow.postMessage({type:t},'*'); }catch(e){} }
