@@ -1,101 +1,94 @@
 /* ============================================================
-   Richard Hunter — biographical events (the timeline spine).
-   Source: Hunter Timeline Audit 2026-05-28 (FH07–09, FH12, FH15,
-   CAA letter, Wikidata Q139959908, local Wikibase Q201/Q234).
-   The life is the spine; "thread" = facet, not phase.
+   The Hunter House — a fifty-year design record.
+
+   The HOUSE is the spine. Only the essential life events that lead
+   up to its design are kept; everything else is the house's own
+   making — schemes, permits and construction, 1969–2020 — drawn
+   from the catalogue (HHC + CAA collections, ~640 dated items
+   across ~40 project phases).
+
+   Threads: Life (the lead-up) · Design (schemes & drawings) ·
+   Build (permits, construction, engineering).
+
+   Sources: Hunter House catalogue (live Wikibase, phase + date per
+   item) for the house thread; Timeline Audit 2026-05-28 (FH08–09,
+   FH15, Wikidata Q139959908, Wikibase Q234) for the lead-up.
+   Sensitive family detail is deliberately held out (per the audit).
    ============================================================ */
 window.TL = {
-  span: [1928, 2025],
+  span: [1928, 2026],
   threads: {
-    life:     { label:"Life",     color:"#f0ede6" },
-    practice: { label:"Practice", color:"#7aaa98" },
-    zen:      { label:"Zen & Travel", color:"#d59b5c" },
-    art:      { label:"Art",      color:"#c4826e" },
-    writing:  { label:"Writing",  color:"#6f93c9" },
-    house:    { label:"House",    color:"#c9a44e" },
+    life:   { label:"Life",   color:"#8c877e" },
+    design: { label:"Design", color:"#c9a44e" },
+    build:  { label:"Build",  color:"#c4826e" },
   },
-  order: ["life","practice","zen","art","writing","house"],
+  order: ["life","design","build"],
   events: [
-    {y:1930, thread:"life", short:"Born", title:"Born in Phoenix, Arizona", place:"Phoenix, AZ", date:"4 November 1930", src:"Wikidata", wd:"Q139959908", key:true,
+    // ── the lead-up: only the essentials before the house ──
+    {y:1930, thread:"life", short:"Born", title:"Born in Phoenix, Arizona", place:"Phoenix, AZ", date:"4 November 1930", src:"Wikidata", key:true,
       note:"Richard Morrow Hunter."},
-    {y:1955, thread:"writing", short:"Mendelsohn Portfolio", title:"Eric Mendelsohn Portfolio", place:"—", date:"1955", src:"FH09", key:true,
-      note:"Designed, produced and published with Louise Mendelsohn."},
-    {y:1958, thread:"practice", short:"Oklahoma", title:"Graduates, University of Oklahoma", place:"Norman, OK", date:"1958", src:"FH09",
-      note:"Architectural degree, in the orbit of Bruce Goff."},
-    {y:1958, thread:"zen", short:"Japan · Daitoku-ji", title:"First trip to Japan", place:"Kyoto, Japan", date:"1958", src:"FH09", key:true,
-      note:"Studies Zen Buddhism at Daitoku-ji; temples and gardens of Kyoto."},
-    {y:1959, y2:1961, thread:"practice", short:"Welton Becket / SFO", title:"Welton Becket Associates, San Francisco", place:"San Francisco, CA", date:"1959–61", src:"FH09",
-      note:"Contributor on the new design for San Francisco International Airport."},
-    {y:1961, y2:1962, thread:"practice", short:"Fairbanks airport", title:"Fairbanks International Airport (unbuilt)", place:"Fairbanks, AK", date:"1961–62", src:"FH15",
-      note:"Designer for the airport; unbuilt."},
-    {y:1962, y2:1964, thread:"zen", short:"Kyoto years", title:"Lives in Kyoto, Japan", place:"Kyoto, Japan", date:"1962–64", src:"FH09",
-      note:"Village architecture, Zen gardens, language; taught English via the International House of Japan."},
-    {y:1964, y2:1968, thread:"practice", short:"Fairbanks practice", title:"Architect in Fairbanks, Alaska", place:"Fairbanks, AK", date:"1964–68", src:"FH09",
-      note:"Apartments, motels, restaurants, stores, private houses."},
-    {y:1966, thread:"writing", short:"Concise History", title:"A Concise History of East Asia", place:"—", date:"1966", src:"FH09",
-      note:"Hunter's photographs published in the volume."},
+    {y:1958, thread:"life", short:"Oklahoma · Goff", title:"Graduates, University of Oklahoma", place:"Norman, OK", date:"1958", src:"FH09",
+      note:"An architecture degree in the orbit of Bruce Goff and the American School of organic architecture — the way of building the house would carry."},
+    {y:1958, thread:"life", short:"Japan · Daitoku-ji", title:"First trip to Japan", place:"Kyoto, Japan", date:"1958", src:"FH09", key:true,
+      note:"Studies Zen Buddhism at Daitoku-ji, among the temples and gardens of Kyoto — the sensibility the house would be built around."},
+    {y:1962, y2:1964, thread:"life", short:"Kyoto years", title:"Lives in Kyoto, Japan", place:"Kyoto, Japan", date:"1962–64", src:"FH09",
+      note:"Village architecture, Zen gardens, the Japanese language — the deepest source of the house's character."},
     {y:1968, thread:"life", short:"To Victoria", title:"Moves to Victoria, B.C.", place:"Victoria, BC", date:"1968", src:"FH09",
-      note:"Leaves the U.S. after travels in Mexico and the American Southwest."},
-    {y:1969, y2:1974, thread:"practice", short:"Private practice I", title:"Private practice, Victoria", place:"Victoria, BC", date:"1969–74", src:"FH09",
-      note:"Residential and commercial work; master plan for the Mt. Baldy Zen monastery."},
-    {y:1970, y2:1973, thread:"house", short:"203 Goward built", title:"Designs & builds the Hunter Residence", place:"203 Goward Rd, Saanich", date:"1970–73", src:"Wikibase Q234", key:true,
-      note:"The residence — architect, client and resident, all Hunter. The central object of the archive."},
-    {y:1974, thread:"life", short:"Citizenship", title:"Canadian citizenship", place:"Canada", date:"1974", src:"FH09",
-      note:""},
-    {y:1974, thread:"art", short:"In Praise of Hands", title:"In Praise of Hands, Toronto", place:"Toronto, ON", date:"1974", src:"FH09",
-      note:"Represents Canada — chemigraphy / dyed banner art."},
-    {y:1974, y2:1981, thread:"practice", short:"B.C. Government", title:"Design architect, B.C. Government", place:"Victoria, BC", date:"1974–81", src:"FH08",
-      note:"Parliament Building renovations; Long-Term Care guidelines. Modelled as contributor, not architect of record."},
-    {y:1975, thread:"zen", short:"Sasaki Roshi", title:"Hosts Sasaki Roshi for two talks", place:"203 Goward Rd · UVic", date:"10–11 June 1975", src:"FH07", key:true,
-      note:"Hand-lettered flyer with a red ensō. A Zen teacher speaking in Hunter's own house."},
-    {y:1976, thread:"art", short:"Habitat UN", title:"Habitat, UN Conference, Vancouver", place:"Vancouver, BC", date:"1976", src:"FH09",
-      note:"Chemigraphy exhibited at the UN Conference on Human Settlements."},
-    {y:1977, thread:"art", short:"Fiberworks", title:"Fiberworks, Cleveland Museum of Art", place:"Cleveland, OH", date:"1977", src:"FH09",
-      note:"International invitational exhibition."},
-    {y:1978, thread:"practice", short:"Skeenaview", title:"Skeenaview Care Home, Terrace", place:"Terrace, BC", date:"1978", src:"FH15",
-      note:"150-bed pod/courtyard care home; B.C. Public Works."},
-    {y:1980, thread:"practice", short:"100 Mile House", title:"100 Mile House care facility", place:"100 Mile House, BC", date:"1980", src:"FH15",
-      note:"First planned multi-level care facility in B.C."},
-    {y:1981, y2:1982, thread:"zen", short:"Family Asia journey", title:"Ten-month family journey", place:"Japan → China → India → Egypt → England", date:"1981–82", src:"FH08", key:true,
-      note:"Domestic architecture of central China, the gardens of Suzhou & Hangzhou, the Jain temples of Rajasthan."},
-    {y:1981, y2:1986, thread:"practice", short:"Private practice II", title:"Private practice, Victoria", place:"Victoria, BC", date:"1981–86", src:"FH08",
-      note:"Residential, housing and health-care work. Re-entry to private practice after the government years."},
-    {y:1983, thread:"practice", short:"Vietnamese plan", title:"Vietnamese Buddhist community master plan", place:"Vancouver, BC", date:"1983", src:"FH08",
-      note:"Master planning for a 10,000-member community."},
-    {y:1984, thread:"practice", short:"Lady Minto", title:"Lady Minto Hospital, Ganges", place:"Salt Spring Island, BC", date:"1984", src:"FH15",
-      note:"Renovation & addition."},
-    {y:1986, thread:"writing", short:"Portfolio", title:"Hunter portfolio published", place:"—", date:"1986", src:"HH-HHC-0115", key:true, archive:true,
-      note:"A key document in the archive — the published portfolio."},
-    {y:1986, thread:"art", short:"Lucier performance", title:"Performs in Lucier's Music for Solo Performer", place:"UVic Sonic Lab", date:"14 November 1986", src:"FH12", key:true,
-      note:"\u201cRick Hunter, Alpha Waves\u201d — performs Alvin Lucier's brain-wave piece. Hunter as performer, not architect."},
-    {y:1988, thread:"practice", short:"Pumple letter", title:"Disowns client alterations (Pumple letter)", place:"Victoria, BC", date:"11 October 1988", src:"CAA 2021.01", key:true, archive:true,
-      note:"Renounces alterations to a house of his design; invokes copyright, Antigone, and Mendelsohn. \u201cArt is not easy.\u201d"},
-    {y:2005, y2:2006, thread:"writing", short:"Mendelsohn essay", title:"On the Early Sketches of Eric Mendelsohn", place:"The Structurist 45/46", date:"2005–06", src:"Structurist (pending)",
-      note:"Co-authored with Ita Heinze-Greenberg. Pending primary-source confirmation."},
-    {y:2020, thread:"house", short:"Final drawings", title:"Final drawings for the residence", place:"203 Goward Rd", date:"2020", src:"Wikibase Q234",
-      note:"Closes a fifty-year working record of the house."},
-    {y:2023, thread:"life", short:"Dies", title:"Dies in Victoria", place:"Victoria, BC", date:"14 January 2023", src:"Wikidata", wd:"Q139959908", key:true,
-      note:""},
+      note:"Arrives on Vancouver Island, where the house will stand."},
+
+    // ── the house: 1969–2020 (drawn from the catalogue) ──
+    {y:1969, thread:"design", short:"Design begins", title:"Pre-Cottage — Phase I, Schemes I & II", place:"203 Goward Rd", date:"1969", src:"HH-HHC", key:true,
+      note:"The first drawings — Scheme I [Star-Pinwheel] and Scheme II [Tilted]. The house begins as a search for a plan."},
+    {y:1969, thread:"build", short:"Site surveyed", title:"First land survey, 203 Goward Road", place:"Prospect Lake, Saanich", date:"1969", src:"HH-HHC",
+      note:"The land measured — the start of a survey record that runs the length of the project, to 2018."},
+    {y:1970, thread:"design", short:"The cottage", title:"Cottage for Ric & Frances Hunter — Phase I", place:"203 Goward Rd", date:"1970", src:"HH-HHC",
+      note:"The original cottage, drawn out."},
+    {y:1970, y2:1973, thread:"build", short:"Cottage built", title:"Original cottage — permit & construction", place:"203 Goward Rd", date:"1970–73", src:"Wikibase Q234", key:true,
+      note:"The house is built — architect, client and resident all Hunter. The newly-finished residence is photographed."},
+    {y:1977, y2:1978, thread:"design", short:"Zendo", title:"Zendo (speculative)", place:"203 Goward Rd", date:"1977–78", src:"HH-HHC",
+      note:"A speculative meditation hall — the Zen thread turned toward the house itself."},
+    {y:1979, thread:"build", short:"Pier", title:"Pier for 203 Goward Road", place:"Prospect Lake", date:"1979", src:"HH-HHC",
+      note:"A pier built down on the lake."},
+    {y:1986, thread:"design", short:"Phase II", title:"Hunter House — Phase II, Schemes I & II", place:"203 Goward Rd", date:"1986", src:"HH-HHC", key:true,
+      note:"The first major reimagining of the house, worked out in two schemes."},
+    {y:1987, thread:"build", short:"Cascade Deck", title:"Cascade Deck", place:"203 Goward Rd", date:"1987", src:"HH-HHC",
+      note:"A deck stepped down the slope."},
+    {y:1990, thread:"design", short:"Studio & Garden", title:"Studio and Garden — Phase II, Scheme II", place:"203 Goward Rd", date:"1990", src:"HH-HHC",
+      note:"Studio and garden drawn into the Phase II addition."},
+    {y:1990, thread:"build", short:"West Wing", title:"Haus Addition permit & West Wing construction", place:"203 Goward Rd", date:"1990", src:"HH-HHC", key:true,
+      note:"The West Wing — permitted and built. 1990 is the single densest year of drawings in the early record."},
+    {y:1992, thread:"design", short:"Colour Studies", title:"Colour Studies for Hunter House", place:"203 Goward Rd", date:"1992", src:"CAA",
+      note:"A campaign of colour studies for the house."},
+    {y:1995, thread:"build", short:"Roof", title:"Roof permit set", place:"203 Goward Rd", date:"1995", src:"HH-HHC",
+      note:"Re-roofing, permitted."},
+    {y:1996, thread:"build", short:"Tower & Apartment", title:"Beam repairs · Tower & Apartment", place:"203 Goward Rd", date:"1996", src:"HH-HHC",
+      note:"Structural beam repairs (Brown & Grant Engineering) and a tower-and-apartment addition."},
+    {y:2002, thread:"build", short:"Entry Door", title:"Entry door set", place:"203 Goward Rd", date:"2002", src:"HH-HHC",
+      note:"A new entry door, with a bedroom-closet set drawn two years before."},
+    {y:2005, y2:2015, thread:"design", short:"Entry Garden", title:"Entry Garden design arc", place:"203 Goward Rd", date:"2005–15", src:"HH-HHC", key:true,
+      note:"A decade-long design of the entry garden and walkway — the longest single design arc in the whole record."},
+    {y:2008, thread:"design", short:"East Wing begins", title:"Hunter Haus — Phase 2 (East Wing)", place:"203 Goward Rd", date:"2008", src:"HH-HHC", key:true,
+      note:"The East Wing — the last great chapter of the house — begins."},
+    {y:2008, thread:"build", short:"East Wing built", title:"East Wing construction", place:"203 Goward Rd", date:"2008", src:"HH-HHC",
+      note:"East Wing construction, with kitchen counter and dining-room work close behind."},
+    {y:2009, y2:2010, thread:"design", short:"East Wing rooms", title:"East Wing dining room & kitchen", place:"203 Goward Rd", date:"2009–10", src:"HH-HHC",
+      note:"Designing the rooms of the East Wing."},
+    {y:2015, thread:"build", short:"Veranda · Kotatsu", title:"Veranda roof · Kotatsu table", place:"203 Goward Rd", date:"2015", src:"HH-HHC",
+      note:"A veranda roof and a built-in kotatsu table."},
+    {y:2016, thread:"design", short:"East Wing office", title:"East Wing office", place:"203 Goward Rd", date:"2016", src:"HH-HHC",
+      note:"An office worked into the East Wing."},
+    {y:2018, thread:"design", short:"East Wing permit", title:"East Wing permit & dining-room schemes", place:"203 Goward Rd", date:"2018", src:"HH-HHC", key:true,
+      note:"The great late push — first and resubmitted permit sets, eight dining-room schemes, and extensive design development. 2018 is the densest year in the entire archive."},
+    {y:2019, thread:"build", short:"Windows · construction", title:"East Wing construction & site-built windows", place:"203 Goward Rd", date:"2019", src:"HH-HHC",
+      note:"East Wing construction, with site-built windows engineered by Harold Engineering."},
+    {y:2020, thread:"build", short:"Final drawings", title:"East Wing refinement — final drawings", place:"203 Goward Rd", date:"2020", src:"Wikibase Q234", key:true,
+      note:"The last drawings. Fifty years of continuous design on one house, closed."},
+
+    // ── after ──
+    {y:2023, thread:"life", short:"Stewardship", title:"Hunter dies; the residence enters Foundation stewardship", place:"Victoria, BC", date:"14 January 2023", src:"Wikidata", key:true,
+      note:"Richard Hunter dies in Victoria. The house and its archive pass into the care of the Hunter House Foundation."},
+    {y:2024, thread:"build", short:"Photographed", title:"Photographic survey of the residence", place:"203 Goward Rd", date:"2024", src:"HH-IHC",
+      note:"Ivan Hunter's photographic survey — the house as it stands today."},
   ],
 };
-/* ── Hunter House track (below the spine): the residence's own 50-year life.
-   Two audited facts (build, final drawings) + the archive's documented
-   campaigns. Campaign dates flagged are drawn from catalogue collections
-   and should be confirmed against live Wikibase. ── */
-window.TL.events.forEach(e=> e.track = (e.thread==="house") ? "house" : "hunter");
-window.TL.events.push(
-  {thread:"house", track:"house", y:1970, y2:1971, short:"Residence Photographs", title:"Hunter Residence Photographs", place:"203 Goward Rd", date:"1970–71", src:"CAA", arch:true,
-    note:"The newly-built house, documented. Catalogue collection."},
-  {thread:"house", track:"house", y:1974, y2:1991, short:"Atrium & Garden", title:"Atrium & Interior Garden work", place:"203 Goward Rd", date:"1974–91", src:"HHC", arch:true,
-    note:"Documented design of the central garden. Catalogue campaign — dates to confirm."},
-  {thread:"house", track:"house", y:1977, y2:1985, short:"East Wing Addition", title:"East Wing Addition", place:"203 Goward Rd", date:"1977–85", src:"HHC", arch:true,
-    note:"Catalogue campaign — dates to confirm."},
-  {thread:"house", track:"house", y:1992, short:"Colour Studies", title:"Colour Studies for Hunter House", place:"203 Goward Rd", date:"1992", src:"CAA", arch:true,
-    note:"A campaign of colour studies. Catalogue collection."},
-  {thread:"house", track:"house", y:2015, y2:2018, short:"Dining Room Addition", title:"Dining Room Addition", place:"203 Goward Rd", date:"2015–18", src:"EGC", arch:true,
-    note:"Catalogue campaign — dates to confirm."},
-  {thread:"house", track:"house", y:2024, short:"Survey", title:"Ivan Hunter photographic survey", place:"203 Goward Rd", date:"2024", src:"IHC", arch:true,
-    note:"Recent photographic survey of the residence."}
-);
-window.TL.span=[1928,2026];
 window.TL.events.forEach((e,i)=> e.id=i);
