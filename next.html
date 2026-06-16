@@ -708,12 +708,14 @@
      present and in position behind it. (They used to dim to opacity:0.3 — removed
      so the list/record stay readable and the panels don't appear to recede when
      the wordmark is clicked.) */
-  .panel-content{flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;position:relative}
-  /* On collapse, defer the hard max-width:0 until AFTER the 260ms width wipe so the
-     content shrinks/clips WITH the frame (the same motion that reveals it on expand)
-     instead of snapping away instantly; only the final 28px sliver is then cleaned
-     up. On expand, .out is removed → base (no delay) → content reveals via flex-grow. */
-  .panel-left.out .panel-content,.panel-right.out .panel-content{max-width:0;transition:max-width 0s 260ms}
+  .panel-content{flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;position:relative;transition:opacity 240ms ease}
+  /* Hide on collapse via OPACITY, not max-width: `max-width:none ↔ 0` is NOT an
+     animatable transition (you can't interpolate to/from `none`), so it snapped the
+     text away instantly regardless of any delay. Opacity fades reliably — the content
+     fades out over 240ms as the frame wipes shut, and `visibility` is deferred to
+     260ms so it leaves focus/AT only after the fade. On expand (.out removed) the
+     element matches the base rule → opacity fades straight back in as the frame opens. */
+  .panel-left.out .panel-content,.panel-right.out .panel-content{opacity:0;visibility:hidden;transition:opacity 240ms ease,visibility 0s 260ms}
 
   /* ── panel edge handle ── */
   .panel-handle{
@@ -3547,7 +3549,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.16";
+  const VERSION      = "v1.09-test.17";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
