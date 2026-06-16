@@ -631,8 +631,11 @@
      closed, then hide it — so the lens ? pane wipes shut like the panel content. */
   .panel-right.out #info-pane{visibility:hidden;transition:visibility 0s 260ms}
   /* Lens ? info: the right panel slides open ABOVE the lens overlay to show the
-     page-specific help (same open/close as the archive ? pane). */
+     page-specific help (same open/close as the archive ? pane). The edge handle is
+     re-enabled here (lens handles are otherwise locked) and lifted above the info
+     overlay so the pane keeps its grab tab — click it to slide the pane shut. */
   body.lens-info #panel-right{z-index:1550}
+  body.lens-info #panel-right .panel-handle{pointer-events:auto;z-index:21}
   #info-pane-close,#rn-help-close{
     position:absolute;top:8px;right:12px;background:none;border:0;cursor:pointer;
     font-size:18px;color:var(--hint);line-height:1;padding:4px 6px;
@@ -3558,7 +3561,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.28";
+  const VERSION      = "v1.09-test.29";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9678,7 +9681,7 @@ WHERE {
       // Edge handles: toggle one panel, then refresh the button so its icon
       // always reflects the real panel state.
       document.getElementById("left-handle").addEventListener("click",  () => { togglePanel("left");  syncFsBtn(); });
-      document.getElementById("right-handle").addEventListener("click", () => { togglePanel("right"); syncFsBtn(); });
+      document.getElementById("right-handle").addEventListener("click", () => { if (document.body.classList.contains("lens-info")) { closeInfoPane(); return; } togglePanel("right"); syncFsBtn(); });
 
       // Bottom-bar button: both hidden → reveal both; otherwise hide both.
       pfsBtn.addEventListener("click", () => {
