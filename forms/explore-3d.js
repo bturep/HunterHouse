@@ -1006,10 +1006,20 @@
   // invisible in plan, so we frame the contour rectangle itself, not the globe).
   function fitOverview(margin){
     var vfov=camera.fov*Math.PI/180, aspect=camera.aspect||(innerWidth/innerHeight);
-    var demW=DEM.x1-DEM.x0;
-    var d=((demW/2)/Math.tan(vfov/2)/aspect)*(margin||1);     // fit map WIDTH to the viewport
+    // Centre on the DRAWN content (linework bounds), not the DEM-extent / sphere centre.
+    // The contours sit offset within the DEM, so targeting SPHERE_C left the plan riding
+    // high and a touch right. Frame the linework's own bounds: target its centre and fit
+    // its width to the viewport.
+    var box=new THREE.Box3();
+    scene.traverse(function(o){ if(o.type==='Line'||o.type==='LineSegments'){
+      if(!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+      if(o.geometry.boundingBox) box.union(o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld)); } });
+    var cx=SPHERE_C.x, cz=SPHERE_C.z, fitW=DEM.x1-DEM.x0;
+    if(isFinite(box.min.x)&&isFinite(box.max.x)){
+      cx=(box.min.x+box.max.x)/2; cz=(box.min.z+box.max.z)/2; fitW=box.max.x-box.min.x; }
+    var d=((fitW/2)/Math.tan(vfov/2)/aspect)*(margin||1);     // fit content WIDTH to the viewport
     OVR.dist=Math.min(controls.maxDistance,Math.max(controls.minDistance,d));
-    OVR.tar.set(SPHERE_C.x,OVR.tar.y,SPHERE_C.z);
+    OVR.tar.set(cx,OVR.tar.y,cz);
   }
   fitOverview(1.0);
   if(mode==='overview' && !introActive) applyPose(OVR);
