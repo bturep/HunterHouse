@@ -130,7 +130,7 @@
   // ---------- materials ----------
   const mat={
     contour:new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.15,vertexColors:true,depthTest:false,depthWrite:false}),
-    lot:    new THREE.LineBasicMaterial({color:0xc4826e,transparent:true,opacity:.9}),
+    lot:    new THREE.LineBasicMaterial({color:0xc4826e,transparent:true,opacity:1}),
     cov:    new THREE.LineBasicMaterial({color:0xa78bbf,transparent:true,opacity:.85}),
     house:  new THREE.LineBasicMaterial({color:0xe6c067,transparent:true,opacity:1}),
     lake:   new THREE.LineBasicMaterial({color:0x7ba0d6,transparent:true,opacity:.85}),
