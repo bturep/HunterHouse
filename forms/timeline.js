@@ -80,7 +80,7 @@
   function fit(pts){ let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
     for(const p of pts){ if(p[0]<minx)minx=p[0]; if(p[0]>maxx)maxx=p[0]; if(p[1]<miny)miny=p[1]; if(p[1]>maxy)maxy=p[1]; }
     const bw=Math.max(maxx-minx,1e-3), bh=Math.max(maxy-miny,1e-3);
-    const PADX=150, PADY=120;
+    const PADX=258, PADY=120;   // PADX clears the 212px margin columns (+26 inset) so the shape sits between them
     const s=Math.min((W-2*PADX)/bw, (H-2*PADY)/bh);
     const ox=W/2 - s*(minx+maxx)/2, oy=H/2 - s*(miny+maxy)/2;
     return {s,ox,oy}; }
@@ -88,6 +88,7 @@
 
   // ---------- events ----------
   const EVENTS=TL.events.slice().sort((a,b)=>a.y-b.y);
+  EVENTS.forEach((e,i)=>{ e.id=i; });   // stable id = sorted index (the data carries none)
   const tOf=y=>Math.max(0,Math.min(1,(y-Y0)/(Y1-Y0)));
   function ptAtT(t,scr){ const f=t*(N-1); let i=Math.floor(f); if(i>=N-1)i=N-2; const fr=f-i;
     return [scr[i][0]+(scr[i+1][0]-scr[i][0])*fr, scr[i][1]+(scr[i+1][1]-scr[i][1])*fr]; }
@@ -112,6 +113,42 @@
     ticks.push({y,ln,tx}); }
 
   function showLabel(id,on){ const it=evEls[id]; if(it)it.lab.classList.toggle('show',on); }
+
+  // ---------- two-column entry index ----------
+  // All events lifted into two reading columns (earlier years left, later
+  // right). Each entry links to its dot both ways; selecting expands the note
+  // inline. Independent of the active shape — the columns are fixed chrome.
+  const cols=document.getElementById('tl-cols'),
+        colL=document.getElementById('tl-col-l'), colR=document.getElementById('tl-col-r');
+  const mid=Math.ceil(EVENTS.length/2);
+  // compact column stamp: a year or a short range ("1970–73"); the full date
+  // (e.date, e.g. "4 November 1930") is reserved for the expanded detail.
+  const shortYr=e=>e.y2?(e.y+'–'+String(e.y2).slice(-2)):(''+e.y);
+  EVENTS.forEach((e,i)=>{ const th=TH[e.thread]; const it=evEls[i];
+    const row=document.createElement('div'); row.className='tl-entry'; row.dataset.i=i;
+    row.tabIndex=0; row.setAttribute('role','button'); row.style.color=th.color;
+    const sm=srcMeta(e); const placeOk=e.place&&e.place!=='—';
+    const kv=[];
+    if(placeOk) kv.push('<div class="row"><span class="k2">place</span><span class="v">'+e.place+'</span></div>');
+    if(sm.ref) kv.push('<div class="row"><span class="k2">source</span><span class="v'+(sm.coll?' archid':'')+'">'+sm.ref+'</span></div>');
+    const foot=kv.length?('<div class="ev-kv">'+kv.join('')+'</div>'):'';
+    row.innerHTML='<span class="te-yr"><i class="te-dot"></i>'+shortYr(e)+'</span>'+
+      '<span class="te-ti">'+(e.short||e.title)+'</span>'+
+      '<div class="tl-detail">'+
+        '<div class="te-k"><span style="color:'+th.color+'">'+th.label+'</span> · '+(e.date||e.y)+'</div>'+
+        '<h3>'+(e.title||e.short)+'</h3>'+
+        (e.note?'<p>'+e.note+'</p>':'')+foot+'</div>';
+    const toggle=()=>{ (selId===i)?deselect():select(i); };
+    row.addEventListener('click',ev=>{ ev.stopPropagation(); toggle(); });
+    row.addEventListener('keydown',ev=>{ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); toggle(); } });
+    row.addEventListener('mouseenter',()=>{ if(selId==null){ showLabel(i,true); it.dot.classList.add('hl'); } });
+    row.addEventListener('mouseleave',()=>{ if(selId!==i){ showLabel(i,false); it.dot.classList.remove('hl'); } });
+    // two-way: hovering the dot lights its entry
+    it.dot.addEventListener('mouseenter',()=>{ if(selId==null)row.classList.add('hl'); });
+    it.dot.addEventListener('mouseleave',()=>{ if(selId!==i)row.classList.remove('hl'); });
+    (i<mid?colL:colR).appendChild(row);
+    it.entry=row;
+  });
 
   // ---------- draw ----------
   // scrOverride: explicit screen-space points (used by the kinhin hand-off so the
@@ -196,26 +233,23 @@
     })(performance.now());
   }
 
-  // ---------- selection / card ----------
-  const card=document.getElementById('card'), hint=document.getElementById('hint');
-  function select(id){ selId=id; const e=EVENTS.find(x=>x.id===id)||evEls[id].e;
-    evEls.forEach(it=>it.dot.classList.toggle('sel',it.e.id===id));
-    evEls.forEach(it=>it.lab.classList.toggle('show',it.e.id===id));
-    const c=TH[e.thread];
-    const sm=srcMeta(e);
-    const placeOk=e.place&&e.place!=='—';
-    const rows=[];
-    if(placeOk) rows.push('<div class="row"><span class="k2">place</span><span class="v">'+e.place+'</span></div>');
-    if(sm.ref) rows.push('<div class="row"><span class="k2">source</span><span class="v'+(sm.coll?' archid':'')+'">'+sm.ref+'</span></div>');
-    const foot=rows.length?('<div class="ev-kv">'+rows.join('')+'</div>'):'';
-    card.innerHTML='<button class="cx" aria-label="Close">×</button>'+
-      '<div class="k"><span style="color:'+c.color+'">'+c.label+'</span><span class="sep">·</span><span class="yr">'+(e.date||e.y)+'</span></div>'+
-      '<h2>'+(e.title||e.short)+'</h2>'+
-      (e.note?'<p>'+e.note+'</p>':'')+
-      foot;
-    card.querySelector('.cx').addEventListener('click',ev=>{ev.stopPropagation();deselect();});
-    card.classList.add('on'); hint.style.opacity='0'; draw(); }
-  function deselect(){ selId=null; evEls.forEach(it=>{it.dot.classList.remove('sel');it.lab.classList.remove('show');}); card.classList.remove('on'); hint.style.opacity=''; draw(); }
+  // ---------- selection ----------
+  // The two-column index is the detail surface now: selecting lights the dot +
+  // label on the shape, highlights the entry, expands its note inline, and dims
+  // the rest. (The old floating caption-card is retired — see .card display:none.)
+  const hint=document.getElementById('hint');
+  function select(id){ const it=evEls[id]; if(!it)return; selId=id;
+    evEls.forEach(x=>{ x.dot.classList.toggle('sel',x.e.id===id); x.dot.classList.remove('hl');
+      x.lab.classList.toggle('show',x.e.id===id);
+      if(x.entry){ x.entry.classList.toggle('sel',x.e.id===id); x.entry.classList.remove('hl'); } });
+    if(cols)cols.classList.add('has-sel');
+    if(it.entry)it.entry.scrollIntoView({block:'nearest',behavior:'smooth'});
+    if(hint)hint.style.opacity='0'; draw(); }
+  function deselect(){ selId=null;
+    evEls.forEach(it=>{ it.dot.classList.remove('sel','hl'); it.lab.classList.remove('show');
+      if(it.entry)it.entry.classList.remove('sel','hl'); });
+    if(cols)cols.classList.remove('has-sel');
+    if(hint)hint.style.opacity=''; draw(); }
   svg.addEventListener('click',()=>{ if(selId!=null)deselect(); });
 
   // ---------- legend (thread filter) ----------
@@ -239,8 +273,17 @@
     cur=ring.map(p=>p.slice()); fromClosed=1; toClosed=1; morph=1; shapeName='ring';
     draw();
   } else {
+    // standalone preview: ?shape=ring|line|column rests directly in that shape
+    // (skips the trail intro); ?pick=N pre-selects an entry. The host drives
+    // shape via postMessage, so this only affects direct/standalone viewing.
+    const sp=new URLSearchParams(location.search), wantShape=sp.get('shape');
     cur=trail.map(p=>p.slice()); fromClosed=1; toClosed=1; shapeName='trail';
     draw();
-    setTimeout(()=>goShape('ring'), 480);
+    if(wantShape && SHAPES[wantShape]){
+      cur=SHAPES[wantShape].map(p=>p.slice()); fromClosed=CLOSED[wantShape]; toClosed=CLOSED[wantShape]; morph=1; shapeName=wantShape;
+      [...document.querySelectorAll('#modes button')].forEach(b=>b.classList.toggle('on',b.dataset.shape===wantShape));
+      draw();
+    } else setTimeout(()=>goShape('ring'), 480);
+    const pick=sp.get('pick'); if(pick!=null && evEls[+pick]) setTimeout(()=>select(+pick), wantShape?80:1900);
   }
 })();

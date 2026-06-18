@@ -3561,7 +3561,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.30";
+  const VERSION      = "v1.09-test.31";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9903,7 +9903,7 @@ WHERE {
 
     // preload both views invisibly so switching is instant
     mapFrame.src='forms/explore-3d.html?intro=0&v=sphere13'; mapOv.classList.add('preload');
-    tlFrame.src='forms/timeline.html?v=hd1'; tlOv.classList.add('preload');
+    tlFrame.src='forms/timeline.html?v=hd2'; tlOv.classList.add('preload');
 
     function showView(which, handoff){              // 'map' | 'tl' — render a view (no history bookkeeping)
       if(closeTimer){ clearTimeout(closeTimer); closeTimer=null; }   // re-opening mid-close: cancel the pending teardown
