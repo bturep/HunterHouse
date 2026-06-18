@@ -2679,6 +2679,15 @@
   }
   html.baden #baden-root{ display:flex; }
   #baden-root *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  /* Form controls don't inherit font-size by default, so the <button> list rows
+     (.bd-item) ignored the A+ size bump while the <h1> header scaled. font-size:1em
+     re-anchors them to the --bd-fs root cascade so A+ resizes the whole room.
+     :where() keeps this at ZERO specificity, so buttons that set their own size on
+     purpose (.bd-tool, .bd-btn, .bd-rec-time) still win and are unaffected. */
+  :where(#baden-root) button,
+  :where(#baden-root) textarea,
+  :where(#baden-root) input,
+  :where(#baden-root) select{ font-size:1em; }
 
   /* ── Header ─────────────────────────────────────────────────────────────── */
   .bd-head{
@@ -3561,7 +3570,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.31";
+  const VERSION      = "v1.09-test.32";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
