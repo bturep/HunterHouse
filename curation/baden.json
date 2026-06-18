@@ -15,17 +15,35 @@
    are not in the catalogue are skipped and logged to the console; if none of
    them resolve, the viewing room shows a readable error with a Retry button.
 
-   The address lines below are PLACEHOLDERS - replace them with real words.
+   This is Brandon's marked selection, exported 2026-06-18, in marked order.
+   Addresses are omitted for now - add a note to Mowry on any item by giving it
+   an "address" value, e.g.  { "id": "HH-CAA-0003", "address": "..." }
 */
 [
-  { "id": "HH-CAA-0007", "address": "Where it begins - the 1970 ground plan: a square house gathered around a circular hearth. I wanted you to see the first idea whole." },
-  { "id": "HH-CAA-0008", "address": "The same scheme worked further. Notice how the geometry starts to negotiate with the site." },
-  { "id": "HH-CAA-0018", "address": "Fifteen years on, Scheme II in coloured pencil (1985). The drawing itself becomes a thing to look at." },
-  { "id": "HH-CAA-0019", "address": "Colour studies, 1992 - the first of three. Hunter testing how light would land inside." },
-  { "id": "HH-CAA-0020", "address": "The second colour study. We straightened these scans this spring; the originals had drifted off-level." },
-  { "id": "HH-CAA-0021", "address": "And the third. Read them as a set." },
-  { "id": "HH-EGC-0001", "address": "From the furniture: Hunter's drawings for Eric Gesinger's commissions. The house extended to the things inside it." },
-  { "id": "HH-HHC-0112", "address": "The Covenant site plan, annotated - the land and its terms, drawn." },
-  { "id": "HH-IHC-0003", "address": "The house as it stands now, at dusk - photographed by Ivan Hunter, 2024." },
-  { "id": "HH-IHC-0015", "address": "An interior, same visit. I thought you'd want to stand inside it for a moment." }
+  { "id": "HH-CAA-0003" },
+  { "id": "HH-CAA-0004" },
+  { "id": "HH-CAA-0007" },
+  { "id": "HH-CAA-0008" },
+  { "id": "HH-CAA-0015" },
+  { "id": "HH-CAA-0018" },
+  { "id": "HH-CAA-0019" },
+  { "id": "HH-CAA-0020" },
+  { "id": "HH-CAA-0021" },
+  { "id": "HH-CAA-0022" },
+  { "id": "HH-CAA-0023" },
+  { "id": "HH-CAA-0024" },
+  { "id": "HH-CAA-0025" },
+  { "id": "HH-HHC-0004" },
+  { "id": "HH-HHC-0005" },
+  { "id": "HH-HHC-0028" },
+  { "id": "HH-HHC-0045" },
+  { "id": "HH-HHC-0084" },
+  { "id": "HH-HHC-0112" },
+  { "id": "HH-HHC-0115" },
+  { "id": "HH-IHC-0003" },
+  { "id": "HH-IHC-0008" },
+  { "id": "HH-IHC-0030" },
+  { "id": "HH-IHC-0038" },
+  { "id": "HH-IHC-0039" },
+  { "id": "HH-IHC-0040" }
 ]
