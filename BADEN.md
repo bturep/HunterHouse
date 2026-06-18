@@ -87,20 +87,38 @@ the words with real ones to Mowry.
 
 ## Before handover (Brandon)
 
-### 1. Stand up the notes backend (one-time)
+### 1. Stand up the notes backend (one-time) — ✅ DONE & VERIFIED 2026-06-18
 The Worker that receives notes is the existing `cloudflare/r2-browser/` Worker,
 extended with `POST /api/notes`. It writes to a **new** R2 bucket in **your own**
 Cloudflare account (native binding = write-capable; the archive bucket stays
 read-only).
 
+**This backend is now live.** Verified end-to-end 2026-06-18:
+- bucket `hhf-baden-notes` exists (628a account);
+- the Worker has `/api/notes` deployed (GET→405, valid POST→201);
+- the `NOTES_TOKEN` shared secret is set on the Worker AND matches
+  `BADEN.NOTES_TOKEN` in `next.html` (set 2026-06-12) — no token → 403, correct
+  token → 201;
+- a real POST landed at `baden-notes/HH-TEST-0000/…json` in R2 and was deleted.
+
+So a note left from the iPad reaches the bucket. Notes land under
+`baden-notes/<item-id>/…` (`.wav` + `.wav.json`, or `<timestamp>.json` for text).
+
+For reference, the original one-time stand-up was:
+
 ```bash
 cd cloudflare/r2-browser
 npx wrangler r2 bucket create hhf-baden-notes   # one-time
 npx wrangler deploy                              # ships /api/notes + the binding
+npx wrangler secret put NOTES_TOKEN             # shared secret; match BADEN.NOTES_TOKEN
 ```
-Until this is deployed, notes still save on the iPad and queue (they POST as soon
-as the Worker is live — no data lost). Notes land in R2 under
-`baden-notes/<item-id>/…` (`.wav` + `.wav.json`, or `<timestamp>.json` for text).
+
+⚠ **Reading notes back has no listing path yet.** The notes bucket is in the
+personal 628a account; the `hh-r2` rclone remote points at the *Foundation*
+account, so it can't see it, and the Worker's `/list` reads the archive bucket
+only. To check "are there new notes from Mowry," use the Cloudflare dashboard, or
+stand up a read path (an `hh-baden:` rclone remote with 628a S3 keys, or a
+researcher-gated read endpoint on the Worker). Not built yet.
 
 ### 2. Test the microphone ON THE ACTUAL iPad — do not skip
 `getUserMedia` has a **history of failing inside home-screen standalone webapps
