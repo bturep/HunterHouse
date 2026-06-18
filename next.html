@@ -2816,7 +2816,18 @@
     flex-direction:column; background:var(--bd-bg); color:var(--bd-ink);
     padding:env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 16px);
     overflow-y:auto;
+    /* Sheets are siblings of #baden-root (not children), so they don't inherit
+       its serif font or --bd-fs base — the add-a-note / speak / type text was
+       rendering at the 16px document default and ignoring A+. Re-establish the
+       room's type here so every sheet reads big and scales with A+ too. */
+    font-family:"Iowan Old Style", Georgia, "Times New Roman", serif;
+    font-size:var(--bd-fs); line-height:1.5;
   }
+  /* Controls inside sheets don't inherit font-size either; zero-specificity
+     :where() re-anchors them without clobbering the ones that set their own. */
+  :where(.bd-sheet) button,
+  :where(.bd-sheet) textarea,
+  :where(.bd-sheet) input{ font-size:1em; }
   .bd-sheet.open{ display:flex; }
   .bd-sheet-head{ padding:16px 4px; border-bottom:2px solid var(--bd-line); }
   .bd-sheet-id{ font-family:"JetBrains Mono", ui-monospace, monospace; font-size:.6em; letter-spacing:.06em; color:var(--bd-accent-ink); }
@@ -3015,7 +3026,6 @@
     <h1>Selected for Mowry&nbsp;Baden — Hunter House Archive</h1>
     <button class="bd-tool" id="bd-text"  type="button" aria-label="Larger text"        title="Larger text">A+</button>
     <button class="bd-tool" id="bd-theme" type="button" aria-label="Switch light or dark" title="Light / dark">◐</button>
-    <button class="bd-tool" id="bd-help-btn" type="button" aria-label="Help">?</button>
   </header>
 
   <!-- LIST -->
@@ -3570,7 +3580,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.32";
+  const VERSION      = "v1.09-test.33";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9555,7 +9565,9 @@ WHERE {
     up("bd-choice-cancel",() => bdCloseSheet("bd-choice"));
     up("bd-type-save",   () => bdSaveType());
     up("bd-type-cancel", () => { BADEN.editing = null; bdCloseSheet("bd-type"); });
-    up("bd-help-btn",  () => bdOpenSheet("bd-help"));
+    // Help (?) button removed per request — Brandon walks Mowry through it in
+    // person. The #bd-help sheet markup is kept (dormant) so "Export my notes"
+    // isn't lost and can be relocated later if wanted.
     up("bd-help-done", () => bdCloseSheet("bd-help"));
     up("bd-export",    () => bdExport());
     up("bd-theme",     () => bdToggleTheme());
