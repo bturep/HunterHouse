@@ -60,7 +60,7 @@
         var ml = document.querySelector('link[rel="manifest"]');
         if (ml) ml.setAttribute("href", "manifest.baden.next.json");
         var at = document.querySelector('meta[name="apple-mobile-web-app-title"]');
-        if (at) at.setAttribute("content", "Hunter House Archive Project");  // full name (iOS clips on-icon caption ~12ch)
+        if (at) at.setAttribute("content", "Hunter House");  // clean label; drops the default "HH Next"
       } catch (e) {}
     }
     return on;
@@ -3146,7 +3146,7 @@
       <li>Tap <strong>Add to Home&nbsp;Screen</strong>.</li>
       <li>Tap <strong>Add</strong>.</li>
     </ol>
-    <p class="bd-hint">An icon called <strong>Hunter&nbsp;House Archive Project</strong> appears on your Home Screen. Tap it any time to come straight back here.</p>
+    <p class="bd-hint">An icon called <strong>Hunter&nbsp;House</strong> appears on your Home Screen. Tap it any time to come straight back here.</p>
   </div>
   <div class="bd-sheet-foot">
     <button class="bd-btn bd-wide" id="bd-install-done" type="button">Got it</button>
@@ -3614,7 +3614,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.35";
+  const VERSION      = "v1.09-test.36";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
