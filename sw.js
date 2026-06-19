@@ -16,7 +16,7 @@
 // next activation. Do this any time the shell layout, asset list, or the
 // caching policy itself changes.
 
-const CACHE_NAME = 'hh-shell-v46';
+const CACHE_NAME = 'hh-shell-v47';
 
 const PRECACHE = [
   './',
@@ -25,6 +25,7 @@ const PRECACHE = [
   './index.html',
   './manifest.json',
   './manifest.next.json',
+  './manifest.baden.next.json',
   './assets/light.css',
   './assets/dark.css',
   './assets/hunter-mark.png',
