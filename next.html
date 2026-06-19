@@ -17,10 +17,13 @@
      (the admin edit-proxy at 127.0.0.1:8731). img-src adds the R2 host that
      Wikibase URLs point at. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://archive.hunterhousefoundation.com; connect-src 'self' https://hunterhouse.wikibase.cloud https://archive.hunterhousefoundation.com https://hhf-r2-browser.brandon-628.workers.dev http://127.0.0.1:* http://localhost:*; media-src 'self' blob:; frame-src 'self'; worker-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'">
-<link rel="manifest" href="manifest.next.json">
+<!-- manifest + apple-mobile-web-app-title are INJECTED by the HH_BADEN script below,
+     NOT static here. iOS reads these once at load and ignores later JS edits, so
+     Baden mode must place its OWN pair (manifest.baden.next.json + "Hunter House")
+     at parse time — swapping them afterward (the old approach) was silently ignored,
+     so an installed icon captured the bare research app instead of the viewing room. -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="HH Next">
 <link rel="apple-touch-icon" href="assets/icon-180-next.png">
 <link rel="icon" type="image/png" href="assets/icon-192-next.png">
 <!-- Paint holdout: sets dark bg before render-blocking external CSS resolves -->
@@ -43,6 +46,23 @@
       else if (f === "off") { localStorage.removeItem("hhf_for_baden"); on = false; }
       else { on = localStorage.getItem("hhf_for_baden") === "1"; }
     } catch (e) { /* private mode / disabled storage → mode off, harmless */ }
+    // Inject the manifest + apple app-title AT PARSE TIME (before iOS reads them at
+    // load — it ignores post-load JS changes). Baden mode gets its own manifest
+    // (start_url ?for=baden) + a clean "Hunter House" label, so an installed
+    // home-screen icon launches straight into the viewing room and lands in the
+    // standalone storage with the flag already set. Everyone else gets the normal
+    // next build (manifest.next.json / "HH Next"); their install is unaffected.
+    try {
+      var head = document.head || document.getElementsByTagName("head")[0];
+      var ml = document.createElement("link");
+      ml.rel = "manifest";
+      ml.href = on ? "manifest.baden.next.json" : "manifest.next.json";
+      head.appendChild(ml);
+      var at = document.createElement("meta");
+      at.name = "apple-mobile-web-app-title";
+      at.content = on ? "Hunter House" : "HH Next";
+      head.appendChild(at);
+    } catch (e) {}
     if (on) {
       var r = document.documentElement;
       r.classList.add("baden");
@@ -51,16 +71,6 @@
       try {
         if (localStorage.getItem("hhf_baden_theme") === "dark") r.classList.add("baden-dark");
         if (localStorage.getItem("hhf_baden_text") === "lg")    r.classList.add("baden-lg");
-      } catch (e) {}
-      // Home-screen install (Baden ONLY): repoint the manifest + icon label at the
-      // viewing room so an installed icon launches into ?for=baden (not the bare
-      // research app), and lands in the standalone storage with the flag already
-      // set. Scoped to `on`, so an ordinary visitor's install is unaffected.
-      try {
-        var ml = document.querySelector('link[rel="manifest"]');
-        if (ml) ml.setAttribute("href", "manifest.baden.next.json");
-        var at = document.querySelector('meta[name="apple-mobile-web-app-title"]');
-        if (at) at.setAttribute("content", "Hunter House");  // clean label; drops the default "HH Next"
       } catch (e) {}
     }
     return on;
@@ -3614,7 +3624,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.36";
+  const VERSION      = "v1.09-test.37";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
