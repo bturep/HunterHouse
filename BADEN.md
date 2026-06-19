@@ -64,7 +64,13 @@ auto-install (no install API; nothing can add itself), so two things make it wor
 - **Image stage**: *Fit* / *Bigger* / *Full size*. Pan by dragging (native
   scroll — no precision gesture). *Full size* loads the real 3840px asset.
   Pinch-zoom also works (the `maximum-scale` lock was removed).
-- **Notes** — a full-width *Add a note* on every record opens two equal choices,
+- **Notes** — **text-only for Mowry** (voice removed 2026-06-18, next v1.09-test.38: he
+  doesn't use it). *Add a note* opens the type box directly. The Speak path + WAV recorder
+  stay in the DOM but **dormant** — `getUserMedia` is never invoked (no mic prompt; the
+  standalone-mic concern in **Before handover §2** is now moot). Re-enable voice by
+  restoring `bdOpenChoice()` on `bd-addnote`. The choice/speak details below are kept for
+  that case:
+- *(dormant)* a full-width *Add a note* opening two equal choices,
   **Speak a note** and **Type a note**:
   - *Type*: a big autofocused box; the keyboard's microphone key dictates too.
   - *Speak*: tap to start, tap to stop (never press-and-hold). Then Play /

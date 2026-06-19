@@ -3624,7 +3624,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.37";
+  const VERSION      = "v1.09-test.38";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9621,7 +9621,11 @@ WHERE {
     up("bd-fit",     () => bdSetZoom("fit"));
     up("bd-bigger",  () => bdSetZoom("bigger"));
     up("bd-fullsize",() => bdSetZoom("full"));
-    up("bd-addnote", () => bdOpenChoice());
+    // Notes are TEXT-ONLY for Mowry (he doesn't use voice) — "Add a note" goes
+    // straight to the type box, skipping the Speak/Type choice. The choice + speak
+    // sheets stay in the DOM but dormant, so getUserMedia is never invoked (no mic
+    // prompt; the standalone-mic risk in BADEN.md §2 is moot). Restore bdOpenChoice() to re-enable voice.
+    up("bd-addnote", () => bdOpenType(null));
     up("bd-choose-speak", () => { bdCloseSheet("bd-choice"); bdOpenSpeak(); });
     up("bd-choose-type",  () => { bdCloseSheet("bd-choice"); bdOpenType(null); });
     up("bd-choice-cancel",() => bdCloseSheet("bd-choice"));
