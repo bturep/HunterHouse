@@ -39,7 +39,8 @@ auto-install (no install API; nothing can add itself), so two things make it wor
   when launched from the installed icon (`navigator.standalone`).
 - **A Baden manifest** (`manifest.baden.next.json`, `start_url: ./next.html?for=baden`).
   The head IIFE repoints `<link rel=manifest>` to it **only when Baden mode is on**, and
-  sets the icon label to "Hunter House". So an installed icon launches into `?for=baden`
+  sets the icon label to "Hunter House Archive Project" (iOS clips the on-icon caption to
+  ~12 chars). So an installed icon launches into `?for=baden`
   (lands in the standalone storage with the flag set) — and an ordinary visitor's install
   is completely unaffected (they keep `manifest.next.json` / "HH Next").
 

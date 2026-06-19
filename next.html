@@ -60,7 +60,7 @@
         var ml = document.querySelector('link[rel="manifest"]');
         if (ml) ml.setAttribute("href", "manifest.baden.next.json");
         var at = document.querySelector('meta[name="apple-mobile-web-app-title"]');
-        if (at) at.setAttribute("content", "Hunter House");
+        if (at) at.setAttribute("content", "Hunter House Archive Project");  // full name (iOS clips on-icon caption ~12ch)
       } catch (e) {}
     }
     return on;
@@ -3142,11 +3142,11 @@
     <ol class="bd-steps">
       <li>Tap the <strong>Share</strong> button
         <svg class="bd-share-ic" width="20" height="24" viewBox="0 0 22 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 2.5 V16"/><path d="M6.5 7 L11 2.5 L15.5 7"/><path d="M5.5 11 H4 a1.5 1.5 0 0 0 -1.5 1.5 V22 a1.5 1.5 0 0 0 1.5 1.5 H18 a1.5 1.5 0 0 0 1.5 -1.5 V12.5 a1.5 1.5 0 0 0 -1.5 -1.5 H16.5"/></svg>
-        at the top of the screen.</li>
+        at the <span id="bd-share-where">top</span> of the screen.</li>
       <li>Tap <strong>Add to Home&nbsp;Screen</strong>.</li>
       <li>Tap <strong>Add</strong>.</li>
     </ol>
-    <p class="bd-hint">An icon called <strong>Hunter&nbsp;House</strong> appears on your Home Screen. Tap it any time to come straight back here.</p>
+    <p class="bd-hint">An icon called <strong>Hunter&nbsp;House Archive Project</strong> appears on your Home Screen. Tap it any time to come straight back here.</p>
   </div>
   <div class="bd-sheet-foot">
     <button class="bd-btn bd-wide" id="bd-install-done" type="button">Got it</button>
@@ -3614,7 +3614,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.34";
+  const VERSION      = "v1.09-test.35";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9570,6 +9570,10 @@ WHERE {
       const standalone = navigator.standalone || matchMedia("(display-mode:standalone)").matches;
       if (standalone) return;
       if (localStorage.getItem("hhf_baden_install_seen") === "1") return;
+      // Share button sits at the BOTTOM in iPhone Safari, the TOP on iPad — say
+      // the right one (Mowry's on an iPad → top; Brandon testing on iPhone → bottom).
+      const w = bd$("bd-share-where");
+      if (w) w.textContent = /iPhone|iPod/.test(navigator.userAgent) ? "bottom" : "top";
       setTimeout(() => { if (bd$("bd-install")) bdOpenSheet("bd-install"); }, 800);
     } catch (e) {}
   }
