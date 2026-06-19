@@ -24,10 +24,34 @@ tool are completely unaffected — Baden mode is invisible unless switched on.
 | `…/next.html?for=off` | Leave Baden mode on this device |
 
 It is a **courtesy-private** URL, not security — nothing secret is behind it.
-The plan is to add it to Mowry's iPad **home screen**; because the mode persists,
-the icon opens straight into the viewing room with zero input.
 
 After promotion the live URL is `https://hunterhouse.org/browse.html?for=baden`.
+
+### Home-screen install (built 2026-06-18)
+The viewing room is meant to live as a **home-screen icon** on Mowry's iPad — because
+the mode persists, the icon opens straight in with zero input. iPadOS Safari can't
+auto-install (no install API; nothing can add itself), so two things make it work:
+
+- **An accessible first-open guide** (`#bd-install` sheet, Baden-only). The first time
+  the room opens *and it isn't already a home-screen app*, a large, plain card shows the
+  three iPad-Safari steps (Share → Add to Home Screen → Add) with the Share glyph. Tapping
+  **Got it** dismisses it for good (`localStorage hhf_baden_install_seen`). It never shows
+  when launched from the installed icon (`navigator.standalone`).
+- **A Baden manifest** (`manifest.baden.next.json`, `start_url: ./next.html?for=baden`).
+  The head IIFE repoints `<link rel=manifest>` to it **only when Baden mode is on**, and
+  sets the icon label to "Hunter House". So an installed icon launches into `?for=baden`
+  (lands in the standalone storage with the flag set) — and an ordinary visitor's install
+  is completely unaffected (they keep `manifest.next.json` / "HH Next").
+
+> **No auto-install is possible on iPad** — confirmed. If Brandon isn't there to do the
+> Share→Add taps, just send the `?for=baden` link: it works fully in Safari with no install
+> (the room *is* the page), and the icon is pure convenience added later.
+
+> **⚠ Promotion to `browse.html`:** the IIFE reference `manifest.baden.next.json` and the
+> `start_url` are NEXT-specific. When Baden mode promotes to live, create
+> **`manifest.baden.json`** (`start_url: ./browse.html?for=baden`) and update the
+> browse.html IIFE to point at it — mirrors the existing `manifest.next.json` →
+> `manifest.json` swap. Also add it to `sw.js` PRECACHE + bump CACHE_NAME.
 
 ---
 

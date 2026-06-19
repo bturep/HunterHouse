@@ -52,6 +52,16 @@
         if (localStorage.getItem("hhf_baden_theme") === "dark") r.classList.add("baden-dark");
         if (localStorage.getItem("hhf_baden_text") === "lg")    r.classList.add("baden-lg");
       } catch (e) {}
+      // Home-screen install (Baden ONLY): repoint the manifest + icon label at the
+      // viewing room so an installed icon launches into ?for=baden (not the bare
+      // research app), and lands in the standalone storage with the flag already
+      // set. Scoped to `on`, so an ordinary visitor's install is unaffected.
+      try {
+        var ml = document.querySelector('link[rel="manifest"]');
+        if (ml) ml.setAttribute("href", "manifest.baden.next.json");
+        var at = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+        if (at) at.setAttribute("content", "Hunter House");
+      } catch (e) {}
     }
     return on;
   })();
@@ -2834,6 +2844,10 @@
   .bd-sheet-title{ font-size:1em; font-weight:600; margin-top:4px; line-height:1.3; }
   .bd-sheet-body{ flex:1 1 auto; display:flex; flex-direction:column; gap:18px; padding:20px 4px; }
   .bd-sheet-foot{ flex:0 0 auto; display:flex; flex-direction:column; gap:14px; padding-top:8px; }
+  /* Add-to-Home-Screen guide steps (large, generously spaced for easy reading) */
+  .bd-steps{ margin:0; padding-left:1.3em; display:flex; flex-direction:column; gap:16px; line-height:1.5; }
+  .bd-steps li{ padding-left:.2em; }
+  .bd-share-ic{ vertical-align:-5px; margin:0 3px; color:var(--bd-accent-ink); }
   .bd-choice-grid{ display:flex; flex-direction:column; gap:18px; flex:1 1 auto; justify-content:center; }
   .bd-choice-grid .bd-btn{ min-height:120px; font-size:1em; }
   .bd-hint{ font-size:.76em; color:var(--bd-ink-soft); line-height:1.5; }
@@ -3116,6 +3130,26 @@
   <div class="bd-sheet-foot">
     <button class="bd-btn bd-wide" id="bd-export" type="button">Export my notes</button>
     <button class="bd-btn bd-ghost bd-wide" id="bd-help-done" type="button">Done</button>
+  </div>
+</div>
+
+<!-- Add to Home Screen — first-open guide (Baden-only; auto-shown once when the
+     page is NOT already a home-screen app). Plain, large, iPad-Safari steps. -->
+<div class="bd-sheet" id="bd-install" role="dialog" aria-modal="true" aria-labelledby="bd-install-title">
+  <div class="bd-sheet-head"><div class="bd-sheet-title" id="bd-install-title">Keep this on your Home Screen</div></div>
+  <div class="bd-sheet-body">
+    <p class="bd-hint" style="font-size:.95em;color:var(--bd-ink)">So next time it's one tap to open — no need to find the email again.</p>
+    <ol class="bd-steps">
+      <li>Tap the <strong>Share</strong> button
+        <svg class="bd-share-ic" width="20" height="24" viewBox="0 0 22 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 2.5 V16"/><path d="M6.5 7 L11 2.5 L15.5 7"/><path d="M5.5 11 H4 a1.5 1.5 0 0 0 -1.5 1.5 V22 a1.5 1.5 0 0 0 1.5 1.5 H18 a1.5 1.5 0 0 0 1.5 -1.5 V12.5 a1.5 1.5 0 0 0 -1.5 -1.5 H16.5"/></svg>
+        at the top of the screen.</li>
+      <li>Tap <strong>Add to Home&nbsp;Screen</strong>.</li>
+      <li>Tap <strong>Add</strong>.</li>
+    </ol>
+    <p class="bd-hint">An icon called <strong>Hunter&nbsp;House</strong> appears on your Home Screen. Tap it any time to come straight back here.</p>
+  </div>
+  <div class="bd-sheet-foot">
+    <button class="bd-btn bd-wide" id="bd-install-done" type="button">Got it</button>
   </div>
 </div>
 
@@ -3580,7 +3614,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.33";
+  const VERSION      = "v1.09-test.34";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9137,6 +9171,7 @@ WHERE {
     bdHideState();
     bdRenderList();
     bdRoot().setAttribute("data-view", "list");
+    bdMaybeOfferInstall();
   }
 
   // ── LIST ────────────────────────────────────────────────────────────────
@@ -9526,6 +9561,19 @@ WHERE {
     if (BADEN._lastFocus && BADEN._lastFocus.focus) BADEN._lastFocus.focus();
   }
 
+  // First open only: offer "Add to Home Screen" when this is NOT already a
+  // home-screen app and the reader hasn't dismissed the tip before. Launched
+  // from the icon (standalone) it never appears. Baden mode IS the iPad
+  // experience, so the iPad-Safari wording is appropriate.
+  function bdMaybeOfferInstall() {
+    try {
+      const standalone = navigator.standalone || matchMedia("(display-mode:standalone)").matches;
+      if (standalone) return;
+      if (localStorage.getItem("hhf_baden_install_seen") === "1") return;
+      setTimeout(() => { if (bd$("bd-install")) bdOpenSheet("bd-install"); }, 800);
+    } catch (e) {}
+  }
+
   // ── Theme + text-size (both persisted) ─────────────────────────────────────
   function bdApplyTheme() {
     const dark = document.documentElement.classList.contains("baden-dark");
@@ -9573,6 +9621,10 @@ WHERE {
     up("bd-theme",     () => bdToggleTheme());
     up("bd-text",      () => bdToggleTextSize());
     up("bd-sendnow",   () => bdRetryQueue());
+    up("bd-install-done", () => {
+      try { localStorage.setItem("hhf_baden_install_seen", "1"); } catch (e) {}
+      bdCloseSheet("bd-install");
+    });
   }
 
   // ── Main (async load) ─────────────────────────────────────────────────────
