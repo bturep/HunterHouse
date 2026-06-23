@@ -3038,6 +3038,63 @@
   #site-help .sh-sep{border-top:1px solid var(--rule);margin:8px 0}
   #site-help .sh-tip{font-size:9.5px;color:var(--muted);line-height:1.65}
   @media (max-width:767px){ #site-overlay{top:0;height:100vh} #timeline-overlay{top:0;height:100vh} }
+
+  /* ── First-run interface walkthrough (coach-mark tour) ───────────────────
+     A dim-the-screen, spotlight-one-element guided tour shown once on first
+     visit (localStorage hhf_tour_seen_v1), replayable from the ? pane, and
+     forceable with ?tour=1. Desktop only. Its own always-dark surface (like
+     the timeline / files panes) so it reads identically in either theme.
+     The dimming is a single box-shadow on #tour-spot — a transparent rect
+     whose 9999px shadow darkens everything outside it; #tour-veil sits below
+     and just swallows clicks so the UI underneath stays inert. */
+  #tour{position:fixed;inset:0;z-index:600;display:none;
+    --to-ink:#f0ede6; --to-muted:#a6a199; --to-hint:#6c675f;
+    --to-rule:rgba(240,237,230,0.16); --to-plate:#221f1c; --to-amber:#e4a47e;}
+  body.tour-on #tour{display:block}
+  body.tour-on{overflow:hidden}
+  #tour-veil{position:absolute;inset:0;background:transparent;
+    transition:background .25s ease}
+  #tour.tour-center #tour-veil{background:rgba(12,11,10,0.76)}
+  #tour-spot{position:absolute;top:0;left:0;width:0;height:0;border-radius:5px;
+    pointer-events:none;box-shadow:0 0 0 9999px rgba(12,11,10,0.76);
+    outline:1.5px solid var(--to-amber);outline-offset:2px;
+    transition:top .34s cubic-bezier(.4,0,.2,1),left .34s cubic-bezier(.4,0,.2,1),
+      width .34s cubic-bezier(.4,0,.2,1),height .34s cubic-bezier(.4,0,.2,1);}
+  #tour.tour-center #tour-spot{display:none}
+  #tour-card{position:absolute;top:50%;left:50%;width:302px;box-sizing:border-box;
+    background:var(--to-plate);border:1px solid var(--to-rule);
+    box-shadow:0 16px 48px rgba(0,0,0,0.55);padding:17px 19px 14px;
+    transition:top .34s cubic-bezier(.4,0,.2,1),left .34s cubic-bezier(.4,0,.2,1);}
+  #tour-x{position:absolute;top:7px;right:10px;background:none;border:0;cursor:pointer;
+    color:var(--to-hint);font-size:16px;line-height:1;padding:2px}
+  #tour-x:hover{color:var(--to-ink)}
+  .tour-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:0.2em;
+    text-transform:uppercase;color:var(--to-amber);margin:0 0 9px}
+  .tour-title{font-family:var(--sans);font-weight:400;font-size:17px;
+    letter-spacing:0.005em;color:var(--to-ink);margin:0 0 7px;line-height:1.2}
+  .tour-body{font-family:var(--sans);font-size:12.5px;line-height:1.62;
+    color:var(--to-muted);margin:0 0 14px}
+  .tour-body b{color:var(--to-ink);font-weight:500}
+  .tour-dots{display:flex;gap:5px;margin:0 0 13px;flex-wrap:wrap}
+  .tour-dot{width:5px;height:5px;border-radius:50%;background:var(--to-hint);
+    opacity:0.55;cursor:pointer;border:0;padding:0;transition:opacity .15s,background .15s}
+  .tour-dot.on{background:var(--to-amber);opacity:1}
+  .tour-nav{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .tour-nav-r{display:flex;align-items:center;gap:8px}
+  .tour-skip{background:none;border:0;cursor:pointer;font-family:var(--mono);
+    font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--to-hint)}
+  .tour-skip:hover{color:var(--to-muted)}
+  .tour-btn{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;
+    text-transform:uppercase;cursor:pointer;padding:7px 13px;
+    background:transparent;border:1px solid var(--to-rule);color:var(--to-ink)}
+  .tour-btn:hover{border-color:var(--to-amber)}
+  .tour-btn:disabled{opacity:0.3;cursor:default;border-color:var(--to-rule)}
+  .tour-next{background:var(--to-amber);border-color:var(--to-amber);color:#1a1816;font-weight:600}
+  .tour-next:hover{filter:brightness(1.07)}
+  @media (prefers-reduced-motion:reduce){
+    #tour-spot,#tour-card{transition:none}
+  }
+  @media (max-width:767px){ body.tour-on #tour{display:none} }  /* desktop-only walkthrough */
 </style>
 </head>
 <body class="loading">
@@ -3283,6 +3340,29 @@
   <div class="files-body" id="files-body"></div>
   <div class="files-foot">
     <span class="files-foot-note">Read-only view of the preservation bucket. Files download from the public archive domain; nothing here can move, rename, or delete an object.</span>
+  </div>
+</div>
+
+<!-- ── First-run interface walkthrough ─────────────────────────────────────
+     Coach-mark tour: dims the screen and spotlights one UI element at a time
+     with an explanatory card. Shown once on first visit, replayable from the
+     ? pane, forceable with ?tour=1. Engine: the IIFE at grep `hhStartTour`. -->
+<div id="tour" aria-hidden="true">
+  <div id="tour-veil"></div>
+  <div id="tour-spot"></div>
+  <div id="tour-card" role="dialog" aria-modal="true" aria-labelledby="tour-title" aria-describedby="tour-body">
+    <button id="tour-x" aria-label="End tour">×</button>
+    <p class="tour-eyebrow"><span id="tour-step">1</span> / <span id="tour-total">1</span> · A quick tour</p>
+    <h2 class="tour-title" id="tour-title"></h2>
+    <p class="tour-body" id="tour-body"></p>
+    <div class="tour-dots" id="tour-dots"></div>
+    <div class="tour-nav">
+      <button id="tour-skip" class="tour-skip">Skip tour</button>
+      <span class="tour-nav-r">
+        <button id="tour-back" class="tour-btn">Back</button>
+        <button id="tour-next" class="tour-btn tour-next">Next</button>
+      </span>
+    </div>
   </div>
 </div>
 
@@ -3624,7 +3704,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.38";
+  const VERSION      = "v1.09-test.39";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -8752,6 +8832,9 @@ WHERE {
         ["Esc",    "Close · exit zen"],
       ])}
 
+      <p class="ip-grp">Guided tour</p>
+      <p class="ip-note"><a href="#" onclick="hhReplayTour();return false;">Replay the interface walkthrough ↻</a> — a quick, spotlit tour of the controls.</p>
+
       <p class="ip-grp">Platform</p>
       <p class="ip-note"><a href="https://hunterhouse.wikibase.cloud/wiki/Main_Page" target="_blank" rel="noopener">Wikibase Main Page — archive structure, rights &amp; endpoints ↗</a></p>
 
@@ -8927,6 +9010,183 @@ WHERE {
   // synchronously (the panels themselves are animated by the lens open/close).
   try { window.hhCloseLensInfo = function(){ clearTimeout(_lensInfoCloseT); document.body.classList.remove("lens-info"); infoPane.classList.remove("open"); }; } catch(e){}
   function toggleInfoPane(){ infoPane.classList.contains("open") ? closeInfoPane() : openInfoPane(); }
+
+  // ── First-run interface walkthrough (coach-mark tour) ─────────────────────
+  // Dims the screen and spotlights one UI element at a time with an
+  // explanatory card. Driven entirely by the card's controls (nothing auto-
+  // advances). Steps whose target isn't on screen are skipped, so the tour
+  // degrades cleanly across modes/roles. Markup: grep id="tour".
+  //   • Auto-runs once after the splash Continue (localStorage hhf_tour_seen_v1)
+  //   • Replayable from the ? pane ("Replay the interface tour")
+  //   • Forceable any time with ?tour=1
+  // Desktop only (the mobile layout has different controls); skips Baden mode.
+  const HHF_TOUR_KEY = "hhf_tour_seen_v1";
+  const TOUR_STEPS = [
+    { place:"center", title:"Welcome to the archive",
+      body:"This is the Hunter House Foundation archive browser. Here's a quick walk through the interface — click <b>Next</b> to step along, or <b>Skip&nbsp;tour</b> whenever you like." },
+    { sel:["#archive-toggle","#map-toggle","#tl-toggle"], place:"bottom", title:"Three lenses on one archive",
+      body:"Switch between the <b>catalogue list</b>, the <b>site plan</b>, and the <b>chronology timeline</b> — the same records seen three different ways." },
+    { sel:"#panel-left", place:"right", title:"Browse the catalogue",
+      body:"Every item in the archive lists here. <b>Filter</b>, sort by ID / Phase / Year, and click any row to open it." },
+    { sel:"#stage", place:"over", title:"The viewing stage",
+      body:"The selected drawing or photograph, shown at high resolution. Drag to pan; scroll or use the controls below to zoom in close." },
+    { sel:".zoom-ctl", place:"top", title:"Viewport controls",
+      body:"Zoom in and out, <b>FIT</b> to the frame, <b>1:1</b> for true pixels, rotate the image, and hide both side panels for a full-bleed view." },
+    { sel:"#panel-right", place:"left", title:"The item record",
+      body:"Full catalogue metadata for the open item — dates, phase, medium, location — and links out to the underlying data." },
+    { sel:"#search-toggle", place:"bottom", title:"Search",
+      body:"Find items by title, ID, type, or keyword. Keyboard shortcut: press <b>/</b>." },
+    { sel:"#rec-info", place:"bottom", title:"Help &amp; shortcuts",
+      body:"Opens an overview of the archive and the keyboard shortcuts — and lets you replay this tour any time." },
+    { sel:"#text-toggle", place:"bottom", title:"Text size",
+      body:"Step the interface text larger for more comfortable reading." },
+    { sel:"#fs-toggle", place:"bottom", title:"Fullscreen",
+      body:"Hand the whole screen to the archive — hides the browser chrome." },
+    { place:"center", title:"That's the tour",
+      body:"You're ready to explore. Open <b>?</b> in the top bar to revisit this walkthrough or the shortcuts. Enjoy the archive." },
+  ];
+
+  const tourEl   = document.getElementById("tour");
+  const tourCard = document.getElementById("tour-card");
+  const tourSpot = document.getElementById("tour-spot");
+  let tourSteps = [], tourIdx = 0, tourKeyHandler = null, tourResizeHandler = null;
+
+  // Union bounding rect of a step's target(s); null if none are visible.
+  function tourTargetRect(step) {
+    if (!step.sel) return null;
+    const sels = Array.isArray(step.sel) ? step.sel : [step.sel];
+    let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity, found = false;
+    sels.forEach(s => {
+      const el = document.querySelector(s);
+      if (!el || el.offsetParent === null) return;          // missing or display:none
+      const r = el.getBoundingClientRect();
+      if (r.width < 1 || r.height < 1) return;
+      found = true;
+      x1 = Math.min(x1, r.left);  y1 = Math.min(y1, r.top);
+      x2 = Math.max(x2, r.right); y2 = Math.max(y2, r.bottom);
+    });
+    return found ? { left:x1, top:y1, width:x2 - x1, height:y2 - y1 } : null;
+  }
+
+  function tourPlace() {
+    const step = tourSteps[tourIdx];
+    const rect = tourTargetRect(step);
+    // "center" = full dim, no spotlight, centred card. "over" = spotlight the
+    // target but still centre the card (for the large central stage, where no
+    // side has room). Otherwise spotlight + side-placed card.
+    const hasSpot = rect && step.place !== "center";
+    const centerCard = !rect || step.place === "center" || step.place === "over";
+    tourEl.classList.toggle("tour-center", !hasSpot);
+    const cardW = tourCard.offsetWidth, cardH = tourCard.offsetHeight;
+    const gap = 16, pad = 6, vw = innerWidth, vh = innerHeight;
+    const clampX = x => Math.max(12, Math.min(x, vw - cardW - 12));
+    const clampY = y => Math.max(12, Math.min(y, vh - cardH - 12));
+
+    // Spotlight the target (padded a touch) when there is one.
+    if (hasSpot) {
+      tourSpot.style.left   = (rect.left - pad) + "px";
+      tourSpot.style.top    = (rect.top  - pad) + "px";
+      tourSpot.style.width  = (rect.width  + pad * 2) + "px";
+      tourSpot.style.height = (rect.height + pad * 2) + "px";
+    }
+    if (centerCard) {
+      tourCard.style.left = ((vw - cardW) / 2) + "px";
+      tourCard.style.top  = ((vh - cardH) / 2) + "px";
+      return;
+    }
+
+    // Place the card per the step's preferred side, then clamp on screen.
+    const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+    let left, top, place = step.place;
+    // Fall back to the opposite side if the preferred one would clip.
+    if (place === "bottom" && rect.bottom + gap + cardH > vh - 12) place = "top";
+    if (place === "top"    && rect.top    - gap - cardH < 12)      place = "bottom";
+    if (place === "right"  && rect.right  + gap + cardW > vw - 12) place = "left";
+    if (place === "left"   && rect.left   - gap - cardW < 12)      place = "right";
+    switch (place) {
+      case "top":    left = cx - cardW / 2;        top = rect.top - gap - cardH;  break;
+      case "left":   left = rect.left - gap - cardW; top = cy - cardH / 2;        break;
+      case "right":  left = rect.right + gap;       top = cy - cardH / 2;         break;
+      default:       left = cx - cardW / 2;         top = rect.bottom + gap;      break; // bottom
+    }
+    tourCard.style.left = clampX(left) + "px";
+    tourCard.style.top  = clampY(top) + "px";
+  }
+
+  function tourRender() {
+    const step = tourSteps[tourIdx];
+    document.getElementById("tour-step").textContent  = tourIdx + 1;
+    document.getElementById("tour-total").textContent = tourSteps.length;
+    document.getElementById("tour-title").innerHTML   = step.title;
+    document.getElementById("tour-body").innerHTML    = step.body;
+    document.getElementById("tour-back").disabled     = tourIdx === 0;
+    document.getElementById("tour-next").textContent  =
+      tourIdx === tourSteps.length - 1 ? "Done" : "Next";
+    const dots = tourSteps.map((_, i) =>
+      `<button class="tour-dot${i === tourIdx ? " on" : ""}" data-i="${i}" aria-label="Step ${i + 1}"></button>`).join("");
+    document.getElementById("tour-dots").innerHTML = dots;
+    // Measure after content is set, then position.
+    tourPlace();
+  }
+
+  function tourGo(i) {
+    tourIdx = Math.max(0, Math.min(i, tourSteps.length - 1));
+    tourRender();
+  }
+  function tourNext() { tourIdx >= tourSteps.length - 1 ? tourEnd() : tourGo(tourIdx + 1); }
+  function tourBack() { tourGo(tourIdx - 1); }
+
+  function tourEnd() {
+    document.body.classList.remove("tour-on");
+    tourEl.setAttribute("aria-hidden", "true");
+    try { localStorage.setItem(HHF_TOUR_KEY, "1"); } catch (e) {}
+    if (tourKeyHandler)    { document.removeEventListener("keydown", tourKeyHandler, true); tourKeyHandler = null; }
+    if (tourResizeHandler) { removeEventListener("resize", tourResizeHandler); tourResizeHandler = null; }
+  }
+
+  function hhStartTour() {
+    if (document.documentElement.classList.contains("baden")) return;   // Baden has its own UI
+    if (innerWidth < 768) return;                                       // desktop walkthrough only
+    // Drop steps whose targets aren't on screen in the current mode/role.
+    tourSteps = TOUR_STEPS.filter(s => s.place === "center" || tourTargetRect(s));
+    if (tourSteps.length === 0) return;
+    tourIdx = 0;
+    document.body.classList.add("tour-on");
+    tourEl.setAttribute("aria-hidden", "false");
+    tourRender();
+    document.getElementById("tour-next").focus();
+    // Keep the spotlight aligned if the window resizes mid-tour.
+    tourResizeHandler = () => tourPlace();
+    addEventListener("resize", tourResizeHandler);
+    // Own the keyboard while the tour is up so arrows/Enter don't reach the app
+    // underneath (capture phase + stopPropagation).
+    tourKeyHandler = e => {
+      if (!document.body.classList.contains("tour-on")) return;
+      if (e.key === "Escape")     { e.preventDefault(); e.stopPropagation(); tourEnd(); }
+      else if (e.key === "ArrowRight" || e.key === "Enter") { e.preventDefault(); e.stopPropagation(); tourNext(); }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); e.stopPropagation(); tourBack(); }
+    };
+    document.addEventListener("keydown", tourKeyHandler, true);
+  }
+  // Auto-run gate: first visit, or forced with ?tour=1.
+  function hhMaybeStartTour() {
+    let seen = false, forced = false;
+    try { seen = localStorage.getItem(HHF_TOUR_KEY) === "1"; } catch (e) {}
+    try { forced = new URLSearchParams(location.search).get("tour") === "1"; } catch (e) {}
+    if (forced || !seen) hhStartTour();
+  }
+  // Replay from the ? pane — close it first so the spotlights aren't covered.
+  function hhReplayTour() { try { closeInfoPane(); } catch (e) {} setTimeout(hhStartTour, 60); }
+  try { window.hhStartTour = hhStartTour; window.hhMaybeStartTour = hhMaybeStartTour; window.hhReplayTour = hhReplayTour; } catch (e) {}
+
+  // Wire the tour card controls once.
+  document.getElementById("tour-next").addEventListener("click", tourNext);
+  document.getElementById("tour-back").addEventListener("click", tourBack);
+  document.getElementById("tour-skip").addEventListener("click", tourEnd);
+  document.getElementById("tour-x").addEventListener("click", tourEnd);
+  document.getElementById("tour-dots").addEventListener("click", e => {
+    const b = e.target.closest(".tour-dot"); if (b) tourGo(+b.dataset.i);
+  });
 
   // ── Filter-panel collection ⓘ popover ──────────────────────────────────
   let _fpiCloseT;
@@ -9692,6 +9952,9 @@ WHERE {
         fitToFrame();
         document.body.classList.remove("refitting");
       }, 280);
+      // First-run walkthrough — fire once the toolbar has faded in and the
+      // panels have settled, so the spotlights land on their final positions.
+      setTimeout(() => { try { hhMaybeStartTour(); } catch (e) {} }, 620);
     });
     document.getElementById("rec-info").addEventListener("click", toggleInfoPane);
     // Aa text-size toggle. Three-state cycle: "" → "lg" → "xl" → "". The
