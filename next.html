@@ -3047,70 +3047,86 @@
      The dimming is a single box-shadow on #tour-spot — a transparent rect
      whose 9999px shadow darkens everything outside it; #tour-veil sits below
      and just swallows clicks so the UI underneath stays inert. */
+  /* Colour split: AMBER marks the demoed area (the ring); the card speaks GREEN. */
   #tour{position:fixed;inset:0;z-index:600;display:none;
-    --to-ink:#f0ede6; --to-muted:#a6a199; --to-hint:#6c675f;
-    --to-rule:rgba(240,237,230,0.16); --to-plate:#221f1c;
-    --to-amber:#e4a47e; --to-green:#84b09d; --to-red:#cf6f53;}
+    --to-ink:#f0ede6; --to-muted:#a6a199; --to-hint:#6c675f; --to-body:#cbc6bc;
+    --to-rule:rgba(240,237,230,0.10);
+    --to-amber:#e4a47e; --to-green:#84b09d; --to-green-dim:rgba(132,176,157,0.55); --to-red:#cf6f53;}
   body.tour-on #tour{display:block}
   body.tour-on{overflow:hidden}
-  #tour-veil{position:absolute;inset:0;background:transparent;
-    transition:background .25s ease}
-  #tour.tour-center #tour-veil{background:rgba(12,11,10,0.76)}
-  #tour-spot{position:absolute;top:0;left:0;width:0;height:0;border-radius:0;
-    pointer-events:none;box-shadow:0 0 0 9999px rgba(12,11,10,0.76);
-    /* inset ring (offset:-2) so it always draws INSIDE the spotlight box —
-       stays visible even when the highlighted element sits on a screen edge. */
-    outline:2px solid var(--to-amber);outline-offset:-2px;
-    transition:top .3s cubic-bezier(.4,0,.2,1),left .3s cubic-bezier(.4,0,.2,1),
-      width .3s cubic-bezier(.4,0,.2,1),height .3s cubic-bezier(.4,0,.2,1);}
+  #tour-veil{position:absolute;inset:0;background:transparent;transition:background .25s ease}
+  #tour.tour-center #tour-veil{background:rgba(12,11,10,0.80)}
+  /* Spotlight — AMBER ring + soft amber halo mark the element being demoed. */
+  #tour-spot{position:absolute;top:0;left:0;width:0;height:0;border-radius:1px;
+    pointer-events:none;
+    box-shadow:0 0 0 9999px rgba(12,11,10,0.80), 0 0 0 1px rgba(228,164,126,0.22), 0 0 22px 2px rgba(228,164,126,0.16);
+    outline:1.5px solid var(--to-amber);outline-offset:-1.5px;
+    transition:top .32s cubic-bezier(.4,0,.2,1),left .32s cubic-bezier(.4,0,.2,1),
+      width .32s cubic-bezier(.4,0,.2,1),height .32s cubic-bezier(.4,0,.2,1);}
   #tour.tour-center #tour-spot{display:none}
-  /* Anchored card framed as a [ ] — full-height brackets left & right (drawn
-     with background gradients: 2 vertical bars + 4 serifs), echoing the
-     bracket motif used across the catalogue. No box border. */
+
+  /* Card — floats on the dim with GREEN bracket-corner marks: no plate, no
+     outline. A soft, edgeless halo (the ::before radial) lifts the text for
+     legibility without drawing a box. The corners are 8 background gradients
+     (an L at each corner: a 15px serif + a 15px stem). */
   #tour-card{position:absolute;width:366px;box-sizing:border-box;border:0;border-radius:0;
-    background-color:var(--to-plate);
+    background-color:transparent;
     background-image:
-      linear-gradient(var(--to-amber),var(--to-amber)),linear-gradient(var(--to-amber),var(--to-amber)),linear-gradient(var(--to-amber),var(--to-amber)),
-      linear-gradient(var(--to-amber),var(--to-amber)),linear-gradient(var(--to-amber),var(--to-amber)),linear-gradient(var(--to-amber),var(--to-amber));
+      linear-gradient(var(--to-green),var(--to-green)),linear-gradient(var(--to-green),var(--to-green)),
+      linear-gradient(var(--to-green),var(--to-green)),linear-gradient(var(--to-green),var(--to-green)),
+      linear-gradient(var(--to-green),var(--to-green)),linear-gradient(var(--to-green),var(--to-green)),
+      linear-gradient(var(--to-green),var(--to-green)),linear-gradient(var(--to-green),var(--to-green));
     background-repeat:no-repeat;
-    background-position:top left,top left,bottom left,top right,top right,bottom right;
-    background-size:2px 100%,16px 2px,16px 2px,2px 100%,16px 2px,16px 2px;
-    box-shadow:0 18px 52px rgba(0,0,0,0.55);padding:20px 26px 17px;
+    background-position:left top,left top, right top,right top, left bottom,left bottom, right bottom,right bottom;
+    background-size:15px 2px,2px 15px, 15px 2px,2px 15px, 15px 2px,2px 15px, 15px 2px,2px 15px;
+    padding:24px 30px 18px;
     transition:top .3s cubic-bezier(.4,0,.2,1),left .3s cubic-bezier(.4,0,.2,1);}
   #tour.tour-center #tour-card{transition:none}
+  /* edgeless halo behind the text — no rectangle, just contrast */
+  #tour-card::before{content:"";position:absolute;inset:-2px;z-index:-1;
+    background:radial-gradient(125% 115% at 50% 45%, rgba(10,9,8,0.94) 30%, rgba(10,9,8,0) 100%);}
   .tour-caret{position:absolute;width:0;height:0;pointer-events:none}
   #tour.tour-center .tour-caret{display:none}
-  #tour-x{position:absolute;top:9px;right:13px;background:none;border:0;cursor:pointer;
-    font-family:var(--mono);color:var(--to-hint);font-size:13px;line-height:1;padding:2px}
+
+  #tour-x{position:absolute;top:11px;right:14px;background:none;border:0;cursor:pointer;
+    font-family:var(--mono);color:var(--to-hint);font-size:15px;line-height:1;padding:3px;transition:color .15s}
   #tour-x:hover{color:var(--to-red)}
-  .tour-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:0.18em;
-    text-transform:uppercase;color:var(--to-hint);margin:0 0 11px}
+
+  .tour-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:0.22em;
+    text-transform:uppercase;color:var(--to-hint);margin:0 0 13px}
   .tour-eyebrow #tour-step{color:var(--to-green)}
   .tour-eyebrow #tour-total{color:var(--to-muted)}
+
   .tour-title{font-family:var(--mono);font-weight:500;font-size:13px;
-    letter-spacing:0.1em;text-transform:uppercase;color:var(--to-amber);margin:0 0 10px;line-height:1.3}
-  .tour-body{font-family:var(--sans);font-size:13.5px;line-height:1.64;
-    color:var(--to-muted);margin:0 0 17px}
+    letter-spacing:0.12em;text-transform:uppercase;color:var(--to-green);
+    margin:0 0 11px;line-height:1.3}
+  .tour-body{font-family:var(--mono);font-size:11.5px;line-height:1.78;
+    color:var(--to-body);margin:0 0 16px;letter-spacing:0.004em}
+  .tour-body::before{content:"\203A  ";color:var(--to-hint)}  /* › lead-in */
   .tour-body b{color:var(--to-green);font-weight:500}
-  .tour-dots{display:flex;gap:6px;margin:0 0 16px}
-  .tour-dot{width:6px;height:6px;border-radius:0;background:var(--to-hint);
-    opacity:0.5;cursor:pointer;border:0;padding:0;transition:opacity .15s,background .15s}
-  .tour-dot.on{background:var(--to-amber);opacity:1}
-  .tour-nav{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .tour-nav-r{display:flex;align-items:center;gap:14px}
-  /* All controls are bracketed mono text — [ skip ] [ ‹ back ] [ next › ]. */
+
+  /* Counter-only step indicator: the 02 / 11 eyebrow carries position, so the
+     #tour-dots row is hidden and the footer sits under a hairline rule. */
+  #tour-dots{display:none}
+  .tour-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding-top:15px;border-top:1px solid var(--to-rule)}
+  .tour-nav-r{display:flex;align-items:center;gap:13px}
+  /* Controls are bracketed mono text — [ skip ] [ ‹ back ] [ next ]. */
   .tour-skip,.tour-btn{background:none;border:0;cursor:pointer;font-family:var(--mono);
-    text-transform:uppercase;letter-spacing:0.1em;padding:2px 0}
+    text-transform:uppercase;letter-spacing:0.1em;padding:3px 0;white-space:nowrap;transition:color .15s,filter .15s}
   .tour-skip::before,.tour-btn::before{content:"[ ";color:var(--to-hint)}
   .tour-skip::after,.tour-btn::after{content:" ]";color:var(--to-hint)}
-  .tour-skip{font-size:10px;color:var(--to-hint)}
+  .tour-skip{font-size:9.5px;color:var(--to-hint)}
   .tour-skip:hover{color:var(--to-muted)}
   .tour-btn{font-size:11px}
-  .tour-back{color:var(--to-green)}
+  .tour-back{color:var(--to-muted)}
   .tour-back:hover{color:var(--to-ink)}
-  .tour-next{color:var(--to-amber);font-weight:600}
+  .tour-next{color:var(--to-green);font-weight:600}
+  .tour-next::before,.tour-next::after{color:var(--to-green-dim)}
   .tour-next:hover{filter:brightness(1.12)}
   .tour-btn:disabled{opacity:0.3;cursor:default}
+  .tour-btn:disabled::before,.tour-btn:disabled::after{opacity:0.5}
+
   @media (prefers-reduced-motion:reduce){ #tour-spot,#tour-card{transition:none} }
   @media (max-width:767px){ body.tour-on #tour{display:none} }  /* desktop-only walkthrough */
 </style>
@@ -3723,7 +3739,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.43";
+  const VERSION      = "v1.09-test.44";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9141,7 +9157,7 @@ WHERE {
     // Caret (amber, matching the ring) points from the card edge to the target.
     // Only on top/bottom edges — the left/right edges carry the [ ] brackets,
     // so for side placements the abutting card + ring carry the anchor instead.
-    const C = "var(--to-amber)", s = 9, base = "position:absolute;width:0;height:0;pointer-events:none;";
+    const C = "var(--to-green)", s = 9, base = "position:absolute;width:0;height:0;pointer-events:none;";
     if (place === "bottom" || place === "top") {
       const x = Math.max(20, Math.min(cx - left, cardW - 20)) - s;
       tourCaret.style.cssText = base +
