@@ -3049,18 +3049,19 @@
      and just swallows clicks so the UI underneath stays inert. */
   /* Colour split: AMBER marks the demoed area (the ring); the card speaks GREEN. */
   #tour{position:fixed;inset:0;z-index:600;display:none;opacity:0;
-    transition:opacity .42s ease;
     --to-ink:#f0ede6; --to-muted:#a6a199; --to-hint:#6c675f; --to-body:#cbc6bc;
     --to-rule:rgba(240,237,230,0.10);
     --to-amber:#e4a47e; --to-green:#84b09d; --to-green-dim:rgba(132,176,157,0.55); --to-red:#cf6f53;}
   body.tour-on #tour{display:block}
-  /* Intentional entrance: the dim eases in (whole-overlay opacity), then the
-     card rises a beat behind it. .tour-show is added a frame after display so
-     the transition has a 0→1 to run; removed on exit to fade everything back
-     out, revealing the archive. */
+  /* Entrance: the dim is INSTANT (no overlay fade) so the archive never flashes
+     bright between the splash and the tour — only the card fades + rises in
+     (the keyframe). Exit is the one place the dim animates: .tour-leaving turns
+     the opacity transition on, then .tour-show comes off → the whole overlay
+     fades out, revealing the archive. */
   #tour.tour-show{opacity:1}
+  #tour.tour-leaving{transition:opacity .4s ease}
   @keyframes tourCardIn{from{opacity:0;transform:translateY(13px)}to{opacity:1;transform:translateY(0)}}
-  #tour.tour-show #tour-card{animation:tourCardIn .5s cubic-bezier(.4,0,.2,1) .12s both}
+  #tour.tour-show #tour-card{animation:tourCardIn .5s cubic-bezier(.4,0,.2,1) .06s both}
   body.tour-on{overflow:hidden}
   #tour-veil{position:absolute;inset:0;background:transparent;transition:background .25s ease}
   #tour.tour-center #tour-veil{background:rgba(12,11,10,0.80)}
@@ -3747,7 +3748,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.47";
+  const VERSION      = "v1.09-test.48";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9193,16 +9194,20 @@ WHERE {
 
   let tourEndT = null;
   function tourEnd() {
-    // Fade the whole overlay back out (dim + card), revealing the archive —
-    // the exit mirror of the entrance. Detach handlers + persist immediately;
+    // Fade the overlay back out (dim + card), revealing the archive — the exit
+    // is the one place the dim animates. Detach handlers + persist immediately;
     // only the display:none is deferred until the fade finishes.
-    tourEl.classList.remove("tour-show");
+    tourEl.classList.add("tour-leaving");     // enables the opacity transition
+    tourEl.classList.remove("tour-show");     // → opacity 0, fades out
     tourEl.setAttribute("aria-hidden", "true");
     try { localStorage.setItem(HHF_TOUR_KEY, "1"); } catch (e) {}
     if (tourKeyHandler)    { document.removeEventListener("keydown", tourKeyHandler, true); tourKeyHandler = null; }
     if (tourResizeHandler) { removeEventListener("resize", tourResizeHandler); tourResizeHandler = null; }
     clearTimeout(tourEndT);
-    tourEndT = setTimeout(() => document.body.classList.remove("tour-on"), 440);
+    tourEndT = setTimeout(() => {
+      document.body.classList.remove("tour-on");
+      tourEl.classList.remove("tour-leaving");
+    }, 430);
   }
 
   function hhStartTour() {
@@ -9213,15 +9218,18 @@ WHERE {
     if (tourSteps.length === 0) return;
     tourIdx = 0;
     clearTimeout(tourEndT);
-    document.body.classList.add("tour-on");   // display:block, still opacity:0
+    // Dim comes up INSTANTLY (no fade) so the bright archive never flashes
+    // between the splash closing and the tour — only the tip itself fades/rises
+    // in (the #tour-card keyframe). tour-on = display:block (opacity 0 base);
+    // a forced reflow then commits opacity:1 in the same tick = instant dim.
+    document.body.classList.remove("tour-on");
+    tourEl.classList.remove("tour-leaving");
+    document.body.classList.add("tour-on");
     tourEl.setAttribute("aria-hidden", "false");
-    tourRender();
-    // Next frame, flip on .tour-show so the opacity transition + card-rise
-    // animation actually run (a 0→1 needs the 0 state painted first).
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      tourEl.classList.add("tour-show");
-      document.getElementById("tour-next").focus({ preventScroll: true });
-    }));
+    tourRender();                 // position + content while still invisible
+    void tourEl.offsetWidth;      // commit the opacity:0 state…
+    tourEl.classList.add("tour-show");   // …then snap to opacity:1 (dim instant)
+    document.getElementById("tour-next").focus({ preventScroll: true });
     // Keep the spotlight aligned if the window resizes mid-tour.
     tourResizeHandler = () => tourPlace();
     addEventListener("resize", tourResizeHandler);
@@ -9235,13 +9243,16 @@ WHERE {
     };
     document.addEventListener("keydown", tourKeyHandler, true);
   }
-  // Auto-run gate: first visit, or forced with ?tour=1.
-  function hhMaybeStartTour() {
+  // Would the tour run right now? (first visit, or ?tour=1) — desktop, non-Baden.
+  function hhTourWillRun() {
+    if (document.documentElement.classList.contains("baden")) return false;
+    if (innerWidth < 768) return false;
     let seen = false, forced = false;
     try { seen = localStorage.getItem(HHF_TOUR_KEY) === "1"; } catch (e) {}
     try { forced = new URLSearchParams(location.search).get("tour") === "1"; } catch (e) {}
-    if (forced || !seen) hhStartTour();
+    return forced || !seen;
   }
+  function hhMaybeStartTour() { if (hhTourWillRun()) hhStartTour(); }
   // Replay from the ? pane — close it first so the spotlights aren't covered.
   function hhReplayTour() { try { closeInfoPane(); } catch (e) {} setTimeout(hhStartTour, 60); }
   try { window.hhStartTour = hhStartTour; window.hhMaybeStartTour = hhMaybeStartTour; window.hhReplayTour = hhReplayTour; } catch (e) {}
@@ -10005,9 +10016,25 @@ WHERE {
     // panels so the visitor lands in the working configuration. After this,
     // clicking HHFA re-opens the about-pane in-place without locking panels.
     document.getElementById("about-pane-continue").addEventListener("click", () => {
-      closeAboutPane();
       const leftP  = document.getElementById("panel-left");
       const rightP = document.getElementById("panel-right");
+      // ── First-run / forced tour: land already-open + dimmed, then fade the
+      // tip in. Snap the panels open with the transition suppressed (no visible
+      // slide) and raise the dim INSTANTLY under cover of the splash, so the
+      // bright archive never flashes. The dim's first step (welcome) is a full
+      // veil, so the panel snap + about-pane close happen invisibly beneath it.
+      if (hhTourWillRun()) {
+        [leftP, rightP].forEach(p => { p.style.transition = "none"; p.classList.remove("out"); });
+        void leftP.offsetWidth;                                   // commit the snap
+        [leftP, rightP].forEach(p => { p.style.transition = ""; });
+        syncFsBtn();
+        fitToFrame();
+        hhStartTour();        // dim instant, tip fades in (panels already settled)
+        closeAboutPane();     // fades out beneath the dim — never seen
+        return;
+      }
+      // ── Returning visitor: the original animated reveal into the bright archive.
+      closeAboutPane();
       leftP.classList.remove("out");
       rightP.classList.remove("out");
       syncFsBtn();
@@ -10019,9 +10046,6 @@ WHERE {
         fitToFrame();
         document.body.classList.remove("refitting");
       }, 280);
-      // First-run walkthrough — fire once the toolbar has faded in and the
-      // panels have settled, so the spotlights land on their final positions.
-      setTimeout(() => { try { hhMaybeStartTour(); } catch (e) {} }, 620);
     });
     document.getElementById("rec-info").addEventListener("click", toggleInfoPane);
     // Aa text-size toggle. Three-state cycle: "" → "lg" → "xl" → "". The
