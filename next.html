@@ -3061,39 +3061,39 @@
     transition:top .34s cubic-bezier(.4,0,.2,1),left .34s cubic-bezier(.4,0,.2,1),
       width .34s cubic-bezier(.4,0,.2,1),height .34s cubic-bezier(.4,0,.2,1);}
   #tour.tour-center #tour-spot{display:none}
-  #tour-card{position:absolute;top:50%;left:50%;width:302px;box-sizing:border-box;
-    background:var(--to-plate);border:1px solid var(--to-rule);
-    box-shadow:0 16px 48px rgba(0,0,0,0.55);padding:17px 19px 14px;
-    transition:top .34s cubic-bezier(.4,0,.2,1),left .34s cubic-bezier(.4,0,.2,1);}
-  #tour-x{position:absolute;top:7px;right:10px;background:none;border:0;cursor:pointer;
-    color:var(--to-hint);font-size:16px;line-height:1;padding:2px}
-  #tour-x:hover{color:var(--to-ink)}
-  .tour-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:0.2em;
-    text-transform:uppercase;color:var(--to-amber);margin:0 0 9px}
-  .tour-title{font-family:var(--sans);font-weight:400;font-size:17px;
-    letter-spacing:0.005em;color:var(--to-ink);margin:0 0 7px;line-height:1.2}
-  .tour-body{font-family:var(--sans);font-size:12.5px;line-height:1.62;
-    color:var(--to-muted);margin:0 0 14px}
+  /* Fixed instruction banner — docked under the 41px top bar. It never moves;
+     only the amber spotlight travels between steps. */
+  #tour-bar{position:absolute;top:41px;left:0;right:0;
+    display:flex;align-items:center;gap:24px;
+    padding:13px 26px;background:var(--to-plate);
+    border-bottom:1px solid var(--to-rule);box-shadow:0 16px 44px rgba(0,0,0,0.5);}
+  .tour-bar-main{flex:1;min-width:0}
+  .tour-eyebrow{font-family:var(--mono);font-size:9.5px;letter-spacing:0.18em;
+    text-transform:uppercase;color:var(--to-amber);margin:0 0 5px}
+  .tour-eyebrow .tour-ttl{color:var(--to-ink);letter-spacing:0.13em}
+  .tour-body{font-family:var(--sans);font-size:13px;line-height:1.5;
+    color:var(--to-muted);margin:0;max-width:66ch}
   .tour-body b{color:var(--to-ink);font-weight:500}
-  .tour-dots{display:flex;gap:5px;margin:0 0 13px;flex-wrap:wrap}
+  .tour-bar-ctl{display:flex;align-items:center;gap:18px;flex-shrink:0}
+  .tour-dots{display:flex;gap:5px}
   .tour-dot{width:5px;height:5px;border-radius:50%;background:var(--to-hint);
     opacity:0.55;cursor:pointer;border:0;padding:0;transition:opacity .15s,background .15s}
   .tour-dot.on{background:var(--to-amber);opacity:1}
-  .tour-nav{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .tour-nav-r{display:flex;align-items:center;gap:8px}
+  .tour-nav{display:flex;align-items:center;gap:8px}
   .tour-skip{background:none;border:0;cursor:pointer;font-family:var(--mono);
     font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--to-hint)}
   .tour-skip:hover{color:var(--to-muted)}
   .tour-btn{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;
-    text-transform:uppercase;cursor:pointer;padding:7px 13px;
+    text-transform:uppercase;cursor:pointer;padding:7px 14px;
     background:transparent;border:1px solid var(--to-rule);color:var(--to-ink)}
   .tour-btn:hover{border-color:var(--to-amber)}
   .tour-btn:disabled{opacity:0.3;cursor:default;border-color:var(--to-rule)}
   .tour-next{background:var(--to-amber);border-color:var(--to-amber);color:#1a1816;font-weight:600}
   .tour-next:hover{filter:brightness(1.07)}
-  @media (prefers-reduced-motion:reduce){
-    #tour-spot,#tour-card{transition:none}
-  }
+  #tour-x{background:none;border:0;cursor:pointer;color:var(--to-hint);
+    font-size:18px;line-height:1;padding:2px 2px 4px;flex-shrink:0}
+  #tour-x:hover{color:var(--to-ink)}
+  @media (prefers-reduced-motion:reduce){ #tour-spot{transition:none} }
   @media (max-width:767px){ body.tour-on #tour{display:none} }  /* desktop-only walkthrough */
 </style>
 </head>
@@ -3350,19 +3350,20 @@
 <div id="tour" aria-hidden="true">
   <div id="tour-veil"></div>
   <div id="tour-spot"></div>
-  <div id="tour-card" role="dialog" aria-modal="true" aria-labelledby="tour-title" aria-describedby="tour-body">
-    <button id="tour-x" aria-label="End tour">×</button>
-    <p class="tour-eyebrow"><span id="tour-step">1</span> / <span id="tour-total">1</span> · A quick tour</p>
-    <h2 class="tour-title" id="tour-title"></h2>
-    <p class="tour-body" id="tour-body"></p>
-    <div class="tour-dots" id="tour-dots"></div>
-    <div class="tour-nav">
-      <button id="tour-skip" class="tour-skip">Skip tour</button>
-      <span class="tour-nav-r">
-        <button id="tour-back" class="tour-btn">Back</button>
-        <button id="tour-next" class="tour-btn tour-next">Next</button>
-      </span>
+  <div id="tour-bar" role="dialog" aria-modal="true" aria-labelledby="tour-title" aria-describedby="tour-body">
+    <div class="tour-bar-main">
+      <p class="tour-eyebrow"><span id="tour-step">1</span> / <span id="tour-total">1</span> · <span class="tour-ttl" id="tour-title"></span></p>
+      <p class="tour-body" id="tour-body"></p>
     </div>
+    <div class="tour-bar-ctl">
+      <div class="tour-dots" id="tour-dots"></div>
+      <div class="tour-nav">
+        <button id="tour-skip" class="tour-skip">Skip</button>
+        <button id="tour-back" class="tour-btn">‹ Back</button>
+        <button id="tour-next" class="tour-btn tour-next">Next ›</button>
+      </div>
+    </div>
+    <button id="tour-x" aria-label="End tour">×</button>
   </div>
 </div>
 
@@ -3704,7 +3705,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.39";
+  const VERSION      = "v1.09-test.40";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9022,32 +9023,31 @@ WHERE {
   // Desktop only (the mobile layout has different controls); skips Baden mode.
   const HHF_TOUR_KEY = "hhf_tour_seen_v1";
   const TOUR_STEPS = [
-    { place:"center", title:"Welcome to the archive",
-      body:"This is the Hunter House Foundation archive browser. Here's a quick walk through the interface — click <b>Next</b> to step along, or <b>Skip&nbsp;tour</b> whenever you like." },
-    { sel:["#archive-toggle","#map-toggle","#tl-toggle"], place:"bottom", title:"Three lenses on one archive",
-      body:"Switch between the <b>catalogue list</b>, the <b>site plan</b>, and the <b>chronology timeline</b> — the same records seen three different ways." },
-    { sel:"#panel-left", place:"right", title:"Browse the catalogue",
-      body:"Every item in the archive lists here. <b>Filter</b>, sort by ID / Phase / Year, and click any row to open it." },
-    { sel:"#stage", place:"over", title:"The viewing stage",
-      body:"The selected drawing or photograph, shown at high resolution. Drag to pan; scroll or use the controls below to zoom in close." },
-    { sel:".zoom-ctl", place:"top", title:"Viewport controls",
-      body:"Zoom in and out, <b>FIT</b> to the frame, <b>1:1</b> for true pixels, rotate the image, and hide both side panels for a full-bleed view." },
-    { sel:"#panel-right", place:"left", title:"The item record",
-      body:"Full catalogue metadata for the open item — dates, phase, medium, location — and links out to the underlying data." },
-    { sel:"#search-toggle", place:"bottom", title:"Search",
-      body:"Find items by title, ID, type, or keyword. Keyboard shortcut: press <b>/</b>." },
-    { sel:"#rec-info", place:"bottom", title:"Help &amp; shortcuts",
-      body:"Opens an overview of the archive and the keyboard shortcuts — and lets you replay this tour any time." },
-    { sel:"#text-toggle", place:"bottom", title:"Text size",
-      body:"Step the interface text larger for more comfortable reading." },
-    { sel:"#fs-toggle", place:"bottom", title:"Fullscreen",
-      body:"Hand the whole screen to the archive — hides the browser chrome." },
-    { place:"center", title:"That's the tour",
-      body:"You're ready to explore. Open <b>?</b> in the top bar to revisit this walkthrough or the shortcuts. Enjoy the archive." },
+    { place:"center", title:"Welcome",
+      body:"A quick tour of the interface. Click <b>Next</b> to step through, or <b>Skip</b> anytime." },
+    { sel:["#archive-toggle","#map-toggle","#tl-toggle"], title:"The lenses",
+      body:"Switch between the <b>catalogue list</b>, the <b>site plan</b>, and the <b>chronology timeline</b>." },
+    { sel:"#panel-left", title:"Browse list",
+      body:"Every item in the archive. Filter, sort, and click a row to open it." },
+    { sel:"#stage", title:"Viewing stage",
+      body:"The selected item at full resolution. Drag to pan, scroll to zoom." },
+    { sel:".zoom-ctl", title:"Viewport controls",
+      body:"Zoom, <b>FIT</b>, <b>1:1</b>, rotate, and hide the side panels." },
+    { sel:"#panel-right", title:"Item record",
+      body:"Full catalogue details for the open item, plus links to the data." },
+    { sel:"#search-toggle", title:"Search",
+      body:"Find items by title, ID, type, or keyword — or press <b>/</b>." },
+    { sel:"#rec-info", title:"Help & shortcuts",
+      body:"Archive overview, keyboard shortcuts, and a way to replay this tour." },
+    { sel:"#text-toggle", title:"Text size",
+      body:"Step the interface text larger." },
+    { sel:"#fs-toggle", title:"Fullscreen",
+      body:"Give the archive the whole screen." },
+    { place:"center", title:"That's it",
+      body:"Reopen the tour anytime from the <b>?</b> menu. Enjoy the archive." },
   ];
 
   const tourEl   = document.getElementById("tour");
-  const tourCard = document.getElementById("tour-card");
   const tourSpot = document.getElementById("tour-spot");
   let tourSteps = [], tourIdx = 0, tourKeyHandler = null, tourResizeHandler = null;
 
@@ -9068,49 +9068,18 @@ WHERE {
     return found ? { left:x1, top:y1, width:x2 - x1, height:y2 - y1 } : null;
   }
 
+  // The banner is fixed; this only moves the spotlight ring. "center" steps
+  // (welcome / done) have no target → full dim, no ring.
   function tourPlace() {
     const step = tourSteps[tourIdx];
-    const rect = tourTargetRect(step);
-    // "center" = full dim, no spotlight, centred card. "over" = spotlight the
-    // target but still centre the card (for the large central stage, where no
-    // side has room). Otherwise spotlight + side-placed card.
-    const hasSpot = rect && step.place !== "center";
-    const centerCard = !rect || step.place === "center" || step.place === "over";
-    tourEl.classList.toggle("tour-center", !hasSpot);
-    const cardW = tourCard.offsetWidth, cardH = tourCard.offsetHeight;
-    const gap = 16, pad = 6, vw = innerWidth, vh = innerHeight;
-    const clampX = x => Math.max(12, Math.min(x, vw - cardW - 12));
-    const clampY = y => Math.max(12, Math.min(y, vh - cardH - 12));
-
-    // Spotlight the target (padded a touch) when there is one.
-    if (hasSpot) {
-      tourSpot.style.left   = (rect.left - pad) + "px";
-      tourSpot.style.top    = (rect.top  - pad) + "px";
-      tourSpot.style.width  = (rect.width  + pad * 2) + "px";
-      tourSpot.style.height = (rect.height + pad * 2) + "px";
-    }
-    if (centerCard) {
-      tourCard.style.left = ((vw - cardW) / 2) + "px";
-      tourCard.style.top  = ((vh - cardH) / 2) + "px";
-      return;
-    }
-
-    // Place the card per the step's preferred side, then clamp on screen.
-    const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
-    let left, top, place = step.place;
-    // Fall back to the opposite side if the preferred one would clip.
-    if (place === "bottom" && rect.bottom + gap + cardH > vh - 12) place = "top";
-    if (place === "top"    && rect.top    - gap - cardH < 12)      place = "bottom";
-    if (place === "right"  && rect.right  + gap + cardW > vw - 12) place = "left";
-    if (place === "left"   && rect.left   - gap - cardW < 12)      place = "right";
-    switch (place) {
-      case "top":    left = cx - cardW / 2;        top = rect.top - gap - cardH;  break;
-      case "left":   left = rect.left - gap - cardW; top = cy - cardH / 2;        break;
-      case "right":  left = rect.right + gap;       top = cy - cardH / 2;         break;
-      default:       left = cx - cardW / 2;         top = rect.bottom + gap;      break; // bottom
-    }
-    tourCard.style.left = clampX(left) + "px";
-    tourCard.style.top  = clampY(top) + "px";
+    const rect = step.place === "center" ? null : tourTargetRect(step);
+    tourEl.classList.toggle("tour-center", !rect);
+    if (!rect) return;
+    const pad = 6;
+    tourSpot.style.left   = (rect.left - pad) + "px";
+    tourSpot.style.top    = (rect.top  - pad) + "px";
+    tourSpot.style.width  = (rect.width  + pad * 2) + "px";
+    tourSpot.style.height = (rect.height + pad * 2) + "px";
   }
 
   function tourRender() {
