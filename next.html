@@ -3049,13 +3049,14 @@
      and just swallows clicks so the UI underneath stays inert. */
   #tour{position:fixed;inset:0;z-index:600;display:none;
     --to-ink:#f0ede6; --to-muted:#a6a199; --to-hint:#6c675f;
-    --to-rule:rgba(240,237,230,0.16); --to-plate:#221f1c; --to-amber:#e4a47e;}
+    --to-rule:rgba(240,237,230,0.16); --to-plate:#221f1c;
+    --to-amber:#e4a47e; --to-green:#84b09d; --to-red:#cf6f53;}
   body.tour-on #tour{display:block}
   body.tour-on{overflow:hidden}
   #tour-veil{position:absolute;inset:0;background:transparent;
     transition:background .25s ease}
   #tour.tour-center #tour-veil{background:rgba(12,11,10,0.76)}
-  #tour-spot{position:absolute;top:0;left:0;width:0;height:0;border-radius:5px;
+  #tour-spot{position:absolute;top:0;left:0;width:0;height:0;border-radius:0;
     pointer-events:none;box-shadow:0 0 0 9999px rgba(12,11,10,0.76);
     /* inset ring (offset:-2) so it always draws INSIDE the spotlight box —
        stays visible even when the highlighted element sits on a screen edge. */
@@ -3063,41 +3064,53 @@
     transition:top .3s cubic-bezier(.4,0,.2,1),left .3s cubic-bezier(.4,0,.2,1),
       width .3s cubic-bezier(.4,0,.2,1),height .3s cubic-bezier(.4,0,.2,1);}
   #tour.tour-center #tour-spot{display:none}
-  /* Anchored card — sits beside the element it describes, a caret pointing at
-     it. Roomy; only the card + ring move between steps. */
-  #tour-card{position:absolute;width:362px;box-sizing:border-box;
-    background:var(--to-plate);border:1px solid var(--to-rule);
-    box-shadow:0 18px 52px rgba(0,0,0,0.55);padding:20px 22px 17px;
+  /* Anchored card framed as a [ ] — full-height brackets left & right (drawn
+     with background gradients: 2 vertical bars + 4 serifs), echoing the
+     bracket motif used across the catalogue. No box border. */
+  #tour-card{position:absolute;width:366px;box-sizing:border-box;border:0;border-radius:0;
+    background-color:var(--to-plate);
+    background-image:
+      linear-gradient(var(--to-amber),var(--to-amber)),linear-gradient(var(--to-amber),var(--to-amber)),linear-gradient(var(--to-amber),var(--to-amber)),
+      linear-gradient(var(--to-amber),var(--to-amber)),linear-gradient(var(--to-amber),var(--to-amber)),linear-gradient(var(--to-amber),var(--to-amber));
+    background-repeat:no-repeat;
+    background-position:top left,top left,bottom left,top right,top right,bottom right;
+    background-size:2px 100%,16px 2px,16px 2px,2px 100%,16px 2px,16px 2px;
+    box-shadow:0 18px 52px rgba(0,0,0,0.55);padding:20px 26px 17px;
     transition:top .3s cubic-bezier(.4,0,.2,1),left .3s cubic-bezier(.4,0,.2,1);}
   #tour.tour-center #tour-card{transition:none}
   .tour-caret{position:absolute;width:0;height:0;pointer-events:none}
   #tour.tour-center .tour-caret{display:none}
-  #tour-x{position:absolute;top:10px;right:12px;background:none;border:0;cursor:pointer;
-    color:var(--to-hint);font-size:16px;line-height:1;padding:2px}
-  #tour-x:hover{color:var(--to-ink)}
-  .tour-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:0.2em;
-    text-transform:uppercase;color:var(--to-amber);margin:0 0 11px}
-  .tour-title{font-family:var(--sans);font-weight:400;font-size:18px;
-    letter-spacing:0.005em;color:var(--to-ink);margin:0 0 8px;line-height:1.22}
+  #tour-x{position:absolute;top:9px;right:13px;background:none;border:0;cursor:pointer;
+    font-family:var(--mono);color:var(--to-hint);font-size:13px;line-height:1;padding:2px}
+  #tour-x:hover{color:var(--to-red)}
+  .tour-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:0.18em;
+    text-transform:uppercase;color:var(--to-hint);margin:0 0 11px}
+  .tour-eyebrow #tour-step{color:var(--to-green)}
+  .tour-eyebrow #tour-total{color:var(--to-muted)}
+  .tour-title{font-family:var(--mono);font-weight:500;font-size:13px;
+    letter-spacing:0.1em;text-transform:uppercase;color:var(--to-amber);margin:0 0 10px;line-height:1.3}
   .tour-body{font-family:var(--sans);font-size:13.5px;line-height:1.64;
     color:var(--to-muted);margin:0 0 17px}
-  .tour-body b{color:var(--to-ink);font-weight:500}
-  .tour-dots{display:flex;gap:5px;margin:0 0 15px}
-  .tour-dot{width:5px;height:5px;border-radius:50%;background:var(--to-hint);
-    opacity:0.55;cursor:pointer;border:0;padding:0;transition:opacity .15s,background .15s}
+  .tour-body b{color:var(--to-green);font-weight:500}
+  .tour-dots{display:flex;gap:6px;margin:0 0 16px}
+  .tour-dot{width:6px;height:6px;border-radius:0;background:var(--to-hint);
+    opacity:0.5;cursor:pointer;border:0;padding:0;transition:opacity .15s,background .15s}
   .tour-dot.on{background:var(--to-amber);opacity:1}
   .tour-nav{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .tour-nav-r{display:flex;align-items:center;gap:8px}
-  .tour-skip{background:none;border:0;cursor:pointer;font-family:var(--mono);
-    font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--to-hint)}
+  .tour-nav-r{display:flex;align-items:center;gap:14px}
+  /* All controls are bracketed mono text — [ skip ] [ ‹ back ] [ next › ]. */
+  .tour-skip,.tour-btn{background:none;border:0;cursor:pointer;font-family:var(--mono);
+    text-transform:uppercase;letter-spacing:0.1em;padding:2px 0}
+  .tour-skip::before,.tour-btn::before{content:"[ ";color:var(--to-hint)}
+  .tour-skip::after,.tour-btn::after{content:" ]";color:var(--to-hint)}
+  .tour-skip{font-size:10px;color:var(--to-hint)}
   .tour-skip:hover{color:var(--to-muted)}
-  .tour-btn{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;
-    text-transform:uppercase;cursor:pointer;padding:7px 15px;
-    background:transparent;border:1px solid var(--to-rule);color:var(--to-ink)}
-  .tour-btn:hover{border-color:var(--to-amber)}
-  .tour-btn:disabled{opacity:0.3;cursor:default;border-color:var(--to-rule)}
-  .tour-next{background:var(--to-amber);border-color:var(--to-amber);color:#1a1816;font-weight:600}
-  .tour-next:hover{filter:brightness(1.07)}
+  .tour-btn{font-size:11px}
+  .tour-back{color:var(--to-green)}
+  .tour-back:hover{color:var(--to-ink)}
+  .tour-next{color:var(--to-amber);font-weight:600}
+  .tour-next:hover{filter:brightness(1.12)}
+  .tour-btn:disabled{opacity:0.3;cursor:default}
   @media (prefers-reduced-motion:reduce){ #tour-spot,#tour-card{transition:none} }
   @media (max-width:767px){ body.tour-on #tour{display:none} }  /* desktop-only walkthrough */
 </style>
@@ -3365,7 +3378,7 @@
     <div class="tour-nav">
       <button id="tour-skip" class="tour-skip">Skip tour</button>
       <span class="tour-nav-r">
-        <button id="tour-back" class="tour-btn">‹ Back</button>
+        <button id="tour-back" class="tour-btn tour-back">‹ Back</button>
         <button id="tour-next" class="tour-btn tour-next">Next ›</button>
       </span>
     </div>
@@ -3710,7 +3723,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.42";
+  const VERSION      = "v1.09-test.43";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9125,18 +9138,17 @@ WHERE {
     tourCard.style.left = left + "px";
     tourCard.style.top  = top + "px";
 
-    // Caret pointing from the card edge toward the target centre.
-    const C = "var(--to-plate)", s = 9, base = "position:absolute;width:0;height:0;pointer-events:none;";
-    const tri = { l:`border-left:${s}px solid transparent;`, r:`border-right:${s}px solid transparent;`,
-                  t:`border-top:${s}px solid transparent;`,  b:`border-bottom:${s}px solid transparent;` };
+    // Caret (amber, matching the ring) points from the card edge to the target.
+    // Only on top/bottom edges — the left/right edges carry the [ ] brackets,
+    // so for side placements the abutting card + ring carry the anchor instead.
+    const C = "var(--to-amber)", s = 9, base = "position:absolute;width:0;height:0;pointer-events:none;";
     if (place === "bottom" || place === "top") {
-      const x = Math.max(16, Math.min(cx - left, cardW - 16)) - s;
-      tourCaret.style.cssText = base + tri.l + tri.r +
+      const x = Math.max(20, Math.min(cx - left, cardW - 20)) - s;
+      tourCaret.style.cssText = base +
+        `border-left:${s}px solid transparent;border-right:${s}px solid transparent;` +
         (place === "bottom" ? `border-bottom:${s}px solid ${C};top:-${s}px;` : `border-top:${s}px solid ${C};bottom:-${s}px;`) + `left:${x}px;`;
     } else {
-      const y = Math.max(16, Math.min(cy - top, cardH - 16)) - s;
-      tourCaret.style.cssText = base + tri.t + tri.b +
-        (place === "right" ? `border-right:${s}px solid ${C};left:-${s}px;` : `border-left:${s}px solid ${C};right:-${s}px;`) + `top:${y}px;`;
+      tourCaret.style.cssText = "display:none";
     }
   }
 
