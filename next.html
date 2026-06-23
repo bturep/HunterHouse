@@ -3739,7 +3739,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.44";
+  const VERSION      = "v1.09-test.45";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9059,8 +9059,8 @@ WHERE {
   const TOUR_STEPS = [
     { place:"center", title:"Welcome",
       body:"A quick tour of the interface. Click <b>Next</b> to step through, or <b>Skip</b> anytime." },
-    { sel:["#archive-toggle","#map-toggle","#tl-toggle"], place:"bottom", title:"The lenses",
-      body:"Switch between the <b>catalogue list</b>, the <b>site plan</b>, and the <b>chronology timeline</b>." },
+    { sel:["#archive-toggle","#map-toggle","#tl-toggle","#search-toggle","#rec-info","#text-toggle","#fs-toggle"], place:"bottom", title:"The top bar",
+      body:"Switch the view between <b>Browse</b>, the <b>site plan</b>, and the <b>timeline</b> — and on the right: <b>search</b> (or press /), <b>help</b> &amp; shortcuts, <b>text size</b>, and <b>fullscreen</b>." },
     { sel:"#panel-left", place:"right", title:"Browse list",
       body:"Every item in the archive. Filter, sort by ID, phase or year, and click a row to open it." },
     { sel:"#stage", place:"over", title:"Viewing stage",
@@ -9069,14 +9069,6 @@ WHERE {
       body:"Zoom, <b>FIT</b>, <b>1:1</b>, rotate, and hide the side panels." },
     { sel:"#panel-right", place:"left", title:"Item record",
       body:"Full catalogue details for the open item, plus links to the data." },
-    { sel:"#search-toggle", place:"bottom", title:"Search",
-      body:"Find items by title, ID, type, or keyword — or press <b>/</b>." },
-    { sel:"#rec-info", place:"bottom", title:"Help & shortcuts",
-      body:"Archive overview, keyboard shortcuts, and a way to replay this tour." },
-    { sel:"#text-toggle", place:"bottom", title:"Text size",
-      body:"Step the interface text larger." },
-    { sel:"#fs-toggle", place:"bottom", title:"Fullscreen",
-      body:"Give the archive the whole screen." },
     { place:"center", title:"That's it",
       body:"Reopen the tour anytime from the <b>?</b> menu. Enjoy the archive." },
   ];
