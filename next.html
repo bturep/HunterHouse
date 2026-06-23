@@ -3048,11 +3048,19 @@
      whose 9999px shadow darkens everything outside it; #tour-veil sits below
      and just swallows clicks so the UI underneath stays inert. */
   /* Colour split: AMBER marks the demoed area (the ring); the card speaks GREEN. */
-  #tour{position:fixed;inset:0;z-index:600;display:none;
+  #tour{position:fixed;inset:0;z-index:600;display:none;opacity:0;
+    transition:opacity .42s ease;
     --to-ink:#f0ede6; --to-muted:#a6a199; --to-hint:#6c675f; --to-body:#cbc6bc;
     --to-rule:rgba(240,237,230,0.10);
     --to-amber:#e4a47e; --to-green:#84b09d; --to-green-dim:rgba(132,176,157,0.55); --to-red:#cf6f53;}
   body.tour-on #tour{display:block}
+  /* Intentional entrance: the dim eases in (whole-overlay opacity), then the
+     card rises a beat behind it. .tour-show is added a frame after display so
+     the transition has a 0→1 to run; removed on exit to fade everything back
+     out, revealing the archive. */
+  #tour.tour-show{opacity:1}
+  @keyframes tourCardIn{from{opacity:0;transform:translateY(13px)}to{opacity:1;transform:translateY(0)}}
+  #tour.tour-show #tour-card{animation:tourCardIn .5s cubic-bezier(.4,0,.2,1) .12s both}
   body.tour-on{overflow:hidden}
   #tour-veil{position:absolute;inset:0;background:transparent;transition:background .25s ease}
   #tour.tour-center #tour-veil{background:rgba(12,11,10,0.80)}
@@ -3127,7 +3135,7 @@
   .tour-btn:disabled{opacity:0.3;cursor:default}
   .tour-btn:disabled::before,.tour-btn:disabled::after{opacity:0.5}
 
-  @media (prefers-reduced-motion:reduce){ #tour-spot,#tour-card{transition:none} }
+  @media (prefers-reduced-motion:reduce){ #tour,#tour-spot,#tour-card{transition:none} #tour.tour-show #tour-card{animation:none} }
   @media (max-width:767px){ body.tour-on #tour{display:none} }  /* desktop-only walkthrough */
 </style>
 </head>
@@ -3739,7 +3747,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.46";
+  const VERSION      = "v1.09-test.47";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9183,12 +9191,18 @@ WHERE {
   function tourNext() { tourIdx >= tourSteps.length - 1 ? tourEnd() : tourGo(tourIdx + 1); }
   function tourBack() { tourGo(tourIdx - 1); }
 
+  let tourEndT = null;
   function tourEnd() {
-    document.body.classList.remove("tour-on");
+    // Fade the whole overlay back out (dim + card), revealing the archive —
+    // the exit mirror of the entrance. Detach handlers + persist immediately;
+    // only the display:none is deferred until the fade finishes.
+    tourEl.classList.remove("tour-show");
     tourEl.setAttribute("aria-hidden", "true");
     try { localStorage.setItem(HHF_TOUR_KEY, "1"); } catch (e) {}
     if (tourKeyHandler)    { document.removeEventListener("keydown", tourKeyHandler, true); tourKeyHandler = null; }
     if (tourResizeHandler) { removeEventListener("resize", tourResizeHandler); tourResizeHandler = null; }
+    clearTimeout(tourEndT);
+    tourEndT = setTimeout(() => document.body.classList.remove("tour-on"), 440);
   }
 
   function hhStartTour() {
@@ -9198,10 +9212,16 @@ WHERE {
     tourSteps = TOUR_STEPS.filter(s => s.place === "center" || tourTargetRect(s));
     if (tourSteps.length === 0) return;
     tourIdx = 0;
-    document.body.classList.add("tour-on");
+    clearTimeout(tourEndT);
+    document.body.classList.add("tour-on");   // display:block, still opacity:0
     tourEl.setAttribute("aria-hidden", "false");
     tourRender();
-    document.getElementById("tour-next").focus();
+    // Next frame, flip on .tour-show so the opacity transition + card-rise
+    // animation actually run (a 0→1 needs the 0 state painted first).
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      tourEl.classList.add("tour-show");
+      document.getElementById("tour-next").focus({ preventScroll: true });
+    }));
     // Keep the spotlight aligned if the window resizes mid-tour.
     tourResizeHandler = () => tourPlace();
     addEventListener("resize", tourResizeHandler);
