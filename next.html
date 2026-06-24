@@ -3058,7 +3058,7 @@
   /* Colour split: AMBER marks the demoed area (the ring); the card speaks GREEN. */
   #tour{position:fixed;inset:0;z-index:600;display:none;opacity:0;
     --to-ink:#f0ede6; --to-muted:#a6a199; --to-hint:#6c675f; --to-body:#cbc6bc;
-    --to-rule:rgba(240,237,230,0.10);
+    --to-rule:rgba(240,237,230,0.10); --to-edge:rgba(240,237,230,0.13);
     --to-amber:#e4a47e; --to-amber-dim:rgba(228,164,126,0.55); --to-red:#cf6f53;}
   body.tour-on #tour{display:block}
   /* Entrance: the dim is INSTANT (no overlay fade) so the archive never flashes
@@ -3082,26 +3082,21 @@
       width .32s cubic-bezier(.4,0,.2,1),height .32s cubic-bezier(.4,0,.2,1);}
   #tour.tour-center #tour-spot{display:none}
 
-  /* Card — floats on the dim with GREEN bracket-corner marks: no plate, no
-     outline. A soft, edgeless halo (the ::before radial) lifts the text for
-     legibility without drawing a box. The corners are 8 background gradients
-     (an L at each corner: a 15px serif + a 15px stem). */
-  #tour-card{position:absolute;width:366px;box-sizing:border-box;border:0;border-radius:0;
-    background-color:transparent;
-    background-image:
-      linear-gradient(var(--to-amber),var(--to-amber)),linear-gradient(var(--to-amber),var(--to-amber)),
-      linear-gradient(var(--to-amber),var(--to-amber)),linear-gradient(var(--to-amber),var(--to-amber)),
-      linear-gradient(var(--to-amber),var(--to-amber)),linear-gradient(var(--to-amber),var(--to-amber)),
-      linear-gradient(var(--to-amber),var(--to-amber)),linear-gradient(var(--to-amber),var(--to-amber));
-    background-repeat:no-repeat;
-    background-position:left top,left top, right top,right top, left bottom,left bottom, right bottom,right bottom;
-    background-size:15px 2px,2px 15px, 15px 2px,2px 15px, 15px 2px,2px 15px, 15px 2px,2px 15px;
-    padding:24px 30px 18px;
+  /* Card — a grounded popover plate (matches the #fp-info-pop / dropdown
+     surface used elsewhere on the site): solid dark plate so it reads the same
+     in either theme, a hairline edge, and a soft drop shadow for lift. Amber
+     registration ticks at top-left + bottom-right carry the catalogue's
+     bracket motif without the old edgeless float. */
+  #tour-card{position:absolute;width:366px;box-sizing:border-box;border-radius:0;
+    background:#211e1b;border:1px solid var(--to-edge);
+    box-shadow:0 16px 44px rgba(0,0,0,0.5);
+    padding:22px 28px 16px;
     transition:top .3s cubic-bezier(.4,0,.2,1),left .3s cubic-bezier(.4,0,.2,1);}
   #tour.tour-center #tour-card{transition:none}
-  /* edgeless halo behind the text — no rectangle, just contrast */
-  #tour-card::before{content:"";position:absolute;inset:-2px;z-index:-1;
-    background:radial-gradient(125% 115% at 50% 45%, rgba(10,9,8,0.94) 30%, rgba(10,9,8,0) 100%);}
+  #tour-card::before{content:"";position:absolute;top:-1px;left:-1px;width:18px;height:18px;
+    border-top:2px solid var(--to-amber);border-left:2px solid var(--to-amber);pointer-events:none}
+  #tour-card::after{content:"";position:absolute;bottom:-1px;right:-1px;width:18px;height:18px;
+    border-bottom:2px solid var(--to-amber);border-right:2px solid var(--to-amber);pointer-events:none}
   .tour-caret{position:absolute;width:0;height:0;pointer-events:none}
   #tour.tour-center .tour-caret{display:none}
 
@@ -3759,7 +3754,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.52";
+  const VERSION      = "v1.09-test.53";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9077,9 +9072,9 @@ WHERE {
   // Desktop only (the mobile layout has different controls); skips Baden mode.
   const HHF_TOUR_KEY = "hhf_tour_seen_v1";
   // Ordered as a left→right sweep across the screen: intro, then the left
-  // panel, the centre stage + its controls, the right panel, and finally the
-  // top bar. No separate "done" step — the engine labels the last step's
-  // button "Done" automatically.
+  // panel, the centre stage + its controls, the right panel, the top bar, and
+  // a closing card that hands off to the first action. The engine labels the
+  // last step's button "Done" automatically.
   const TOUR_STEPS = [
     { place:"center", title:"Welcome",
       body:"A quick tour of the interface. Click <b>Next</b> to step through, or <b>Skip</b> anytime." },
@@ -9093,6 +9088,8 @@ WHERE {
       body:"Full catalogue details for the open item, plus links to the data." },
     { sel:["#search-toggle","#rec-info","#text-toggle","#fs-toggle"], place:"bottom", title:"The top bar",
       body:"<b>Search</b> the archive (or press /), open <b>help</b> &amp; shortcuts, resize the <b>text</b>, and go <b>fullscreen</b>. The <b>?</b> reopens this tour anytime." },
+    { place:"center", title:"You're set",
+      body:"Open any item to begin — or start with a <b>curated selection</b>." },
   ];
 
   const tourEl    = document.getElementById("tour");
