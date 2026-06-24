@@ -2899,6 +2899,14 @@
   .site-topright .lens:hover{opacity:1}
   .site-topright .lens.cur{opacity:1}
   .tr-div{width:1px;height:15px;align-self:center;background:var(--rule);flex:none}
+  /* ── Lens icons HELD BACK for the next browse update (2026-06-23) ──────────
+     The Browse / Site-plan / Timeline lens toggles + their divider are hidden,
+     NOT deleted — the buttons stay in the DOM so their position, colour,
+     behaviour, and the forms/ lens code are all preserved and the boot wiring
+     (getElementById("…-toggle").addEventListener) still resolves. Site plan +
+     timeline aren't being shipped yet; only Browse is in play. To bring them
+     back: delete this one rule. */
+  #archive-toggle, #map-toggle, #tl-toggle, .site-topright .tr-div{display:none!important}
   /* switching wordmark (mk-home button replaces the plain .markid link) */
   .markid{display:flex;align-items:baseline;gap:9px;text-decoration:none;color:inherit;cursor:pointer}
   /* gap matches the internal word-space so "HUNTER HOUSE ARCHIVE" reads as one
@@ -3113,6 +3121,9 @@
     color:var(--to-body);margin:0 0 16px;letter-spacing:0.004em}
   .tour-body::before{content:"\203A  ";color:var(--to-hint)}  /* › lead-in */
   .tour-body b{color:var(--to-green);font-weight:500}
+  .tour-lnk{color:var(--to-green);font-weight:500;text-decoration:underline;
+    text-underline-offset:2px;text-decoration-thickness:1px;cursor:pointer}
+  .tour-lnk:hover{color:var(--to-ink)}
 
   /* Counter-only step indicator: the 02 / 11 eyebrow carries position, so the
      #tour-dots row is hidden and the footer sits under a hairline rule. */
@@ -3748,7 +3759,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.49";
+  const VERSION      = "v1.09-test.50";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9073,15 +9084,15 @@ WHERE {
     { place:"center", title:"Welcome",
       body:"A quick tour of the interface. Click <b>Next</b> to step through, or <b>Skip</b> anytime." },
     { sel:"#panel-left", place:"right", title:"Browse list",
-      body:"Every item in the archive. Filter, sort by ID, phase or year, and click a row to open it." },
+      body:"Every item in the archive lists here. <a href=\"#\" class=\"tour-lnk\" onclick=\"event.stopPropagation();hhTourPeekFilters();return false;\">Browse&nbsp;items</a> opens the filters — by collection, project phase, item type and year — and clicking any row opens that item." },
     { sel:"#stage", place:"over", title:"Viewing stage",
       body:"The selected item at full resolution. Drag to pan, scroll to zoom." },
     { sel:".zoom-ctl", place:"top", title:"Viewport controls",
       body:"Zoom, <b>FIT</b>, <b>1:1</b>, rotate, and hide the side panels." },
     { sel:"#panel-right", place:"left", title:"Item record",
       body:"Full catalogue details for the open item, plus links to the data." },
-    { sel:["#archive-toggle","#map-toggle","#tl-toggle","#search-toggle","#rec-info","#text-toggle","#fs-toggle"], place:"bottom", title:"The top bar",
-      body:"Switch the view between <b>Browse</b>, the <b>site plan</b>, and the <b>timeline</b> — and on the right: <b>search</b> (or press /), <b>help</b>, <b>text size</b>, and <b>fullscreen</b>. The <b>?</b> reopens this tour anytime." },
+    { sel:["#search-toggle","#rec-info","#text-toggle","#fs-toggle"], place:"bottom", title:"The top bar",
+      body:"<b>Search</b> the archive (or press /), open <b>help</b> &amp; shortcuts, resize the <b>text</b>, and go <b>fullscreen</b>. The <b>?</b> reopens this tour anytime." },
   ];
 
   const tourEl    = document.getElementById("tour");
@@ -9257,7 +9268,17 @@ WHERE {
   function hhMaybeStartTour() { if (hhTourWillRun()) hhStartTour(); }
   // Replay from the ? pane — close it first so the spotlights aren't covered.
   function hhReplayTour() { try { closeInfoPane(); } catch (e) {} setTimeout(hhStartTour, 60); }
-  try { window.hhStartTour = hhStartTour; window.hhMaybeStartTour = hhMaybeStartTour; window.hhReplayTour = hhReplayTour; } catch (e) {}
+  // Tour "Browse items" link — opens the filter panel so the visitor sees what's
+  // inside (the panel sits in the spotlit left pane). The dim's full-screen
+  // veil blocks clicking the real button, so the card link drives it directly.
+  function hhTourPeekFilters() {
+    try {
+      const fp = document.getElementById("filter-panel");
+      if (fp && fp.hidden) document.getElementById("filter-toggle").click();
+      requestAnimationFrame(tourPlace);   // re-anchor the ring after layout shift
+    } catch (e) {}
+  }
+  try { window.hhStartTour = hhStartTour; window.hhMaybeStartTour = hhMaybeStartTour; window.hhReplayTour = hhReplayTour; window.hhTourPeekFilters = hhTourPeekFilters; } catch (e) {}
 
   // Wire the tour card controls once.
   document.getElementById("tour-next").addEventListener("click", tourNext);
