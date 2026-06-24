@@ -3754,7 +3754,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.54";
+  const VERSION      = "v1.09-test.55";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6650,6 +6650,11 @@ WHERE {
       <hr class="ap-rule">
       <div class="ap-foot-row">
         <div class="cp-foot">
+          <!-- Palette picker (House · Citrus · Press) commented out 2026-06-23 so
+               curator mode silently uses the House default — no colour options
+               shown. The picker script still applies House via apply(saved ||
+               'house'); querySelectorAll('.cp-pal') just finds nothing. Restore
+               the radiogroup below to offer Citrus/Press again.
           <div class="cp-palette" role="radiogroup" aria-label="Palette">
             <span class="cp-palette-label">Palette</span>
             <button type="button" data-palette="house"  class="cp-pal active">House</button>
@@ -6658,6 +6663,7 @@ WHERE {
             <span class="cp-pal-sep">·</span>
             <button type="button" data-palette="press"  class="cp-pal">Press</button>
           </div>
+          -->
           <button class="cur-continue" id="cur-continue">Enter Selection →</button>
         </div>
       </div>`;
