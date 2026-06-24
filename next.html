@@ -3759,7 +3759,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.50";
+  const VERSION      = "v1.09-test.51";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9084,7 +9084,7 @@ WHERE {
     { place:"center", title:"Welcome",
       body:"A quick tour of the interface. Click <b>Next</b> to step through, or <b>Skip</b> anytime." },
     { sel:"#panel-left", place:"right", title:"Browse list",
-      body:"Every item in the archive lists here. <a href=\"#\" class=\"tour-lnk\" onclick=\"event.stopPropagation();hhTourPeekFilters();return false;\">Browse&nbsp;items</a> opens the filters — by collection, project phase, item type and year — and clicking any row opens that item." },
+      body:"Every item in the archive lists here. <a href=\"#\" class=\"tour-lnk\" onclick=\"event.stopPropagation();hhTourPeekFilters();return false;\">Browse&nbsp;items</a> opens the filters — by collection, project phase, item type, year, and <b>curated selections</b> — and clicking any row opens that item." },
     { sel:"#stage", place:"over", title:"Viewing stage",
       body:"The selected item at full resolution. Drag to pan, scroll to zoom." },
     { sel:".zoom-ctl", place:"top", title:"Viewport controls",
