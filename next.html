@@ -3059,7 +3059,7 @@
   #tour{position:fixed;inset:0;z-index:600;display:none;opacity:0;
     --to-ink:#f0ede6; --to-muted:#a6a199; --to-hint:#6c675f; --to-body:#cbc6bc;
     --to-rule:rgba(240,237,230,0.10);
-    --to-amber:#e4a47e; --to-green:#84b09d; --to-green-dim:rgba(132,176,157,0.55); --to-red:#cf6f53;}
+    --to-amber:#e4a47e; --to-amber-dim:rgba(228,164,126,0.55); --to-red:#cf6f53;}
   body.tour-on #tour{display:block}
   /* Entrance: the dim is INSTANT (no overlay fade) so the archive never flashes
      bright between the splash and the tour — only the card fades + rises in
@@ -3089,10 +3089,10 @@
   #tour-card{position:absolute;width:366px;box-sizing:border-box;border:0;border-radius:0;
     background-color:transparent;
     background-image:
-      linear-gradient(var(--to-green),var(--to-green)),linear-gradient(var(--to-green),var(--to-green)),
-      linear-gradient(var(--to-green),var(--to-green)),linear-gradient(var(--to-green),var(--to-green)),
-      linear-gradient(var(--to-green),var(--to-green)),linear-gradient(var(--to-green),var(--to-green)),
-      linear-gradient(var(--to-green),var(--to-green)),linear-gradient(var(--to-green),var(--to-green));
+      linear-gradient(var(--to-amber),var(--to-amber)),linear-gradient(var(--to-amber),var(--to-amber)),
+      linear-gradient(var(--to-amber),var(--to-amber)),linear-gradient(var(--to-amber),var(--to-amber)),
+      linear-gradient(var(--to-amber),var(--to-amber)),linear-gradient(var(--to-amber),var(--to-amber)),
+      linear-gradient(var(--to-amber),var(--to-amber)),linear-gradient(var(--to-amber),var(--to-amber));
     background-repeat:no-repeat;
     background-position:left top,left top, right top,right top, left bottom,left bottom, right bottom,right bottom;
     background-size:15px 2px,2px 15px, 15px 2px,2px 15px, 15px 2px,2px 15px, 15px 2px,2px 15px;
@@ -3111,17 +3111,17 @@
 
   .tour-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:0.22em;
     text-transform:uppercase;color:var(--to-hint);margin:0 0 13px}
-  .tour-eyebrow #tour-step{color:var(--to-green)}
+  .tour-eyebrow #tour-step{color:var(--to-amber)}
   .tour-eyebrow #tour-total{color:var(--to-muted)}
 
   .tour-title{font-family:var(--mono);font-weight:500;font-size:13px;
-    letter-spacing:0.12em;text-transform:uppercase;color:var(--to-green);
+    letter-spacing:0.12em;text-transform:uppercase;color:var(--to-amber);
     margin:0 0 11px;line-height:1.3}
   .tour-body{font-family:var(--mono);font-size:11.5px;line-height:1.78;
     color:var(--to-body);margin:0 0 16px;letter-spacing:0.004em}
   .tour-body::before{content:"\203A  ";color:var(--to-hint)}  /* › lead-in */
-  .tour-body b{color:var(--to-green);font-weight:500}
-  .tour-lnk{color:var(--to-green);font-weight:500;text-decoration:underline;
+  .tour-body b{color:var(--to-amber);font-weight:500}
+  .tour-lnk{color:var(--to-amber);font-weight:500;text-decoration:underline;
     text-underline-offset:2px;text-decoration-thickness:1px;cursor:pointer}
   .tour-lnk:hover{color:var(--to-ink)}
 
@@ -3141,8 +3141,8 @@
   .tour-btn{font-size:11px}
   .tour-back{color:var(--to-muted)}
   .tour-back:hover{color:var(--to-ink)}
-  .tour-next{color:var(--to-green);font-weight:600}
-  .tour-next::before,.tour-next::after{color:var(--to-green-dim)}
+  .tour-next{color:var(--to-amber);font-weight:600}
+  .tour-next::before,.tour-next::after{color:var(--to-amber-dim)}
   .tour-next:hover{filter:brightness(1.12)}
   .tour-btn:disabled{opacity:0.3;cursor:default}
   .tour-btn:disabled::before,.tour-btn:disabled::after{opacity:0.5}
@@ -3759,7 +3759,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.51";
+  const VERSION      = "v1.09-test.52";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9171,7 +9171,7 @@ WHERE {
     // Caret (amber, matching the ring) points from the card edge to the target.
     // Only on top/bottom edges — the left/right edges carry the [ ] brackets,
     // so for side placements the abutting card + ring carry the anchor instead.
-    const C = "var(--to-green)", s = 9, base = "position:absolute;width:0;height:0;pointer-events:none;";
+    const C = "var(--to-amber)", s = 9, base = "position:absolute;width:0;height:0;pointer-events:none;";
     if (place === "bottom" || place === "top") {
       const x = Math.max(20, Math.min(cx - left, cardW - 20)) - s;
       tourCaret.style.cssText = base +
