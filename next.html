@@ -3144,6 +3144,22 @@
 
   @media (prefers-reduced-motion:reduce){ #tour,#tour-spot,#tour-card{transition:none} #tour.tour-show #tour-card{animation:none} }
   @media (max-width:767px){ body.tour-on #tour{display:none} }  /* desktop-only walkthrough */
+
+  /* ── Transcript panel (letters) — collapsible record-pane section ───────── */
+  .transcript-section .ts-head{cursor:pointer;user-select:none}
+  .transcript-section .ts-head .tw{display:inline-block;width:1em;transition:transform .15s;color:var(--hint)}
+  .transcript-section.open .ts-head .tw{transform:rotate(90deg)}
+  .transcript-section .ts-body{display:none;margin-top:6px}
+  .transcript-section.open .ts-body{display:block}
+  .ts-body p{margin:0 0 .7em;font-size:13px;line-height:1.62;color:var(--ink);white-space:pre-wrap}
+  .ts-body p.ts-aside{color:var(--muted);font-style:italic}
+  .ts-body p:last-child{margin-bottom:0}
+  /* ── Cite popover ──────────────────────────────────────────────────────── */
+  #cite-pop{position:fixed;z-index:9000;background:var(--bg);border:1px solid var(--rule);
+    border-radius:3px;box-shadow:0 8px 28px rgba(0,0,0,.28);padding:4px;min-width:140px;font-family:var(--mono,monospace)}
+  #cite-pop button{display:block;width:100%;text-align:left;background:none;border:0;color:var(--ink);
+    font:inherit;font-size:12px;padding:7px 10px;cursor:pointer;border-radius:2px}
+  #cite-pop button:hover,#cite-pop button:focus-visible{background:var(--soft);outline:none}
 </style>
 </head>
 <body class="loading">
@@ -3571,6 +3587,7 @@
       </div>
       <div class="data-footer" id="data-footer">
         <a id="df-permalink" href="#" onclick="return false" style="opacity:0.4" title="Copy this item's permanent link">Permalink ⧉</a>
+        <a id="df-cite" href="#" onclick="return false" style="opacity:0.4" title="Copy a citation for this item">Cite ⧉</a>
         <a id="df-wikibase" href="#" onclick="return false" style="opacity:0.4">Wikibase ↗</a>
         <a id="df-sparql"   href="#" onclick="return false" style="opacity:0.4">SPARQL ↗</a>
         <a id="df-json"     href="#" onclick="return false" style="opacity:0.4">JSON ↗</a>
@@ -3754,7 +3771,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.55";
+  const VERSION      = "v1.09-test.56";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -5810,6 +5827,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     "fulker":                     "FUL",
     "eric gesinger":              "EGC",
     "ivan hunter":                "IHC",
+    "frances hunter":             "FRH",
   };
   // Per-collection blurbs shown in the filter-panel ⓘ popover. Stats and
   // counts are hand-maintained; refresh when collections grow.
@@ -5849,6 +5867,13 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       body:  "Photographs of the Hunter Residence by Ivan Hunter, captured 2024-02-11 — the first photographic survey of the residence catalogued here.",
       qid:   "Q183",
       stats: "45 photographs",
+      custodian: "Hunter House Foundation",
+    },
+    FRH: {
+      title: "Frances Hunter Collection",
+      body:  "Correspondence and papers of Frances Hunter, including letters written by Richard Hunter. Digitization in progress; most items are available to researchers by permission.",
+      qid:   null,
+      stats: "In progress",
       custodian: "Hunter House Foundation",
     },
   };
@@ -6144,6 +6169,150 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   // Converts raw SPARQL bindings to the items array. Used by the normal
   // fetch path, and by the legacy splash-page prefetch path if it ever
   // returns (index.html is currently a thin redirect — no prefetch).
+  // ── Transcript + citation (letters tryout, v1.09-test.56) ────────────────
+  // transcriptToHTML: one <p> per line; lines starting "[" are editorial asides.
+  function transcriptToHTML(txt) {
+    return (txt || "").split("\n").map(line => {
+      const t = line.trim(); if (!t) return "";
+      const cls = t.startsWith("[") ? ' class="ts-aside"' : "";
+      return `<p${cls}>${escapeHTML(line)}</p>`;
+    }).join("");
+  }
+  const _CMON = ["January","February","March","April","May","June","July",
+                 "August","September","October","November","December"];
+  function fmtCiteDate(d, style) {
+    if (!d) return "n.d.";
+    const [y, m, day] = d.split("-").map(Number);
+    if (!m) return "" + y;
+    if (style === "apa") return day ? `${y}, ${_CMON[m-1]} ${day}` : `${y}, ${_CMON[m-1]}`;
+    return day ? `${_CMON[m-1]} ${day}, ${y}` : `${_CMON[m-1]} ${y}`;
+  }
+  function nameLastFirst(n) {
+    if (!n) return n || "";
+    const p = n.trim().split(/\s+/); if (p.length < 2) return n;
+    const last = p.pop(); return `${last}, ${p.join(" ")}`;
+  }
+  // Build Chicago / MLA / APA reference-list entries from item metadata + the
+  // canonical permalink. Letters use from→to; other items use creator + title.
+  function citeFor(item) {
+    const url  = "https://hunterhouse.org/archive/" + item.id + ".html";
+    const repo = "Hunter House Foundation Archive";
+    const coll = collectionOf(item);
+    const collId = coll ? `${coll}, ${item.id}` : item.id;
+    const cdate = fmtCiteDate(item.date, "chicago");
+    const adate = fmtCiteDate(item.date, "apa");
+    if (item.letter) {
+      const from = item.letterFrom || item.creator || "Unknown";
+      const to   = item.letterTo || "an unidentified recipient";
+      return {
+        chicago: `${nameLastFirst(from)}. ${from} to ${to}, ${cdate}. ${collId}. ${repo}. ${url}.`,
+        mla:     `${nameLastFirst(from)}. Letter to ${to}. ${cdate}. ${collId}, ${repo}, ${url}.`,
+        apa:     `${nameLastFirst(from)} (${adate}). [Letter to ${to}]. ${collId}. ${repo}. ${url}`,
+      };
+    }
+    const creator = item.creator || "Hunter House Foundation";
+    const title   = item.title || item.id;
+    return {
+      chicago: `${nameLastFirst(creator)}. ${title}. ${cdate}. ${collId}. ${repo}. ${url}.`,
+      mla:     `${nameLastFirst(creator)}. ${title}. ${cdate}. ${collId}, ${repo}, ${url}.`,
+      apa:     `${nameLastFirst(creator)} (${adate}). ${title} [${item.itemType || "archival item"}]. ${collId}. ${repo}. ${url}`,
+    };
+  }
+  function _citeOutside(e) { const p = document.getElementById("cite-pop"); if (p && !p.contains(e.target) && e.target.id !== "df-cite") closeCitePopover(); }
+  function _citeEsc(e) { if (e.key === "Escape") closeCitePopover(); }
+  function closeCitePopover() {
+    const p = document.getElementById("cite-pop"); if (p) p.remove();
+    document.removeEventListener("mousedown", _citeOutside, true);
+    document.removeEventListener("keydown", _citeEsc, true);
+  }
+  function openCitePopover(anchor, item) {
+    closeCitePopover();
+    const cites = citeFor(item);
+    const pop = document.createElement("div");
+    pop.id = "cite-pop"; pop.setAttribute("role", "menu");
+    [["Chicago","chicago"],["MLA","mla"],["APA","apa"]].forEach(([lbl, key]) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = lbl; b.setAttribute("role", "menuitem");
+      b.onclick = () => {
+        const t = cites[key];
+        if (navigator.clipboard && navigator.clipboard.writeText)
+          navigator.clipboard.writeText(t).then(() => hhToast(lbl + " citation copied")).catch(() => window.prompt("Copy citation:", t));
+        else window.prompt("Copy citation:", t);
+        closeCitePopover();
+      };
+      pop.appendChild(b);
+    });
+    document.body.appendChild(pop);
+    const r = anchor.getBoundingClientRect();
+    pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - pop.offsetWidth - 8)) + "px";
+    let top = r.top - pop.offsetHeight - 6;
+    if (top < 4) top = r.bottom + 6;
+    pop.style.top = top + "px";
+    setTimeout(() => {
+      document.addEventListener("mousedown", _citeOutside, true);
+      document.addEventListener("keydown", _citeEsc, true);
+    }, 0);
+    pop.querySelector("button")?.focus();
+  }
+
+  // TEMPORARY tryout (2026-06-26): two real Frances Hunter letters injected
+  // client-side so the transcript panel + Cite can be exercised on a typed and a
+  // handwritten letter before HH-FRH is modelled in Wikibase. The gated one is
+  // only injected for researchers (canMark()). Remove this block + the inject in
+  // processRows when the real HH-FRH ingest lands. Assets live on R2 under
+  // frances-hunter-collection/ (forward-compatible naming).
+  const DEMO_LETTERS = (() => {
+    const R2 = "https://archive.hunterhousefoundation.com/frances-hunter-collection";
+    const base = {
+      qid: null, areas: [], categories: [], drawTypes: [], builtBy: [],
+      designedBy: null, use: null, scale: null, medium: null, builtStatus: null,
+      setPosition: null, notes: null, archiveLink: null, location: null, rotation: 0,
+      phase: null, phaseQID: null, sourceCollection: "Frances Hunter Collection",
+      rights: "Hunter House Foundation", heldBy: null, itemType: "Letter",
+      creator: "Richard Hunter", letter: true, letterFrom: "Richard Hunter",
+      letterTo: "Luise Mendelsohn", letterPlace: "Brentwood Bay, BC",
+    };
+    return [
+      { ...base, id: "HH-FRH-0001",
+        title: "Richard Hunter to Luise Mendelsohn, 13 September 1970",
+        date: "1970-09-13", handwritten: false, gated: false,
+        image: `${R2}/previews/HH-FRH-0001_p01_prev.jpg`, master: null,
+        accessCopy: `${R2}/pdf/HH-FRH-0001.pdf`,
+        transcript: [
+          "13 September 1970",
+          "Luischen!",
+          "This will be a chatty homey sort of epistle because it seems to me it's been a long time. Sunshine falls all over me. Shan is nearly crawling all over me (strike out the nearly). Frances stands across from me at our joint table—making a commissioned belt at her table loom; Ivan is next door with his number one girl friend (his girl friend of the minute I should say—he has at least three of them) and I am taking the day off from my most recent job of being ankle deep in the dirt of the forty foot square ugly excavation for a little house we'll start building next week on our land. Looks like this:",
+          "[sketch, leaf 1: a low cedar pavilion among tall trees, in perspective; at right a square plan — Ivan's and Shan's rooms, a living area, and a central glass-domed garden, with a north arrow. Annotation: “corner beams are rain scuppers.”]",
+          "Nothing extraordinary in an absolute sense but if it comes off as I expect the total cost of less than $12,000 will make it very extraordinary. I never thought I'd do anything so simple and boxy but here it is! Inside and out covered alike with cedar boards of various width and thicknesses. Irregular window width—rhythm of tree trunks in a forest. Large Japanese style bath and central glass domed garden. I'll do all the finishing as well as manufacturing (manual) of doors and windows. So this explains what I'll be doing during the coming four months or more.",
+          "Thanks for the phone call. They leave one wanting more and are never very satisfying but it's good to hear all the saga. We both think your project is quite awesome and hope it will all be in print eventually and as it should be. I'll look forward to the new Zevi book too—the essay to end all essays?",
+          "The Guimard brochure arrived two days ago and we both thank you for it. Frances loves Art Nouveau and neither of us know anything about Guimard even tho he seems as bright a star as the other people so much better known. Has anyone written much about art nouveau as a psychedelic island in the history of western art? No more chance that it has been rediscovered by youth today as a western link to former cultures at once more primitive and more sophisticated than our own—and in touch with psychedelic experience.",
+          "Our circle of friendly acquaintances expands—more and more Americans, mostly young, really intelligent and aware people, nearly all with the same idea of getting out into the wilderness and making it. The irony is that that same wilderness is so largely controlled by Americans older and richer than themselves. The migration apparently is reaching historic proportions. We just heard that all along the border are deserters, deserters, deserters. How long Canada will continue to cope is troublesome conjecture. Many people are already very upset about Americans here, of any age or affluence.",
+          "A few weeks ago I received a phone call from a very proper English lady asking for the architect. Frances answered the phone and after asking for me, the woman said, “By the way, what is his name?” Frances told her and called me to the phone. When I picked up the receiver it was dead; hung up. About ten days later I got the inclosed letter from Vancouver to which I sent the also inclosed reply. My letter has not been answered and undoubtedly won't be. How could I ever join them? This society needs to fall apart from every joint. And it will. Please return this correspondence.",
+          "Observe Mr. Polson's statement: “will leave no choice…” How many times have we seen this? Everywhere men on the right side of the law regard themselves as machines (having no choice once they are plugged in) and are very proud of it. Anyway this is not important, just a pimple on my “career,” something to provide you with diversionary amusement. Up to a point it is rather titillating to be a Marked Man tho when you think about it, rather frightening how easy it is becoming to be one. A friend voiced the interesting notion that the movement will succeed to the extent it goes relatively unnoticed by those in control.",
+          "Ivan has started public school and we're certainly not happy about it. Even in kindegarten they begin the herding technique. Bright hope is that some friends will begin a free school (overworked and inaccurate term) in January and if so we'll put Ivan in it. Shan is ready for a group environment too and Frances will try to get something together for him with other people this winter. Both boys are absolute charmers, exuberant and beautiful and probably I'm hoplessly prejudiced. Certainly I'm lucky!",
+          "We haven't heard about the Willses for a long time. Love to them, the Josephs and all. You too! Stay well, don't push—just dangle your toes in the river and let it flow.",
+          "ric",
+        ].join("\n"),
+      },
+      { ...base, id: "HH-FRH-0002",
+        title: "Richard Hunter to Luise Mendelsohn, 15 November 1970",
+        date: "1970-11-15", handwritten: true, gated: true,
+        image: `${R2}/previews/HH-FRH-0002_card_prev.jpg`,
+        master: `${R2}/large/HH-FRH-0002_card_large.jpg`, accessCopy: null,
+        transcript: [
+          "15 Nov. 70",
+          "Can write again!",
+          "Return Clay article which I could not help being critical of. You will love this Nuyttle[?] article — still more drivel.",
+          "Rain falls. Are you well? I am doing zazen daily — have reached momentous decision. 40 years!",
+          "May as well laugh all the way.",
+          "Frances is bearing up and as far as children are concerned that takes some doing these days.",
+          "Watch out!",
+          "ric",
+        ].join("\n"),
+      },
+    ];
+  })();
+
   function processRows(rows) {
     const dateStr = v => v ? v.replace(/^\+/, "").split("T")[0] : null;
     const map = new Map();
@@ -6191,7 +6360,9 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       if (r.builtByLabel?.value && !it.builtBy.includes(r.builtByLabel.value))
         it.builtBy.push(r.builtByLabel.value);
     }
-    return [...map.values()].sort((a, b) => (a.id || "").localeCompare(b.id || ""));
+    const out = [...map.values()];
+    for (const d of DEMO_LETTERS) { if (!d.gated || canMark()) out.push(d); }   // letters tryout
+    return out.sort((a, b) => (a.id || "").localeCompare(b.id || ""));
   }
 
   // Fetch the static catalogue snapshot from R2 and run it through the same
@@ -7417,6 +7588,12 @@ WHERE {
       };
     }
 
+    const citeEl = document.getElementById("df-cite");
+    if (citeEl) {
+      citeEl.style.opacity = ""; citeEl.style.pointerEvents = "";
+      citeEl.onclick = (e) => { e.preventDefault(); openCitePopover(citeEl, item); };
+    }
+
     const graphN = archRows.length > 0 ? "03" : "02";
     body.innerHTML = `
       <h1 class="meta-title">${formatTitle(item.title)}</h1>
@@ -7436,6 +7613,10 @@ WHERE {
         <div class="graph-path">${graphPathHTML}</div>
         ${siblingsHTML}
       </section>` : ""}
+      ${(item.transcript && (!item.gated || canMark())) ? `<section class="meta-section transcript-section${item.handwritten ? " open" : ""}">
+        <h3 class="ts-head"><span><span class="tw">▸</span>Transcript</span><span class="ct">${item.handwritten ? "handwritten" : "typed"}${item.gated ? " · researcher" : ""}</span></h3>
+        <div class="ts-body">${transcriptToHTML(item.transcript)}</div>
+      </section>` : ""}
       <div class="rn-panel" id="rn-panel"></div>
       <div class="rn-tools" id="rn-tools" hidden></div>
     `;
@@ -7445,6 +7626,8 @@ WHERE {
     });
     const cnGo = body.querySelector(".cn-go[data-next-id]");
     if (cnGo) cnGo.addEventListener("click", () => selectItem(cnGo.dataset.nextId));
+    const tsHead = body.querySelector(".transcript-section .ts-head");
+    if (tsHead) tsHead.addEventListener("click", () => tsHead.closest(".transcript-section").classList.toggle("open"));
     if (state.curation) renderCuratorNote(item); else renderRN(item.id);
     renderRnTools();
     wireMetaEdit(item);
