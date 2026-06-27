@@ -2,7 +2,7 @@
   "period": "2026-06",
   "dataset": "Hunter_House_Archive",
   "totals": {
-    "events": 352,
+    "events": 353,
     "views": 335,
     "searches": 1,
     "zero_result_searches": 1,
@@ -10,6 +10,7 @@
   },
   "events_by_type": {
     "search0": 1,
+    "pageview": 1,
     "view": 335,
     "search": 1,
     "deeplink": 11,
@@ -29,11 +30,15 @@
       "views": 7
     },
     {
-      "id": "HH-CAA-0011",
+      "id": "HH-CAA-0003",
       "views": 6
     },
     {
-      "id": "HH-IHC-0004",
+      "id": "HH-IHC-0002",
+      "views": 6
+    },
+    {
+      "id": "HH-CAA-0011",
       "views": 6
     },
     {
@@ -41,12 +46,28 @@
       "views": 6
     },
     {
-      "id": "HH-CAA-0003",
+      "id": "HH-IHC-0004",
       "views": 6
     },
     {
-      "id": "HH-IHC-0002",
-      "views": 6
+      "id": "HH-CAA-0014",
+      "views": 5
+    },
+    {
+      "id": "HH-CAA-0008",
+      "views": 5
+    },
+    {
+      "id": "HH-CAA-0002",
+      "views": 5
+    },
+    {
+      "id": "HH-CAA-0001",
+      "views": 5
+    },
+    {
+      "id": "HH-IHC-0007",
+      "views": 5
     },
     {
       "id": "HH-CAA-0010",
@@ -57,51 +78,11 @@
       "views": 5
     },
     {
-      "id": "HH-CAA-0008",
-      "views": 5
-    },
-    {
-      "id": "HH-IHC-0007",
-      "views": 5
-    },
-    {
       "id": "HH-CAA-0004",
       "views": 5
     },
     {
-      "id": "HH-CAA-0002",
-      "views": 5
-    },
-    {
-      "id": "HH-CAA-0014",
-      "views": 5
-    },
-    {
-      "id": "HH-CAA-0001",
-      "views": 5
-    },
-    {
-      "id": "HH-HHC-0112",
-      "views": 4
-    },
-    {
-      "id": "HH-CAA-0006",
-      "views": 4
-    },
-    {
       "id": "HH-CAA-0005",
-      "views": 4
-    },
-    {
-      "id": "HH-IHC-0006",
-      "views": 4
-    },
-    {
-      "id": "HH-HHC-0113",
-      "views": 4
-    },
-    {
-      "id": "HH-IHC-0005",
       "views": 4
     },
     {
@@ -109,23 +90,31 @@
       "views": 4
     },
     {
+      "id": "HH-IHC-0005",
+      "views": 4
+    },
+    {
       "id": "HH-CAA-0012",
       "views": 4
     },
     {
-      "id": "HH-CAA-0031",
-      "views": 3
+      "id": "HH-IHC-0006",
+      "views": 4
     },
     {
-      "id": "HH-CAA-0009",
-      "views": 3
+      "id": "HH-CAA-0006",
+      "views": 4
     },
     {
-      "id": "HH-CAA-0025",
-      "views": 3
+      "id": "HH-HHC-0113",
+      "views": 4
     },
     {
-      "id": "HH-HHC-0083",
+      "id": "HH-HHC-0112",
+      "views": 4
+    },
+    {
+      "id": "HH-CAA-0024",
       "views": 3
     },
     {
@@ -133,19 +122,19 @@
       "views": 3
     },
     {
+      "id": "HH-CAA-0016",
+      "views": 3
+    },
+    {
+      "id": "HH-IHC-0012",
+      "views": 3
+    },
+    {
+      "id": "HH-HHC-0083",
+      "views": 3
+    },
+    {
       "id": "HH-IHC-0008",
-      "views": 3
-    },
-    {
-      "id": "HH-IHC-0042",
-      "views": 3
-    },
-    {
-      "id": "HH-CAA-0026",
-      "views": 3
-    },
-    {
-      "id": "HH-HHC-0077",
       "views": 3
     },
     {
@@ -157,15 +146,7 @@
       "views": 3
     },
     {
-      "id": "HH-IHC-0015",
-      "views": 3
-    },
-    {
-      "id": "HH-CAA-0016",
-      "views": 3
-    },
-    {
-      "id": "HH-CAA-0024",
+      "id": "HH-CAA-0009",
       "views": 3
     },
     {
@@ -173,23 +154,39 @@
       "views": 3
     },
     {
-      "id": "HH-IHC-0012",
+      "id": "HH-CAA-0025",
       "views": 3
     },
     {
-      "id": "HH-HHC-0097",
-      "views": 2
+      "id": "HH-CAA-0026",
+      "views": 3
     },
     {
-      "id": "HH-IHC-0022",
-      "views": 2
+      "id": "HH-IHC-0015",
+      "views": 3
     },
     {
-      "id": "HH-CAA-0032",
+      "id": "HH-CAA-0031",
+      "views": 3
+    },
+    {
+      "id": "HH-HHC-0077",
+      "views": 3
+    },
+    {
+      "id": "HH-IHC-0042",
+      "views": 3
+    },
+    {
+      "id": "HH-HHC-0055",
       "views": 2
     },
     {
       "id": "HH-EGC-0022",
+      "views": 2
+    },
+    {
+      "id": "HH-HHC-0114",
       "views": 2
     },
     {
@@ -201,19 +198,23 @@
       "views": 2
     },
     {
-      "id": "HH-HHC-0114",
-      "views": 2
-    },
-    {
       "id": "HH-HHC-0002",
       "views": 2
     },
     {
-      "id": "HH-EGC-0030",
+      "id": "HH-HHC-0001",
       "views": 2
     },
     {
-      "id": "HH-IHC-0044",
+      "id": "HH-IHC-0009",
+      "views": 2
+    },
+    {
+      "id": "HH-EGC-0018",
+      "views": 2
+    },
+    {
+      "id": "HH-IHC-0013",
       "views": 2
     }
   ],
@@ -243,10 +244,16 @@
       "n": 1
     }
   ],
+  "pageviews_by_page": [
+    {
+      "page": "gallery.html",
+      "n": 1
+    }
+  ],
   "by_country": [
     {
       "country": "CA",
-      "n": 329
+      "n": 330
     },
     {
       "country": "GR",
