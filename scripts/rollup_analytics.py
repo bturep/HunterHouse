@@ -114,6 +114,11 @@ def rollup_month(token, ym):
                                        f"AND blob1='search0' AND blob4!='' GROUP BY q ORDER BY n DESC LIMIT {TOP_N}"),
         "downloads_by_collection": ranked("blob3 AS collection, count() AS n",
                                           f"AND blob1='download' GROUP BY collection ORDER BY n DESC LIMIT {TOP_N}"),
+        # Front-of-house pageviews (static SITE pages: index.html, gallery.html …),
+        # broken out by page so the homepage vs gallery split is visible rather
+        # than lumped under events_by_type.pageview. blob6 = page filename.
+        "pageviews_by_page": ranked("blob6 AS page, count() AS n",
+                                    f"AND blob1='pageview' AND blob6!='' GROUP BY page ORDER BY n DESC LIMIT {TOP_N}"),
         "by_country": ranked("blob5 AS country, count() AS n",
                              f"AND blob5!='' GROUP BY country ORDER BY n DESC LIMIT {TOP_N}"),
     }
