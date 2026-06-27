@@ -103,6 +103,7 @@ const PUBLIC_BASE = "https://archive.hunterhousefoundation.com";
 const EVENT_TYPES = new Set([
   "view", "search", "search0", "deeplink",
   "collection", "curation", "timeline", "files",
+  "pageview",   // static SITE pages (index.html, gallery.html) — front-of-house
 ]);
 // Collection code from an archive id, e.g. "HH-CAA-0018" → "CAA".
 function collectionOf(id) {
