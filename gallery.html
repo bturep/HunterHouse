@@ -328,5 +328,30 @@ lightbox.init();
 
 <!-- PWA: register the shell service worker (re-added on import). -->
 <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
+<!-- Cookieless pageview beacon — the same first-party analytics as the archive
+     tool (browse.html). Fires one "pageview" to the Worker /event endpoint on
+     load. Honours Do-Not-Track / Global-Privacy-Control and the ?noanalytics=1
+     per-device opt-out (shares localStorage key "hhf_analytics_optout" with the
+     SPA, so opting a device out there silences it here too). No cookies, no IP
+     stored, no third parties. Telemetry must never break the page. -->
+<script>
+(function () {
+  try {
+    var BASE = "https://hhf-r2-browser.brandon-628.workers.dev";
+    var OPTOUT_KEY = "hhf_analytics_optout";
+    var na = new URLSearchParams(location.search).get("noanalytics");
+    if (na === "1") { try { localStorage.setItem(OPTOUT_KEY, "1"); } catch (e) {} }
+    else if (na === "0") { try { localStorage.removeItem(OPTOUT_KEY); } catch (e) {} }
+    var optedOut = false;
+    try { optedOut = localStorage.getItem(OPTOUT_KEY) === "1"; } catch (e) {}
+    var ok = !(navigator.doNotTrack === "1" || window.doNotTrack === "1" ||
+               navigator.globalPrivacyControl === true);
+    if (!ok || optedOut || !navigator.sendBeacon) return;
+    var p = (location.pathname.split("/").pop() || "index.html");
+    navigator.sendBeacon(BASE + "/event",
+      new Blob([JSON.stringify({ t: "pageview", p: p })], { type: "text/plain" }));
+  } catch (e) { /* telemetry must never break the page */ }
+})();
+</script>
 </body>
 </html>
