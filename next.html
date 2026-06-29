@@ -1106,6 +1106,23 @@
   .cur-pager .cp-sep{display:inline-block;width:1px;height:11px;background:var(--rule)}
   .cur-pager .cp-count{color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:0.04em}
   .pane-image.pdf-mode .cur-pager{display:none}
+  /* ── Correspondence view (letters) ── */
+  .letter-row .title.lr-fromto{font-weight:500}
+  .letter-row .lr-arrow{color:var(--hint);margin:0 4px;font-weight:400}
+  body.letters-view .site-topright #letters-toggle{color:var(--red-deep)}
+  .fp-letters{padding:10px 12px;font-size:12px}
+  .fp-ltitle{font-weight:600;letter-spacing:.02em;margin-bottom:8px}
+  .fp-lsub{color:var(--muted);font-weight:400}
+  .fp-lsec{margin-bottom:12px}
+  .fp-lh{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--hint);margin-bottom:5px}
+  .fp-lchip{display:inline-flex;align-items:center;gap:5px;margin:0 5px 5px 0;padding:3px 8px;border:1px solid var(--rule);border-radius:11px;background:none;color:var(--ink);font:inherit;font-size:11px;cursor:pointer;line-height:1.4}
+  .fp-lchip:hover{border-color:var(--muted)}
+  .fp-lchip.active{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .fp-ln{color:var(--hint);font-variant-numeric:tabular-nums;font-size:10px}
+  .fp-lchip.active .fp-ln{color:var(--bg);opacity:.7}
+  .fp-lmore{color:var(--hint);font-size:10px;display:inline-block;margin-top:2px}
+  .fp-lclear{margin-top:6px;background:none;border:0;color:var(--muted);font:inherit;font-size:11px;cursor:pointer;padding:2px 0}
+  .fp-lclear:hover{color:var(--ink)}
   .zoom-ctl{
     display:flex;align-items:center;justify-content:center;gap:0;user-select:none;flex-shrink:0;
   }
@@ -3781,7 +3798,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.59";
+  const VERSION      = "v1.09-test.60";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -5798,6 +5815,11 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     curation: null,     // active curation object, or null = normal archive mode
     bulkSel: new Set(), // archIds selected for bulk-edit (admin only)
     bulkAnchor: null,   // last clicked id, for Shift-range
+    // ── Correspondence view (researcher-only; letters are their own object) ──
+    view: "archive",            // "archive" (drawings/photos) | "letters"
+    filterCorrespondent: new Set(),
+    filterSubject: new Set(),
+    filterPerson: new Set(),
   };
 
   const BADGE_LEGEND = [
@@ -6286,7 +6308,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     try { localStorage.setItem("hhf_gated_token", t.trim()); } catch (e) {}
     loadGatedLetters(true);
   }
-  window.hhLetters = setGatedToken;
+  window.hhLetters = toggleLettersView;
   // Consistent letter-title date — derive from the structured ISO date so every
   // title reads the same way ("12 March 1953"), regardless of how the date was
   // written on the page (as_written ranges from "Monday night" to "15 Sept. 61").
@@ -6316,6 +6338,9 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       itemType: r.kind === "letter" ? "Letter" : (r.kind || "item"),
       creator: r.from || null, letter: true, letterFrom: r.from || null, letterTo: to,
       letterPlace: r.place_written || null, handwritten: /manuscript|mixed/i.test(r.medium || ""),
+      asWritten: r.as_written || null, docForm: r.doc_form || null,
+      summary: r.summary || null, subjects: Array.isArray(r.subjects) ? r.subjects : [],
+      entities: (r.entities && typeof r.entities === "object") ? r.entities : null,
       gated: true, transcript: r.transcript || null, sourceCollection: "Frances Hunter Collection",
       medium: r.medium || null, areas: [], categories: [], drawTypes: [], builtBy: [],
       designedBy: null, use: null, scale: null, builtStatus: null, setPosition: null, notes: null,
@@ -6706,8 +6731,10 @@ WHERE {
         .map(e => byId.get(e.id)).filter(Boolean);
       return;
     }
+    if (state.view === "letters") { applyLetterFilters(); return; }
     const q = state.search.trim().toLowerCase();
     state.filtered = state.items.filter(it => {
+      if (it.gated) return false;   // gated letters live in the Correspondence view, not the archive list
       if (state.filterMarkedOnly && !marksHas(it.id)) return false;
       if (state.filterCollection.size && !state.filterCollection.has(archiveAbbrev(collectionOf(it)))) return false;
       if (state.filterArea.size && !(it.areas||[]).some(a => state.filterArea.has(a))) return false;
@@ -6754,6 +6781,182 @@ WHERE {
       ms.sort((a, b) => rank.get(a.id) - rank.get(b.id));
       state.filtered = ms.concat(rest);
     }
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // CORRESPONDENCE VIEW — letters are their own object (From→To·date, subjects,
+  // named-entity index), not drawings. Entered from the ✉ button; reuses the
+  // shell (image stage + pager + record container) but renders letter-native
+  // list / record / facets and full-text search. state.view gates everything.
+  // ══════════════════════════════════════════════════════════════════════════
+  const DOC_FORMS = { ALS:"Autograph letter, signed", TLS:"Typed letter, signed",
+    ANS:"Autograph note, signed", TL:"Typed letter (unsigned)", AL:"Autograph letter (unsigned)",
+    carbon:"Carbon copy", draft:"Draft", printed:"Printed", postcard:"Postcard", telegram:"Telegram" };
+  const docFormLabel = c => DOC_FORMS[c] || c || "";
+
+  // The non-Hunter party — the axis a researcher browses correspondence by.
+  function letterCorrespondent(it) {
+    const isHunter = s => /hunter/i.test(s || "");
+    if (it.letterFrom && !isHunter(it.letterFrom)) return it.letterFrom;
+    if (it.letterTo) { const first = it.letterTo.split(",")[0].trim(); if (!isHunter(first)) return first; }
+    return (it.letterTo || it.letterFrom || "—").split(",")[0].trim();
+  }
+  const peopleNames = it => (((it.entities || {}).people) || []).map(p => (p && p.name) || p).filter(Boolean);
+
+  async function toggleLettersView() {
+    if (state.view === "letters") { exitLetters(); return; }
+    if (!canMark()) { hhToast("Researcher view — unlock with your PIN first"); return; }
+    if (!gatedToken()) {
+      const t = window.prompt("Researcher token for the letters collection:", "");
+      if (t === null) return;
+      try { localStorage.setItem("hhf_gated_token", t.trim()); } catch (e) {}
+    }
+    if (!state.items.some(i => i.letter)) {
+      await loadGatedLetters(false);
+      if (!state.items.some(i => i.letter)) return;   // load failed; toast already shown
+    }
+    enterLetters();
+  }
+
+  function enterLetters() {
+    state.view = "letters";
+    document.body.classList.add("letters-view");
+    state.sortCol = "year"; state.sortDir = "asc";
+    state.search = "";
+    const si = document.getElementById("search-input"); if (si) si.value = "";
+    applyFilters(); renderList(); renderFilterPanel(); updateFilterBadge();
+    if (state.filtered.length) selectItem(state.filtered[0].id);
+    hhToast(`Correspondence — ${state.filtered.length} letters`);
+  }
+  function exitLetters() {
+    state.view = "archive";
+    document.body.classList.remove("letters-view");
+    state.filterCorrespondent.clear(); state.filterSubject.clear(); state.filterPerson.clear();
+    state.search = "";
+    const si = document.getElementById("search-input"); if (si) si.value = "";
+    applyFilters(); renderList(); renderFilterPanel(); updateFilterBadge();
+    if (state.filtered.length) selectItem(state.filtered[0].id);
+  }
+
+  function applyLetterFilters() {
+    const q = state.search.trim().toLowerCase();
+    state.filtered = state.items.filter(it => it.letter).filter(it => {
+      if (state.filterMarkedOnly && !marksHas(it.id)) return false;
+      if (state.filterCorrespondent.size && !state.filterCorrespondent.has(letterCorrespondent(it))) return false;
+      if (state.filterSubject.size && !(it.subjects || []).some(s => state.filterSubject.has(s))) return false;
+      if (state.filterPerson.size && !peopleNames(it).some(n => state.filterPerson.has(n))) return false;
+      if (q) {
+        const e = it.entities || {};
+        const names = peopleNames(it)
+          .concat(e.places || [], (e.orgs || []).map(o => (o && o.name) || o), (e.publications || []).map(p => (p && p.name) || p));
+        const hay = [it.letterFrom, it.letterTo, it.letterPlace, it.summary,
+          (it.subjects || []).join(" "), names.join(" "), it.transcript, it.asWritten]
+          .filter(Boolean).join(" ").toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+    const dir = state.sortDir === "asc" ? 1 : -1;
+    const dk = it => it.date || "9999-99-99";
+    const byDate = (a, b) => dir * dk(a).localeCompare(dk(b)) || (a.id || "").localeCompare(b.id || "");
+    const cmp = { id: (a, b) => dir * (a.id || "").localeCompare(b.id || ""), year: byDate, phase: byDate };
+    state.filtered.sort(cmp[state.sortCol] || byDate);
+    if (state.filterMarkedOnly) {
+      const rank = new Map(marked.map((id, i) => [id, i]));
+      state.filtered.sort((a, b) => (rank.get(a.id) ?? 1e9) - (rank.get(b.id) ?? 1e9));
+    }
+  }
+
+  function renderLettersList() {
+    const container = $("#rows");
+    container.innerHTML = "";
+    document.body.classList.toggle("marks-only", !!state.filterMarkedOnly && canMark());
+    if (state.filtered.length === 0) {
+      container.innerHTML = `<div class="empty">No letters match</div>`;
+      updateMobCount(); return;
+    }
+    const frag = document.createDocumentFragment();
+    const noted = rnNotedIds();
+    const flags = canMark();
+    if (state.filterCorrespondent.size || state.filterSubject.size || state.filterPerson.size) {
+      const d = document.createElement("div"); d.className = "phase-divider";
+      d.innerHTML = `<span>Filtered <span style="color:var(--muted);font-weight:400">${String(state.filtered.length).padStart(2,"0")} letters</span></span><span class="r" style="cursor:pointer" id="lf-clear-inline">✕ clear</span>`;
+      frag.appendChild(d);
+    }
+    state.filtered.forEach(it => {
+      const row = document.createElement("div");
+      row.className = "row letter-row" + (it.id === state.selectedId ? " sel" : "") + (marksHas(it.id) ? " marked" : "") + (seen.has(it.id) ? " seen" : "") + (noted.has(it.id) ? " has-note" : "");
+      row.dataset.id = it.id;
+      const fromTo = `${escapeHTML(it.letterFrom || "?")} <span class="lr-arrow">→</span> ${escapeHTML(it.letterTo || "?")}`;
+      const sub = escapeHTML(it.letterPlace || docFormLabel(it.docForm) || "");
+      row.innerHTML = `
+        <span class="col-id">
+          <span class="archid"><span class="tmark pc-stone" data-type="L" title="Letter">L</span></span>
+          ${flags ? `<span class="row-flags" aria-hidden="true">
+            <span class="rf-slot rf-slot-mark"><span class="rf-ico"><span class="rf-mark" title="Click to unmark [M]"></span></span></span>
+            <span class="rf-slot rf-slot-seen"><span class="rf-ico"><span class="rf-seen" title="Reviewed — click to clear [R]"><svg viewBox="0 0 14 10" width="10" height="7" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5s2.2-4 6-4 6 4 6 4-2.2 4-6 4-6-4-6-4z"/><circle cx="7" cy="5" r="1.7"/></svg></span></span></span>
+            <span class="rf-slot rf-slot-note"><span class="rf-ico"><span class="rf-note" title="Has a researcher note"><svg viewBox="0 0 10 12" width="8" height="10" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 1h4l3 3v7H2z"/><path d="M6 1v3h3"/><path d="M3.7 6.6h3M3.7 8.6h3"/></svg></span></span></span>
+          </span>` : ""}
+        </span>
+        <div class="title-wrap">
+          <div class="title lr-fromto">${fromTo}</div>
+          <div class="ph">${sub}</div>
+        </div>
+        <span class="year">${escapeHTML(yearOf(it.date))}</span>`;
+      frag.appendChild(row);
+    });
+    container.appendChild(frag);
+    const ci = document.getElementById("lf-clear-inline");
+    if (ci) ci.addEventListener("click", e => {
+      e.stopPropagation();
+      state.filterCorrespondent.clear(); state.filterSubject.clear(); state.filterPerson.clear();
+      applyFilters(); renderList(); renderFilterPanel(); updateFilterBadge();
+    });
+    requestAnimationFrame(() => updatePip("rows", "list-pip"));
+    updateMobCount();
+    renderMarkBar();
+  }
+
+  // Letter facet panel — the corpus index used as a filter: correspondent,
+  // subject, named person. (A dedicated browsable Index view is a later phase.)
+  function renderLetterFacets() {
+    const panel = $("#filter-panel");
+    if (!panel) return;
+    const L = state.items.filter(i => i.letter);
+    const tally = arr => {
+      const m = new Map();
+      arr.forEach(v => { if (v) m.set(v, (m.get(v) || 0) + 1); });
+      return [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    };
+    const corr = tally(L.map(letterCorrespondent));
+    const subj = tally(L.flatMap(i => i.subjects || []));
+    const ppl  = tally(L.flatMap(peopleNames));
+    const sec = (title, entries, set, attr, limit) => {
+      if (!entries.length) return "";
+      const shown = limit ? entries.slice(0, limit) : entries;
+      return `<div class="fp-lsec"><div class="fp-lh">${title}</div>${shown.map(([v, n]) =>
+        `<button class="fp-lchip${set.has(v) ? " active" : ""}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}<span class="fp-ln">${n}</span></button>`).join("")}${limit && entries.length > limit ? `<span class="fp-lmore">+${entries.length - limit} more</span>` : ""}</div>`;
+    };
+    panel.innerHTML = `
+      <div class="fp-letters">
+        <div class="fp-ltitle">Correspondence <span class="fp-lsub">${L.length} letters</span></div>
+        ${sec("Correspondent", corr, state.filterCorrespondent, "lfcorr")}
+        ${sec("Subject", subj, state.filterSubject, "lfsubj")}
+        ${sec("Person", ppl, state.filterPerson, "lfperson", 30)}
+        <button class="fp-lclear" id="lf-clear">✕ clear filters</button>
+      </div>`;
+    const wire = (attr, set) => panel.querySelectorAll(`[data-${attr}]`).forEach(el => el.addEventListener("click", () => {
+      toggleSet(set, el.dataset[attr.replace(/-([a-z])/g, (_, c) => c.toUpperCase())] || el.getAttribute(`data-${attr}`));
+      applyFilters(); renderList(); renderLetterFacets(); updateFilterBadge();
+    }));
+    wire("lfcorr", state.filterCorrespondent);
+    wire("lfsubj", state.filterSubject);
+    wire("lfperson", state.filterPerson);
+    const clr = panel.querySelector("#lf-clear");
+    if (clr) clr.addEventListener("click", () => {
+      state.filterCorrespondent.clear(); state.filterSubject.clear(); state.filterPerson.clear();
+      applyFilters(); renderList(); renderLetterFacets(); updateFilterBadge();
+    });
   }
 
   // ── Sort header UI ────────────────────────────────────────────────────────
@@ -6966,6 +7169,7 @@ WHERE {
   }
 
   function renderList() {
+    if (state.view === "letters") { renderLettersList(); return; }
     const container = $("#rows");
     container.innerHTML = "";
 
@@ -7418,7 +7622,36 @@ WHERE {
     // edit-affordances ON); populated fields always show. Non-letters unchanged.
     const showEmpty = item.letter ? (adminEdit && !adminEditsOff()) : adminEdit;
     const EM = '<span class="hh-empty">—</span>';
+    const coll = collectionOf(item);
+    const creatorRowLabel = creatorLabel(item.itemType);
     const descRows = [];
+    const archRows = [];
+    if (item.letter) {
+      // Letter-native record: who/whom/when + summary + the access-point index.
+      const lchip = (v, cls, attr, active) =>
+        `<button class="pill ${cls}${active ? " active" : ""}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}</button>`;
+      if (item.letterFrom) descRows.push(["From", lchip(item.letterFrom, "creator-pill " + pillCls(PC.clay), "correspondent", state.filterCorrespondent.has(item.letterFrom))]);
+      if (item.letterTo)   descRows.push(["To", escapeHTML(item.letterTo)]);
+      if (item.letterPlace) descRows.push(["Place", escapeHTML(item.letterPlace)]);
+      const dl = fmtLetterDate(item.date, item.asWritten);
+      if (dl) descRows.push(["Date", escapeHTML(dl) + (item.asWritten && item.asWritten !== dl ? ` <span class="hh-empty">· as written “${escapeHTML(item.asWritten)}”</span>` : "")]);
+      if (item.docForm) descRows.push(["Form", escapeHTML(docFormLabel(item.docForm))]);
+      if (item.medium)  descRows.push(["Medium", escapeHTML(item.medium)]);
+      if (item.summary) descRows.push(["Summary", `<span class="hh-note-text">${escapeHTML(item.summary)}</span>`]);
+      const subj = (item.subjects || []).map(s => lchip(s, "category-pill " + pillCls(PC.indigo), "subject", state.filterSubject.has(s))).join("");
+      if (subj) descRows.push(["Subjects", subj]);
+      const e = item.entities || {};
+      const ppl = ((e.people) || []).map(p => { const n = (p && p.name) || p; return lchip(n, "creator-pill " + pillCls(PC.clay), "person", state.filterPerson.has(n)); }).join("");
+      if (ppl) descRows.push(["People", ppl]);
+      const plc = (e.places || []).map(p => `<span class="pill ${pillCls(PC.sage)}">${escapeHTML(p)}</span>`).join("");
+      if (plc) descRows.push(["Places", plc]);
+      const orgs = (e.orgs || []).map(o => `<span class="pill ${pillCls(PC.denim)}">${escapeHTML((o && o.name) || o)}</span>`).join("");
+      if (orgs) descRows.push(["Organizations", orgs]);
+      const pubs = (e.publications || []).map(p => `<span class="pill ${pillCls(PC.stone)}">${escapeHTML((p && p.name) || p)}</span>`).join("");
+      if (pubs) descRows.push(["Works cited", pubs]);
+      if (coll) archRows.push(["Held by", `<span class="pill collection-pill ${pillCls(PC.denim)}">${escapeHTML(coll)}</span>`]);
+      if (item.rights) archRows.push(["Rights", rightsRowHTML(item.rights, coll)]);
+    } else {
     if (item.id)          descRows.push(["Item",    displayId(item.id)]);
     if (item.date || showEmpty) descRows.push(["Date", item.date ? escapeHTML(item.date) : EM]);
     if (item.phase || showEmpty) {
@@ -7448,7 +7681,6 @@ WHERE {
         ? `<button class="pill builtstatus-pill ${pillCls(PC.moss)}${bsActive}" data-builtstatus="${escapeHTML(item.builtStatus)}">${escapeHTML(item.builtStatus)}</button>`
         : EM]);
     }
-    const creatorRowLabel = creatorLabel(item.itemType);
     if (item.creator || showEmpty) {
       const cActive = item.creator && state.filterCreator.has(item.creator) ? " active" : "";
       descRows.push([creatorRowLabel, item.creator
@@ -7471,7 +7703,6 @@ WHERE {
     if (item.medium || showEmpty) descRows.push(["Medium", item.medium ? escapeHTML(item.medium) : EM]);
     if (item.scale  || showEmpty) descRows.push(["Scale",  item.scale  ? escapeHTML(item.scale)  : EM]);
     if (item.use    || showEmpty) descRows.push(["Use",    item.use    ? escapeHTML(item.use)    : EM]);
-    const coll = collectionOf(item);
     if (coll)             descRows.push(["Held by", `<span class="pill collection-pill ${pillCls(PC.denim)}">${escapeHTML(archiveAbbrev(coll))}</span>`]);
     if (item.notes || showEmpty) {
       descRows.push(["Notes", item.notes
@@ -7479,7 +7710,6 @@ WHERE {
         : EM]);
     }
 
-    const archRows = [];
     if (item.location || showEmpty) {
       const crumbs = item.location
         ? item.location.split(/,\s*/).map(escapeHTML).join(" › ")
@@ -7490,6 +7720,7 @@ WHERE {
       archRows.push(["Rights", rightsRowHTML(item.rights, coll)]);
     }
     if (item.archiveLink) archRows.push(["Finding aid", findingAidHTML(item.archiveLink, coll)]);
+    }
 
     // Inline-editable record-pane rows. Keys are the user-facing labels
     // (which the picker matches against). PIDs reference PROPERTIES — the
@@ -7606,7 +7837,11 @@ WHERE {
     // host so a copied link is citable regardless of which origin you're on.
     const permalink = "https://hunterhouse.org/archive/" + item.id + ".html";
     const pl = document.getElementById("df-permalink");
-    if (pl) {
+    if (pl && item.gated) {
+      // Gated letters have no public static permalink page — hide it.
+      pl.style.display = "none";
+    } else if (pl) {
+      pl.style.display = "";
       pl.href = permalink;
       pl.style.opacity = ""; pl.style.pointerEvents = "";
       pl.setAttribute("target", "_blank"); pl.setAttribute("rel", "noopener");
@@ -7663,6 +7898,15 @@ WHERE {
     if (cnGo) cnGo.addEventListener("click", () => selectItem(cnGo.dataset.nextId));
     const tsHead = body.querySelector(".transcript-section .ts-head");
     if (tsHead) tsHead.addEventListener("click", () => tsHead.closest(".transcript-section").classList.toggle("open"));
+    // Letter access-point chips → filter the correspondence view.
+    const wireLetterChip = (attr, set) => body.querySelectorAll(`[data-${attr}]`).forEach(el =>
+      el.addEventListener("click", ev => {
+        ev.preventDefault();
+        if (state.view !== "letters") enterLetters();
+        toggleSet(set, el.getAttribute(`data-${attr}`));
+        applyFilters(); renderList(); renderFilterPanel(); updateFilterBadge();
+      }));
+    if (item.letter) { wireLetterChip("correspondent", state.filterCorrespondent); wireLetterChip("subject", state.filterSubject); wireLetterChip("person", state.filterPerson); }
     if (state.curation) renderCuratorNote(item); else renderRN(item.id);
     renderRnTools();
     wireMetaEdit(item);
@@ -7824,6 +8068,7 @@ WHERE {
   function renderFilterPanel() {
     const panel = $("#filter-panel");
     if (!panel) return;
+    if (state.view === "letters") { renderLetterFacets(); return; }
 
     // Collections in the filter panel mirror the catalogue list's order:
     // tail collections (EGC) sort to the bottom regardless of alphabet.
