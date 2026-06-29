@@ -3781,7 +3781,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.58";
+  const VERSION      = "v1.09-test.59";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6287,6 +6287,19 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     loadGatedLetters(true);
   }
   window.hhLetters = setGatedToken;
+  // Consistent letter-title date — derive from the structured ISO date so every
+  // title reads the same way ("12 March 1953"), regardless of how the date was
+  // written on the page (as_written ranges from "Monday night" to "15 Sept. 61").
+  const GLM_MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  function fmtLetterDate(iso, asWritten) {
+    if (typeof iso === "string") {
+      let m;
+      if ((m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/))) return `${+m[3]} ${GLM_MONTHS[+m[2]-1]} ${m[1]}`;
+      if ((m = iso.match(/^(\d{4})-(\d{2})$/)))          return `${GLM_MONTHS[+m[2]-1]} ${m[1]}`;
+      if ((m = iso.match(/^(\d{4})$/)))                  return m[1];
+    }
+    return asWritten || iso || "";
+  }
   function gatedRecToItem(r) {
     const tok = encodeURIComponent(gatedToken());
     // page count: explicit r.pages (int), else one per source scan, else 1 if any prefix.
@@ -6298,7 +6311,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     const img = pages[0] || null;
     const to = Array.isArray(r.to) ? r.to.filter(Boolean).join(", ") : (r.to || "");
     return {
-      qid: null, id: r.id, title: `${r.from || "?"} to ${to || "?"}, ${r.as_written || r.date || ""}`,
+      qid: null, id: r.id, title: `${r.from || "?"} to ${to || "?"}, ${fmtLetterDate(r.date, r.as_written)}`,
       image: img, pages, master: null, accessCopy: null, date: r.date || null,
       itemType: r.kind === "letter" ? "Letter" : (r.kind || "item"),
       creator: r.from || null, letter: true, letterFrom: r.from || null, letterTo: to,
@@ -7399,70 +7412,75 @@ WHERE {
     ).join("");
 
     const adminEdit = canEditWikibase();
+    // Letters carry none of the drawing-centric fields (phase, sheet, area,
+    // drawing type…), and aren't Wikibase-editable, so empty rows are pure
+    // noise. For letters, show empty fields only in edit mode (admin with
+    // edit-affordances ON); populated fields always show. Non-letters unchanged.
+    const showEmpty = item.letter ? (adminEdit && !adminEditsOff()) : adminEdit;
     const EM = '<span class="hh-empty">—</span>';
     const descRows = [];
     if (item.id)          descRows.push(["Item",    displayId(item.id)]);
-    if (item.date || adminEdit) descRows.push(["Date", item.date ? escapeHTML(item.date) : EM]);
-    if (item.phase || adminEdit) {
+    if (item.date || showEmpty) descRows.push(["Date", item.date ? escapeHTML(item.date) : EM]);
+    if (item.phase || showEmpty) {
       descRows.push(["Phase", item.phase ? escapeHTML(item.phase) : EM]);
     }
-    if (item.setPosition || adminEdit) {
+    if (item.setPosition || showEmpty) {
       descRows.push(["Sheet", item.setPosition ? escapeHTML(item.setPosition) : EM]);
     }
-    if (areasHtml || adminEdit) descRows.push(["Areas", areasHtml || EM]);
-    if (categoriesHtml || adminEdit) descRows.push(["Category", categoriesHtml || EM]);
-    if (item.itemType || adminEdit) {
+    if (areasHtml || showEmpty) descRows.push(["Areas", areasHtml || EM]);
+    if (categoriesHtml || showEmpty) descRows.push(["Category", categoriesHtml || EM]);
+    if (item.itemType || showEmpty) {
       const isActive = state.filterType.has(item.itemType);
       descRows.push(["Item type", item.itemType
         ? `<button class="pill type-pill ${pillCls(itemTypePillColor())}${isActive ? " active" : ""}" data-itype="${escapeHTML(item.itemType)}">${escapeHTML(item.itemType)}</button>`
         : EM
       ]);
     }
-    if (item.drawTypes?.length || adminEdit) {
+    if (item.drawTypes?.length || showEmpty) {
       const drawHtml = sortDrawTypes(item.drawTypes || []).map(dt =>
         `<button class="pill drawtype-pill ${pillCls(drawTypePillColor())}${state.filterDrawType.has(dt) ? " active" : ""}" data-drawtype="${escapeHTML(dt)}">${escapeHTML(dt)}</button>`
       ).join("");
       descRows.push(["Drawing type", drawHtml || EM]);
     }
-    if (item.builtStatus || adminEdit) {
+    if (item.builtStatus || showEmpty) {
       const bsActive = state.filterBuiltStatus.has(item.builtStatus) ? " active" : "";
       descRows.push(["Built", item.builtStatus
         ? `<button class="pill builtstatus-pill ${pillCls(PC.moss)}${bsActive}" data-builtstatus="${escapeHTML(item.builtStatus)}">${escapeHTML(item.builtStatus)}</button>`
         : EM]);
     }
     const creatorRowLabel = creatorLabel(item.itemType);
-    if (item.creator || adminEdit) {
+    if (item.creator || showEmpty) {
       const cActive = item.creator && state.filterCreator.has(item.creator) ? " active" : "";
       descRows.push([creatorRowLabel, item.creator
         ? `<button class="pill creator-pill ${pillCls(PC.clay)}${cActive}" data-creator="${escapeHTML(item.creator)}">${escapeHTML(item.creator)}</button>`
         : EM]);
     }
-    if (item.designedBy || adminEdit) {
+    if (item.designedBy || showEmpty) {
       const cActive = item.designedBy && state.filterCreator.has(item.designedBy) ? " active" : "";
       descRows.push(["Designed by", item.designedBy
         ? `<button class="pill creator-pill ${pillCls(PC.clay)}${cActive}" data-creator="${escapeHTML(item.designedBy)}">${escapeHTML(item.designedBy)}</button>`
         : EM]);
     }
-    if (item.builtBy?.length || adminEdit) {
+    if (item.builtBy?.length || showEmpty) {
       const html = (item.builtBy || []).map(b => {
         const a = state.filterCreator.has(b) ? " active" : "";
         return `<button class="pill creator-pill ${pillCls(PC.clay)}${a}" data-creator="${escapeHTML(b)}">${escapeHTML(b)}</button>`;
       }).join("");
       descRows.push(["Built by", html || EM]);
     }
-    if (item.medium || adminEdit) descRows.push(["Medium", item.medium ? escapeHTML(item.medium) : EM]);
-    if (item.scale  || adminEdit) descRows.push(["Scale",  item.scale  ? escapeHTML(item.scale)  : EM]);
-    if (item.use    || adminEdit) descRows.push(["Use",    item.use    ? escapeHTML(item.use)    : EM]);
+    if (item.medium || showEmpty) descRows.push(["Medium", item.medium ? escapeHTML(item.medium) : EM]);
+    if (item.scale  || showEmpty) descRows.push(["Scale",  item.scale  ? escapeHTML(item.scale)  : EM]);
+    if (item.use    || showEmpty) descRows.push(["Use",    item.use    ? escapeHTML(item.use)    : EM]);
     const coll = collectionOf(item);
     if (coll)             descRows.push(["Held by", `<span class="pill collection-pill ${pillCls(PC.denim)}">${escapeHTML(archiveAbbrev(coll))}</span>`]);
-    if (item.notes || adminEdit) {
+    if (item.notes || showEmpty) {
       descRows.push(["Notes", item.notes
         ? `<span class="hh-note-text">${escapeHTML(item.notes)}</span>`
         : EM]);
     }
 
     const archRows = [];
-    if (item.location || adminEdit) {
+    if (item.location || showEmpty) {
       const crumbs = item.location
         ? item.location.split(/,\s*/).map(escapeHTML).join(" › ")
         : EM;
