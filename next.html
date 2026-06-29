@@ -3798,7 +3798,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.60";
+  const VERSION      = "v1.09-test.61";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -10722,14 +10722,20 @@ WHERE {
       const items = await loadFromWikibase({
         onRevalidated: (fresh) => {
           if (!fresh || !fresh.length) return;
+          // Preserve any loaded gated letters — they live alongside the
+          // catalogue in state.items but come from a separate source, so the
+          // revalidated catalogue must NOT clobber them (else the Correspondence
+          // view empties out a few seconds after the letters load).
+          const gated = state.items.filter(i => i.gated);
+          const current = state.items.filter(i => !i.gated);
           // Same list shape (overwhelmingly the common case) — swap refs
           // silently to keep the user's scroll, selection, and any in-flight
           // interaction untouched. Different shape (item added/removed) —
           // re-derive filtered + redraw.
           const sameShape =
-            fresh.length === state.items.length &&
-            fresh.every((it, i) => it.id === state.items[i]?.id);
-          state.items = fresh;
+            fresh.length === current.length &&
+            fresh.every((it, i) => it.id === current[i]?.id);
+          state.items = fresh.concat(gated);
           if (!sameShape) { applyFilters(); renderList(); }
         }
       });
@@ -10740,7 +10746,7 @@ WHERE {
         return;
       }
 
-      state.items = items;
+      state.items = items.concat(state.items.filter(i => i.gated));   // keep any already-loaded gated letters
 
       // BADEN MODE: data is ready — hand off to the viewing room and stop here,
       // so none of the desktop render/wire below runs. Same state.items, no fork.
