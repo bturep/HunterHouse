@@ -363,10 +363,11 @@ export default {
     const cors = corsHeaders(origin);
     const url = new URL(request.url);
 
-    if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
-
-    // ── Gated letters (researcher-only, real auth; private bucket) ───────
+    // ── Gated letters (researcher-only; handles its OWN OPTIONS/CORS so the
+    //    X-Researcher-Token preflight gets the right Allow-Headers) ────────
     if (url.pathname.startsWith("/gated/")) return handleGated(request, env);
+
+    if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
 
     // ── Usage beacon (POST) ──────────────────────────────────────────────
     if (url.pathname === "/event") {
