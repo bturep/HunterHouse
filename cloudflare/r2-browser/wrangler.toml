@@ -45,3 +45,11 @@ dataset = "Hunter_House_Archive"
 [[r2_buckets]]
 binding = "NOTES_BUCKET"
 bucket_name = "hhf-baden-notes"
+
+# Gated letters storage (researcher-only). Native binding → same-account private
+# bucket; reachable ONLY through the token-checked /gated/* endpoints (src/gated-letters.js).
+#   Create once:  npx wrangler r2 bucket create hhf-gated
+#   Secret:       npx wrangler secret put GATED_TOKEN   (the researcher password)
+[[r2_buckets]]
+binding = "GATED_BUCKET"
+bucket_name = "hhf-gated"

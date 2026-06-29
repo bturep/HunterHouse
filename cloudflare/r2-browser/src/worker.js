@@ -355,6 +355,8 @@ function parseListXml(xml, prefix) {
   return { folders, files, truncated, cursor };
 }
 
+import { handleGated } from "./gated-letters.js";
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
@@ -362,6 +364,9 @@ export default {
     const url = new URL(request.url);
 
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
+
+    // ── Gated letters (researcher-only, real auth; private bucket) ───────
+    if (url.pathname.startsWith("/gated/")) return handleGated(request, env);
 
     // ── Usage beacon (POST) ──────────────────────────────────────────────
     if (url.pathname === "/event") {
