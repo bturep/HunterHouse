@@ -3536,7 +3536,7 @@
       <iframe id="pdf-frame" title="Publication PDF" src="about:blank"></iframe>
     </div>
     <div class="image-foot">
-      <span class="foot-left"><button id="pdf-view" type="button" hidden>View PDF</button><button id="pdf-close" type="button" title="Close PDF" aria-label="Close PDF" hidden>✕</button><span class="cur-pager" id="cur-pager" hidden><button class="cp-btn" id="cp-prev" type="button" aria-label="Previous in selection">← Prev</button><span class="cp-sep"></span><span class="cp-count" id="cp-count">— / —</span><span class="cp-sep"></span><button class="cp-btn" id="cp-next" type="button" aria-label="Next in selection">Next →</button></span></span>
+      <span class="foot-left"><button id="pdf-view" type="button" hidden>View PDF</button><button id="pdf-close" type="button" title="Close PDF" aria-label="Close PDF" hidden>✕</button><span class="cur-pager" id="cur-pager" hidden><button class="cp-btn" id="cp-prev" type="button" aria-label="Previous in selection">← Prev</button><span class="cp-sep"></span><span class="cp-count" id="cp-count">— / —</span><span class="cp-sep"></span><button class="cp-btn" id="cp-next" type="button" aria-label="Next in selection">Next →</button></span><span class="cur-pager" id="letter-pager" hidden><button class="cp-btn" id="lp-prev" type="button" aria-label="Previous page">← Page</button><span class="cp-sep"></span><span class="cp-count" id="lp-count">— / —</span><span class="cp-sep"></span><button class="cp-btn" id="lp-next" type="button" aria-label="Next page">Page →</button></span></span>
       <div class="zoom-ctl">
         <button id="zoom-out" type="button" title="Zoom out [-]" aria-label="Zoom out">−</button>
         <span class="pct" id="zoom-pct">100%</span>
@@ -3781,7 +3781,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.57";
+  const VERSION      = "v1.09-test.58";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6289,12 +6289,17 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   window.hhLetters = setGatedToken;
   function gatedRecToItem(r) {
     const tok = encodeURIComponent(gatedToken());
-    const img = (r.pages && r.img_prefix)
-      ? `${GATED_BASE}/img?key=${encodeURIComponent(r.img_prefix + "01_prev.jpg")}&t=${tok}` : null;
+    // page count: explicit r.pages (int), else one per source scan, else 1 if any prefix.
+    // Build a per-page _prev.jpg URL list so multi-page letters get a page pager.
+    const npages = (typeof r.pages === "number" ? r.pages
+                    : (r.source_scans ? r.source_scans.length : 0)) || (r.img_prefix ? 1 : 0);
+    const pageUrl = k => `${GATED_BASE}/img?key=${encodeURIComponent(r.img_prefix + String(k + 1).padStart(2, "0") + "_prev.jpg")}&t=${tok}`;
+    const pages = (r.img_prefix && npages > 0) ? Array.from({ length: npages }, (_, k) => pageUrl(k)) : [];
+    const img = pages[0] || null;
     const to = Array.isArray(r.to) ? r.to.filter(Boolean).join(", ") : (r.to || "");
     return {
       qid: null, id: r.id, title: `${r.from || "?"} to ${to || "?"}, ${r.as_written || r.date || ""}`,
-      image: img, master: null, accessCopy: null, date: r.date || null,
+      image: img, pages, master: null, accessCopy: null, date: r.date || null,
       itemType: r.kind === "letter" ? "Letter" : (r.kind || "item"),
       creator: r.from || null, letter: true, letterFrom: r.from || null, letterTo: to,
       letterPlace: r.place_written || null, handwritten: /manuscript|mixed/i.test(r.medium || ""),
@@ -7053,6 +7058,7 @@ WHERE {
   let currentImg = null;
   let zoomState = { scale:1, fitScale:1, tx:0, ty:0, naturalW:0, naturalH:0, rotation:0 };
   let renderGen = 0; // incremented on each renderImage call; stale callbacks self-cancel
+  let letterPage = 0; // current page index for multi-page gated letters (reset on item change)
 
   function renderImage(item) {
     closePdf();   // switching items always returns to the image view
@@ -7061,7 +7067,10 @@ WHERE {
     const idx = state.filtered.findIndex(i => i.id === item.id);
 
 
-    const url = imageUrl(item);
+    // Multi-page gated letters paint the current page; everything else uses item.image.
+    const url = (item.pages && item.pages.length > 1)
+      ? item.pages[Math.min(Math.max(letterPage, 0), item.pages.length - 1)]
+      : imageUrl(item);
     canvas.innerHTML = "";
     currentImg = null;
     canvas.classList.add("no-zoom");
@@ -7656,6 +7665,7 @@ WHERE {
       }
     }
     state.selectedId = id;
+    letterPage = 0;                         // reset multi-page letter pager on item change
     const item = state.items.find(i => i.id === id);
     if (!item) return;
 
@@ -7673,6 +7683,7 @@ WHERE {
     renderImage(item);
     renderMeta(item);
     updateCurPager();
+    updateLetterPager();
     trackView(id);
 
     const url = new URL(location.href);
@@ -7702,6 +7713,33 @@ WHERE {
     const idx = state.filtered.findIndex(i => i.id === state.selectedId);
     const next = idx + delta;
     if (next >= 0 && next < state.filtered.length) selectItem(state.filtered[next].id);
+  }
+
+  // Multi-page letter pager — shows ‹ 1 / N › on the image foot for items with
+  // more than one scanned page (gated letters), and swaps the displayed page.
+  function updateLetterPager() {
+    const pager = document.getElementById("letter-pager");
+    if (!pager) return;
+    const item = state.items.find(i => i.id === state.selectedId);
+    const n = item && item.pages ? item.pages.length : 0;
+    if (!item || n <= 1) { pager.hidden = true; return; }
+    pager.hidden = false;
+    const count = document.getElementById("lp-count");
+    const prev = document.getElementById("lp-prev");
+    const next = document.getElementById("lp-next");
+    if (count) count.textContent = `${letterPage + 1} / ${n}`;
+    if (prev) prev.disabled = letterPage <= 0;
+    if (next) next.disabled = letterPage >= n - 1;
+  }
+  function letterPageStep(delta) {
+    const item = state.items.find(i => i.id === state.selectedId);
+    const n = item && item.pages ? item.pages.length : 0;
+    if (n <= 1) return;
+    const np = Math.min(Math.max(letterPage + delta, 0), n - 1);
+    if (np === letterPage) return;
+    letterPage = np;
+    renderImage(item);
+    updateLetterPager();
   }
 
   function updateMobileNav() {
@@ -8248,6 +8286,8 @@ WHERE {
     document.getElementById("mob-snav-next")?.addEventListener("click", () => selectAdjacent(+1));
     document.getElementById("cp-prev")?.addEventListener("click", () => selectAdjacent(-1));
     document.getElementById("cp-next")?.addEventListener("click", () => selectAdjacent(+1));
+    document.getElementById("lp-prev")?.addEventListener("click", () => letterPageStep(-1));
+    document.getElementById("lp-next")?.addEventListener("click", () => letterPageStep(+1));
     document.getElementById("cur-leave")?.addEventListener("click", exitCuration);
 
     // Version displays (ap-ver / mob-about-ver are already painted at script
