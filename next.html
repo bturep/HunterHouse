@@ -16,7 +16,7 @@
      connect-src whitelists Wikibase Cloud (catalogue + writes) and loopback
      (the admin edit-proxy at 127.0.0.1:8731). img-src adds the R2 host that
      Wikibase URLs point at. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://archive.hunterhousefoundation.com; connect-src 'self' https://hunterhouse.wikibase.cloud https://archive.hunterhousefoundation.com https://hhf-r2-browser.brandon-628.workers.dev http://127.0.0.1:* http://localhost:*; media-src 'self' blob:; frame-src 'self'; worker-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://archive.hunterhousefoundation.com https://hhf-r2-browser.brandon-628.workers.dev; connect-src 'self' https://hunterhouse.wikibase.cloud https://archive.hunterhousefoundation.com https://hhf-r2-browser.brandon-628.workers.dev http://127.0.0.1:* http://localhost:*; media-src 'self' blob:; frame-src 'self'; worker-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'">
 <!-- manifest + apple-mobile-web-app-title are INJECTED by the HH_BADEN script below,
      NOT static here. iOS reads these once at load and ignores later JS edits, so
      Baden mode must place its OWN pair (manifest.baden.next.json + "Hunter House")
@@ -2553,6 +2553,15 @@
   .site-topright #files-toggle svg{display:block;pointer-events:none}
   .site-topright #files-toggle:hover{opacity:0.5}
   html[data-splash-init="1"] body .site-top #files-toggle{display:none}
+  /* Researcher "Letters" button — mirrors #files-toggle (researcher-gated) */
+  .site-topright #letters-toggle{display:none}
+  body.is-researcher .site-topright #letters-toggle{
+    display:flex;align-items:center;justify-content:center;
+    background:none;border:0;border-radius:0;padding:0;cursor:pointer;color:var(--ink);
+  }
+  .site-topright #letters-toggle svg{display:block;pointer-events:none}
+  .site-topright #letters-toggle:hover{opacity:0.5}
+  html[data-splash-init="1"] body .site-top #letters-toggle{display:none}
 
   #files-pane{
     display:none;position:fixed;inset:0;z-index:400;
@@ -3343,6 +3352,7 @@
     <!-- Files button — read-only R2 bucket browser (#files-pane). Researcher-
          only: hidden unless body.is-researcher (see #files-toggle CSS). -->
     <button class="theme-btn" id="files-toggle" title="Archive files" aria-label="Browse archive files"><svg width="14" height="13" viewBox="0 0 14 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3.2V11h12V4.5H6.5L5 3.2H1z"/></svg></button>
+    <button class="theme-btn" id="letters-toggle" title="Researcher letters (enter token / load)" aria-label="Researcher letters" onclick="window.hhLetters && window.hhLetters()"><svg width="15" height="12" viewBox="0 0 16 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="2" width="14" height="9.5" rx="1"/><path d="M1.5 3l6.5 4.5L14.5 3"/></svg></button>
     <!-- Info ("?") button — opens the shortcuts/info pane. In-flow between
          #search-toggle and #fs-toggle; hidden while the about-pane is open
          and on first paint via data-splash-init (see the #rec-info rules). -->
@@ -3771,7 +3781,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.56";
+  const VERSION      = "v1.09-test.57";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6313,6 +6323,54 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     ];
   })();
 
+  // ── Gated letters (researcher-only) — fetched live from the auth Worker ─────
+  // The Frances Hunter correspondence lives in a PRIVATE R2 bucket behind the
+  // Worker's /gated/* endpoints (researcher token). It is NOT in the public
+  // Wikibase/catalogue. Researchers enter the token once (Letters button); it is
+  // stored locally and sent as X-Researcher-Token (data) / ?t= (images).
+  const GATED_BASE = ANALYTICS_BASE + "/gated";
+  function gatedToken() { try { return localStorage.getItem("hhf_gated_token") || ""; } catch (e) { return ""; } }
+  function setGatedToken() {
+    const t = window.prompt("Researcher token for the letters collection:", gatedToken());
+    if (t === null) return;
+    try { localStorage.setItem("hhf_gated_token", t.trim()); } catch (e) {}
+    loadGatedLetters(true);
+  }
+  window.hhLetters = setGatedToken;
+  function gatedRecToItem(r) {
+    const tok = encodeURIComponent(gatedToken());
+    const img = (r.pages && r.img_prefix)
+      ? `${GATED_BASE}/img?key=${encodeURIComponent(r.img_prefix + "01_prev.jpg")}&t=${tok}` : null;
+    const to = Array.isArray(r.to) ? r.to.filter(Boolean).join(", ") : (r.to || "");
+    return {
+      qid: null, id: r.id, title: `${r.from || "?"} to ${to || "?"}, ${r.as_written || r.date || ""}`,
+      image: img, master: null, accessCopy: null, date: r.date || null,
+      itemType: r.kind === "letter" ? "Letter" : (r.kind || "item"),
+      creator: r.from || null, letter: true, letterFrom: r.from || null, letterTo: to,
+      letterPlace: r.place_written || null, handwritten: /manuscript|mixed/i.test(r.medium || ""),
+      gated: true, transcript: r.transcript || null, sourceCollection: "Frances Hunter Collection",
+      medium: r.medium || null, areas: [], categories: [], drawTypes: [], builtBy: [],
+      designedBy: null, use: null, scale: null, builtStatus: null, setPosition: null, notes: null,
+      rights: "Hunter House Foundation", heldBy: null, archiveLink: null, location: null,
+      rotation: 0, phase: null, phaseQID: null,
+    };
+  }
+  async function loadGatedLetters(announce) {
+    if (!canMark()) return;                         // researchers only
+    const tok = gatedToken();
+    if (!tok) { if (announce) hhToast("Enter the researcher token first (Letters ✉)"); return; }
+    try {
+      const res = await fetch(GATED_BASE + "/letters", { headers: { "X-Researcher-Token": tok }, cache: "no-store" });
+      if (res.status === 401) { hhToast("Letters: token rejected", "err"); return; }
+      if (!res.ok) { hhToast("Letters: load failed (" + res.status + ")", "err"); return; }
+      const data = await res.json();
+      const recs = (data.records || []).map(gatedRecToItem);
+      state.items = state.items.filter(i => !i.gated).concat(recs);   // idempotent re-load
+      applyFilters(); renderList();
+      hhToast(`Loaded ${recs.length} researcher letters`);
+    } catch (e) { console.warn("gated letters load failed", e); hhToast("Letters: load error", "err"); }
+  }
+
   function processRows(rows) {
     const dateStr = v => v ? v.replace(/^\+/, "").split("T")[0] : null;
     const map = new Map();
@@ -6361,7 +6419,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         it.builtBy.push(r.builtByLabel.value);
     }
     const out = [...map.values()];
-    for (const d of DEMO_LETTERS) { if (!d.gated || canMark()) out.push(d); }   // letters tryout
+    // Letters now load live from the gated Worker (loadGatedLetters), researcher-only — no demo inject.
     return out.sort((a, b) => (a.id || "").localeCompare(b.id || ""));
   }
 
@@ -10466,6 +10524,9 @@ WHERE {
       // Distinct from an in-session view: someone arrived straight at an item
       // via a shared / external deep-link.
       if (urlId && target === urlId) hhTrack("deeplink", { id: urlId });
+
+      // Researcher-only: pull the gated letters from the auth Worker + merge in.
+      loadGatedLetters();
 
     } catch (err) {
       console.error(err);
