@@ -3812,7 +3812,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.62";
+  const VERSION      = "v1.09-test.63";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -10781,7 +10781,7 @@ WHERE {
       // browse.html). With this commented, state.curations stays empty so the
       // [Curated] filter entry never renders; all overlay/card/note code is
       // inert. Restore by uncommenting (and re-add curated mentions to the tour).
-      // await loadCurationIndex();   // populate [Curated] entry (tiny local JSON; no-op if absent)
+      await loadCurationIndex();   // populate [Curated] entry (tiny local JSON; no-op if absent)
       applyFilters();
       renderList();
       wireControls();

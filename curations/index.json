@@ -1,6 +1,6 @@
 {
   "_note": "Index of available curators. Each entry's <slug>.json holds that curator's selection + bio + intro. The slug is internal — only the displayed `curator` string is user-visible in the chip.",
   "curations": [
-    { "slug": "brandon-poole", "curator": "Brandon Poole" }
+    { "slug": "for-theodora", "curator": "For Theodora" }
   ]
 }
