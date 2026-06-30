@@ -3812,7 +3812,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.63";
+  const VERSION      = "v1.09-test.64";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -10800,6 +10800,14 @@ WHERE {
 
       // Researcher-only: pull the gated letters from the auth Worker + merge in.
       loadGatedLetters();
+
+      // Deep-entry: ?open=<curation-slug> lands directly in that curated selection
+      // (e.g. a preview link shared with a mentor opens straight into the walk).
+      const openSlug = params.get("open");
+      if (openSlug) {
+        try { enterCuration(await getCuration(openSlug)); }
+        catch (e) { console.warn("open curation failed:", openSlug, e); }
+      }
 
     } catch (err) {
       console.error(err);
