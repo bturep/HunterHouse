@@ -38,6 +38,20 @@
      just decides the mode + flips the class + picks the saved theme/size early.
      ════════════════════════════════════════════════════════════════════════ -->
 <script>
+  // Researcher-preview link — ?researcher=<token> auto-enables researcher mode and
+  // loads the gated letters, so a shared recipient (e.g. a colleague/mentor) lands in
+  // the full instrument without entering a PIN/token. The token IS the credential
+  // (validated server-side by the Worker); it is NOT embedded here — it only ever
+  // arrives via the URL the sender chooses to share. Researcher role only (not admin),
+  // so no edit affordances show.
+  try {
+    var _rt = new URLSearchParams(location.search).get("researcher");
+    if (_rt) {
+      sessionStorage.setItem("hhf_researcher", JSON.stringify({ role: "research", name: "Guest researcher", initials: "GR", qid: null }));
+      localStorage.setItem("hhf_gated_token", _rt);
+    }
+  } catch (e) { /* storage disabled → recipient can still unlock manually */ }
+
   window.HH_BADEN = (function () {
     var on = false;
     try {
@@ -3798,7 +3812,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.61";
+  const VERSION      = "v1.09-test.62";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
