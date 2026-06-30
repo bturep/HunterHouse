@@ -4,6 +4,17 @@ For a software engineer inspecting the live site. Scope = what `https://hunterho
 
 **Snapshot date:** 2026-06-11. **Live:** `browse.html` `v1.08.03`. **Staging:** `next.html` `v1.09-test.06`.
 
+> **Updates since this snapshot (→ 2026-06-30, live `v1.08.04` / staging `v1.09-test.69`):** the body
+> below describes the 2026-06-11 state. Since then, staging (`next.html`) gained a **researcher-only
+> Correspondence view** for the Frances Hunter letters (~70 gated items, served from a *private* R2
+> bucket `hhf-gated` via the Worker's token-gated `/gated/*` endpoints — deliberately **not** in the
+> public Wikibase); the **curator lens re-enabled** (a "For Theodora" selection) with a
+> `?researcher=<token>` preview link + `?open=<slug>` curation deep-entry; and the public catalogue is
+> now **226** items (CAA 36). The governing access model is the **exhibition / reading-room** split —
+> *gate the instrument, not the collection*: public = narrative + curated selections + open per-item
+> pages; researcher = the full workbench (browse + letters + files). Full detail in `CLAUDE.md`;
+> `BACKLOG.md` indexes what's still pending. These ship at the next `browse.html` promotion.
+
 ---
 
 ## 1. TL;DR
@@ -112,7 +123,7 @@ Each ingest script calls `sync_one_metadata.py` fail-safe at the end of every su
 - `rollup_analytics.py` — Cloudflare Analytics Engine only keeps raw points ~90 days; this snapshots each calendar month's aggregates to `data/analytics/<YYYY-MM>.json` (totals, top items, top searches incl. zero-result, downloads by collection, coarse country) + rebuilds `monthly-summary.csv` from all the JSONs (self-healing). Queries the AE SQL API; read-only token (`CF_ANALYTICS_TOKEN` env / repo secret, or local wrangler OAuth). Runs monthly via `.github/workflows/rollup-analytics.yml` (cron) + `workflow_dispatch`.
 
 **One-off maintenance** (most are completed migrations kept for reference; candidates for `scripts/archived/` when next touched)
-`patch_dates.py`, `clean_titles.py`, `strip_counter_brackets.py`, `recolor_previews.py`, `fix_caa_scheme_split.py`, `regen_previews.py`, `regen_icons.py`, `remove_caa_use_q70.py`. (`rotate_images.py` was retired to `scripts/archived/` 2026-06-11 — it re-encoded master TIFs in place with no backup and ran on import; the P144 CSS rotation is the non-destructive display-orientation path.)
+`patch_dates.py`, `clean_titles.py`, `strip_counter_brackets.py`, `recolor_previews.py`, `regen_previews.py`, `regen_icons.py`. (`fix_caa_scheme_split.py` + `remove_caa_use_q70.py` retired to `scripts/archived/` 2026-06-30; `rotate_images.py` was retired to `scripts/archived/` 2026-06-11 — it re-encoded master TIFs in place with no backup and ran on import; the P144 CSS rotation is the non-destructive display-orientation path.)
 
 **`scripts/archived/`** — completed one-shot migrations + `make_ges_intake.py` superseded by `batch_ingest_egc.py`.
 
