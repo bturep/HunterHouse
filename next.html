@@ -3806,7 +3806,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.68";
+  const VERSION      = "v1.09-test.69";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6418,7 +6418,9 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       const recs = (data.records || []).map(gatedRecToItem);
       state.items = state.items.filter(i => !i.gated).concat(recs);   // idempotent re-load
       applyFilters(); renderList();
-      hhToast(`Loaded ${recs.length} researcher letters`);
+      // No toast on the silent auto-load (boot / preview link) — only on an
+      // explicit manual token entry. Opening the ✉ view shows its own confirmation.
+      if (announce) hhToast(`Loaded ${recs.length} researcher letters`);
     } catch (e) { console.warn("gated letters load failed", e); hhToast("Letters: load error", "err"); }
   }
 

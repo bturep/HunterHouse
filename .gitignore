@@ -46,3 +46,4 @@ data/snapshots/catalogue/
 tests/.pytest_cache/
 test-results/
 playwright-report/
+tour-design-brief.txt
