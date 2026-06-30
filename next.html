@@ -1124,19 +1124,7 @@
   .letter-row .title.lr-fromto{font-weight:500}
   .letter-row .lr-arrow{color:var(--hint);margin:0 4px;font-weight:400}
   body.letters-view .site-topright #letters-toggle{color:var(--red-deep)}
-  .fp-letters{padding:10px 12px;font-size:12px}
-  .fp-ltitle{font-weight:600;letter-spacing:.02em;margin-bottom:8px}
-  .fp-lsub{color:var(--muted);font-weight:400}
-  .fp-lsec{margin-bottom:12px}
-  .fp-lh{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--hint);margin-bottom:5px}
-  .fp-lchip{display:inline-flex;align-items:center;gap:5px;margin:0 5px 5px 0;padding:3px 8px;border:1px solid var(--rule);border-radius:11px;background:none;color:var(--ink);font:inherit;font-size:11px;cursor:pointer;line-height:1.4}
-  .fp-lchip:hover{border-color:var(--muted)}
-  .fp-lchip.active{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-  .fp-ln{color:var(--hint);font-variant-numeric:tabular-nums;font-size:10px}
-  .fp-lchip.active .fp-ln{color:var(--bg);opacity:.7}
-  .fp-lmore{color:var(--hint);font-size:10px;display:inline-block;margin-top:2px}
-  .fp-lclear{margin-top:6px;background:none;border:0;color:var(--muted);font:inherit;font-size:11px;cursor:pointer;padding:2px 0}
-  .fp-lclear:hover{color:var(--ink)}
+  /* Letter facets reuse the drawings filter chips (.fp-group/.fp-chip + pillCls). */
   .zoom-ctl{
     display:flex;align-items:center;justify-content:center;gap:0;user-select:none;flex-shrink:0;
   }
@@ -3818,7 +3806,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.65";
+  const VERSION      = "v1.09-test.66";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6999,25 +6987,28 @@ WHERE {
       arr.forEach(v => { if (v) m.set(v, (m.get(v) || 0) + 1); });
       return [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
     };
-    const corr = tally(L.map(letterCorrespondent));
-    const subj = tally(L.flatMap(i => i.subjects || []));
-    const ppl  = tally(L.flatMap(peopleNames));
-    const sec = (title, entries, set, attr, limit) => {
-      if (!entries.length) return "";
-      const shown = limit ? entries.slice(0, limit) : entries;
-      return `<div class="fp-lsec"><div class="fp-lh">${title}</div>${shown.map(([v, n]) =>
-        `<button class="fp-lchip${set.has(v) ? " active" : ""}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}<span class="fp-ln">${n}</span></button>`).join("")}${limit && entries.length > limit ? `<span class="fp-lmore">+${entries.length - limit} more</span>` : ""}</div>`;
+    // order each facet by frequency (most common first); render labels only
+    const names = m => [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(e => e[0]);
+    const corr = names(tally(L.map(letterCorrespondent)));
+    const subj = names(tally(L.flatMap(i => i.subjects || [])));
+    const ppl  = names(tally(L.flatMap(peopleNames))).slice(0, 40);
+    // Mirror the drawings filter exactly: .fp-group / .fp-chip + pillCls() colour
+    // + .on active state — the same bracketed, coloured chips as the record pills.
+    const group = (label, vals, set, attr, color, cls) => {
+      if (!vals.length) return "";
+      const pc = ` ${pillCls(color)}`;
+      const chips = vals.map(v =>
+        `<button class="fp-chip${set.has(v) ? " on" : ""}${pc}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}</button>`).join("");
+      return `<div class="fp-group fp-grp-${cls}"><div class="fp-lbl">${label}</div><div class="fp-chips">${chips}</div></div>`;
     };
-    panel.innerHTML = `
-      <div class="fp-letters">
-        <div class="fp-ltitle">Correspondence <span class="fp-lsub">${L.length} letters</span></div>
-        ${sec("Correspondent", corr, state.filterCorrespondent, "lfcorr")}
-        ${sec("Subject", subj, state.filterSubject, "lfsubj")}
-        ${sec("Person", ppl, state.filterPerson, "lfperson", 30)}
-        <button class="fp-lclear" id="lf-clear">✕ clear filters</button>
-      </div>`;
+    const hasActive = state.filterCorrespondent.size || state.filterSubject.size || state.filterPerson.size;
+    panel.innerHTML =
+      group("Correspondent", corr, state.filterCorrespondent, "lfcorr", PC.clay, "corr") +
+      group("Subject", subj, state.filterSubject, "lfsubj", PC.indigo, "subj") +
+      group("Person", ppl, state.filterPerson, "lfperson", PC.clay, "person") +
+      `<div class="fp-footer">${hasActive ? `<button class="fp-clear" id="lf-clear">Clear all</button>` : `<span></span>`}<span class="fp-show" style="pointer-events:none">${L.length} letters</span></div>`;
     const wire = (attr, set) => panel.querySelectorAll(`[data-${attr}]`).forEach(el => el.addEventListener("click", () => {
-      toggleSet(set, el.dataset[attr.replace(/-([a-z])/g, (_, c) => c.toUpperCase())] || el.getAttribute(`data-${attr}`));
+      toggleSet(set, el.getAttribute(`data-${attr}`));
       applyFilters(); renderList(); renderLetterFacets(); updateFilterBadge();
     }));
     wire("lfcorr", state.filterCorrespondent);
