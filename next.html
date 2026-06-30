@@ -3806,7 +3806,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.70";
+  const VERSION      = "v1.09-test.71";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -5857,6 +5857,16 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     return `${escapeHTML(m[1])}<span class="meta-title-sub">${escapeHTML(m[2])}</span>`;
   };
   const yearOf = d => d ? d.slice(0, 4) : "—";
+  // Hunter's own compact date convention (e.g. 23.VI.69 = 23 June 1969) for the
+  // Correspondence list — shows day + month, falls back for partial dates.
+  const CD_ROMAN = ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
+  const condensedDate = iso => {
+    if (typeof iso !== "string") return "—";
+    let m;
+    if ((m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/))) return `${+m[3]}.${CD_ROMAN[+m[2]-1]}.${m[1].slice(2)}`;
+    if ((m = iso.match(/^(\d{4})-(\d{2})$/)))          return `${CD_ROMAN[+m[2]-1]}.${m[1].slice(2)}`;
+    return yearOf(iso);
+  };
   const imageUrl = it => it.image || null;
   const uniqueSorted = arr => Array.from(new Set(arr)).filter(Boolean).sort();
 
@@ -6913,7 +6923,7 @@ WHERE {
           <div class="title lr-fromto">${fromTo}</div>
           <div class="ph">${sub}</div>
         </div>
-        <span class="year">${escapeHTML(yearOf(it.date))}</span>`;
+        <span class="year">${escapeHTML(condensedDate(it.date))}</span>`;
       frag.appendChild(row);
     });
     container.appendChild(frag);
@@ -9297,6 +9307,12 @@ WHERE {
       if ((e.key === "r" || e.key === "R") && !inInput && canMark() && state.selectedId) { toggleSeen(state.selectedId); return; }
       if (e.key === "ArrowDown" && !inInput) { e.preventDefault(); selectAdjacent(+1); }
       if (e.key === "ArrowUp"   && !inInput) { e.preventDefault(); selectAdjacent(-1); }
+      // Left/Right flip the pages of a multi-page letter (matches the ‹ Page › pager);
+      // Up/Down stay item navigation. No-op on single-page items / drawings.
+      if ((e.key === "ArrowRight" || e.key === "ArrowLeft") && !inInput) {
+        const _it = state.items.find(i => i.id === state.selectedId);
+        if (_it && _it.pages && _it.pages.length > 1) { e.preventDefault(); letterPageStep(e.key === "ArrowRight" ? +1 : -1); }
+      }
       if (e.key === "Enter"     && !inInput) {
         e.preventDefault();
         document.getElementById("zoom-fs").click();   // zen — hide / show both panels
