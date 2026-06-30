@@ -3806,7 +3806,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.67";
+  const VERSION      = "v1.09-test.68";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -10825,10 +10825,10 @@ WHERE {
       marksHydrate();   // restore this session's researcher marks (if unlocked)
       seenHydrate();
       reflectComposeRole();   // gate the eyeball + apply persisted compose state
-      // Curator lens DORMANT (2026-06-23) — not shipping for now (matches live
-      // browse.html). With this commented, state.curations stays empty so the
-      // [Curated] filter entry never renders; all overlay/card/note code is
-      // inert. Restore by uncommenting (and re-add curated mentions to the tour).
+      // Curator lens ACTIVE on next.html (re-enabled 2026-06-29 for the "For
+      // Theodora" selection). Populates state.curations from curations/index.json
+      // → the [Curated] filter row + the ?open=<slug> deep-entry. Live browse.html
+      // keeps this commented (curator dormant there until the next promotion).
       await loadCurationIndex();   // populate [Curated] entry (tiny local JSON; no-op if absent)
       applyFilters();
       renderList();
