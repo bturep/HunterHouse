@@ -3806,7 +3806,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.66";
+  const VERSION      = "v1.09-test.67";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6987,8 +6987,8 @@ WHERE {
       arr.forEach(v => { if (v) m.set(v, (m.get(v) || 0) + 1); });
       return [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
     };
-    // order each facet by frequency (most common first); render labels only
-    const names = m => [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(e => e[0]);
+    // tally returns sorted [name, count] entries; names() just extracts the labels.
+    const names = entries => entries.map(e => e[0]);
     const corr = names(tally(L.map(letterCorrespondent)));
     const subj = names(tally(L.flatMap(i => i.subjects || [])));
     const ppl  = names(tally(L.flatMap(peopleNames))).slice(0, 40);
