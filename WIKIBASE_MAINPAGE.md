@@ -14,8 +14,8 @@ is needed to pick up.
 | | |
 |---|---|
 | Live page | https://hunterhouse.wikibase.cloud/wiki/Main_Page |
-| Current revision | **4439** |
-| Last edited | 2026-05-17 (session: technical reframe) |
+| Current revision | **5225** |
+| Last edited | 2026-06-30 (CAA count 35→36; Frances Hunter Collection → researcher-gated/outside the graph) |
 | Working branch when edited | `v1.04` |
 | Editor | bot `MyBot@my-bot` via MediaWiki API |
 
@@ -23,7 +23,9 @@ is needed to pick up.
 
 | Rev | What |
 |---|---|
-| **4439** | Dropped ID-prefix column (only archive-item IDs are a real scheme); source-collection count made open-ended. **← current** |
+| **5225** | CAA count 35→36 (HH-CAA-0036 added); Frances Hunter Collection status → "Processed — researcher-gated, held outside this Wikibase" (correspondence intake done, held in R2, not the graph). **← current** |
+| ~5219–5222 | UI edits (2026-06-06+): org rename to "Hunter House Foundation", hunterhouse.org link, collections/custody table. Made in the Wikibase UI; this working file had drifted from live until the 2026-06-30 resync. |
+| **4439** | Dropped ID-prefix column (only archive-item IDs are a real scheme); source-collection count made open-ended. |
 | 4438 | First technical rewrite: removed biography / "character of the record" / "design arcs"; resolved Q? links; corrected ID scheme + counts; added Arrangement / Rights / Endpoints; epigraph removed. |
 | 2864 | Original pre-edit page (long biography + character + design-arcs narrative, broken Q? links, malformed epigraph div, truncated `= Tools =`). Revert target if a full undo is ever wanted. |
 
@@ -231,7 +233,7 @@ The archive draws on a growing set of source collections; more are expected as m
 {| class="wikitable" style="font-size:0.95em; margin-bottom:14px;"
 ! Collection !! Custodian !! Catalogued here !! Reference
 |-
-| '''[[Item:Q178|Canadian Architectural Archives]]''' || University of Calgary · accession 2019.61 || 35 archive items || [https://searcharchives.ucalgary.ca/richard-hunter-accession Finding aid →]
+| '''[[Item:Q178|Canadian Architectural Archives]]''' || University of Calgary · accession 2019.61 || 36 archive items || [https://searcharchives.ucalgary.ca/richard-hunter-accession Finding aid →]
 |-
 | '''[[Item:Q184|John Fulker Collection]]''' || [[Item:Q186|West Vancouver Museum]] || — || Pending integration
 |}
@@ -245,7 +247,7 @@ The archive draws on a growing set of source collections; more are expected as m
 |-
 | '''[[Item:Q182|Eric Gesinger Collection]]''' || [[Item:Q209|Eric Gesinger]] || 30 archive items || Catalogued
 |-
-| '''[[Item:Q181|Frances Hunter Collection]]''' || [[Item:Q202|Frances Hunter]] || — || Pending processing
+| '''[[Item:Q181|Frances Hunter Collection]]''' || [[Item:Q202|Frances Hunter]] || — || Processed — researcher-gated, held outside this Wikibase
 |-
 | '''[[Item:Q183|Ivan Hunter Collection]]''' || [[Item:Q203|Ivan Hunter]] || 45 archive items || Catalogued
 |}
