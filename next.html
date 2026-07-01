@@ -3806,7 +3806,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.71";
+  const VERSION      = "v1.09-test.72";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -10789,6 +10789,15 @@ WHERE {
 
       if (urlSort && ["id","phase","year"].includes(urlSort)) state.sortCol = urlSort;
       if (urlDir  && ["asc","desc"].includes(urlDir))         state.sortDir = urlDir;
+
+      // Shareable pre-filtered entry, e.g. ?collection=EGC — sends a collaborator
+      // straight to one collection (comma-separated; matched by archive abbrev).
+      const urlColl = params.get("collection");
+      if (urlColl) {
+        state.filterCollection = new Set(
+          urlColl.split(",").map(s => s.trim().toUpperCase()).filter(Boolean)
+        );
+      }
 
       marksHydrate();   // restore this session's researcher marks (if unlocked)
       seenHydrate();
