@@ -14,8 +14,8 @@ is needed to pick up.
 | | |
 |---|---|
 | Live page | https://hunterhouse.wikibase.cloud/wiki/Main_Page |
-| Current revision | **5272** |
-| Last edited | 2026-06-30 (EGC 30→59: Knowles photo batch + stool drawing; Person 33→34; Archive Item 225→254) |
+| Current revision | **5377** |
+| Last edited | 2026-06-30 (EGC 30→58: Knowles photo batch + stool drawing, subject-grouped renumber, 1 near-dup retired; Person 33→34; Archive Item 225→253) |
 | Working branch when edited | `v1.04` |
 | Editor | bot `MyBot@my-bot` via MediaWiki API |
 
@@ -23,7 +23,8 @@ is needed to pick up.
 
 | Rev | What |
 |---|---|
-| **5272** | EGC count 30→59 (28 Knowles photographs + Hunter's stool drawing, HH-EGC-0031–0059); Person 33→34 (Knowles Q586); Archive Item type-count 225→254. **← current** |
+| **5377** | EGC 59→58: retired near-dup HH-EGC-0041 during a subject-grouped renumber of the photos (now 0031–0058 contiguous); Archive Item 254→253. **← current** |
+| **5272** | EGC count 30→59 (28 Knowles photographs + Hunter's stool drawing, HH-EGC-0031–0059); Person 33→34 (Knowles Q586); Archive Item type-count 225→254. |
 | **5225** | CAA count 35→36 (HH-CAA-0036 added); Frances Hunter Collection status → "Processed — researcher-gated, held outside this Wikibase" (correspondence intake done, held in R2, not the graph). |
 | ~5219–5222 | UI edits (2026-06-06+): org rename to "Hunter House Foundation", hunterhouse.org link, collections/custody table. Made in the Wikibase UI; this working file had drifted from live until the 2026-06-30 resync. |
 | **4439** | Dropped ID-prefix column (only archive-item IDs are a real scheme); source-collection count made open-ended. |
@@ -107,14 +108,14 @@ Not yet in Wikibase: a dedicated "Hunter House Foundation" org item (use Q187 in
 | Work | 22 | `HH-W-1` (unpadded) |
 | Phase | 38 | `HH-PH-23` (unpadded) |
 | Area | 36 | `HH-A-1` (unpadded) |
-| Archive Item | 254 | `HH-HHC-0004` / `HH-CAA-0002` (**4-digit padded — the real scheme**) |
+| Archive Item | 253 | `HH-HHC-0004` / `HH-CAA-0002` (**4-digit padded — the real scheme**) |
 | Person | 33 | `HH-P-1` (unpadded) |
 | Event | 5 | `HH-E-8` (unpadded) |
 | Institution | 20 | `HH-I-1` (unpadded) |
 | Building | 3 | `HH-B-1` (unpadded) |
 | Place | — | no P2 (Wikidata-linked) |
 
-- Archive items by source collection: **HHC 115** · **CAA 36** · **EGC 59** · **IHC 45** = 255 archive items.
+- Archive items by source collection: **HHC 115** · **CAA 36** · **EGC 58** · **IHC 45** = 254 archive items.
   Remaining collections (Fulker, Frances Hunter): 0 catalogued yet.
 - ~485 total entity items; only 382 carry any P2. ~225 are the browse.html-visible
   archive items (P2 + P96).
@@ -246,7 +247,7 @@ The archive draws on a growing set of source collections; more are expected as m
 |-
 | '''[[Item:Q180|Hunter House Collection]]''' || [[Item:Q187|Hunter House Foundation]] || 115 archive items || Primary collection
 |-
-| '''[[Item:Q182|Eric Gesinger Collection]]''' || [[Item:Q209|Eric Gesinger]] || 59 archive items || Catalogued
+| '''[[Item:Q182|Eric Gesinger Collection]]''' || [[Item:Q209|Eric Gesinger]] || 58 archive items || Catalogued
 |-
 | '''[[Item:Q181|Frances Hunter Collection]]''' || [[Item:Q202|Frances Hunter]] || — || Processed — researcher-gated, held outside this Wikibase
 |-
@@ -266,7 +267,7 @@ The archive is organized into nine Item Types, each with its own controlled voca
 |-
 | '''Area''' || Named architectural sub-parts of a Work — wings, rooms, towers, gardens, decks, built features || 36
 |-
-| '''Archive Item''' || The primary materials, sub-typed by medium: drawing, photograph, engineering document, land survey, permit set, ephemera || 254
+| '''Archive Item''' || The primary materials, sub-typed by medium: drawing, photograph, engineering document, land survey, permit set, ephemera || 253
 |-
 | '''Person''' || Individuals connected to Hunter's practice and to the archive || 34
 |-
