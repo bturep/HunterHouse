@@ -2,39 +2,48 @@
   "period": "2026-06",
   "dataset": "Hunter_House_Archive",
   "totals": {
-    "events": 353,
-    "views": 335,
+    "events": 446,
+    "views": 386,
     "searches": 1,
     "zero_result_searches": 1,
     "downloads": 4
   },
   "events_by_type": {
     "search0": 1,
-    "pageview": 1,
-    "view": 335,
+    "pageview": 37,
+    "curation": 3,
+    "view": 386,
     "search": 1,
-    "deeplink": 11,
+    "deeplink": 14,
     "download": 4
   },
   "top_items": [
     {
       "id": "HH-CAA-0018",
-      "views": 41
+      "views": 69
+    },
+    {
+      "id": "L031",
+      "views": 9
     },
     {
       "id": "HH-IHC-0001",
       "views": 9
     },
     {
+      "id": "HH-CAA-0007",
+      "views": 8
+    },
+    {
+      "id": "HH-CAA-0003",
+      "views": 7
+    },
+    {
       "id": "HH-IHC-0003",
       "views": 7
     },
     {
-      "id": "HH-CAA-0003",
-      "views": 6
-    },
-    {
-      "id": "HH-IHC-0002",
+      "id": "HH-CAA-0001",
       "views": 6
     },
     {
@@ -42,7 +51,15 @@
       "views": 6
     },
     {
-      "id": "HH-CAA-0007",
+      "id": "HH-IHC-0002",
+      "views": 6
+    },
+    {
+      "id": "HH-CAA-0004",
+      "views": 6
+    },
+    {
+      "id": "HH-CAA-0002",
       "views": 6
     },
     {
@@ -50,23 +67,7 @@
       "views": 6
     },
     {
-      "id": "HH-CAA-0014",
-      "views": 5
-    },
-    {
       "id": "HH-CAA-0008",
-      "views": 5
-    },
-    {
-      "id": "HH-CAA-0002",
-      "views": 5
-    },
-    {
-      "id": "HH-CAA-0001",
-      "views": 5
-    },
-    {
-      "id": "HH-IHC-0007",
       "views": 5
     },
     {
@@ -74,31 +75,35 @@
       "views": 5
     },
     {
+      "id": "HH-IHC-0007",
+      "views": 5
+    },
+    {
       "id": "HH-CAA-0017",
       "views": 5
     },
     {
-      "id": "HH-CAA-0004",
+      "id": "HH-CAA-0014",
       "views": 5
     },
     {
-      "id": "HH-CAA-0005",
-      "views": 4
+      "id": "HH-CAA-0012",
+      "views": 5
     },
     {
       "id": "HH-CAA-0015",
       "views": 4
     },
     {
+      "id": "HH-CAA-0016",
+      "views": 4
+    },
+    {
+      "id": "HH-CAA-0005",
+      "views": 4
+    },
+    {
       "id": "HH-IHC-0005",
-      "views": 4
-    },
-    {
-      "id": "HH-CAA-0012",
-      "views": 4
-    },
-    {
-      "id": "HH-IHC-0006",
       "views": 4
     },
     {
@@ -114,27 +119,15 @@
       "views": 4
     },
     {
-      "id": "HH-CAA-0024",
-      "views": 3
+      "id": "HH-CAA-0025",
+      "views": 4
     },
     {
-      "id": "HH-CAA-0019",
-      "views": 3
-    },
-    {
-      "id": "HH-CAA-0016",
-      "views": 3
-    },
-    {
-      "id": "HH-IHC-0012",
-      "views": 3
+      "id": "HH-IHC-0006",
+      "views": 4
     },
     {
       "id": "HH-HHC-0083",
-      "views": 3
-    },
-    {
-      "id": "HH-IHC-0008",
       "views": 3
     },
     {
@@ -142,11 +135,7 @@
       "views": 3
     },
     {
-      "id": "HH-CAA-0028",
-      "views": 3
-    },
-    {
-      "id": "HH-CAA-0009",
+      "id": "HH-IHC-0012",
       "views": 3
     },
     {
@@ -154,7 +143,11 @@
       "views": 3
     },
     {
-      "id": "HH-CAA-0025",
+      "id": "HH-CAA-0019",
+      "views": 3
+    },
+    {
+      "id": "HH-CAA-0028",
       "views": 3
     },
     {
@@ -162,11 +155,23 @@
       "views": 3
     },
     {
+      "id": "HH-IHC-0008",
+      "views": 3
+    },
+    {
       "id": "HH-IHC-0015",
       "views": 3
     },
     {
-      "id": "HH-CAA-0031",
+      "id": "HH-CAA-0009",
+      "views": 3
+    },
+    {
+      "id": "HH-IHC-0042",
+      "views": 3
+    },
+    {
+      "id": "HH-CAA-0024",
       "views": 3
     },
     {
@@ -174,8 +179,12 @@
       "views": 3
     },
     {
-      "id": "HH-IHC-0042",
+      "id": "HH-CAA-0031",
       "views": 3
+    },
+    {
+      "id": "HH-EGC-0030",
+      "views": 2
     },
     {
       "id": "HH-HHC-0055",
@@ -190,23 +199,11 @@
       "views": 2
     },
     {
-      "id": "HH-IHC-0029",
-      "views": 2
-    },
-    {
       "id": "HH-IHC-0033",
       "views": 2
     },
     {
-      "id": "HH-HHC-0002",
-      "views": 2
-    },
-    {
-      "id": "HH-HHC-0001",
-      "views": 2
-    },
-    {
-      "id": "HH-IHC-0009",
+      "id": "HH-HHC-0073",
       "views": 2
     },
     {
@@ -214,7 +211,11 @@
       "views": 2
     },
     {
-      "id": "HH-IHC-0013",
+      "id": "HH-IHC-0029",
+      "views": 2
+    },
+    {
+      "id": "HH-HHC-0001",
       "views": 2
     }
   ],
@@ -246,6 +247,14 @@
   ],
   "pageviews_by_page": [
     {
+      "page": "index.html",
+      "n": 30
+    },
+    {
+      "page": "gallery",
+      "n": 6
+    },
+    {
       "page": "gallery.html",
       "n": 1
     }
@@ -253,15 +262,23 @@
   "by_country": [
     {
       "country": "CA",
-      "n": 330
+      "n": 394
+    },
+    {
+      "country": "US",
+      "n": 29
     },
     {
       "country": "GR",
       "n": 20
     },
     {
-      "country": "US",
-      "n": 3
+      "country": "DE",
+      "n": 2
+    },
+    {
+      "country": "BR",
+      "n": 1
     }
   ]
 }
