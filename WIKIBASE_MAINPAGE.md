@@ -14,8 +14,8 @@ is needed to pick up.
 | | |
 |---|---|
 | Live page | https://hunterhouse.wikibase.cloud/wiki/Main_Page |
-| Current revision | **5479** |
-| Last edited | 2026-06-30 (EGC 30→57: Knowles photo batch + stool drawing, subject-grouped renumber, 2 near-dups retired; Person 33→34; Archive Item 225→252) |
+| Current revision | **5524** |
+| Last edited | 2026-07-01 (Phase 38→39: minted "Stool" phase Q616, stool split from the side table; EGC-0023 relabel reverted) |
 | Working branch when edited | `v1.04` |
 | Editor | bot `MyBot@my-bot` via MediaWiki API |
 
@@ -23,7 +23,8 @@ is needed to pick up.
 
 | Rev | What |
 |---|---|
-| **5479** | EGC 58→57: retired a 2nd near-dup during the subject-grouped renumber (photos now 0032–0057 contiguous); Archive Item 253→252. **← current** |
+| **5524** | Phase 38→39: minted "Stool" phase Q616 (the stool — drawing 0031 + photos 0032–0036 — split from the side table; EGC-0023 reverted to "East Wing Living Room Side Table"). **← current** |
+| **5479** | EGC 58→57: retired a 2nd near-dup during the subject-grouped renumber (photos now 0032–0057 contiguous); Archive Item 253→252. |
 | **5377** | EGC 59→58: retired near-dup HH-EGC-0041 during a subject-grouped renumber of the photos (now 0031–0058 contiguous); Archive Item 254→253. |
 | **5272** | EGC count 30→59 (28 Knowles photographs + Hunter's stool drawing, HH-EGC-0031–0059); Person 33→34 (Knowles Q586); Archive Item type-count 225→254. |
 | **5225** | CAA count 35→36 (HH-CAA-0036 added); Frances Hunter Collection status → "Processed — researcher-gated, held outside this Wikibase" (correspondence intake done, held in R2, not the graph). |
@@ -264,7 +265,7 @@ The archive is organized into nine Item Types, each with its own controlled voca
 |-
 | '''Work''' || Buildings, additions, gardens, renovations, theoretical projects, and other authored architectural works || 22
 |-
-| '''Phase''' || Discrete design iterations, schemes, and sub-projects within a Work || 38
+| '''Phase''' || Discrete design iterations, schemes, and sub-projects within a Work || 39
 |-
 | '''Area''' || Named architectural sub-parts of a Work — wings, rooms, towers, gardens, decks, built features || 36
 |-
