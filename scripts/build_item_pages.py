@@ -236,9 +236,11 @@ REC_FIELDS = [
     ("Drawing type", "drawTypes"),
     ("Category", "categories"),
     ("Areas", "areas"),
-    ("Creator", "creator"),
+    # Temporal hierarchy of authorship: Designed → Built → Creator
+    # (draughtsman/photographer, the last act). Kept in step with the record pane.
     ("Designed by", "designedBy"),
     ("Built by", "builtBy"),
+    ("Creator", "creator"),
     ("Built status", "builtStatus"),
     ("Use", "use"),
     ("Medium", "medium"),

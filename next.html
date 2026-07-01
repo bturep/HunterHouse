@@ -1812,9 +1812,13 @@
   /* ── Key/value list ── */
   .pane-meta .kv{font-family:var(--mono);font-size:11px;line-height:1.55}
   .pane-meta .kv > .row{
-    display:grid;grid-template-columns:96px 1fr;gap:8px;
+    display:grid;grid-template-columns:110px 1fr;gap:8px;
     padding:2px 0;border-bottom:0;align-items:baseline;
   }
+  /* label column widened 96→110px so the longest label ("photographed by") no
+     longer overflows into its colon/value; scaled up for the a11y text sizes. */
+  html.text-lg .pane-meta .kv > .row{grid-template-columns:120px 1fr}
+  html.text-xl .pane-meta .kv > .row{grid-template-columns:132px 1fr}
   .pane-meta .kv dt{
     font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:0.04em;
     text-transform:lowercase;color:var(--muted);text-align:right;
@@ -3806,7 +3810,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.72";
+  const VERSION      = "v1.09-test.73";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6061,9 +6065,11 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       descRows.push(["Drawing type", sortDrawTypes(item.drawTypes).map(dt => pill(`drawtype-pill ${pillCls(drawTypePillColor())}`, dt)).join("")]);
     }
     if (item.builtStatus)       descRows.push(["Built",     pill(`builtstatus-pill ${pillCls(PC.moss)}`, item.builtStatus)]);
-    if (item.creator)           descRows.push([creatorLabel(item.itemType), pill(`creator-pill ${pillCls(PC.clay)}`, item.creator)]);
+    // Temporal hierarchy: Designed → Built → (Drawn/Photographed). Keep in step
+    // with renderMeta (desktop). Creator (draughtsman/photographer) is last.
     if (item.designedBy)        descRows.push(["Designed by", pill(`creator-pill ${pillCls(PC.clay)}`, item.designedBy)]);
     if (item.builtBy?.length)   descRows.push(["Built by",  item.builtBy.map(b => pill(`creator-pill ${pillCls(PC.clay)}`, b)).join("")]);
+    if (item.creator)           descRows.push([creatorLabel(item.itemType), pill(`creator-pill ${pillCls(PC.clay)}`, item.creator)]);
     const coll = collectionOf(item);
     if (coll)                   descRows.push(["Held by",   pill(`collection-pill ${pillCls(PC.denim)}`, archiveAbbrev(coll))]);
 
@@ -7705,12 +7711,10 @@ WHERE {
         ? `<button class="pill builtstatus-pill ${pillCls(PC.moss)}${bsActive}" data-builtstatus="${escapeHTML(item.builtStatus)}">${escapeHTML(item.builtStatus)}</button>`
         : EM]);
     }
-    if (item.creator || showEmpty) {
-      const cActive = item.creator && state.filterCreator.has(item.creator) ? " active" : "";
-      descRows.push([creatorRowLabel, item.creator
-        ? `<button class="pill creator-pill ${pillCls(PC.clay)}${cActive}" data-creator="${escapeHTML(item.creator)}">${escapeHTML(item.creator)}</button>`
-        : EM]);
-    }
+    // Temporal hierarchy of authorship — the record renders these in the order
+    // the actions happened: Designed → Built → (Drawn/Photographed). The item's
+    // own creator (draughtsman/photographer) is the LAST act, documenting an
+    // already designed-and-built thing, so it sits after designed/built.
     if (item.designedBy || showEmpty) {
       const cActive = item.designedBy && state.filterCreator.has(item.designedBy) ? " active" : "";
       descRows.push(["Designed by", item.designedBy
@@ -7723,6 +7727,12 @@ WHERE {
         return `<button class="pill creator-pill ${pillCls(PC.clay)}${a}" data-creator="${escapeHTML(b)}">${escapeHTML(b)}</button>`;
       }).join("");
       descRows.push(["Built by", html || EM]);
+    }
+    if (item.creator || showEmpty) {
+      const cActive = item.creator && state.filterCreator.has(item.creator) ? " active" : "";
+      descRows.push([creatorRowLabel, item.creator
+        ? `<button class="pill creator-pill ${pillCls(PC.clay)}${cActive}" data-creator="${escapeHTML(item.creator)}">${escapeHTML(item.creator)}</button>`
+        : EM]);
     }
     if (item.medium || showEmpty) descRows.push(["Medium", item.medium ? escapeHTML(item.medium) : EM]);
     if (item.scale  || showEmpty) descRows.push(["Scale",  item.scale  ? escapeHTML(item.scale)  : EM]);

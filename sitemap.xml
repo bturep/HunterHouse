@@ -503,11 +503,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://hunterhouse.org/archive/HH-EGC-0058.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://hunterhouse.org/archive/HH-HHC-0001.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
