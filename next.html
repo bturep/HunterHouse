@@ -3810,7 +3810,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.73";
+  const VERSION      = "v1.09-test.74";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6310,14 +6310,6 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     }, 0);
     pop.querySelector("button")?.focus();
   }
-
-  // TEMPORARY tryout (2026-06-26): two real Frances Hunter letters injected
-  // client-side so the transcript panel + Cite can be exercised on a typed and a
-  // handwritten letter before HH-FRH is modelled in Wikibase. The gated one is
-  // only injected for researchers (canMark()). Remove this block + the inject in
-  // processRows when the real HH-FRH ingest lands. Assets live on R2 under
-  // frances-hunter-collection/ (forward-compatible naming).
-  const DEMO_LETTERS = []; /* demo-letter transcripts purged from history */
 
   // ── Gated letters (researcher-only) — fetched live from the auth Worker ─────
   // The Frances Hunter correspondence lives in a PRIVATE R2 bucket behind the
