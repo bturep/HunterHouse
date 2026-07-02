@@ -8,6 +8,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#1a1816">
 <meta name="color-scheme" content="dark light">
+<!-- Referrer policy: never send path/query (which can carry a ?researcher= token or
+     ?id=) to cross-origin hosts. Explicit rather than relying on the browser default. -->
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <!-- CSP: defence-in-depth. Restricts where the browser may load resources
      from. 'unsafe-inline' on script/style is required because the page is a
      deliberate single-file SPA with inline <script> + <style> blocks; the
@@ -49,6 +52,15 @@
     if (_rt) {
       sessionStorage.setItem("hhf_researcher", JSON.stringify({ role: "research", name: "Guest researcher", initials: "GR", qid: null }));
       localStorage.setItem("hhf_gated_token", _rt);
+      // Strip the token from the address bar the instant it's consumed into storage,
+      // so it never survives into a shared ?id= deep-link, browser history, or a URL
+      // the recipient copies. The credential now lives only in storage; the Worker
+      // still validates it server-side on every gated fetch.
+      try {
+        var _u = new URL(location.href);
+        _u.searchParams.delete("researcher");
+        history.replaceState(null, "", _u.pathname + _u.search + _u.hash);
+      } catch (e) { /* old browser → token lingers in the bar, still functional */ }
     }
   } catch (e) { /* storage disabled → recipient can still unlock manually */ }
 
@@ -3810,7 +3822,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.74";
+  const VERSION      = "v1.09-test.75";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
