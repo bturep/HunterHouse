@@ -158,7 +158,7 @@ CSV_COLUMNS = [
     "archId", "qid", "label", "itemType", "sourceCollection", "heldBy",
     "phase", "date", "creator", "designedBy", "builtBy", "drawTypes",
     "areas", "categories", "use", "scale", "medium", "builtStatus",
-    "setPosition", "rotation", "location", "rights", "notes",
+    "setPosition", "rotation", "location", "rights", "rightsUri", "notes",
     "image", "master", "accessCopy", "archiveLink",
 ]
 
@@ -202,6 +202,7 @@ def bindings_to_csv_rows(bindings):
                 "rotation": val(b, "rotation"),
                 "location": val(b, "location"),
                 "rights": val(b, "rightsLabel"),
+                "rightsUri": val(b, "rightsUri"),
                 "notes": val(b, "notes"),
                 "image": val(b, "img"),
                 "master": val(b, "master"),

@@ -27,7 +27,7 @@ import { execFileSync } from "node:child_process";
 
 const HTMLS = [
   { file: "browse.html", versionRe: /^v\d+\.\d{2}\.\d{2}$/,        kind: "live"    },
-  { file: "next.html",   versionRe: /^v\d+\.\d{2}-test\.\d{2}$/,   kind: "staging" },
+  { file: "next.html",   versionRe: /^v\d+\.\d{2}-test\.\d{2,}$/,  kind: "staging" },
 ];
 const MANIFESTS = ["manifest.json", "manifest.next.json"];
 
@@ -144,6 +144,50 @@ if (!prevSha) {
       pass(`${file}: VERSION bumped ${oldVer} → ${newVer}`);
     }
   }
+}
+
+// (5) Promotion invariants (audit B5) — browse.html is the LIVE file; each of
+// these encodes a real, previously-shipped promotion mistake:
+//   · v1.08 promotion shipped the staging manifest to live (857053d)
+//   · v1.08 promotion shipped staging title/icons to live (c2a4a30)
+//   · a stray "-test." VERSION on live would poison returning visitors' caches
+try {
+  const live = readFileSync("browse.html", "utf8");
+  const liveVer = live.match(VERSION_RE)?.[1] || "";
+  if (live.includes("manifest.next.json"))
+    fail("browse.html: references manifest.next.json — staging manifest must not ship to live");
+  else pass("browse.html: manifest reference is live (manifest.json)");
+  if (liveVer.includes("-test."))
+    fail(`browse.html: VERSION "${liveVer}" carries -test. — staging version must not ship to live`);
+  else pass("browse.html: VERSION is a live version (no -test.)");
+  if (!/<title>\s*Hunter House Archive\s*<\/title>/.test(live))
+    fail("browse.html: <title> is not the live title 'Hunter House Archive' — staging title shipped?");
+  else pass("browse.html: live <title> intact");
+} catch (e) { fail("promotion-invariant checks: " + e.message); }
+
+// (6) sw.js must parse, and an assets/ or sw.js change should come with a
+// CACHE_NAME bump (stale-cache foot-gun; warn-level check → fails only on
+// a definite miss, skips when history is unavailable).
+try {
+  const swFile = join(tmp, "sw.check.js");
+  writeFileSync(swFile, readFileSync("sw.js", "utf8"));
+  execFileSync(process.execPath, ["--check", swFile], { stdio: "pipe" });
+  pass("sw.js: syntax OK");
+} catch (e) { fail("sw.js: parse failed — " + (e.stderr?.toString() || e.message).split("\n")[0]); }
+if (prevSha) {
+  try {
+    const assetDiff = git(["diff", "--name-only", prevSha, "--", "assets/", "sw.js"]);
+    if (assetDiff && assetDiff.trim()) {
+      const oldSw = git(["show", `${prevSha}:sw.js`]) || "";
+      // sw.js declares CACHE_NAME with SINGLE quotes — accept either.
+      const cacheRe = /CACHE_NAME\s*=\s*['"]([^'"]+)['"]/;
+      const oldCache = oldSw.match(cacheRe)?.[1];
+      const newCache = readFileSync("sw.js", "utf8").match(cacheRe)?.[1];
+      if (oldCache && newCache && oldCache === newCache)
+        console.log(`  ⚠ assets/ or sw.js changed but CACHE_NAME is still "${newCache}" — cached visitors may not see the change (notice only)`);
+      else pass(`sw.js CACHE_NAME: ${oldCache || "?"} → ${newCache || "?"}`);
+    }
+  } catch (e) { console.log("  (CACHE_NAME check skipped — " + e.message.split("\n")[0] + ")"); }
 }
 
 rmSync(tmp, { recursive: true, force: true });

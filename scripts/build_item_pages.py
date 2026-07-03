@@ -27,6 +27,12 @@ USAGE:
   python3 scripts/build_item_pages.py                 # all items + sitemap
   python3 scripts/build_item_pages.py --one HH-CAA-0018   # just that page (+ sitemap)
   python3 scripts/build_item_pages.py --query-from next.html
+
+⚠ DEFAULT QUERY SOURCE is next.html until the v1.09 promotion: the ?rightsUri
+binding (P146 standard rights statements) lives only in next.html's
+CATALOGUE_QUERY. A build from browse.html would silently strip the rights
+links + schema.org license from all 261 pages. Flip the default back to
+browse.html at promotion (it's on the promotion checklist in SYNC-MAP.md).
 Read-only on Wikibase; the only writes are local files in the repo.
 
 INTAKE: each ingest script calls this best-effort at the end (see the call in
@@ -49,7 +55,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_DIR = os.path.join(REPO, "archive")
 SITE = "https://hunterhouse.org"
 WIKIBASE = "https://hunterhouse.wikibase.cloud"
-DEFAULT_QUERY_SOURCE = os.path.join(REPO, "browse.html")   # the live query
+DEFAULT_QUERY_SOURCE = os.path.join(REPO, "next.html")   # ⚠ until the v1.09 promotion — browse.html lacks ?rightsUri (P146); a browse-built run strips rights links from all pages. Flip back at promotion (SYNC-MAP checklist).
 HUNTER_QID = "Q139959908"   # Richard Hunter on Wikidata (for schema sameAs)
 HUNTER_NAMES = {"Richard Hunter", "Richard Morrow Hunter"}
 FALLBACK_OG = ("https://archive.hunterhousefoundation.com/canadian-architecture-archive/"
@@ -119,6 +125,8 @@ CSS = """
   .cta{display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:0.06em;
     text-transform:uppercase;color:var(--accent);text-decoration:none;margin:8px 0}
   .cta:hover{color:var(--fg)}
+  .cite{font-size:13px;color:var(--muted);line-height:1.65;border-left:2px solid var(--line);
+        padding-left:14px;user-select:all}
   .data{font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;
     text-transform:uppercase;color:var(--muted);margin-top:14px}
   .data a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line)}
@@ -181,10 +189,44 @@ def deck(row):
     return " · ".join(parts)
 
 
+_MONTHS = ["January", "February", "March", "April", "May", "June", "July",
+           "August", "September", "October", "November", "December"]
+
+
+def human_date(d):
+    """ISO date (y / y-m / y-m-d) → readable prose date, precision-aware."""
+    if not d:
+        return None
+    parts = str(d).split("-")
+    try:
+        y = parts[0]
+        if len(parts) == 1 or not parts[1] or parts[1] == "00":
+            return y
+        m = _MONTHS[int(parts[1]) - 1]
+        if len(parts) == 2 or not parts[2] or parts[2] == "00":
+            return f"{m} {y}"
+        return f"{int(parts[2])} {m} {y}"
+    except (ValueError, IndexError):
+        return str(d)
+
+
+# Notes at/above this length read as prose and become the lead paragraph;
+# shorter ones render as a Note row in the grid. ONE constant — lead() and
+# render_page() must agree or notes vanish/duplicate.
+NOTE_LEAD_MIN = 60
+
+
 def lead(row):
-    coll = row.get("sourceCollection") or "the Hunter House archive"
+    # Prefer the cataloguer's own prose (P100) — real writing beats the
+    # template, on the page and in search (audit C6). Terse notes (a title
+    # fragment, a filename echo) stay in the record grid instead.
+    if row.get("notes") and len(row["notes"]) >= NOTE_LEAD_MIN:
+        return row["notes"]
+    coll = row.get("sourceCollection") or "Hunter House archive"
     itl = (row.get("itemType") or "item").lower()
-    return (f"This {itl} is held in {coll}{date_clause(row)}. It forms part of the "
+    hd = human_date(row.get("date"))
+    dated = f", dated {hd}," if hd else ""
+    return (f"This {itl}{dated} is held in the {coll}. It forms part of the "
             f"architectural archive of Richard Hunter (1930–2023), documenting his "
             f"residence at 203 Goward Road, Saanich, British Columbia.")
 
@@ -217,6 +259,8 @@ def jsonld(row, page_url, img):
         obj["artMedium"] = row["medium"]
     if row.get("rights"):
         obj["copyrightNotice"] = row["rights"]
+    if row.get("rightsUri"):
+        obj["license"] = row["rightsUri"]
     creator = row.get("creator")
     if creator:
         person = {"@type": "Person", "name": creator}
@@ -225,6 +269,28 @@ def jsonld(row, page_url, img):
         obj["creator"] = person
     return json.dumps(obj, ensure_ascii=False, indent=2)
 
+
+# P146 standard rights URIs → short labels (keep in step with next.html's
+# RIGHTS_URI_LABELS).
+RIGHTS_URI_LABELS = {
+    "https://rightsstatements.org/vocab/InC/1.0/": "In Copyright",
+    "https://rightsstatements.org/vocab/CNE/1.0/": "Copyright Not Evaluated",
+    "https://creativecommons.org/licenses/by-nc-nd/4.0/": "CC BY-NC-ND 4.0",
+}
+
+
+def rights_uri_label(uri):
+    """Short label for a P146 URI; None if the URI is unusable. Guarded — a
+    malformed value in Wikibase must degrade to no-link, not crash the build
+    of all 261 pages (this script runs best-effort inside every ingest)."""
+    if not uri or not uri.startswith(("http://", "https://")):
+        return None
+    if uri in RIGHTS_URI_LABELS:
+        return RIGHTS_URI_LABELS[uri]
+    try:
+        return uri.split("/")[2]
+    except IndexError:
+        return None
 
 # Fields shown in the catalogue-record grid, in order. (label, row-key)
 REC_FIELDS = [
@@ -245,9 +311,52 @@ REC_FIELDS = [
     ("Use", "use"),
     ("Medium", "medium"),
     ("Scale", "scale"),
+    ("Sheet", "setPosition"),
+    ("Note", "notes"),
     ("Location", "location"),
     ("Rights", "rights"),
 ]
+
+
+_ORG_WORDS = ("Foundation", "Archives", "Archive", "Collection", "Institute",
+              "University", "School", "Museum", "Associates", "Ltd", "Inc")
+
+
+def name_last_first(n):
+    n = (n or "").strip()
+    if any(w in n for w in _ORG_WORDS):
+        return n  # institutional name — never inverted
+    p = n.split()
+    return f"{p[-1]}, {' '.join(p[:-1])}" if len(p) >= 2 else n
+
+
+def chicago_date(d):
+    """Chicago-style date ("November 14, 1986") — matches next.html's
+    fmtCiteDate(d, "chicago") so the static page and the Cite popover agree."""
+    if not d:
+        return "n.d."
+    parts = str(d).split("-")
+    try:
+        y = parts[0]
+        if len(parts) == 1 or not parts[1] or parts[1] == "00":
+            return y
+        m = _MONTHS[int(parts[1]) - 1]
+        if len(parts) == 2 or not parts[2] or parts[2] == "00":
+            return f"{m} {y}"
+        return f"{m} {int(parts[2])}, {y}"
+    except (ValueError, IndexError):
+        return str(d)
+
+
+def chicago_citation(row, page_url):
+    """One-line Chicago reference — keep in step with next.html's citeFor()."""
+    creator = row.get("creator") or "Hunter House Foundation"
+    coll = row.get("sourceCollection")
+    coll_id = f"{coll}, {row['archId']}" if coll else row["archId"]
+    date = chicago_date(row.get("date"))
+    dseg = date if date.endswith(".") else date + "."
+    return (f"{name_last_first(creator)}. {row['label'] or row['archId']}. {dseg} "
+            f"{coll_id}. Hunter House Foundation Archive. {page_url}.")
 
 
 def render_page(row):
@@ -264,11 +373,32 @@ def render_page(row):
     rows_html = []
     for label, key in REC_FIELDS:
         v = row.get(key)
+        if key == "rights" and not v and row.get("rightsUri"):
+            uri = row["rightsUri"]
+            lbl = rights_uri_label(uri)
+            if lbl:
+                rows_html.append(f'      <dt>Rights</dt><dd><a href="{esc(uri)}" target="_blank" rel="noopener">{esc(lbl)}</a></dd>')
+            continue
         if not v:
             continue
         if key == "heldBy" and v == row.get("sourceCollection"):
             continue
+        if key == "notes" and len(v) >= NOTE_LEAD_MIN:
+            continue  # already the lead paragraph
         disp = title_case_type(v) if key == "itemType" else v
+        if key == "rights":
+            # Pair the local rights text with the standard statement link
+            # (P146 — RightsStatements.org / CC; audit adoption 1).
+            uri = row.get("rightsUri")
+            lbl = rights_uri_label(uri)
+            if lbl and lbl == disp:
+                bits = [f'<a href="{esc(uri)}" target="_blank" rel="noopener">{esc(disp)}</a>']
+            else:
+                bits = [esc(disp)]
+                if lbl:
+                    bits.append(f'<a href="{esc(uri)}" target="_blank" rel="noopener">{esc(lbl)}</a>')
+            rows_html.append(f"      <dt>{esc(label)}</dt><dd>{' · '.join(bits)}</dd>")
+            continue
         rows_html.append(f"      <dt>{esc(label)}</dt><dd>{esc(disp)}</dd>")
     grid = "\n".join(rows_html)
 
@@ -340,6 +470,8 @@ def render_page(row):
     parts.append('  <dl class="rec">')
     parts.append(grid)
     parts.append("  </dl>")
+    parts.append('  <div class="sec-label">Cite this item</div>')
+    parts.append(f'  <p class="cite">{esc(chicago_citation(row, page_url))}</p>')
     parts.append('  <div class="sec-label">In the archive</div>')
     parts.append(f'  <p><a class="cta" href="../browse.html?id={esc(aid)}">View in the interactive archive →</a></p>')
     if data_html:

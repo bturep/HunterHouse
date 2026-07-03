@@ -1,0 +1,76 @@
+# Weekly deployed-system health check — audit 2026-07 items B2/B3/D3.
+#
+# Watches the LIVE system (no secrets needed — everything checked is public):
+#   1. verify_r2_links.py — every Wikibase URL claim + derived sidecar HEAD-checked
+#      (this is the check that would have caught the June sidecar 404s the week
+#      they happened, instead of six weeks later).
+#   2. browse.html serves and carries a VERSION string.
+#   3. The R2 catalogue snapshot is fresh (< 14 days) and its item count matches
+#      live SPARQL (a stale snapshot silently serves first-paint data).
+#
+# Fails loudly on any problem → GitHub emails the maintainer. Also runnable by
+# hand via workflow_dispatch. NOTE: GitHub disables cron workflows after 60 days
+# without repo activity — if the archive goes dormant, re-enable from the
+# Actions tab (documented in CLAUDE.md session-log ritual).
+name: health
+on:
+  schedule:
+    - cron: "0 7 * * 1"   # Mondays 07:00 UTC (~midnight Pacific)
+  workflow_dispatch:
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install requests
+        run: pip install requests
+
+      - name: Live site serves with a VERSION
+        run: |
+          set -e
+          html=$(curl -sSf --max-time 30 https://hunterhouse.org/browse.html)
+          echo "$html" | grep -qE 'VERSION\s*=\s*"v[0-9]' || { echo "::error::browse.html has no VERSION string"; exit 1; }
+          echo "browse.html OK: $(echo "$html" | grep -oE 'VERSION\s*=\s*"[^"]+"' | head -1)"
+
+      - name: Catalogue snapshot fresh + count parity
+        run: |
+          python3 - <<'PY'
+          import json, sys, urllib.request, datetime
+          req = urllib.request.Request(
+              "https://archive.hunterhousefoundation.com/catalogue/catalogue.json",
+              headers={"User-Agent": "hh-health-action"})
+          snap = json.load(urllib.request.urlopen(req, timeout=60))
+          gen = snap.get("generated", "")[:10]
+          age = (datetime.date.today() - datetime.date.fromisoformat(gen)).days if gen else 999
+          n_snap = snap.get("item_count") or len({b["archId"]["value"] for b in snap["bindings"]})
+          q = ('PREFIX wdt: <https://hunterhouse.wikibase.cloud/prop/direct/> '
+               'SELECT (COUNT(DISTINCT ?i) AS ?n) WHERE { ?i wdt:P2 ?id . ?i wdt:P79 ?c . '
+               'FILTER(STRSTARTS(?id,"HH-")) }')
+          req = urllib.request.Request(
+              "https://hunterhouse.wikibase.cloud/query/sparql",
+              data=q.encode(),
+              headers={"Content-Type": "application/sparql-query",
+                       "Accept": "application/sparql-results+json",
+                       "User-Agent": "hh-health-action"})
+          n_live = int(json.load(urllib.request.urlopen(req, timeout=120))
+                       ["results"]["bindings"][0]["n"]["value"])
+          print(f"snapshot: {n_snap} items, generated {gen} ({age}d old); live: {n_live}")
+          if age > 14:
+              # warning, not failure: snapshot refresh is deliberately manual
+              # (no R2 creds in CI), so age tracks work cadence, not health.
+              # Count parity below is the real staleness detector.
+              print(f"::warning::catalogue snapshot is {age} days old — run build_catalogue_snapshot.py --execute at next session")
+          if n_snap != n_live:
+              print(f"::error::snapshot has {n_snap} items but live SPARQL has {n_live} — snapshot is stale")
+              sys.exit(1)
+          PY
+
+      - name: Verify every R2 URL claim + sidecar
+        run: python3 scripts/verify_r2_links.py

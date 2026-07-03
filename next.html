@@ -3822,7 +3822,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.75";
+  const VERSION      = "v1.09-test.76";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -3945,6 +3945,7 @@
     SOURCE_COLLECTION: "P79",    // HHC / CAA / EGC / FUL — gates the catalogue
     HELD_BY:           "P94",    // institution physically holding the original
     RIGHTS:            "P93",
+    RIGHTS_URI:        "P146",  // standard rights statement (RightsStatements.org / CC URL) — descriptive anchor, audit 2026-07 adoption 1
     ARCHIVE_LINK:      "P99",    // AtoM item-level URL (CAA items)
     LOCATION:          "P142",   // physical archival path
     // Attribution
@@ -4818,7 +4819,11 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       const all = JSON.parse(localStorage.getItem("hhf_rn") || "{}");
       all[archId] = notes;
       localStorage.setItem("hhf_rn", JSON.stringify(all));
-    } catch {}
+    } catch (e) {
+      // Audit B4: notes are the one user-authored datum here — never drop
+      // one silently. QuotaExceeded is the realistic failure.
+      try { hhToast("⚠ Note NOT saved — browser storage is full"); } catch { alert("Note NOT saved — browser storage is full"); }
+    }
   }
   // Set of archIds that carry a note VISIBLE to the current viewer — computed
   // once per list render. Public → empty; researcher → only their own;
@@ -5978,8 +5983,35 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       : "Contact the Hunter House Foundation.";
   }
   // Rights row HTML — assembles the rights-label + contact-note span.
-  function rightsRowHTML(rightsText, coll) {
-    return `${escapeHTML(rightsText)}<span class="rights-note">${escapeHTML(archiveContactText(coll))}</span>`;
+  // Map the P146 standard rights URI → a short human label. Descriptive
+  // statements (RightsStatements.org) or an actual license (CC). Unknown
+  // URIs fall back to the hostname so a new statement still renders.
+  const RIGHTS_URI_LABELS = {
+    "https://rightsstatements.org/vocab/InC/1.0/": "In Copyright",
+    "https://rightsstatements.org/vocab/CNE/1.0/": "Copyright Not Evaluated",
+    "https://creativecommons.org/licenses/by-nc-nd/4.0/": "CC BY-NC-ND 4.0",
+  };
+  function rightsUriLabel(uri) {
+    if (RIGHTS_URI_LABELS[uri]) return RIGHTS_URI_LABELS[uri];
+    try { return new URL(uri).hostname; } catch { return null; }
+  }
+  function rightsRowHTML(rightsText, coll, rightsUri) {
+    const parts = [];
+    if (rightsText) parts.push(escapeHTML(rightsText));
+    if (rightsUri) {
+      const lbl = rightsUriLabel(rightsUri);
+      // only link http(s) — same defensive rule as findingAidHTML
+      let safe = "";
+      try { const u = new URL(rightsUri); if (u.protocol === "http:" || u.protocol === "https:") safe = rightsUri; } catch {}
+      if (lbl && safe) {
+        if (rightsText && lbl === rightsText)
+          parts[0] = `<a href="${escapeHTML(safe)}" target="_blank" rel="noopener">${escapeHTML(rightsText)}</a>`;  // same label — render the text AS the link (matches the static pages)
+        else
+          parts.push(`<a href="${escapeHTML(safe)}" target="_blank" rel="noopener">${escapeHTML(lbl)}</a>`);
+      }
+    }
+    if (!parts.length) return "";
+    return `${parts.join(" · ")}<span class="rights-note">${escapeHTML(archiveContactText(coll))}</span>`;
   }
   // Finding-aid link HTML — single source of truth for the AtoM/etc.
   // anchor (CAA items).
@@ -6089,8 +6121,8 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     if (item.location) {
       archRows.push(["Location", item.location.split(/,\s*/).map(escapeHTML).join(" › ")]);
     }
-    if (item.rights) {
-      archRows.push(["Rights", rightsRowHTML(item.rights, coll)]);
+    if (item.rights || item.rightsUri) {
+      archRows.push(["Rights", rightsRowHTML(item.rights, coll, item.rightsUri)]);
     }
     if (item.archiveLink) {
       archRows.push(["Finding aid", findingAidHTML(item.archiveLink, coll)]);
@@ -6213,11 +6245,14 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     // 800 ms later almost always succeeds. If both fail the caller
     // (loadFromWikibase) falls back to any stale localStorage cache.
     const url = SPARQL_URL + "?query=" + encodeURIComponent(q) + "&format=json";
-    const opts = { headers: { Accept: "application/sparql-results+json" } };
+    const baseOpts = { headers: { Accept: "application/sparql-results+json" } };
     let lastErr;
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
-        const res = await fetch(url, opts);
+        // Fresh signal per attempt (audit B6 + review): a shared signal is
+        // permanently aborted after one timeout, which would turn the retry
+        // into an instant no-op exactly when the timeout is the failure mode.
+        const res = await fetch(url, { ...baseOpts, signal: AbortSignal.timeout(45000) });
         if (!res.ok) throw new Error("SPARQL " + res.status);
         return (await res.json()).results.bindings;
       } catch (e) {
@@ -6229,6 +6264,22 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   }
 
   const CACHE_KEY = "hhf_" + VERSION;
+  // Evict superseded per-version catalogue caches (audit B4): every VERSION
+  // bump orphans a ~300 KB "hhf_v…" entry; against a ~5 MB origin quota that
+  // eventually makes localStorage.setItem throw — and researcher notes are
+  // the casualty. Researcher data lives under hhf_rn / hhf_marks / hhf_seen
+  // / hhf_theme_v2 / hhf_analytics_optout, none of which match "hhf_v".
+  // Scope: only THIS page's lineage. browse.html and next.html share the
+  // origin; staging keys carry "-test.", live keys don't — evicting across
+  // that line would delete the sibling page's warm cache on every visit
+  // (and after promotion the two pages would ping-pong-evict each other).
+  try {
+    const isStagingKey = (k) => k.includes("-test.");
+    const mine = isStagingKey(CACHE_KEY);
+    for (const k of Object.keys(localStorage))
+      if (k.startsWith("hhf_v") && k !== CACHE_KEY && isStagingKey(k) === mine)
+        localStorage.removeItem(k);
+  } catch { /* storage unavailable — nothing to evict */ }
 
   function clearCache() {
     try { localStorage.removeItem(CACHE_KEY); } catch {}
@@ -6255,8 +6306,10 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     if (style === "apa") return day ? `${y}, ${_CMON[m-1]} ${day}` : `${y}, ${_CMON[m-1]}`;
     return day ? `${_CMON[m-1]} ${day}, ${y}` : `${_CMON[m-1]} ${y}`;
   }
+  const _ORG_WORDS = ["Foundation","Archives","Archive","Collection","Institute","University","School","Museum","Associates","Ltd","Inc"];  // keep in step with build_item_pages.py _ORG_WORDS (SYNC-MAP)
   function nameLastFirst(n) {
     if (!n) return n || "";
+    if (_ORG_WORDS.some(w => n.includes(w))) return n;  // institutional name — never inverted
     const p = n.trim().split(/\s+/); if (p.length < 2) return n;
     const last = p.pop(); return `${last}, ${p.join(" ")}`;
   }
@@ -6361,7 +6414,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     const img = pages[0] || null;
     const to = Array.isArray(r.to) ? r.to.filter(Boolean).join(", ") : (r.to || "");
     return {
-      qid: null, id: r.id, title: `${r.from || "?"} to ${to || "?"}, ${fmtLetterDate(r.date, r.as_written)}`,
+      qid: null, id: r.id, title: r.title || `${r.from || "?"} to ${to || "?"}, ${fmtLetterDate(r.date, r.as_written)}`,  // non-letter gated records (photograph/notebook) carry their own title
       image: img, pages, master: null, accessCopy: null, date: r.date || null,
       itemType: r.kind === "letter" ? "Letter" : (r.kind || "item"),
       creator: r.from || null, letter: true, letterFrom: r.from || null, letterTo: to,
@@ -6370,9 +6423,12 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       summary: r.summary || null, subjects: Array.isArray(r.subjects) ? r.subjects : [],
       entities: (r.entities && typeof r.entities === "object") ? r.entities : null,
       gated: true, transcript: r.transcript || null, sourceCollection: "Frances Hunter Collection",
+      // Correspondence is in copyright (letter author's estate, life+70) — keep
+      // the rights row + contact note that the old blanket default used to provide.
+      rights: null, rightsUri: "https://rightsstatements.org/vocab/InC/1.0/",
       medium: r.medium || null, areas: [], categories: [], drawTypes: [], builtBy: [],
       designedBy: null, use: null, scale: null, builtStatus: null, setPosition: null, notes: null,
-      rights: "Hunter House Foundation", heldBy: null, archiveLink: null, location: null,
+      rights: null, rightsUri: null, heldBy: null, archiveLink: null, location: null,
       rotation: 0, phase: null, phaseQID: null,
     };
   }
@@ -6424,6 +6480,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
           setPosition:      r.setPos?.value || null,
           notes:            r.notes?.value || null,
           rights:           r.rightsLabel?.value || null,
+          rightsUri:        r.rightsUri?.value || null,
           heldBy:           r.heldByLabel?.value || null,
           archiveLink:      r.archiveLink?.value || null,
           location:         r.location?.value || null,
@@ -6454,7 +6511,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   // Wikibase is fully down. Throws on network/parse error so the caller can
   // fall through to its last resort.
   async function fetchSnapshot() {
-    const res = await fetch(SNAPSHOT_URL, { cache: "no-store" });
+    const res = await fetch(SNAPSHOT_URL, { cache: "no-store", signal: AbortSignal.timeout(15000) });  // audit B6: bound a stalled CDN without aborting slow-but-healthy links (catalogue.json is ~1.7 MB — 4 s was too tight below ~3.5 Mbps)
     if (!res.ok) throw new Error("snapshot " + res.status);
     const snap = await res.json();
     const rows = Array.isArray(snap) ? snap : (snap.bindings || []);
@@ -6623,7 +6680,7 @@ SELECT ?item ?archId ?label ?img ?master
        ?use ?useLabel ?scale ?medium
        ?builtStatus ?builtStatusLabel
        ?setPos ?notes
-       ?rights ?rightsLabel
+       ?rights ?rightsLabel ?rightsUri
        ?heldBy ?heldByLabel
        ?archiveLink ?location ?accessCopy ?rotation
 WHERE {
@@ -6652,6 +6709,7 @@ WHERE {
   OPTIONAL { ?item wdt:${PROPERTIES.SET_POSITION} ?setPos }
   OPTIONAL { ?item wdt:${PROPERTIES.NOTES} ?notes }
   OPTIONAL { ?item wdt:${PROPERTIES.RIGHTS} ?rights . ?rights rdfs:label ?rightsLabel . FILTER(LANG(?rightsLabel)="en") }
+  OPTIONAL { ?item wdt:${PROPERTIES.RIGHTS_URI} ?rightsUri }
   OPTIONAL { ?item wdt:${PROPERTIES.HELD_BY} ?heldBy . ?heldBy rdfs:label ?heldByLabel . FILTER(LANG(?heldByLabel)="en") }
   OPTIONAL { ?item wdt:${PROPERTIES.ARCHIVE_LINK} ?archiveLink }
   OPTIONAL { ?item wdt:${PROPERTIES.LOCATION} ?location }
@@ -7684,7 +7742,7 @@ WHERE {
       const pubs = (e.publications || []).map(p => `<span class="pill ${pillCls(PC.stone)}">${escapeHTML((p && p.name) || p)}</span>`).join("");
       if (pubs) descRows.push(["Works cited", pubs]);
       if (coll) archRows.push(["Held by", `<span class="pill collection-pill ${pillCls(PC.denim)}">${escapeHTML(coll)}</span>`]);
-      if (item.rights) archRows.push(["Rights", rightsRowHTML(item.rights, coll)]);
+      if (item.rights || item.rightsUri) archRows.push(["Rights", rightsRowHTML(item.rights, coll, item.rightsUri)]);
     } else {
     if (item.id)          descRows.push(["Item",    displayId(item.id)]);
     if (item.date || showEmpty) descRows.push(["Date", item.date ? escapeHTML(item.date) : EM]);
@@ -7754,8 +7812,8 @@ WHERE {
         : EM;
       archRows.push(["Location", item.location ? `<span class="location-path">${crumbs}</span>` : EM]);
     }
-    if (item.rights) {
-      archRows.push(["Rights", rightsRowHTML(item.rights, coll)]);
+    if (item.rights || item.rightsUri) {
+      archRows.push(["Rights", rightsRowHTML(item.rights, coll, item.rightsUri)]);
     }
     if (item.archiveLink) archRows.push(["Finding aid", findingAidHTML(item.archiveLink, coll)]);
     }

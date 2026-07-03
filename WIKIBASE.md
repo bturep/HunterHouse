@@ -77,6 +77,7 @@ For **bulk changes to many items at once**: use a SPARQL query to get the QIDs f
 | P140 | built by | Item | Person/org who built the physical piece (distinct from P80 creator = drawer/photographer). First values written 2026-05-20 (EGC: Q209 Gesinger on 9 items, Q536 Byers on 1). |
 | P141 | designed by | Item | Person who designed the physical piece (distinct from creator/built-by). Property exists; no values yet — Hunter implicit as designer on everything for now. |
 | P145 | category | Item | Subject category (e.g. Furniture, Architecture). Multi-value. Inline-editable by admins. Created 2026-05-20. |
+| P146 | rights statement URI | URL | Standard machine-readable rights statement — a RightsStatements.org URI (InC = In Copyright, CNE = Copyright Not Evaluated) or a Creative Commons license URL. **Descriptive, not a license grant** — P93 still carries the local rights/license item; P146 is the interoperable anchor (DPLA/Europeana convention, audit 2026-07 adoption 1). Every archive item carries one (defaults: InC where the copyright chain is known; CNE for the few unattributed FRH photos). Q117 (CC BY-NC-ND 4.0) also carries its canonical CC URL. Created 2026-07-02. |
 
 ### Other properties in the schema (for reference)
 
