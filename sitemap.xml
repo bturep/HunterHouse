@@ -1113,11 +1113,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://hunterhouse.org/archive/HH-HHC-0116.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://hunterhouse.org/archive/HH-IHC-0001.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
