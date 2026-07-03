@@ -53,6 +53,7 @@ COLLECTION_FOLDER = {
     "CAA": "canadian-architecture-archive",
     "EGC": "eric-gesinger-collection",
     "IHC": "ivan-hunter-collection",
+    "FRH": "frances-hunter-collection",  # public objects only; letters gated, not in Wikibase
 }
 
 

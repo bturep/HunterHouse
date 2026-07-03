@@ -503,6 +503,41 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://hunterhouse.org/archive/HH-FRH-DOC-01.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://hunterhouse.org/archive/HH-FRH-DOC-02.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://hunterhouse.org/archive/HH-FRH-DOC-03.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://hunterhouse.org/archive/HH-FRH-PHOTO-01.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://hunterhouse.org/archive/HH-FRH-PHOTO-02.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://hunterhouse.org/archive/HH-FRH-PHOTO-03.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://hunterhouse.org/archive/HH-FRH-PHOTO-04.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://hunterhouse.org/archive/HH-HHC-0001.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -1074,6 +1109,11 @@
   </url>
   <url>
     <loc>https://hunterhouse.org/archive/HH-HHC-0115.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://hunterhouse.org/archive/HH-HHC-0116.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
