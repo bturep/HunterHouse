@@ -115,9 +115,13 @@ CSS_LAB_B = """\
   .br-row .r{color:var(--muted);letter-spacing:0.06em;font-size:9px}
   .br-row:hover{color:var(--ink)}
   .br-row .ph-chev{display:inline-block;width:14px;color:var(--muted)}
-  /* v23: the pip rides ABOVE the tinted blocks (was sliding behind them)
-     but below the rails and the filter overlay. */
+  /* v23/v35: the pip gets its OWN SLOT — a 7px gutter right of the list
+     content (rows margin + rail inset), so the indicator never rides over
+     the selected item's outline or the dashed row separators. Chrome rows
+     and the foot stay full-width: the gutter belongs to the list only. */
   .scroll-pip{z-index:7}
+  #rows{margin-right:7px}
+  #bin-rail-top{right:7px}
   /* ══ v25: dark-mode DEPTH LADDER (Brandon) — light = instrument, dark =
      viewing depth. Darkest to lightest: image stage (artifact floats in
      the deepest room) < item rows < collection bars < UI chrome (the
@@ -270,14 +274,15 @@ NEW_PHASE_DIVIDER_B = """\
         lastPhase = gkey;
         const count = state.filtered.filter(x => gkeyOf(x) === gkey).length;
         const d = document.createElement("div");
-        const open = searchOpen || phaseExpanded.has(gkey);
+        const open = phaseExpanded.has(gkey) || ((searchOpen || afActive) && !phaseCollapsed.has(gkey));   // v36: filtered/searched bins default OPEN, still closable
         d.className = "phase-divider ph-head" + (open ? "" : " closed");
         d.dataset.phase = gkey;
         d.dataset.count = String(count).padStart(2,"0");   // v23: the rails read this
         const gloss = glossOf(gkey);
         d.innerHTML = `<span><span class="ph-chev">${open ? "\\u2304" : "\\u203a"}</span>${escapeHTML(glabelOf(gkey))}${gloss ? `<span class="ph-gloss">${escapeHTML(gloss)}</span>` : ""}</span><span class="r">${String(count).padStart(2,"0")} items</span>`;
         d.addEventListener("click", () => {
-          if (phaseExpanded.has(gkey)) phaseExpanded.delete(gkey); else phaseExpanded.add(gkey);
+          if (open) { phaseExpanded.delete(gkey); phaseCollapsed.add(gkey); }
+          else { phaseCollapsed.delete(gkey); phaseExpanded.add(gkey); }
           renderList();
         });
         frag.appendChild(d);
@@ -421,7 +426,8 @@ def main():
     # headers; Year sort stays flat. All groups contracted by default.
     build("b", CSS_LAB_B, [
         ("  function renderList() {",
-         "  const phaseExpanded = new Set();   // LAB B: opened groups (contracted by default, session-scope)\n"
+         "  const phaseExpanded = new Set();    // LAB B: opened groups (contracted by default, session-scope)\n"
+         "  const phaseCollapsed = new Set();   // LAB B v36: manual closes that override auto-open (search/filter)\n"
          "  function renderList() {",
          "expand-state"),
         ('    const grouped = !state.curation && state.sortCol === "phase";',
@@ -646,7 +652,7 @@ def main():
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
-    ], version="34", tray=False)
+    ], version="36", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.

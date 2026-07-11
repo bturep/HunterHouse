@@ -1001,9 +1001,13 @@
   .br-row .r{color:var(--muted);letter-spacing:0.06em;font-size:9px}
   .br-row:hover{color:var(--ink)}
   .br-row .ph-chev{display:inline-block;width:14px;color:var(--muted)}
-  /* v23: the pip rides ABOVE the tinted blocks (was sliding behind them)
-     but below the rails and the filter overlay. */
+  /* v23/v35: the pip gets its OWN SLOT — a 7px gutter right of the list
+     content (rows margin + rail inset), so the indicator never rides over
+     the selected item's outline or the dashed row separators. Chrome rows
+     and the foot stay full-width: the gutter belongs to the list only. */
   .scroll-pip{z-index:7}
+  #rows{margin-right:7px}
+  #bin-rail-top{right:7px}
   /* ══ v25: dark-mode DEPTH LADDER (Brandon) — light = instrument, dark =
      viewing depth. Darkest to lightest: image stage (artifact floats in
      the deepest room) < item rows < collection bars < UI chrome (the
@@ -4027,7 +4031,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.34";
+  const VERSION      = "v1.09-test.79-labb.36";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7504,7 +7508,8 @@ WHERE {
     if (panel) panel.innerHTML = "";
   }
 
-  const phaseExpanded = new Set();   // LAB B: opened groups (contracted by default, session-scope)
+  const phaseExpanded = new Set();    // LAB B: opened groups (contracted by default, session-scope)
+  const phaseCollapsed = new Set();   // LAB B v36: manual closes that override auto-open (search/filter)
   function renderList() {
     if (state.view === "letters") { renderLettersList(); return; }
     const container = $("#rows");
@@ -7605,14 +7610,15 @@ WHERE {
         lastPhase = gkey;
         const count = state.filtered.filter(x => gkeyOf(x) === gkey).length;
         const d = document.createElement("div");
-        const open = searchOpen || phaseExpanded.has(gkey);
+        const open = phaseExpanded.has(gkey) || ((searchOpen || afActive) && !phaseCollapsed.has(gkey));   // v36: filtered/searched bins default OPEN, still closable
         d.className = "phase-divider ph-head" + (open ? "" : " closed");
         d.dataset.phase = gkey;
         d.dataset.count = String(count).padStart(2,"0");   // v23: the rails read this
         const gloss = glossOf(gkey);
         d.innerHTML = `<span><span class="ph-chev">${open ? "\u2304" : "\u203a"}</span>${escapeHTML(glabelOf(gkey))}${gloss ? `<span class="ph-gloss">${escapeHTML(gloss)}</span>` : ""}</span><span class="r">${String(count).padStart(2,"0")} items</span>`;
         d.addEventListener("click", () => {
-          if (phaseExpanded.has(gkey)) phaseExpanded.delete(gkey); else phaseExpanded.add(gkey);
+          if (open) { phaseExpanded.delete(gkey); phaseCollapsed.add(gkey); }
+          else { phaseCollapsed.delete(gkey); phaseExpanded.add(gkey); }
           renderList();
         });
         frag.appendChild(d);
