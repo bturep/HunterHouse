@@ -915,6 +915,39 @@
   .fpi-meta a:hover{border-bottom-color:var(--copper-deep)}
   html.dark #fp-info-pop{background:#1f1d1a;border-color:#3a3733}
 
+  /* ── Facet counts + zero-greys (promoted from lab-a 2026-07-10) ── */
+  .fp-chip .fp-ct{margin-left:6px;font-size:9px;opacity:0.6;letter-spacing:0.02em}
+  .fp-chip.zero{opacity:0.32;cursor:default;pointer-events:none}
+  .fp-chip.on .fp-ct{opacity:0.85}
+  /* ── Applied-filter bar above the list (promoted from lab-a) ── */
+  .af-bar{display:flex;flex-wrap:wrap;gap:5px;align-items:center;
+    padding:10px 20px;border-bottom:1px solid var(--rule);background:var(--soft)}
+  .af-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);
+    letter-spacing:0.16em;text-transform:uppercase;margin-right:4px}
+  .af-pill{font-family:var(--mono);font-size:10px;letter-spacing:0.03em;
+    border:1px solid var(--rule);background:var(--bg);color:var(--ink);
+    padding:2px 8px;border-radius:2px;cursor:pointer;line-height:1.5}
+  .af-pill:hover{border-color:var(--ink)}
+  .af-pill .x{margin-left:5px;color:var(--muted)}
+  .af-pill:hover .x{color:var(--red-deep)}
+  .af-clear{font-family:var(--mono);font-size:9px;color:var(--muted);
+    letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;
+    background:none;border:0;padding:2px 4px;margin-left:auto}
+  .af-clear:hover{color:var(--ink)}
+  .empty-hint{padding:10px 20px 0;font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.7}
+  /* ── Search lives with finding (left panel), not the top-right settings
+     cluster (promoted from lab-a). #search-input stays in the DOM as the
+     proxy target — the same pattern mobile's fp-search-row already uses. ── */
+  .lp-search{display:flex;align-items:center;gap:8px;padding:8px 20px;border-bottom:1px solid var(--rule);flex-shrink:0}
+  .lp-search .pfx{font-family:var(--mono);font-size:10px;color:var(--hint)}
+  .lp-search input{flex:1;min-width:0;background:none;border:0;outline:none;font-family:var(--mono);font-size:11px;color:var(--ink);letter-spacing:0.03em}
+  .lp-search input::placeholder{color:var(--hint);text-transform:lowercase;letter-spacing:0.06em}
+  @media (min-width:768px){
+    #search-toggle{display:none!important}
+    #search-input.tr-search-input{display:none!important}
+    .filter-panel{top:74px}   /* dropdown opens below the search row, still full-height */
+  }
+  @media (max-width:767px){ .lp-search{display:none} }  /* mobile keeps its fp-search-row */
   .row{
     display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
     padding:11px 20px;align-items:start;cursor:pointer;
@@ -3535,6 +3568,10 @@
           <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>
         </div>
       </div>
+      <div class="lp-search" id="lp-search">
+        <span class="pfx">/</span>
+        <input id="lp-search-input" type="text" placeholder="search archive" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search the archive">
+      </div>
       <div class="filter-panel" id="filter-panel" hidden></div>
       <div class="mark-bar" id="mark-bar" hidden></div>
       <div class="bulk-bar" id="bulk-bar" hidden></div>
@@ -3822,7 +3859,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.76";
+  const VERSION      = "v1.09-test.77";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7270,8 +7307,55 @@ WHERE {
     document.body.classList.toggle("marks-only",
       !!state.filterMarkedOnly && canMark() && !state.curation);
 
+    // ── Applied filters as removable pills above the list (promoted from
+    // lab-a 2026-07-10) — always visible whenever any facet is active,
+    // whether or not the dropdown is open. Every group is represented (the
+    // old divider covered only 3 of 6, which is how a stacked Collection
+    // filter could empty the list with no visible explanation).
+    const AF_GROUPS = [
+      ["collection",  state.filterCollection ],
+      ["area",        state.filterArea       ],
+      ["itype",       state.filterType       ],
+      ["drawtype",    state.filterDrawType   ],
+      ["creator",     state.filterCreator    ],
+      ["builtstatus", state.filterBuiltStatus],
+    ];
+    const afActive = !state.curation && AF_GROUPS.some(([,s]) => s.size);
+    const afBar = () => {
+      const bar = document.createElement("div");
+      bar.className = "af-bar";
+      bar.innerHTML =
+        `<span class="af-lbl">Filters</span>` +
+        AF_GROUPS.flatMap(([g, s]) => [...s].map(v =>
+          `<button class="af-pill" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">×</span></button>`
+        )).join("") +
+        `<button class="af-clear" id="filter-clear-all">✕ clear all</button>`;
+      bar.querySelectorAll(".af-pill").forEach(p => p.addEventListener("click", e => {
+        e.stopPropagation();
+        const set = new Map(AF_GROUPS).get(p.dataset.afG);
+        if (set) set.delete(p.dataset.afV);
+        applyFilters(); renderList(); updateFilterBadge(); renderFilterPanel();
+      }));
+      return bar;
+    };
+
     if (state.filtered.length === 0) {
-      container.innerHTML = `<div class="empty">No items match</div>`;
+      if (afActive) container.appendChild(afBar());
+      const d = document.createElement("div");
+      d.className = "empty";
+      d.textContent = "No items match this combination";
+      container.appendChild(d);
+      const hint = document.createElement("div");
+      hint.className = "empty-hint";
+      hint.textContent = afActive
+        ? "Remove a filter above to widen the selection — an empty result means these facets don't overlap in the catalogue."
+        : "Try a different search term.";
+      container.appendChild(hint);
+      const clearBtn0 = document.getElementById("filter-clear-all");
+      if (clearBtn0) clearBtn0.addEventListener("click", e => {
+        e.stopPropagation(); clearAllFilters();
+        applyFilters(); renderList(); updateFilterBadge(); renderFilterPanel();
+      });
       return;
     }
 
@@ -7281,14 +7365,7 @@ WHERE {
     const noted = rnNotedIds();   // items with a viewer-visible note
     const flags = canMark();      // the flag strip is a researcher workspace
 
-    const anyFilter = state.filterArea.size || state.filterType.size || state.filterDrawType.size;
-    if (anyFilter) {
-      const d = document.createElement("div");
-      d.className = "phase-divider";
-      const n = String(state.filtered.length).padStart(2,"0");
-      d.innerHTML = `<span>Filtered <span style="color:var(--muted);font-weight:400">${n} items</span></span><span class="r" style="cursor:pointer" id="filter-clear-all">✕ clear all</span>`;
-      frag.appendChild(d);
-    }
+    if (afActive) frag.appendChild(afBar());
 
     state.filtered.forEach((it, _idx) => {
       if (grouped && it.phase !== lastPhase) {
@@ -8161,6 +8238,39 @@ WHERE {
     badge.classList.toggle("visible", total > 0);
   }
 
+  // ── Per-chip facet counts (promoted from lab-a 2026-07-10). For each facet
+  // group, the count base is the item set passing every OTHER active filter
+  // (standard facet logic) — a chip's number answers "what would I get if I
+  // added this?". 260 items client-side; naive per-chip counting is fine.
+  function facetBase(exclude) {
+    const q = state.search.trim().toLowerCase();
+    return state.items.filter(it => {
+      if (it.gated) return false;
+      if (state.filterMarkedOnly && !marksHas(it.id)) return false;
+      if (exclude !== "collection" && state.filterCollection.size && !state.filterCollection.has(archiveAbbrev(collectionOf(it)))) return false;
+      if (exclude !== "area" && state.filterArea.size && !(it.areas||[]).some(a => state.filterArea.has(a))) return false;
+      if (exclude !== "itype" && state.filterType.size && !state.filterType.has(it.itemType)) return false;
+      if (exclude !== "drawtype" && state.filterDrawType.size && !(it.drawTypes||[]).some(dt => state.filterDrawType.has(dt))) return false;
+      if (exclude !== "creator" && state.filterCreator.size) {
+        const persons = [it.creator, it.designedBy, ...(it.builtBy || [])].filter(Boolean);
+        if (!persons.some(c => state.filterCreator.has(c))) return false;
+      }
+      if (exclude !== "builtstatus" && state.filterBuiltStatus.size && !state.filterBuiltStatus.has(it.builtStatus)) return false;
+      if (q) {
+        const hay = [it.id, it.title, it.phase, it.itemType||"", (it.drawTypes||[]).join(" "), (it.areas||[]).join(" "), it.creator, it.designedBy||"", (it.builtBy||[]).join(" "), it.notes||"", it.location||""].join(" ").toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+  const FACET_MATCH = {
+    collection:  (it, v) => archiveAbbrev(collectionOf(it)) === v,
+    area:        (it, v) => (it.areas||[]).includes(v),
+    itype:       (it, v) => it.itemType === v,
+    drawtype:    (it, v) => (it.drawTypes||[]).includes(v),
+    creator:     (it, v) => [it.creator, it.designedBy, ...(it.builtBy||[])].includes(v),
+    builtstatus: (it, v) => it.builtStatus === v,
+  };
   function renderFilterPanel() {
     const panel = $("#filter-panel");
     if (!panel) return;
@@ -8184,8 +8294,12 @@ WHERE {
     const group = (label, vals, activeSet, cls, attr, color) => {
       if (!vals.length) return "";
       const pc = color ? ` ${pillCls(color)}` : "";
+      const base = facetBase(attr);          // count base for this group
+      const match = FACET_MATCH[attr];
       const chips = vals.map(v => {
-        const chip = `<button class="fp-chip${activeSet.has(v) ? " on" : ""}${pc}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}</button>`;
+        const n = match ? base.filter(it => match(it, v)).length : 0;
+        const zero = n === 0 && !activeSet.has(v);   // active chips stay clickable (to deselect)
+        const chip = `<button class="fp-chip${activeSet.has(v) ? " on" : ""}${zero ? " zero" : ""}${pc}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}<span class="fp-ct">${n}</span></button>`;
         // Collection chips get an ⓘ for the per-collection blurb popover.
         const info = (attr === "collection" && COLLECTION_INFO[v])
           ? `<button class="fp-info" data-coll-info="${escapeHTML(v)}" title="About ${escapeHTML(v)}" aria-label="About ${escapeHTML(v)}">ⓘ</button>`
@@ -8339,6 +8453,30 @@ WHERE {
     });
 
     $("#filter-panel").addEventListener("click", e => e.stopPropagation());
+
+    // Left-panel search (promoted from lab-a 2026-07-10) — proxies into
+    // #search-input exactly like the mobile fp-search-row does. Two-way
+    // sync; Escape clears.
+    {
+      const lp = document.getElementById("lp-search-input");
+      const se = document.getElementById("search-input");
+      if (lp && se) {
+        lp.addEventListener("input", () => {
+          se.value = lp.value;
+          se.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+        se.addEventListener("input", () => {
+          if (document.activeElement !== lp && lp.value !== se.value) lp.value = se.value;
+        });
+        lp.addEventListener("keydown", e => {
+          if (e.key === "Escape") {
+            lp.value = ""; se.value = "";
+            se.dispatchEvent(new Event("input", { bubbles: true }));
+            lp.blur(); e.preventDefault();
+          }
+        });
+      }
+    }
 
     // Column-header sort
     document.querySelectorAll(".sort-hd[data-sort-col]").forEach(btn => {
@@ -10784,7 +10922,11 @@ WHERE {
     // through it). Guard every lookup so a missing element doesn't throw
     // and abort main() before loadFromWikibase() runs.
     const searchInput = document.getElementById("search-input");
-    function openSearch() { if (!searchInput) return; searchInput.classList.add("open"); searchInput.focus(); }
+    function openSearch() {
+      const lp = document.getElementById("lp-search-input");          // "/" focuses the
+      if (lp && lp.offsetParent) { lp.focus(); return; }              // left-panel search
+      if (!searchInput) return; searchInput.classList.add("open"); searchInput.focus();
+    }
     function closeSearch() { if (!searchInput) return; searchInput.classList.remove("open"); searchInput.value = ""; searchInput.dispatchEvent(new Event("input")); }
     const searchToggleBtn = document.getElementById("search-toggle");
     if (searchToggleBtn) {

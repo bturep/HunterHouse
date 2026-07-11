@@ -918,11 +918,11 @@
   .fpi-meta a:hover{border-bottom-color:var(--copper-deep)}
   html.dark #fp-info-pop{background:#1f1d1a;border-color:#3a3733}
 
-  /* ══ LAB: facet counts + zero-greys ══ */
+  /* ── Facet counts + zero-greys (promoted from lab-a 2026-07-10) ── */
   .fp-chip .fp-ct{margin-left:6px;font-size:9px;opacity:0.6;letter-spacing:0.02em}
   .fp-chip.zero{opacity:0.32;cursor:default;pointer-events:none}
   .fp-chip.on .fp-ct{opacity:0.85}
-  /* ══ LAB: applied-filter bar above the list ══ */
+  /* ── Applied-filter bar above the list (promoted from lab-a) ── */
   .af-bar{display:flex;flex-wrap:wrap;gap:5px;align-items:center;
     padding:10px 20px;border-bottom:1px solid var(--rule);background:var(--soft)}
   .af-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);
@@ -938,9 +938,9 @@
     background:none;border:0;padding:2px 4px;margin-left:auto}
   .af-clear:hover{color:var(--ink)}
   .empty-hint{padding:10px 20px 0;font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.7}
-  /* ══ LAB: search lives with finding (left panel), not in the top-right
-     settings cluster. Desktop hides the top-right search UI; the #search-input
-     element stays in the DOM as the proxy target (same pattern mobile uses). ══ */
+  /* ── Search lives with finding (left panel), not the top-right settings
+     cluster (promoted from lab-a). #search-input stays in the DOM as the
+     proxy target — the same pattern mobile's fp-search-row already uses. ── */
   .lp-search{display:flex;align-items:center;gap:8px;padding:8px 20px;border-bottom:1px solid var(--rule);flex-shrink:0}
   .lp-search .pfx{font-family:var(--mono);font-size:10px;color:var(--hint)}
   .lp-search input{flex:1;min-width:0;background:none;border:0;outline:none;font-family:var(--mono);font-size:11px;color:var(--ink);letter-spacing:0.03em}
@@ -948,9 +948,9 @@
   @media (min-width:768px){
     #search-toggle{display:none!important}
     #search-input.tr-search-input{display:none!important}
-    .filter-panel{top:74px}   /* tray opens below the search row, not over it */
+    .filter-panel{top:74px}   /* dropdown opens below the search row, still full-height */
   }
-  @media (max-width:767px){ .lp-search{display:none} }  /* mobile keeps its own fp-search-row */
+  @media (max-width:767px){ .lp-search{display:none} }  /* mobile keeps its fp-search-row */
   .row{
     display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
     padding:11px 20px;align-items:start;cursor:pointer;
@@ -3862,7 +3862,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.76-laba.02";
+  const VERSION      = "v1.09-test.77-laba.03";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7310,9 +7310,11 @@ WHERE {
     document.body.classList.toggle("marks-only",
       !!state.filterMarkedOnly && canMark() && !state.curation);
 
-    // ── LAB: applied filters as removable pills above the list — always
-    // visible whenever any facet is active, whether or not the dropdown is
-    // open. Every group is represented (the old divider covered only 3 of 6).
+    // ── Applied filters as removable pills above the list (promoted from
+    // lab-a 2026-07-10) — always visible whenever any facet is active,
+    // whether or not the dropdown is open. Every group is represented (the
+    // old divider covered only 3 of 6, which is how a stacked Collection
+    // filter could empty the list with no visible explanation).
     const AF_GROUPS = [
       ["collection",  state.filterCollection ],
       ["area",        state.filterArea       ],
@@ -8239,9 +8241,10 @@ WHERE {
     badge.classList.toggle("visible", total > 0);
   }
 
-  // ── LAB: per-chip facet counts. For each facet group, the count base is
-  // the item set passing every OTHER active filter (standard facet logic) —
-  // a chip's number answers "what would I get if I added this?".
+  // ── Per-chip facet counts (promoted from lab-a 2026-07-10). For each facet
+  // group, the count base is the item set passing every OTHER active filter
+  // (standard facet logic) — a chip's number answers "what would I get if I
+  // added this?". 260 items client-side; naive per-chip counting is fine.
   function facetBase(exclude) {
     const q = state.search.trim().toLowerCase();
     return state.items.filter(it => {
@@ -8294,10 +8297,10 @@ WHERE {
     const group = (label, vals, activeSet, cls, attr, color) => {
       if (!vals.length) return "";
       const pc = color ? ` ${pillCls(color)}` : "";
-      const base = facetBase(attr);          // LAB: count base for this group
+      const base = facetBase(attr);          // count base for this group
       const match = FACET_MATCH[attr];
       const chips = vals.map(v => {
-        const n = match ? base.filter(it => match(it, v)).length : 0;   // LAB
+        const n = match ? base.filter(it => match(it, v)).length : 0;
         const zero = n === 0 && !activeSet.has(v);   // active chips stay clickable (to deselect)
         const chip = `<button class="fp-chip${activeSet.has(v) ? " on" : ""}${zero ? " zero" : ""}${pc}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}<span class="fp-ct">${n}</span></button>`;
         // Collection chips get an ⓘ for the per-collection blurb popover.
@@ -8454,8 +8457,9 @@ WHERE {
 
     $("#filter-panel").addEventListener("click", e => e.stopPropagation());
 
-    // LAB: left-panel search — proxies into #search-input exactly like the
-    // mobile filter-panel search does. Two-way sync, Escape clears.
+    // Left-panel search (promoted from lab-a 2026-07-10) — proxies into
+    // #search-input exactly like the mobile fp-search-row does. Two-way
+    // sync; Escape clears.
     {
       const lp = document.getElementById("lp-search-input");
       const se = document.getElementById("search-input");
@@ -10922,7 +10926,7 @@ WHERE {
     // and abort main() before loadFromWikibase() runs.
     const searchInput = document.getElementById("search-input");
     function openSearch() {
-      const lp = document.getElementById("lp-search-input");          // LAB: "/" focuses the
+      const lp = document.getElementById("lp-search-input");          // "/" focuses the
       if (lp && lp.offsetParent) { lp.focus(); return; }              // left-panel search
       if (!searchInput) return; searchInput.classList.add("open"); searchInput.focus();
     }
