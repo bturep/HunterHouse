@@ -89,20 +89,23 @@ CSS_LAB_B = """\
   .phase-divider.ph-head,.bin-sort,.row.in-bin{border-left:2px solid transparent}
   .ph-head:not(.closed),.bin-sort,.row.in-bin{border-left-color:#7a4020}
   html.dark .ph-head:not(.closed),html.dark .bin-sort,html.dark .row.in-bin{border-left-color:#b08468}
-  /* v23: bin RAILS — collections scrolled past stack compact at the top of
-     the rows viewport, upcoming ones at the bottom: every archive block is
-     always on screen in abbreviated, non-description form (chevron, code,
-     count). Click a rail row to jump to that collection. Empty rails have
-     zero height, so they never block the list. */
-  #bin-rail-top,#bin-rail-bot{position:absolute;left:0;right:0;z-index:8;overflow:hidden}
-  #bin-rail-bot{bottom:0}
+  /* v23/v32: bin RAIL — collections scrolled past stack compact at the
+     top of the rows viewport in abbreviated, non-description form (chevron,
+     code, count). Click a rail row to jump to that collection. An empty
+     rail has zero height, so it never blocks the list. (v32 removed the
+     bottom rail in favour of the chrome list-foot.) */
+  #bin-rail-top{position:absolute;left:0;right:0;z-index:8;overflow:hidden}
+  /* v32: the bottom rail is gone (a bin "stuck" at the bottom read badly).
+     The pane instead ends in a quiet chrome foot — same 41px as the bar
+     under the preview pane. Flow child, so it never covers rows. */
+  #list-foot{height:41px;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg)}
+  html.dark body #list-foot{background:#2b2823}
   .br-row{display:flex;justify-content:space-between;align-items:center;height:25px;box-sizing:border-box;
     padding:0 20px 0 12px;background:var(--soft);border-bottom:1px solid var(--rule);
     border-left:2px solid transparent;cursor:pointer;
     font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--copper-deep)}
   .br-row.open{border-left-color:#7a4020}
   html.dark .br-row.open{border-left-color:#b08468}
-  #bin-rail-bot .br-row{border-bottom:0;border-top:1px solid var(--rule)}
   .br-row .r{color:var(--muted);letter-spacing:0.06em;font-size:9px}
   .br-row:hover{color:var(--ink)}
   .br-row .ph-chev{display:inline-block;width:14px;color:var(--muted)}
@@ -465,7 +468,7 @@ def main():
         ('      <div class="rows" id="rows"></div>',
          '      <div class="rows" id="rows"></div>\n'
          '      <div id="bin-rail-top" aria-hidden="true"></div>\n'
-         '      <div id="bin-rail-bot" aria-hidden="true"></div>',
+         '      <div id="list-foot" aria-hidden="true"></div>',
          "bin-rail-markup"),
         # v31: splash bottom strip — fixed, so DOM placement is free.
         ('</body>',
@@ -480,20 +483,13 @@ def main():
          '  function updateBinRails() {\n'
          '    const rows = document.getElementById("rows");\n'
          '    const railT = document.getElementById("bin-rail-top");\n'
-         '    const railB = document.getElementById("bin-rail-bot");\n'
-         '    if (!rows || !railT || !railB) return;\n'
+         '    if (!rows || !railT) return;\n'
          '    const heads = [...rows.querySelectorAll(".ph-head")];\n'
          '    const rect  = rows.getBoundingClientRect();\n'
          '    railT.style.top = rows.offsetTop + "px";\n'
          '    const above = [];\n'
          '    for (const h of heads) {\n'
          '      if (h.getBoundingClientRect().top < rect.top + above.length * BR_H) above.push(h); else break;\n'
-         '    }\n'
-         '    const below = [];\n'
-         '    for (let i = heads.length - 1; i >= 0; i--) {\n'
-         '      const h = heads[i];\n'
-         '      if (above.includes(h)) break;\n'
-         '      if (h.getBoundingClientRect().bottom > rect.bottom - below.length * BR_H) below.unshift(h); else break;\n'
          '    }\n'
          '    const brRow = h => {\n'
          '      const el = document.createElement("div");\n'
@@ -505,7 +501,6 @@ def main():
          '      return el;\n'
          '    };\n'
          '    railT.replaceChildren(...above.map(brRow));\n'
-         '    railB.replaceChildren(...below.map(brRow));\n'
          '  }\n'
          '  // v24: re-run the pip after the left panel finishes its width\n'
          '  // transition — it gets sized during the splash-collapsed layout and\n'
@@ -584,7 +579,7 @@ def main():
          '          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
          '        )).join("") +',
          "af-pill-brackets"),
-    ], version="31", tray=False)
+    ], version="32", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.

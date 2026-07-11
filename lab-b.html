@@ -975,20 +975,23 @@
   .phase-divider.ph-head,.bin-sort,.row.in-bin{border-left:2px solid transparent}
   .ph-head:not(.closed),.bin-sort,.row.in-bin{border-left-color:#7a4020}
   html.dark .ph-head:not(.closed),html.dark .bin-sort,html.dark .row.in-bin{border-left-color:#b08468}
-  /* v23: bin RAILS — collections scrolled past stack compact at the top of
-     the rows viewport, upcoming ones at the bottom: every archive block is
-     always on screen in abbreviated, non-description form (chevron, code,
-     count). Click a rail row to jump to that collection. Empty rails have
-     zero height, so they never block the list. */
-  #bin-rail-top,#bin-rail-bot{position:absolute;left:0;right:0;z-index:8;overflow:hidden}
-  #bin-rail-bot{bottom:0}
+  /* v23/v32: bin RAIL — collections scrolled past stack compact at the
+     top of the rows viewport in abbreviated, non-description form (chevron,
+     code, count). Click a rail row to jump to that collection. An empty
+     rail has zero height, so it never blocks the list. (v32 removed the
+     bottom rail in favour of the chrome list-foot.) */
+  #bin-rail-top{position:absolute;left:0;right:0;z-index:8;overflow:hidden}
+  /* v32: the bottom rail is gone (a bin "stuck" at the bottom read badly).
+     The pane instead ends in a quiet chrome foot — same 41px as the bar
+     under the preview pane. Flow child, so it never covers rows. */
+  #list-foot{height:41px;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg)}
+  html.dark body #list-foot{background:#2b2823}
   .br-row{display:flex;justify-content:space-between;align-items:center;height:25px;box-sizing:border-box;
     padding:0 20px 0 12px;background:var(--soft);border-bottom:1px solid var(--rule);
     border-left:2px solid transparent;cursor:pointer;
     font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--copper-deep)}
   .br-row.open{border-left-color:#7a4020}
   html.dark .br-row.open{border-left-color:#b08468}
-  #bin-rail-bot .br-row{border-bottom:0;border-top:1px solid var(--rule)}
   .br-row .r{color:var(--muted);letter-spacing:0.06em;font-size:9px}
   .br-row:hover{color:var(--ink)}
   .br-row .ph-chev{display:inline-block;width:14px;color:var(--muted)}
@@ -3733,7 +3736,7 @@
       <div class="curation-card" id="curation-card" hidden></div>
       <div class="rows" id="rows"></div>
       <div id="bin-rail-top" aria-hidden="true"></div>
-      <div id="bin-rail-bot" aria-hidden="true"></div>
+      <div id="list-foot" aria-hidden="true"></div>
     </div>
     <button class="panel-handle" id="left-handle" aria-label="Toggle browse panel">
       <svg class="handle-chevron" width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2,1 5,5 2,9"/></svg>
@@ -4016,7 +4019,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.31";
+  const VERSION      = "v1.09-test.79-labb.32";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6417,20 +6420,13 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   function updateBinRails() {
     const rows = document.getElementById("rows");
     const railT = document.getElementById("bin-rail-top");
-    const railB = document.getElementById("bin-rail-bot");
-    if (!rows || !railT || !railB) return;
+    if (!rows || !railT) return;
     const heads = [...rows.querySelectorAll(".ph-head")];
     const rect  = rows.getBoundingClientRect();
     railT.style.top = rows.offsetTop + "px";
     const above = [];
     for (const h of heads) {
       if (h.getBoundingClientRect().top < rect.top + above.length * BR_H) above.push(h); else break;
-    }
-    const below = [];
-    for (let i = heads.length - 1; i >= 0; i--) {
-      const h = heads[i];
-      if (above.includes(h)) break;
-      if (h.getBoundingClientRect().bottom > rect.bottom - below.length * BR_H) below.unshift(h); else break;
     }
     const brRow = h => {
       const el = document.createElement("div");
@@ -6442,7 +6438,6 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       return el;
     };
     railT.replaceChildren(...above.map(brRow));
-    railB.replaceChildren(...below.map(brRow));
   }
   // v24: re-run the pip after the left panel finishes its width
   // transition — it gets sized during the splash-collapsed layout and
