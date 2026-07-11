@@ -963,6 +963,14 @@
      the cascade). */
   .phase-divider.ph-head{background:var(--soft)}
   .bin-sort,.row.in-bin{background:color-mix(in srgb, var(--bg) 96.5%, var(--ink))}
+  /* v22: collection SPINE — a 2px left rule in the collection facet's
+     sienna runs down every header and through each open block (header,
+     sort strip, rows: one continuous line), so mid-scroll you are never
+     in unmarked territory. Closed headers carry a short tick of the same
+     line. 2px, not an indent — horizontal space stays whole. Composes
+     with the v21 tiers; either dial can be turned off alone. */
+  .phase-divider.ph-head,.bin-sort,.row.in-bin{border-left:2px solid #7a4020}
+  html.dark .phase-divider.ph-head,html.dark .bin-sort,html.dark .row.in-bin{border-left-color:#b08468}
   /* v17: hanging indent — a long collection name (CAA, FRH) wraps back to
      the panel edge under the chevron. Chevron gets its own column; the name
      wraps within its column; the gloss sits aligned beneath the name. */
@@ -3938,7 +3946,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.21";
+  const VERSION      = "v1.09-test.79-labb.22";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.

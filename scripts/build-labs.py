@@ -77,6 +77,14 @@ CSS_LAB_B = """\
      the cascade). */
   .phase-divider.ph-head{background:var(--soft)}
   .bin-sort,.row.in-bin{background:color-mix(in srgb, var(--bg) 96.5%, var(--ink))}
+  /* v22: collection SPINE — a 2px left rule in the collection facet's
+     sienna runs down every header and through each open block (header,
+     sort strip, rows: one continuous line), so mid-scroll you are never
+     in unmarked territory. Closed headers carry a short tick of the same
+     line. 2px, not an indent — horizontal space stays whole. Composes
+     with the v21 tiers; either dial can be turned off alone. */
+  .phase-divider.ph-head,.bin-sort,.row.in-bin{border-left:2px solid #7a4020}
+  html.dark .phase-divider.ph-head,html.dark .bin-sort,html.dark .row.in-bin{border-left-color:#b08468}
   /* v17: hanging indent — a long collection name (CAA, FRH) wraps back to
      the panel edge under the chevron. Chevron gets its own column; the name
      wraps within its column; the gloss sits aligned beneath the name. */
@@ -448,7 +456,7 @@ def main():
          '          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
          '        )).join("") +',
          "af-pill-brackets"),
-    ], version="21", tray=False)
+    ], version="22", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
