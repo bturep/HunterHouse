@@ -10,11 +10,12 @@ The labs now carry only the still-open questions:
   lab-a.html  the TRAY: the filter dropdown becomes a max-height tray so the
               list stays visible and live-updates below while chips are
               toggled ("the horizontal split of the left pane" — undecided).
-  lab-b.html  = a + the grouped list: opens grouped by ITEM TYPE (everyday
-              bins, CCA functional-series style), contracted by default,
-              sticky collapsible headers with counts; Phase grouping stays
-              available via the Phase sort for the scholarly reading; an
-              active search auto-expands all groups.
+  lab-b.html  = a + the grouped list: opens grouped by COLLECTION (the
+              fonds-level bins, authored order), contracted by default,
+              sticky collapsible headers; v09 = headers ONLY (no item peek),
+              each with an authored equal-word-count gloss ending in a
+              contents list; Phase grouping stays available via the Phase
+              sort; an active search auto-expands all groups.
   lab-c.html  = a + an always-visible facet sidebar left of the item list
               (stakeholder proposal — REJECTED 2026-07-10 review, kept only
               for the F&O comparison; delete when the email is out).
@@ -66,10 +67,8 @@ CSS_LAB_B = """\
   .ph-head:hover span:first-child{color:var(--ink)}
   .ph-chev{display:inline-block;width:14px;color:var(--muted)}
   .ph-head.closed{border-bottom-style:dashed}
-  /* v08: header gloss + contracted-group peek — show, don't teach */
+  /* v09: header gloss only — authored, equal word count, no peek rows */
   .ph-gloss{display:block;font-family:var(--mono);font-size:9px;letter-spacing:0.05em;text-transform:none;color:var(--muted);margin:3px 0 0 14px;white-space:normal;line-height:1.5}
-  .ph-more{font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:0.06em;padding:8px 20px 9px 34px;cursor:pointer;border-bottom:1px dashed var(--rule)}
-  .ph-more:hover{color:var(--ink)}
 """
 
 OLD_PHASE_DIVIDER = """\
@@ -85,26 +84,28 @@ OLD_PHASE_DIVIDER = """\
 """
 NEW_PHASE_DIVIDER_B = """\
     // LAB B: the COLLECTIONS are the shape (Brandon, 2026-07-10 tuning) — the
-    // fonds-level buckets in authored order. v08 answers "how do people know
-    // what they're choosing?" by SHOWING, not teaching: each header carries a
-    // one-line gloss (from the collection's own blurb), and each contracted
-    // group keeps a 3-row PEEK of its actual items with an expandable
-    // "… N more" row — every collection demonstrates itself. A live search
-    // still auto-expands everything.
-    const PEEK = 3;
+    // fonds-level buckets in authored order. v09 (Brandon, 2026-07-11):
+    // headers ONLY — no item peek. Each header carries an authored gloss:
+    // EXACTLY 12 words each (equal length is the design constraint; keep
+    // parity when editing), a tight description ending in a semicolon list
+    // of contents. Never derived, never truncated. A live search still
+    // auto-expands everything.
+    const GLOSS = {
+      CAA: "Richard Hunter's career donations to the University of Calgary, 1955–2010. Drawings; photographs.",
+      HHC: "The residence's own record, passed with the house in 2024. Drawings; documents.",
+      IHC: "Ivan Hunter's first photographic survey of the residence, captured February 2024. Photographs.",
+      EGC: "Furniture drawings gifted to cabinetmaker Eric Gesinger, photographed in situ. Drawings; photographs.",
+      FRH: "Papers of Frances Hunter; correspondence gated to researchers. Photographs; invitations; flyers; programs.",
+      FUL: "John Fulker's photographs, held at the West Vancouver Museum; catalogue pending. Photographs.",
+    };
     const gkeyOf = it => (state.sortCol === "id"
       ? (archiveAbbrev(collectionOf(it)) || "—")
       : (it.phase || "—"));
     const glabelOf = k => (state.sortCol === "id" && COLLECTION_INFO[k]?.title)
       ? `${k} — ${COLLECTION_INFO[k].title}` : k;
-    const glossOf = k => {
-      if (state.sortCol !== "id") return "";
-      const b = COLLECTION_INFO[k]?.body || "";
-      const first = (b.split(". ")[0] || "") + (b.includes(". ") ? "." : "");
-      return first.length > 92 ? first.slice(0, 89).replace(/\\s+\\S*$/, "") + "\\u2026" : first;
-    };
+    const glossOf = k => (state.sortCol === "id" && GLOSS[k]) || "";
     const searchOpen = !!state.search.trim();
-    let peekLeft = 0, peekKey = null, peekTotal = 0;
+    let groupOpen = true;
     state.filtered.forEach((it, _idx) => {
       const gkey = gkeyOf(it);
       if (grouped && gkey !== lastPhase) {
@@ -121,22 +122,9 @@ NEW_PHASE_DIVIDER_B = """\
           renderList();
         });
         frag.appendChild(d);
-        peekKey = gkey; peekLeft = open ? Infinity : PEEK; peekTotal = count;
+        groupOpen = open;
       }
-      if (grouped && peekKey === gkey && peekLeft !== Infinity) {   // LAB B: contracted → 3-row peek
-        if (peekLeft <= 0) {
-          if (peekLeft === 0) {
-            peekLeft = -1;
-            const m = document.createElement("div");
-            m.className = "ph-more";
-            m.textContent = `\\u2026 ${peekTotal - PEEK} more`;
-            m.addEventListener("click", () => { phaseExpanded.add(gkey); renderList(); });
-            frag.appendChild(m);
-          }
-          return;
-        }
-        peekLeft--;
-      }
+      if (grouped && !groupOpen) return;   // v09: contracted = header only, no peek
 """
 
 # ── lab-d: record pops up, never pulls out ───────────────────────────────
@@ -267,7 +255,7 @@ def main():
          '      }),',
          "id-collection-order"),
         (OLD_PHASE_DIVIDER, NEW_PHASE_DIVIDER_B, "collapsible-headers"),
-    ], version="08")
+    ], version="09")
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
