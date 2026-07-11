@@ -109,6 +109,19 @@ CSS_LAB_B = """\
   /* v23: the pip rides ABOVE the tinted blocks (was sliding behind them)
      but below the rails and the filter overlay. */
   .scroll-pip{z-index:7}
+  /* ══ v25: dark-mode DEPTH LADDER (Brandon) — light = instrument, dark =
+     viewing depth. Darkest to lightest: image stage (artifact floats in
+     the deepest room) < item rows < collection bars < UI chrome (the
+     surface you grip). Light mode already follows this logic (paper
+     chrome, soft stage) and is untouched. All four steps stay inside the
+     warm near-black family, one perceptible step apart. `html.dark body`
+     outranks the base html.dark overrides that lightened the stage. ══ */
+  html.dark body .pane-image,html.dark body .image-stage{background:#151311}
+  html.dark body .bin-sort,html.dark body .row.in-bin{background:#1e1b19}
+  html.dark body .phase-divider.ph-head,html.dark body .br-row{background:#252220}
+  html.dark body .site-top,html.dark body .list-head,html.dark body .lp-search,
+  html.dark body .meta-head,html.dark body .image-foot,html.dark body .panel-handle{background:#2b2823}
+  html.dark body .panel-handle::before{background:#8a847c}
   /* v17: hanging indent — a long collection name (CAA, FRH) wraps back to
      the panel edge under the chevron. Chevron gets its own column; the name
      wraps within its column; the gloss sits aligned beneath the name. */
@@ -541,7 +554,7 @@ def main():
          '          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
          '        )).join("") +',
          "af-pill-brackets"),
-    ], version="24", tray=False)
+    ], version="25", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
