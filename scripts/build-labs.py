@@ -69,11 +69,14 @@ CSS_LAB_B = """\
   .ph-head.closed{border-bottom-style:dashed}
   /* v09: header gloss only — authored, equal word count, no peek rows */
   .ph-gloss{display:block;font-family:var(--mono);font-size:9px;letter-spacing:0.05em;text-transform:none;color:var(--muted);margin:3px 0 0 0;white-space:normal;line-height:1.5}
-  /* v20: an OPEN bin reads as one BLOCK — header, sort strip, and rows
-     share a faint ink tint, so multiple open collections separate from
-     each other and from closed headers. Hover/selected states sit on top
-     (they come later in the cascade). */
-  .ph-head:not(.closed),.bin-sort,.row.in-bin{background:color-mix(in srgb, var(--bg) 96.5%, var(--ink))}
+  /* v21: THREE tonal tiers (Brandon) — with several collections open the
+     header block read too much like the item block. Ladder: chrome
+     (Catalogue / filter / search) = plain ground; collection headers =
+     var(--soft), a clear step up, open or closed; rows + their sort strip
+     = the faint ink tint between. Hover/selected sit on top (later in
+     the cascade). */
+  .phase-divider.ph-head{background:var(--soft)}
+  .bin-sort,.row.in-bin{background:color-mix(in srgb, var(--bg) 96.5%, var(--ink))}
   /* v17: hanging indent — a long collection name (CAA, FRH) wraps back to
      the panel edge under the chevron. Chevron gets its own column; the name
      wraps within its column; the gloss sits aligned beneath the name. */
@@ -445,7 +448,7 @@ def main():
          '          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
          '        )).join("") +',
          "af-pill-brackets"),
-    ], version="20", tray=False)
+    ], version="21", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
