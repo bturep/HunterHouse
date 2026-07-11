@@ -155,12 +155,12 @@ NEW_PHASE_DIVIDER_B = """\
       FRH: "Papers of Frances Hunter; correspondence gated to researchers. Photographs; invitations; flyers; programs.",
       FUL: "John Fulker's photographs, held at the West Vancouver Museum; catalogue pending. Photographs.",
     };
-    const gkeyOf = it => (state.sortCol === "id"
+    const gkeyOf = it => (state.sortCol !== "phase"
       ? (archiveAbbrev(collectionOf(it)) || "—")
       : (it.phase || "—"));
-    const glabelOf = k => (state.sortCol === "id" && COLLECTION_INFO[k]?.title)
+    const glabelOf = k => (state.sortCol !== "phase" && COLLECTION_INFO[k]?.title)
       ? `${k} — ${COLLECTION_INFO[k].title}` : k;
-    const glossOf = k => (state.sortCol === "id" && GLOSS[k]) || "";
+    const glossOf = k => (state.sortCol !== "phase" && GLOSS[k]) || "";
     const searchOpen = !!state.search.trim();
     let groupOpen = true;
     state.filtered.forEach((it, _idx) => {
@@ -301,7 +301,7 @@ def main():
          "  function renderList() {",
          "expand-state"),
         ('    const grouped = !state.curation && state.sortCol === "phase";',
-         '    const grouped = !state.curation && (state.sortCol === "phase" || state.sortCol === "id");   // LAB B v05',
+         '    const grouped = !state.curation;   // LAB B v16: the bins ARE the list — sorting reorders within them, never dissolves them',
          "grouped-trigger"),
         # ID sort orders groups by the authored collection order (CAA, HHC,
         # IHC, EGC, FRH), IDs ascending within each group. Replaces tailLast
@@ -312,6 +312,14 @@ def main():
          '        return (rank(a) - rank(b)) || dir * (a.id || "").localeCompare(b.id || "");\n'
          '      }),',
          "id-collection-order"),
+        # v16: Year must sort WITHIN the bins, not dissolve them into a flat
+        # global list — collection rank leads, date decides inside each bin.
+        ('      "year":  tailLast((a, b) => dir * dateKey(a).localeCompare(dateKey(b)) || (a.id||"").localeCompare(b.id||"")),',
+         '      "year":  ((a, b) => {   // LAB B v16: collection bins first, date within\n'
+         '        const rank = x => { const i = ["CAA","HHC","IHC","EGC","FRH"].indexOf(archiveAbbrev(collectionOf(x))); return i === -1 ? 99 : i; };\n'
+         '        return (rank(a) - rank(b)) || dir * dateKey(a).localeCompare(dateKey(b)) || (a.id||"").localeCompare(b.id||"");\n'
+         '      }),',
+         "year-within-bins"),
         (OLD_PHASE_DIVIDER, NEW_PHASE_DIVIDER_B, "collapsible-headers"),
         # v10: curated row label (Brandon 2026-07-11).
         ('<div class="fp-lbl">Curators</div>',
@@ -406,7 +414,7 @@ def main():
          '          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
          '        )).join("") +',
          "af-pill-brackets"),
-    ], version="15", tray=False)
+    ], version="16", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.

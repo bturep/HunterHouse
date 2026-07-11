@@ -3924,7 +3924,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.15";
+  const VERSION      = "v1.09-test.79-labb.16";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6957,7 +6957,10 @@ WHERE {
         return (rank(a) - rank(b)) || dir * (a.id || "").localeCompare(b.id || "");
       }),
       "phase": tailLast((a, b) => dir * (a.phase||"").localeCompare(b.phase||"") || (a.id||"").localeCompare(b.id||"")),
-      "year":  tailLast((a, b) => dir * dateKey(a).localeCompare(dateKey(b)) || (a.id||"").localeCompare(b.id||"")),
+      "year":  ((a, b) => {   // LAB B v16: collection bins first, date within
+        const rank = x => { const i = ["CAA","HHC","IHC","EGC","FRH"].indexOf(archiveAbbrev(collectionOf(x))); return i === -1 ? 99 : i; };
+        return (rank(a) - rank(b)) || dir * dateKey(a).localeCompare(dateKey(b)) || (a.id||"").localeCompare(b.id||"");
+      }),
     };
     state.filtered.sort(comparators[state.sortCol] || comparators["year"]);
     // [only] mode is the curator's draft sequence — show items in mark-order
@@ -7430,7 +7433,7 @@ WHERE {
       return;
     }
 
-    const grouped = !state.curation && (state.sortCol === "phase" || state.sortCol === "id");   // LAB B v05
+    const grouped = !state.curation;   // LAB B v16: the bins ARE the list — sorting reorders within them, never dissolves them
     const frag = document.createDocumentFragment();
     let lastPhase = null;
     const noted = rnNotedIds();   // items with a viewer-visible note
@@ -7453,12 +7456,12 @@ WHERE {
       FRH: "Papers of Frances Hunter; correspondence gated to researchers. Photographs; invitations; flyers; programs.",
       FUL: "John Fulker's photographs, held at the West Vancouver Museum; catalogue pending. Photographs.",
     };
-    const gkeyOf = it => (state.sortCol === "id"
+    const gkeyOf = it => (state.sortCol !== "phase"
       ? (archiveAbbrev(collectionOf(it)) || "—")
       : (it.phase || "—"));
-    const glabelOf = k => (state.sortCol === "id" && COLLECTION_INFO[k]?.title)
+    const glabelOf = k => (state.sortCol !== "phase" && COLLECTION_INFO[k]?.title)
       ? `${k} — ${COLLECTION_INFO[k].title}` : k;
-    const glossOf = k => (state.sortCol === "id" && GLOSS[k]) || "";
+    const glossOf = k => (state.sortCol !== "phase" && GLOSS[k]) || "";
     const searchOpen = !!state.search.trim();
     let groupOpen = true;
     state.filtered.forEach((it, _idx) => {
