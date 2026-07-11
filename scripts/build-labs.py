@@ -114,24 +114,24 @@ CSS_LAB_B = """\
      the deepest room) < item rows < collection bars < UI chrome (the
      surface you grip). Light mode already follows this logic (paper
      chrome, soft stage) and is untouched. All four steps stay inside the
-     warm near-black family, one perceptible step apart. `html.dark body`
+     warm near-black family; v28 widened the steps (~12 pts each). `html.dark body`
      outranks the base html.dark overrides that lightened the stage. ══ */
-  html.dark body .pane-image,html.dark body .image-stage{background:#151311}
-  html.dark body .bin-sort,html.dark body .row.in-bin{background:#1e1b19}
-  html.dark body .phase-divider.ph-head,html.dark body .br-row{background:#252220}
+  html.dark body .pane-image,html.dark body .image-stage{background:#100e0d}
+  html.dark body .bin-sort,html.dark body .row.in-bin{background:#1d1a18}
+  html.dark body .phase-divider.ph-head,html.dark body .br-row{background:#282421}
   html.dark body .site-top,html.dark body .list-head,html.dark body .lp-search,
-  html.dark body .meta-head,html.dark body .image-foot,html.dark body .panel-handle{background:#2b2823}
+  html.dark body .meta-head,html.dark body .image-foot,html.dark body .panel-handle{background:#342f28}
   html.dark body .panel-handle::before{background:#8a847c}
   /* v26: the record pane is STATIC — an instrument surface, not content —
      so the whole right panel reads as one chrome-toned object with its
      ITEM RECORD head, not a lit cap on a dark well. */
-  html.dark body .panel-right{background:#2b2823}
+  html.dark body .panel-right{background:#342f28}
   /* v27: two stragglers — the permalink/data footer carries an explicit
      --bg of its own, and the left pane's empty ground below the collection
      bars sat at base dark. Both are instrument surface: chrome. Content
      (bars, rows) keeps its darker ladder steps on top. */
-  html.dark body .data-footer{background:#2b2823}
-  html.dark body .panel-left{background:#2b2823}
+  html.dark body .data-footer{background:#342f28}
+  html.dark body .panel-left{background:#342f28}
   /* v17: hanging indent — a long collection name (CAA, FRH) wraps back to
      the panel edge under the chevron. Chevron gets its own column; the name
      wraps within its column; the gloss sits aligned beneath the name. */
@@ -564,7 +564,7 @@ def main():
          '          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
          '        )).join("") +',
          "af-pill-brackets"),
-    ], version="27", tray=False)
+    ], version="28", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
