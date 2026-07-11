@@ -82,13 +82,18 @@ CSS_LAB_B = """\
   .panel-handle:hover{background:var(--bg)}
   .panel-handle:hover::before{background:var(--ink)}
   .panel-handle .handle-chevron{display:none}
-  /* v11: split list-head — static title left, FILTER control beside it,
-     sort keys keep the right edge. */
-  .list-head{justify-content:flex-start;gap:16px}
-  .list-head .sort-mini{margin-left:auto}
+  /* v12: CATALOGUE alone on the header line; FILTER lives in the search
+     row below, separated from the input by a rule. */
   .lh-title{cursor:default}
-  .lh-filter{color:var(--muted)}
+  .lh-filter{color:var(--muted);flex-shrink:0;padding-right:12px;border-right:1px solid var(--rule)}
   .lh-filter:hover,.lh-filter.fp-open{color:var(--ink)}
+  /* mobile: the row survives for the FILTER control alone — the filter
+     panel carries its own search field on mobile. */
+  @media (max-width:767px){
+    .lp-search{display:flex}
+    .lp-search .pfx,.lp-search input{display:none}
+    .lh-filter{border-right:0}
+  }
   /* v11: applied-filter pills = the browse chips' bracket convention —
      no box, per-category colour (pc-*), the removal \u00d7 inside the brackets. */
   .af-pill{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:0.02em;
@@ -290,14 +295,54 @@ def main():
         ('<div class="fp-lbl">Curators</div>',
          '<div class="fp-lbl">Curated selections by</div>',
          "curators-label"),
-        # v11: "Browse items" was doing double duty as the pane title AND the
-        # filter toggle — vague. Split: static CATALOGUE title (pairs with the
-        # right pane's ITEM RECORD) + an explicit FILTER control that owns the
-        # overlay. #filter-toggle keeps its id so all wiring holds.
+        # v11/v12: "Browse items" was doing double duty as the pane title AND
+        # the filter toggle — vague. v12: CATALOGUE stands alone on the header
+        # line (v11's inline pair read as one phrase); FILTER moves into the
+        # search row below, so the two narrowing tools share a line. The
+        # #filter-toggle id travels with the button so all wiring holds.
         ('        <button class="l" id="filter-toggle" title="Filter">Browse items<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">\u203a</span></button>',
-         '        <span class="l lh-title">Catalogue</span>\n'
-         '        <button class="l lh-filter" id="filter-toggle" title="Filter">Filter<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">\u203a</span></button>',
-         "catalogue-filter-split"),
+         '        <span class="l lh-title">Catalogue</span>',
+         "catalogue-title"),
+        ('      <div class="lp-search" id="lp-search">\n        <span class="pfx">/</span>',
+         '      <div class="lp-search" id="lp-search">\n'
+         '        <button class="l lh-filter" id="filter-toggle" title="Filter">Filter<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">\u203a</span></button>\n'
+         '        <span class="pfx">/</span>',
+         "filter-into-search-row"),
+        # v12: facet colours become a SPECTRUM (Brandon: a mixed set of
+        # selected tags should read linearly). Tokens are recoloured so the
+        # panel's existing group order — Collection, Areas, Item type,
+        # Drawing type, Made by, Built status — runs warm\u2192cool: sienna,
+        # ochre, olive, teal, navy, plum. The category\u2192class mapping is
+        # untouched, so the record-pane pills recolour in lockstep by
+        # construction. Also fixes drawtype navy \u2248 collection navy.
+        ("""  .pc-sage  {--pf:#7a5820}  /* amber/ochre \u2014 areas */
+  .pc-stone {--pf:#7a4020}  /* sienna \u2014 item type */
+  .pc-slate {--pf:#284878}  /* steel blue \u2014 drawing type */
+  .pc-clay  {--pf:#6a2068}  /* plum \u2014 creator */
+  .pc-moss  {--pf:#386028}  /* olive \u2014 built status */
+  .pc-indigo{--pf:var(--copper-deep)}
+  .pc-denim {--pf:#283878}  /* navy \u2014 collection */""",
+         """  .pc-denim {--pf:#7a4020}  /* LAB B spectrum 1 sienna \u2014 collection */
+  .pc-sage  {--pf:#7a5820}  /* LAB B spectrum 2 ochre \u2014 areas */
+  .pc-stone {--pf:#386028}  /* LAB B spectrum 3 olive \u2014 item type */
+  .pc-slate {--pf:#1a6b70}  /* LAB B spectrum 4 teal \u2014 drawing type */
+  .pc-clay  {--pf:#283878}  /* LAB B spectrum 5 navy \u2014 made by */
+  .pc-moss  {--pf:#6a2068}  /* LAB B spectrum 6 plum \u2014 built status */
+  .pc-indigo{--pf:var(--copper-deep)}""",
+         "facet-spectrum-light"),
+        ("""  html.dark .pc-sage  {--pf:#c09858}
+  html.dark .pc-stone {--pf:#b09870}
+  html.dark .pc-slate {--pf:#7898b8}
+  html.dark .pc-clay  {--pf:#a07898}
+  html.dark .pc-moss  {--pf:#88a070}
+  html.dark .pc-denim {--pf:#6890a8}""",
+         """  html.dark .pc-denim {--pf:#b08468}
+  html.dark .pc-sage  {--pf:#c09858}
+  html.dark .pc-stone {--pf:#88a070}
+  html.dark .pc-slate {--pf:#68a8a0}
+  html.dark .pc-clay  {--pf:#7898b8}
+  html.dark .pc-moss  {--pf:#a07898}""",
+         "facet-spectrum-dark"),
         # v11: applied-filter pills mirror the browse chips — same bracket
         # convention, same per-category colour — so the active filters above
         # the list read as the same objects the visitor just clicked.
@@ -314,7 +359,7 @@ def main():
          '          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
          '        )).join("") +',
          "af-pill-brackets"),
-    ], version="11", tray=False)
+    ], version="12", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.

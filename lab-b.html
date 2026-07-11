@@ -968,13 +968,18 @@
   .panel-handle:hover{background:var(--bg)}
   .panel-handle:hover::before{background:var(--ink)}
   .panel-handle .handle-chevron{display:none}
-  /* v11: split list-head — static title left, FILTER control beside it,
-     sort keys keep the right edge. */
-  .list-head{justify-content:flex-start;gap:16px}
-  .list-head .sort-mini{margin-left:auto}
+  /* v12: CATALOGUE alone on the header line; FILTER lives in the search
+     row below, separated from the input by a rule. */
   .lh-title{cursor:default}
-  .lh-filter{color:var(--muted)}
+  .lh-filter{color:var(--muted);flex-shrink:0;padding-right:12px;border-right:1px solid var(--rule)}
   .lh-filter:hover,.lh-filter.fp-open{color:var(--ink)}
+  /* mobile: the row survives for the FILTER control alone — the filter
+     panel carries its own search field on mobile. */
+  @media (max-width:767px){
+    .lp-search{display:flex}
+    .lp-search .pfx,.lp-search input{display:none}
+    .lh-filter{border-right:0}
+  }
   /* v11: applied-filter pills = the browse chips' bracket convention —
      no box, per-category colour (pc-*), the removal × inside the brackets. */
   .af-pill{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:0.02em;
@@ -1510,20 +1515,20 @@
   html.dark{--copper-deep:#9dc2b2;--copper-pale:rgba(157,194,178,0.15)}
 
   /* ── pill colour themes ── */
-  .pc-sage  {--pf:#7a5820}  /* amber/ochre — areas */
-  .pc-stone {--pf:#7a4020}  /* sienna — item type */
-  .pc-slate {--pf:#284878}  /* steel blue — drawing type */
-  .pc-clay  {--pf:#6a2068}  /* plum — creator */
-  .pc-moss  {--pf:#386028}  /* olive — built status */
+  .pc-denim {--pf:#7a4020}  /* LAB B spectrum 1 sienna — collection */
+  .pc-sage  {--pf:#7a5820}  /* LAB B spectrum 2 ochre — areas */
+  .pc-stone {--pf:#386028}  /* LAB B spectrum 3 olive — item type */
+  .pc-slate {--pf:#1a6b70}  /* LAB B spectrum 4 teal — drawing type */
+  .pc-clay  {--pf:#283878}  /* LAB B spectrum 5 navy — made by */
+  .pc-moss  {--pf:#6a2068}  /* LAB B spectrum 6 plum — built status */
   .pc-indigo{--pf:var(--copper-deep)}
-  .pc-denim {--pf:#283878}  /* navy — collection */
   .pc-red   {--pf:var(--red)}  /* curators — softer sibling of the brighter .c-red used on HHFA pane (Hunter accent); var(--red) auto-darkens via light.css */
+  html.dark .pc-denim {--pf:#b08468}
   html.dark .pc-sage  {--pf:#c09858}
-  html.dark .pc-stone {--pf:#b09870}
-  html.dark .pc-slate {--pf:#7898b8}
-  html.dark .pc-clay  {--pf:#a07898}
-  html.dark .pc-moss  {--pf:#88a070}
-  html.dark .pc-denim {--pf:#6890a8}
+  html.dark .pc-stone {--pf:#88a070}
+  html.dark .pc-slate {--pf:#68a8a0}
+  html.dark .pc-clay  {--pf:#7898b8}
+  html.dark .pc-moss  {--pf:#a07898}
   /* .pc-red uses var(--red), which already has a light/dark pair in light.css. */
 
   /* dark mode overrides for hardcoded colours */
@@ -3598,7 +3603,6 @@
       <div class="scroll-pip" id="list-pip"></div>
       <div class="list-head">
         <span class="l lh-title">Catalogue</span>
-        <button class="l lh-filter" id="filter-toggle" title="Filter">Filter<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">›</span></button>
         <button id="list-info" type="button" title="About this archive" aria-label="About this archive">?</button>
         <div class="sort-mini">
           <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>
@@ -3607,6 +3611,7 @@
         </div>
       </div>
       <div class="lp-search" id="lp-search">
+        <button class="l lh-filter" id="filter-toggle" title="Filter">Filter<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">›</span></button>
         <span class="pfx">/</span>
         <input id="lp-search-input" type="text" placeholder="search archive" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search the archive">
       </div>
@@ -3897,7 +3902,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.11";
+  const VERSION      = "v1.09-test.79-labb.12";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
