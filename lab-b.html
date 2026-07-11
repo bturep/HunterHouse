@@ -955,6 +955,11 @@
   .ph-head.closed{border-bottom-style:dashed}
   /* v09: header gloss only — authored, equal word count, no peek rows */
   .ph-gloss{display:block;font-family:var(--mono);font-size:9px;letter-spacing:0.05em;text-transform:none;color:var(--muted);margin:3px 0 0 0;white-space:normal;line-height:1.5}
+  /* v20: an OPEN bin reads as one BLOCK — header, sort strip, and rows
+     share a faint ink tint, so multiple open collections separate from
+     each other and from closed headers. Hover/selected states sit on top
+     (they come later in the cascade). */
+  .ph-head:not(.closed),.bin-sort,.row.in-bin{background:color-mix(in srgb, var(--bg) 96.5%, var(--ink))}
   /* v17: hanging indent — a long collection name (CAA, FRH) wraps back to
      the panel edge under the chevron. Chevron gets its own column; the name
      wraps within its column; the gloss sits aligned beneath the name. */
@@ -3930,7 +3935,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.19";
+  const VERSION      = "v1.09-test.79-labb.20";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7512,7 +7517,7 @@ WHERE {
       }
       if (grouped && !groupOpen) return;   // v09: contracted = header only, no peek
       const row = document.createElement("div");
-      row.className = "row" + (it.id === state.selectedId ? " sel" : "") + (marksHas(it.id) ? " marked" : "") + (seen.has(it.id) ? " seen" : "") + (noted.has(it.id) ? " has-note" : "") + (state.bulkSel.has(it.id) ? " bulk-sel" : "");
+      row.className = "row" + (grouped ? " in-bin" : "") + (it.id === state.selectedId ? " sel" : "") + (marksHas(it.id) ? " marked" : "") + (seen.has(it.id) ? " seen" : "") + (noted.has(it.id) ? " has-note" : "") + (state.bulkSel.has(it.id) ? " bulk-sel" : "");
       row.dataset.id = it.id;
       // In curation mode: replace [LS]/[D] tmark chip with the 01/02/03
       // sequence number reflecting the curator's authored order, and move
