@@ -122,6 +122,10 @@ CSS_LAB_B = """\
   html.dark body .site-top,html.dark body .list-head,html.dark body .lp-search,
   html.dark body .meta-head,html.dark body .image-foot,html.dark body .panel-handle{background:#2b2823}
   html.dark body .panel-handle::before{background:#8a847c}
+  /* v26: the record pane is STATIC — an instrument surface, not content —
+     so the whole right panel reads as one chrome-toned object with its
+     ITEM RECORD head, not a lit cap on a dark well. */
+  html.dark body .panel-right{background:#2b2823}
   /* v17: hanging indent — a long collection name (CAA, FRH) wraps back to
      the panel edge under the chevron. Chevron gets its own column; the name
      wraps within its column; the gloss sits aligned beneath the name. */
@@ -554,7 +558,7 @@ def main():
          '          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
          '        )).join("") +',
          "af-pill-brackets"),
-    ], version="25", tray=False)
+    ], version="26", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
