@@ -165,9 +165,13 @@ CSS_LAB_B = """\
     display:flex;align-items:center;padding:0 20px;
     font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em}
   html.dark body #list-foot{background:#2b2823}
-  /* — pip slot + mirrored gutters (v35/v37/v38) — */
+  /* — pip slot + mirrored gutters (v35/v37/v38); v42 extends the same
+     slots to the record pane — content inset between two 7px lanes, the
+     meta pip runs in the inner one. Chrome (head, data footer) stays
+     full-width. — */
   .scroll-pip{z-index:7}
   #rows{margin:0 7px}
+  .pane-meta .meta-body{margin:0 7px}
   /* — top-right cluster separators (v33) — */
   .tr-vsep{width:1px;align-self:stretch;background:var(--rule);flex:none}
   .site-topright .tr-div{height:auto;align-self:stretch}
@@ -615,7 +619,7 @@ def main():
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
-    ], version="41", tray=False)
+    ], version="42", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
