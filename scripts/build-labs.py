@@ -105,6 +105,21 @@ NEW_PHASE_DIVIDER_B = """\
       if (grouped && !searchOpen && !phaseExpanded.has(gkey)) return;   // LAB B: group is contracted
 """
 
+# ── lab-d: record less present ───────────────────────────────────────────
+CSS_LAB_D = """\
+  /* ══ LAB D: record less present — the right pane opens collapsed (public);
+     a one-line caption under the image carries the identity line, with the
+     full record one click away. Researchers/admins boot with the workbench
+     pane open as before. Mobile keeps its Record tab untouched. ══ */
+  .rec-caption{display:none;align-items:baseline;gap:14px;padding:9px 18px;border-top:1px solid var(--rule);background:var(--bg)}
+  body.rec-collapsed .rec-caption.has-item{display:flex}
+  @media (max-width:767px){ body.rec-collapsed .rec-caption.has-item{display:none} }
+  .rc-title{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;letter-spacing:0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rc-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.04em;white-space:nowrap;flex-shrink:0}
+  .rc-open{margin-left:auto;flex-shrink:0;font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;background:none;border:1px solid var(--rule);border-radius:2px;color:var(--muted);padding:3px 9px;cursor:pointer}
+  .rc-open:hover{color:var(--ink);border-color:var(--ink)}
+"""
+
 # ── lab-c: permanent facet sidebar ───────────────────────────────────────
 CSS_LAB_C = """\
   /* ══ LAB C: always-visible facet sidebar (stakeholder proposal) ══ */
@@ -175,6 +190,53 @@ def main():
          "grouped-trigger"),
         (OLD_PHASE_DIVIDER, NEW_PHASE_DIVIDER_B, "collapsible-headers"),
     ], version="04")
+
+    # LAB D — record less present: right pane collapsed by default (public),
+    # identity caption under the image, full record one click away.
+    # Researchers/admins boot with the pane open (their workbench).
+    build("d", CSS_LAB_D, [
+        ('  <section class="panel-right pane-meta" id="panel-right" aria-label="Item record">',
+         '  <section class="panel-right pane-meta out" id="panel-right" aria-label="Item record">',
+         "collapsed-default"),
+        ('      <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">↓ Original</a><a href="#" id="pdf-dl" rel="noopener" download hidden>↓ PDF</a></span>\n    </div>',
+         '      <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">↓ Original</a><a href="#" id="pdf-dl" rel="noopener" download hidden>↓ PDF</a></span>\n'
+         '    </div>\n'
+         '    <div class="rec-caption" id="rec-caption">\n'
+         '      <span class="rc-title" id="rc-title"></span>\n'
+         '      <span class="rc-meta" id="rc-meta"></span>\n'
+         '      <button class="rc-open" id="rc-open" type="button" title="Open the full record">Full record →</button>\n'
+         '    </div>',
+         "caption-markup"),
+        ('      document.getElementById("right-handle").addEventListener("click", () => { if (document.body.classList.contains("lens-info")) { closeInfoPane(); return; } togglePanel("right"); syncFsBtn(); });',
+         '      document.getElementById("right-handle").addEventListener("click", () => { if (document.body.classList.contains("lens-info")) { closeInfoPane(); return; } togglePanel("right"); syncFsBtn(); });\n'
+         '\n'
+         '      // LAB D: body.rec-collapsed mirrors the right pane\'s .out state, from\n'
+         '      // ONE place (a class observer) so every collapse path — handle, [Z],\n'
+         '      // bottom-bar button — keeps the caption in sync without chasing each.\n'
+         '      {\n'
+         '        const rp = document.getElementById("panel-right");\n'
+         '        const syncRec = () => document.body.classList.toggle("rec-collapsed", rp.classList.contains("out"));\n'
+         '        new MutationObserver(syncRec).observe(rp, { attributes: true, attributeFilter: ["class"] });\n'
+         '        if (canMark() || canEditWikibase()) rp.classList.remove("out");   // roles boot with the workbench open\n'
+         '        syncRec();\n'
+         '        const rcBtn = document.getElementById("rc-open");\n'
+         '        if (rcBtn) rcBtn.addEventListener("click", () => { rp.classList.remove("out"); syncFsBtn(); });\n'
+         '      }',
+         "caption-sync"),
+        ('  function renderMeta(item) {\n    const body = $("#meta-body");',
+         '  function renderMeta(item) {\n'
+         '    // LAB D: mirror the record\'s identity line into the under-image caption\n'
+         '    {\n'
+         '      const rt = document.getElementById("rc-title"), rm = document.getElementById("rc-meta"), rc = document.getElementById("rec-caption");\n'
+         '      if (rt && rm && rc) {\n'
+         '        rt.textContent = item.title || "";\n'
+         '        rm.textContent = [displayId(item.id), item.phase || "", yearOf(item.date)].filter(Boolean).join(" · ");\n'
+         '        rc.classList.add("has-item");\n'
+         '      }\n'
+         '    }\n'
+         '    const body = $("#meta-body");',
+         "caption-populate"),
+    ], version="01")
 
     # LAB C — + always-on facet sidebar (rejected; kept for the F&O comparison)
     build("c", CSS_LAB_C, [
