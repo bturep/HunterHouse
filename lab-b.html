@@ -1012,6 +1012,12 @@
      so the whole right panel reads as one chrome-toned object with its
      ITEM RECORD head, not a lit cap on a dark well. */
   html.dark body .panel-right{background:#2b2823}
+  /* v27: two stragglers — the permalink/data footer carries an explicit
+     --bg of its own, and the left pane's empty ground below the collection
+     bars sat at base dark. Both are instrument surface: chrome. Content
+     (bars, rows) keeps its darker ladder steps on top. */
+  html.dark body .data-footer{background:#2b2823}
+  html.dark body .panel-left{background:#2b2823}
   /* v17: hanging indent — a long collection name (CAA, FRH) wraps back to
      the panel edge under the chevron. Chevron gets its own column; the name
      wraps within its column; the gloss sits aligned beneath the name. */
@@ -3994,7 +4000,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.26";
+  const VERSION      = "v1.09-test.79-labb.27";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
