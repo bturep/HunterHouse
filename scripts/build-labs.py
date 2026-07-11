@@ -30,7 +30,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC  = ROOT / "next.html"
-SRC_VERSION = "v1.09-test.78"
+SRC_VERSION = "v1.09-test.79"
 
 def patch(text, old, new, label):
     n = text.count(old)
@@ -216,7 +216,7 @@ def build(lab, css_extra, extra_patches, version):
 
 def main():
     # LAB A — the tray only (everything else promoted 2026-07-10)
-    build("a", "", [], version="05")
+    build("a", "", [], version="07")
 
     # LAB B — + grouped list, v05: COLLECTION bins (the fonds level — Brandon:
     # "the collections themselves are good buckets… they show the shape").
@@ -240,7 +240,7 @@ def main():
          '      }),',
          "id-collection-order"),
         (OLD_PHASE_DIVIDER, NEW_PHASE_DIVIDER_B, "collapsible-headers"),
-    ], version="06")
+    ], version="07")
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
@@ -301,7 +301,7 @@ def main():
          '    }\n'
          '    const body = $("#meta-body");',
          "caption-populate"),
-    ], version="03")
+    ], version="05")
 
     # LAB C — + always-on facet sidebar (rejected; kept for the F&O comparison)
     build("c", CSS_LAB_C, [
@@ -317,7 +317,7 @@ def main():
          '    const panel = (side && window.matchMedia("(min-width:768px)").matches) ? side : $("#filter-panel");\n'
          '    if (!panel) return;',
          "sidebar-target"),
-    ], version="04")
+    ], version="05")
 
 if __name__ == "__main__":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
