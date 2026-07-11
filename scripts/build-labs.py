@@ -68,7 +68,12 @@ CSS_LAB_B = """\
   .ph-chev{display:inline-block;width:14px;color:var(--muted)}
   .ph-head.closed{border-bottom-style:dashed}
   /* v09: header gloss only — authored, equal word count, no peek rows */
-  .ph-gloss{display:block;font-family:var(--mono);font-size:9px;letter-spacing:0.05em;text-transform:none;color:var(--muted);margin:3px 0 0 14px;white-space:normal;line-height:1.5}
+  .ph-gloss{display:block;font-family:var(--mono);font-size:9px;letter-spacing:0.05em;text-transform:none;color:var(--muted);margin:3px 0 0 0;white-space:normal;line-height:1.5}
+  /* v17: hanging indent — a long collection name (CAA, FRH) wraps back to
+     the panel edge under the chevron. Chevron gets its own column; the name
+     wraps within its column; the gloss sits aligned beneath the name. */
+  .ph-head > span:first-child{display:grid;grid-template-columns:14px 1fr;align-items:baseline}
+  .ph-head .ph-gloss{grid-column:2}
   /* v10: panel handle = PULL TAB (Brandon 2026-07-11). The base handle is an
      innie straddling the panel edge, which merges visually with the list
      scroll bar. Here it sits fully OUTSIDE the edge on the image stage, panel-
@@ -414,7 +419,7 @@ def main():
          '          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
          '        )).join("") +',
          "af-pill-brackets"),
-    ], version="16", tray=False)
+    ], version="17", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
