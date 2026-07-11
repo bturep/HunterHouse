@@ -63,7 +63,7 @@ NEW_FILTER_PANEL_CSS = """\
 # ── lab-b: grouped list ──────────────────────────────────────────────────
 CSS_LAB_B = """\
   /* ══ LAB B: collapsible, sticky group headers (contracted by default) ══ */
-  .ph-head{position:sticky;top:0;z-index:6;cursor:pointer}
+  .ph-head{cursor:pointer}   /* v23: rails replace sticky headers */
   .ph-head:hover span:first-child{color:var(--ink)}
   .ph-chev{display:inline-block;width:14px;color:var(--muted)}
   .ph-head.closed{border-bottom-style:dashed}
@@ -85,6 +85,25 @@ CSS_LAB_B = """\
      with the v21 tiers; either dial can be turned off alone. */
   .phase-divider.ph-head,.bin-sort,.row.in-bin{border-left:2px solid #7a4020}
   html.dark .phase-divider.ph-head,html.dark .bin-sort,html.dark .row.in-bin{border-left-color:#b08468}
+  /* v23: bin RAILS — collections scrolled past stack compact at the top of
+     the rows viewport, upcoming ones at the bottom: every archive block is
+     always on screen in abbreviated, non-description form (chevron, code,
+     count). Click a rail row to jump to that collection. Empty rails have
+     zero height, so they never block the list. */
+  #bin-rail-top,#bin-rail-bot{position:absolute;left:0;right:0;z-index:8;overflow:hidden}
+  #bin-rail-bot{bottom:0}
+  .br-row{display:flex;justify-content:space-between;align-items:center;height:25px;box-sizing:border-box;
+    padding:0 20px 0 12px;background:var(--soft);border-bottom:1px solid var(--rule);
+    border-left:2px solid #7a4020;cursor:pointer;
+    font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--copper-deep)}
+  html.dark .br-row{border-left-color:#b08468}
+  #bin-rail-bot .br-row{border-bottom:0;border-top:1px solid var(--rule)}
+  .br-row .r{color:var(--muted);letter-spacing:0.06em;font-size:9px}
+  .br-row:hover{color:var(--ink)}
+  .br-row .ph-chev{display:inline-block;width:14px;color:var(--muted)}
+  /* v23: the pip rides ABOVE the tinted blocks (was sliding behind them)
+     but below the rails and the filter overlay. */
+  .scroll-pip{z-index:7}
   /* v17: hanging indent — a long collection name (CAA, FRH) wraps back to
      the panel edge under the chevron. Chevron gets its own column; the name
      wraps within its column; the gloss sits aligned beneath the name. */
@@ -199,6 +218,7 @@ NEW_PHASE_DIVIDER_B = """\
         const open = searchOpen || phaseExpanded.has(gkey);
         d.className = "phase-divider ph-head" + (open ? "" : " closed");
         d.dataset.phase = gkey;
+        d.dataset.count = String(count).padStart(2,"0");   // v23: the rails read this
         const gloss = glossOf(gkey);
         d.innerHTML = `<span><span class="ph-chev">${open ? "\\u2304" : "\\u203a"}</span>${escapeHTML(glabelOf(gkey))}${gloss ? `<span class="ph-gloss">${escapeHTML(gloss)}</span>` : ""}</span><span class="r">${String(count).padStart(2,"0")} items</span>`;
         d.addEventListener("click", () => {
@@ -392,6 +412,55 @@ def main():
          '        <button class="l lh-filter" id="filter-toggle" title="Filter">Filter<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">\u203a</span></button>\n'
          '        <span class="pfx">/</span>',
          "filter-into-search-row"),
+        # v23: rail containers — siblings of #rows inside .panel-content.
+        ('      <div class="rows" id="rows"></div>',
+         '      <div class="rows" id="rows"></div>\n'
+         '      <div id="bin-rail-top" aria-hidden="true"></div>\n'
+         '      <div id="bin-rail-bot" aria-hidden="true"></div>',
+         "bin-rail-markup"),
+        # v23: rails logic rides on updatePip, which already fires on every
+        # list render, scroll and resize; pip track top derives from the
+        # scroller's real offset (was hardcoded 41px — in this lab the rows
+        # start lower, so the pip bled into the filter/search row).
+        ('  function updatePip(scrollId, pipId) {\n    const scrollEl = document.getElementById(scrollId);',
+         '  const BR_H = 25;   // LAB B v23: rail row height\n'
+         '  function updateBinRails() {\n'
+         '    const rows = document.getElementById("rows");\n'
+         '    const railT = document.getElementById("bin-rail-top");\n'
+         '    const railB = document.getElementById("bin-rail-bot");\n'
+         '    if (!rows || !railT || !railB) return;\n'
+         '    const heads = [...rows.querySelectorAll(".ph-head")];\n'
+         '    const rect  = rows.getBoundingClientRect();\n'
+         '    railT.style.top = rows.offsetTop + "px";\n'
+         '    const above = [];\n'
+         '    for (const h of heads) {\n'
+         '      if (h.getBoundingClientRect().top < rect.top + above.length * BR_H) above.push(h); else break;\n'
+         '    }\n'
+         '    const below = [];\n'
+         '    for (let i = heads.length - 1; i >= 0; i--) {\n'
+         '      const h = heads[i];\n'
+         '      if (above.includes(h)) break;\n'
+         '      if (h.getBoundingClientRect().bottom > rect.bottom - below.length * BR_H) below.unshift(h); else break;\n'
+         '    }\n'
+         '    const brRow = h => {\n'
+         '      const el = document.createElement("div");\n'
+         '      el.className = "br-row";\n'
+         '      el.innerHTML = `<span><span class="ph-chev">${h.classList.contains("closed") ? "\\u203a" : "\\u2304"}</span>${escapeHTML(h.dataset.phase || "")}</span><span class="r">${escapeHTML(h.dataset.count || "")}</span>`;\n'
+         '      el.addEventListener("click", () => {\n'
+         '        rows.scrollTop = h.offsetTop - rows.offsetTop - heads.indexOf(h) * BR_H;\n'
+         '      });\n'
+         '      return el;\n'
+         '    };\n'
+         '    railT.replaceChildren(...above.map(brRow));\n'
+         '    railB.replaceChildren(...below.map(brRow));\n'
+         '  }\n'
+         '  function updatePip(scrollId, pipId) {\n'
+         '    if (scrollId === "rows") updateBinRails();\n'
+         '    const scrollEl = document.getElementById(scrollId);',
+         "bin-rails-js"),
+        ('    pip.style.top   = (41 + ratio * (trackHeight - thumbHeight)) + "px";',
+         '    pip.style.top   = (scrollEl.offsetTop + ratio * (trackHeight - thumbHeight)) + "px";',
+         "pip-track-offset"),
         # v14/v19: the sort keys leave the header line; v19 renders them
         # per-bin instead (inside each OPEN collection, under its header —
         # see NEW_PHASE_DIVIDER_B), so no static strip remains.
@@ -456,7 +525,7 @@ def main():
          '          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
          '        )).join("") +',
          "af-pill-brackets"),
-    ], version="22", tray=False)
+    ], version="23", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
