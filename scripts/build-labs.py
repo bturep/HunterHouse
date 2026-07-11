@@ -104,8 +104,11 @@ CSS_LAB_B = """\
     padding:6px 20px;border-bottom:1px solid var(--rule);flex-shrink:0;
   }
   .pane-list .sort-mini .sort-hd{justify-content:flex-start}
-  .pane-list .sort-mini .sort-hd[data-sort-col="phase"]{margin-left:0}
-  .pane-list .sort-mini .sort-hd[data-sort-col="year"]{width:auto;justify-content:flex-end}
+  /* v15: Phase sort retired for now — the phase labels aren't worked out
+     yet and sort illogically (alphabetic). Hidden, not removed, so the
+     wiring stays intact for reintegration later. */
+  .pane-list .sort-mini .sort-hd[data-sort-col="phase"]{display:none}
+  .pane-list .sort-mini .sort-hd[data-sort-col="year"]{width:auto;justify-content:flex-end;grid-column:3}
   /* mobile: the row survives for the FILTER control alone — the filter
      panel carries its own search field on mobile. */
   @media (max-width:767px){
@@ -403,7 +406,7 @@ def main():
          '          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
          '        )).join("") +',
          "af-pill-brackets"),
-    ], version="14", tray=False)
+    ], version="15", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
