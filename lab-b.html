@@ -938,7 +938,7 @@
     background:none;border:0;padding:2px 4px;margin-left:auto}
   .af-clear:hover{color:var(--ink)}
   .empty-hint{padding:10px 20px 0;font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.7}
-  /* ══ LAB B: collapsible, sticky phase-group headers ══ */
+  /* ══ LAB B: collapsible, sticky group headers (contracted by default) ══ */
   .ph-head{position:sticky;top:0;z-index:6;cursor:pointer}
   .ph-head:hover span:first-child{color:var(--ink)}
   .ph-chev{display:inline-block;width:14px;color:var(--muted)}
@@ -3559,6 +3559,7 @@
         <button id="list-info" type="button" title="About this archive" aria-label="About this archive">?</button>
         <div class="sort-mini">
           <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>
+          <button class="sort-hd" data-sort-col="type">Type<span class="sort-arrow" id="sa-type"></span></button>
           <button class="sort-hd" data-sort-col="phase">Phase<span class="sort-arrow" id="sa-phase"></span></button>
           <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>
         </div>
@@ -3850,7 +3851,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.76-labb.01";
+  const VERSION      = "v1.09-test.76-labb.02";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -5857,7 +5858,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     items: [],
     filtered: [],
     selectedId: null,
-    sortCol: "phase",   // LAB B: open grouped by phase — the archival series view
+    sortCol: "type",   // LAB B: open grouped by item type — everyday bins (CCA-style series)
     sortDir: "asc",
     search: "",
     filterCollection: new Set(),
@@ -6879,6 +6880,7 @@ WHERE {
     };
     const comparators = {
       "id":    tailLast((a, b) => dir * (a.id || "").localeCompare(b.id || "")),
+      "type":  tailLast((a, b) => dir * (a.itemType||"").localeCompare(b.itemType||"") || (a.id||"").localeCompare(b.id||"")),   // LAB B
       "phase": tailLast((a, b) => dir * (a.phase||"").localeCompare(b.phase||"") || (a.id||"").localeCompare(b.id||"")),
       "year":  tailLast((a, b) => dir * dateKey(a).localeCompare(dateKey(b)) || (a.id||"").localeCompare(b.id||"")),
     };
@@ -7081,7 +7083,7 @@ WHERE {
 
   // ── Sort header UI ────────────────────────────────────────────────────────
   function renderListHead() {
-    ["id", "phase", "year"].forEach(col => {
+    ["id", "type", "phase", "year"].forEach(col => {
       const btn   = document.querySelector(`.sort-hd[data-sort-col="${col}"]`);
       const arrow = document.getElementById(`sa-${col}`);
       if (!btn || !arrow) return;
@@ -7288,7 +7290,7 @@ WHERE {
     if (panel) panel.innerHTML = "";
   }
 
-  const phaseCollapsed = new Set();   // LAB B: collapsed phase groups (session-scope)
+  const phaseExpanded = new Set();   // LAB B: opened groups (contracted by default, session-scope)
   function renderList() {
     if (state.view === "letters") { renderLettersList(); return; }
     const container = $("#rows");
@@ -7349,7 +7351,7 @@ WHERE {
       return;
     }
 
-    const grouped = !state.curation && state.sortCol === "phase";
+    const grouped = !state.curation && (state.sortCol === "phase" || state.sortCol === "type");   // LAB B
     const frag = document.createDocumentFragment();
     let lastPhase = null;
     const noted = rnNotedIds();   // items with a viewer-visible note
@@ -7357,23 +7359,29 @@ WHERE {
 
     if (afActive) frag.appendChild(afBar());
 
+    // LAB B: groups follow the active sort column — Type (everyday, CCA-style
+    // functional series) or Phase (the scholarly axis). Groups open CONTRACTED
+    // (the CCA convention — counts do the orienting); a live search auto-
+    // expands everything so results never hide behind a closed header.
+    const gkeyOf = it => (state.sortCol === "type" ? (it.itemType || "—") : (it.phase || "—"));
+    const searchOpen = !!state.search.trim();
     state.filtered.forEach((it, _idx) => {
-      if (grouped && it.phase !== lastPhase) {
-        lastPhase = it.phase;
-        const count = state.filtered.filter(x => x.phase === lastPhase).length;
+      const gkey = gkeyOf(it);
+      if (grouped && gkey !== lastPhase) {
+        lastPhase = gkey;
+        const count = state.filtered.filter(x => gkeyOf(x) === gkey).length;
         const d = document.createElement("div");
-        const key = lastPhase || "—";
-        const closed = phaseCollapsed.has(key);
-        d.className = "phase-divider ph-head" + (closed ? " closed" : "");
-        d.dataset.phase = key;
-        d.innerHTML = `<span><span class="ph-chev">${closed ? "›" : "⌄"}</span>${escapeHTML(key)}</span><span class="r">${String(count).padStart(2,"0")} items</span>`;
+        const open = searchOpen || phaseExpanded.has(gkey);
+        d.className = "phase-divider ph-head" + (open ? "" : " closed");
+        d.dataset.phase = gkey;
+        d.innerHTML = `<span><span class="ph-chev">${open ? "⌄" : "›"}</span>${escapeHTML(gkey)}</span><span class="r">${String(count).padStart(2,"0")} items</span>`;
         d.addEventListener("click", () => {
-          if (phaseCollapsed.has(key)) phaseCollapsed.delete(key); else phaseCollapsed.add(key);
+          if (phaseExpanded.has(gkey)) phaseExpanded.delete(gkey); else phaseExpanded.add(gkey);
           renderList();
         });
         frag.appendChild(d);
       }
-      if (grouped && phaseCollapsed.has(it.phase || "—")) return;   // LAB B: group is collapsed
+      if (grouped && !searchOpen && !phaseExpanded.has(gkey)) return;   // LAB B: group is contracted
       const row = document.createElement("div");
       row.className = "row" + (it.id === state.selectedId ? " sel" : "") + (marksHas(it.id) ? " marked" : "") + (seen.has(it.id) ? " seen" : "") + (noted.has(it.id) ? " has-note" : "") + (state.bulkSel.has(it.id) ? " bulk-sel" : "");
       row.dataset.id = it.id;

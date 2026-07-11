@@ -65,7 +65,7 @@ CSS_COMMON = """\
 """
 
 CSS_LAB_B = """\
-  /* ══ LAB B: collapsible, sticky phase-group headers ══ */
+  /* ══ LAB B: collapsible, sticky group headers (contracted by default) ══ */
   .ph-head{position:sticky;top:0;z-index:6;cursor:pointer}
   .ph-head:hover span:first-child{color:var(--ink)}
   .ph-chev{display:inline-block;width:14px;color:var(--muted)}
@@ -254,35 +254,41 @@ OLD_PHASE_DIVIDER = """\
 """
 
 NEW_PHASE_DIVIDER_B = """\
+    // LAB B: groups follow the active sort column — Type (everyday, CCA-style
+    // functional series) or Phase (the scholarly axis). Groups open CONTRACTED
+    // (the CCA convention — counts do the orienting); a live search auto-
+    // expands everything so results never hide behind a closed header.
+    const gkeyOf = it => (state.sortCol === "type" ? (it.itemType || "—") : (it.phase || "—"));
+    const searchOpen = !!state.search.trim();
     state.filtered.forEach((it, _idx) => {
-      if (grouped && it.phase !== lastPhase) {
-        lastPhase = it.phase;
-        const count = state.filtered.filter(x => x.phase === lastPhase).length;
+      const gkey = gkeyOf(it);
+      if (grouped && gkey !== lastPhase) {
+        lastPhase = gkey;
+        const count = state.filtered.filter(x => gkeyOf(x) === gkey).length;
         const d = document.createElement("div");
-        const key = lastPhase || "—";
-        const closed = phaseCollapsed.has(key);
-        d.className = "phase-divider ph-head" + (closed ? " closed" : "");
-        d.dataset.phase = key;
-        d.innerHTML = `<span><span class="ph-chev">${closed ? "›" : "⌄"}</span>${escapeHTML(key)}</span><span class="r">${String(count).padStart(2,"0")} items</span>`;
+        const open = searchOpen || phaseExpanded.has(gkey);
+        d.className = "phase-divider ph-head" + (open ? "" : " closed");
+        d.dataset.phase = gkey;
+        d.innerHTML = `<span><span class="ph-chev">${open ? "⌄" : "›"}</span>${escapeHTML(gkey)}</span><span class="r">${String(count).padStart(2,"0")} items</span>`;
         d.addEventListener("click", () => {
-          if (phaseCollapsed.has(key)) phaseCollapsed.delete(key); else phaseCollapsed.add(key);
+          if (phaseExpanded.has(gkey)) phaseExpanded.delete(gkey); else phaseExpanded.add(gkey);
           renderList();
         });
         frag.appendChild(d);
       }
-      if (grouped && phaseCollapsed.has(it.phase || "—")) return;   // LAB B: group is collapsed
+      if (grouped && !searchOpen && !phaseExpanded.has(gkey)) return;   // LAB B: group is contracted
 """
 
 # ───────────────────────── per-lab build ─────────────────────────
 
-def build(lab, css_extra, extra_patches):
+def build(lab, css_extra, extra_patches, version="01"):
     text = SRC.read_text(encoding="utf-8")
     L = lab.upper()
 
     text = patch(text, "<title>Hunter House Archive — NEXT</title>",
                        f"<title>Hunter House Archive — LAB {L}</title>", "title")
     text = patch(text, '  const VERSION      = "v1.09-test.76";',
-                       f'  const VERSION      = "v1.09-test.76-lab{lab}.01";', "version")
+                       f'  const VERSION      = "v1.09-test.76-lab{lab}.{version}";', "version")
     text = patch(text, '<span class="mk-page" id="mk-page">Archive</span>',
                        f'<span class="mk-page" id="mk-page">Archive · Lab {L}</span>', "mk-page")
     text = patch(text, "cur==='map'?'Site Plan':(cur==='tl'?'Timeline':'Archive')",
@@ -308,17 +314,36 @@ def main():
     # LAB A — feedback repairs only
     build("a", "", [])
 
-    # LAB B — + phase-grouped list (default sort = phase; sticky collapsible headers)
+    # LAB B — + grouped list. v.02 after Brandon's 2026-07-10 review: groups by
+    # ITEM TYPE by default (everyday bins, CCA functional-series style — phases
+    # assume expert knowledge), contracted by default (the CCA convention),
+    # Phase grouping still available via the Phase sort for the scholarly eye.
     build("b", CSS_LAB_B, [
         ('    sortCol: "id",',
-         '    sortCol: "phase",   // LAB B: open grouped by phase — the archival series view',
+         '    sortCol: "type",   // LAB B: open grouped by item type — everyday bins (CCA-style series)',
          "default-sort"),
+        # Type joins the sort row (ID · Type · Phase · Year)
+        ('          <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>',
+         '          <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>\n'
+         '          <button class="sort-hd" data-sort-col="type">Type<span class="sort-arrow" id="sa-type"></span></button>',
+         "type-sort-button"),
+        ('    ["id", "phase", "year"].forEach(col => {',
+         '    ["id", "type", "phase", "year"].forEach(col => {',
+         "type-sort-head"),
+        ('      "phase": tailLast((a, b) => dir * (a.phase||"").localeCompare(b.phase||"") || (a.id||"").localeCompare(b.id||"")),',
+         '      "type":  tailLast((a, b) => dir * (a.itemType||"").localeCompare(b.itemType||"") || (a.id||"").localeCompare(b.id||"")),   // LAB B\n'
+         '      "phase": tailLast((a, b) => dir * (a.phase||"").localeCompare(b.phase||"") || (a.id||"").localeCompare(b.id||"")),',
+         "type-comparator"),
         ("  function renderList() {",
-         "  const phaseCollapsed = new Set();   // LAB B: collapsed phase groups (session-scope)\n"
+         "  const phaseExpanded = new Set();   // LAB B: opened groups (contracted by default, session-scope)\n"
          "  function renderList() {",
-         "collapse-state"),
+         "expand-state"),
+        # grouped-view trigger widens to the Type sort (AF_BAR_BLOCK plants this line)
+        ('    const grouped = !state.curation && state.sortCol === "phase";',
+         '    const grouped = !state.curation && (state.sortCol === "phase" || state.sortCol === "type");   // LAB B',
+         "grouped-trigger"),
         (OLD_PHASE_DIVIDER, NEW_PHASE_DIVIDER_B, "collapsible-headers"),
-    ])
+    ], version="02")
 
     # LAB C — + always-visible facet sidebar (desktop)
     build("c", CSS_LAB_C, [
