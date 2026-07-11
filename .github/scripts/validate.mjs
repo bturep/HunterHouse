@@ -32,7 +32,7 @@ const HTMLS = [
 // UI-lab variants (scripts/build-labs.py) — disposable test pages. Syntax-check
 // them like the staging file while they exist; the existsSync guard means this
 // block self-disables when the labs are deleted after a direction is chosen.
-for (const lab of ["lab-a.html", "lab-b.html", "lab-c.html"]) {
+for (const lab of ["lab-a.html", "lab-b.html", "lab-c.html", "lab-d.html"]) {
   if (existsSync(lab)) {
     HTMLS.push({ file: lab, versionRe: /^v\d+\.\d{2}-test\.\d{2,}-lab[a-z]\.\d{2}$/, kind: "lab" });
   }
