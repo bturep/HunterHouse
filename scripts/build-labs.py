@@ -113,7 +113,9 @@ CSS_LAB_B = """\
   /* — row (v40a/b/f): stacked block, all-mono, no separators — rhythm
      from padding; kicker holds ID (with the type mark) left, year right;
      subtitles wrap, never truncate. — */
-  .pane-list .row{display:flex;flex-direction:column;align-items:stretch;gap:5px;padding:14px 20px;border-bottom:0}
+  .pane-list .row{display:flex;flex-direction:column;align-items:stretch;gap:5px;padding:14px 20px;
+    border-bottom:1px dashed color-mix(in srgb, var(--rule) 45%, transparent)}   /* v41: very light dashed dividers back between items */
+  .pane-list .row:last-child,.pane-list .row.sel{border-bottom-color:transparent}
   .r-kick{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em}
   .r-kick .archid{font-size:10.5px;color:color-mix(in srgb, var(--ink) 72%, transparent)}
   .pane-list .row .year{font-family:var(--mono);font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
@@ -613,7 +615,7 @@ def main():
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
-    ], version="40", tray=False)
+    ], version="41", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
