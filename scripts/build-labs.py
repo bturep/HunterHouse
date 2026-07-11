@@ -169,6 +169,28 @@ def build(lab, css_extra, extra_patches, version):
                        f"cur==='map'?'Site Plan':(cur==='tl'?'Timeline':'Archive · Lab {L}')", "mk-page-js")
     text = patch(text, OLD_FILTER_PANEL_CSS, NEW_FILTER_PANEL_CSS, "tray-css")
 
+    # Authored collection order (Brandon 2026-07-10): CAA, HHC, IHC, EGC, FRH —
+    # replaces alphabetical-with-EGC-last. Unknown future collections fall to
+    # the end alphabetically. All labs share the tray.
+    text = patch(text,
+        '    // Collections in the filter panel mirror the catalogue list\'s order:\n'
+        '    // tail collections (EGC) sort to the bottom regardless of alphabet.\n'
+        '    const uniqueCollections = [...new Set(\n'
+        '      state.items.map(i => archiveAbbrev(collectionOf(i))).filter(Boolean)\n'
+        '    )].sort((a, b) =>\n'
+        '      (isTailCollection(a) ? 1 : 0) - (isTailCollection(b) ? 1 : 0)\n'
+        '      || a.localeCompare(b)\n'
+        '    );',
+        '    // LAB: authored collection order (Brandon 2026-07-10).\n'
+        '    const COLL_ORDER = ["CAA", "HHC", "IHC", "EGC", "FRH"];\n'
+        '    const uniqueCollections = [...new Set(\n'
+        '      state.items.map(i => archiveAbbrev(collectionOf(i))).filter(Boolean)\n'
+        '    )].sort((a, b) => {\n'
+        '      const ra = COLL_ORDER.indexOf(a), rb = COLL_ORDER.indexOf(b);\n'
+        '      return (ra === -1 ? 99 : ra) - (rb === -1 ? 99 : rb) || a.localeCompare(b);\n'
+        '    });',
+        "collection-order")
+
     # Collection chips carry their full names ("HHC — Hunter House Collection")
     # — the bare abbreviations don't tell a visitor what a collection contains
     # (Brandon, 2026-07-10 review of lab-a). All labs share the tray.
@@ -194,7 +216,7 @@ def build(lab, css_extra, extra_patches, version):
 
 def main():
     # LAB A — the tray only (everything else promoted 2026-07-10)
-    build("a", "", [], version="04")
+    build("a", "", [], version="05")
 
     # LAB B — + grouped list, v05: COLLECTION bins (the fonds level — Brandon:
     # "the collections themselves are good buckets… they show the shape").
@@ -208,6 +230,15 @@ def main():
         ('    const grouped = !state.curation && state.sortCol === "phase";',
          '    const grouped = !state.curation && (state.sortCol === "phase" || state.sortCol === "id");   // LAB B v05',
          "grouped-trigger"),
+        # ID sort orders groups by the authored collection order (CAA, HHC,
+        # IHC, EGC, FRH), IDs ascending within each group. Replaces tailLast
+        # for the id column — the authored order decides EGC's place now.
+        ('      "id":    tailLast((a, b) => dir * (a.id || "").localeCompare(b.id || "")),',
+         '      "id":    ((a, b) => {   // LAB B: authored collection order, then ID\n'
+         '        const rank = x => { const i = ["CAA","HHC","IHC","EGC","FRH"].indexOf(archiveAbbrev(collectionOf(x))); return i === -1 ? 99 : i; };\n'
+         '        return (rank(a) - rank(b)) || dir * (a.id || "").localeCompare(b.id || "");\n'
+         '      }),',
+         "id-collection-order"),
         (OLD_PHASE_DIVIDER, NEW_PHASE_DIVIDER_B, "collapsible-headers"),
     ], version="06")
 

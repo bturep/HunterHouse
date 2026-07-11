@@ -6895,7 +6895,10 @@ WHERE {
       return ra !== rb ? ra - rb : cmp(a, b);
     };
     const comparators = {
-      "id":    tailLast((a, b) => dir * (a.id || "").localeCompare(b.id || "")),
+      "id":    ((a, b) => {   // LAB B: authored collection order, then ID
+        const rank = x => { const i = ["CAA","HHC","IHC","EGC","FRH"].indexOf(archiveAbbrev(collectionOf(x))); return i === -1 ? 99 : i; };
+        return (rank(a) - rank(b)) || dir * (a.id || "").localeCompare(b.id || "");
+      }),
       "phase": tailLast((a, b) => dir * (a.phase||"").localeCompare(b.phase||"") || (a.id||"").localeCompare(b.id||"")),
       "year":  tailLast((a, b) => dir * dateKey(a).localeCompare(dateKey(b)) || (a.id||"").localeCompare(b.id||"")),
     };
@@ -8306,14 +8309,14 @@ WHERE {
     if (!panel) return;
     if (state.view === "letters") { renderLetterFacets(); return; }
 
-    // Collections in the filter panel mirror the catalogue list's order:
-    // tail collections (EGC) sort to the bottom regardless of alphabet.
+    // LAB: authored collection order (Brandon 2026-07-10).
+    const COLL_ORDER = ["CAA", "HHC", "IHC", "EGC", "FRH"];
     const uniqueCollections = [...new Set(
       state.items.map(i => archiveAbbrev(collectionOf(i))).filter(Boolean)
-    )].sort((a, b) =>
-      (isTailCollection(a) ? 1 : 0) - (isTailCollection(b) ? 1 : 0)
-      || a.localeCompare(b)
-    );
+    )].sort((a, b) => {
+      const ra = COLL_ORDER.indexOf(a), rb = COLL_ORDER.indexOf(b);
+      return (ra === -1 ? 99 : ra) - (rb === -1 ? 99 : rb) || a.localeCompare(b);
+    });
     const uniqueAreas       = uniqueSorted(state.items.flatMap(i => i.areas || []));
     const uniqueTypes       = uniqueSorted(state.items.map(i => i.itemType).filter(Boolean));
     const uniqueDrawTypes   = uniqueSorted(state.items.flatMap(i => i.drawTypes || []));
