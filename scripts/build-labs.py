@@ -98,8 +98,14 @@ CSS_LAB_B = """\
   /* v32: the bottom rail is gone (a bin "stuck" at the bottom read badly).
      The pane instead ends in a quiet chrome foot — same 41px as the bar
      under the preview pane. Flow child, so it never covers rows. */
-  #list-foot{height:41px;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg)}
+  #list-foot{height:41px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
+    display:flex;align-items:center;padding:0 20px;
+    font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em}
   html.dark body #list-foot{background:#2b2823}
+  /* v33: top-right cluster grouped — full-height separators; the lens
+     divider (.tr-div) stretches to the same language. */
+  .tr-vsep{width:1px;align-self:stretch;background:var(--rule);flex:none}
+  .site-topright .tr-div{height:auto;align-self:stretch}
   .br-row{display:flex;justify-content:space-between;align-items:center;height:25px;box-sizing:border-box;
     padding:0 20px 0 12px;background:var(--soft);border-bottom:1px solid var(--rule);
     border-left:2px solid transparent;cursor:pointer;
@@ -124,7 +130,8 @@ CSS_LAB_B = """\
   html.dark body .bin-sort,html.dark body .row.in-bin{background:#1e1b19}
   html.dark body .phase-divider.ph-head,html.dark body .br-row{background:#252220}
   html.dark body .site-top,html.dark body .list-head,html.dark body .lp-search,
-  html.dark body .meta-head,html.dark body .image-foot,html.dark body .panel-handle{background:#2b2823}
+  html.dark body .lp-filter,html.dark body .meta-head,html.dark body .image-foot,
+  html.dark body .panel-handle{background:#2b2823}
   html.dark body .panel-handle::before{background:#8a847c}
   /* v26: the record pane is STATIC — an instrument surface, not content —
      so the whole right panel reads as one chrome-toned object with its
@@ -189,11 +196,14 @@ CSS_LAB_B = """\
   .lh-filter .filter-chevron{font-size:13px;color:var(--muted);letter-spacing:0;font-weight:400;line-height:1}
   .lh-filter:hover,.lh-filter.fp-open{color:var(--ink)}
   .lh-filter:hover .filter-chevron,.lh-filter.fp-open .filter-chevron{color:var(--ink)}
-  /* v24: tighten the seam under the filter/search row — its 8px bottom
-     padding + rule read as a gap above the first collection bar. The
-     bar's own soft edge is the separator now. Overlay top follows. */
-  .lp-search{border-bottom:0;padding-bottom:4px}
-  @media (min-width:768px){ .filter-panel{top:69px} }
+  /* v24/v34: seam stays tight — search row borderless; the FILTER row
+     below it carries the active tags and is the last chrome row before
+     the collection bars. Overlay top follows the taller stack. */
+  .lp-search{border-bottom:0;padding-bottom:2px}
+  .lp-filter{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;padding:2px 20px 7px;background:var(--bg)}
+  .lp-filter .lh-filter{border-right:0;padding-right:0}
+  #lf-pills{display:flex;flex-wrap:wrap;gap:3px 9px;align-items:center;min-width:0}
+  @media (min-width:768px){ .filter-panel{top:90px} }   /* measured: row bottom 89.5 */
   /* v14/v19: the sort keys are column headers on the row grid (104px /
      1fr / 50px); v19 renders one strip per OPEN bin, under its header,
      dashed like the rows it governs. */
@@ -207,13 +217,6 @@ CSS_LAB_B = """\
      wiring stays intact for reintegration later. */
   .pane-list .sort-mini .sort-hd[data-sort-col="phase"]{display:none}
   .pane-list .sort-mini .sort-hd[data-sort-col="year"]{width:auto;justify-content:flex-end;grid-column:3}
-  /* mobile: the row survives for the FILTER control alone — the filter
-     panel carries its own search field on mobile. */
-  @media (max-width:767px){
-    .lp-search{display:flex}
-    .lp-search .pfx,.lp-search input{display:none}
-    .lh-filter{border-right:0}
-  }
   /* v11: applied-filter pills = the browse chips' bracket convention —
      no box, per-category colour (pc-*), the removal \u00d7 inside the brackets. */
   .af-pill{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:0.02em;
@@ -459,16 +462,24 @@ def main():
         ('        <button class="l" id="filter-toggle" title="Filter">Browse items<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">\u203a</span></button>',
          '        <span class="l lh-title">Catalogue</span>',
          "catalogue-title"),
-        ('      <div class="lp-search" id="lp-search">\n        <span class="pfx">/</span>',
-         '      <div class="lp-search" id="lp-search">\n'
+        # v34: search on its own line; the FILTER row sits below it and
+        # carries the active tags (#lf-pills) beside the control.
+        ('        <input id="lp-search-input" type="text" placeholder="search archive" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search the archive">\n'
+         '      </div>\n'
+         '      <div class="filter-panel" id="filter-panel" hidden></div>',
+         '        <input id="lp-search-input" type="text" placeholder="search archive" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search the archive">\n'
+         '      </div>\n'
+         '      <div class="lp-filter" id="lp-filter">\n'
          '        <button class="l lh-filter" id="filter-toggle" title="Filter">Filter<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">\u203a</span></button>\n'
-         '        <span class="pfx">/</span>',
-         "filter-into-search-row"),
+         '        <span id="lf-pills"></span>\n'
+         '      </div>\n'
+         '      <div class="filter-panel" id="filter-panel" hidden></div>',
+         "filter-row-below-search"),
         # v23: rail containers — siblings of #rows inside .panel-content.
         ('      <div class="rows" id="rows"></div>',
          '      <div class="rows" id="rows"></div>\n'
          '      <div id="bin-rail-top" aria-hidden="true"></div>\n'
-         '      <div id="list-foot" aria-hidden="true"></div>',
+         '      <div id="list-foot"><span id="lf-count"></span></div>',
          "bin-rail-markup"),
         # v31: splash bottom strip — fixed, so DOM placement is free.
         ('</body>',
@@ -515,6 +526,31 @@ def main():
         ('    pip.style.top   = (41 + ratio * (trackHeight - thumbHeight)) + "px";',
          '    pip.style.top   = (scrollEl.offsetTop + ratio * (trackHeight - thumbHeight)) + "px";',
          "pip-track-offset"),
+        # v33: list-foot count — "252 items" at rest, "132 / 252 items" when
+        # a filter or search narrows the list. Same source as mob-count.
+        ('  function updateMobCount() {\n'
+         '    const el = document.getElementById("mob-count");\n'
+         '    if (!el) return;\n'
+         '    const f = state.filtered.length, t = state.items.length;\n'
+         '    el.textContent = (f < t) ? `${f} / ${t}` : `${t}`;\n'
+         '  }',
+         '  function updateMobCount() {\n'
+         '    const f = state.filtered.length, t = state.items.length;\n'
+         '    const txt = (f < t) ? `${f} / ${t}` : `${t}`;\n'
+         '    const lf = document.getElementById("lf-count");   // LAB B v33: list-foot count\n'
+         '    if (lf) lf.textContent = txt + " items";\n'
+         '    const el = document.getElementById("mob-count");\n'
+         '    if (!el) return;\n'
+         '    el.textContent = txt;\n'
+         '  }',
+         "list-foot-count"),
+        # v33: top-right cluster grouped by FULL-HEIGHT separators —
+        # lenses | search-timeline-files-letters | ? alone | Aa + fullscreen.
+        ('    <button id="rec-info" title="About this archive &amp; shortcuts [?]" aria-label="Info">?</button>',
+         '    <span class="tr-vsep" aria-hidden="true"></span>\n'
+         '    <button id="rec-info" title="About this archive &amp; shortcuts [?]" aria-label="Info">?</button>\n'
+         '    <span class="tr-vsep" aria-hidden="true"></span>',
+         "topright-separators"),
         # v14/v19: the sort keys leave the header line; v19 renders them
         # per-bin instead (inside each OPEN collection, under its header —
         # see NEW_PHASE_DIVIDER_B), so no static strip remains.
@@ -563,23 +599,54 @@ def main():
   html.dark .pc-clay  {--pf:#7898b8}
   html.dark .pc-moss  {--pf:#a07898}""",
          "facet-spectrum-dark"),
-        # v11: applied-filter pills mirror the browse chips — same bracket
-        # convention, same per-category colour — so the active filters above
-        # the list read as the same objects the visitor just clicked.
-        ('      bar.innerHTML =\n'
-         '        `<span class="af-lbl">Filters</span>` +\n'
-         '        AF_GROUPS.flatMap(([g, s]) => [...s].map(v =>\n'
-         '          `<button class="af-pill" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
-         '        )).join("") +',
-         '      const AF_PC = { collection:PC.denim, area:PC.sage, itype:PC.stone,\n'
-         '                      drawtype:PC.slate, creator:PC.clay, builtstatus:PC.moss };   // LAB B: chip colours\n'
+        # v34: the active tags live IN the filter row beside FILTER — no
+        # separate bar above the list, no "Filters" label. Pills keep the
+        # browse chips' bracket + per-category colour. clear-all binding
+        # stays with the existing renderList code (it queries by id and
+        # runs after these calls in both branches).
+        ('    const afBar = () => {\n'
+         '      const bar = document.createElement("div");\n'
+         '      bar.className = "af-bar";\n'
          '      bar.innerHTML =\n'
          '        `<span class="af-lbl">Filters</span>` +\n'
          '        AF_GROUPS.flatMap(([g, s]) => [...s].map(v =>\n'
+         '          `<button class="af-pill" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
+         '        )).join("") +\n'
+         '        `<button class="af-clear" id="filter-clear-all">\u2715 clear all</button>`;\n'
+         '      bar.querySelectorAll(".af-pill").forEach(p => p.addEventListener("click", e => {\n'
+         '        e.stopPropagation();\n'
+         '        const set = new Map(AF_GROUPS).get(p.dataset.afG);\n'
+         '        if (set) set.delete(p.dataset.afV);\n'
+         '        applyFilters(); renderList(); updateFilterBadge(); renderFilterPanel();\n'
+         '      }));\n'
+         '      return bar;\n'
+         '    };',
+         '    const AF_PC = { collection:PC.denim, area:PC.sage, itype:PC.stone,\n'
+         '                    drawtype:PC.slate, creator:PC.clay, builtstatus:PC.moss };   // LAB B: chip colours\n'
+         '    const renderAfPills = () => {   // LAB B v34: pills render into the filter row\n'
+         '      const slot = document.getElementById("lf-pills");\n'
+         '      if (!slot) return;\n'
+         '      if (!afActive) { slot.innerHTML = ""; return; }\n'
+         '      slot.innerHTML =\n'
+         '        AF_GROUPS.flatMap(([g, s]) => [...s].map(v =>\n'
          '          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
-         '        )).join("") +',
-         "af-pill-brackets"),
-    ], version="32", tray=False)
+         '        )).join("") +\n'
+         '        `<button class="af-clear" id="filter-clear-all">\u2715 clear all</button>`;\n'
+         '      slot.querySelectorAll(".af-pill").forEach(p => p.addEventListener("click", e => {\n'
+         '        e.stopPropagation();\n'
+         '        const set = new Map(AF_GROUPS).get(p.dataset.afG);\n'
+         '        if (set) set.delete(p.dataset.afV);\n'
+         '        applyFilters(); renderList(); updateFilterBadge(); renderFilterPanel();\n'
+         '      }));\n'
+         '    };',
+         "af-pills-in-filter-row"),
+        ('      if (afActive) container.appendChild(afBar());',
+         '      renderAfPills();',
+         "af-call-empty"),
+        ('    if (afActive) frag.appendChild(afBar());',
+         '    renderAfPills();',
+         "af-call-main"),
+    ], version="34", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
