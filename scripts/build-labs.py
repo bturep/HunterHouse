@@ -62,6 +62,19 @@ CSS_COMMON = """\
     background:none;border:0;padding:2px 4px;margin-left:auto}
   .af-clear:hover{color:var(--ink)}
   .empty-hint{padding:10px 20px 0;font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.7}
+  /* ══ LAB: search lives with finding (left panel), not in the top-right
+     settings cluster. Desktop hides the top-right search UI; the #search-input
+     element stays in the DOM as the proxy target (same pattern mobile uses). ══ */
+  .lp-search{display:flex;align-items:center;gap:8px;padding:8px 20px;border-bottom:1px solid var(--rule);flex-shrink:0}
+  .lp-search .pfx{font-family:var(--mono);font-size:10px;color:var(--hint)}
+  .lp-search input{flex:1;min-width:0;background:none;border:0;outline:none;font-family:var(--mono);font-size:11px;color:var(--ink);letter-spacing:0.03em}
+  .lp-search input::placeholder{color:var(--hint);text-transform:lowercase;letter-spacing:0.06em}
+  @media (min-width:768px){
+    #search-toggle{display:none!important}
+    #search-input.tr-search-input{display:none!important}
+    .filter-panel{top:74px}   /* tray opens below the search row, not over it */
+  }
+  @media (max-width:767px){ .lp-search{display:none} }  /* mobile keeps its own fp-search-row */
 """
 
 CSS_LAB_B = """\
@@ -303,6 +316,51 @@ def build(lab, css_extra, extra_patches, version="01"):
     text = patch(text, OLD_GROUP_FN, NEW_GROUP_FN, "chip-counts")
     text = patch(text, OLD_EMPTY_AND_DIVIDER, AF_BAR_BLOCK, "af-bar")
 
+    # Left-panel search row (markup + proxy wiring + "/" shortcut retarget)
+    text = patch(text,
+        '      <div class="filter-panel" id="filter-panel" hidden></div>',
+        '      <div class="lp-search" id="lp-search">\n'
+        '        <span class="pfx">/</span>\n'
+        '        <input id="lp-search-input" type="text" placeholder="search archive" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search the archive">\n'
+        '      </div>\n'
+        '      <div class="filter-panel" id="filter-panel" hidden></div>',
+        "lp-search-markup")
+    text = patch(text,
+        '    $("#filter-panel").addEventListener("click", e => e.stopPropagation());',
+        '    $("#filter-panel").addEventListener("click", e => e.stopPropagation());\n'
+        '\n'
+        '    // LAB: left-panel search — proxies into #search-input exactly like the\n'
+        '    // mobile filter-panel search does. Two-way sync, Escape clears.\n'
+        '    {\n'
+        '      const lp = document.getElementById("lp-search-input");\n'
+        '      const se = document.getElementById("search-input");\n'
+        '      if (lp && se) {\n'
+        '        lp.addEventListener("input", () => {\n'
+        '          se.value = lp.value;\n'
+        '          se.dispatchEvent(new Event("input", { bubbles: true }));\n'
+        '        });\n'
+        '        se.addEventListener("input", () => {\n'
+        '          if (document.activeElement !== lp && lp.value !== se.value) lp.value = se.value;\n'
+        '        });\n'
+        '        lp.addEventListener("keydown", e => {\n'
+        '          if (e.key === "Escape") {\n'
+        '            lp.value = ""; se.value = "";\n'
+        '            se.dispatchEvent(new Event("input", { bubbles: true }));\n'
+        '            lp.blur(); e.preventDefault();\n'
+        '          }\n'
+        '        });\n'
+        '      }\n'
+        '    }',
+        "lp-search-wiring")
+    text = patch(text,
+        '    function openSearch() { if (!searchInput) return; searchInput.classList.add("open"); searchInput.focus(); }',
+        '    function openSearch() {\n'
+        '      const lp = document.getElementById("lp-search-input");          // LAB: "/" focuses the\n'
+        '      if (lp && lp.offsetParent) { lp.focus(); return; }              // left-panel search\n'
+        '      if (!searchInput) return; searchInput.classList.add("open"); searchInput.focus();\n'
+        '    }',
+        "slash-retarget")
+
     for old, new, label in extra_patches:
         text = patch(text, old, new, label)
 
@@ -312,7 +370,7 @@ def build(lab, css_extra, extra_patches, version="01"):
 
 def main():
     # LAB A — feedback repairs only
-    build("a", "", [])
+    build("a", "", [], version="02")
 
     # LAB B — + grouped list. v.02 after Brandon's 2026-07-10 review: groups by
     # ITEM TYPE by default (everyday bins, CCA functional-series style — phases
@@ -343,7 +401,7 @@ def main():
          '    const grouped = !state.curation && (state.sortCol === "phase" || state.sortCol === "type");   // LAB B',
          "grouped-trigger"),
         (OLD_PHASE_DIVIDER, NEW_PHASE_DIVIDER_B, "collapsible-headers"),
-    ], version="02")
+    ], version="03")
 
     # LAB C — + always-visible facet sidebar (desktop)
     build("c", CSS_LAB_C, [
@@ -359,7 +417,7 @@ def main():
          '    const panel = (side && window.matchMedia("(min-width:768px)").matches) ? side : $("#filter-panel");\n'
          '    if (!panel) return;',
          "sidebar-target"),
-    ])
+    ], version="02")
 
 if __name__ == "__main__":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")

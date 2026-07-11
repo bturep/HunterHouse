@@ -938,6 +938,19 @@
     background:none;border:0;padding:2px 4px;margin-left:auto}
   .af-clear:hover{color:var(--ink)}
   .empty-hint{padding:10px 20px 0;font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.7}
+  /* ══ LAB: search lives with finding (left panel), not in the top-right
+     settings cluster. Desktop hides the top-right search UI; the #search-input
+     element stays in the DOM as the proxy target (same pattern mobile uses). ══ */
+  .lp-search{display:flex;align-items:center;gap:8px;padding:8px 20px;border-bottom:1px solid var(--rule);flex-shrink:0}
+  .lp-search .pfx{font-family:var(--mono);font-size:10px;color:var(--hint)}
+  .lp-search input{flex:1;min-width:0;background:none;border:0;outline:none;font-family:var(--mono);font-size:11px;color:var(--ink);letter-spacing:0.03em}
+  .lp-search input::placeholder{color:var(--hint);text-transform:lowercase;letter-spacing:0.06em}
+  @media (min-width:768px){
+    #search-toggle{display:none!important}
+    #search-input.tr-search-input{display:none!important}
+    .filter-panel{top:74px}   /* tray opens below the search row, not over it */
+  }
+  @media (max-width:767px){ .lp-search{display:none} }  /* mobile keeps its own fp-search-row */
   /* ══ LAB C: always-visible facet sidebar (stakeholder proposal) ══ */
   .panel-left{width:44%}
   #facet-side{width:210px;flex-shrink:0;overflow-y:auto;
@@ -3567,6 +3580,10 @@
           <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>
         </div>
       </div>
+      <div class="lp-search" id="lp-search">
+        <span class="pfx">/</span>
+        <input id="lp-search-input" type="text" placeholder="search archive" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search the archive">
+      </div>
       <div class="filter-panel" id="filter-panel" hidden></div>
       <div class="mark-bar" id="mark-bar" hidden></div>
       <div class="bulk-bar" id="bulk-bar" hidden></div>
@@ -3854,7 +3871,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.76-labc.01";
+  const VERSION      = "v1.09-test.76-labc.02";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -8449,6 +8466,29 @@ WHERE {
 
     $("#filter-panel").addEventListener("click", e => e.stopPropagation());
 
+    // LAB: left-panel search — proxies into #search-input exactly like the
+    // mobile filter-panel search does. Two-way sync, Escape clears.
+    {
+      const lp = document.getElementById("lp-search-input");
+      const se = document.getElementById("search-input");
+      if (lp && se) {
+        lp.addEventListener("input", () => {
+          se.value = lp.value;
+          se.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+        se.addEventListener("input", () => {
+          if (document.activeElement !== lp && lp.value !== se.value) lp.value = se.value;
+        });
+        lp.addEventListener("keydown", e => {
+          if (e.key === "Escape") {
+            lp.value = ""; se.value = "";
+            se.dispatchEvent(new Event("input", { bubbles: true }));
+            lp.blur(); e.preventDefault();
+          }
+        });
+      }
+    }
+
     // Column-header sort
     document.querySelectorAll(".sort-hd[data-sort-col]").forEach(btn => {
       btn.addEventListener("click", () => {
@@ -10893,7 +10933,11 @@ WHERE {
     // through it). Guard every lookup so a missing element doesn't throw
     // and abort main() before loadFromWikibase() runs.
     const searchInput = document.getElementById("search-input");
-    function openSearch() { if (!searchInput) return; searchInput.classList.add("open"); searchInput.focus(); }
+    function openSearch() {
+      const lp = document.getElementById("lp-search-input");          // LAB: "/" focuses the
+      if (lp && lp.offsetParent) { lp.focus(); return; }              // left-panel search
+      if (!searchInput) return; searchInput.classList.add("open"); searchInput.focus();
+    }
     function closeSearch() { if (!searchInput) return; searchInput.classList.remove("open"); searchInput.value = ""; searchInput.dispatchEvent(new Event("input")); }
     const searchToggleBtn = document.getElementById("search-toggle");
     if (searchToggleBtn) {
