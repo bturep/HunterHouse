@@ -3867,7 +3867,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.78-labb.05";
+  const VERSION      = "v1.09-test.78-labb.06";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -8329,7 +8329,8 @@ WHERE {
       const chips = vals.map(v => {
         const n = match ? base.filter(it => match(it, v)).length : 0;
         const zero = n === 0 && !activeSet.has(v);   // active chips stay clickable (to deselect)
-        const chip = `<button class="fp-chip${activeSet.has(v) ? " on" : ""}${zero ? " zero" : ""}${pc}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}<span class="fp-ct">${n}</span></button>`;
+        const lbl = (attr === "collection" && COLLECTION_INFO[v]?.title) ? `${v} — ${COLLECTION_INFO[v].title}` : v;   // LAB: legible collections
+        const chip = `<button class="fp-chip${activeSet.has(v) ? " on" : ""}${zero ? " zero" : ""}${pc}" data-${attr}="${escapeHTML(v)}">${escapeHTML(lbl)}<span class="fp-ct">${n}</span></button>`;
         // Collection chips get an ⓘ for the per-collection blurb popover.
         const info = (attr === "collection" && COLLECTION_INFO[v])
           ? `<button class="fp-info" data-coll-info="${escapeHTML(v)}" title="About ${escapeHTML(v)}" aria-label="About ${escapeHTML(v)}">ⓘ</button>`

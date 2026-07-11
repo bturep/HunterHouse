@@ -129,13 +129,15 @@ CSS_LAB_D = """\
   .rc-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.04em;white-space:nowrap;flex-shrink:0}
   .rc-open{margin-left:auto;flex-shrink:0;font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;background:none;border:1px solid var(--rule);border-radius:2px;color:var(--muted);padding:3px 9px;cursor:pointer}
   .rc-open:hover{color:var(--ink);border-color:var(--ink)}
-  #rec-card{position:absolute;inset:0;z-index:60;display:flex;align-items:center;justify-content:center}
+  /* v03: the record covers the ENTIRE preview pane as a near-opaque veil —
+     the image ghosts through behind the text; no floating card chrome. */
+  #rec-card{position:absolute;inset:0;z-index:60}
   #rec-card[hidden]{display:none}
-  .rcc-scrim{position:absolute;inset:0;background:rgba(20,17,14,0.32)}
-  .rcc-card{position:relative;width:min(440px,86%);max-height:82%;overflow-y:auto;
-    background:var(--bg);border:1px solid var(--rule);padding:22px 24px 18px;
-    box-shadow:0 18px 48px -20px rgba(0,0,0,0.5)}
-  .rcc-x{position:absolute;top:10px;right:12px;background:none;border:0;font-size:16px;color:var(--muted);cursor:pointer;line-height:1}
+  .rcc-scrim{position:absolute;inset:0;background:color-mix(in srgb, var(--bg) 93%, transparent)}
+  .rcc-card{position:relative;height:100%;width:100%;overflow-y:auto;
+    background:transparent;border:0;box-shadow:none;padding:46px 58px 40px}
+  .rcc-body{max-width:560px}
+  .rcc-x{position:fixed;position:absolute;top:14px;right:20px;background:none;border:0;font-size:18px;color:var(--muted);cursor:pointer;line-height:1}
   .rcc-x:hover{color:var(--ink)}
 """
 
@@ -166,6 +168,19 @@ def build(lab, css_extra, extra_patches, version):
     text = patch(text, "cur==='map'?'Site Plan':(cur==='tl'?'Timeline':'Archive')",
                        f"cur==='map'?'Site Plan':(cur==='tl'?'Timeline':'Archive · Lab {L}')", "mk-page-js")
     text = patch(text, OLD_FILTER_PANEL_CSS, NEW_FILTER_PANEL_CSS, "tray-css")
+
+    # Collection chips carry their full names ("HHC — Hunter House Collection")
+    # — the bare abbreviations don't tell a visitor what a collection contains
+    # (Brandon, 2026-07-10 review of lab-a). All labs share the tray.
+    text = patch(text,
+        '        const n = match ? base.filter(it => match(it, v)).length : 0;\n'
+        '        const zero = n === 0 && !activeSet.has(v);   // active chips stay clickable (to deselect)\n'
+        '        const chip = `<button class="fp-chip${activeSet.has(v) ? " on" : ""}${zero ? " zero" : ""}${pc}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}<span class="fp-ct">${n}</span></button>`;',
+        '        const n = match ? base.filter(it => match(it, v)).length : 0;\n'
+        '        const zero = n === 0 && !activeSet.has(v);   // active chips stay clickable (to deselect)\n'
+        '        const lbl = (attr === "collection" && COLLECTION_INFO[v]?.title) ? `${v} — ${COLLECTION_INFO[v].title}` : v;   // LAB: legible collections\n'
+        '        const chip = `<button class="fp-chip${activeSet.has(v) ? " on" : ""}${zero ? " zero" : ""}${pc}" data-${attr}="${escapeHTML(v)}">${escapeHTML(lbl)}<span class="fp-ct">${n}</span></button>`;',
+        "collection-names")
     if css_extra:
         row_anchor = "  .row{\n    display:grid;grid-template-columns:104px 1fr 50px;gap:12px;"
         text = patch(text, row_anchor, css_extra + row_anchor, "lab-css")
@@ -179,7 +194,7 @@ def build(lab, css_extra, extra_patches, version):
 
 def main():
     # LAB A — the tray only (everything else promoted 2026-07-10)
-    build("a", "", [], version="03")
+    build("a", "", [], version="04")
 
     # LAB B — + grouped list, v05: COLLECTION bins (the fonds level — Brandon:
     # "the collections themselves are good buckets… they show the shape").
@@ -194,7 +209,7 @@ def main():
          '    const grouped = !state.curation && (state.sortCol === "phase" || state.sortCol === "id");   // LAB B v05',
          "grouped-trigger"),
         (OLD_PHASE_DIVIDER, NEW_PHASE_DIVIDER_B, "collapsible-headers"),
-    ], version="05")
+    ], version="06")
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
@@ -255,7 +270,7 @@ def main():
          '    }\n'
          '    const body = $("#meta-body");',
          "caption-populate"),
-    ], version="02")
+    ], version="03")
 
     # LAB C — + always-on facet sidebar (rejected; kept for the F&O comparison)
     build("c", CSS_LAB_C, [
@@ -271,7 +286,7 @@ def main():
          '    const panel = (side && window.matchMedia("(min-width:768px)").matches) ? side : $("#filter-panel");\n'
          '    if (!panel) return;',
          "sidebar-target"),
-    ], version="03")
+    ], version="04")
 
 if __name__ == "__main__":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
