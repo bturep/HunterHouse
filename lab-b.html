@@ -862,13 +862,10 @@
 
   /* ── filter panel ── */
   .filter-panel{
-    position:absolute;top:41px;left:0;right:0;z-index:50;
-    max-height:min(62%,520px);                     /* LAB: tray, not curtain — */
-    background:var(--bg);                          /* the list stays visible + */
-    padding:16px 20px 14px;                        /* live-updates below.      */
+    position:absolute;top:41px;left:0;right:0;bottom:0;z-index:50;
+    background:var(--bg);
+    padding:16px 20px 14px;
     overflow-y:auto;
-    border-bottom:1px solid var(--rule);
-    box-shadow:0 14px 24px -18px rgba(0,0,0,0.45);
   }
   .fp-group{margin-bottom:14px}
   .fp-group:last-child{margin-bottom:0}
@@ -958,6 +955,19 @@
   .ph-head.closed{border-bottom-style:dashed}
   /* v09: header gloss only — authored, equal word count, no peek rows */
   .ph-gloss{display:block;font-family:var(--mono);font-size:9px;letter-spacing:0.05em;text-transform:none;color:var(--muted);margin:3px 0 0 14px;white-space:normal;line-height:1.5}
+  /* v10: panel handle = PULL TAB (Brandon 2026-07-11). The base handle is an
+     innie straddling the panel edge, which merges visually with the list
+     scroll bar. Here it sits fully OUTSIDE the edge on the image stage, panel-
+     coloured with a rule border (none on the attached side, so it reads as one
+     piece with the panel) and an always-visible grip line in place of the
+     hover chevron. */
+  .panel-handle{width:12px;height:44px;background:var(--bg);border:1px solid var(--rule)}
+  .panel-left .panel-handle{right:-13px;border-left:0;border-radius:0 4px 4px 0}
+  .panel-right .panel-handle{left:-13px;border-right:0;border-radius:4px 0 0 4px}
+  .panel-handle::before{content:"";width:1px;height:14px;background:var(--muted);transition:background 0.15s}
+  .panel-handle:hover{background:var(--bg)}
+  .panel-handle:hover::before{background:var(--ink)}
+  .panel-handle .handle-chevron{display:none}
   .row{
     display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
     padding:11px 20px;align-items:start;cursor:pointer;
@@ -3869,7 +3879,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.09";
+  const VERSION      = "v1.09-test.79-labb.10";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -8365,7 +8375,7 @@ WHERE {
     // don't toggle a Set; clicking opens the curator threshold overlay.
     // Hidden while inside a curation (the card's exit is the way out).
     const curatedRow = (!state.curation && (state.curations || []).length)
-      ? `<div class="fp-group fp-grp-cur"><div class="fp-lbl">Curators</div><div class="fp-chips">${
+      ? `<div class="fp-group fp-grp-cur"><div class="fp-lbl">Curated selections by</div><div class="fp-chips">${
           state.curations.map(c =>
             `<button class="fp-chip ${pillCls(PC.red)}" data-cur-slug="${escapeHTML(c.slug)}">${escapeHTML(c.curator || c.title || c.slug)}</button>`
           ).join("")
@@ -8374,7 +8384,6 @@ WHERE {
 
     panel.innerHTML =
       curatedRow +
-      group("Collection",   uniqueCollections, state.filterCollection,  "coll",        "collection",  PC.denim) +
       group("Areas",        uniqueAreas,       state.filterArea,        "area",        "area",        PC.sage)  +
       group("Item type",    uniqueTypes,       state.filterType,        "itype",       "itype",       PC.stone) +
       group("Drawing type", uniqueDrawTypes,   state.filterDrawType,    "drawtype",    "drawtype",    PC.slate) +

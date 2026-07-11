@@ -69,6 +69,19 @@ CSS_LAB_B = """\
   .ph-head.closed{border-bottom-style:dashed}
   /* v09: header gloss only — authored, equal word count, no peek rows */
   .ph-gloss{display:block;font-family:var(--mono);font-size:9px;letter-spacing:0.05em;text-transform:none;color:var(--muted);margin:3px 0 0 14px;white-space:normal;line-height:1.5}
+  /* v10: panel handle = PULL TAB (Brandon 2026-07-11). The base handle is an
+     innie straddling the panel edge, which merges visually with the list
+     scroll bar. Here it sits fully OUTSIDE the edge on the image stage, panel-
+     coloured with a rule border (none on the attached side, so it reads as one
+     piece with the panel) and an always-visible grip line in place of the
+     hover chevron. */
+  .panel-handle{width:12px;height:44px;background:var(--bg);border:1px solid var(--rule)}
+  .panel-left .panel-handle{right:-13px;border-left:0;border-radius:0 4px 4px 0}
+  .panel-right .panel-handle{left:-13px;border-right:0;border-radius:4px 0 0 4px}
+  .panel-handle::before{content:"";width:1px;height:14px;background:var(--muted);transition:background 0.15s}
+  .panel-handle:hover{background:var(--bg)}
+  .panel-handle:hover::before{background:var(--ink)}
+  .panel-handle .handle-chevron{display:none}
 """
 
 OLD_PHASE_DIVIDER = """\
@@ -170,7 +183,7 @@ CSS_LAB_C = """\
 
 # ── per-lab build ────────────────────────────────────────────────────────
 
-def build(lab, css_extra, extra_patches, version):
+def build(lab, css_extra, extra_patches, version, tray=True):
     text = SRC.read_text(encoding="utf-8")
     L = lab.upper()
 
@@ -182,7 +195,8 @@ def build(lab, css_extra, extra_patches, version):
                        f'<span class="mk-page" id="mk-page">Archive · Lab {L}</span>', "mk-page")
     text = patch(text, "cur==='map'?'Site Plan':(cur==='tl'?'Timeline':'Archive')",
                        f"cur==='map'?'Site Plan':(cur==='tl'?'Timeline':'Archive · Lab {L}')", "mk-page-js")
-    text = patch(text, OLD_FILTER_PANEL_CSS, NEW_FILTER_PANEL_CSS, "tray-css")
+    if tray:   # lab-b opted back to the full-height pane (Brandon 2026-07-11)
+        text = patch(text, OLD_FILTER_PANEL_CSS, NEW_FILTER_PANEL_CSS, "tray-css")
 
     # Authored collection order (Brandon 2026-07-10): CAA, HHC, IHC, EGC, FRH —
     # replaces alphabetical-with-EGC-last. Unknown future collections fall to
@@ -255,7 +269,16 @@ def main():
          '      }),',
          "id-collection-order"),
         (OLD_PHASE_DIVIDER, NEW_PHASE_DIVIDER_B, "collapsible-headers"),
-    ], version="09")
+        # v10: the grouped list IS the collection chooser — the facet row is
+        # redundant, remove it from the browse panel (Brandon 2026-07-11).
+        ('      group("Collection",   uniqueCollections, state.filterCollection,  "coll",        "collection",  PC.denim) +\n',
+         '',
+         "drop-collection-facet"),
+        # v10: curated row label (Brandon 2026-07-11).
+        ('<div class="fp-lbl">Curators</div>',
+         '<div class="fp-lbl">Curated selections by</div>',
+         "curators-label"),
+    ], version="10", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
