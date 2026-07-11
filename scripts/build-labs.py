@@ -139,6 +139,15 @@ CSS_LAB_B = """\
      its stage tone is --soft. */
   .pane-list .row.sel{background:var(--soft);outline:1px solid #7a4020;outline-offset:-1px}
   html.dark body .row.sel{background:#151311;outline-color:#b08468}
+  /* v31: splash FRAME — the landing state is framed by chrome left, right
+     and top (28px each: collapsed slivers + shrunk header), but the bottom
+     edge was open. A 28px strip completes the frame. No content. Fades
+     with the panels when the archive opens. */
+  #splash-foot{position:fixed;left:0;right:0;bottom:0;height:28px;z-index:30;
+    background:var(--bg);border-top:1px solid var(--rule);
+    opacity:0;pointer-events:none;transition:opacity 240ms ease}
+  body.hh-splash #splash-foot{opacity:1}
+  html.dark body #splash-foot{background:#2b2823}
   /* v17: hanging indent — a long collection name (CAA, FRH) wraps back to
      the panel edge under the chevron. Chevron gets its own column; the name
      wraps within its column; the gloss sits aligned beneath the name. */
@@ -458,6 +467,10 @@ def main():
          '      <div id="bin-rail-top" aria-hidden="true"></div>\n'
          '      <div id="bin-rail-bot" aria-hidden="true"></div>',
          "bin-rail-markup"),
+        # v31: splash bottom strip — fixed, so DOM placement is free.
+        ('</body>',
+         '<div id="splash-foot" aria-hidden="true"></div>\n</body>',
+         "splash-foot-markup"),
         # v23: rails logic rides on updatePip, which already fires on every
         # list render, scroll and resize; pip track top derives from the
         # scroller's real offset (was hardcoded 41px — in this lab the rows
@@ -571,7 +584,7 @@ def main():
          '          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
          '        )).join("") +',
          "af-pill-brackets"),
-    ], version="30", tray=False)
+    ], version="31", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.

@@ -1025,6 +1025,15 @@
      its stage tone is --soft. */
   .pane-list .row.sel{background:var(--soft);outline:1px solid #7a4020;outline-offset:-1px}
   html.dark body .row.sel{background:#151311;outline-color:#b08468}
+  /* v31: splash FRAME — the landing state is framed by chrome left, right
+     and top (28px each: collapsed slivers + shrunk header), but the bottom
+     edge was open. A 28px strip completes the frame. No content. Fades
+     with the panels when the archive opens. */
+  #splash-foot{position:fixed;left:0;right:0;bottom:0;height:28px;z-index:30;
+    background:var(--bg);border-top:1px solid var(--rule);
+    opacity:0;pointer-events:none;transition:opacity 240ms ease}
+  body.hh-splash #splash-foot{opacity:1}
+  html.dark body #splash-foot{background:#2b2823}
   /* v17: hanging indent — a long collection name (CAA, FRH) wraps back to
      the panel edge under the chevron. Chevron gets its own column; the name
      wraps within its column; the gloss sits aligned beneath the name. */
@@ -4007,7 +4016,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.30";
+  const VERSION      = "v1.09-test.79-labb.31";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -11512,5 +11521,6 @@ WHERE {
   })();
 </script>
 
+<div id="splash-foot" aria-hidden="true"></div>
 </body>
 </html>
