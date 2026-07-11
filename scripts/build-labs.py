@@ -171,7 +171,11 @@ CSS_LAB_B = """\
      full-width. — */
   .scroll-pip{z-index:7}
   #rows{margin:0 7px}
-  .pane-meta .meta-body{margin:0 7px}
+  /* v43: the inset record body also takes the collections-tier tone —
+     a recessed content block within the chrome panel, same step as the
+     collection bars on the left. */
+  .pane-meta .meta-body{margin:0 7px;background:var(--soft)}
+  html.dark body .pane-meta .meta-body{background:#252220}
   /* — top-right cluster separators (v33) — */
   .tr-vsep{width:1px;align-self:stretch;background:var(--rule);flex:none}
   .site-topright .tr-div{height:auto;align-self:stretch}
@@ -619,7 +623,7 @@ def main():
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
-    ], version="42", tray=False)
+    ], version="43", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.

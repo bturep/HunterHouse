@@ -1057,7 +1057,11 @@
      full-width. — */
   .scroll-pip{z-index:7}
   #rows{margin:0 7px}
-  .pane-meta .meta-body{margin:0 7px}
+  /* v43: the inset record body also takes the collections-tier tone —
+     a recessed content block within the chrome panel, same step as the
+     collection bars on the left. */
+  .pane-meta .meta-body{margin:0 7px;background:var(--soft)}
+  html.dark body .pane-meta .meta-body{background:#252220}
   /* — top-right cluster separators (v33) — */
   .tr-vsep{width:1px;align-self:stretch;background:var(--rule);flex:none}
   .site-topright .tr-div{height:auto;align-self:stretch}
@@ -3987,7 +3991,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.42";
+  const VERSION      = "v1.09-test.79-labb.43";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
