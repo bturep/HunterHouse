@@ -20,7 +20,7 @@
 // Failure → exits non-zero. GitHub Actions then emails the repo owner on the
 // failed run, which is the audit's "alert without gating the push" model.
 
-import { readFileSync, writeFileSync, mkdtempSync, rmSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdtempSync, rmSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
@@ -29,6 +29,14 @@ const HTMLS = [
   { file: "browse.html", versionRe: /^v\d+\.\d{2}\.\d{2}$/,        kind: "live"    },
   { file: "next.html",   versionRe: /^v\d+\.\d{2}-test\.\d{2,}$/,  kind: "staging" },
 ];
+// UI-lab variants (scripts/build-labs.py) — disposable test pages. Syntax-check
+// them like the staging file while they exist; the existsSync guard means this
+// block self-disables when the labs are deleted after a direction is chosen.
+for (const lab of ["lab-a.html", "lab-b.html", "lab-c.html"]) {
+  if (existsSync(lab)) {
+    HTMLS.push({ file: lab, versionRe: /^v\d+\.\d{2}-test\.\d{2,}-lab[a-z]\.\d{2}$/, kind: "lab" });
+  }
+}
 const MANIFESTS = ["manifest.json", "manifest.next.json"];
 
 // Inline <script> only — skip src=… loads. Greedy across newlines.
@@ -111,7 +119,8 @@ if (!prevSha) {
   console.log("\n(VERSION-bump check skipped — no previous SHA available)");
 } else {
   console.log(`\nVERSION-bump check (vs. ${prevSha.slice(0, 7)}):`);
-  for (const { file } of HTMLS) {
+  for (const { file, kind } of HTMLS) {
+    if (kind === "lab") continue;   // labs are disposable + regenerated; bump discipline is for live/staging
     // Compare PREV against the working tree (no ..HEAD) so the same check
     // catches uncommitted changes when run locally before a push. In CI,
     // working tree == HEAD, so the result is identical.
