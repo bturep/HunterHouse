@@ -62,175 +62,46 @@ NEW_FILTER_PANEL_CSS = """\
 
 # ── lab-b: grouped list ──────────────────────────────────────────────────
 CSS_LAB_B = """\
-  /* ══ LAB B: collapsible, sticky group headers (contracted by default) ══ */
-  .ph-head{cursor:pointer}   /* v23: rails replace sticky headers */
-  .ph-head:hover span:first-child{color:var(--ink)}
-  .ph-chev{display:inline-block;width:14px;color:var(--muted)}
+  /* ══ LAB B v40 — consolidated (design spec 7a + the v20-v39 system) ══ */
+  /* — bin header (v40e): block layout replaces the base grid; chevron
+     hangs in the gutter so name/gloss/ID/title share one left edge;
+     count reads label-first; Year sort lives on the gloss line. — */
+  .phase-divider.ph-head{display:block;position:relative;cursor:pointer;
+    padding:10px 20px 12px;letter-spacing:normal;text-transform:none}
+  .ph-chev{position:absolute;left:6px;top:11px;font-size:11px;color:var(--muted)}
+  .ph-head:hover .ph-chev{color:var(--ink)}
   .ph-head.closed{border-bottom-style:dashed}
-  /* v09: header gloss only — authored, equal word count, no peek rows */
-  .ph-gloss{display:block;font-family:var(--mono);font-size:9px;letter-spacing:0.05em;text-transform:none;color:var(--muted);margin:3px 0 0 0;white-space:normal;line-height:1.5}
-  /* v21: THREE tonal tiers (Brandon) — with several collections open the
-     header block read too much like the item block. Ladder: chrome
-     (Catalogue / filter / search) = plain ground; collection headers =
-     var(--soft), a clear step up, open or closed; rows + their sort strip
-     = the faint ink tint between. Hover/selected sit on top (later in
-     the cascade). */
-  .phase-divider.ph-head{background:var(--soft)}
-  .bin-sort,.row.in-bin{background:color-mix(in srgb, var(--bg) 96.5%, var(--ink))}
-  /* v22: collection SPINE — a 2px left rule in the collection facet's
-     sienna runs down every header and through each open block (header,
-     sort strip, rows: one continuous line), so mid-scroll you are never
-     in unmarked territory. Closed headers carry a short tick of the same
-     line. 2px, not an indent — horizontal space stays whole. Composes
-     with the v21 tiers; either dial can be turned off alone. */
-  /* v24: the spine DESCRIBES something now — it marks the extent of an
-     OPEN collection only (header, strip, rows, and its rail shadow).
-     Closed bars carry a transparent stub so text never shifts. */
-  .phase-divider.ph-head,.bin-sort,.row.in-bin{border-left:2px solid transparent}
-  .ph-head:not(.closed),.bin-sort,.row.in-bin{border-left-color:#7a4020}
-  html.dark .ph-head:not(.closed),html.dark .bin-sort,html.dark .row.in-bin{border-left-color:#b08468}
-  /* v23/v32: bin RAIL — collections scrolled past stack compact at the
-     top of the rows viewport in abbreviated, non-description form (chevron,
-     code, count). Click a rail row to jump to that collection. An empty
-     rail has zero height, so it never blocks the list. (v32 removed the
-     bottom rail in favour of the chrome list-foot.) */
-  #bin-rail-top{position:absolute;left:0;right:0;z-index:8;overflow:hidden}
-  /* v32: the bottom rail is gone (a bin "stuck" at the bottom read badly).
-     The pane instead ends in a quiet chrome foot — same 41px as the bar
-     under the preview pane. Flow child, so it never covers rows. */
-  #list-foot{height:41px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
-    display:flex;align-items:center;padding:0 20px;
-    font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em}
-  html.dark body #list-foot{background:#2b2823}
-  /* v33: top-right cluster grouped — full-height separators; the lens
-     divider (.tr-div) stretches to the same language. */
-  .tr-vsep{width:1px;align-self:stretch;background:var(--rule);flex:none}
-  .site-topright .tr-div{height:auto;align-self:stretch}
-  .br-row{display:flex;justify-content:space-between;align-items:center;height:25px;box-sizing:border-box;
-    padding:0 20px 0 12px;background:var(--soft);border-bottom:1px solid var(--rule);
-    border-left:2px solid transparent;cursor:pointer;
-    font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--copper-deep)}
-  .br-row.open{border-left-color:#7a4020}
-  html.dark .br-row.open{border-left-color:#b08468}
-  .br-row .r{color:var(--muted);letter-spacing:0.06em;font-size:9px}
-  .br-row:hover{color:var(--ink)}
-  .br-row .ph-chev{display:inline-block;width:14px;color:var(--muted)}
-  /* v23/v35: the pip gets its OWN SLOT — a 7px gutter right of the list
-     content (rows margin + rail inset), so the indicator never rides over
-     the selected item's outline or the dashed row separators. Chrome rows
-     and the foot stay full-width: the gutter belongs to the list only. */
-  .scroll-pip{z-index:7}
-  /* v37/v38: mirrored 7px gutters frame the list column (kept for the
-     balance); the twin LEFT pip was tried in v37 and pulled in v38 —
-     double scroll register read as redundant. */
-  #rows{margin:0 7px}
-  #bin-rail-top{left:7px;right:7px}
-  /* ══ v25: dark-mode DEPTH LADDER (Brandon) — light = instrument, dark =
-     viewing depth. Darkest to lightest: image stage (artifact floats in
-     the deepest room) < item rows < collection bars < UI chrome (the
-     surface you grip). Light mode already follows this logic (paper
-     chrome, soft stage) and is untouched. All four steps stay inside the
-     warm near-black family, one perceptible step apart (v28's wider
-     steps were reverted in v29 — too much). `html.dark body`
-     outranks the base html.dark overrides that lightened the stage. ══ */
-  html.dark body .pane-image,html.dark body .image-stage{background:#151311}
-  html.dark body .bin-sort,html.dark body .row.in-bin{background:#1e1b19}
-  html.dark body .phase-divider.ph-head,html.dark body .br-row{background:#252220}
-  html.dark body .site-top,html.dark body .list-head,html.dark body .lp-search,
-  html.dark body .lp-filter,html.dark body .meta-head,html.dark body .image-foot,
-  html.dark body .panel-handle{background:#2b2823}
-  html.dark body .panel-handle::before{background:#8a847c}
-  /* v26: the record pane is STATIC — an instrument surface, not content —
-     so the whole right panel reads as one chrome-toned object with its
-     ITEM RECORD head, not a lit cap on a dark well. */
-  html.dark body .panel-right{background:#2b2823}
-  /* v27: two stragglers — the permalink/data footer carries an explicit
-     --bg of its own, and the left pane's empty ground below the collection
-     bars sat at base dark. Both are instrument surface: chrome. Content
-     (bars, rows) keeps its darker ladder steps on top. */
-  html.dark body .data-footer{background:#2b2823}
-  html.dark body .panel-left{background:#2b2823}
-  /* v30/v39: SELECTION = "this item is in the viewer" — the selected row
-     sinks to stage depth. v39: the box OPENS to the right (reading
-     direction); the left is already carried by the spine; top + bottom are
-     inset sienna lines (no layout shift), and the dashed separators are
-     suppressed where they'd collide with them. */
-  .pane-list .row.sel{background:var(--soft);
-    box-shadow:inset 0 1px 0 #7a4020, inset 0 -1px 0 #7a4020;
-    border-bottom-color:transparent}
-  .rows .row:has(+ .row.sel){border-bottom-color:transparent}
-  html.dark body .row.sel{background:#151311;
-    box-shadow:inset 0 1px 0 #b08468, inset 0 -1px 0 #b08468}
-  /* v31: splash FRAME — the landing state is framed by chrome left, right
-     and top (28px each: collapsed slivers + shrunk header), but the bottom
-     edge was open. A 28px strip completes the frame. No content. Fades
-     with the panels when the archive opens. */
-  #splash-foot{position:fixed;left:0;right:0;bottom:0;height:28px;z-index:30;
-    background:var(--bg);border-top:1px solid var(--rule);
-    opacity:0;pointer-events:none;transition:opacity 240ms ease}
-  body.hh-splash #splash-foot{opacity:1}
-  html.dark body #splash-foot{background:#2b2823}
-  /* v17: hanging indent — a long collection name (CAA, FRH) wraps back to
-     the panel edge under the chevron. Chevron gets its own column; the name
-     wraps within its column; the gloss sits aligned beneath the name. */
-  .ph-head > span:first-child{display:grid;grid-template-columns:14px 1fr;align-items:baseline}
-  .ph-head .ph-gloss{grid-column:2}
-  /* v10: panel handle = PULL TAB (Brandon 2026-07-11). The base handle is an
-     innie straddling the panel edge, which merges visually with the list
-     scroll bar. Here it sits fully OUTSIDE the edge on the image stage, panel-
-     coloured with a rule border (none on the attached side, so it reads as one
-     piece with the panel) and an always-visible grip line in place of the
-     hover chevron. */
-  .panel-handle{width:12px;height:44px;background:var(--bg);border:1px solid var(--rule)}
-  .panel-left .panel-handle{right:-13px;border-left:0;border-radius:0 4px 4px 0}
-  .panel-right .panel-handle{left:-13px;border-right:0;border-radius:4px 0 0 4px}
-  .panel-handle::before{content:"";width:1px;height:14px;background:var(--muted);transition:background 0.15s}
-  .panel-handle:hover{background:var(--bg)}
-  .panel-handle:hover::before{background:var(--ink)}
-  .panel-handle .handle-chevron{display:none}
-  /* v18: the panels clip at their edge (overflow:hidden on .pane-list /
-     .pane-meta), which swallowed the outie tab entirely — the panes lost
-     their open/close affordance. Content containment lives one level down
-     on .panel-content, so the panel frame itself can be visible. */
-  .panel-left.pane-list,.panel-right.pane-meta{overflow:visible}
-  /* v12: CATALOGUE alone on the header line; FILTER lives in the search
-     row below, separated from the input by a rule. v13: the .l styles are
-     scoped to .list-head, so out here the button needs the full flat
-     treatment itself (native button chrome was showing as a box). */
-  .lh-title{cursor:default}
-  .lh-filter{
-    font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.18em;
-    text-transform:uppercase;color:var(--muted);cursor:pointer;
-    display:flex;align-items:center;gap:6px;
-    background:none;border:0;padding:0 12px 0 0;flex-shrink:0;
-    border-right:1px solid var(--rule);border-radius:0;
-  }
+  .ph-line1,.ph-line2{display:flex;justify-content:space-between;align-items:baseline;gap:14px}
+  .ph-line2{margin-top:3px}
+  .ph-name{font-family:var(--mono);font-size:12.5px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink);line-height:1.35}
+  .ph-count{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+  .ph-count b{color:var(--ink);font-weight:500}
+  .ph-gloss{font-family:var(--mono);font-size:9px;letter-spacing:0.04em;text-transform:none;color:var(--hint);line-height:1.5;white-space:normal;min-width:0}
+  .ph-sort{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;white-space:nowrap}
+  .ph-sort .sort-arrow{font-family:var(--mono);font-size:9px;display:inline-block;min-width:8px}
+  /* — chrome toolbar (v40c): Catalogue · search · Filter share ONE row
+     behind full-height separators. Catalogue demoted below the wordmark
+     (v40d): chrome ranks by dimness+tracking, content by ink. — */
+  .lp-toolbar{display:flex;align-items:center;gap:12px;padding:11px 20px;background:var(--bg);flex-shrink:0}
+  .lp-toolbar .lh-title{font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:0.10em;text-transform:uppercase;color:color-mix(in srgb, var(--ink) 72%, transparent);cursor:default}
+  .lp-toolbar #lp-search-input{flex:1;min-width:0;background:none;border:0;outline:none;font-family:var(--mono);font-size:11px;letter-spacing:0.02em;color:var(--ink)}
+  .lp-toolbar #lp-search-input::placeholder{color:var(--hint);text-transform:lowercase;letter-spacing:0.06em}
+  .tb-vsep{width:1px;align-self:stretch;background:var(--rule);flex:none}
+  .lh-filter{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.12em;
+    text-transform:uppercase;color:var(--muted);background:none;border:0;padding:0;border-radius:0;
+    display:flex;align-items:center;gap:8px;cursor:pointer;flex-shrink:0}
   .lh-filter .filter-chevron{font-size:13px;color:var(--muted);letter-spacing:0;font-weight:400;line-height:1}
   .lh-filter:hover,.lh-filter.fp-open{color:var(--ink)}
   .lh-filter:hover .filter-chevron,.lh-filter.fp-open .filter-chevron{color:var(--ink)}
-  /* v24/v34: seam stays tight — search row borderless; the FILTER row
-     below it carries the active tags and is the last chrome row before
-     the collection bars. Overlay top follows the taller stack. */
-  .lp-search{border-bottom:0;padding-bottom:2px}
-  .lp-filter{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;padding:2px 20px 7px;background:var(--bg)}
-  .lp-filter .lh-filter{border-right:0;padding-right:0}
-  #lf-pills{display:flex;flex-wrap:wrap;gap:3px 9px;align-items:center;min-width:0}
-  @media (min-width:768px){ .filter-panel{top:90px} }   /* measured: row bottom 89.5 */
-  /* v14/v19: the sort keys are column headers on the row grid (104px /
-     1fr / 50px); v19 renders one strip per OPEN bin, under its header,
-     dashed like the rows it governs. */
-  .pane-list .sort-mini{
-    display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
-    padding:6px 20px;border-bottom:1px dashed var(--rule);flex-shrink:0;
-  }
-  .pane-list .sort-mini .sort-hd{justify-content:flex-start}
-  /* v15: Phase sort retired for now — the phase labels aren't worked out
-     yet and sort illogically (alphabetic). Hidden, not removed, so the
-     wiring stays intact for reintegration later. */
-  .pane-list .sort-mini .sort-hd[data-sort-col="phase"]{display:none}
-  .pane-list .sort-mini .sort-hd[data-sort-col="year"]{width:auto;justify-content:flex-end;grid-column:3}
-  /* v11: applied-filter pills = the browse chips' bracket convention —
-     no box, per-category colour (pc-*), the removal \u00d7 inside the brackets. */
+  /* active-tag row — exists only while filters are active ([hidden] via
+     renderAfPills); clear-all folds inline after the last tag. */
+  .lp-filter{padding:0 20px 12px;background:var(--bg);border-bottom:1px solid var(--rule)}
+  #lf-pills{display:flex;flex-wrap:wrap;gap:3px 9px;align-items:baseline;min-width:0}
+  #lf-pills .af-clear{font-family:var(--mono);font-size:10px;letter-spacing:0.10em;text-transform:uppercase;
+    color:color-mix(in srgb, var(--muted) 40%, transparent);background:none;border:0;padding:0;margin-left:2px;cursor:pointer}
+  #lf-pills .af-clear:hover{color:var(--muted)}
+  @media (min-width:768px){ .filter-panel{top:81px} }   /* measured: toolbar bottom 80.8 */
+  /* applied tags — the browse chips' bracket convention, category colour */
   .af-pill{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:0.02em;
     text-transform:capitalize;line-height:1.6;background:transparent;border:0;
     padding:0;border-radius:0;color:var(--pf,var(--ink))}
@@ -239,6 +110,80 @@ CSS_LAB_B = """\
   .af-pill:hover{opacity:0.75}
   .af-pill .x{margin-left:5px;color:var(--muted)}
   .af-pill:hover .x{color:var(--red-deep)}
+  /* — row (v40a/b/f): stacked block, all-mono, no separators — rhythm
+     from padding; kicker holds ID (with the type mark) left, year right;
+     subtitles wrap, never truncate. — */
+  .pane-list .row{display:flex;flex-direction:column;align-items:stretch;gap:5px;padding:14px 20px;border-bottom:0}
+  .r-kick{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em}
+  .r-kick .archid{font-size:10.5px;color:color-mix(in srgb, var(--ink) 72%, transparent)}
+  .pane-list .row .year{font-family:var(--mono);font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .r-title{font-family:var(--mono);font-size:13.5px;font-weight:500;letter-spacing:0.01em;color:var(--ink);line-height:1.4}
+  .r-note{font-family:var(--mono);font-size:10.5px;color:var(--hint);line-height:1.5;white-space:normal}
+  /* — all-mono BOTH panes (Brandon): the record pane joins the list — */
+  .panel-right .panel-content{font-family:var(--mono)}
+  .panel-right.pane-meta .meta-title{font-family:var(--mono);font-size:16px;letter-spacing:0.01em;line-height:1.45}
+  .graph-path .node .lbl{font-family:var(--mono);letter-spacing:0.01em}
+  /* — tonal tiers (v21) + depth ladder (v25-v29): chrome > collections >
+     rows > stage, warm near-black family (wider v28 steps reverted). — */
+  .phase-divider.ph-head{background:var(--soft)}
+  .row.in-bin{background:color-mix(in srgb, var(--bg) 96.5%, var(--ink))}
+  html.dark body .pane-image,html.dark body .image-stage{background:#151311}
+  html.dark body .row.in-bin{background:#1e1b19}
+  html.dark body .phase-divider.ph-head,html.dark body .br-row{background:#252220}
+  html.dark body .site-top,html.dark body .lp-toolbar,html.dark body .lp-filter,
+  html.dark body .meta-head,html.dark body .image-foot,html.dark body .panel-handle{background:#2b2823}
+  html.dark body .panel-handle::before{background:#8a847c}
+  html.dark body .panel-right{background:#2b2823}
+  html.dark body .data-footer{background:#2b2823}
+  html.dark body .panel-left{background:#2b2823}
+  /* — spine (v22/v24): sienna marks the extent of an OPEN collection —
+     header, rows, rail shadow; closed bars carry a transparent stub. — */
+  .phase-divider.ph-head,.row.in-bin{border-left:2px solid transparent}
+  .ph-head:not(.closed),.row.in-bin{border-left-color:#7a4020}
+  html.dark .ph-head:not(.closed),html.dark .row.in-bin{border-left-color:#b08468}
+  /* — selection (v30/v39): the row in the viewer sinks to stage depth;
+     the box opens right, spine carries the left, sienna lines top+bottom. — */
+  .pane-list .row.sel{background:var(--soft);
+    box-shadow:inset 0 1px 0 #7a4020, inset 0 -1px 0 #7a4020}
+  html.dark body .row.sel{background:#151311;
+    box-shadow:inset 0 1px 0 #b08468, inset 0 -1px 0 #b08468}
+  /* — bin rail (v23/v32): passed collections stack compact at the top;
+     the pane ends in a 41px chrome foot carrying the item count (v33). — */
+  #bin-rail-top{position:absolute;left:7px;right:7px;z-index:8;overflow:hidden}
+  .br-row{display:flex;justify-content:space-between;align-items:center;height:25px;box-sizing:border-box;
+    padding:0 20px 0 12px;background:var(--soft);border-bottom:1px solid var(--rule);
+    border-left:2px solid transparent;cursor:pointer;
+    font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--copper-deep)}
+  .br-row.open{border-left-color:#7a4020}
+  html.dark .br-row.open{border-left-color:#b08468}
+  .br-row .r{color:var(--muted);letter-spacing:0.06em;font-size:9px}
+  .br-row:hover{color:var(--ink)}
+  .br-row .ph-chev{position:static;display:inline-block;width:14px;font-size:10px;color:var(--muted)}
+  #list-foot{height:41px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
+    display:flex;align-items:center;padding:0 20px;
+    font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em}
+  html.dark body #list-foot{background:#2b2823}
+  /* — pip slot + mirrored gutters (v35/v37/v38) — */
+  .scroll-pip{z-index:7}
+  #rows{margin:0 7px}
+  /* — top-right cluster separators (v33) — */
+  .tr-vsep{width:1px;align-self:stretch;background:var(--rule);flex:none}
+  .site-topright .tr-div{height:auto;align-self:stretch}
+  /* — splash frame (v31) — */
+  #splash-foot{position:fixed;left:0;right:0;bottom:0;height:28px;z-index:30;
+    background:var(--bg);border-top:1px solid var(--rule);
+    opacity:0;pointer-events:none;transition:opacity 240ms ease}
+  body.hh-splash #splash-foot{opacity:1}
+  html.dark body #splash-foot{background:#2b2823}
+  /* — pull tabs (v10/v18) — */
+  .panel-handle{width:12px;height:44px;background:var(--bg);border:1px solid var(--rule)}
+  .panel-left .panel-handle{right:-13px;border-left:0;border-radius:0 4px 4px 0}
+  .panel-right .panel-handle{left:-13px;border-right:0;border-radius:4px 0 0 4px}
+  .panel-handle::before{content:"";width:1px;height:14px;background:var(--muted);transition:background 0.15s}
+  .panel-handle:hover{background:var(--bg)}
+  .panel-handle:hover::before{background:var(--ink)}
+  .panel-handle .handle-chevron{display:none}
+  .panel-left.pane-list,.panel-right.pane-meta{overflow:visible}
 """
 
 OLD_PHASE_DIVIDER = """\
@@ -253,15 +198,15 @@ OLD_PHASE_DIVIDER = """\
       }
 """
 NEW_PHASE_DIVIDER_B = """\
-    // LAB B: the COLLECTIONS are the shape (Brandon, 2026-07-10 tuning) — the
-    // fonds-level buckets in authored order. v09 (Brandon, 2026-07-11):
-    // headers ONLY — no item peek. Each header carries an authored gloss:
-    // EXACTLY 12 words each (equal length is the design constraint; keep
-    // parity when editing), a tight description ending in a semicolon list
-    // of contents. Never derived, never truncated. A live search still
-    // auto-expands everything.
+    // LAB B: the COLLECTIONS are the shape. v40 (design 7a): chevron hangs
+    // in the gutter; name, gloss, ID and title share one left edge; count
+    // reads label-first; the Year control lives on the gloss line and
+    // cycles year-asc \u2192 year-desc \u2192 authored default (collection
+    // order, ID ascending). Bins: contracted at rest, auto-open under
+    // search/filter, manual close wins (v36). Glosses are AUTHORED —
+    // exactly 12 words each, ending in a contents list; never derived.
     const GLOSS = {
-      CAA: "Richard Hunter's career donations to the University of Calgary, 1955–2010. Drawings; photographs.",
+      CAA: "Richard Hunter's career donations to the University of Calgary, 1955\u20132010. Drawings; photographs.",
       HHC: "The residence's own record, passed with the house in 2024. Drawings; documents.",
       IHC: "Ivan Hunter's first photographic survey of the residence, captured February 2024. Photographs.",
       EGC: "Furniture drawings gifted to cabinetmaker Eric Gesinger, photographed in situ. Drawings; photographs.",
@@ -269,11 +214,12 @@ NEW_PHASE_DIVIDER_B = """\
       FUL: "John Fulker's photographs, held at the West Vancouver Museum; catalogue pending. Photographs.",
     };
     const gkeyOf = it => (state.sortCol !== "phase"
-      ? (archiveAbbrev(collectionOf(it)) || "—")
-      : (it.phase || "—"));
+      ? (archiveAbbrev(collectionOf(it)) || "\u2014")
+      : (it.phase || "\u2014"));
     const glabelOf = k => (state.sortCol !== "phase" && COLLECTION_INFO[k]?.title)
-      ? `${k} — ${COLLECTION_INFO[k].title}` : k;
+      ? `${k} \u2014 ${COLLECTION_INFO[k].title}` : k;
     const glossOf = k => (state.sortCol !== "phase" && GLOSS[k]) || "";
+    const emd = t => t.replace(/ - /g, " \u2014 ");   // v40h: display-only em dashes
     const searchOpen = !!state.search.trim();
     let groupOpen = true;
     state.filtered.forEach((it, _idx) => {
@@ -282,43 +228,36 @@ NEW_PHASE_DIVIDER_B = """\
         lastPhase = gkey;
         const count = state.filtered.filter(x => gkeyOf(x) === gkey).length;
         const d = document.createElement("div");
-        const open = phaseExpanded.has(gkey) || ((searchOpen || afActive) && !phaseCollapsed.has(gkey));   // v36: filtered/searched bins default OPEN, still closable
+        const open = phaseExpanded.has(gkey) || ((searchOpen || afActive) && !phaseCollapsed.has(gkey));
         d.className = "phase-divider ph-head" + (open ? "" : " closed");
         d.dataset.phase = gkey;
-        d.dataset.count = String(count).padStart(2,"0");   // v23: the rails read this
+        d.dataset.count = String(count).padStart(2,"0");   // the rail reads this
         const gloss = glossOf(gkey);
-        d.innerHTML = `<span><span class="ph-chev">${open ? "\\u2304" : "\\u203a"}</span>${escapeHTML(glabelOf(gkey))}${gloss ? `<span class="ph-gloss">${escapeHTML(gloss)}</span>` : ""}</span><span class="r">${String(count).padStart(2,"0")} items</span>`;
+        const yrOn = state.sortCol === "year";
+        d.innerHTML =
+          `<span class="ph-chev">${open ? "\u2304" : "\u203a"}</span>` +
+          `<span class="ph-line1"><span class="ph-name">${escapeHTML(glabelOf(gkey))}</span><span class="ph-count">Items <b>${String(count).padStart(2,"0")}</b></span></span>` +
+          `<span class="ph-line2"><span class="ph-gloss">${gloss ? escapeHTML(gloss) : ""}</span>${open ? `<button class="ph-sort" data-sort-col="year" title="Sort by year \u2014 third press restores archive order">Year <span class="sort-arrow">${yrOn ? (state.sortDir === "asc" ? "\u2191" : "\u2193") : ""}</span></button>` : ""}</span>`;
         d.addEventListener("click", () => {
           if (open) { phaseExpanded.delete(gkey); phaseCollapsed.add(gkey); }
           else { phaseCollapsed.delete(gkey); phaseExpanded.add(gkey); }
           renderList();
         });
+        d.querySelector(".ph-sort")?.addEventListener("click", e => {   // v40: 3-state cycle
+          e.stopPropagation();
+          if (state.sortCol !== "year") { state.sortCol = "year"; state.sortDir = "asc"; }
+          else if (state.sortDir === "asc") { state.sortDir = "desc"; }
+          else { state.sortCol = "id"; state.sortDir = "asc"; }
+          applyFilters(); renderList();
+          const url = new URL(location.href);
+          url.searchParams.set("sort", state.sortCol);
+          url.searchParams.set("dir",  state.sortDir);
+          history.replaceState({}, "", url);
+        });
         frag.appendChild(d);
         groupOpen = open;
-        if (open) {   // v19: sort keys live INSIDE the open bin, under its header
-          const ss = document.createElement("div");
-          ss.className = "sort-mini bin-sort";
-          [["id","ID"],["year","Year"]].forEach(([col, lbl]) => {
-            const b = document.createElement("button");
-            b.className = "sort-hd" + (state.sortCol === col ? " active" : "");
-            b.dataset.sortCol = col;
-            b.innerHTML = `${lbl}<span class="sort-arrow">${state.sortCol === col ? (state.sortDir === "asc" ? "\u2191" : "\u2193") : ""}</span>`;
-            b.addEventListener("click", e => {
-              e.stopPropagation();
-              if (state.sortCol === col) state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
-              else { state.sortCol = col; state.sortDir = "asc"; }
-              applyFilters(); renderList();
-              const url = new URL(location.href);
-              url.searchParams.set("sort", state.sortCol);
-              url.searchParams.set("dir", state.sortDir);
-              history.replaceState({}, "", url);
-            });
-            ss.appendChild(b);
-          });
-          frag.appendChild(ss);
-        }
       }
-      if (grouped && !groupOpen) return;   // v09: contracted = header only, no peek
+      if (grouped && !groupOpen) return;   // contracted = header only
 """
 
 # ── lab-d: record pops up, never pulls out ───────────────────────────────
@@ -468,27 +407,51 @@ def main():
         ('<div class="fp-lbl">Curators</div>',
          '<div class="fp-lbl">Curated selections by</div>',
          "curators-label"),
-        # v11/v12: "Browse items" was doing double duty as the pane title AND
-        # the filter toggle — vague. v12: CATALOGUE stands alone on the header
-        # line (v11's inline pair read as one phrase); FILTER moves into the
-        # search row below, so the two narrowing tools share a line. The
-        # #filter-toggle id travels with the button so all wiring holds.
-        ('        <button class="l" id="filter-toggle" title="Filter">Browse items<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">\u203a</span></button>',
-         '        <span class="l lh-title">Catalogue</span>',
-         "catalogue-title"),
-        # v34: search on its own line; the FILTER row sits below it and
-        # carries the active tags (#lf-pills) beside the control.
-        ('        <input id="lp-search-input" type="text" placeholder="search archive" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search the archive">\n'
+        # v40c: ONE chrome row — Catalogue · search · Filter behind full-
+        # height separators; the active-tag row below exists only while
+        # filters are active. #list-info survives for mobile. Replaces the
+        # whole list-head + lp-search stack; ids travel so wiring holds.
+        ('      <div class="list-head">\n'
+         '        <button class="l" id="filter-toggle" title="Filter">Browse items<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">›</span></button>\n'
+         '        <button id="list-info" type="button" title="About this archive" aria-label="About this archive">?</button>\n'
+         '        <div class="sort-mini">\n'
+         '          <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>\n'
+         '          <button class="sort-hd" data-sort-col="phase">Phase<span class="sort-arrow" id="sa-phase"></span></button>\n'
+         '          <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>\n'
+         '        </div>\n'
          '      </div>\n'
-         '      <div class="filter-panel" id="filter-panel" hidden></div>',
+         '      <div class="lp-search" id="lp-search">\n'
+         '        <span class="pfx">/</span>\n'
          '        <input id="lp-search-input" type="text" placeholder="search archive" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search the archive">\n'
          '      </div>\n'
-         '      <div class="lp-filter" id="lp-filter">\n'
-         '        <button class="l lh-filter" id="filter-toggle" title="Filter">Filter<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">\u203a</span></button>\n'
-         '        <span id="lf-pills"></span>\n'
-         '      </div>\n'
          '      <div class="filter-panel" id="filter-panel" hidden></div>',
-         "filter-row-below-search"),
+         '      <div class="lp-toolbar">\n'
+         '        <span class="l lh-title">Catalogue</span>\n'
+         '        <span class="tb-vsep" aria-hidden="true"></span>\n'
+         '        <input id="lp-search-input" type="text" placeholder="search archive" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search the archive">\n'
+         '        <span class="tb-vsep" aria-hidden="true"></span>\n'
+         '        <button class="l lh-filter" id="filter-toggle" title="Filter">Filter<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">›</span></button>\n'
+         '        <button id="list-info" type="button" title="About this archive" aria-label="About this archive">?</button>\n'
+         '      </div>\n'
+         '      <div class="lp-filter" id="lp-filter" hidden><span id="lf-pills"></span></div>\n'
+         '      <div class="filter-panel" id="filter-panel" hidden></div>',
+         "toolbar"),
+        # v40b: the row restacks — kicker (ID + type mark left, year right),
+        # title, note. Researcher furniture (flags, drag, curation seq) is
+        # re-housed untouched; styling it is deferred (Brandon).
+        ('        ${reorderHTML}\n        <span class="col-id">',
+         '        ${reorderHTML}\n        <span class="r-kick">\n        <span class="col-id">',
+         "row-kick-open"),
+        ('        <div class="title-wrap">\n'
+         '          <div class="title">${escapeHTML(it.title)}</div>\n'
+         '          <div class="ph">${phSlotHTML}</div>\n'
+         '        </div>\n'
+         '        <span class="year">${escapeHTML(yearOf(it.date))}</span>',
+         '        <span class="year">${escapeHTML(yearOf(it.date))}</span>\n'
+         '        </span>\n'
+         '        <div class="r-title">${emd(escapeHTML(it.title))}</div>\n'
+         '        ${phSlotHTML ? `<div class="r-note">${emd(phSlotHTML)}</div>` : ""}',
+         "row-restack"),
         # v23: rail containers — siblings of #rows inside .panel-content.
         ('      <div class="rows" id="rows"></div>',
          '      <div class="rows" id="rows"></div>\n'
@@ -566,19 +529,6 @@ def main():
          '    <button id="rec-info" title="About this archive &amp; shortcuts [?]" aria-label="Info">?</button>\n'
          '    <span class="tr-vsep" aria-hidden="true"></span>',
          "topright-separators"),
-        # v14/v19: the sort keys leave the header line; v19 renders them
-        # per-bin instead (inside each OPEN collection, under its header —
-        # see NEW_PHASE_DIVIDER_B), so no static strip remains.
-        ('        <div class="sort-mini">\n'
-         '          <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>\n'
-         '          <button class="sort-hd" data-sort-col="phase">Phase<span class="sort-arrow" id="sa-phase"></span></button>\n'
-         '          <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>\n'
-         '        </div>\n'
-         '      </div>\n'
-         '      <div class="lp-search" id="lp-search">',
-         '      </div>\n'
-         '      <div class="lp-search" id="lp-search">',
-         "sort-out-of-head"),
         # v12: facet colours become a SPECTRUM (Brandon: a mixed set of
         # selected tags should read linearly). Tokens are recoloured so the
         # panel's existing group order — Collection, Areas, Item type,
@@ -607,12 +557,12 @@ def main():
   html.dark .pc-clay  {--pf:#a07898}
   html.dark .pc-moss  {--pf:#88a070}
   html.dark .pc-denim {--pf:#6890a8}""",
-         """  html.dark .pc-denim {--pf:#b08468}
-  html.dark .pc-sage  {--pf:#c09858}
-  html.dark .pc-stone {--pf:#88a070}
-  html.dark .pc-slate {--pf:#68a8a0}
-  html.dark .pc-clay  {--pf:#7898b8}
-  html.dark .pc-moss  {--pf:#a07898}""",
+         """  html.dark .pc-denim {--pf:#aa8572}  /* v40g: ~40% toward warm grey */
+  html.dark .pc-sage  {--pf:#aa9168}
+  html.dark .pc-stone {--pf:#899676}
+  html.dark .pc-slate {--pf:#769b93}
+  html.dark .pc-clay  {--pf:#7f91a1}
+  html.dark .pc-moss  {--pf:#977e8e}""",
          "facet-spectrum-dark"),
         # v34: the active tags live IN the filter row beside FILTER — no
         # separate bar above the list, no "Filters" label. Pills keep the
@@ -641,6 +591,8 @@ def main():
          '    const renderAfPills = () => {   // LAB B v34: pills render into the filter row\n'
          '      const slot = document.getElementById("lf-pills");\n'
          '      if (!slot) return;\n'
+         '      const wrap = document.getElementById("lp-filter");\n'
+         '      if (wrap) wrap.hidden = !afActive;   // v40: the tag row exists only while filters are active\n'
          '      if (!afActive) { slot.innerHTML = ""; return; }\n'
          '      slot.innerHTML =\n'
          '        AF_GROUPS.flatMap(([g, s]) => [...s].map(v =>\n'
@@ -661,7 +613,7 @@ def main():
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
-    ], version="39", tray=False)
+    ], version="40", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
