@@ -133,6 +133,12 @@ CSS_LAB_B = """\
      (bars, rows) keeps its darker ladder steps on top. */
   html.dark body .data-footer{background:#2b2823}
   html.dark body .panel-left{background:#2b2823}
+  /* v30: SELECTION = "this item is in the viewer" — the selected row sinks
+     to stage depth (the same tone as the viewing room) and takes a quiet
+     sienna box. Outline, not border: zero layout shift. Light mode agrees:
+     its stage tone is --soft. */
+  .pane-list .row.sel{background:var(--soft);outline:1px solid #7a4020;outline-offset:-1px}
+  html.dark body .row.sel{background:#151311;outline-color:#b08468}
   /* v17: hanging indent — a long collection name (CAA, FRH) wraps back to
      the panel edge under the chevron. Chevron gets its own column; the name
      wraps within its column; the gloss sits aligned beneath the name. */
@@ -565,7 +571,7 @@ def main():
          '          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
          '        )).join("") +',
          "af-pill-brackets"),
-    ], version="29", tray=False)
+    ], version="30", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.

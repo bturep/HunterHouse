@@ -1019,6 +1019,12 @@
      (bars, rows) keeps its darker ladder steps on top. */
   html.dark body .data-footer{background:#2b2823}
   html.dark body .panel-left{background:#2b2823}
+  /* v30: SELECTION = "this item is in the viewer" — the selected row sinks
+     to stage depth (the same tone as the viewing room) and takes a quiet
+     sienna box. Outline, not border: zero layout shift. Light mode agrees:
+     its stage tone is --soft. */
+  .pane-list .row.sel{background:var(--soft);outline:1px solid #7a4020;outline-offset:-1px}
+  html.dark body .row.sel{background:#151311;outline-color:#b08468}
   /* v17: hanging indent — a long collection name (CAA, FRH) wraps back to
      the panel edge under the chevron. Chevron gets its own column; the name
      wraps within its column; the gloss sits aligned beneath the name. */
@@ -4001,7 +4007,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.29";
+  const VERSION      = "v1.09-test.79-labb.30";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
