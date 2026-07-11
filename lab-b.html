@@ -919,9 +919,9 @@
   html.dark #fp-info-pop{background:#1f1d1a;border-color:#3a3733}
 
   /* ── Facet counts + zero-greys (promoted from lab-a 2026-07-10) ── */
-  .fp-chip .fp-ct{margin-left:6px;font-size:9px;opacity:0.6;letter-spacing:0.02em}
+  .fp-chip .fp-ct{margin-left:2px;font-size:7.5px;opacity:0.55;letter-spacing:0.02em;vertical-align:super;line-height:0;color:var(--hint)}
   .fp-chip.zero{opacity:0.32;cursor:default;pointer-events:none}
-  .fp-chip.on .fp-ct{opacity:0.85}
+  .fp-chip.on .fp-ct{opacity:0.8;color:inherit}
   /* ── Applied-filter bar above the list (promoted from lab-a) ── */
   .af-bar{display:flex;flex-wrap:wrap;gap:5px;align-items:center;
     padding:10px 20px;border-bottom:1px solid var(--rule);background:var(--soft)}
@@ -3572,7 +3572,6 @@
         <button id="list-info" type="button" title="About this archive" aria-label="About this archive">?</button>
         <div class="sort-mini">
           <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>
-          <button class="sort-hd" data-sort-col="type">Type<span class="sort-arrow" id="sa-type"></span></button>
           <button class="sort-hd" data-sort-col="phase">Phase<span class="sort-arrow" id="sa-phase"></span></button>
           <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>
         </div>
@@ -3868,7 +3867,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.77-labb.04";
+  const VERSION      = "v1.09-test.78-labb.05";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -5875,7 +5874,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     items: [],
     filtered: [],
     selectedId: null,
-    sortCol: "type",   // LAB B: open grouped by item type — everyday bins (CCA-style series)
+    sortCol: "id",
     sortDir: "asc",
     search: "",
     filterCollection: new Set(),
@@ -6897,7 +6896,6 @@ WHERE {
     };
     const comparators = {
       "id":    tailLast((a, b) => dir * (a.id || "").localeCompare(b.id || "")),
-      "type":  tailLast((a, b) => dir * (a.itemType||"").localeCompare(b.itemType||"") || (a.id||"").localeCompare(b.id||"")),   // LAB B
       "phase": tailLast((a, b) => dir * (a.phase||"").localeCompare(b.phase||"") || (a.id||"").localeCompare(b.id||"")),
       "year":  tailLast((a, b) => dir * dateKey(a).localeCompare(dateKey(b)) || (a.id||"").localeCompare(b.id||"")),
     };
@@ -7100,7 +7098,7 @@ WHERE {
 
   // ── Sort header UI ────────────────────────────────────────────────────────
   function renderListHead() {
-    ["id", "type", "phase", "year"].forEach(col => {
+    ["id", "phase", "year"].forEach(col => {
       const btn   = document.querySelector(`.sort-hd[data-sort-col="${col}"]`);
       const arrow = document.getElementById(`sa-${col}`);
       if (!btn || !arrow) return;
@@ -7370,7 +7368,7 @@ WHERE {
       return;
     }
 
-    const grouped = !state.curation && (state.sortCol === "phase" || state.sortCol === "type");   // LAB B
+    const grouped = !state.curation && (state.sortCol === "phase" || state.sortCol === "id");   // LAB B v05
     const frag = document.createDocumentFragment();
     let lastPhase = null;
     const noted = rnNotedIds();   // items with a viewer-visible note
@@ -7378,11 +7376,18 @@ WHERE {
 
     if (afActive) frag.appendChild(afBar());
 
-    // LAB B: groups follow the active sort column — Type (everyday, CCA-style
-    // functional series) or Phase (the scholarly axis). Groups open CONTRACTED
-    // (the CCA convention — counts do the orienting); a live search auto-
+    // LAB B v05: the COLLECTIONS are the shape (Brandon, 2026-07-10 tuning) —
+    // the fonds-level buckets: HHC 115 / EGC 57 / IHC 45 / CAA 36 / FRH 7.
+    // ID sort already clusters by collection (HH-{COLL}-{NNNN}), so the
+    // grouped view is simply the ID sort wearing collection headers; the
+    // Phase sort keeps its headers as the scholarly reading. Groups open
+    // CONTRACTED (counts + names do the orienting); a live search auto-
     // expands everything so results never hide behind a closed header.
-    const gkeyOf = it => (state.sortCol === "type" ? (it.itemType || "—") : (it.phase || "—"));
+    const gkeyOf = it => (state.sortCol === "id"
+      ? (archiveAbbrev(collectionOf(it)) || "—")
+      : (it.phase || "—"));
+    const glabelOf = k => (state.sortCol === "id" && COLLECTION_INFO[k]?.title)
+      ? `${k} — ${COLLECTION_INFO[k].title}` : k;
     const searchOpen = !!state.search.trim();
     state.filtered.forEach((it, _idx) => {
       const gkey = gkeyOf(it);
@@ -7393,7 +7398,7 @@ WHERE {
         const open = searchOpen || phaseExpanded.has(gkey);
         d.className = "phase-divider ph-head" + (open ? "" : " closed");
         d.dataset.phase = gkey;
-        d.innerHTML = `<span><span class="ph-chev">${open ? "⌄" : "›"}</span>${escapeHTML(gkey)}</span><span class="r">${String(count).padStart(2,"0")} items</span>`;
+        d.innerHTML = `<span><span class="ph-chev">${open ? "⌄" : "›"}</span>${escapeHTML(glabelOf(gkey))}</span><span class="r">${String(count).padStart(2,"0")} items</span>`;
         d.addEventListener("click", () => {
           if (phaseExpanded.has(gkey)) phaseExpanded.delete(gkey); else phaseExpanded.add(gkey);
           renderList();

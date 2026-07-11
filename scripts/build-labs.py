@@ -30,7 +30,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC  = ROOT / "next.html"
-SRC_VERSION = "v1.09-test.77"
+SRC_VERSION = "v1.09-test.78"
 
 def patch(text, old, new, label):
     n = text.count(old)
@@ -80,11 +80,18 @@ OLD_PHASE_DIVIDER = """\
       }
 """
 NEW_PHASE_DIVIDER_B = """\
-    // LAB B: groups follow the active sort column — Type (everyday, CCA-style
-    // functional series) or Phase (the scholarly axis). Groups open CONTRACTED
-    // (the CCA convention — counts do the orienting); a live search auto-
+    // LAB B v05: the COLLECTIONS are the shape (Brandon, 2026-07-10 tuning) —
+    // the fonds-level buckets: HHC 115 / EGC 57 / IHC 45 / CAA 36 / FRH 7.
+    // ID sort already clusters by collection (HH-{COLL}-{NNNN}), so the
+    // grouped view is simply the ID sort wearing collection headers; the
+    // Phase sort keeps its headers as the scholarly reading. Groups open
+    // CONTRACTED (counts + names do the orienting); a live search auto-
     // expands everything so results never hide behind a closed header.
-    const gkeyOf = it => (state.sortCol === "type" ? (it.itemType || "—") : (it.phase || "—"));
+    const gkeyOf = it => (state.sortCol === "id"
+      ? (archiveAbbrev(collectionOf(it)) || "—")
+      : (it.phase || "—"));
+    const glabelOf = k => (state.sortCol === "id" && COLLECTION_INFO[k]?.title)
+      ? `${k} — ${COLLECTION_INFO[k].title}` : k;
     const searchOpen = !!state.search.trim();
     state.filtered.forEach((it, _idx) => {
       const gkey = gkeyOf(it);
@@ -95,7 +102,7 @@ NEW_PHASE_DIVIDER_B = """\
         const open = searchOpen || phaseExpanded.has(gkey);
         d.className = "phase-divider ph-head" + (open ? "" : " closed");
         d.dataset.phase = gkey;
-        d.innerHTML = `<span><span class="ph-chev">${open ? "⌄" : "›"}</span>${escapeHTML(gkey)}</span><span class="r">${String(count).padStart(2,"0")} items</span>`;
+        d.innerHTML = `<span><span class="ph-chev">${open ? "⌄" : "›"}</span>${escapeHTML(glabelOf(gkey))}</span><span class="r">${String(count).padStart(2,"0")} items</span>`;
         d.addEventListener("click", () => {
           if (phaseExpanded.has(gkey)) phaseExpanded.delete(gkey); else phaseExpanded.add(gkey);
           renderList();
@@ -105,19 +112,31 @@ NEW_PHASE_DIVIDER_B = """\
       if (grouped && !searchOpen && !phaseExpanded.has(gkey)) return;   // LAB B: group is contracted
 """
 
-# ── lab-d: record less present ───────────────────────────────────────────
+# ── lab-d: record pops up, never pulls out ───────────────────────────────
 CSS_LAB_D = """\
-  /* ══ LAB D: record less present — the right pane opens collapsed (public);
-     a one-line caption under the image carries the identity line, with the
-     full record one click away. Researchers/admins boot with the workbench
-     pane open as before. Mobile keeps its Record tab untouched. ══ */
+  /* ══ LAB D v02: record pops up, never pulls out (Brandon: "it's either
+     available or isn't"). Public sessions have NO right pane — the image
+     takes its width; a one-line caption under the image carries the identity
+     line and opens the full record as a reading CARD over a dimmed image
+     (Esc / scrim / × dismiss). Researcher & admin sessions keep the
+     workbench pane exactly as today. Mobile untouched (Record tab stays). ══ */
+  @media (min-width:768px){
+    body:not(.is-researcher):not(.is-admin) .panel-right{display:none}
+    body:not(.is-researcher):not(.is-admin) .rec-caption.has-item{display:flex}
+  }
   .rec-caption{display:none;align-items:baseline;gap:14px;padding:9px 18px;border-top:1px solid var(--rule);background:var(--bg)}
-  body.rec-collapsed .rec-caption.has-item{display:flex}
-  @media (max-width:767px){ body.rec-collapsed .rec-caption.has-item{display:none} }
   .rc-title{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;letter-spacing:0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .rc-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.04em;white-space:nowrap;flex-shrink:0}
   .rc-open{margin-left:auto;flex-shrink:0;font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;background:none;border:1px solid var(--rule);border-radius:2px;color:var(--muted);padding:3px 9px;cursor:pointer}
   .rc-open:hover{color:var(--ink);border-color:var(--ink)}
+  #rec-card{position:absolute;inset:0;z-index:60;display:flex;align-items:center;justify-content:center}
+  #rec-card[hidden]{display:none}
+  .rcc-scrim{position:absolute;inset:0;background:rgba(20,17,14,0.32)}
+  .rcc-card{position:relative;width:min(440px,86%);max-height:82%;overflow-y:auto;
+    background:var(--bg);border:1px solid var(--rule);padding:22px 24px 18px;
+    box-shadow:0 18px 48px -20px rgba(0,0,0,0.5)}
+  .rcc-x{position:absolute;top:10px;right:12px;background:none;border:0;font-size:16px;color:var(--muted);cursor:pointer;line-height:1}
+  .rcc-x:hover{color:var(--ink)}
 """
 
 # ── lab-c: permanent facet sidebar ───────────────────────────────────────
@@ -162,70 +181,68 @@ def main():
     # LAB A — the tray only (everything else promoted 2026-07-10)
     build("a", "", [], version="03")
 
-    # LAB B — + grouped list (type bins, contracted). v04 candidate: authored
-    # series map (House drawings 116 / House photographs 71 / Furniture &
-    # objects 45 / Engineering & surveys 21 / Papers & ephemera 7) — pending
-    # Brandon's blessing of the labels.
+    # LAB B — + grouped list, v05: COLLECTION bins (the fonds level — Brandon:
+    # "the collections themselves are good buckets… they show the shape").
+    # Default ID sort = collection-grouped headers; Phase sort keeps phase
+    # headers; Year sort stays flat. All groups contracted by default.
     build("b", CSS_LAB_B, [
-        ('    sortCol: "id",',
-         '    sortCol: "type",   // LAB B: open grouped by item type — everyday bins (CCA-style series)',
-         "default-sort"),
-        ('          <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>',
-         '          <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>\n'
-         '          <button class="sort-hd" data-sort-col="type">Type<span class="sort-arrow" id="sa-type"></span></button>',
-         "type-sort-button"),
-        ('    ["id", "phase", "year"].forEach(col => {',
-         '    ["id", "type", "phase", "year"].forEach(col => {',
-         "type-sort-head"),
-        ('      "phase": tailLast((a, b) => dir * (a.phase||"").localeCompare(b.phase||"") || (a.id||"").localeCompare(b.id||"")),',
-         '      "type":  tailLast((a, b) => dir * (a.itemType||"").localeCompare(b.itemType||"") || (a.id||"").localeCompare(b.id||"")),   // LAB B\n'
-         '      "phase": tailLast((a, b) => dir * (a.phase||"").localeCompare(b.phase||"") || (a.id||"").localeCompare(b.id||"")),',
-         "type-comparator"),
         ("  function renderList() {",
          "  const phaseExpanded = new Set();   // LAB B: opened groups (contracted by default, session-scope)\n"
          "  function renderList() {",
          "expand-state"),
         ('    const grouped = !state.curation && state.sortCol === "phase";',
-         '    const grouped = !state.curation && (state.sortCol === "phase" || state.sortCol === "type");   // LAB B',
+         '    const grouped = !state.curation && (state.sortCol === "phase" || state.sortCol === "id");   // LAB B v05',
          "grouped-trigger"),
         (OLD_PHASE_DIVIDER, NEW_PHASE_DIVIDER_B, "collapsible-headers"),
-    ], version="04")
+    ], version="05")
 
-    # LAB D — record less present: right pane collapsed by default (public),
-    # identity caption under the image, full record one click away.
-    # Researchers/admins boot with the pane open (their workbench).
+    # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
+    # caption under the image opens the full record as a card overlay.
+    # Researchers/admins keep the workbench pane untouched.
     build("d", CSS_LAB_D, [
-        ('  <section class="panel-right pane-meta" id="panel-right" aria-label="Item record">',
-         '  <section class="panel-right pane-meta out" id="panel-right" aria-label="Item record">',
-         "collapsed-default"),
         ('      <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">↓ Original</a><a href="#" id="pdf-dl" rel="noopener" download hidden>↓ PDF</a></span>\n    </div>',
          '      <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">↓ Original</a><a href="#" id="pdf-dl" rel="noopener" download hidden>↓ PDF</a></span>\n'
          '    </div>\n'
          '    <div class="rec-caption" id="rec-caption">\n'
          '      <span class="rc-title" id="rc-title"></span>\n'
          '      <span class="rc-meta" id="rc-meta"></span>\n'
-         '      <button class="rc-open" id="rc-open" type="button" title="Open the full record">Full record →</button>\n'
+         '      <button class="rc-open" id="rc-open" type="button" title="Read the full record">Full record →</button>\n'
+         '    </div>\n'
+         '    <div id="rec-card" hidden>\n'
+         '      <div class="rcc-scrim" id="rcc-scrim"></div>\n'
+         '      <div class="rcc-card" role="dialog" aria-modal="true" aria-label="Item record">\n'
+         '        <button class="rcc-x" id="rcc-x" aria-label="Close record">×</button>\n'
+         '        <div class="rcc-body" id="rcc-body"></div>\n'
+         '      </div>\n'
          '    </div>',
-         "caption-markup"),
+         "caption-card-markup"),
         ('      document.getElementById("right-handle").addEventListener("click", () => { if (document.body.classList.contains("lens-info")) { closeInfoPane(); return; } togglePanel("right"); syncFsBtn(); });',
          '      document.getElementById("right-handle").addEventListener("click", () => { if (document.body.classList.contains("lens-info")) { closeInfoPane(); return; } togglePanel("right"); syncFsBtn(); });\n'
          '\n'
-         '      // LAB D: body.rec-collapsed mirrors the right pane\'s .out state, from\n'
-         '      // ONE place (a class observer) so every collapse path — handle, [Z],\n'
-         '      // bottom-bar button — keeps the caption in sync without chasing each.\n'
+         '      // LAB D v02: the public record CARD — populated from the (hidden)\n'
+         '      // record pane\'s own rendered HTML, so one renderer serves both.\n'
          '      {\n'
-         '        const rp = document.getElementById("panel-right");\n'
-         '        const syncRec = () => document.body.classList.toggle("rec-collapsed", rp.classList.contains("out"));\n'
-         '        new MutationObserver(syncRec).observe(rp, { attributes: true, attributeFilter: ["class"] });\n'
-         '        if (canMark() || canEditWikibase()) rp.classList.remove("out");   // roles boot with the workbench open\n'
-         '        syncRec();\n'
+         '        const card = document.getElementById("rec-card");\n'
+         '        const openCard = () => {\n'
+         '          const src = document.getElementById("meta-body");\n'
+         '          if (!src) return;\n'
+         '          document.getElementById("rcc-body").innerHTML = src.innerHTML;\n'
+         '          card.hidden = false;\n'
+         '        };\n'
+         '        const closeCard = () => { card.hidden = true; };\n'
          '        const rcBtn = document.getElementById("rc-open");\n'
-         '        if (rcBtn) rcBtn.addEventListener("click", () => { rp.classList.remove("out"); syncFsBtn(); });\n'
+         '        if (rcBtn) rcBtn.addEventListener("click", openCard);\n'
+         '        document.getElementById("rcc-x").addEventListener("click", closeCard);\n'
+         '        document.getElementById("rcc-scrim").addEventListener("click", closeCard);\n'
+         '        document.addEventListener("keydown", e => {\n'
+         '          if (e.key === "Escape" && !card.hidden) { closeCard(); e.stopPropagation(); e.preventDefault(); }\n'
+         '        }, true);\n'
          '      }',
-         "caption-sync"),
+         "card-wiring"),
         ('  function renderMeta(item) {\n    const body = $("#meta-body");',
          '  function renderMeta(item) {\n'
-         '    // LAB D: mirror the record\'s identity line into the under-image caption\n'
+         '    // LAB D: mirror the record\'s identity line into the under-image caption;\n'
+         '    // close any open record card (its contents belong to the previous item).\n'
          '    {\n'
          '      const rt = document.getElementById("rc-title"), rm = document.getElementById("rc-meta"), rc = document.getElementById("rec-caption");\n'
          '      if (rt && rm && rc) {\n'
@@ -233,10 +250,12 @@ def main():
          '        rm.textContent = [displayId(item.id), item.phase || "", yearOf(item.date)].filter(Boolean).join(" · ");\n'
          '        rc.classList.add("has-item");\n'
          '      }\n'
+         '      const oc = document.getElementById("rec-card");\n'
+         '      if (oc) oc.hidden = true;\n'
          '    }\n'
          '    const body = $("#meta-body");',
          "caption-populate"),
-    ], version="01")
+    ], version="02")
 
     # LAB C — + always-on facet sidebar (rejected; kept for the F&O comparison)
     build("c", CSS_LAB_C, [

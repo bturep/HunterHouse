@@ -919,9 +919,9 @@
   html.dark #fp-info-pop{background:#1f1d1a;border-color:#3a3733}
 
   /* ── Facet counts + zero-greys (promoted from lab-a 2026-07-10) ── */
-  .fp-chip .fp-ct{margin-left:6px;font-size:9px;opacity:0.6;letter-spacing:0.02em}
+  .fp-chip .fp-ct{margin-left:2px;font-size:7.5px;opacity:0.55;letter-spacing:0.02em;vertical-align:super;line-height:0;color:var(--hint)}
   .fp-chip.zero{opacity:0.32;cursor:default;pointer-events:none}
-  .fp-chip.on .fp-ct{opacity:0.85}
+  .fp-chip.on .fp-ct{opacity:0.8;color:inherit}
   /* ── Applied-filter bar above the list (promoted from lab-a) ── */
   .af-bar{display:flex;flex-wrap:wrap;gap:5px;align-items:center;
     padding:10px 20px;border-bottom:1px solid var(--rule);background:var(--soft)}
@@ -951,17 +951,29 @@
     .filter-panel{top:74px}   /* dropdown opens below the search row, still full-height */
   }
   @media (max-width:767px){ .lp-search{display:none} }  /* mobile keeps its fp-search-row */
-  /* ══ LAB D: record less present — the right pane opens collapsed (public);
-     a one-line caption under the image carries the identity line, with the
-     full record one click away. Researchers/admins boot with the workbench
-     pane open as before. Mobile keeps its Record tab untouched. ══ */
+  /* ══ LAB D v02: record pops up, never pulls out (Brandon: "it's either
+     available or isn't"). Public sessions have NO right pane — the image
+     takes its width; a one-line caption under the image carries the identity
+     line and opens the full record as a reading CARD over a dimmed image
+     (Esc / scrim / × dismiss). Researcher & admin sessions keep the
+     workbench pane exactly as today. Mobile untouched (Record tab stays). ══ */
+  @media (min-width:768px){
+    body:not(.is-researcher):not(.is-admin) .panel-right{display:none}
+    body:not(.is-researcher):not(.is-admin) .rec-caption.has-item{display:flex}
+  }
   .rec-caption{display:none;align-items:baseline;gap:14px;padding:9px 18px;border-top:1px solid var(--rule);background:var(--bg)}
-  body.rec-collapsed .rec-caption.has-item{display:flex}
-  @media (max-width:767px){ body.rec-collapsed .rec-caption.has-item{display:none} }
   .rc-title{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;letter-spacing:0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .rc-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.04em;white-space:nowrap;flex-shrink:0}
   .rc-open{margin-left:auto;flex-shrink:0;font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;background:none;border:1px solid var(--rule);border-radius:2px;color:var(--muted);padding:3px 9px;cursor:pointer}
   .rc-open:hover{color:var(--ink);border-color:var(--ink)}
+  #rec-card{position:absolute;inset:0;z-index:60;display:flex;align-items:center;justify-content:center}
+  #rec-card[hidden]{display:none}
+  .rcc-scrim{position:absolute;inset:0;background:rgba(20,17,14,0.32)}
+  .rcc-card{position:relative;width:min(440px,86%);max-height:82%;overflow-y:auto;
+    background:var(--bg);border:1px solid var(--rule);padding:22px 24px 18px;
+    box-shadow:0 18px 48px -20px rgba(0,0,0,0.5)}
+  .rcc-x{position:absolute;top:10px;right:12px;background:none;border:0;font-size:16px;color:var(--muted);cursor:pointer;line-height:1}
+  .rcc-x:hover{color:var(--ink)}
   .row{
     display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
     padding:11px 20px;align-items:start;cursor:pointer;
@@ -3651,7 +3663,14 @@
     <div class="rec-caption" id="rec-caption">
       <span class="rc-title" id="rc-title"></span>
       <span class="rc-meta" id="rc-meta"></span>
-      <button class="rc-open" id="rc-open" type="button" title="Open the full record">Full record →</button>
+      <button class="rc-open" id="rc-open" type="button" title="Read the full record">Full record →</button>
+    </div>
+    <div id="rec-card" hidden>
+      <div class="rcc-scrim" id="rcc-scrim"></div>
+      <div class="rcc-card" role="dialog" aria-modal="true" aria-label="Item record">
+        <button class="rcc-x" id="rcc-x" aria-label="Close record">×</button>
+        <div class="rcc-body" id="rcc-body"></div>
+      </div>
     </div>
     <div class="mobile-img-nav" id="mobile-img-nav">
       <button id="mob-prev" class="mob-nav-btn" aria-label="Previous item">←</button>
@@ -3659,7 +3678,7 @@
     </div>
   </section>
 
-  <section class="panel-right pane-meta out" id="panel-right" aria-label="Item record">
+  <section class="panel-right pane-meta" id="panel-right" aria-label="Item record">
     <button class="panel-handle" id="right-handle" aria-label="Toggle record panel">
       <svg class="handle-chevron" width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,1 5,5 2,9"/></svg>
     </button>
@@ -3878,7 +3897,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.77-labd.01";
+  const VERSION      = "v1.09-test.78-labd.02";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7793,7 +7812,8 @@ WHERE {
 
   // ── Meta pane ─────────────────────────────────────────────────────────────
   function renderMeta(item) {
-    // LAB D: mirror the record's identity line into the under-image caption
+    // LAB D: mirror the record's identity line into the under-image caption;
+    // close any open record card (its contents belong to the previous item).
     {
       const rt = document.getElementById("rc-title"), rm = document.getElementById("rc-meta"), rc = document.getElementById("rec-caption");
       if (rt && rm && rc) {
@@ -7801,6 +7821,8 @@ WHERE {
         rm.textContent = [displayId(item.id), item.phase || "", yearOf(item.date)].filter(Boolean).join(" · ");
         rc.classList.add("has-item");
       }
+      const oc = document.getElementById("rec-card");
+      if (oc) oc.hidden = true;
     }
     const body = $("#meta-body");
 
@@ -10916,17 +10938,24 @@ WHERE {
       document.getElementById("left-handle").addEventListener("click",  () => { togglePanel("left");  syncFsBtn(); });
       document.getElementById("right-handle").addEventListener("click", () => { if (document.body.classList.contains("lens-info")) { closeInfoPane(); return; } togglePanel("right"); syncFsBtn(); });
 
-      // LAB D: body.rec-collapsed mirrors the right pane's .out state, from
-      // ONE place (a class observer) so every collapse path — handle, [Z],
-      // bottom-bar button — keeps the caption in sync without chasing each.
+      // LAB D v02: the public record CARD — populated from the (hidden)
+      // record pane's own rendered HTML, so one renderer serves both.
       {
-        const rp = document.getElementById("panel-right");
-        const syncRec = () => document.body.classList.toggle("rec-collapsed", rp.classList.contains("out"));
-        new MutationObserver(syncRec).observe(rp, { attributes: true, attributeFilter: ["class"] });
-        if (canMark() || canEditWikibase()) rp.classList.remove("out");   // roles boot with the workbench open
-        syncRec();
+        const card = document.getElementById("rec-card");
+        const openCard = () => {
+          const src = document.getElementById("meta-body");
+          if (!src) return;
+          document.getElementById("rcc-body").innerHTML = src.innerHTML;
+          card.hidden = false;
+        };
+        const closeCard = () => { card.hidden = true; };
         const rcBtn = document.getElementById("rc-open");
-        if (rcBtn) rcBtn.addEventListener("click", () => { rp.classList.remove("out"); syncFsBtn(); });
+        if (rcBtn) rcBtn.addEventListener("click", openCard);
+        document.getElementById("rcc-x").addEventListener("click", closeCard);
+        document.getElementById("rcc-scrim").addEventListener("click", closeCard);
+        document.addEventListener("keydown", e => {
+          if (e.key === "Escape" && !card.hidden) { closeCard(); e.stopPropagation(); e.preventDefault(); }
+        }, true);
       }
 
       // Bottom-bar button: both hidden → reveal both; otherwise hide both.
