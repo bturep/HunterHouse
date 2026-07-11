@@ -120,9 +120,9 @@ CSS_LAB_B = """\
      the selected item's outline or the dashed row separators. Chrome rows
      and the foot stay full-width: the gutter belongs to the list only. */
   .scroll-pip{z-index:7}
-  /* v37: mirrored lanes — a twin pip on the pane's LEFT edge for balance;
-     the list column sits between two 7px gutters (the spine moves inward
-     with the rows, so pip and spine never collide). */
+  /* v37/v38: mirrored 7px gutters frame the list column (kept for the
+     balance); the twin LEFT pip was tried in v37 and pulled in v38 —
+     double scroll register read as redundant. */
   #rows{margin:0 7px}
   #bin-rail-top{left:7px;right:7px}
   /* ══ v25: dark-mode DEPTH LADDER (Brandon) — light = instrument, dark =
@@ -487,7 +487,6 @@ def main():
         # v23: rail containers — siblings of #rows inside .panel-content.
         ('      <div class="rows" id="rows"></div>',
          '      <div class="rows" id="rows"></div>\n'
-         '      <div class="scroll-pip scroll-pip-r" id="list-pip-l" aria-hidden="true"></div>\n'
          '      <div id="bin-rail-top" aria-hidden="true"></div>\n'
          '      <div id="list-foot"><span id="lf-count"></span></div>',
          "bin-rail-markup"),
@@ -531,7 +530,7 @@ def main():
          '  });\n'
          '  function updatePip(scrollId, pipId) {\n'
          '    if (scrollId === "rows") updateBinRails();\n'
-         '    if (pipId === "list-pip") updatePip("rows", "list-pip-l");   // v37: twin left pip\n'
+
          '    const scrollEl = document.getElementById(scrollId);',
          "bin-rails-js"),
         ('    pip.style.top   = (41 + ratio * (trackHeight - thumbHeight)) + "px";',
@@ -657,7 +656,7 @@ def main():
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
-    ], version="37", tray=False)
+    ], version="38", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
