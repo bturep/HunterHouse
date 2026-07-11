@@ -968,6 +968,23 @@
   .panel-handle:hover{background:var(--bg)}
   .panel-handle:hover::before{background:var(--ink)}
   .panel-handle .handle-chevron{display:none}
+  /* v11: split list-head — static title left, FILTER control beside it,
+     sort keys keep the right edge. */
+  .list-head{justify-content:flex-start;gap:16px}
+  .list-head .sort-mini{margin-left:auto}
+  .lh-title{cursor:default}
+  .lh-filter{color:var(--muted)}
+  .lh-filter:hover,.lh-filter.fp-open{color:var(--ink)}
+  /* v11: applied-filter pills = the browse chips' bracket convention —
+     no box, per-category colour (pc-*), the removal × inside the brackets. */
+  .af-pill{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:0.02em;
+    text-transform:capitalize;line-height:1.6;background:transparent;border:0;
+    padding:0;border-radius:0;color:var(--pf,var(--ink))}
+  .af-pill::before{content:"["}
+  .af-pill::after{content:"]"}
+  .af-pill:hover{opacity:0.75}
+  .af-pill .x{margin-left:5px;color:var(--muted)}
+  .af-pill:hover .x{color:var(--red-deep)}
   .row{
     display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
     padding:11px 20px;align-items:start;cursor:pointer;
@@ -3580,7 +3597,8 @@
     <div class="panel-content">
       <div class="scroll-pip" id="list-pip"></div>
       <div class="list-head">
-        <button class="l" id="filter-toggle" title="Filter">Browse items<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">›</span></button>
+        <span class="l lh-title">Catalogue</span>
+        <button class="l lh-filter" id="filter-toggle" title="Filter">Filter<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">›</span></button>
         <button id="list-info" type="button" title="About this archive" aria-label="About this archive">?</button>
         <div class="sort-mini">
           <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>
@@ -3879,7 +3897,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.10";
+  const VERSION      = "v1.09-test.79-labb.11";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7348,10 +7366,12 @@ WHERE {
     const afBar = () => {
       const bar = document.createElement("div");
       bar.className = "af-bar";
+      const AF_PC = { collection:PC.denim, area:PC.sage, itype:PC.stone,
+                      drawtype:PC.slate, creator:PC.clay, builtstatus:PC.moss };   // LAB B: chip colours
       bar.innerHTML =
         `<span class="af-lbl">Filters</span>` +
         AF_GROUPS.flatMap(([g, s]) => [...s].map(v =>
-          `<button class="af-pill" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">×</span></button>`
+          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">×</span></button>`
         )).join("") +
         `<button class="af-clear" id="filter-clear-all">✕ clear all</button>`;
       bar.querySelectorAll(".af-pill").forEach(p => p.addEventListener("click", e => {
@@ -8384,6 +8404,7 @@ WHERE {
 
     panel.innerHTML =
       curatedRow +
+      group("Collection",   uniqueCollections, state.filterCollection,  "coll",        "collection",  PC.denim) +
       group("Areas",        uniqueAreas,       state.filterArea,        "area",        "area",        PC.sage)  +
       group("Item type",    uniqueTypes,       state.filterType,        "itype",       "itype",       PC.stone) +
       group("Drawing type", uniqueDrawTypes,   state.filterDrawType,    "drawtype",    "drawtype",    PC.slate) +

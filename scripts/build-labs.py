@@ -82,6 +82,23 @@ CSS_LAB_B = """\
   .panel-handle:hover{background:var(--bg)}
   .panel-handle:hover::before{background:var(--ink)}
   .panel-handle .handle-chevron{display:none}
+  /* v11: split list-head — static title left, FILTER control beside it,
+     sort keys keep the right edge. */
+  .list-head{justify-content:flex-start;gap:16px}
+  .list-head .sort-mini{margin-left:auto}
+  .lh-title{cursor:default}
+  .lh-filter{color:var(--muted)}
+  .lh-filter:hover,.lh-filter.fp-open{color:var(--ink)}
+  /* v11: applied-filter pills = the browse chips' bracket convention —
+     no box, per-category colour (pc-*), the removal \u00d7 inside the brackets. */
+  .af-pill{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:0.02em;
+    text-transform:capitalize;line-height:1.6;background:transparent;border:0;
+    padding:0;border-radius:0;color:var(--pf,var(--ink))}
+  .af-pill::before{content:"["}
+  .af-pill::after{content:"]"}
+  .af-pill:hover{opacity:0.75}
+  .af-pill .x{margin-left:5px;color:var(--muted)}
+  .af-pill:hover .x{color:var(--red-deep)}
 """
 
 OLD_PHASE_DIVIDER = """\
@@ -269,16 +286,35 @@ def main():
          '      }),',
          "id-collection-order"),
         (OLD_PHASE_DIVIDER, NEW_PHASE_DIVIDER_B, "collapsible-headers"),
-        # v10: the grouped list IS the collection chooser — the facet row is
-        # redundant, remove it from the browse panel (Brandon 2026-07-11).
-        ('      group("Collection",   uniqueCollections, state.filterCollection,  "coll",        "collection",  PC.denim) +\n',
-         '',
-         "drop-collection-facet"),
         # v10: curated row label (Brandon 2026-07-11).
         ('<div class="fp-lbl">Curators</div>',
          '<div class="fp-lbl">Curated selections by</div>',
          "curators-label"),
-    ], version="10", tray=False)
+        # v11: "Browse items" was doing double duty as the pane title AND the
+        # filter toggle — vague. Split: static CATALOGUE title (pairs with the
+        # right pane's ITEM RECORD) + an explicit FILTER control that owns the
+        # overlay. #filter-toggle keeps its id so all wiring holds.
+        ('        <button class="l" id="filter-toggle" title="Filter">Browse items<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">\u203a</span></button>',
+         '        <span class="l lh-title">Catalogue</span>\n'
+         '        <button class="l lh-filter" id="filter-toggle" title="Filter">Filter<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">\u203a</span></button>',
+         "catalogue-filter-split"),
+        # v11: applied-filter pills mirror the browse chips — same bracket
+        # convention, same per-category colour — so the active filters above
+        # the list read as the same objects the visitor just clicked.
+        ('      bar.innerHTML =\n'
+         '        `<span class="af-lbl">Filters</span>` +\n'
+         '        AF_GROUPS.flatMap(([g, s]) => [...s].map(v =>\n'
+         '          `<button class="af-pill" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
+         '        )).join("") +',
+         '      const AF_PC = { collection:PC.denim, area:PC.sage, itype:PC.stone,\n'
+         '                      drawtype:PC.slate, creator:PC.clay, builtstatus:PC.moss };   // LAB B: chip colours\n'
+         '      bar.innerHTML =\n'
+         '        `<span class="af-lbl">Filters</span>` +\n'
+         '        AF_GROUPS.flatMap(([g, s]) => [...s].map(v =>\n'
+         '          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
+         '        )).join("") +',
+         "af-pill-brackets"),
+    ], version="11", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
