@@ -1006,8 +1006,11 @@
      the selected item's outline or the dashed row separators. Chrome rows
      and the foot stay full-width: the gutter belongs to the list only. */
   .scroll-pip{z-index:7}
-  #rows{margin-right:7px}
-  #bin-rail-top{right:7px}
+  /* v37: mirrored lanes — a twin pip on the pane's LEFT edge for balance;
+     the list column sits between two 7px gutters (the spine moves inward
+     with the rows, so pip and spine never collide). */
+  #rows{margin:0 7px}
+  #bin-rail-top{left:7px;right:7px}
   /* ══ v25: dark-mode DEPTH LADDER (Brandon) — light = instrument, dark =
      viewing depth. Darkest to lightest: image stage (artifact floats in
      the deepest room) < item rows < collection bars < UI chrome (the
@@ -3747,6 +3750,7 @@
       <div class="bulk-bar" id="bulk-bar" hidden></div>
       <div class="curation-card" id="curation-card" hidden></div>
       <div class="rows" id="rows"></div>
+      <div class="scroll-pip scroll-pip-r" id="list-pip-l" aria-hidden="true"></div>
       <div id="bin-rail-top" aria-hidden="true"></div>
       <div id="list-foot"><span id="lf-count"></span></div>
     </div>
@@ -4031,7 +4035,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.36";
+  const VERSION      = "v1.09-test.79-labb.37";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6459,6 +6463,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   });
   function updatePip(scrollId, pipId) {
     if (scrollId === "rows") updateBinRails();
+    if (pipId === "list-pip") updatePip("rows", "list-pip-l");   // v37: twin left pip
     const scrollEl = document.getElementById(scrollId);
     const pip = document.getElementById(pipId);
     if (!scrollEl || !pip) return;
