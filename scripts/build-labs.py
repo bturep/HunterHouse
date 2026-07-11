@@ -150,12 +150,17 @@ CSS_LAB_B = """\
      (bars, rows) keeps its darker ladder steps on top. */
   html.dark body .data-footer{background:#2b2823}
   html.dark body .panel-left{background:#2b2823}
-  /* v30: SELECTION = "this item is in the viewer" — the selected row sinks
-     to stage depth (the same tone as the viewing room) and takes a quiet
-     sienna box. Outline, not border: zero layout shift. Light mode agrees:
-     its stage tone is --soft. */
-  .pane-list .row.sel{background:var(--soft);outline:1px solid #7a4020;outline-offset:-1px}
-  html.dark body .row.sel{background:#151311;outline-color:#b08468}
+  /* v30/v39: SELECTION = "this item is in the viewer" — the selected row
+     sinks to stage depth. v39: the box OPENS to the right (reading
+     direction); the left is already carried by the spine; top + bottom are
+     inset sienna lines (no layout shift), and the dashed separators are
+     suppressed where they'd collide with them. */
+  .pane-list .row.sel{background:var(--soft);
+    box-shadow:inset 0 1px 0 #7a4020, inset 0 -1px 0 #7a4020;
+    border-bottom-color:transparent}
+  .rows .row:has(+ .row.sel){border-bottom-color:transparent}
+  html.dark body .row.sel{background:#151311;
+    box-shadow:inset 0 1px 0 #b08468, inset 0 -1px 0 #b08468}
   /* v31: splash FRAME — the landing state is framed by chrome left, right
      and top (28px each: collapsed slivers + shrunk header), but the bottom
      edge was open. A 28px strip completes the frame. No content. Fades
@@ -656,7 +661,7 @@ def main():
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
-    ], version="38", tray=False)
+    ], version="39", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
