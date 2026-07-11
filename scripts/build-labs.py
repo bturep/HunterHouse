@@ -66,6 +66,10 @@ CSS_LAB_B = """\
   .ph-head:hover span:first-child{color:var(--ink)}
   .ph-chev{display:inline-block;width:14px;color:var(--muted)}
   .ph-head.closed{border-bottom-style:dashed}
+  /* v08: header gloss + contracted-group peek — show, don't teach */
+  .ph-gloss{display:block;font-family:var(--mono);font-size:9px;letter-spacing:0.05em;text-transform:none;color:var(--muted);margin:3px 0 0 14px;white-space:normal;line-height:1.5}
+  .ph-more{font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:0.06em;padding:8px 20px 9px 34px;cursor:pointer;border-bottom:1px dashed var(--rule)}
+  .ph-more:hover{color:var(--ink)}
 """
 
 OLD_PHASE_DIVIDER = """\
@@ -80,19 +84,27 @@ OLD_PHASE_DIVIDER = """\
       }
 """
 NEW_PHASE_DIVIDER_B = """\
-    // LAB B v05: the COLLECTIONS are the shape (Brandon, 2026-07-10 tuning) —
-    // the fonds-level buckets: HHC 115 / EGC 57 / IHC 45 / CAA 36 / FRH 7.
-    // ID sort already clusters by collection (HH-{COLL}-{NNNN}), so the
-    // grouped view is simply the ID sort wearing collection headers; the
-    // Phase sort keeps its headers as the scholarly reading. Groups open
-    // CONTRACTED (counts + names do the orienting); a live search auto-
-    // expands everything so results never hide behind a closed header.
+    // LAB B: the COLLECTIONS are the shape (Brandon, 2026-07-10 tuning) — the
+    // fonds-level buckets in authored order. v08 answers "how do people know
+    // what they're choosing?" by SHOWING, not teaching: each header carries a
+    // one-line gloss (from the collection's own blurb), and each contracted
+    // group keeps a 3-row PEEK of its actual items with an expandable
+    // "… N more" row — every collection demonstrates itself. A live search
+    // still auto-expands everything.
+    const PEEK = 3;
     const gkeyOf = it => (state.sortCol === "id"
       ? (archiveAbbrev(collectionOf(it)) || "—")
       : (it.phase || "—"));
     const glabelOf = k => (state.sortCol === "id" && COLLECTION_INFO[k]?.title)
       ? `${k} — ${COLLECTION_INFO[k].title}` : k;
+    const glossOf = k => {
+      if (state.sortCol !== "id") return "";
+      const b = COLLECTION_INFO[k]?.body || "";
+      const first = (b.split(". ")[0] || "") + (b.includes(". ") ? "." : "");
+      return first.length > 92 ? first.slice(0, 89).replace(/\\s+\\S*$/, "") + "\\u2026" : first;
+    };
     const searchOpen = !!state.search.trim();
+    let peekLeft = 0, peekKey = null, peekTotal = 0;
     state.filtered.forEach((it, _idx) => {
       const gkey = gkeyOf(it);
       if (grouped && gkey !== lastPhase) {
@@ -102,14 +114,29 @@ NEW_PHASE_DIVIDER_B = """\
         const open = searchOpen || phaseExpanded.has(gkey);
         d.className = "phase-divider ph-head" + (open ? "" : " closed");
         d.dataset.phase = gkey;
-        d.innerHTML = `<span><span class="ph-chev">${open ? "⌄" : "›"}</span>${escapeHTML(glabelOf(gkey))}</span><span class="r">${String(count).padStart(2,"0")} items</span>`;
+        const gloss = glossOf(gkey);
+        d.innerHTML = `<span><span class="ph-chev">${open ? "\\u2304" : "\\u203a"}</span>${escapeHTML(glabelOf(gkey))}${gloss ? `<span class="ph-gloss">${escapeHTML(gloss)}</span>` : ""}</span><span class="r">${String(count).padStart(2,"0")} items</span>`;
         d.addEventListener("click", () => {
           if (phaseExpanded.has(gkey)) phaseExpanded.delete(gkey); else phaseExpanded.add(gkey);
           renderList();
         });
         frag.appendChild(d);
+        peekKey = gkey; peekLeft = open ? Infinity : PEEK; peekTotal = count;
       }
-      if (grouped && !searchOpen && !phaseExpanded.has(gkey)) return;   // LAB B: group is contracted
+      if (grouped && peekKey === gkey && peekLeft !== Infinity) {   // LAB B: contracted → 3-row peek
+        if (peekLeft <= 0) {
+          if (peekLeft === 0) {
+            peekLeft = -1;
+            const m = document.createElement("div");
+            m.className = "ph-more";
+            m.textContent = `\\u2026 ${peekTotal - PEEK} more`;
+            m.addEventListener("click", () => { phaseExpanded.add(gkey); renderList(); });
+            frag.appendChild(m);
+          }
+          return;
+        }
+        peekLeft--;
+      }
 """
 
 # ── lab-d: record pops up, never pulls out ───────────────────────────────
@@ -216,7 +243,7 @@ def build(lab, css_extra, extra_patches, version):
 
 def main():
     # LAB A — the tray only (everything else promoted 2026-07-10)
-    build("a", "", [], version="07")
+    build("a", "", [], version="08")
 
     # LAB B — + grouped list, v05: COLLECTION bins (the fonds level — Brandon:
     # "the collections themselves are good buckets… they show the shape").
@@ -240,7 +267,7 @@ def main():
          '      }),',
          "id-collection-order"),
         (OLD_PHASE_DIVIDER, NEW_PHASE_DIVIDER_B, "collapsible-headers"),
-    ], version="07")
+    ], version="08")
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
