@@ -983,6 +983,15 @@
   .lh-filter .filter-chevron{font-size:13px;color:var(--muted);letter-spacing:0;font-weight:400;line-height:1}
   .lh-filter:hover,.lh-filter.fp-open{color:var(--ink)}
   .lh-filter:hover .filter-chevron,.lh-filter.fp-open .filter-chevron{color:var(--ink)}
+  /* v14: the sort keys are column headers — their strip mirrors the row
+     grid (104px / 1fr / 50px) so ID, Phase, Year sit over their columns. */
+  .pane-list .sort-mini{
+    display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
+    padding:6px 20px;border-bottom:1px solid var(--rule);flex-shrink:0;
+  }
+  .pane-list .sort-mini .sort-hd{justify-content:flex-start}
+  .pane-list .sort-mini .sort-hd[data-sort-col="phase"]{margin-left:0}
+  .pane-list .sort-mini .sort-hd[data-sort-col="year"]{width:auto;justify-content:flex-end}
   /* mobile: the row survives for the FILTER control alone — the filter
      panel carries its own search field on mobile. */
   @media (max-width:767px){
@@ -3614,16 +3623,16 @@
       <div class="list-head">
         <span class="l lh-title">Catalogue</span>
         <button id="list-info" type="button" title="About this archive" aria-label="About this archive">?</button>
-        <div class="sort-mini">
-          <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>
-          <button class="sort-hd" data-sort-col="phase">Phase<span class="sort-arrow" id="sa-phase"></span></button>
-          <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>
-        </div>
       </div>
       <div class="lp-search" id="lp-search">
         <button class="l lh-filter" id="filter-toggle" title="Filter">Filter<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">›</span></button>
         <span class="pfx">/</span>
         <input id="lp-search-input" type="text" placeholder="search archive" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search the archive">
+      </div>
+      <div class="sort-mini">
+          <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>
+          <button class="sort-hd" data-sort-col="phase">Phase<span class="sort-arrow" id="sa-phase"></span></button>
+          <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>
       </div>
       <div class="filter-panel" id="filter-panel" hidden></div>
       <div class="mark-bar" id="mark-bar" hidden></div>
@@ -3912,7 +3921,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.13";
+  const VERSION      = "v1.09-test.79-labb.14";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.

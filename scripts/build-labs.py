@@ -97,6 +97,15 @@ CSS_LAB_B = """\
   .lh-filter .filter-chevron{font-size:13px;color:var(--muted);letter-spacing:0;font-weight:400;line-height:1}
   .lh-filter:hover,.lh-filter.fp-open{color:var(--ink)}
   .lh-filter:hover .filter-chevron,.lh-filter.fp-open .filter-chevron{color:var(--ink)}
+  /* v14: the sort keys are column headers — their strip mirrors the row
+     grid (104px / 1fr / 50px) so ID, Phase, Year sit over their columns. */
+  .pane-list .sort-mini{
+    display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
+    padding:6px 20px;border-bottom:1px solid var(--rule);flex-shrink:0;
+  }
+  .pane-list .sort-mini .sort-hd{justify-content:flex-start}
+  .pane-list .sort-mini .sort-hd[data-sort-col="phase"]{margin-left:0}
+  .pane-list .sort-mini .sort-hd[data-sort-col="year"]{width:auto;justify-content:flex-end}
   /* mobile: the row survives for the FILTER control alone — the filter
      panel carries its own search field on mobile. */
   @media (max-width:767px){
@@ -318,6 +327,31 @@ def main():
          '        <button class="l lh-filter" id="filter-toggle" title="Filter">Filter<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">\u203a</span></button>\n'
          '        <span class="pfx">/</span>',
          "filter-into-search-row"),
+        # v14: ID/PHASE/YEAR move BELOW the filter/search line — they are the
+        # rows' column headers, so they sit directly atop the columns they
+        # sort, aligned to the row grid.
+        ('        <div class="sort-mini">\n'
+         '          <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>\n'
+         '          <button class="sort-hd" data-sort-col="phase">Phase<span class="sort-arrow" id="sa-phase"></span></button>\n'
+         '          <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>\n'
+         '        </div>\n'
+         '      </div>\n'
+         '      <div class="lp-search" id="lp-search">',
+         '      </div>\n'
+         '      <div class="lp-search" id="lp-search">',
+         "sort-out-of-head"),
+        ('        <input id="lp-search-input" type="text" placeholder="search archive" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search the archive">\n'
+         '      </div>\n'
+         '      <div class="filter-panel" id="filter-panel" hidden></div>',
+         '        <input id="lp-search-input" type="text" placeholder="search archive" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search the archive">\n'
+         '      </div>\n'
+         '      <div class="sort-mini">\n'
+         '          <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>\n'
+         '          <button class="sort-hd" data-sort-col="phase">Phase<span class="sort-arrow" id="sa-phase"></span></button>\n'
+         '          <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>\n'
+         '      </div>\n'
+         '      <div class="filter-panel" id="filter-panel" hidden></div>',
+         "sort-strip-below-search"),
         # v12: facet colours become a SPECTRUM (Brandon: a mixed set of
         # selected tags should read linearly). Tokens are recoloured so the
         # panel's existing group order — Collection, Areas, Item type,
@@ -369,7 +403,7 @@ def main():
          '          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
          '        )).join("") +',
          "af-pill-brackets"),
-    ], version="13", tray=False)
+    ], version="14", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
