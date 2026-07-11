@@ -993,11 +993,12 @@
   .lh-filter .filter-chevron{font-size:13px;color:var(--muted);letter-spacing:0;font-weight:400;line-height:1}
   .lh-filter:hover,.lh-filter.fp-open{color:var(--ink)}
   .lh-filter:hover .filter-chevron,.lh-filter.fp-open .filter-chevron{color:var(--ink)}
-  /* v14: the sort keys are column headers — their strip mirrors the row
-     grid (104px / 1fr / 50px) so ID, Phase, Year sit over their columns. */
+  /* v14/v19: the sort keys are column headers on the row grid (104px /
+     1fr / 50px); v19 renders one strip per OPEN bin, under its header,
+     dashed like the rows it governs. */
   .pane-list .sort-mini{
     display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
-    padding:6px 20px;border-bottom:1px solid var(--rule);flex-shrink:0;
+    padding:6px 20px;border-bottom:1px dashed var(--rule);flex-shrink:0;
   }
   .pane-list .sort-mini .sort-hd{justify-content:flex-start}
   /* v15: Phase sort retired for now — the phase labels aren't worked out
@@ -3642,11 +3643,6 @@
         <span class="pfx">/</span>
         <input id="lp-search-input" type="text" placeholder="search archive" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search the archive">
       </div>
-      <div class="sort-mini">
-          <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>
-          <button class="sort-hd" data-sort-col="phase">Phase<span class="sort-arrow" id="sa-phase"></span></button>
-          <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>
-      </div>
       <div class="filter-panel" id="filter-panel" hidden></div>
       <div class="mark-bar" id="mark-bar" hidden></div>
       <div class="bulk-bar" id="bulk-bar" hidden></div>
@@ -3934,7 +3930,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.18";
+  const VERSION      = "v1.09-test.79-labb.19";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7491,6 +7487,28 @@ WHERE {
         });
         frag.appendChild(d);
         groupOpen = open;
+        if (open) {   // v19: sort keys live INSIDE the open bin, under its header
+          const ss = document.createElement("div");
+          ss.className = "sort-mini bin-sort";
+          [["id","ID"],["year","Year"]].forEach(([col, lbl]) => {
+            const b = document.createElement("button");
+            b.className = "sort-hd" + (state.sortCol === col ? " active" : "");
+            b.dataset.sortCol = col;
+            b.innerHTML = `${lbl}<span class="sort-arrow">${state.sortCol === col ? (state.sortDir === "asc" ? "↑" : "↓") : ""}</span>`;
+            b.addEventListener("click", e => {
+              e.stopPropagation();
+              if (state.sortCol === col) state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
+              else { state.sortCol = col; state.sortDir = "asc"; }
+              applyFilters(); renderList();
+              const url = new URL(location.href);
+              url.searchParams.set("sort", state.sortCol);
+              url.searchParams.set("dir", state.sortDir);
+              history.replaceState({}, "", url);
+            });
+            ss.appendChild(b);
+          });
+          frag.appendChild(ss);
+        }
       }
       if (grouped && !groupOpen) return;   // v09: contracted = header only, no peek
       const row = document.createElement("div");

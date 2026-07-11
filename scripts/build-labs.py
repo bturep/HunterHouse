@@ -107,11 +107,12 @@ CSS_LAB_B = """\
   .lh-filter .filter-chevron{font-size:13px;color:var(--muted);letter-spacing:0;font-weight:400;line-height:1}
   .lh-filter:hover,.lh-filter.fp-open{color:var(--ink)}
   .lh-filter:hover .filter-chevron,.lh-filter.fp-open .filter-chevron{color:var(--ink)}
-  /* v14: the sort keys are column headers — their strip mirrors the row
-     grid (104px / 1fr / 50px) so ID, Phase, Year sit over their columns. */
+  /* v14/v19: the sort keys are column headers on the row grid (104px /
+     1fr / 50px); v19 renders one strip per OPEN bin, under its header,
+     dashed like the rows it governs. */
   .pane-list .sort-mini{
     display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
-    padding:6px 20px;border-bottom:1px solid var(--rule);flex-shrink:0;
+    padding:6px 20px;border-bottom:1px dashed var(--rule);flex-shrink:0;
   }
   .pane-list .sort-mini .sort-hd{justify-content:flex-start}
   /* v15: Phase sort retired for now — the phase labels aren't worked out
@@ -190,6 +191,28 @@ NEW_PHASE_DIVIDER_B = """\
         });
         frag.appendChild(d);
         groupOpen = open;
+        if (open) {   // v19: sort keys live INSIDE the open bin, under its header
+          const ss = document.createElement("div");
+          ss.className = "sort-mini bin-sort";
+          [["id","ID"],["year","Year"]].forEach(([col, lbl]) => {
+            const b = document.createElement("button");
+            b.className = "sort-hd" + (state.sortCol === col ? " active" : "");
+            b.dataset.sortCol = col;
+            b.innerHTML = `${lbl}<span class="sort-arrow">${state.sortCol === col ? (state.sortDir === "asc" ? "\u2191" : "\u2193") : ""}</span>`;
+            b.addEventListener("click", e => {
+              e.stopPropagation();
+              if (state.sortCol === col) state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
+              else { state.sortCol = col; state.sortDir = "asc"; }
+              applyFilters(); renderList();
+              const url = new URL(location.href);
+              url.searchParams.set("sort", state.sortCol);
+              url.searchParams.set("dir", state.sortDir);
+              history.replaceState({}, "", url);
+            });
+            ss.appendChild(b);
+          });
+          frag.appendChild(ss);
+        }
       }
       if (grouped && !groupOpen) return;   // v09: contracted = header only, no peek
 """
@@ -348,9 +371,9 @@ def main():
          '        <button class="l lh-filter" id="filter-toggle" title="Filter">Filter<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">\u203a</span></button>\n'
          '        <span class="pfx">/</span>',
          "filter-into-search-row"),
-        # v14: ID/PHASE/YEAR move BELOW the filter/search line — they are the
-        # rows' column headers, so they sit directly atop the columns they
-        # sort, aligned to the row grid.
+        # v14/v19: the sort keys leave the header line; v19 renders them
+        # per-bin instead (inside each OPEN collection, under its header —
+        # see NEW_PHASE_DIVIDER_B), so no static strip remains.
         ('        <div class="sort-mini">\n'
          '          <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>\n'
          '          <button class="sort-hd" data-sort-col="phase">Phase<span class="sort-arrow" id="sa-phase"></span></button>\n'
@@ -361,18 +384,6 @@ def main():
          '      </div>\n'
          '      <div class="lp-search" id="lp-search">',
          "sort-out-of-head"),
-        ('        <input id="lp-search-input" type="text" placeholder="search archive" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search the archive">\n'
-         '      </div>\n'
-         '      <div class="filter-panel" id="filter-panel" hidden></div>',
-         '        <input id="lp-search-input" type="text" placeholder="search archive" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search the archive">\n'
-         '      </div>\n'
-         '      <div class="sort-mini">\n'
-         '          <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>\n'
-         '          <button class="sort-hd" data-sort-col="phase">Phase<span class="sort-arrow" id="sa-phase"></span></button>\n'
-         '          <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>\n'
-         '      </div>\n'
-         '      <div class="filter-panel" id="filter-panel" hidden></div>',
-         "sort-strip-below-search"),
         # v12: facet colours become a SPECTRUM (Brandon: a mixed set of
         # selected tags should read linearly). Tokens are recoloured so the
         # panel's existing group order — Collection, Areas, Item type,
@@ -424,7 +435,7 @@ def main():
          '          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
          '        )).join("") +',
          "af-pill-brackets"),
-    ], version="18", tray=False)
+    ], version="19", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
