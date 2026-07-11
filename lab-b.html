@@ -973,6 +973,11 @@
   .panel-handle:hover{background:var(--bg)}
   .panel-handle:hover::before{background:var(--ink)}
   .panel-handle .handle-chevron{display:none}
+  /* v18: the panels clip at their edge (overflow:hidden on .pane-list /
+     .pane-meta), which swallowed the outie tab entirely — the panes lost
+     their open/close affordance. Content containment lives one level down
+     on .panel-content, so the panel frame itself can be visible. */
+  .panel-left.pane-list,.panel-right.pane-meta{overflow:visible}
   /* v12: CATALOGUE alone on the header line; FILTER lives in the search
      row below, separated from the input by a rule. v13: the .l styles are
      scoped to .list-head, so out here the button needs the full flat
@@ -3929,7 +3934,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.17";
+  const VERSION      = "v1.09-test.79-labb.18";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.

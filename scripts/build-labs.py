@@ -87,6 +87,11 @@ CSS_LAB_B = """\
   .panel-handle:hover{background:var(--bg)}
   .panel-handle:hover::before{background:var(--ink)}
   .panel-handle .handle-chevron{display:none}
+  /* v18: the panels clip at their edge (overflow:hidden on .pane-list /
+     .pane-meta), which swallowed the outie tab entirely — the panes lost
+     their open/close affordance. Content containment lives one level down
+     on .panel-content, so the panel frame itself can be visible. */
+  .panel-left.pane-list,.panel-right.pane-meta{overflow:visible}
   /* v12: CATALOGUE alone on the header line; FILTER lives in the search
      row below, separated from the input by a rule. v13: the .l styles are
      scoped to .list-head, so out here the button needs the full flat
@@ -419,7 +424,7 @@ def main():
          '          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
          '        )).join("") +',
          "af-pill-brackets"),
-    ], version="17", tray=False)
+    ], version="18", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
