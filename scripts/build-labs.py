@@ -83,10 +83,20 @@ CSS_LAB_B = """\
   .panel-handle:hover::before{background:var(--ink)}
   .panel-handle .handle-chevron{display:none}
   /* v12: CATALOGUE alone on the header line; FILTER lives in the search
-     row below, separated from the input by a rule. */
+     row below, separated from the input by a rule. v13: the .l styles are
+     scoped to .list-head, so out here the button needs the full flat
+     treatment itself (native button chrome was showing as a box). */
   .lh-title{cursor:default}
-  .lh-filter{color:var(--muted);flex-shrink:0;padding-right:12px;border-right:1px solid var(--rule)}
+  .lh-filter{
+    font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.18em;
+    text-transform:uppercase;color:var(--muted);cursor:pointer;
+    display:flex;align-items:center;gap:6px;
+    background:none;border:0;padding:0 12px 0 0;flex-shrink:0;
+    border-right:1px solid var(--rule);border-radius:0;
+  }
+  .lh-filter .filter-chevron{font-size:13px;color:var(--muted);letter-spacing:0;font-weight:400;line-height:1}
   .lh-filter:hover,.lh-filter.fp-open{color:var(--ink)}
+  .lh-filter:hover .filter-chevron,.lh-filter.fp-open .filter-chevron{color:var(--ink)}
   /* mobile: the row survives for the FILTER control alone — the filter
      panel carries its own search field on mobile. */
   @media (max-width:767px){
@@ -359,7 +369,7 @@ def main():
          '          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
          '        )).join("") +',
          "af-pill-brackets"),
-    ], version="12", tray=False)
+    ], version="13", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
