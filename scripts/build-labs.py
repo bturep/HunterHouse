@@ -83,8 +83,12 @@ CSS_LAB_B = """\
      in unmarked territory. Closed headers carry a short tick of the same
      line. 2px, not an indent — horizontal space stays whole. Composes
      with the v21 tiers; either dial can be turned off alone. */
-  .phase-divider.ph-head,.bin-sort,.row.in-bin{border-left:2px solid #7a4020}
-  html.dark .phase-divider.ph-head,html.dark .bin-sort,html.dark .row.in-bin{border-left-color:#b08468}
+  /* v24: the spine DESCRIBES something now — it marks the extent of an
+     OPEN collection only (header, strip, rows, and its rail shadow).
+     Closed bars carry a transparent stub so text never shifts. */
+  .phase-divider.ph-head,.bin-sort,.row.in-bin{border-left:2px solid transparent}
+  .ph-head:not(.closed),.bin-sort,.row.in-bin{border-left-color:#7a4020}
+  html.dark .ph-head:not(.closed),html.dark .bin-sort,html.dark .row.in-bin{border-left-color:#b08468}
   /* v23: bin RAILS — collections scrolled past stack compact at the top of
      the rows viewport, upcoming ones at the bottom: every archive block is
      always on screen in abbreviated, non-description form (chevron, code,
@@ -94,9 +98,10 @@ CSS_LAB_B = """\
   #bin-rail-bot{bottom:0}
   .br-row{display:flex;justify-content:space-between;align-items:center;height:25px;box-sizing:border-box;
     padding:0 20px 0 12px;background:var(--soft);border-bottom:1px solid var(--rule);
-    border-left:2px solid #7a4020;cursor:pointer;
+    border-left:2px solid transparent;cursor:pointer;
     font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--copper-deep)}
-  html.dark .br-row{border-left-color:#b08468}
+  .br-row.open{border-left-color:#7a4020}
+  html.dark .br-row.open{border-left-color:#b08468}
   #bin-rail-bot .br-row{border-bottom:0;border-top:1px solid var(--rule)}
   .br-row .r{color:var(--muted);letter-spacing:0.06em;font-size:9px}
   .br-row:hover{color:var(--ink)}
@@ -142,6 +147,11 @@ CSS_LAB_B = """\
   .lh-filter .filter-chevron{font-size:13px;color:var(--muted);letter-spacing:0;font-weight:400;line-height:1}
   .lh-filter:hover,.lh-filter.fp-open{color:var(--ink)}
   .lh-filter:hover .filter-chevron,.lh-filter.fp-open .filter-chevron{color:var(--ink)}
+  /* v24: tighten the seam under the filter/search row — its 8px bottom
+     padding + rule read as a gap above the first collection bar. The
+     bar's own soft edge is the separator now. Overlay top follows. */
+  .lp-search{border-bottom:0;padding-bottom:4px}
+  @media (min-width:768px){ .filter-panel{top:69px} }
   /* v14/v19: the sort keys are column headers on the row grid (104px /
      1fr / 50px); v19 renders one strip per OPEN bin, under its header,
      dashed like the rows it governs. */
@@ -444,7 +454,7 @@ def main():
          '    }\n'
          '    const brRow = h => {\n'
          '      const el = document.createElement("div");\n'
-         '      el.className = "br-row";\n'
+         '      el.className = "br-row" + (h.classList.contains("closed") ? "" : " open");\n'
          '      el.innerHTML = `<span><span class="ph-chev">${h.classList.contains("closed") ? "\\u203a" : "\\u2304"}</span>${escapeHTML(h.dataset.phase || "")}</span><span class="r">${escapeHTML(h.dataset.count || "")}</span>`;\n'
          '      el.addEventListener("click", () => {\n'
          '        rows.scrollTop = h.offsetTop - rows.offsetTop - heads.indexOf(h) * BR_H;\n'
@@ -454,6 +464,12 @@ def main():
          '    railT.replaceChildren(...above.map(brRow));\n'
          '    railB.replaceChildren(...below.map(brRow));\n'
          '  }\n'
+         '  // v24: re-run the pip after the left panel finishes its width\n'
+         '  // transition — it gets sized during the splash-collapsed layout and\n'
+         '  // can stay stale-active over a list that does not overflow.\n'
+         '  document.getElementById("panel-left").addEventListener("transitionend", e => {\n'
+         '    if (e.propertyName === "width") updatePip("rows", "list-pip");\n'
+         '  });\n'
          '  function updatePip(scrollId, pipId) {\n'
          '    if (scrollId === "rows") updateBinRails();\n'
          '    const scrollEl = document.getElementById(scrollId);',
@@ -525,7 +541,7 @@ def main():
          '          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">\u00d7</span></button>`\n'
          '        )).join("") +',
          "af-pill-brackets"),
-    ], version="23", tray=False)
+    ], version="24", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
