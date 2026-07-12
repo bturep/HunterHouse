@@ -1070,14 +1070,14 @@
   #meta-content{display:flex;flex-direction:column;flex:1}
   .pane-meta .data-footer{height:auto;background:transparent;border-top:1px solid var(--rule);
     padding:14px 0 2px;margin-top:28px;display:flex;flex-wrap:wrap;gap:12px 14px}
-  .meta-foot{height:41px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
-    display:flex;align-items:center;justify-content:center;padding:0 22px}
-  .meta-foot a{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.12em;
-    text-transform:uppercase;color:var(--ink);text-decoration:none;border:0}
-  .meta-foot a::before{content:"[ "}
-  .meta-foot a::after{content:" ]"}
-  .meta-foot a:hover{color:var(--copper-deep)}
-  html.dark body .meta-foot{background:#2b2823}
+  /* v46: [ SHOW ITEM RECORD ] — image foot, right end. Visible only
+     while the record pane is collapsed (its new default). */
+  #if-record{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--ink);background:none;border:0;padding:0;margin-left:18px;cursor:pointer;flex-shrink:0;white-space:nowrap}
+  #if-record::before{content:"[ "}
+  #if-record::after{content:" ]"}
+  #if-record:hover{color:var(--copper-deep)}
+  .shell:has(#panel-right:not(.out)) #if-record{display:none}
   /* — top-right cluster separators (v33) — */
   .tr-vsep{width:1px;align-self:stretch;background:var(--rule);flex:none}
   .site-topright .tr-div{height:auto;align-self:stretch}
@@ -3781,6 +3781,7 @@
         </button>
       </div>
       <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">↓ Original</a><a href="#" id="pdf-dl" rel="noopener" download hidden>↓ PDF</a></span>
+      <button id="if-record" type="button" title="Open the item record">Show item record</button>
     </div>
     <div class="mobile-img-nav" id="mobile-img-nav">
       <button id="mob-prev" class="mob-nav-btn" aria-label="Previous item">←</button>
@@ -3829,9 +3830,6 @@
           <a id="df-sparql"   href="#" onclick="return false" style="opacity:0.4">SPARQL ↗</a>
           <a id="df-json"     href="#" onclick="return false" style="opacity:0.4">JSON ↗</a>
         </div>
-      </div>
-      <div class="meta-foot" id="meta-foot">
-        <a id="mf-record" href="#" target="_blank" rel="noopener" title="Open this item's permanent record page">Show item record</a>
       </div>
     </div>
     <div id="info-pane" role="dialog" aria-modal="true" aria-label="About this archive and keyboard shortcuts">
@@ -4012,7 +4010,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.45";
+  const VERSION      = "v1.09-test.79-labb.46";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -8022,8 +8020,6 @@ WHERE {
 
   // ── Meta pane ─────────────────────────────────────────────────────────────
   function renderMeta(item) {
-    const mf = document.getElementById("mf-record");
-    if (mf) mf.href = "archive/" + item.id + ".html";
     const body = $("#meta-content");
 
     const areasHtml = (item.areas || []).map(a =>
@@ -11046,8 +11042,7 @@ WHERE {
       }
       // ── Returning visitor: the original animated reveal into the bright archive.
       closeAboutPane();
-      leftP.classList.remove("out");
-      rightP.classList.remove("out");
+      leftP.classList.remove("out");   // LAB B v46: record stays collapsed by default
       syncFsBtn();
       // Hide the canvas while panels animate + fit settles; reveal once the
       // image is at the correct post-open size. Avoids the flash where the
@@ -11138,6 +11133,7 @@ WHERE {
       // always reflects the real panel state.
       document.getElementById("left-handle").addEventListener("click",  () => { togglePanel("left");  syncFsBtn(); });
       document.getElementById("right-handle").addEventListener("click", () => { if (document.body.classList.contains("lens-info")) { closeInfoPane(); return; } togglePanel("right"); syncFsBtn(); });
+      document.getElementById("if-record")?.addEventListener("click", () => { togglePanel("right"); syncFsBtn(); });   // LAB B v46
 
       // Bottom-bar button: both hidden → reveal both; otherwise hide both.
       pfsBtn.addEventListener("click", () => {

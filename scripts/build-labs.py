@@ -184,14 +184,14 @@ CSS_LAB_B = """\
   #meta-content{display:flex;flex-direction:column;flex:1}
   .pane-meta .data-footer{height:auto;background:transparent;border-top:1px solid var(--rule);
     padding:14px 0 2px;margin-top:28px;display:flex;flex-wrap:wrap;gap:12px 14px}
-  .meta-foot{height:41px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
-    display:flex;align-items:center;justify-content:center;padding:0 22px}
-  .meta-foot a{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.12em;
-    text-transform:uppercase;color:var(--ink);text-decoration:none;border:0}
-  .meta-foot a::before{content:"[ "}
-  .meta-foot a::after{content:" ]"}
-  .meta-foot a:hover{color:var(--copper-deep)}
-  html.dark body .meta-foot{background:#2b2823}
+  /* v46: [ SHOW ITEM RECORD ] — image foot, right end. Visible only
+     while the record pane is collapsed (its new default). */
+  #if-record{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--ink);background:none;border:0;padding:0;margin-left:18px;cursor:pointer;flex-shrink:0;white-space:nowrap}
+  #if-record::before{content:"[ "}
+  #if-record::after{content:" ]"}
+  #if-record:hover{color:var(--copper-deep)}
+  .shell:has(#panel-right:not(.out)) #if-record{display:none}
   /* — top-right cluster separators (v33) — */
   .tr-vsep{width:1px;align-self:stretch;background:var(--rule);flex:none}
   .site-topright .tr-div{height:auto;align-self:stretch}
@@ -487,19 +487,36 @@ def main():
          '          <a id="df-sparql"   href="#" onclick="return false" style="opacity:0.4">SPARQL ↗</a>\n'
          '          <a id="df-json"     href="#" onclick="return false" style="opacity:0.4">JSON ↗</a>\n'
          '        </div>\n'
-         '      </div>\n'
-         '      <div class="meta-foot" id="meta-foot">\n'
-         '        <a id="mf-record" href="#" target="_blank" rel="noopener" title="Open this item\'s permanent record page">Show item record</a>\n'
          '      </div>',
          "record-foot-cta"),
         # v45: renderMeta writes into #meta-content so the in-scroll footer
         # survives rebuilds; the CTA follows the selected item.
         ('  function renderMeta(item) {\n    const body = $("#meta-body");',
-         '  function renderMeta(item) {\n'
-         '    const mf = document.getElementById("mf-record");\n'
-         '    if (mf) mf.href = "archive/" + item.id + ".html";\n'
-         '    const body = $("#meta-content");',
+         '  function renderMeta(item) {\n    const body = $("#meta-content");',
          "meta-content-target"),
+        # v46: record pane defaults CLOSED — the normal Continue opens only
+        # the left panel (the first-run tour still opens both; its steps
+        # point at the record). The image-foot CTA below opens it on demand.
+        ('      closeAboutPane();\n'
+         '      leftP.classList.remove("out");\n'
+         '      rightP.classList.remove("out");\n'
+         '      syncFsBtn();',
+         '      closeAboutPane();\n'
+         '      leftP.classList.remove("out");   // LAB B v46: record stays collapsed by default\n'
+         '      syncFsBtn();',
+         "right-closed-default"),
+        # v46: [ SHOW ITEM RECORD ] in the image foot — visible while the
+        # pane is collapsed, opens it, hides while open (the pull tab and
+        # handle close it again).
+        ('      <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">\u2193 Original</a><a href="#" id="pdf-dl" rel="noopener" download hidden>\u2193 PDF</a></span>\n    </div>',
+         '      <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">\u2193 Original</a><a href="#" id="pdf-dl" rel="noopener" download hidden>\u2193 PDF</a></span>\n'
+         '      <button id="if-record" type="button" title="Open the item record">Show item record</button>\n'
+         '    </div>',
+         "foot-record-cta"),
+        ('      document.getElementById("right-handle").addEventListener("click", () => { if (document.body.classList.contains("lens-info")) { closeInfoPane(); return; } togglePanel("right"); syncFsBtn(); });',
+         '      document.getElementById("right-handle").addEventListener("click", () => { if (document.body.classList.contains("lens-info")) { closeInfoPane(); return; } togglePanel("right"); syncFsBtn(); });\n'
+         '      document.getElementById("if-record")?.addEventListener("click", () => { togglePanel("right"); syncFsBtn(); });   // LAB B v46',
+         "foot-record-wiring"),
         # v40b: the row restacks — kicker (ID + type mark left, year right),
         # title, note. Researcher furniture (flags, drag, curation seq) is
         # re-housed untouched; styling it is deferred (Brandon).
@@ -677,7 +694,7 @@ def main():
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
-    ], version="45", tray=False)
+    ], version="46", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
