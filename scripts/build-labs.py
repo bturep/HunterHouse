@@ -140,8 +140,7 @@ CSS_LAB_B = """\
   /* — spine (v22/v24): sienna marks the extent of an OPEN collection —
      header, rows, rail shadow; closed bars carry a transparent stub. — */
   .phase-divider.ph-head,.row.in-bin{border-left:2px solid transparent}
-  .ph-head:not(.closed),.row.in-bin{border-left-color:#7a4020}
-  html.dark .ph-head:not(.closed),html.dark .row.in-bin{border-left-color:#b08468}
+  .ph-head:not(.closed),.row.in-bin{border-left-color:var(--copper-deep)}   /* v47: open-collection spine = copper green */
   /* — selection (v30/v39): the row in the viewer sinks to stage depth;
      the box opens right, spine carries the left, sienna lines top+bottom. — */
   .pane-list .row.sel{background:var(--soft);
@@ -155,8 +154,7 @@ CSS_LAB_B = """\
     padding:0 20px 0 12px;background:var(--soft);border-bottom:1px solid var(--rule);
     border-left:2px solid transparent;cursor:pointer;
     font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--copper-deep)}
-  .br-row.open{border-left-color:#7a4020}
-  html.dark .br-row.open{border-left-color:#b08468}
+  .br-row.open{border-left-color:var(--copper-deep)}
   .br-row .r{color:var(--muted);letter-spacing:0.06em;font-size:9px}
   .br-row:hover{color:var(--ink)}
   .br-row .ph-chev{position:static;display:inline-block;width:14px;font-size:10px;color:var(--muted)}
@@ -177,7 +175,7 @@ CSS_LAB_B = """\
   html.dark body .pane-meta .meta-body{background:#252220}
   /* v44: no rule under ITEM RECORD — the recessed body's own edge is the
      separator, mirroring the left toolbar's seamless seam. */
-  .meta-head{border-bottom:0}
+  .pane-meta .meta-head{border-bottom:0}   /* v47: outranks the base rule (v44's selector tied and lost) */
   /* v45: the technical links live at the end of the SCROLL, quiet; the
      fixed bar below carries one prominent action — the item's permanent
      record page. */
@@ -254,7 +252,7 @@ NEW_PHASE_DIVIDER_B = """\
         lastPhase = gkey;
         const count = state.filtered.filter(x => gkeyOf(x) === gkey).length;
         const d = document.createElement("div");
-        const open = phaseExpanded.has(gkey) || ((searchOpen || afActive) && !phaseCollapsed.has(gkey));
+        const open = phaseExpanded.has(gkey) || !phaseCollapsed.has(gkey);   // v47: bins OPEN at the beginning; only a manual close shuts one
         d.className = "phase-divider ph-head" + (open ? "" : " closed");
         d.dataset.phase = gkey;
         d.dataset.count = String(count).padStart(2,"0");   // the rail reads this
@@ -694,7 +692,7 @@ def main():
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
-    ], version="46", tray=False)
+    ], version="47", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
