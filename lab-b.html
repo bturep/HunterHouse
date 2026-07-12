@@ -1022,7 +1022,6 @@
   html.dark body .meta-head,html.dark body .image-foot,html.dark body .panel-handle{background:#2b2823}
   html.dark body .panel-handle::before{background:#8a847c}
   html.dark body .panel-right{background:#2b2823}
-  html.dark body .data-footer{background:#2b2823}
   html.dark body .panel-left{background:#2b2823}
   /* — spine (v22/v24): sienna marks the extent of an OPEN collection —
      header, rows, rail shadow; closed bars carry a transparent stub. — */
@@ -1065,6 +1064,20 @@
   /* v44: no rule under ITEM RECORD — the recessed body's own edge is the
      separator, mirroring the left toolbar's seamless seam. */
   .meta-head{border-bottom:0}
+  /* v45: the technical links live at the end of the SCROLL, quiet; the
+     fixed bar below carries one prominent action — the item's permanent
+     record page. */
+  #meta-content{display:flex;flex-direction:column;flex:1}
+  .pane-meta .data-footer{height:auto;background:transparent;border-top:1px solid var(--rule);
+    padding:14px 0 2px;margin-top:28px;display:flex;flex-wrap:wrap;gap:12px 14px}
+  .meta-foot{height:41px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
+    display:flex;align-items:center;justify-content:center;padding:0 22px}
+  .meta-foot a{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.12em;
+    text-transform:uppercase;color:var(--ink);text-decoration:none;border:0}
+  .meta-foot a::before{content:"[ "}
+  .meta-foot a::after{content:" ]"}
+  .meta-foot a:hover{color:var(--copper-deep)}
+  html.dark body .meta-foot{background:#2b2823}
   /* — top-right cluster separators (v33) — */
   .tr-vsep{width:1px;align-self:stretch;background:var(--rule);flex:none}
   .site-topright .tr-div{height:auto;align-self:stretch}
@@ -3806,14 +3819,19 @@
         </span>
       </div>
       <div class="meta-body" id="meta-body">
-        <div class="empty">Select an item from the list</div>
+        <div id="meta-content">
+          <div class="empty">Select an item from the list</div>
+        </div>
+        <div class="data-footer" id="data-footer">
+          <a id="df-permalink" href="#" onclick="return false" style="opacity:0.4" title="Copy this item's permanent link">Permalink ⧉</a>
+          <a id="df-cite" href="#" onclick="return false" style="opacity:0.4" title="Copy a citation for this item">Cite ⧉</a>
+          <a id="df-wikibase" href="#" onclick="return false" style="opacity:0.4">Wikibase ↗</a>
+          <a id="df-sparql"   href="#" onclick="return false" style="opacity:0.4">SPARQL ↗</a>
+          <a id="df-json"     href="#" onclick="return false" style="opacity:0.4">JSON ↗</a>
+        </div>
       </div>
-      <div class="data-footer" id="data-footer">
-        <a id="df-permalink" href="#" onclick="return false" style="opacity:0.4" title="Copy this item's permanent link">Permalink ⧉</a>
-        <a id="df-cite" href="#" onclick="return false" style="opacity:0.4" title="Copy a citation for this item">Cite ⧉</a>
-        <a id="df-wikibase" href="#" onclick="return false" style="opacity:0.4">Wikibase ↗</a>
-        <a id="df-sparql"   href="#" onclick="return false" style="opacity:0.4">SPARQL ↗</a>
-        <a id="df-json"     href="#" onclick="return false" style="opacity:0.4">JSON ↗</a>
+      <div class="meta-foot" id="meta-foot">
+        <a id="mf-record" href="#" target="_blank" rel="noopener" title="Open this item's permanent record page">Show item record</a>
       </div>
     </div>
     <div id="info-pane" role="dialog" aria-modal="true" aria-label="About this archive and keyboard shortcuts">
@@ -3994,7 +4012,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.44";
+  const VERSION      = "v1.09-test.79-labb.45";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -8004,7 +8022,9 @@ WHERE {
 
   // ── Meta pane ─────────────────────────────────────────────────────────────
   function renderMeta(item) {
-    const body = $("#meta-body");
+    const mf = document.getElementById("mf-record");
+    if (mf) mf.href = "archive/" + item.id + ".html";
+    const body = $("#meta-content");
 
     const areasHtml = (item.areas || []).map(a =>
       `<button class="pill area-pill ${pillCls(PC.sage)}${state.filterArea.has(a) ? " active" : ""}" data-area="${escapeHTML(a)}">${escapeHTML(a)}</button>`

@@ -136,7 +136,6 @@ CSS_LAB_B = """\
   html.dark body .meta-head,html.dark body .image-foot,html.dark body .panel-handle{background:#2b2823}
   html.dark body .panel-handle::before{background:#8a847c}
   html.dark body .panel-right{background:#2b2823}
-  html.dark body .data-footer{background:#2b2823}
   html.dark body .panel-left{background:#2b2823}
   /* — spine (v22/v24): sienna marks the extent of an OPEN collection —
      header, rows, rail shadow; closed bars carry a transparent stub. — */
@@ -179,6 +178,20 @@ CSS_LAB_B = """\
   /* v44: no rule under ITEM RECORD — the recessed body's own edge is the
      separator, mirroring the left toolbar's seamless seam. */
   .meta-head{border-bottom:0}
+  /* v45: the technical links live at the end of the SCROLL, quiet; the
+     fixed bar below carries one prominent action — the item's permanent
+     record page. */
+  #meta-content{display:flex;flex-direction:column;flex:1}
+  .pane-meta .data-footer{height:auto;background:transparent;border-top:1px solid var(--rule);
+    padding:14px 0 2px;margin-top:28px;display:flex;flex-wrap:wrap;gap:12px 14px}
+  .meta-foot{height:41px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
+    display:flex;align-items:center;justify-content:center;padding:0 22px}
+  .meta-foot a{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.12em;
+    text-transform:uppercase;color:var(--ink);text-decoration:none;border:0}
+  .meta-foot a::before{content:"[ "}
+  .meta-foot a::after{content:" ]"}
+  .meta-foot a:hover{color:var(--copper-deep)}
+  html.dark body .meta-foot{background:#2b2823}
   /* — top-right cluster separators (v33) — */
   .tr-vsep{width:1px;align-self:stretch;background:var(--rule);flex:none}
   .site-topright .tr-div{height:auto;align-self:stretch}
@@ -449,6 +462,44 @@ def main():
          '      <div class="lp-filter" id="lp-filter" hidden><span id="lf-pills"></span></div>\n'
          '      <div class="filter-panel" id="filter-panel" hidden></div>',
          "toolbar"),
+        # v45: the permalink/cite/data links move INTO the scrollable record
+        # body (renderMeta rebuilds #meta-content, so the footer node
+        # survives); the fixed bottom-right bar becomes one prominent
+        # action: Show item record -> the item's static permalink page.
+        ('      <div class="meta-body" id="meta-body">\n'
+         '        <div class="empty">Select an item from the list</div>\n'
+         '      </div>\n'
+         '      <div class="data-footer" id="data-footer">\n'
+         '        <a id="df-permalink" href="#" onclick="return false" style="opacity:0.4" title="Copy this item\'s permanent link">Permalink ⧉</a>\n'
+         '        <a id="df-cite" href="#" onclick="return false" style="opacity:0.4" title="Copy a citation for this item">Cite ⧉</a>\n'
+         '        <a id="df-wikibase" href="#" onclick="return false" style="opacity:0.4">Wikibase ↗</a>\n'
+         '        <a id="df-sparql"   href="#" onclick="return false" style="opacity:0.4">SPARQL ↗</a>\n'
+         '        <a id="df-json"     href="#" onclick="return false" style="opacity:0.4">JSON ↗</a>\n'
+         '      </div>',
+         '      <div class="meta-body" id="meta-body">\n'
+         '        <div id="meta-content">\n'
+         '          <div class="empty">Select an item from the list</div>\n'
+         '        </div>\n'
+         '        <div class="data-footer" id="data-footer">\n'
+         '          <a id="df-permalink" href="#" onclick="return false" style="opacity:0.4" title="Copy this item\'s permanent link">Permalink ⧉</a>\n'
+         '          <a id="df-cite" href="#" onclick="return false" style="opacity:0.4" title="Copy a citation for this item">Cite ⧉</a>\n'
+         '          <a id="df-wikibase" href="#" onclick="return false" style="opacity:0.4">Wikibase ↗</a>\n'
+         '          <a id="df-sparql"   href="#" onclick="return false" style="opacity:0.4">SPARQL ↗</a>\n'
+         '          <a id="df-json"     href="#" onclick="return false" style="opacity:0.4">JSON ↗</a>\n'
+         '        </div>\n'
+         '      </div>\n'
+         '      <div class="meta-foot" id="meta-foot">\n'
+         '        <a id="mf-record" href="#" target="_blank" rel="noopener" title="Open this item\'s permanent record page">Show item record</a>\n'
+         '      </div>',
+         "record-foot-cta"),
+        # v45: renderMeta writes into #meta-content so the in-scroll footer
+        # survives rebuilds; the CTA follows the selected item.
+        ('  function renderMeta(item) {\n    const body = $("#meta-body");',
+         '  function renderMeta(item) {\n'
+         '    const mf = document.getElementById("mf-record");\n'
+         '    if (mf) mf.href = "archive/" + item.id + ".html";\n'
+         '    const body = $("#meta-content");',
+         "meta-content-target"),
         # v40b: the row restacks — kicker (ID + type mark left, year right),
         # title, note. Researcher furniture (flags, drag, curation seq) is
         # re-housed untouched; styling it is deferred (Brandon).
@@ -626,7 +677,7 @@ def main():
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
-    ], version="44", tray=False)
+    ], version="45", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
