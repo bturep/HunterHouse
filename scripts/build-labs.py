@@ -176,6 +176,9 @@ CSS_LAB_B = """\
      collection bars on the left. */
   .pane-meta .meta-body{margin:0 7px;background:var(--soft)}
   html.dark body .pane-meta .meta-body{background:#252220}
+  /* v44: no rule under ITEM RECORD — the recessed body's own edge is the
+     separator, mirroring the left toolbar's seamless seam. */
+  .meta-head{border-bottom:0}
   /* — top-right cluster separators (v33) — */
   .tr-vsep{width:1px;align-self:stretch;background:var(--rule);flex:none}
   .site-topright .tr-div{height:auto;align-self:stretch}
@@ -623,7 +626,7 @@ def main():
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
-    ], version="43", tray=False)
+    ], version="44", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
