@@ -4013,7 +4013,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.50";
+  const VERSION      = "v1.09-test.79-labb.51";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -11273,7 +11273,7 @@ WHERE {
       // Theodora" selection). Populates state.curations from curations/index.json
       // → the [Curated] filter row + the ?open=<slug> deep-entry. Live browse.html
       // keeps this commented (curator dormant there until the next promotion).
-      await loadCurationIndex();   // populate [Curated] entry (tiny local JSON; no-op if absent)
+      // LAB B v51: curation index not loaded — no curated-selections row in this lab.
       applyFilters();
       renderList();
       wireControls();

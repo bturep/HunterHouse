@@ -439,6 +439,12 @@ def main():
         ('<div class="fp-lbl">Curators</div>',
          '<div class="fp-lbl">Curated selections by</div>',
          "curators-label"),
+        # v51: no curated selections in this lab — the For Theodora row is
+        # a next.html concern (the live mentor preview link); the lab skips
+        # loading the index entirely, so the row never renders.
+        ('      await loadCurationIndex();   // populate [Curated] entry (tiny local JSON; no-op if absent)',
+         '      // LAB B v51: curation index not loaded — no curated-selections row in this lab.',
+         "no-curations"),
         # v40c: ONE chrome row — Catalogue · search · Filter behind full-
         # height separators; the active-tag row below exists only while
         # filters are active. #list-info survives for mobile. Replaces the
@@ -693,7 +699,7 @@ def main():
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
-    ], version="50", tray=False)
+    ], version="51", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
