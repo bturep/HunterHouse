@@ -1026,7 +1026,7 @@
   /* — spine (v22/v24): sienna marks the extent of an OPEN collection —
      header, rows, rail shadow; closed bars carry a transparent stub. — */
   .phase-divider.ph-head,.row.in-bin{border-left:2px solid transparent}
-  .ph-head:not(.closed),.row.in-bin{border-left-color:var(--copper-deep)}   /* v47: open-collection spine = copper green */
+  .ph-head:not(.closed),.row.in-bin{border-left-color:var(--copper)}   /* v48: open-collection spine = the copper green (4f7a6b / 7aaa98) */
   /* — selection (v30/v39): the row in the viewer sinks to stage depth;
      the box opens right, spine carries the left, sienna lines top+bottom. — */
   .pane-list .row.sel{background:var(--soft);
@@ -1040,7 +1040,7 @@
     padding:0 20px 0 12px;background:var(--soft);border-bottom:1px solid var(--rule);
     border-left:2px solid transparent;cursor:pointer;
     font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--copper-deep)}
-  .br-row.open{border-left-color:var(--copper-deep)}
+  .br-row.open{border-left-color:var(--copper)}
   .br-row .r{color:var(--muted);letter-spacing:0.06em;font-size:9px}
   .br-row:hover{color:var(--ink)}
   .br-row .ph-chev{position:static;display:inline-block;width:14px;font-size:10px;color:var(--muted)}
@@ -1068,14 +1068,6 @@
   #meta-content{display:flex;flex-direction:column;flex:1}
   .pane-meta .data-footer{height:auto;background:transparent;border-top:1px solid var(--rule);
     padding:14px 0 2px;margin-top:28px;display:flex;flex-wrap:wrap;gap:12px 14px}
-  /* v46: [ SHOW ITEM RECORD ] — image foot, right end. Visible only
-     while the record pane is collapsed (its new default). */
-  #if-record{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;
-    color:var(--ink);background:none;border:0;padding:0;margin-left:18px;cursor:pointer;flex-shrink:0;white-space:nowrap}
-  #if-record::before{content:"[ "}
-  #if-record::after{content:" ]"}
-  #if-record:hover{color:var(--copper-deep)}
-  .shell:has(#panel-right:not(.out)) #if-record{display:none}
   /* — top-right cluster separators (v33) — */
   .tr-vsep{width:1px;align-self:stretch;background:var(--rule);flex:none}
   .site-topright .tr-div{height:auto;align-self:stretch}
@@ -3779,7 +3771,6 @@
         </button>
       </div>
       <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">↓ Original</a><a href="#" id="pdf-dl" rel="noopener" download hidden>↓ PDF</a></span>
-      <button id="if-record" type="button" title="Open the item record">Show item record</button>
     </div>
     <div class="mobile-img-nav" id="mobile-img-nav">
       <button id="mob-prev" class="mob-nav-btn" aria-label="Previous item">←</button>
@@ -4008,7 +3999,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.47";
+  const VERSION      = "v1.09-test.79-labb.48";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7590,7 +7581,7 @@ WHERE {
         lastPhase = gkey;
         const count = state.filtered.filter(x => gkeyOf(x) === gkey).length;
         const d = document.createElement("div");
-        const open = phaseExpanded.has(gkey) || !phaseCollapsed.has(gkey);   // v47: bins OPEN at the beginning; only a manual close shuts one
+        const open = phaseExpanded.has(gkey) || ((searchOpen || afActive) && !phaseCollapsed.has(gkey));   // v36/v48: contracted at rest; search/filter auto-open; manual close wins
         d.className = "phase-divider ph-head" + (open ? "" : " closed");
         d.dataset.phase = gkey;
         d.dataset.count = String(count).padStart(2,"0");   // the rail reads this
@@ -11040,7 +11031,8 @@ WHERE {
       }
       // ── Returning visitor: the original animated reveal into the bright archive.
       closeAboutPane();
-      leftP.classList.remove("out");   // LAB B v46: record stays collapsed by default
+      leftP.classList.remove("out");
+      rightP.classList.remove("out");
       syncFsBtn();
       // Hide the canvas while panels animate + fit settles; reveal once the
       // image is at the correct post-open size. Avoids the flash where the
@@ -11131,7 +11123,6 @@ WHERE {
       // always reflects the real panel state.
       document.getElementById("left-handle").addEventListener("click",  () => { togglePanel("left");  syncFsBtn(); });
       document.getElementById("right-handle").addEventListener("click", () => { if (document.body.classList.contains("lens-info")) { closeInfoPane(); return; } togglePanel("right"); syncFsBtn(); });
-      document.getElementById("if-record")?.addEventListener("click", () => { togglePanel("right"); syncFsBtn(); });   // LAB B v46
 
       // Bottom-bar button: both hidden → reveal both; otherwise hide both.
       pfsBtn.addEventListener("click", () => {

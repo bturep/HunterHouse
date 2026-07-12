@@ -140,7 +140,7 @@ CSS_LAB_B = """\
   /* — spine (v22/v24): sienna marks the extent of an OPEN collection —
      header, rows, rail shadow; closed bars carry a transparent stub. — */
   .phase-divider.ph-head,.row.in-bin{border-left:2px solid transparent}
-  .ph-head:not(.closed),.row.in-bin{border-left-color:var(--copper-deep)}   /* v47: open-collection spine = copper green */
+  .ph-head:not(.closed),.row.in-bin{border-left-color:var(--copper)}   /* v48: open-collection spine = the copper green (4f7a6b / 7aaa98) */
   /* — selection (v30/v39): the row in the viewer sinks to stage depth;
      the box opens right, spine carries the left, sienna lines top+bottom. — */
   .pane-list .row.sel{background:var(--soft);
@@ -154,7 +154,7 @@ CSS_LAB_B = """\
     padding:0 20px 0 12px;background:var(--soft);border-bottom:1px solid var(--rule);
     border-left:2px solid transparent;cursor:pointer;
     font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--copper-deep)}
-  .br-row.open{border-left-color:var(--copper-deep)}
+  .br-row.open{border-left-color:var(--copper)}
   .br-row .r{color:var(--muted);letter-spacing:0.06em;font-size:9px}
   .br-row:hover{color:var(--ink)}
   .br-row .ph-chev{position:static;display:inline-block;width:14px;font-size:10px;color:var(--muted)}
@@ -182,14 +182,6 @@ CSS_LAB_B = """\
   #meta-content{display:flex;flex-direction:column;flex:1}
   .pane-meta .data-footer{height:auto;background:transparent;border-top:1px solid var(--rule);
     padding:14px 0 2px;margin-top:28px;display:flex;flex-wrap:wrap;gap:12px 14px}
-  /* v46: [ SHOW ITEM RECORD ] — image foot, right end. Visible only
-     while the record pane is collapsed (its new default). */
-  #if-record{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;
-    color:var(--ink);background:none;border:0;padding:0;margin-left:18px;cursor:pointer;flex-shrink:0;white-space:nowrap}
-  #if-record::before{content:"[ "}
-  #if-record::after{content:" ]"}
-  #if-record:hover{color:var(--copper-deep)}
-  .shell:has(#panel-right:not(.out)) #if-record{display:none}
   /* — top-right cluster separators (v33) — */
   .tr-vsep{width:1px;align-self:stretch;background:var(--rule);flex:none}
   .site-topright .tr-div{height:auto;align-self:stretch}
@@ -252,7 +244,7 @@ NEW_PHASE_DIVIDER_B = """\
         lastPhase = gkey;
         const count = state.filtered.filter(x => gkeyOf(x) === gkey).length;
         const d = document.createElement("div");
-        const open = phaseExpanded.has(gkey) || !phaseCollapsed.has(gkey);   // v47: bins OPEN at the beginning; only a manual close shuts one
+        const open = phaseExpanded.has(gkey) || ((searchOpen || afActive) && !phaseCollapsed.has(gkey));   // v36/v48: contracted at rest; search/filter auto-open; manual close wins
         d.className = "phase-divider ph-head" + (open ? "" : " closed");
         d.dataset.phase = gkey;
         d.dataset.count = String(count).padStart(2,"0");   // the rail reads this
@@ -492,29 +484,6 @@ def main():
         ('  function renderMeta(item) {\n    const body = $("#meta-body");',
          '  function renderMeta(item) {\n    const body = $("#meta-content");',
          "meta-content-target"),
-        # v46: record pane defaults CLOSED — the normal Continue opens only
-        # the left panel (the first-run tour still opens both; its steps
-        # point at the record). The image-foot CTA below opens it on demand.
-        ('      closeAboutPane();\n'
-         '      leftP.classList.remove("out");\n'
-         '      rightP.classList.remove("out");\n'
-         '      syncFsBtn();',
-         '      closeAboutPane();\n'
-         '      leftP.classList.remove("out");   // LAB B v46: record stays collapsed by default\n'
-         '      syncFsBtn();',
-         "right-closed-default"),
-        # v46: [ SHOW ITEM RECORD ] in the image foot — visible while the
-        # pane is collapsed, opens it, hides while open (the pull tab and
-        # handle close it again).
-        ('      <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">\u2193 Original</a><a href="#" id="pdf-dl" rel="noopener" download hidden>\u2193 PDF</a></span>\n    </div>',
-         '      <span class="foot-dl"><a href="#" id="if-full" target="_blank" rel="noopener">\u2193 Original</a><a href="#" id="pdf-dl" rel="noopener" download hidden>\u2193 PDF</a></span>\n'
-         '      <button id="if-record" type="button" title="Open the item record">Show item record</button>\n'
-         '    </div>',
-         "foot-record-cta"),
-        ('      document.getElementById("right-handle").addEventListener("click", () => { if (document.body.classList.contains("lens-info")) { closeInfoPane(); return; } togglePanel("right"); syncFsBtn(); });',
-         '      document.getElementById("right-handle").addEventListener("click", () => { if (document.body.classList.contains("lens-info")) { closeInfoPane(); return; } togglePanel("right"); syncFsBtn(); });\n'
-         '      document.getElementById("if-record")?.addEventListener("click", () => { togglePanel("right"); syncFsBtn(); });   // LAB B v46',
-         "foot-record-wiring"),
         # v40b: the row restacks — kicker (ID + type mark left, year right),
         # title, note. Researcher furniture (flags, drag, curation seq) is
         # re-housed untouched; styling it is deferred (Brandon).
@@ -692,7 +661,7 @@ def main():
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
-    ], version="47", tray=False)
+    ], version="48", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
