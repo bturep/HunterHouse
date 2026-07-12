@@ -1062,9 +1062,25 @@
   /* v44: no rule under ITEM RECORD — the recessed body's own edge is the
      separator, mirroring the left toolbar's seamless seam. */
   .pane-meta .meta-head{border-bottom:0}   /* v47: outranks the base rule (v44's selector tied and lost) */
-  /* v45: the technical links live at the end of the SCROLL, quiet; the
-     fixed bar below carries one prominent action — the item's permanent
-     record page. */
+  /* v45/v49: the technical links live at the end of the SCROLL, quiet;
+     the pane still ENDS in a 41px chrome foot — empty frame, continuing
+     the bottom line across all three panes. */
+  .meta-foot{height:41px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
+    display:flex;align-items:center;justify-content:flex-end;gap:16px;padding:0 22px}
+  html.dark body .meta-foot{background:#2b2823}
+  /* v50: ? / Aa / fullscreen live here now — their base styles were scoped
+     to .site-topright, so the flat treatment is restated for this home. */
+  .meta-foot button{background:none;border:0;padding:0;cursor:pointer;color:var(--ink);
+    font-family:var(--mono);font-weight:500;line-height:1;display:inline-flex;align-items:center}
+  .meta-foot button:hover{opacity:0.5}
+  .meta-foot #rec-info{font-size:14px}
+  .meta-foot #text-toggle{align-items:baseline;gap:1px}
+  .meta-foot #text-toggle .aa-sm{font-size:10px;opacity:1}
+  .meta-foot #text-toggle .aa-lg{font-size:14px;opacity:0.4}
+  html.text-lg .meta-foot #text-toggle .aa-sm{opacity:0.4}
+  html.text-lg .meta-foot #text-toggle .aa-lg{opacity:1}
+  html.text-xl .meta-foot #text-toggle .aa-sm{opacity:1;font-weight:700}
+  html.text-xl .meta-foot #text-toggle .aa-lg{opacity:1;font-weight:700;font-size:15px}
   #meta-content{display:flex;flex-direction:column;flex:1}
   .pane-meta .data-footer{height:auto;background:transparent;border-top:1px solid var(--rule);
     padding:14px 0 2px;margin-top:28px;display:flex;flex-wrap:wrap;gap:12px 14px}
@@ -3568,20 +3584,13 @@
     <!-- Info ("?") button — opens the shortcuts/info pane. In-flow between
          #search-toggle and #fs-toggle; hidden while the about-pane is open
          and on first paint via data-splash-init (see the #rec-info rules). -->
-    <span class="tr-vsep" aria-hidden="true"></span>
-    <button id="rec-info" title="About this archive &amp; shortcuts [?]" aria-label="Info">?</button>
-    <span class="tr-vsep" aria-hidden="true"></span>
     <!-- Aa text-size toggle. Click cycles 3 states: default → text-lg →
          text-xl → default. Persisted to localStorage["hhf_text_size"]
          ("" | "lg" | "xl"). The two glyphs shift opacity / weight to indicate
          the active size. Legacy "hhf_text_lg" key is read once at pre-init
          for backward-compat. -->
-    <button class="theme-btn" id="text-toggle" title="Larger text" aria-label="Cycle text size">
-      <span class="aa-sm">A</span><span class="aa-lg">A</span>
-    </button>
     <!-- fs-toggle LAST so flex-end (padding-right:0) lands its right edge at
          viewport_right - 28 — the inner edge of the collapsed right panel. -->
-    <button class="theme-btn" id="fs-toggle" title="Enter fullscreen" aria-label="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
   </div>
 </header>
 
@@ -3820,6 +3829,11 @@
           <a id="df-json"     href="#" onclick="return false" style="opacity:0.4">JSON ↗</a>
         </div>
       </div>
+      <div class="meta-foot" id="meta-foot">
+        <button id="rec-info" title="About this archive &amp; shortcuts [?]" aria-label="Info">?</button>
+        <button class="theme-btn" id="text-toggle" title="Larger text" aria-label="Cycle text size"><span class="aa-sm">A</span><span class="aa-lg">A</span></button>
+        <button class="theme-btn" id="fs-toggle" title="Enter fullscreen" aria-label="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
+      </div>
     </div>
     <div id="info-pane" role="dialog" aria-modal="true" aria-label="About this archive and keyboard shortcuts">
       <button id="info-pane-close" aria-label="Close">×</button>
@@ -3999,7 +4013,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.48";
+  const VERSION      = "v1.09-test.79-labb.50";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6424,6 +6438,9 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   // can stay stale-active over a list that does not overflow.
   document.getElementById("panel-left").addEventListener("transitionend", e => {
     if (e.propertyName === "width") updatePip("rows", "list-pip");
+  });
+  document.getElementById("panel-right").addEventListener("transitionend", e => {   // v49: same stale-size fix for the record pip
+    if (e.propertyName === "width") updatePip("meta-body", "meta-pip");
   });
   function updatePip(scrollId, pipId) {
     if (scrollId === "rows") updateBinRails();
