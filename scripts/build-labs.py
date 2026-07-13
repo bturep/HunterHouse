@@ -109,7 +109,7 @@ CSS_LAB_B = """\
   #lf-pills .af-clear{font-family:var(--mono);font-size:10px;letter-spacing:0.10em;text-transform:uppercase;
     color:color-mix(in srgb, var(--muted) 40%, transparent);background:none;border:0;padding:0;margin-left:2px;cursor:pointer}
   #lf-pills .af-clear:hover{color:var(--muted)}
-  @media (min-width:768px){ .panel-left .filter-panel{top:40px;bottom:38px} }   /* flush under the toolbar; stops above the foot like the ? pane */
+  @media (min-width:768px){ .panel-left .filter-panel{top:40px;bottom:28px} }   /* flush under the toolbar; stops above the foot like the ? pane */
   /* v57: the tray joins the pip system — native scrollbar hidden, pip in
      the slot, above the overlay. The Show action moves to the list foot
      while the tray is open; the overlay keeps only Clear all. */
@@ -196,7 +196,7 @@ CSS_LAB_B = """\
   .br-row .r{color:var(--muted);letter-spacing:0.06em;font-size:9px}
   .br-row:hover{color:var(--ink)}
   .br-row .ph-chev{position:static;display:inline-block;width:14px;font-size:10px;color:var(--muted)}
-  #list-foot{height:38px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
+  #list-foot{height:28px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
     display:flex;align-items:center;padding:0 20px;
     font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em}
   html.dark body #list-foot{background:#2b2823}
@@ -219,7 +219,7 @@ CSS_LAB_B = """\
   /* v45/v49: the technical links live at the end of the SCROLL, quiet;
      the pane still ENDS in a 41px chrome foot — empty frame, continuing
      the bottom line across all three panes. */
-  .meta-foot{height:38px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
+  .meta-foot{height:28px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
     display:flex;align-items:center;justify-content:flex-end;gap:16px;padding:0 22px}
   html.dark body .meta-foot{background:#2b2823}
   /* v50/v53: only the ? lives here (Aa + fullscreen went home to the top
@@ -230,7 +230,7 @@ CSS_LAB_B = """\
     font-family:var(--mono);font-weight:500;line-height:1;display:inline-flex;align-items:center}
   .meta-foot button:hover{opacity:0.5}
   .meta-foot #rec-info{font-size:14px}
-  .panel-right #info-pane{bottom:38px}
+  .panel-right #info-pane{bottom:28px}
   /* v56: signed-out unlock lives in ? now, not under the record */
   body:not(.is-researcher) #meta-content #rn-panel{display:none}
   #rn-unlock-ip{margin-top:22px;padding-top:16px;border-top:1px solid var(--rule)}
@@ -258,8 +258,9 @@ CSS_LAB_B = """\
   .panel-handle:hover::before{background:var(--ink)}
   .panel-handle .handle-chevron{display:none}
   .panel-left.pane-list,.panel-right.pane-meta{overflow:visible}
-  /* v63: feet a touch shorter (41 -> 38); the image foot follows */
-  .pane-image .image-foot{height:38px}
+  /* v63/v68: feet at 28px — the collapsed sliver width; the frame is
+     one dimension all round (slivers, feet, splash strip). */
+  .pane-image .image-foot{height:28px}
   /* v63: the collapsed record sliver names itself — vertical label,
      whole sliver clickable (pull tab still works). Hidden during splash. */
   .panel-right.out{cursor:pointer}
@@ -814,7 +815,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="67", tray=False)
+    ], version="68", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
