@@ -1159,7 +1159,8 @@
   /* v77: the ? never disappears — when the record collapses, its foot
      survives as a 28x28 square in the sliver's corner (visibility is
      resettable on descendants); the image foot butts against it. */
-  .panel-right.out .meta-foot{visibility:visible;padding:0;justify-content:center}
+  .panel-right.out .meta-foot{visibility:visible;padding:0 7px 0 0}   /* v79: stays right-anchored — 7px right = optically centred in the 28px square; no justify snap */
+  .meta-foot{transition:padding 260ms cubic-bezier(0.4,0,0.2,1)}   /* v79: the padding eases on the pane's own curve */
   /* v64: the catalogue sliver gets the same treatment */
   .panel-left.out{cursor:pointer}
   .panel-left.out::after{content:"ARCHIVE";position:absolute;top:50%;left:50%;
@@ -4078,7 +4079,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.78";
+  const VERSION      = "v1.09-test.79-labb.79";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
