@@ -535,9 +535,7 @@ def main():
          '      <div class="filter-panel" id="filter-panel" hidden></div>',
          '      <div class="lp-toolbar">\n'
          '        <span class="l lh-title">Catalogue</span>\n'
-         '        <span class="tb-vsep" aria-hidden="true"></span>\n'
          '        <input id="lp-search-input" type="text" placeholder="search archive" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search the archive">\n'
-         '        <span class="tb-vsep" aria-hidden="true"></span>\n'
          '        <button class="l lh-filter" id="filter-toggle" title="Filter">Filter<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">›</span></button>\n'
          '        <button id="list-info" type="button" title="About this archive" aria-label="About this archive">?</button>\n'
          '      </div>\n'
@@ -816,7 +814,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="70", tray=False)
+    ], version="71", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
