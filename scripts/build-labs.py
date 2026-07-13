@@ -105,7 +105,19 @@ CSS_LAB_B = """\
   #lf-pills .af-clear{font-family:var(--mono);font-size:10px;letter-spacing:0.10em;text-transform:uppercase;
     color:color-mix(in srgb, var(--muted) 40%, transparent);background:none;border:0;padding:0;margin-left:2px;cursor:pointer}
   #lf-pills .af-clear:hover{color:var(--muted)}
-  @media (min-width:768px){ .filter-panel{top:40px} }   /* toolbar underside in PANEL coords (v40 double-counted the 41px site-top) */
+  @media (min-width:768px){ .panel-left .filter-panel{top:40px;bottom:41px} }   /* flush under the toolbar; stops above the foot like the ? pane */
+  /* v57: the tray joins the pip system — native scrollbar hidden, pip in
+     the slot, above the overlay. The Show action moves to the list foot
+     while the tray is open; the overlay keeps only Clear all. */
+  .filter-panel{scrollbar-width:none}
+  .filter-panel::-webkit-scrollbar{display:none}
+  #filter-pip{z-index:51}
+  .fp-show{display:none}
+  #lf-show{display:none;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.12em;
+    text-transform:uppercase;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;margin-left:auto}
+  #lf-show:hover{color:var(--copper-deep)}
+  .panel-left:has(#filter-panel:not([hidden])) #lf-count{display:none}
+  .panel-left:has(#filter-panel:not([hidden])) #lf-show{display:inline-flex}
   /* applied tags — the browse chips' bracket convention, category colour */
   .af-pill{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:0.02em;
     text-transform:capitalize;line-height:1.6;background:transparent;border:0;
@@ -556,8 +568,9 @@ def main():
         # v23: rail containers — siblings of #rows inside .panel-content.
         ('      <div class="rows" id="rows"></div>',
          '      <div class="rows" id="rows"></div>\n'
+         '      <div class="scroll-pip" id="filter-pip" aria-hidden="true"></div>\n'
          '      <div id="bin-rail-top" aria-hidden="true"></div>\n'
-         '      <div id="list-foot"><span id="lf-count"></span></div>',
+         '      <div id="list-foot"><span id="lf-count"></span><button id="lf-show" type="button" title="Apply and close the filter">Show \u2192</button></div>',
          "bin-rail-markup"),
         # v31: splash bottom strip — fixed, so DOM placement is free.
         ('</body>',
@@ -717,7 +730,27 @@ def main():
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
-    ], version="56", tray=False)
+        # v57: the Show action lives in the list foot while the tray is
+        # open (mirrors the ? pane: overlay above, action in the frame);
+        # the overlay pip refreshes on every panel render.
+        ('    panel.querySelector("#fp-clear-btn")?.addEventListener("click", e => {',
+         '    const lfShow = document.getElementById("lf-show");\n'
+         '    if (lfShow) lfShow.textContent = `Show ${state.filtered.length} \u2192`;\n'
+         '    requestAnimationFrame(() => updatePip("filter-panel", "filter-pip"));\n'
+         '    panel.querySelector("#fp-clear-btn")?.addEventListener("click", e => {',
+         "lf-show-label"),
+        # v57: overlay scroll + any click keeps the filter pip honest; the
+        # foot Show proxies the overlay's own (hidden) Show button.
+        ('    document.getElementById("rows").addEventListener("scroll",\n'
+         '      () => updatePip("rows", "list-pip"), { passive: true });',
+         '    document.getElementById("rows").addEventListener("scroll",\n'
+         '      () => updatePip("rows", "list-pip"), { passive: true });\n'
+         '    document.getElementById("filter-panel").addEventListener("scroll",\n'
+         '      () => updatePip("filter-panel", "filter-pip"), { passive: true });\n'
+         '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
+         '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
+         "filter-pip-wiring"),
+    ], version="57", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.

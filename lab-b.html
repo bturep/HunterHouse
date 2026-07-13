@@ -991,7 +991,19 @@
   #lf-pills .af-clear{font-family:var(--mono);font-size:10px;letter-spacing:0.10em;text-transform:uppercase;
     color:color-mix(in srgb, var(--muted) 40%, transparent);background:none;border:0;padding:0;margin-left:2px;cursor:pointer}
   #lf-pills .af-clear:hover{color:var(--muted)}
-  @media (min-width:768px){ .filter-panel{top:40px} }   /* toolbar underside in PANEL coords (v40 double-counted the 41px site-top) */
+  @media (min-width:768px){ .panel-left .filter-panel{top:40px;bottom:41px} }   /* flush under the toolbar; stops above the foot like the ? pane */
+  /* v57: the tray joins the pip system — native scrollbar hidden, pip in
+     the slot, above the overlay. The Show action moves to the list foot
+     while the tray is open; the overlay keeps only Clear all. */
+  .filter-panel{scrollbar-width:none}
+  .filter-panel::-webkit-scrollbar{display:none}
+  #filter-pip{z-index:51}
+  .fp-show{display:none}
+  #lf-show{display:none;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.12em;
+    text-transform:uppercase;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;margin-left:auto}
+  #lf-show:hover{color:var(--copper-deep)}
+  .panel-left:has(#filter-panel:not([hidden])) #lf-count{display:none}
+  .panel-left:has(#filter-panel:not([hidden])) #lf-show{display:inline-flex}
   /* applied tags — the browse chips' bracket convention, category colour */
   .af-pill{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:0.02em;
     text-transform:capitalize;line-height:1.6;background:transparent;border:0;
@@ -3735,8 +3747,9 @@
       <div class="bulk-bar" id="bulk-bar" hidden></div>
       <div class="curation-card" id="curation-card" hidden></div>
       <div class="rows" id="rows"></div>
+      <div class="scroll-pip" id="filter-pip" aria-hidden="true"></div>
       <div id="bin-rail-top" aria-hidden="true"></div>
-      <div id="list-foot"><span id="lf-count"></span></div>
+      <div id="list-foot"><span id="lf-count"></span><button id="lf-show" type="button" title="Apply and close the filter">Show →</button></div>
     </div>
     <button class="panel-handle" id="left-handle" aria-label="Toggle browse panel">
       <svg class="handle-chevron" width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2,1 5,5 2,9"/></svg>
@@ -4024,7 +4037,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.56";
+  const VERSION      = "v1.09-test.79-labb.57";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -8601,6 +8614,9 @@ WHERE {
         <button class="fp-show" id="fp-show-btn">Show ${state.filtered.length} →</button>
       </div>`;
 
+    const lfShow = document.getElementById("lf-show");
+    if (lfShow) lfShow.textContent = `Show ${state.filtered.length} →`;
+    requestAnimationFrame(() => updatePip("filter-panel", "filter-pip"));
     panel.querySelector("#fp-clear-btn")?.addEventListener("click", e => {
       e.stopPropagation();
       clearAllFilters();
@@ -11219,6 +11235,10 @@ WHERE {
     // ── Scroll pips ───────────────────────────────────────────────────────────
     document.getElementById("rows").addEventListener("scroll",
       () => updatePip("rows", "list-pip"), { passive: true });
+    document.getElementById("filter-panel").addEventListener("scroll",
+      () => updatePip("filter-panel", "filter-pip"), { passive: true });
+    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));
+    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());
     document.getElementById("meta-body").addEventListener("scroll",
       () => updatePip("meta-body", "meta-pip"), { passive: true });
 
