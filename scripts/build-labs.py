@@ -192,10 +192,10 @@ CSS_LAB_B = """\
   .br-row{display:flex;justify-content:space-between;align-items:center;height:25px;box-sizing:border-box;
     padding:0 20px 0 12px;background:var(--soft);border-bottom:1px solid var(--rule);
     border-left:2px solid transparent;cursor:pointer;
-    font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--copper-deep)}
+    font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink)}   /* v78: rail names in ink, matching the expanded headers */
   .br-row.open{border-left-color:color-mix(in srgb, var(--bin, var(--copper)) 55%, transparent)}
   .br-row .r{color:var(--muted);letter-spacing:0.06em;font-size:9px}
-  .br-row:hover{color:var(--ink)}
+  .br-row:hover{opacity:0.7}
   .br-row .ph-chev{position:static;display:inline-block;width:14px;font-size:10px;color:var(--muted)}
   #list-foot{height:28px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
     display:flex;align-items:center;padding:0 20px;
@@ -837,7 +837,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="77", tray=False)
+    ], version="78", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
