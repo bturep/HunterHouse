@@ -85,7 +85,7 @@ CSS_LAB_B = """\
   /* — chrome toolbar (v40c): Catalogue · search · Filter share ONE row
      behind full-height separators. Catalogue demoted below the wordmark
      (v40d): chrome ranks by dimness+tracking, content by ink. — */
-  .lp-toolbar{display:flex;align-items:center;gap:12px;padding:11px 20px 11px 29px;background:var(--bg);flex-shrink:0}
+  .lp-toolbar{display:flex;align-items:center;gap:12px;padding:11px 20px 11px 29px;flex-shrink:0}
   /* v55: type hierarchy + one left edge — the wordmark reads above
      CATALOGUE (12.5 > 11.5), and Hunter House Archive / Catalogue /
      collection titles all start at x=29 (gutter + spine + padding). */
@@ -153,8 +153,14 @@ CSS_LAB_B = """\
   html.dark body .pane-image,html.dark body .image-stage{background:#191614}   /* v55: stage lifted a touch; the chosen item matches it */
   html.dark body .row.in-bin{background:#1e1b19}
   html.dark body .phase-divider.ph-head,html.dark body .br-row{background:#252220}
-  html.dark body .site-top,html.dark body .lp-toolbar,html.dark body .lp-filter,
-  html.dark body .meta-head,html.dark body .image-foot,html.dark body .panel-handle{background:#2b2823}
+  html.dark body .site-top,html.dark body .lp-filter,
+  html.dark body .image-foot,html.dark body .panel-handle{background:#2b2823}
+  /* v65: pane HEADERS get their own half-step above the frame — raised
+     toward the hand, so an open pane reads header / recessed content /
+     frame instead of undifferentiated chrome. Closed slivers and feet
+     stay at frame tone: the closed state is unchanged. */
+  html.dark body .lp-toolbar,html.dark body .meta-head{background:#322d27}
+  .lp-toolbar,.pane-meta .meta-head{background:#faf9f5}
   html.dark body .panel-handle::before{background:#8a847c}
   html.dark body .panel-right{background:#2b2823}
   html.dark body .panel-left{background:#2b2823}
@@ -798,7 +804,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="64", tray=False)
+    ], version="65", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
