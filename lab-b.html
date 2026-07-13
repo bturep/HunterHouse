@@ -4075,7 +4075,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.66";
+  const VERSION      = "v1.09-test.79-labb.67";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7609,12 +7609,12 @@ WHERE {
       d.className = "empty";
       d.textContent = "No items match this combination";
       container.appendChild(d);
-      const hint = document.createElement("div");
-      hint.className = "empty-hint";
-      hint.textContent = afActive
-        ? "Remove a filter above to widen the selection — an empty result means these facets don't overlap in the catalogue."
-        : "Try a different search term.";
-      container.appendChild(hint);
+      if (afActive) {   // LAB B v67: search-empty carries no hint
+        const hint = document.createElement("div");
+        hint.className = "empty-hint";
+        hint.textContent = "Remove a filter above to widen the selection — an empty result means these facets don't overlap in the catalogue.";
+        container.appendChild(hint);
+      }
       const clearBtn0 = document.getElementById("filter-clear-all");
       if (clearBtn0) clearBtn0.addEventListener("click", e => {
         e.stopPropagation(); clearAllFilters();

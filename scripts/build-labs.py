@@ -776,6 +776,21 @@ def main():
         ('      if (afActive) container.appendChild(afBar());',
          '      renderAfPills();',
          "af-call-empty"),
+        # v67: no "Try a different search term" note — the empty state
+        # keeps only the filter-overlap hint (which is load-bearing).
+        ('      const hint = document.createElement("div");\n'
+         '      hint.className = "empty-hint";\n'
+         '      hint.textContent = afActive\n'
+         '        ? "Remove a filter above to widen the selection \u2014 an empty result means these facets don\'t overlap in the catalogue."\n'
+         '        : "Try a different search term.";\n'
+         '      container.appendChild(hint);',
+         '      if (afActive) {   // LAB B v67: search-empty carries no hint\n'
+         '        const hint = document.createElement("div");\n'
+         '        hint.className = "empty-hint";\n'
+         '        hint.textContent = "Remove a filter above to widen the selection \u2014 an empty result means these facets don\'t overlap in the catalogue.";\n'
+         '        container.appendChild(hint);\n'
+         '      }',
+         "no-search-hint"),
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
@@ -799,7 +814,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="66", tray=False)
+    ], version="67", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
