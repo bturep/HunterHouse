@@ -115,6 +115,9 @@ CSS_LAB_B = """\
      the slot, above the overlay. The Show action moves to the list foot
      while the tray is open; the overlay keeps only Clear all. */
   .filter-panel{scrollbar-width:none}
+  .panel-left .filter-panel{padding-left:29px}   /* v80/v81: joins the x=29 plumb line — needs the stronger selector; base padding shorthand comes later and won the tie */
+  .filter-panel .fp-lbl{color:var(--ink)}   /* v80: facet headers in ink — a step above their chips */
+  .filter-panel .fp-group + .fp-group{border-top:1px dashed color-mix(in srgb, var(--rule) 45%, transparent);padding-top:12px}   /* v80: faint dashed rules between sections, the rows' own separator language */
   .filter-panel::-webkit-scrollbar{display:none}
   #filter-pip{z-index:51}
   .fp-show{display:none}
@@ -273,7 +276,7 @@ CSS_LAB_B = """\
   /* v77: the ? never disappears — when the record collapses, its foot
      survives as a 28x28 square in the sliver's corner (visibility is
      resettable on descendants); the image foot butts against it. */
-  .panel-right.out .meta-foot{visibility:visible;padding:0 7px 0 0}   /* v79: stays right-anchored — 7px right = optically centred in the 28px square; no justify snap */
+  .panel-right.out .meta-foot{visibility:visible;padding:0 9px 0 0}   /* v79/v81: right-anchored; 9px measured-centres the 8.4px glyph in the 27px box */
   .meta-foot{transition:padding 260ms cubic-bezier(0.4,0,0.2,1)}   /* v79: the padding eases on the pane's own curve */
   /* v64: the catalogue sliver gets the same treatment */
   .panel-left.out{cursor:pointer}
@@ -838,7 +841,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="79", tray=False)
+    ], version="81", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
