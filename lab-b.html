@@ -1153,6 +1153,13 @@
     font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;
     text-transform:uppercase;color:var(--muted);pointer-events:none}
   body.hh-splash .panel-right.out::after{content:none}
+  /* v64: the catalogue sliver gets the same treatment */
+  .panel-left.out{cursor:pointer}
+  .panel-left.out::after{content:"CATALOGUE";position:absolute;top:50%;left:50%;
+    transform:translate(-50%,-50%);writing-mode:vertical-rl;white-space:nowrap;
+    font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;
+    text-transform:uppercase;color:var(--muted);pointer-events:none}
+  body.hh-splash .panel-left.out::after{content:none}
   .row{
     display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
     padding:11px 20px;align-items:start;cursor:pointer;
@@ -4067,7 +4074,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.63";
+  const VERSION      = "v1.09-test.79-labb.64";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -11185,6 +11192,9 @@ WHERE {
       document.getElementById("right-handle").addEventListener("click", () => { if (document.body.classList.contains("lens-info")) { closeInfoPane(); return; } togglePanel("right"); syncFsBtn(); });
       document.getElementById("panel-right").addEventListener("click", e => {   // LAB B v63: the collapsed sliver opens the record
         if (e.currentTarget.classList.contains("out") && !e.target.closest(".panel-handle")) { togglePanel("right"); syncFsBtn(); }
+      });
+      document.getElementById("panel-left").addEventListener("click", e => {   // LAB B v64: same for the catalogue sliver
+        if (e.currentTarget.classList.contains("out") && !e.target.closest(".panel-handle")) { togglePanel("left"); syncFsBtn(); }
       });
 
       // Bottom-bar button: both hidden → reveal both; otherwise hide both.

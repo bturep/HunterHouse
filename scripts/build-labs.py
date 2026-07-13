@@ -267,6 +267,13 @@ CSS_LAB_B = """\
     font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;
     text-transform:uppercase;color:var(--muted);pointer-events:none}
   body.hh-splash .panel-right.out::after{content:none}
+  /* v64: the catalogue sliver gets the same treatment */
+  .panel-left.out{cursor:pointer}
+  .panel-left.out::after{content:"CATALOGUE";position:absolute;top:50%;left:50%;
+    transform:translate(-50%,-50%);writing-mode:vertical-rl;white-space:nowrap;
+    font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;
+    text-transform:uppercase;color:var(--muted);pointer-events:none}
+  body.hh-splash .panel-left.out::after{content:none}
 """
 
 OLD_PHASE_DIVIDER = """\
@@ -584,6 +591,9 @@ def main():
          '      document.getElementById("right-handle").addEventListener("click", () => { if (document.body.classList.contains("lens-info")) { closeInfoPane(); return; } togglePanel("right"); syncFsBtn(); });\n'
          '      document.getElementById("panel-right").addEventListener("click", e => {   // LAB B v63: the collapsed sliver opens the record\n'
          '        if (e.currentTarget.classList.contains("out") && !e.target.closest(".panel-handle")) { togglePanel("right"); syncFsBtn(); }\n'
+         '      });\n'
+         '      document.getElementById("panel-left").addEventListener("click", e => {   // LAB B v64: same for the catalogue sliver\n'
+         '        if (e.currentTarget.classList.contains("out") && !e.target.closest(".panel-handle")) { togglePanel("left"); syncFsBtn(); }\n'
          '      });',
          "sliver-opens-record"),
         # v40b: the row restacks — kicker (ID + type mark left, year right),
@@ -788,7 +798,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="63", tray=False)
+    ], version="64", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
