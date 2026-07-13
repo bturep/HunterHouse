@@ -1084,6 +1084,9 @@
   .meta-foot button:hover{opacity:0.5}
   .meta-foot #rec-info{font-size:14px}
   .panel-right #info-pane{bottom:41px}
+  /* v56: signed-out unlock lives in ? now, not under the record */
+  body:not(.is-researcher) #meta-content #rn-panel{display:none}
+  #rn-unlock-ip{margin-top:22px;padding-top:16px;border-top:1px solid var(--rule)}
   .panel-right #info-pane-close{display:none}
   #panel-right:has(#info-pane.open) #rec-info{font-size:0}
   #panel-right:has(#info-pane.open) #rec-info::after{content:"✕";font-size:13px}
@@ -4021,7 +4024,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.55";
+  const VERSION      = "v1.09-test.79-labb.56";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9883,15 +9886,11 @@ WHERE {
         ["Esc",    "Close · exit zen"],
       ])}
 
-      <p class="ip-grp">Guided tour</p>
-      <p class="ip-note"><a href="#" onclick="hhReplayTour();return false;">Replay the interface walkthrough ↻</a> — a quick, spotlit tour of the controls.</p>
-
-      <p class="ip-grp">Platform</p>
-      <p class="ip-note"><a href="https://hunterhouse.wikibase.cloud/wiki/Main_Page" target="_blank" rel="noopener">Wikibase Main Page — archive structure, rights &amp; endpoints ↗</a></p>
-
       <p class="ip-foot">Researchers: a second ? appears in the record bar with notes,
-        marking, and your own shortcuts.</p>`;
+        marking, and your own shortcuts.</p>
+      <div id="rn-unlock-ip"></div>`;
     document.getElementById("ip-inner").innerHTML = html;
+    if (!rnSession()) renderRN(state.selectedId, "rn-unlock-ip");   // LAB B v56: unlock lives at the bottom of ?
   }
 
   // Researcher help — opens from the ? button in the Item-record bar. Public

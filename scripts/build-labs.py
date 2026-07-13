@@ -198,6 +198,9 @@ CSS_LAB_B = """\
   .meta-foot button:hover{opacity:0.5}
   .meta-foot #rec-info{font-size:14px}
   .panel-right #info-pane{bottom:41px}
+  /* v56: signed-out unlock lives in ? now, not under the record */
+  body:not(.is-researcher) #meta-content #rn-panel{display:none}
+  #rn-unlock-ip{margin-top:22px;padding-top:16px;border-top:1px solid var(--rule)}
   .panel-right #info-pane-close{display:none}
   #panel-right:has(#info-pane.open) #rec-info{font-size:0}
   #panel-right:has(#info-pane.open) #rec-info::after{content:"\u2715";font-size:13px}
@@ -451,6 +454,25 @@ def main():
         ('      await loadCurationIndex();   // populate [Curated] entry (tiny local JSON; no-op if absent)',
          '      // LAB B v51: curation index not loaded — no curated-selections row in this lab.',
          "no-curations"),
+        # v56: Guided tour + Platform sections leave the ? pane.
+        ('      <p class="ip-grp">Guided tour</p>\n'
+         '      <p class="ip-note"><a href="#" onclick="hhReplayTour();return false;">Replay the interface walkthrough \u21bb</a> \u2014 a quick, spotlit tour of the controls.</p>\n'
+         '\n'
+         '      <p class="ip-grp">Platform</p>\n'
+         '      <p class="ip-note"><a href="https://hunterhouse.wikibase.cloud/wiki/Main_Page" target="_blank" rel="noopener">Wikibase Main Page \u2014 archive structure, rights &amp; endpoints \u2197</a></p>\n'
+         '\n',
+         '',
+         "no-tour-platform"),
+        # v56: research-mode unlock moves to the BOTTOM of the ? pane
+        # (renderRN already takes a target panel id); the record pane's
+        # signed-out unlock row is suppressed via CSS.
+        ('        marking, and your own shortcuts.</p>`;\n'
+         '    document.getElementById("ip-inner").innerHTML = html;',
+         '        marking, and your own shortcuts.</p>\n'
+         '      <div id="rn-unlock-ip"></div>`;\n'
+         '    document.getElementById("ip-inner").innerHTML = html;\n'
+         '    if (!rnSession()) renderRN(state.selectedId, "rn-unlock-ip");   // LAB B v56: unlock lives at the bottom of ?',
+         "unlock-in-info"),
         # v40c: ONE chrome row — Catalogue · search · Filter behind full-
         # height separators; the active-tag row below exists only while
         # filters are active. #list-info survives for mobile. Replaces the
@@ -695,7 +717,7 @@ def main():
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
-    ], version="55", tray=False)
+    ], version="56", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
