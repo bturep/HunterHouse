@@ -140,7 +140,7 @@ CSS_LAB_B = """\
   /* — spine (v22/v24): sienna marks the extent of an OPEN collection —
      header, rows, rail shadow; closed bars carry a transparent stub. — */
   .phase-divider.ph-head,.row.in-bin{border-left:2px solid transparent}
-  .ph-head:not(.closed),.row.in-bin{border-left-color:var(--copper)}   /* v48: open-collection spine = the copper green (4f7a6b / 7aaa98) */
+  .ph-head:not(.closed),.row.in-bin{border-left-color:color-mix(in srgb, var(--copper) 55%, transparent)}   /* v48/v52: copper spine, dimmed — quieter */
   /* — selection (v30/v39): the row in the viewer sinks to stage depth;
      the box opens right, spine carries the left, sienna lines top+bottom. — */
   .pane-list .row.sel{background:var(--soft);
@@ -154,7 +154,7 @@ CSS_LAB_B = """\
     padding:0 20px 0 12px;background:var(--soft);border-bottom:1px solid var(--rule);
     border-left:2px solid transparent;cursor:pointer;
     font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--copper-deep)}
-  .br-row.open{border-left-color:var(--copper)}
+  .br-row.open{border-left-color:color-mix(in srgb, var(--copper) 55%, transparent)}
   .br-row .r{color:var(--muted);letter-spacing:0.06em;font-size:9px}
   .br-row:hover{color:var(--ink)}
   .br-row .ph-chev{position:static;display:inline-block;width:14px;font-size:10px;color:var(--muted)}
@@ -167,6 +167,7 @@ CSS_LAB_B = """\
      meta pip runs in the inner one. Chrome (head, data footer) stays
      full-width. — */
   .scroll-pip{z-index:7}
+  .shell .scroll-pip.active{opacity:0.22}   /* v52: quieter pips (base 0.4); outranks the later base rule */
   #rows{margin:0 7px}
   /* v43: the inset record body also takes the collections-tier tone —
      a recessed content block within the chrome panel, same step as the
@@ -176,6 +177,7 @@ CSS_LAB_B = """\
   /* v44: no rule under ITEM RECORD — the recessed body's own edge is the
      separator, mirroring the left toolbar's seamless seam. */
   .pane-meta .meta-head{border-bottom:0}   /* v47: outranks the base rule (v44's selector tied and lost) */
+  .pane-meta .meta-head .l{color:color-mix(in srgb, var(--ink) 72%, transparent)}   /* v52: same white intensity as CATALOGUE */
   /* v45/v49: the technical links live at the end of the SCROLL, quiet;
      the pane still ENDS in a 41px chrome foot — empty frame, continuing
      the bottom line across all three panes. */
@@ -699,7 +701,7 @@ def main():
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
-    ], version="51", tray=False)
+    ], version="52", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
