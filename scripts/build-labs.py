@@ -100,7 +100,7 @@ CSS_LAB_B = """\
   #lf-pills .af-clear{font-family:var(--mono);font-size:10px;letter-spacing:0.10em;text-transform:uppercase;
     color:color-mix(in srgb, var(--muted) 40%, transparent);background:none;border:0;padding:0;margin-left:2px;cursor:pointer}
   #lf-pills .af-clear:hover{color:var(--muted)}
-  @media (min-width:768px){ .filter-panel{top:81px} }   /* measured: toolbar bottom 80.8 */
+  @media (min-width:768px){ .filter-panel{top:40px} }   /* toolbar underside in PANEL coords (v40 double-counted the 41px site-top) */
   /* applied tags — the browse chips' bracket convention, category colour */
   .af-pill{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:0.02em;
     text-transform:capitalize;line-height:1.6;background:transparent;border:0;
@@ -690,7 +690,7 @@ def main():
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
-    ], version="53", tray=False)
+    ], version="54", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.

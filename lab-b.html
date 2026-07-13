@@ -986,7 +986,7 @@
   #lf-pills .af-clear{font-family:var(--mono);font-size:10px;letter-spacing:0.10em;text-transform:uppercase;
     color:color-mix(in srgb, var(--muted) 40%, transparent);background:none;border:0;padding:0;margin-left:2px;cursor:pointer}
   #lf-pills .af-clear:hover{color:var(--muted)}
-  @media (min-width:768px){ .filter-panel{top:81px} }   /* measured: toolbar bottom 80.8 */
+  @media (min-width:768px){ .filter-panel{top:40px} }   /* toolbar underside in PANEL coords (v40 double-counted the 41px site-top) */
   /* applied tags — the browse chips' bracket convention, category colour */
   .af-pill{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:0.02em;
     text-transform:capitalize;line-height:1.6;background:transparent;border:0;
@@ -4016,7 +4016,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.53";
+  const VERSION      = "v1.09-test.79-labb.54";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
