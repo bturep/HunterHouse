@@ -184,19 +184,18 @@ CSS_LAB_B = """\
   .meta-foot{height:41px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
     display:flex;align-items:center;justify-content:flex-end;gap:16px;padding:0 22px}
   html.dark body .meta-foot{background:#2b2823}
-  /* v50: ? / Aa / fullscreen live here now — their base styles were scoped
-     to .site-topright, so the flat treatment is restated for this home. */
+  /* v50/v53: only the ? lives here (Aa + fullscreen went home to the top
+     bar). The info pane occupies the ITEM RECORD space — it stops above
+     this foot — and while it is open the ? reads as \u2715 in the exact
+     same spot: open and close share one location. */
   .meta-foot button{background:none;border:0;padding:0;cursor:pointer;color:var(--ink);
     font-family:var(--mono);font-weight:500;line-height:1;display:inline-flex;align-items:center}
   .meta-foot button:hover{opacity:0.5}
   .meta-foot #rec-info{font-size:14px}
-  .meta-foot #text-toggle{align-items:baseline;gap:1px}
-  .meta-foot #text-toggle .aa-sm{font-size:10px;opacity:1}
-  .meta-foot #text-toggle .aa-lg{font-size:14px;opacity:0.4}
-  html.text-lg .meta-foot #text-toggle .aa-sm{opacity:0.4}
-  html.text-lg .meta-foot #text-toggle .aa-lg{opacity:1}
-  html.text-xl .meta-foot #text-toggle .aa-sm{opacity:1;font-weight:700}
-  html.text-xl .meta-foot #text-toggle .aa-lg{opacity:1;font-weight:700;font-size:15px}
+  .panel-right #info-pane{bottom:41px}
+  .panel-right #info-pane-close{display:none}
+  #panel-right:has(#info-pane.open) #rec-info{font-size:0}
+  #panel-right:has(#info-pane.open) #rec-info::after{content:"\u2715";font-size:13px}
   #meta-content{display:flex;flex-direction:column;flex:1}
   .pane-meta .data-footer{height:auto;background:transparent;border-top:1px solid var(--rule);
     padding:14px 0 2px;margin-top:28px;display:flex;flex-wrap:wrap;gap:12px 14px}
@@ -504,8 +503,6 @@ def main():
          '      </div>\n'
          '      <div class="meta-foot" id="meta-foot">\n'
          '        <button id="rec-info" title="About this archive &amp; shortcuts [?]" aria-label="Info">?</button>\n'
-         '        <button class="theme-btn" id="text-toggle" title="Larger text" aria-label="Cycle text size"><span class="aa-sm">A</span><span class="aa-lg">A</span></button>\n'
-         '        <button class="theme-btn" id="fs-toggle" title="Enter fullscreen" aria-label="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>\n'
          '      </div>',
          "record-foot-cta"),
         # v45: renderMeta writes into #meta-content so the in-scroll footer
@@ -608,15 +605,7 @@ def main():
          '    <!-- Aa text-size toggle.',
          '    <!-- Aa text-size toggle.',
          "strip-rec-info"),
-        ('    <button class="theme-btn" id="text-toggle" title="Larger text" aria-label="Cycle text size">\n'
-         '      <span class="aa-sm">A</span><span class="aa-lg">A</span>\n'
-         '    </button>\n',
-         '',
-         "strip-text-toggle"),
-        ('         viewport_right - 28 \u2014 the inner edge of the collapsed right panel. -->\n'
-         '    <button class="theme-btn" id="fs-toggle" title="Enter fullscreen" aria-label="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>\n',
-         '         viewport_right - 28 \u2014 the inner edge of the collapsed right panel. -->\n',
-         "strip-fs-toggle"),
+
         # v12: facet colours become a SPECTRUM (Brandon: a mixed set of
         # selected tags should read linearly). Tokens are recoloured so the
         # panel's existing group order — Collection, Areas, Item type,
@@ -701,7 +690,7 @@ def main():
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
-    ], version="52", tray=False)
+    ], version="53", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.

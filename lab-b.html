@@ -1070,19 +1070,18 @@
   .meta-foot{height:41px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
     display:flex;align-items:center;justify-content:flex-end;gap:16px;padding:0 22px}
   html.dark body .meta-foot{background:#2b2823}
-  /* v50: ? / Aa / fullscreen live here now — their base styles were scoped
-     to .site-topright, so the flat treatment is restated for this home. */
+  /* v50/v53: only the ? lives here (Aa + fullscreen went home to the top
+     bar). The info pane occupies the ITEM RECORD space — it stops above
+     this foot — and while it is open the ? reads as ✕ in the exact
+     same spot: open and close share one location. */
   .meta-foot button{background:none;border:0;padding:0;cursor:pointer;color:var(--ink);
     font-family:var(--mono);font-weight:500;line-height:1;display:inline-flex;align-items:center}
   .meta-foot button:hover{opacity:0.5}
   .meta-foot #rec-info{font-size:14px}
-  .meta-foot #text-toggle{align-items:baseline;gap:1px}
-  .meta-foot #text-toggle .aa-sm{font-size:10px;opacity:1}
-  .meta-foot #text-toggle .aa-lg{font-size:14px;opacity:0.4}
-  html.text-lg .meta-foot #text-toggle .aa-sm{opacity:0.4}
-  html.text-lg .meta-foot #text-toggle .aa-lg{opacity:1}
-  html.text-xl .meta-foot #text-toggle .aa-sm{opacity:1;font-weight:700}
-  html.text-xl .meta-foot #text-toggle .aa-lg{opacity:1;font-weight:700;font-size:15px}
+  .panel-right #info-pane{bottom:41px}
+  .panel-right #info-pane-close{display:none}
+  #panel-right:has(#info-pane.open) #rec-info{font-size:0}
+  #panel-right:has(#info-pane.open) #rec-info::after{content:"✕";font-size:13px}
   #meta-content{display:flex;flex-direction:column;flex:1}
   .pane-meta .data-footer{height:auto;background:transparent;border-top:1px solid var(--rule);
     padding:14px 0 2px;margin-top:28px;display:flex;flex-wrap:wrap;gap:12px 14px}
@@ -3591,8 +3590,12 @@
          ("" | "lg" | "xl"). The two glyphs shift opacity / weight to indicate
          the active size. Legacy "hhf_text_lg" key is read once at pre-init
          for backward-compat. -->
+    <button class="theme-btn" id="text-toggle" title="Larger text" aria-label="Cycle text size">
+      <span class="aa-sm">A</span><span class="aa-lg">A</span>
+    </button>
     <!-- fs-toggle LAST so flex-end (padding-right:0) lands its right edge at
          viewport_right - 28 — the inner edge of the collapsed right panel. -->
+    <button class="theme-btn" id="fs-toggle" title="Enter fullscreen" aria-label="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
   </div>
 </header>
 
@@ -3833,8 +3836,6 @@
       </div>
       <div class="meta-foot" id="meta-foot">
         <button id="rec-info" title="About this archive &amp; shortcuts [?]" aria-label="Info">?</button>
-        <button class="theme-btn" id="text-toggle" title="Larger text" aria-label="Cycle text size"><span class="aa-sm">A</span><span class="aa-lg">A</span></button>
-        <button class="theme-btn" id="fs-toggle" title="Enter fullscreen" aria-label="Enter fullscreen"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M1 4.5V1h3.5M12 4.5V1H8.5M1 8.5v3h3.5M12 8.5v3H8.5"/></svg></button>
       </div>
     </div>
     <div id="info-pane" role="dialog" aria-modal="true" aria-label="About this archive and keyboard shortcuts">
@@ -4015,7 +4016,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.52";
+  const VERSION      = "v1.09-test.79-labb.53";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
