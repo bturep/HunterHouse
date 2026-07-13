@@ -85,8 +85,9 @@ CSS_LAB_B = """\
   /* — chrome toolbar (v40c): Catalogue · search · Filter share ONE row
      behind full-height separators. Catalogue demoted below the wordmark
      (v40d): chrome ranks by dimness+tracking, content by ink. — */
-  .lp-toolbar{display:flex;align-items:center;gap:12px;padding:11px 20px 11px 29px;background:var(--bg);flex-shrink:0;
-    border-bottom:1px solid var(--rule)}   /* v66: a TITLE BAR — the same rule the site-top carries; no new tone */
+  .lp-toolbar{display:flex;align-items:center;gap:12px;height:41px;box-sizing:border-box;
+    padding:0 20px 0 29px;background:var(--bg);flex-shrink:0;
+    border-bottom:1px solid var(--rule)}   /* v66/v69: a TITLE BAR — explicit 41px, same as .meta-head (was padding-driven ~40) */
   /* v55: type hierarchy + one left edge — the wordmark reads above
      CATALOGUE (12.5 > 11.5), and Hunter House Archive / Catalogue /
      collection titles all start at x=29 (gutter + spine + padding). */
@@ -815,7 +816,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="68", tray=False)
+    ], version="69", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
