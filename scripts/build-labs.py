@@ -270,6 +270,10 @@ CSS_LAB_B = """\
     font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;
     text-transform:uppercase;color:var(--muted);pointer-events:none}
   body.hh-splash .panel-right.out::after{content:none}
+  /* v77: the ? never disappears — when the record collapses, its foot
+     survives as a 28x28 square in the sliver's corner (visibility is
+     resettable on descendants); the image foot butts against it. */
+  .panel-right.out .meta-foot{visibility:visible;padding:0;justify-content:center}
   /* v64: the catalogue sliver gets the same treatment */
   .panel-left.out{cursor:pointer}
   .panel-left.out::after{content:"ARCHIVE";position:absolute;top:50%;left:50%;
@@ -590,7 +594,7 @@ def main():
         ('      document.getElementById("right-handle").addEventListener("click", () => { if (document.body.classList.contains("lens-info")) { closeInfoPane(); return; } togglePanel("right"); syncFsBtn(); });',
          '      document.getElementById("right-handle").addEventListener("click", () => { if (document.body.classList.contains("lens-info")) { closeInfoPane(); return; } togglePanel("right"); syncFsBtn(); });\n'
          '      document.getElementById("panel-right").addEventListener("click", e => {   // LAB B v63: the collapsed sliver opens the record\n'
-         '        if (e.currentTarget.classList.contains("out") && !e.target.closest(".panel-handle")) { togglePanel("right"); syncFsBtn(); }\n'
+         '        if (e.currentTarget.classList.contains("out") && !e.target.closest(".panel-handle") && !e.target.closest(".meta-foot")) { togglePanel("right"); syncFsBtn(); }   // v77: the ? square handles itself\n'
          '      });\n'
          '      document.getElementById("panel-left").addEventListener("click", e => {   // LAB B v64: same for the catalogue sliver\n'
          '        if (e.currentTarget.classList.contains("out") && !e.target.closest(".panel-handle")) { togglePanel("left"); syncFsBtn(); }\n'
@@ -833,7 +837,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="76", tray=False)
+    ], version="77", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
