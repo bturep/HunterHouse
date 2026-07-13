@@ -1158,7 +1158,7 @@
   body.hh-splash .panel-right.out::after{content:none}
   /* v64: the catalogue sliver gets the same treatment */
   .panel-left.out{cursor:pointer}
-  .panel-left.out::after{content:"CATALOGUE";position:absolute;top:50%;left:50%;
+  .panel-left.out::after{content:"ARCHIVE";position:absolute;top:50%;left:50%;
     transform:translate(-50%,-50%);writing-mode:vertical-rl;white-space:nowrap;
     font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;
     text-transform:uppercase;color:var(--muted);pointer-events:none}
@@ -3602,7 +3602,7 @@
 <header class="site-top" id="site-header" role="banner" aria-label="Site header">
   <div class="markid" id="markid">
     <button class="mk-home" id="mk-home" type="button" aria-label="About this archive">
-      <span class="mk-static">Hunter House</span>
+      <span class="mk-static">Hunter House Archive</span>
       <span class="mk-page" id="mk-page"></span>
     </button>
   </div>
@@ -3774,8 +3774,7 @@
     <div class="panel-content">
       <div class="scroll-pip" id="list-pip"></div>
       <div class="lp-toolbar">
-        <span class="l lh-title">Catalogue</span>
-        <input id="lp-search-input" type="text" placeholder="search the catalogue" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search the catalogue">
+        <input id="lp-search-input" type="text" placeholder="search the archive" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search the archive">
         <button class="l lh-filter" id="filter-toggle" title="Filter">Filter<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">›</span></button>
         <button id="list-info" type="button" title="About this archive" aria-label="About this archive">?</button>
       </div>
@@ -4075,7 +4074,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.75";
+  const VERSION      = "v1.09-test.79-labb.76";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
