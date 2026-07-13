@@ -4082,7 +4082,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.82";
+  const VERSION      = "v1.09-test.79-labb.83";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6489,7 +6489,10 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     railT.style.top = rows.offsetTop + "px";
     const above = [];
     for (const h of heads) {
-      if (h.getBoundingClientRect().top < rect.top + above.length * BR_H) above.push(h); else break;
+      // v83: rail on the header BOTTOM, not top — the compact strip only
+      // appears once the full header has left (its remaining sliver fits
+      // under the strip), so it replaces rather than doubles.
+      if (h.getBoundingClientRect().bottom <= rect.top + (above.length + 1) * BR_H) above.push(h); else break;
     }
     const brRow = h => {
       const el = document.createElement("div");

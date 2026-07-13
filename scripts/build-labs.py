@@ -646,7 +646,10 @@ def main():
          '    railT.style.top = rows.offsetTop + "px";\n'
          '    const above = [];\n'
          '    for (const h of heads) {\n'
-         '      if (h.getBoundingClientRect().top < rect.top + above.length * BR_H) above.push(h); else break;\n'
+         '      // v83: rail on the header BOTTOM, not top — the compact strip only\n'
+         '      // appears once the full header has left (its remaining sliver fits\n'
+         '      // under the strip), so it replaces rather than doubles.\n'
+         '      if (h.getBoundingClientRect().bottom <= rect.top + (above.length + 1) * BR_H) above.push(h); else break;\n'
          '    }\n'
          '    const brRow = h => {\n'
          '      const el = document.createElement("div");\n'
@@ -841,7 +844,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="82", tray=False)
+    ], version="83", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
