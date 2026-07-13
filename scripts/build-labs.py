@@ -73,7 +73,7 @@ CSS_LAB_B = """\
   .ph-head.closed{border-bottom-style:dashed}
   .ph-line1,.ph-line2{display:flex;justify-content:space-between;align-items:baseline;gap:14px}
   .ph-line2{margin-top:3px}
-  .ph-name{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink);line-height:1.35}   /* v58: parent outweighs the 13.5px item title */
+  .ph-name{font-family:var(--mono);font-size:12.5px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink);line-height:1.35}   /* v59: back to 12.5 — hierarchy fixed by demoting the title instead */
   .ph-count{font-family:var(--mono);font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}   /* v58: matches the rows' kicker size */
   .ph-count b{color:var(--ink);font-weight:500}
   .ph-gloss{font-family:var(--mono);font-size:9px;letter-spacing:0.04em;text-transform:none;color:var(--hint);line-height:1.5;white-space:normal;min-width:0}
@@ -140,11 +140,12 @@ CSS_LAB_B = """\
   .r-kick{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em}
   .r-kick .archid{font-size:10.5px;color:color-mix(in srgb, var(--ink) 72%, transparent)}
   .pane-list .row .year{font-family:var(--mono);font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
-  .r-title{font-family:var(--mono);font-size:13.5px;font-weight:500;letter-spacing:0.01em;color:var(--ink);line-height:1.4}
+  .r-title{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:0.01em;color:var(--ink);line-height:1.45}   /* v59: below the 12.5px collection name */
   .r-note{font-family:var(--mono);font-size:10.5px;color:var(--hint);line-height:1.5;white-space:normal}
   /* — all-mono BOTH panes (Brandon): the record pane joins the list — */
   .panel-right .panel-content{font-family:var(--mono)}
-  .panel-right.pane-meta .meta-title{font-family:var(--mono);font-size:16px;letter-spacing:0.01em;line-height:1.45}
+  .panel-right.pane-meta .meta-title{font-family:var(--mono);font-size:14px;letter-spacing:0.01em;line-height:1.5}   /* v59: scaled to the new list (title 12 / collection 12.5) */
+  .pane-meta .kv dd{font-size:12px}
   .graph-path .node .lbl{font-family:var(--mono);letter-spacing:0.01em}
   /* — tonal tiers (v21) + depth ladder (v25-v29): chrome > collections >
      rows > stage, warm near-black family (wider v28 steps reverted). — */
@@ -768,7 +769,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="58", tray=False)
+    ], version="59", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
