@@ -794,12 +794,18 @@ def main():
         # v74: vocabulary — ARCHIVE is the institution (wordmark), CATALOGUE
         # the instrument (pane). The page lens no longer repeats "Archive"
         # beside the wordmark; Site Plan / Timeline labels still appear.
+        # v75: lab branding removed — this page is the de-facto next state.
+        # The wordmark stands alone; Site Plan / Timeline still label their
+        # lenses when open.
         ('<span class="mk-page" id="mk-page">Archive \u00b7 Lab B</span>',
-         '<span class="mk-page" id="mk-page">Lab B</span>',
+         '<span class="mk-page" id="mk-page"></span>',
          "mk-page-vocab"),
         ("cur==='map'?'Site Plan':(cur==='tl'?'Timeline':'Archive \u00b7 Lab B')",
-         "cur==='map'?'Site Plan':(cur==='tl'?'Timeline':'Lab B')",
+         "cur==='map'?'Site Plan':(cur==='tl'?'Timeline':'')",
          "mk-page-js-vocab"),
+        ('<title>Hunter House Archive \u2014 LAB B</title>',
+         '<title>Hunter House Archive</title>',
+         "title-vocab"),
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
@@ -823,7 +829,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="74", tray=False)
+    ], version="75", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.

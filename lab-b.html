@@ -2,7 +2,7 @@
 <html lang="en" class="dark">
 <head>
 <meta charset="utf-8">
-<title>Hunter House Archive — LAB B</title>
+<title>Hunter House Archive</title>
 <!-- maximum-scale removed 2026-06-11 (Baden mode / AUDIT.md §1.1): it blocked
      iPadOS pinch-zoom + system "Larger Text" (WCAG 1.4.4). Affects all visitors. -->
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -3603,7 +3603,7 @@
   <div class="markid" id="markid">
     <button class="mk-home" id="mk-home" type="button" aria-label="About this archive">
       <span class="mk-static">Hunter House</span>
-      <span class="mk-page" id="mk-page">Lab B</span>
+      <span class="mk-page" id="mk-page"></span>
     </button>
   </div>
   <div class="header-search"></div>
@@ -4075,7 +4075,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.74";
+  const VERSION      = "v1.09-test.79-labb.75";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -11452,7 +11452,7 @@ WHERE {
     function anchorTitle(){ var mk=document.querySelector('.markid'), tb=document.getElementById('site-titlebar'); if(mk&&tb) tb.style.left=Math.round(mk.getBoundingClientRect().right+16)+'px'; }
     // light the active view label beside the wordmark; dim the other two
     function updateMark(){ var cur=inMap()?'map':(inTL()?'tl':'archive');
-      var page=document.getElementById('mk-page'); if(page)page.textContent=(cur==='map'?'Site Plan':(cur==='tl'?'Timeline':'Lab B'));
+      var page=document.getElementById('mk-page'); if(page)page.textContent=(cur==='map'?'Site Plan':(cur==='tl'?'Timeline':''));
       var mh=document.getElementById('mk-home'); if(mh)mh.style.color='var(--lens-'+cur+')';   // wordmark takes the active lens colour
       var lens={archive:'archive-toggle',map:'map-toggle',tl:'tl-toggle'};
       ['archive-toggle','map-toggle','tl-toggle'].forEach(function(id){ var el=document.getElementById(id); if(el)el.classList.toggle('cur',lens[cur]===id); }); }
