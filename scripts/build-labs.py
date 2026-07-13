@@ -167,9 +167,9 @@ CSS_LAB_B = """\
      the box opens right, spine carries the left, sienna lines top+bottom. — */
   .pane-list .row.sel{background:var(--soft);
     box-shadow:inset 0 1px 0 color-mix(in srgb, var(--copper) 55%, transparent),
-               inset 0 -1px 0 color-mix(in srgb, var(--copper) 55%, transparent),
-               inset 1px 0 0 color-mix(in srgb, var(--copper) 55%, transparent)}
-  .pane-list .row.in-bin.sel{border-left-color:transparent}   /* v58: no doubled left weight — the 1px line takes over */
+               inset 0 -1px 0 color-mix(in srgb, var(--copper) 55%, transparent)}
+  /* v60: the spine runs THROUGH the selection as its left edge — same
+     2px, same copper, seamless; the top/bottom lines meet it. */
   .pane-list .row.sel::before{display:none}   /* v58: the base 3px red indicator was the real extra left thickness */
   html.dark body .row.sel{background:#191614}
   /* — bin rail (v23/v32): passed collections stack compact at the top;
@@ -769,7 +769,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="59", tray=False)
+    ], version="60", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.

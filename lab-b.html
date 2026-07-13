@@ -1053,9 +1053,9 @@
      the box opens right, spine carries the left, sienna lines top+bottom. — */
   .pane-list .row.sel{background:var(--soft);
     box-shadow:inset 0 1px 0 color-mix(in srgb, var(--copper) 55%, transparent),
-               inset 0 -1px 0 color-mix(in srgb, var(--copper) 55%, transparent),
-               inset 1px 0 0 color-mix(in srgb, var(--copper) 55%, transparent)}
-  .pane-list .row.in-bin.sel{border-left-color:transparent}   /* v58: no doubled left weight — the 1px line takes over */
+               inset 0 -1px 0 color-mix(in srgb, var(--copper) 55%, transparent)}
+  /* v60: the spine runs THROUGH the selection as its left edge — same
+     2px, same copper, seamless; the top/bottom lines meet it. */
   .pane-list .row.sel::before{display:none}   /* v58: the base 3px red indicator was the real extra left thickness */
   html.dark body .row.sel{background:#191614}
   /* — bin rail (v23/v32): passed collections stack compact at the top;
@@ -4045,7 +4045,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.59";
+  const VERSION      = "v1.09-test.79-labb.60";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
