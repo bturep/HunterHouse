@@ -85,7 +85,8 @@ CSS_LAB_B = """\
   /* — chrome toolbar (v40c): Catalogue · search · Filter share ONE row
      behind full-height separators. Catalogue demoted below the wordmark
      (v40d): chrome ranks by dimness+tracking, content by ink. — */
-  .lp-toolbar{display:flex;align-items:center;gap:12px;padding:11px 20px 11px 29px;flex-shrink:0}
+  .lp-toolbar{display:flex;align-items:center;gap:12px;padding:11px 20px 11px 29px;background:var(--bg);flex-shrink:0;
+    border-bottom:1px solid var(--rule)}   /* v66: a TITLE BAR — the same rule the site-top carries; no new tone */
   /* v55: type hierarchy + one left edge — the wordmark reads above
      CATALOGUE (12.5 > 11.5), and Hunter House Archive / Catalogue /
      collection titles all start at x=29 (gutter + spine + padding). */
@@ -153,14 +154,8 @@ CSS_LAB_B = """\
   html.dark body .pane-image,html.dark body .image-stage{background:#191614}   /* v55: stage lifted a touch; the chosen item matches it */
   html.dark body .row.in-bin{background:#1e1b19}
   html.dark body .phase-divider.ph-head,html.dark body .br-row{background:#252220}
-  html.dark body .site-top,html.dark body .lp-filter,
-  html.dark body .image-foot,html.dark body .panel-handle{background:#2b2823}
-  /* v65: pane HEADERS get their own half-step above the frame — raised
-     toward the hand, so an open pane reads header / recessed content /
-     frame instead of undifferentiated chrome. Closed slivers and feet
-     stay at frame tone: the closed state is unchanged. */
-  html.dark body .lp-toolbar,html.dark body .meta-head{background:#322d27}
-  .lp-toolbar,.pane-meta .meta-head{background:#faf9f5}
+  html.dark body .site-top,html.dark body .lp-toolbar,html.dark body .lp-filter,
+  html.dark body .meta-head,html.dark body .image-foot,html.dark body .panel-handle{background:#2b2823}
   html.dark body .panel-handle::before{background:#8a847c}
   html.dark body .panel-right{background:#2b2823}
   html.dark body .panel-left{background:#2b2823}
@@ -219,7 +214,7 @@ CSS_LAB_B = """\
   html.dark body .pane-meta .meta-body{background:#252220}
   /* v44: no rule under ITEM RECORD — the recessed body's own edge is the
      separator, mirroring the left toolbar's seamless seam. */
-  .pane-meta .meta-head{border-bottom:0}   /* v47: outranks the base rule (v44's selector tied and lost) */
+  .pane-meta .meta-head{border-bottom:1px solid var(--rule)}   /* v66: title bar again — reverses v44/v47; the recessed body changed what the line sits against */
   .pane-meta .meta-head .l{color:color-mix(in srgb, var(--ink) 72%, transparent)}   /* v52: same white intensity as CATALOGUE */
   /* v45/v49: the technical links live at the end of the SCROLL, quiet;
      the pane still ENDS in a 41px chrome foot — empty frame, continuing
@@ -804,7 +799,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="65", tray=False)
+    ], version="66", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
