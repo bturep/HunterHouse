@@ -82,7 +82,12 @@ CSS_LAB_B = """\
   /* — chrome toolbar (v40c): Catalogue · search · Filter share ONE row
      behind full-height separators. Catalogue demoted below the wordmark
      (v40d): chrome ranks by dimness+tracking, content by ink. — */
-  .lp-toolbar{display:flex;align-items:center;gap:12px;padding:11px 20px;background:var(--bg);flex-shrink:0}
+  .lp-toolbar{display:flex;align-items:center;gap:12px;padding:11px 20px 11px 29px;background:var(--bg);flex-shrink:0}
+  /* v55: type hierarchy + one left edge — the wordmark reads above
+     CATALOGUE (12.5 > 11.5), and Hunter House Archive / Catalogue /
+     collection titles all start at x=29 (gutter + spine + padding). */
+  .site-top{padding-left:29px}
+  .site-top .mk-static,.site-top .mk-page{font-size:12.5px}
   .lp-toolbar .lh-title{font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:0.10em;text-transform:uppercase;color:color-mix(in srgb, var(--ink) 72%, transparent);cursor:default}
   .lp-toolbar #lp-search-input{flex:1;min-width:0;background:none;border:0;outline:none;font-family:var(--mono);font-size:11px;letter-spacing:0.02em;color:var(--ink)}
   .lp-toolbar #lp-search-input::placeholder{color:var(--hint);text-transform:lowercase;letter-spacing:0.06em}
@@ -129,7 +134,7 @@ CSS_LAB_B = """\
      rows > stage, warm near-black family (wider v28 steps reverted). — */
   .phase-divider.ph-head{background:var(--soft)}
   .row.in-bin{background:color-mix(in srgb, var(--bg) 96.5%, var(--ink))}
-  html.dark body .pane-image,html.dark body .image-stage{background:#151311}
+  html.dark body .pane-image,html.dark body .image-stage{background:#191614}   /* v55: stage lifted a touch; the chosen item matches it */
   html.dark body .row.in-bin{background:#1e1b19}
   html.dark body .phase-divider.ph-head,html.dark body .br-row{background:#252220}
   html.dark body .site-top,html.dark body .lp-toolbar,html.dark body .lp-filter,
@@ -145,7 +150,7 @@ CSS_LAB_B = """\
      the box opens right, spine carries the left, sienna lines top+bottom. — */
   .pane-list .row.sel{background:var(--soft);
     box-shadow:inset 0 1px 0 #7a4020, inset 0 -1px 0 #7a4020}
-  html.dark body .row.sel{background:#151311;
+  html.dark body .row.sel{background:#191614;
     box-shadow:inset 0 1px 0 #b08468, inset 0 -1px 0 #b08468}
   /* — bin rail (v23/v32): passed collections stack compact at the top;
      the pane ends in a 41px chrome foot carrying the item count (v33). — */
@@ -690,7 +695,7 @@ def main():
         ('    if (afActive) frag.appendChild(afBar());',
          '    renderAfPills();',
          "af-call-main"),
-    ], version="54", tray=False)
+    ], version="55", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
