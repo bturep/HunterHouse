@@ -975,7 +975,7 @@
   /* v55: type hierarchy + one left edge — the wordmark reads above
      CATALOGUE (12.5 > 11.5), and Hunter House Archive / Catalogue /
      collection titles all start at x=29 (gutter + spine + padding). */
-  .site-top{padding-left:29px}
+  .site-top{padding-left:29px;height:44px}   /* v63: a touch taller */
   .site-top .mk-static,.site-top .mk-page{font-size:12.5px}
   .lp-toolbar .lh-title{font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:0.10em;text-transform:uppercase;color:color-mix(in srgb, var(--ink) 72%, transparent);cursor:default}
   .lp-toolbar #lp-search-input{flex:1;min-width:0;background:none;border:0;outline:none;font-family:var(--mono);font-size:11px;letter-spacing:0.02em;color:var(--ink)}
@@ -994,7 +994,7 @@
   #lf-pills .af-clear{font-family:var(--mono);font-size:10px;letter-spacing:0.10em;text-transform:uppercase;
     color:color-mix(in srgb, var(--muted) 40%, transparent);background:none;border:0;padding:0;margin-left:2px;cursor:pointer}
   #lf-pills .af-clear:hover{color:var(--muted)}
-  @media (min-width:768px){ .panel-left .filter-panel{top:40px;bottom:41px} }   /* flush under the toolbar; stops above the foot like the ? pane */
+  @media (min-width:768px){ .panel-left .filter-panel{top:40px;bottom:38px} }   /* flush under the toolbar; stops above the foot like the ? pane */
   /* v57: the tray joins the pip system — native scrollbar hidden, pip in
      the slot, above the overlay. The Show action moves to the list foot
      while the tray is open; the overlay keeps only Clear all. */
@@ -1081,7 +1081,7 @@
   .br-row .r{color:var(--muted);letter-spacing:0.06em;font-size:9px}
   .br-row:hover{color:var(--ink)}
   .br-row .ph-chev{position:static;display:inline-block;width:14px;font-size:10px;color:var(--muted)}
-  #list-foot{height:41px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
+  #list-foot{height:38px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
     display:flex;align-items:center;padding:0 20px;
     font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em}
   html.dark body #list-foot{background:#2b2823}
@@ -1104,7 +1104,7 @@
   /* v45/v49: the technical links live at the end of the SCROLL, quiet;
      the pane still ENDS in a 41px chrome foot — empty frame, continuing
      the bottom line across all three panes. */
-  .meta-foot{height:41px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
+  .meta-foot{height:38px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
     display:flex;align-items:center;justify-content:flex-end;gap:16px;padding:0 22px}
   html.dark body .meta-foot{background:#2b2823}
   /* v50/v53: only the ? lives here (Aa + fullscreen went home to the top
@@ -1115,7 +1115,7 @@
     font-family:var(--mono);font-weight:500;line-height:1;display:inline-flex;align-items:center}
   .meta-foot button:hover{opacity:0.5}
   .meta-foot #rec-info{font-size:14px}
-  .panel-right #info-pane{bottom:41px}
+  .panel-right #info-pane{bottom:38px}
   /* v56: signed-out unlock lives in ? now, not under the record */
   body:not(.is-researcher) #meta-content #rn-panel{display:none}
   #rn-unlock-ip{margin-top:22px;padding-top:16px;border-top:1px solid var(--rule)}
@@ -1143,6 +1143,16 @@
   .panel-handle:hover::before{background:var(--ink)}
   .panel-handle .handle-chevron{display:none}
   .panel-left.pane-list,.panel-right.pane-meta{overflow:visible}
+  /* v63: feet a touch shorter (41 -> 38); the image foot follows */
+  .pane-image .image-foot{height:38px}
+  /* v63: the collapsed record sliver names itself — vertical label,
+     whole sliver clickable (pull tab still works). Hidden during splash. */
+  .panel-right.out{cursor:pointer}
+  .panel-right.out::after{content:"ITEM RECORD";position:absolute;top:50%;left:50%;
+    transform:translate(-50%,-50%);writing-mode:vertical-rl;white-space:nowrap;
+    font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;
+    text-transform:uppercase;color:var(--muted);pointer-events:none}
+  body.hh-splash .panel-right.out::after{content:none}
   .row{
     display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
     padding:11px 20px;align-items:start;cursor:pointer;
@@ -4057,7 +4067,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.62";
+  const VERSION      = "v1.09-test.79-labb.63";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -11082,8 +11092,7 @@ WHERE {
       }
       // ── Returning visitor: the original animated reveal into the bright archive.
       closeAboutPane();
-      leftP.classList.remove("out");
-      rightP.classList.remove("out");
+      leftP.classList.remove("out");   // LAB B v63: record stays collapsed by default
       syncFsBtn();
       // Hide the canvas while panels animate + fit settles; reveal once the
       // image is at the correct post-open size. Avoids the flash where the
@@ -11174,6 +11183,9 @@ WHERE {
       // always reflects the real panel state.
       document.getElementById("left-handle").addEventListener("click",  () => { togglePanel("left");  syncFsBtn(); });
       document.getElementById("right-handle").addEventListener("click", () => { if (document.body.classList.contains("lens-info")) { closeInfoPane(); return; } togglePanel("right"); syncFsBtn(); });
+      document.getElementById("panel-right").addEventListener("click", e => {   // LAB B v63: the collapsed sliver opens the record
+        if (e.currentTarget.classList.contains("out") && !e.target.closest(".panel-handle")) { togglePanel("right"); syncFsBtn(); }
+      });
 
       // Bottom-bar button: both hidden → reveal both; otherwise hide both.
       pfsBtn.addEventListener("click", () => {
