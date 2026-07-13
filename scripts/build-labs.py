@@ -78,10 +78,9 @@ CSS_LAB_B = """\
   .ph-count b{color:var(--ink);font-weight:500}
   .ph-gloss{font-family:var(--mono);font-size:9px;letter-spacing:0.04em;text-transform:none;color:var(--hint);line-height:1.5;white-space:normal;min-width:0}
   .ph-sort{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;white-space:nowrap}
-  .bin-sort{display:flex;justify-content:flex-end;padding:6px 20px 7px;
-    background:color-mix(in srgb, var(--bg) 96.5%, var(--ink));
-    border-left:2px solid color-mix(in srgb, var(--copper) 55%, transparent)}
-  html.dark body .bin-sort{background:#1e1b19}
+  /* v61: the Year bar is gone entirely — authored order is the only
+     ordering; sortCol "year" is unreachable from the UI (URL ?sort=year
+     still honoured). */
   .ph-sort .sort-arrow{font-family:var(--mono);font-size:9px;display:inline-block;min-width:8px}
   /* — chrome toolbar (v40c): Catalogue · search · Filter share ONE row
      behind full-height separators. Catalogue demoted below the wordmark
@@ -305,28 +304,6 @@ NEW_PHASE_DIVIDER_B = """\
           renderList();
         });
         frag.appendChild(d);
-        if (open) {   // v58: Year is its own slim bar below the collection block
-          const ss = document.createElement("div");
-          ss.className = "bin-sort";
-          const bb = document.createElement("button");
-          bb.className = "ph-sort";
-          bb.dataset.sortCol = "year";
-          bb.title = "Sort by year \u2014 third press restores archive order";
-          bb.innerHTML = `Year <span class="sort-arrow">${yrOn ? (state.sortDir === "asc" ? "\u2191" : "\u2193") : ""}</span>`;
-          bb.addEventListener("click", e => {   // 3-state cycle: year asc \u2192 desc \u2192 authored default
-            e.stopPropagation();
-            if (state.sortCol !== "year") { state.sortCol = "year"; state.sortDir = "asc"; }
-            else if (state.sortDir === "asc") { state.sortDir = "desc"; }
-            else { state.sortCol = "id"; state.sortDir = "asc"; }
-            applyFilters(); renderList();
-            const url = new URL(location.href);
-            url.searchParams.set("sort", state.sortCol);
-            url.searchParams.set("dir",  state.sortDir);
-            history.replaceState({}, "", url);
-          });
-          ss.appendChild(bb);
-          frag.appendChild(ss);
-        }
         groupOpen = open;
       }
       if (grouped && !groupOpen) return;   // contracted = header only
@@ -769,7 +746,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="60", tray=False)
+    ], version="61", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
