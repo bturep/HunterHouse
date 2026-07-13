@@ -991,7 +991,7 @@
   .lh-filter:hover .filter-chevron,.lh-filter.fp-open .filter-chevron{color:var(--ink)}
   /* active-tag row — exists only while filters are active ([hidden] via
      renderAfPills); clear-all folds inline after the last tag. */
-  .lp-filter{padding:0 20px 12px;background:var(--bg);border-bottom:1px solid var(--rule)}
+  .lp-filter{padding:12px 20px 12px 29px;background:var(--bg);border-bottom:1px solid var(--rule)}   /* v82: equidistant above/below the tags; left joins the x=29 plumb line */
   #lf-pills{display:flex;flex-wrap:wrap;gap:3px 9px;align-items:baseline;min-width:0}
   #lf-pills .af-clear{font-family:var(--mono);font-size:10px;letter-spacing:0.10em;text-transform:uppercase;
     color:color-mix(in srgb, var(--muted) 40%, transparent);background:none;border:0;padding:0;margin-left:2px;cursor:pointer}
@@ -4082,7 +4082,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.81";
+  const VERSION      = "v1.09-test.79-labb.82";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.

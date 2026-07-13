@@ -105,7 +105,7 @@ CSS_LAB_B = """\
   .lh-filter:hover .filter-chevron,.lh-filter.fp-open .filter-chevron{color:var(--ink)}
   /* active-tag row — exists only while filters are active ([hidden] via
      renderAfPills); clear-all folds inline after the last tag. */
-  .lp-filter{padding:0 20px 12px;background:var(--bg);border-bottom:1px solid var(--rule)}
+  .lp-filter{padding:12px 20px 12px 29px;background:var(--bg);border-bottom:1px solid var(--rule)}   /* v82: equidistant above/below the tags; left joins the x=29 plumb line */
   #lf-pills{display:flex;flex-wrap:wrap;gap:3px 9px;align-items:baseline;min-width:0}
   #lf-pills .af-clear{font-family:var(--mono);font-size:10px;letter-spacing:0.10em;text-transform:uppercase;
     color:color-mix(in srgb, var(--muted) 40%, transparent);background:none;border:0;padding:0;margin-left:2px;cursor:pointer}
@@ -841,7 +841,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="81", tray=False)
+    ], version="82", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
