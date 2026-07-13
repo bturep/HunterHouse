@@ -91,9 +91,7 @@ CSS_LAB_B = """\
   /* v55: type hierarchy + one left edge — the wordmark reads above
      CATALOGUE (12.5 > 11.5), and Hunter House Archive / Catalogue /
      collection titles all start at x=29 (gutter + spine + padding). */
-  .site-top{padding-left:29px;height:44px}   /* v72: 44px head everywhere — v70's 28px clipped the wordmark; the ENTRY page rises to match instead */
-  html[data-splash-init="1"] body .site-top{height:44px}
-  body.hh-splash .site-top{height:44px}
+  .site-top{padding-left:29px;height:44px}   /* v73: resting head 44px; the splash keeps the thin 28px frame and the bar EXPANDS on Continue (base 280ms height transition does the move) */
   .site-top .mk-static,.site-top .mk-page{font-size:12.5px}
   .lp-toolbar .lh-title{font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:0.10em;text-transform:uppercase;color:color-mix(in srgb, var(--ink) 72%, transparent);cursor:default}
   .lp-toolbar #lp-search-input{flex:1;min-width:0;background:none;border:0;outline:none;font-family:var(--mono);font-size:11px;letter-spacing:0.02em;color:var(--ink)}
@@ -816,7 +814,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="72", tray=False)
+    ], version="73", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
