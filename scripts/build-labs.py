@@ -67,17 +67,21 @@ CSS_LAB_B = """\
      hangs in the gutter so name/gloss/ID/title share one left edge;
      count reads label-first; Year sort lives on the gloss line. — */
   .phase-divider.ph-head{display:block;position:relative;cursor:pointer;
-    padding:10px 20px 12px;letter-spacing:normal;text-transform:none}
-  .ph-chev{position:absolute;left:6px;top:11px;font-size:11px;color:var(--muted)}
+    padding:13px 20px 13px;letter-spacing:normal;text-transform:none}   /* v58: same breathing as rows (14/20) */
+  .ph-chev{position:absolute;left:6px;top:15px;font-size:11px;color:var(--muted)}
   .ph-head:hover .ph-chev{color:var(--ink)}
   .ph-head.closed{border-bottom-style:dashed}
   .ph-line1,.ph-line2{display:flex;justify-content:space-between;align-items:baseline;gap:14px}
   .ph-line2{margin-top:3px}
-  .ph-name{font-family:var(--mono);font-size:12.5px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink);line-height:1.35}
-  .ph-count{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+  .ph-name{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink);line-height:1.35}   /* v58: parent outweighs the 13.5px item title */
+  .ph-count{font-family:var(--mono);font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}   /* v58: matches the rows' kicker size */
   .ph-count b{color:var(--ink);font-weight:500}
   .ph-gloss{font-family:var(--mono);font-size:9px;letter-spacing:0.04em;text-transform:none;color:var(--hint);line-height:1.5;white-space:normal;min-width:0}
   .ph-sort{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;white-space:nowrap}
+  .bin-sort{display:flex;justify-content:flex-end;padding:6px 20px 7px;
+    background:color-mix(in srgb, var(--bg) 96.5%, var(--ink));
+    border-left:2px solid color-mix(in srgb, var(--copper) 55%, transparent)}
+  html.dark body .bin-sort{background:#1e1b19}
   .ph-sort .sort-arrow{font-family:var(--mono);font-size:9px;display:inline-block;min-width:8px}
   /* — chrome toolbar (v40c): Catalogue · search · Filter share ONE row
      behind full-height separators. Catalogue demoted below the wordmark
@@ -161,9 +165,12 @@ CSS_LAB_B = """\
   /* — selection (v30/v39): the row in the viewer sinks to stage depth;
      the box opens right, spine carries the left, sienna lines top+bottom. — */
   .pane-list .row.sel{background:var(--soft);
-    box-shadow:inset 0 1px 0 #7a4020, inset 0 -1px 0 #7a4020}
-  html.dark body .row.sel{background:#191614;
-    box-shadow:inset 0 1px 0 #b08468, inset 0 -1px 0 #b08468}
+    box-shadow:inset 0 1px 0 color-mix(in srgb, var(--copper) 55%, transparent),
+               inset 0 -1px 0 color-mix(in srgb, var(--copper) 55%, transparent),
+               inset 1px 0 0 color-mix(in srgb, var(--copper) 55%, transparent)}
+  .pane-list .row.in-bin.sel{border-left-color:transparent}   /* v58: no doubled left weight — the 1px line takes over */
+  .pane-list .row.sel::before{display:none}   /* v58: the base 3px red indicator was the real extra left thickness */
+  html.dark body .row.sel{background:#191614}
   /* — bin rail (v23/v32): passed collections stack compact at the top;
      the pane ends in a 41px chrome foot carrying the item count (v33). — */
   #bin-rail-top{position:absolute;left:7px;right:7px;z-index:8;overflow:hidden}
@@ -290,24 +297,35 @@ NEW_PHASE_DIVIDER_B = """\
         d.innerHTML =
           `<span class="ph-chev">${open ? "\u2304" : "\u203a"}</span>` +
           `<span class="ph-line1"><span class="ph-name">${escapeHTML(glabelOf(gkey))}</span><span class="ph-count">Items <b>${String(count).padStart(2,"0")}</b></span></span>` +
-          `<span class="ph-line2"><span class="ph-gloss">${gloss ? escapeHTML(gloss) : ""}</span>${open ? `<button class="ph-sort" data-sort-col="year" title="Sort by year \u2014 third press restores archive order">Year <span class="sort-arrow">${yrOn ? (state.sortDir === "asc" ? "\u2191" : "\u2193") : ""}</span></button>` : ""}</span>`;
+          `<span class="ph-line2"><span class="ph-gloss">${gloss ? escapeHTML(gloss) : ""}</span></span>`;
         d.addEventListener("click", () => {
           if (open) { phaseExpanded.delete(gkey); phaseCollapsed.add(gkey); }
           else { phaseCollapsed.delete(gkey); phaseExpanded.add(gkey); }
           renderList();
         });
-        d.querySelector(".ph-sort")?.addEventListener("click", e => {   // v40: 3-state cycle
-          e.stopPropagation();
-          if (state.sortCol !== "year") { state.sortCol = "year"; state.sortDir = "asc"; }
-          else if (state.sortDir === "asc") { state.sortDir = "desc"; }
-          else { state.sortCol = "id"; state.sortDir = "asc"; }
-          applyFilters(); renderList();
-          const url = new URL(location.href);
-          url.searchParams.set("sort", state.sortCol);
-          url.searchParams.set("dir",  state.sortDir);
-          history.replaceState({}, "", url);
-        });
         frag.appendChild(d);
+        if (open) {   // v58: Year is its own slim bar below the collection block
+          const ss = document.createElement("div");
+          ss.className = "bin-sort";
+          const bb = document.createElement("button");
+          bb.className = "ph-sort";
+          bb.dataset.sortCol = "year";
+          bb.title = "Sort by year \u2014 third press restores archive order";
+          bb.innerHTML = `Year <span class="sort-arrow">${yrOn ? (state.sortDir === "asc" ? "\u2191" : "\u2193") : ""}</span>`;
+          bb.addEventListener("click", e => {   // 3-state cycle: year asc \u2192 desc \u2192 authored default
+            e.stopPropagation();
+            if (state.sortCol !== "year") { state.sortCol = "year"; state.sortDir = "asc"; }
+            else if (state.sortDir === "asc") { state.sortDir = "desc"; }
+            else { state.sortCol = "id"; state.sortDir = "asc"; }
+            applyFilters(); renderList();
+            const url = new URL(location.href);
+            url.searchParams.set("sort", state.sortCol);
+            url.searchParams.set("dir",  state.sortDir);
+            history.replaceState({}, "", url);
+          });
+          ss.appendChild(bb);
+          frag.appendChild(ss);
+        }
         groupOpen = open;
       }
       if (grouped && !groupOpen) return;   // contracted = header only
@@ -750,7 +768,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="57", tray=False)
+    ], version="58", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
