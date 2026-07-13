@@ -160,13 +160,26 @@ CSS_LAB_B = """\
   html.dark body .panel-left{background:#2b2823}
   /* — spine (v22/v24): sienna marks the extent of an OPEN collection —
      header, rows, rail shadow; closed bars carry a transparent stub. — */
+  /* v62: each collection owns a colour — spine, selection lines and rail
+     ticks inherit it via --bin (fallback: the copper green). Identity
+     colour, not facet coding: the tray's category chips stay as they are. */
+  [data-phase="CAA"],[data-bin="CAA"]{--bin:#7a4020}
+  [data-phase="HHC"],[data-bin="HHC"]{--bin:#4f7a6b}
+  [data-phase="IHC"],[data-bin="IHC"]{--bin:#284878}
+  [data-phase="EGC"],[data-bin="EGC"]{--bin:#7a5820}
+  [data-phase="FRH"],[data-bin="FRH"]{--bin:#6a2068}
+  html.dark [data-phase="CAA"],html.dark [data-bin="CAA"]{--bin:#b08468}
+  html.dark [data-phase="HHC"],html.dark [data-bin="HHC"]{--bin:#7aaa98}
+  html.dark [data-phase="IHC"],html.dark [data-bin="IHC"]{--bin:#7898b8}
+  html.dark [data-phase="EGC"],html.dark [data-bin="EGC"]{--bin:#c09858}
+  html.dark [data-phase="FRH"],html.dark [data-bin="FRH"]{--bin:#a07898}
   .phase-divider.ph-head,.row.in-bin{border-left:2px solid transparent}
-  .ph-head:not(.closed),.row.in-bin{border-left-color:color-mix(in srgb, var(--copper) 55%, transparent)}   /* v48/v52: copper spine, dimmed — quieter */
+  .ph-head:not(.closed),.row.in-bin{border-left-color:color-mix(in srgb, var(--bin, var(--copper)) 55%, transparent)}
   /* — selection (v30/v39): the row in the viewer sinks to stage depth;
      the box opens right, spine carries the left, sienna lines top+bottom. — */
   .pane-list .row.sel{background:var(--soft);
-    box-shadow:inset 0 1px 0 color-mix(in srgb, var(--copper) 55%, transparent),
-               inset 0 -1px 0 color-mix(in srgb, var(--copper) 55%, transparent)}
+    box-shadow:inset 0 1px 0 color-mix(in srgb, var(--bin, var(--copper)) 55%, transparent),
+               inset 0 -1px 0 color-mix(in srgb, var(--bin, var(--copper)) 55%, transparent)}
   /* v60: the spine runs THROUGH the selection as its left edge — same
      2px, same copper, seamless; the top/bottom lines meet it. */
   .pane-list .row.sel::before{display:none}   /* v58: the base 3px red indicator was the real extra left thickness */
@@ -178,7 +191,7 @@ CSS_LAB_B = """\
     padding:0 20px 0 12px;background:var(--soft);border-bottom:1px solid var(--rule);
     border-left:2px solid transparent;cursor:pointer;
     font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--copper-deep)}
-  .br-row.open{border-left-color:color-mix(in srgb, var(--copper) 55%, transparent)}
+  .br-row.open{border-left-color:color-mix(in srgb, var(--bin, var(--copper)) 55%, transparent)}
   .br-row .r{color:var(--muted);letter-spacing:0.06em;font-size:9px}
   .br-row:hover{color:var(--ink)}
   .br-row .ph-chev{position:static;display:inline-block;width:14px;font-size:10px;color:var(--muted)}
@@ -449,6 +462,7 @@ def main():
         # v20: rows rendered under grouping are always in an OPEN bin (closed
         # bins return before row creation) — tag them so the block can tint.
         ('      row.className = "row" + (it.id === state.selectedId ? " sel" : "")',
+         '      row.dataset.bin = gkey;   // v62: collection identity drives the colour\n'
          '      row.className = "row" + (grouped ? " in-bin" : "") + (it.id === state.selectedId ? " sel" : "")',
          "row-in-bin"),
         (OLD_PHASE_DIVIDER, NEW_PHASE_DIVIDER_B, "collapsible-headers"),
@@ -592,6 +606,7 @@ def main():
          '    const brRow = h => {\n'
          '      const el = document.createElement("div");\n'
          '      el.className = "br-row" + (h.classList.contains("closed") ? "" : " open");\n'
+         '      el.dataset.bin = h.dataset.phase;   // v62: identity colour\n'
          '      el.innerHTML = `<span><span class="ph-chev">${h.classList.contains("closed") ? "\\u203a" : "\\u2304"}</span>${escapeHTML(h.dataset.phase || "")}</span><span class="r">${escapeHTML(h.dataset.count || "")}</span>`;\n'
          '      el.addEventListener("click", () => {\n'
          '        rows.scrollTop = h.offsetTop - rows.offsetTop - heads.indexOf(h) * BR_H;\n'
@@ -746,7 +761,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="61", tray=False)
+    ], version="62", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
