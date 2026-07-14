@@ -4088,7 +4088,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.87";
+  const VERSION      = "v1.09-test.79-labb.88";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7424,10 +7424,12 @@ WHERE {
   function pillCls(c) { return c ? c.cls : ""; }
 
   function updateMobCount() {
-    const f = state.filtered.length, t = state.items.length;
+    const inLetters = state.view === "letters";   // v88: count the ACTIVE corpus only
+    const t = state.items.filter(i => inLetters ? i.letter : !i.gated).length;
+    const f = state.filtered.length;
     const txt = (f < t) ? `${f} / ${t}` : `${t}`;
     const lf = document.getElementById("lf-count");   // LAB B v33: list-foot count
-    if (lf) lf.textContent = txt + " items";
+    if (lf) lf.textContent = txt + (inLetters ? " letters" : " items");
     const el = document.getElementById("mob-count");
     if (!el) return;
     el.textContent = txt;

@@ -827,10 +827,12 @@ def main():
          '    el.textContent = (f < t) ? `${f} / ${t}` : `${t}`;\n'
          '  }',
          '  function updateMobCount() {\n'
-         '    const f = state.filtered.length, t = state.items.length;\n'
+         '    const inLetters = state.view === "letters";   // v88: count the ACTIVE corpus only\n'
+         '    const t = state.items.filter(i => inLetters ? i.letter : !i.gated).length;\n'
+         '    const f = state.filtered.length;\n'
          '    const txt = (f < t) ? `${f} / ${t}` : `${t}`;\n'
          '    const lf = document.getElementById("lf-count");   // LAB B v33: list-foot count\n'
-         '    if (lf) lf.textContent = txt + " items";\n'
+         '    if (lf) lf.textContent = txt + (inLetters ? " letters" : " items");\n'
          '    const el = document.getElementById("mob-count");\n'
          '    if (!el) return;\n'
          '    el.textContent = txt;\n'
@@ -982,7 +984,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="87", tray=False)
+    ], version="88", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
