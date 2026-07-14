@@ -4096,7 +4096,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.81";
+  const VERSION      = "v1.09-test.82";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7232,7 +7232,7 @@ WHERE {
     clearAllFilters();   // LAB B v90: archive filters never carry into the letters
     applyFilters(); renderList(); renderFilterPanel(); updateFilterBadge();
     if (state.filtered.length) selectItem(state.filtered[0].id);
-    hhToast(`Correspondence — ${state.filtered.length} letters`);
+    // test.82: no arrival toast — the foot count and FRH header already say it
   }
   function exitLetters() {
     state.view = "archive";
