@@ -4128,7 +4128,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.86";
+  const VERSION      = "v1.09-test.87";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7257,13 +7257,16 @@ WHERE {
   function enterLetters() {
     state.view = "letters";
     document.body.classList.add("letters-view");
-    if (state.sortCol !== "year") { state.sortCol = "year"; state.sortDir = "asc"; }   // test.85: a URL-restored year sort (e.g. dir=desc) survives entry
+    const pend = window._hhPendingLetter || null; window._hhPendingLetter = null;   // test.87: one-shot shared-link intent
+    if (pend && pend.sort === "year" && ["asc","desc"].includes(pend.dir)) { state.sortCol = "year"; state.sortDir = pend.dir; }
+    else if (state.sortCol !== "year") { state.sortCol = "year"; state.sortDir = "asc"; }
     state.search = "";
     const si = document.getElementById("search-input"); if (si) si.value = "";
     const lpi = document.getElementById("lp-search-input"); if (lpi) lpi.placeholder = "search the letters";   // LAB B v89
     clearAllFilters();   // LAB B v90: archive filters never carry into the letters
     applyFilters(); renderList(); renderFilterPanel(); updateFilterBadge();
-    if (state.filtered.length) selectItem(state.filtered[0].id);
+    if (pend && state.filtered.some(i => i.id === pend.id)) selectItem(pend.id, { scrollIntoView: true, tap: true });
+    else if (state.filtered.length) selectItem(state.filtered[0].id);
     // test.82: no arrival toast — the foot count and FRH header already say it
   }
   function exitLetters() {
@@ -11430,8 +11433,13 @@ WHERE {
       const urlDir  = params.get("dir");
       const urlId   = params.get("id");
 
-      if (urlSort && ["id","phase","year"].includes(urlSort)) state.sortCol = urlSort;
-      if (urlDir  && ["asc","desc"].includes(urlDir))         state.sortDir = urlDir;
+      // test.87: a LETTER id in the URL (no HH- prefix) is a letters-entry
+      // intent, not an archive deep-link — hold it (plus any sort) for the
+      // first \u2709 entry; the archive landing stays untouched.
+      const urlIsLetter = urlId && !/^HH-/.test(urlId);
+      if (urlIsLetter) window._hhPendingLetter = { id: urlId, sort: urlSort, dir: urlDir };
+      if (!urlIsLetter && urlSort && ["id","phase","year"].includes(urlSort)) state.sortCol = urlSort;
+      if (!urlIsLetter && urlDir  && ["asc","desc"].includes(urlDir))         state.sortDir = urlDir;
 
       // Shareable pre-filtered entry, e.g. ?collection=EGC — sends a collaborator
       // straight to one collection (comma-separated; matched by archive abbrev).
