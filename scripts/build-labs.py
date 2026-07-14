@@ -251,6 +251,10 @@ CSS_LAB_B = """\
   .panel-right #info-pane-close{display:none}
   #panel-right:has(#info-pane.open) #rec-info{font-size:0}
   #panel-right:has(#info-pane.open) #rec-info::after{content:"\u2715";font-size:13px}
+  /* v93: while the ? pane is open the title bar reads ? instead of
+     ITEM RECORD — the pane names its current side. */
+  #panel-right:has(#info-pane.open) .meta-head .l{font-size:0}
+  #panel-right:has(#info-pane.open) .meta-head .l::after{content:"?";font-family:var(--mono);font-size:12.5px;font-weight:500;letter-spacing:0;color:color-mix(in srgb, var(--ink) 72%, transparent)}
   #meta-content{display:flex;flex-direction:column;flex:1}
   .pane-meta .data-footer{height:auto;background:transparent;border-top:1px solid var(--rule);
     padding:14px 0 2px;margin-top:28px;display:flex;flex-wrap:wrap;gap:12px 14px}
@@ -1027,7 +1031,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="92", tray=False)
+    ], version="93", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
