@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hunter House Foundation — site-lens MOCK</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<!-- ════════════════════════════════════════════════════════════════════════
+     MOCK — landing concept 3, 2026-07-14 (Brandon, corrected): the INTERACTIVE
+     SITE-PLAN LENS (forms/explore-3d.html — the contour model we built) IS the
+     landing. Full-bleed, lands straight in the model (intro skipped). The
+     lens's own chrome (layers panel, hints, plan/recenter buttons) is stripped
+     by injected CSS so you see ONLY the drawing; over it float the wordmark,
+     one line, an ENTER block, and the citation. Drag to orbit, scroll to zoom
+     — the site itself is the front door. DISPOSABLE — delete with the other
+     mocks when the site design resolves.
+
+     Note: the model floats in a dark field (#242220), so this mock is the
+     inverse palette of mock-plan (light chrome on dark).
+     ═══════════════════════════════════════════════════════════════════════ -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{ --field:#242220; --paper:#f2efe8; --muted:#a49a89; --gold:#c9a44e; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden;background:var(--field)}
+  body{font-family:"Inter Tight",Arial,sans-serif;color:var(--paper)}
+
+  /* the lens, full-bleed */
+  #lens{position:fixed;inset:0;width:100%;height:100%;border:0;display:block;background:var(--field)}
+
+  /* a whisper of vignette so the floating chrome reads over any contour density */
+  .veil{position:fixed;inset:0;pointer-events:none;z-index:1;
+    background:radial-gradient(120% 90% at 50% 45%,transparent 55%,rgba(18,16,14,.42) 100%)}
+
+  .chrome{position:fixed;inset:0;z-index:2;pointer-events:none}
+  .chrome a,.chrome button{pointer-events:auto}
+
+  .wordmark{position:absolute;top:26px;left:30px;
+    font-weight:800;text-transform:uppercase;letter-spacing:.24em;
+    font-size:13px;line-height:1.7;color:var(--paper);
+    text-shadow:0 2px 18px rgba(0,0,0,.6)}
+  .wordmark span{color:var(--gold)}
+
+  .enter{position:absolute;bottom:28px;left:30px;display:inline-block;
+    background:var(--paper);color:var(--field);text-decoration:none;
+    font-weight:800;text-transform:uppercase;letter-spacing:.1em;font-size:13px;
+    padding:14px 18px 12px;transition:background .15s,color .15s}
+  .enter:hover{background:var(--gold);color:#1a1712}
+
+  .lede{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
+    font-size:12.5px;color:var(--paper);opacity:.86;letter-spacing:.01em;
+    max-width:46ch;text-align:center;line-height:1.6;
+    text-shadow:0 2px 16px rgba(0,0,0,.7)}
+
+  .cite{position:absolute;bottom:30px;right:30px;text-align:right;line-height:1.7;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9.5px;
+    letter-spacing:.07em;color:var(--muted);text-shadow:0 2px 12px rgba(0,0,0,.7)}
+  .cite a{color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(201,164,78,.4)}
+  .cite a:hover{border-bottom-color:var(--gold)}
+
+  .orbit{position:absolute;top:50%;right:28px;transform:translateY(-50%) rotate(180deg);
+    writing-mode:vertical-rl;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:8.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);opacity:.8}
+
+  .mock-tag{position:absolute;top:28px;right:30px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:8.5px;
+    letter-spacing:.16em;color:var(--muted)}
+
+  @media (max-width:760px){ .lede,.orbit{display:none} }
+</style>
+</head>
+<body>
+
+<iframe id="lens" title="Hunter House site — interactive contour model"
+        src="forms/explore-3d.html?intro=0" allow="fullscreen"></iframe>
+
+<div class="veil"></div>
+
+<div class="chrome">
+  <div class="wordmark">Hunter House<br><span>Foundation</span></div>
+  <span class="mock-tag">MOCK · 3 · THE LENS</span>
+  <a class="enter" href="browse.html">Enter the archive →</a>
+  <p class="lede">The residence and archive of architect Richard Morrow Hunter
+     (1930–2023), built by his own hand at 203 Goward Road, Saanich.</p>
+  <div class="cite"><a href="browse.html">Site contour model · survey 2018 · Hunter House Archive</a></div>
+  <div class="orbit">drag to orbit · scroll to zoom</div>
+</div>
+
+<script>
+  // Same-origin (both on hunterhouse.org): once the lens loads, inject a
+  // stylesheet that hides its native chrome so the landing shows ONLY the
+  // drawing. Wrapped in try/catch — if the browser ever blocks it, the lens
+  // just shows with its own controls (graceful, not broken).
+  const lens = document.getElementById("lens");
+  lens.addEventListener("load", () => {
+    try {
+      const doc = lens.contentDocument;
+      if (!doc) return;
+      const s = doc.createElement("style");
+      s.textContent = `
+        .layers,.formtag,.hint,.orbithint,#topbtn,#recenterbtn,.i-prov,.intro{
+          display:none !important; opacity:0 !important; pointer-events:none !important;
+        }`;
+      doc.head.appendChild(s);
+    } catch (e) { /* cross-origin or timing — leave the lens as-is */ }
+  });
+</script>
+</body>
+</html>
