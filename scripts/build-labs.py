@@ -124,13 +124,14 @@ CSS_LAB_B = """\
   #lf-show{display:none;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.12em;
     text-transform:uppercase;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;margin-left:auto}
   #lf-show:hover{color:var(--copper-deep)}
-  /* v84: letters entry in the list foot's right corner */
-  #lf-letters{margin-left:auto;background:none;border:0;padding:0;cursor:pointer;
+  /* v84/v91: letters entry LEFT, count/Show right — the Show arrow no
+     longer points at the envelope. */
+  #lf-letters{background:none;border:0;padding:0;cursor:pointer;
     color:var(--muted);display:inline-flex;align-items:center}
   #lf-letters:hover{color:var(--ink)}
   #lf-letters svg{display:block;pointer-events:none}
   body.letters-view #lf-letters{color:var(--red-deep)}
-  .panel-left:has(#filter-panel:not([hidden])) #lf-letters{margin-left:14px}   /* Show → owns the auto slot while the tray is open */
+  #lf-count{margin-left:auto}
   .panel-left:has(#filter-panel:not([hidden])) #lf-count{display:none}
   .panel-left:has(#filter-panel:not([hidden])) #lf-show{display:inline-flex}
   /* applied tags — the browse chips' bracket convention, category colour */
@@ -802,7 +803,7 @@ def main():
          '      <div class="rows" id="rows"></div>\n'
          '      <div class="scroll-pip" id="filter-pip" aria-hidden="true"></div>\n'
          '      <div id="bin-rail-top" aria-hidden="true"></div>\n'
-         '      <div id="list-foot"><span id="lf-count"></span><button id="lf-show" type="button" title="Apply and close the filter">Show \u2192</button><button id="lf-letters" type="button" title="Researcher letters" aria-label="Researcher letters" onclick="window.hhLetters && window.hhLetters()"><svg width="15" height="12" viewBox="0 0 16 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="2" width="14" height="9.5" rx="1"/><path d="M1.5 3l6.5 4.5L14.5 3"/></svg></button></div>',
+         '      <div id="list-foot"><button id="lf-letters" type="button" title="Researcher letters" aria-label="Researcher letters" onclick="window.hhLetters && window.hhLetters()"><svg width="15" height="12" viewBox="0 0 16 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="2" width="14" height="9.5" rx="1"/><path d="M1.5 3l6.5 4.5L14.5 3"/></svg></button><span id="lf-count"></span><button id="lf-show" type="button" title="Apply and close the filter">Show \u2192</button></div>',
          "bin-rail-markup"),
         # v31: splash bottom strip — fixed, so DOM placement is free.
         ('</body>',
@@ -1023,7 +1024,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="90", tray=False)
+    ], version="91", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.

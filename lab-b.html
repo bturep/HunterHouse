@@ -1010,13 +1010,14 @@
   #lf-show{display:none;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.12em;
     text-transform:uppercase;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;margin-left:auto}
   #lf-show:hover{color:var(--copper-deep)}
-  /* v84: letters entry in the list foot's right corner */
-  #lf-letters{margin-left:auto;background:none;border:0;padding:0;cursor:pointer;
+  /* v84/v91: letters entry LEFT, count/Show right — the Show arrow no
+     longer points at the envelope. */
+  #lf-letters{background:none;border:0;padding:0;cursor:pointer;
     color:var(--muted);display:inline-flex;align-items:center}
   #lf-letters:hover{color:var(--ink)}
   #lf-letters svg{display:block;pointer-events:none}
   body.letters-view #lf-letters{color:var(--red-deep)}
-  .panel-left:has(#filter-panel:not([hidden])) #lf-letters{margin-left:14px}   /* Show → owns the auto slot while the tray is open */
+  #lf-count{margin-left:auto}
   .panel-left:has(#filter-panel:not([hidden])) #lf-count{display:none}
   .panel-left:has(#filter-panel:not([hidden])) #lf-show{display:inline-flex}
   /* applied tags — the browse chips' bracket convention, category colour */
@@ -3800,7 +3801,7 @@
       <div class="rows" id="rows"></div>
       <div class="scroll-pip" id="filter-pip" aria-hidden="true"></div>
       <div id="bin-rail-top" aria-hidden="true"></div>
-      <div id="list-foot"><span id="lf-count"></span><button id="lf-show" type="button" title="Apply and close the filter">Show →</button><button id="lf-letters" type="button" title="Researcher letters" aria-label="Researcher letters" onclick="window.hhLetters && window.hhLetters()"><svg width="15" height="12" viewBox="0 0 16 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="2" width="14" height="9.5" rx="1"/><path d="M1.5 3l6.5 4.5L14.5 3"/></svg></button></div>
+      <div id="list-foot"><button id="lf-letters" type="button" title="Researcher letters" aria-label="Researcher letters" onclick="window.hhLetters && window.hhLetters()"><svg width="15" height="12" viewBox="0 0 16 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="2" width="14" height="9.5" rx="1"/><path d="M1.5 3l6.5 4.5L14.5 3"/></svg></button><span id="lf-count"></span><button id="lf-show" type="button" title="Apply and close the filter">Show →</button></div>
     </div>
     <button class="panel-handle" id="left-handle" aria-label="Toggle browse panel">
       <svg class="handle-chevron" width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2,1 5,5 2,9"/></svg>
@@ -4088,7 +4089,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.90";
+  const VERSION      = "v1.09-test.79-labb.91";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
