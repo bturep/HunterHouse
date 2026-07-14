@@ -2,7 +2,7 @@
 <html lang="en" class="dark">
 <head>
 <meta charset="utf-8">
-<title>Hunter House Archive</title>
+<title>Hunter House Archive — NEXT (frozen test.79)</title>
 <!-- maximum-scale removed 2026-06-11 (Baden mode / AUDIT.md §1.1): it blocked
      iPadOS pinch-zoom + system "Larger Text" (WCAG 1.4.4). Affects all visitors. -->
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -948,243 +948,6 @@
     .filter-panel{top:74px}   /* dropdown opens below the search row, still full-height */
   }
   @media (max-width:767px){ .lp-search{display:none} }  /* mobile keeps its fp-search-row */
-  /* ══ LAB B v40 — consolidated (design spec 7a + the v20-v39 system) ══ */
-  /* — bin header (v40e): block layout replaces the base grid; chevron
-     hangs in the gutter so name/gloss/ID/title share one left edge;
-     count reads label-first; Year sort lives on the gloss line. — */
-  .phase-divider.ph-head{display:block;position:relative;cursor:pointer;
-    padding:13px 20px 13px;letter-spacing:normal;text-transform:none}   /* v58: same breathing as rows (14/20) */
-  .ph-chev{position:absolute;left:6px;top:15px;font-size:11px;color:var(--muted)}
-  .ph-head:hover .ph-chev{color:var(--ink)}
-  .ph-head.closed{border-bottom-style:dashed}
-  .ph-line1,.ph-line2{display:flex;justify-content:space-between;align-items:baseline;gap:14px}
-  .ph-line2{margin-top:3px}
-  .ph-name{font-family:var(--mono);font-size:12.5px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink);line-height:1.35}   /* v59: back to 12.5 — hierarchy fixed by demoting the title instead */
-  .ph-count{font-family:var(--mono);font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}   /* v58: matches the rows' kicker size */
-  .ph-count b{color:var(--ink);font-weight:500}
-  .ph-gloss{font-family:var(--mono);font-size:9px;letter-spacing:0.04em;text-transform:none;color:var(--hint);line-height:1.5;white-space:normal;min-width:0}
-  .ph-sort{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;white-space:nowrap}
-  /* v61: the Year bar is gone entirely — authored order is the only
-     ordering; sortCol "year" is unreachable from the UI (URL ?sort=year
-     still honoured). */
-  .ph-sort .sort-arrow{font-family:var(--mono);font-size:9px;display:inline-block;min-width:8px}
-  /* — chrome toolbar (v40c): Catalogue · search · Filter share ONE row
-     behind full-height separators. Catalogue demoted below the wordmark
-     (v40d): chrome ranks by dimness+tracking, content by ink. — */
-  .lp-toolbar{display:flex;align-items:center;gap:12px;height:41px;box-sizing:border-box;
-    padding:0 20px 0 29px;background:var(--bg);flex-shrink:0;
-    border-bottom:1px solid var(--rule)}   /* v66/v69: a TITLE BAR — explicit 41px, same as .meta-head (was padding-driven ~40) */
-  /* v55: type hierarchy + one left edge — the wordmark reads above
-     CATALOGUE (12.5 > 11.5), and Hunter House Archive / Catalogue /
-     collection titles all start at x=29 (gutter + spine + padding). */
-  .site-top{padding-left:29px;height:44px}   /* v73: resting head 44px; the splash keeps the thin 28px frame and the bar EXPANDS on Continue (base 280ms height transition does the move) */
-  .site-top .mk-static,.site-top .mk-page{font-size:12.5px}
-  .lp-toolbar .lh-title{font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:0.10em;text-transform:uppercase;color:color-mix(in srgb, var(--ink) 72%, transparent);cursor:default}
-  .lp-toolbar #lp-search-input{flex:1;min-width:0;background:none;border:0;outline:none;font-family:var(--mono);font-size:11px;letter-spacing:0.02em;color:var(--ink)}
-  .lp-toolbar #lp-search-input::placeholder{color:var(--hint);text-transform:lowercase;letter-spacing:0.06em}
-  .tb-vsep{width:1px;align-self:stretch;background:var(--rule);flex:none}
-  .lh-filter{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.12em;
-    text-transform:uppercase;color:var(--muted);background:none;border:0;padding:0;border-radius:0;
-    display:flex;align-items:center;gap:8px;cursor:pointer;flex-shrink:0}
-  .lh-filter .filter-chevron{font-size:13px;color:var(--muted);letter-spacing:0;font-weight:400;line-height:1}
-  .lh-filter:hover,.lh-filter.fp-open{color:var(--ink)}
-  .lh-filter:hover .filter-chevron,.lh-filter.fp-open .filter-chevron{color:var(--ink)}
-  /* active-tag row — exists only while filters are active ([hidden] via
-     renderAfPills); clear-all folds inline after the last tag. */
-  .lp-filter{padding:12px 20px 12px 29px;background:var(--bg);border-bottom:1px solid var(--rule)}   /* v82: equidistant above/below the tags; left joins the x=29 plumb line */
-  #lf-pills{display:flex;flex-wrap:wrap;gap:3px 9px;align-items:baseline;min-width:0}
-  #lf-pills .af-clear{font-family:var(--mono);font-size:10px;letter-spacing:0.10em;text-transform:uppercase;
-    color:color-mix(in srgb, var(--muted) 40%, transparent);background:none;border:0;padding:0;margin-left:2px;cursor:pointer}
-  #lf-pills .af-clear:hover{color:var(--muted)}
-  @media (min-width:768px){ .panel-left .filter-panel{top:40px;bottom:28px} }   /* flush under the toolbar; stops above the foot like the ? pane */
-  /* v57: the tray joins the pip system — native scrollbar hidden, pip in
-     the slot, above the overlay. The Show action moves to the list foot
-     while the tray is open; the overlay keeps only Clear all. */
-  .filter-panel{scrollbar-width:none}
-  .panel-left .filter-panel{padding-left:29px}   /* v80/v81: joins the x=29 plumb line — needs the stronger selector; base padding shorthand comes later and won the tie */
-  .filter-panel .fp-lbl{color:var(--ink)}   /* v80: facet headers in ink — a step above their chips */
-  .filter-panel .fp-group + .fp-group{border-top:1px dashed color-mix(in srgb, var(--rule) 45%, transparent);padding-top:12px}   /* v80: faint dashed rules between sections, the rows' own separator language */
-  .filter-panel::-webkit-scrollbar{display:none}
-  #filter-pip{z-index:51}
-  .fp-show{display:none}
-  #lf-show{display:none;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.12em;
-    text-transform:uppercase;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;margin-left:auto}
-  #lf-show:hover{color:var(--copper-deep)}
-  /* v84/v91: letters entry LEFT, count/Show right — the Show arrow no
-     longer points at the envelope. */
-  #lf-letters{background:none;border:0;padding:0;cursor:pointer;
-    color:var(--muted);display:inline-flex;align-items:center}
-  #lf-letters:hover{color:var(--ink)}
-  #lf-letters svg{display:block;pointer-events:none}
-  body.letters-view #lf-letters{color:var(--red-deep)}
-  #lf-count{margin-left:auto}
-  .panel-left:has(#filter-panel:not([hidden])) #lf-count{display:none}
-  .panel-left:has(#filter-panel:not([hidden])) #lf-show{display:inline-flex}
-  /* applied tags — the browse chips' bracket convention, category colour */
-  .af-pill{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:0.02em;
-    text-transform:capitalize;line-height:1.6;background:transparent;border:0;
-    padding:0;border-radius:0;color:var(--pf,var(--ink))}
-  .af-pill::before{content:"["}
-  .af-pill::after{content:"]"}
-  .af-pill:hover{opacity:0.75}
-  .af-pill .x{margin-left:5px;color:var(--muted)}
-  .af-pill:hover .x{color:var(--red-deep)}
-  /* — row (v40a/b/f): stacked block, all-mono, no separators — rhythm
-     from padding; kicker holds ID (with the type mark) left, year right;
-     subtitles wrap, never truncate. — */
-  .pane-list .row{display:flex;flex-direction:column;align-items:stretch;gap:5px;padding:14px 20px;
-    border-bottom:1px dashed color-mix(in srgb, var(--rule) 45%, transparent)}   /* v41: very light dashed dividers back between items */
-  .pane-list .row:last-child,.pane-list .row.sel,.pane-list .row:has(+ .ph-head){border-bottom-color:transparent}
-  .r-kick{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em}
-  .r-kick .archid{font-size:10.5px;color:color-mix(in srgb, var(--ink) 72%, transparent)}
-  .pane-list .row .year{font-family:var(--mono);font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
-  .r-title{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:0.01em;color:var(--ink);line-height:1.45}   /* v59: below the 12.5px collection name */
-  .r-note{font-family:var(--mono);font-size:10.5px;color:var(--hint);line-height:1.5;white-space:normal}
-  /* — all-mono BOTH panes (Brandon): the record pane joins the list — */
-  .panel-right .panel-content{font-family:var(--mono)}
-  .panel-right.pane-meta .meta-title{font-family:var(--mono);font-size:14px;letter-spacing:0.01em;line-height:1.5}   /* v59: scaled to the new list (title 12 / collection 12.5) */
-  .pane-meta .kv dd{font-size:12px}
-  .graph-path .node .lbl{font-family:var(--mono);letter-spacing:0.01em}
-  /* — tonal tiers (v21) + depth ladder (v25-v29): chrome > collections >
-     rows > stage, warm near-black family (wider v28 steps reverted). — */
-  .phase-divider.ph-head{background:var(--soft)}
-  .row.in-bin{background:color-mix(in srgb, var(--bg) 96.5%, var(--ink))}
-  html.dark body .pane-image,html.dark body .image-stage{background:#191614}   /* v55: stage lifted a touch; the chosen item matches it */
-  html.dark body .row.in-bin{background:#1e1b19}
-  html.dark body .phase-divider.ph-head,html.dark body .br-row{background:#252220}
-  html.dark body .site-top,html.dark body .lp-toolbar,html.dark body .lp-filter,
-  html.dark body .meta-head,html.dark body .image-foot,html.dark body .panel-handle{background:#2b2823}
-  html.dark body .panel-handle::before{background:#8a847c}
-  html.dark body .panel-right{background:#2b2823}
-  html.dark body .panel-left{background:#2b2823}
-  /* — spine (v22/v24): sienna marks the extent of an OPEN collection —
-     header, rows, rail shadow; closed bars carry a transparent stub. — */
-  /* v62: each collection owns a colour — spine, selection lines and rail
-     ticks inherit it via --bin (fallback: the copper green). Identity
-     colour, not facet coding: the tray's category chips stay as they are. */
-  [data-phase="CAA"],[data-bin="CAA"]{--bin:#7a4020}
-  [data-phase="HHC"],[data-bin="HHC"]{--bin:#4f7a6b}
-  [data-phase="IHC"],[data-bin="IHC"]{--bin:#284878}
-  [data-phase="EGC"],[data-bin="EGC"]{--bin:#7a5820}
-  [data-phase="FRH"],[data-bin="FRH"]{--bin:#6a2068}
-  html.dark [data-phase="CAA"],html.dark [data-bin="CAA"]{--bin:#b08468}
-  html.dark [data-phase="HHC"],html.dark [data-bin="HHC"]{--bin:#7aaa98}
-  html.dark [data-phase="IHC"],html.dark [data-bin="IHC"]{--bin:#7898b8}
-  html.dark [data-phase="EGC"],html.dark [data-bin="EGC"]{--bin:#c09858}
-  html.dark [data-phase="FRH"],html.dark [data-bin="FRH"]{--bin:#a07898}
-  .phase-divider.ph-head,.row.in-bin{border-left:2px solid transparent}
-  .ph-head:not(.closed),.row.in-bin{border-left-color:color-mix(in srgb, var(--bin, var(--copper)) 55%, transparent)}
-  /* — selection (v30/v39): the row in the viewer sinks to stage depth;
-     the box opens right, spine carries the left, sienna lines top+bottom. — */
-  .pane-list .row.sel{background:var(--soft);
-    box-shadow:inset 0 1px 0 color-mix(in srgb, var(--bin, var(--copper)) 55%, transparent),
-               inset 0 -1px 0 color-mix(in srgb, var(--bin, var(--copper)) 55%, transparent)}
-  /* v60: the spine runs THROUGH the selection as its left edge — same
-     2px, same copper, seamless; the top/bottom lines meet it. */
-  .pane-list .row.sel::before{display:none}   /* v58: the base 3px red indicator was the real extra left thickness */
-  html.dark body .row.sel{background:#191614}
-  /* — bin rail (v23/v32): passed collections stack compact at the top;
-     the pane ends in a 41px chrome foot carrying the item count (v33). — */
-  #bin-rail-top{position:absolute;left:7px;right:7px;z-index:8;overflow:hidden}
-  .br-row{display:flex;justify-content:space-between;align-items:center;height:25px;box-sizing:border-box;
-    padding:0 20px 0 12px;background:var(--soft);border-bottom:1px solid var(--rule);
-    border-left:2px solid transparent;cursor:pointer;
-    font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink)}   /* v78: rail names in ink, matching the expanded headers */
-  .br-row.open{border-left-color:color-mix(in srgb, var(--bin, var(--copper)) 55%, transparent)}
-  .br-row .r{color:var(--muted);letter-spacing:0.06em;font-size:9px}
-  .br-row:hover{opacity:0.7}
-  .br-row .ph-chev{position:static;display:inline-block;width:14px;font-size:10px;color:var(--muted)}
-  #list-foot{height:28px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
-    display:flex;align-items:center;padding:0 20px;
-    font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em}
-  html.dark body #list-foot{background:#2b2823}
-  /* — pip slot + mirrored gutters (v35/v37/v38); v42 extends the same
-     slots to the record pane — content inset between two 7px lanes, the
-     meta pip runs in the inner one. Chrome (head, data footer) stays
-     full-width. — */
-  .scroll-pip{z-index:7}
-  .shell .scroll-pip.active{opacity:0.22}   /* v52: quieter pips (base 0.4); outranks the later base rule */
-  #rows{margin:0 7px}
-  /* v43: the inset record body also takes the collections-tier tone —
-     a recessed content block within the chrome panel, same step as the
-     collection bars on the left. */
-  .pane-meta .meta-body{margin:0 7px;background:var(--soft)}
-  html.dark body .pane-meta .meta-body{background:#252220}
-  /* v44: no rule under ITEM RECORD — the recessed body's own edge is the
-     separator, mirroring the left toolbar's seamless seam. */
-  .pane-meta .meta-head{border-bottom:1px solid var(--rule)}   /* v66: title bar again — reverses v44/v47; the recessed body changed what the line sits against */
-  .pane-meta .meta-head .l{color:color-mix(in srgb, var(--ink) 72%, transparent)}   /* v52: same white intensity as CATALOGUE */
-  /* v45/v49: the technical links live at the end of the SCROLL, quiet;
-     the pane still ENDS in a 41px chrome foot — empty frame, continuing
-     the bottom line across all three panes. */
-  .meta-foot{height:28px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
-    display:flex;align-items:center;justify-content:flex-end;gap:16px;padding:0 22px}
-  html.dark body .meta-foot{background:#2b2823}
-  /* v50/v53: only the ? lives here (Aa + fullscreen went home to the top
-     bar). The info pane occupies the ITEM RECORD space — it stops above
-     this foot — and while it is open the ? reads as ✕ in the exact
-     same spot: open and close share one location. */
-  .meta-foot button{background:none;border:0;padding:0;cursor:pointer;color:var(--ink);
-    font-family:var(--mono);font-weight:500;line-height:1;display:inline-flex;align-items:center}
-  .meta-foot button:hover{opacity:0.5}
-  .meta-foot #rec-info{font-size:14px}
-  /* v92: the ? pane wears the record body's own cloth — the recessed
-     soft block inset between the 7px pip lanes, not a bare curtain. */
-  .panel-right #info-pane{top:41px;bottom:28px;left:7px;right:7px;background:var(--soft)}   /* v94: starts below the title bar (which reads ?) */
-  html.dark body .panel-right #info-pane{background:#252220}
-  /* v85: public-only page — the record never shows the notes/unlock panel */
-  #meta-content #rn-panel{display:none}
-  .panel-right #info-pane-close{display:none}
-  #panel-right:has(#info-pane.open) #rec-info{font-size:0}
-  #panel-right:has(#info-pane.open) #rec-info::after{content:"✕";font-size:13px}
-  /* v93: while the ? pane is open the title bar reads ? instead of
-     ITEM RECORD — the pane names its current side. */
-  #panel-right:has(#info-pane.open) .meta-head .l{font-size:0}
-  #panel-right:has(#info-pane.open) .meta-head .l::after{content:"?";font-family:var(--mono);font-size:12.5px;font-weight:500;letter-spacing:0;color:color-mix(in srgb, var(--ink) 72%, transparent)}
-  #meta-content{display:flex;flex-direction:column;flex:1}
-  .pane-meta .data-footer{height:auto;background:transparent;border-top:1px solid var(--rule);
-    padding:14px 0 2px;margin-top:28px;display:flex;flex-wrap:wrap;gap:12px 14px}
-  /* — top-right cluster separators (v33) — */
-  .tr-vsep{width:1px;align-self:stretch;background:var(--rule);flex:none}
-  .site-topright .tr-div{height:auto;align-self:stretch}
-  /* — splash frame (v31) — */
-  #splash-foot{position:fixed;left:0;right:0;bottom:0;height:28px;z-index:30;
-    background:var(--bg);border-top:1px solid var(--rule);
-    opacity:0;pointer-events:none;transition:opacity 240ms ease}
-  body.hh-splash #splash-foot{opacity:1}
-  html.dark body #splash-foot{background:#2b2823}
-  /* — pull tabs (v10/v18) — */
-  .panel-handle{width:12px;height:44px;background:var(--bg);border:1px solid var(--rule)}
-  .panel-left .panel-handle{right:-13px;border-left:0;border-radius:0 4px 4px 0}
-  .panel-right .panel-handle{left:-13px;border-right:0;border-radius:4px 0 0 4px}
-  .panel-handle::before{content:"";width:1px;height:14px;background:var(--muted);transition:background 0.15s}
-  .panel-handle:hover{background:var(--bg)}
-  .panel-handle:hover::before{background:var(--ink)}
-  .panel-handle .handle-chevron{display:none}
-  .panel-left.pane-list,.panel-right.pane-meta{overflow:visible}
-  /* v63/v68: feet at 28px — the collapsed sliver width; the frame is
-     one dimension all round (slivers, feet, splash strip). */
-  .pane-image .image-foot{height:28px}
-  /* v63: the collapsed record sliver names itself — vertical label,
-     whole sliver clickable (pull tab still works). Hidden during splash. */
-  .panel-right.out{cursor:pointer}
-  .panel-right.out::after{content:"ITEM RECORD";position:absolute;top:50%;left:50%;
-    transform:translate(-50%,-50%);writing-mode:vertical-rl;white-space:nowrap;
-    font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;
-    text-transform:uppercase;color:var(--muted);pointer-events:none}
-  body.hh-splash .panel-right.out::after{content:none}
-  /* v77: the ? never disappears — when the record collapses, its foot
-     survives as a 28x28 square in the sliver's corner (visibility is
-     resettable on descendants); the image foot butts against it. */
-  .panel-right.out .meta-foot{visibility:visible;padding:0 9px 0 0}   /* v79/v81: right-anchored; 9px measured-centres the 8.4px glyph in the 27px box */
-  .meta-foot{transition:padding 260ms cubic-bezier(0.4,0,0.2,1)}   /* v79: the padding eases on the pane's own curve */
-  /* v64: the catalogue sliver gets the same treatment */
-  .panel-left.out{cursor:pointer}
-  .panel-left.out::after{content:"ARCHIVE";position:absolute;top:50%;left:50%;
-    transform:translate(-50%,-50%);writing-mode:vertical-rl;white-space:nowrap;
-    font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.18em;
-    text-transform:uppercase;color:var(--muted);pointer-events:none}
-  body.hh-splash .panel-left.out::after{content:none}
   .row{
     display:grid;grid-template-columns:104px 1fr 50px;gap:12px;
     padding:11px 20px;align-items:start;cursor:pointer;
@@ -1710,20 +1473,20 @@
   html.dark{--copper-deep:#9dc2b2;--copper-pale:rgba(157,194,178,0.15)}
 
   /* ── pill colour themes ── */
-  .pc-denim {--pf:#7a4020}  /* LAB B spectrum 1 sienna — collection */
-  .pc-sage  {--pf:#7a5820}  /* LAB B spectrum 2 ochre — areas */
-  .pc-stone {--pf:#386028}  /* LAB B spectrum 3 olive — item type */
-  .pc-slate {--pf:#1a6b70}  /* LAB B spectrum 4 teal — drawing type */
-  .pc-clay  {--pf:#283878}  /* LAB B spectrum 5 navy — made by */
-  .pc-moss  {--pf:#6a2068}  /* LAB B spectrum 6 plum — built status */
+  .pc-sage  {--pf:#7a5820}  /* amber/ochre — areas */
+  .pc-stone {--pf:#7a4020}  /* sienna — item type */
+  .pc-slate {--pf:#284878}  /* steel blue — drawing type */
+  .pc-clay  {--pf:#6a2068}  /* plum — creator */
+  .pc-moss  {--pf:#386028}  /* olive — built status */
   .pc-indigo{--pf:var(--copper-deep)}
+  .pc-denim {--pf:#283878}  /* navy — collection */
   .pc-red   {--pf:var(--red)}  /* curators — softer sibling of the brighter .c-red used on HHFA pane (Hunter accent); var(--red) auto-darkens via light.css */
-  html.dark .pc-denim {--pf:#aa8572}  /* v40g: ~40% toward warm grey */
-  html.dark .pc-sage  {--pf:#aa9168}
-  html.dark .pc-stone {--pf:#899676}
-  html.dark .pc-slate {--pf:#769b93}
-  html.dark .pc-clay  {--pf:#7f91a1}
-  html.dark .pc-moss  {--pf:#977e8e}
+  html.dark .pc-sage  {--pf:#c09858}
+  html.dark .pc-stone {--pf:#b09870}
+  html.dark .pc-slate {--pf:#7898b8}
+  html.dark .pc-clay  {--pf:#a07898}
+  html.dark .pc-moss  {--pf:#88a070}
+  html.dark .pc-denim {--pf:#6890a8}
   /* .pc-red uses var(--red), which already has a light/dark pair in light.css. */
 
   /* dark mode overrides for hardcoded colours */
@@ -3624,8 +3387,8 @@
 <header class="site-top" id="site-header" role="banner" aria-label="Site header">
   <div class="markid" id="markid">
     <button class="mk-home" id="mk-home" type="button" aria-label="About this archive">
-      <span class="mk-static">Hunter House Archive</span>
-      <span class="mk-page" id="mk-page"></span>
+      <span class="mk-static">Hunter House</span>
+      <span class="mk-page" id="mk-page">Archive</span>
     </button>
   </div>
   <div class="header-search"></div>
@@ -3667,6 +3430,7 @@
     <!-- Info ("?") button — opens the shortcuts/info pane. In-flow between
          #search-toggle and #fs-toggle; hidden while the about-pane is open
          and on first paint via data-splash-init (see the #rec-info rules). -->
+    <button id="rec-info" title="About this archive &amp; shortcuts [?]" aria-label="Info">?</button>
     <!-- Aa text-size toggle. Click cycles 3 states: default → text-lg →
          text-xl → default. Persisted to localStorage["hhf_text_size"]
          ("" | "lg" | "xl"). The two glyphs shift opacity / weight to indicate
@@ -3795,20 +3559,24 @@
     <button class="cur-leave" id="cur-leave" type="button" hidden title="Leave this selection">LEAVE SELECTION <span class="cl-x">×</span></button>
     <div class="panel-content">
       <div class="scroll-pip" id="list-pip"></div>
-      <div class="lp-toolbar">
-        <input id="lp-search-input" type="text" placeholder="search the archive" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search the archive">
-        <button class="l lh-filter" id="filter-toggle" title="Filter">Filter<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">›</span></button>
+      <div class="list-head">
+        <button class="l" id="filter-toggle" title="Filter">Browse items<span class="filter-badge" id="filter-badge"></span><span class="filter-chevron">›</span></button>
         <button id="list-info" type="button" title="About this archive" aria-label="About this archive">?</button>
+        <div class="sort-mini">
+          <button class="sort-hd" data-sort-col="id">ID<span class="sort-arrow" id="sa-id"></span></button>
+          <button class="sort-hd" data-sort-col="phase">Phase<span class="sort-arrow" id="sa-phase"></span></button>
+          <button class="sort-hd" data-sort-col="year">Year<span class="sort-arrow" id="sa-year"></span></button>
+        </div>
       </div>
-      <div class="lp-filter" id="lp-filter" hidden><span id="lf-pills"></span></div>
+      <div class="lp-search" id="lp-search">
+        <span class="pfx">/</span>
+        <input id="lp-search-input" type="text" placeholder="search archive" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search the archive">
+      </div>
       <div class="filter-panel" id="filter-panel" hidden></div>
       <div class="mark-bar" id="mark-bar" hidden></div>
       <div class="bulk-bar" id="bulk-bar" hidden></div>
       <div class="curation-card" id="curation-card" hidden></div>
       <div class="rows" id="rows"></div>
-      <div class="scroll-pip" id="filter-pip" aria-hidden="true"></div>
-      <div id="bin-rail-top" aria-hidden="true"></div>
-      <div id="list-foot"><button id="lf-letters" type="button" title="Researcher letters" aria-label="Researcher letters" onclick="window.hhLetters && window.hhLetters()"><svg width="15" height="12" viewBox="0 0 16 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="2" width="14" height="9.5" rx="1"/><path d="M1.5 3l6.5 4.5L14.5 3"/></svg></button><span id="lf-count"></span><button id="lf-show" type="button" title="Apply and close the filter">Show →</button></div>
     </div>
     <button class="panel-handle" id="left-handle" aria-label="Toggle browse panel">
       <svg class="handle-chevron" width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2,1 5,5 2,9"/></svg>
@@ -3903,19 +3671,14 @@
         </span>
       </div>
       <div class="meta-body" id="meta-body">
-        <div id="meta-content">
-          <div class="empty">Select an item from the list</div>
-        </div>
-        <div class="data-footer" id="data-footer">
-          <a id="df-permalink" href="#" onclick="return false" style="opacity:0.4" title="Copy this item's permanent link">Permalink ⧉</a>
-          <a id="df-cite" href="#" onclick="return false" style="opacity:0.4" title="Copy a citation for this item">Cite ⧉</a>
-          <a id="df-wikibase" href="#" onclick="return false" style="opacity:0.4">Wikibase ↗</a>
-          <a id="df-sparql"   href="#" onclick="return false" style="opacity:0.4">SPARQL ↗</a>
-          <a id="df-json"     href="#" onclick="return false" style="opacity:0.4">JSON ↗</a>
-        </div>
+        <div class="empty">Select an item from the list</div>
       </div>
-      <div class="meta-foot" id="meta-foot">
-        <button id="rec-info" title="About this archive &amp; shortcuts [?]" aria-label="Info">?</button>
+      <div class="data-footer" id="data-footer">
+        <a id="df-permalink" href="#" onclick="return false" style="opacity:0.4" title="Copy this item's permanent link">Permalink ⧉</a>
+        <a id="df-cite" href="#" onclick="return false" style="opacity:0.4" title="Copy a citation for this item">Cite ⧉</a>
+        <a id="df-wikibase" href="#" onclick="return false" style="opacity:0.4">Wikibase ↗</a>
+        <a id="df-sparql"   href="#" onclick="return false" style="opacity:0.4">SPARQL ↗</a>
+        <a id="df-json"     href="#" onclick="return false" style="opacity:0.4">JSON ↗</a>
       </div>
     </div>
     <div id="info-pane" role="dialog" aria-modal="true" aria-label="About this archive and keyboard shortcuts">
@@ -4096,7 +3859,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.80";
+  const VERSION      = "v1.09-test.79";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4266,7 +4029,7 @@
   function rnUnlock(entry)    { sessionStorage.setItem("hhf_researcher", JSON.stringify(entry)); }
   function rnLockOut()        { sessionStorage.removeItem("hhf_researcher"); rnShowAll = false; }
   // Role / capability gate. Public = not unlocked.
-  function rnRole()           { return "public"; }   // LAB B v85: public-only page; admin entry comes later
+  function rnRole()           { const s = rnSession(); return (s && s.role) || "public"; }
   function canEditWikibase()  { return rnRole() === "admin"; }
 
   // Notes are private: a researcher sees only their own; an admin may toggle
@@ -6493,44 +6256,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   // bottom-bar icon never falls out of sync with the panels.
   let syncFsBtn = () => {};
 
-  const BR_H = 25;   // LAB B v23: rail row height
-  function updateBinRails() {
-    const rows = document.getElementById("rows");
-    const railT = document.getElementById("bin-rail-top");
-    if (!rows || !railT) return;
-    const heads = [...rows.querySelectorAll(".ph-head")];
-    const rect  = rows.getBoundingClientRect();
-    railT.style.top = rows.offsetTop + "px";
-    const above = [];
-    for (const h of heads) {
-      // v83: rail on the header BOTTOM, not top — the compact strip only
-      // appears once the full header has left (its remaining sliver fits
-      // under the strip), so it replaces rather than doubles.
-      if (h.getBoundingClientRect().bottom <= rect.top + (above.length + 1) * BR_H) above.push(h); else break;
-    }
-    const brRow = h => {
-      const el = document.createElement("div");
-      el.className = "br-row" + (h.classList.contains("closed") ? "" : " open");
-      el.dataset.bin = h.dataset.phase;   // v62: identity colour
-      el.innerHTML = `<span><span class="ph-chev">${h.classList.contains("closed") ? "\u203a" : "\u2304"}</span>${escapeHTML(h.dataset.phase || "")}</span><span class="r">${escapeHTML(h.dataset.count || "")}</span>`;
-      el.addEventListener("click", () => {
-        rows.scrollTop = h.offsetTop - rows.offsetTop - heads.indexOf(h) * BR_H;
-      });
-      return el;
-    };
-    railT.replaceChildren(...above.map(brRow));
-  }
-  // v24: re-run the pip after the left panel finishes its width
-  // transition — it gets sized during the splash-collapsed layout and
-  // can stay stale-active over a list that does not overflow.
-  document.getElementById("panel-left").addEventListener("transitionend", e => {
-    if (e.propertyName === "width") updatePip("rows", "list-pip");
-  });
-  document.getElementById("panel-right").addEventListener("transitionend", e => {   // v49: same stale-size fix for the record pip
-    if (e.propertyName === "width") updatePip("meta-body", "meta-pip");
-  });
   function updatePip(scrollId, pipId) {
-    if (scrollId === "rows") updateBinRails();
     const scrollEl = document.getElementById(scrollId);
     const pip = document.getElementById(pipId);
     if (!scrollEl || !pip) return;
@@ -6546,7 +6272,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     // Position: scroll ratio mapped across the remaining track space
     const maxScroll = scrollHeight - clientHeight;
     const ratio     = maxScroll > 0 ? scrollTop / maxScroll : 0;
-    pip.style.top   = (scrollEl.offsetTop + ratio * (trackHeight - thumbHeight)) + "px";
+    pip.style.top   = (41 + ratio * (trackHeight - thumbHeight)) + "px";
   }
 
   // ── Wikibase fetch layer ──────────────────────────────────────────────────
@@ -6744,6 +6470,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     };
   }
   async function loadGatedLetters(announce) {
+    if (!canMark()) return;                         // researchers only
     const tok = gatedToken();
     if (!tok) { if (announce) hhToast("Enter the researcher token first (Letters ✉)"); return; }
     try {
@@ -7160,15 +6887,9 @@ WHERE {
       return ra !== rb ? ra - rb : cmp(a, b);
     };
     const comparators = {
-      "id":    ((a, b) => {   // LAB B: authored collection order, then ID
-        const rank = x => { const i = ["CAA","HHC","IHC","EGC","FRH"].indexOf(archiveAbbrev(collectionOf(x))); return i === -1 ? 99 : i; };
-        return (rank(a) - rank(b)) || dir * (a.id || "").localeCompare(b.id || "");
-      }),
+      "id":    tailLast((a, b) => dir * (a.id || "").localeCompare(b.id || "")),
       "phase": tailLast((a, b) => dir * (a.phase||"").localeCompare(b.phase||"") || (a.id||"").localeCompare(b.id||"")),
-      "year":  ((a, b) => {   // LAB B v16: collection bins first, date within
-        const rank = x => { const i = ["CAA","HHC","IHC","EGC","FRH"].indexOf(archiveAbbrev(collectionOf(x))); return i === -1 ? 99 : i; };
-        return (rank(a) - rank(b)) || dir * dateKey(a).localeCompare(dateKey(b)) || (a.id||"").localeCompare(b.id||"");
-      }),
+      "year":  tailLast((a, b) => dir * dateKey(a).localeCompare(dateKey(b)) || (a.id||"").localeCompare(b.id||"")),
     };
     state.filtered.sort(comparators[state.sortCol] || comparators["year"]);
     // [only] mode is the curator's draft sequence — show items in mark-order
@@ -7209,6 +6930,7 @@ WHERE {
 
   async function toggleLettersView() {
     if (state.view === "letters") { exitLetters(); return; }
+    if (!canMark()) { hhToast("Researcher view — unlock with your PIN first"); return; }
     if (!gatedToken()) {
       const t = window.prompt("Researcher token for the letters collection:", "");
       if (t === null) return;
@@ -7228,8 +6950,6 @@ WHERE {
     state.sortCol = "year"; state.sortDir = "asc";
     state.search = "";
     const si = document.getElementById("search-input"); if (si) si.value = "";
-    const lpi = document.getElementById("lp-search-input"); if (lpi) lpi.placeholder = "search the letters";   // LAB B v89
-    clearAllFilters();   // LAB B v90: archive filters never carry into the letters
     applyFilters(); renderList(); renderFilterPanel(); updateFilterBadge();
     if (state.filtered.length) selectItem(state.filtered[0].id);
     hhToast(`Correspondence — ${state.filtered.length} letters`);
@@ -7237,8 +6957,6 @@ WHERE {
   function exitLetters() {
     state.view = "archive";
     document.body.classList.remove("letters-view");
-    const lpx = document.getElementById("lp-search-input"); if (lpx) { lpx.placeholder = "search the archive"; lpx.value = ""; }   // LAB B v89/v90
-    state.search = "";   // LAB B v90: a letters search term never carries back to the archive
     state.filterCorrespondent.clear(); state.filterSubject.clear(); state.filterPerson.clear();
     state.search = "";
     const si = document.getElementById("search-input"); if (si) si.value = "";
@@ -7286,17 +7004,6 @@ WHERE {
     const frag = document.createDocumentFragment();
     const noted = rnNotedIds();
     const flags = canMark();
-    { const lpf = document.getElementById("lp-filter"); if (lpf) { lpf.hidden = true; } }   // LAB B v90: the archive tag row never shows over letters
-    {   // LAB B v84: the letters list opens with a collection-grammar header
-      const hd = document.createElement("div");
-      hd.className = "phase-divider ph-head";
-      hd.dataset.phase = "FRH";
-      hd.style.cursor = "default";
-      hd.innerHTML =
-        `<span class="ph-line1"><span class="ph-name">FRH — Correspondence</span><span class="ph-count">Items <b>${String(state.filtered.length).padStart(2,"0")}</b></span></span>` +
-        `<span class="ph-line2"><span class="ph-gloss">The letters of Richard Hunter, 1953–1980, mostly to Luise Mendelsohn. Transcripts; scans.</span></span>`;
-      frag.appendChild(hd);
-    }
     if (state.filterCorrespondent.size || state.filterSubject.size || state.filterPerson.size) {
       const d = document.createElement("div"); d.className = "phase-divider";
       d.innerHTML = `<span>Filtered <span style="color:var(--muted);font-weight:400">${String(state.filtered.length).padStart(2,"0")} letters</span></span><span class="r" style="cursor:pointer" id="lf-clear-inline">✕ clear</span>`;
@@ -7304,13 +7011,11 @@ WHERE {
     }
     state.filtered.forEach(it => {
       const row = document.createElement("div");
-      row.dataset.bin = "FRH";   // LAB B v84: FRH identity (plum spine)
-      row.className = "row letter-row in-bin" + (it.id === state.selectedId ? " sel" : "") + (marksHas(it.id) ? " marked" : "") + (seen.has(it.id) ? " seen" : "") + (noted.has(it.id) ? " has-note" : "");
+      row.className = "row letter-row" + (it.id === state.selectedId ? " sel" : "") + (marksHas(it.id) ? " marked" : "") + (seen.has(it.id) ? " seen" : "") + (noted.has(it.id) ? " has-note" : "");
       row.dataset.id = it.id;
       const fromTo = `${escapeHTML(it.letterFrom || "?")} <span class="lr-arrow">→</span> ${escapeHTML(it.letterTo || "?")}`;
       const sub = escapeHTML(it.letterPlace || docFormLabel(it.docForm) || "");
       row.innerHTML = `
-        <span class="r-kick">
         <span class="col-id">
           <span class="archid"><span class="tmark pc-stone" data-type="L" title="Letter">L</span></span>
           ${flags ? `<span class="row-flags" aria-hidden="true">
@@ -7319,10 +7024,11 @@ WHERE {
             <span class="rf-slot rf-slot-note"><span class="rf-ico"><span class="rf-note" title="Has a researcher note"><svg viewBox="0 0 10 12" width="8" height="10" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 1h4l3 3v7H2z"/><path d="M6 1v3h3"/><path d="M3.7 6.6h3M3.7 8.6h3"/></svg></span></span></span>
           </span>` : ""}
         </span>
-        <span class="year">${escapeHTML(condensedDate(it.date))}</span>
-        </span>
-        <div class="r-title lr-fromto">${fromTo}</div>
-        ${sub ? `<div class="r-note">${sub}</div>` : ""}`;
+        <div class="title-wrap">
+          <div class="title lr-fromto">${fromTo}</div>
+          <div class="ph">${sub}</div>
+        </div>
+        <span class="year">${escapeHTML(condensedDate(it.date))}</span>`;
       frag.appendChild(row);
     });
     container.appendChild(frag);
@@ -7353,26 +7059,13 @@ WHERE {
     const corr = names(tally(L.map(letterCorrespondent)));
     const subj = names(tally(L.flatMap(i => i.subjects || [])));
     const ppl  = names(tally(L.flatMap(peopleNames))).slice(0, 40);
-    // LAB B v87: archive-facet parity — live counts under the OTHER
-    // active facets, zero-greys, Show-N footer.
-    const pass = (i, skip) =>
-      (skip === "corr"   || !state.filterCorrespondent.size || state.filterCorrespondent.has(letterCorrespondent(i))) &&
-      (skip === "subj"   || !state.filterSubject.size || (i.subjects || []).some(x => state.filterSubject.has(x))) &&
-      (skip === "person" || !state.filterPerson.size || peopleNames(i).some(x => state.filterPerson.has(x)));
-    const LF_MATCH = {
-      corr:   (i, v) => letterCorrespondent(i) === v,
-      subj:   (i, v) => (i.subjects || []).includes(v),
-      person: (i, v) => peopleNames(i).includes(v),
-    };
+    // Mirror the drawings filter exactly: .fp-group / .fp-chip + pillCls() colour
+    // + .on active state — the same bracketed, coloured chips as the record pills.
     const group = (label, vals, set, attr, color, cls) => {
       if (!vals.length) return "";
       const pc = ` ${pillCls(color)}`;
-      const base = L.filter(i => pass(i, cls));
-      const chips = vals.map(v => {
-        const n = base.filter(i => LF_MATCH[cls](i, v)).length;
-        const zero = n === 0 && !set.has(v);
-        return `<button class="fp-chip${set.has(v) ? " on" : ""}${zero ? " zero" : ""}${pc}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}<span class="fp-ct">${n}</span></button>`;
-      }).join("");
+      const chips = vals.map(v =>
+        `<button class="fp-chip${set.has(v) ? " on" : ""}${pc}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}</button>`).join("");
       return `<div class="fp-group fp-grp-${cls}"><div class="fp-lbl">${label}</div><div class="fp-chips">${chips}</div></div>`;
     };
     const hasActive = state.filterCorrespondent.size || state.filterSubject.size || state.filterPerson.size;
@@ -7380,10 +7073,7 @@ WHERE {
       group("Correspondent", corr, state.filterCorrespondent, "lfcorr", PC.clay, "corr") +
       group("Subject", subj, state.filterSubject, "lfsubj", PC.indigo, "subj") +
       group("Person", ppl, state.filterPerson, "lfperson", PC.clay, "person") +
-      `<div class="fp-footer">${hasActive ? `<button class="fp-clear" id="lf-clear">Clear all</button>` : `<span></span>`}<button class="fp-show" id="fp-show-btn">Show ${state.filtered.length} →</button></div>`;
-    const lfShow2 = document.getElementById("lf-show");
-    if (lfShow2) lfShow2.textContent = `Show ${state.filtered.length} →`;
-    requestAnimationFrame(() => updatePip("filter-panel", "filter-pip"));
+      `<div class="fp-footer">${hasActive ? `<button class="fp-clear" id="lf-clear">Clear all</button>` : `<span></span>`}<span class="fp-show" style="pointer-events:none">${L.length} letters</span></div>`;
     const wire = (attr, set) => panel.querySelectorAll(`[data-${attr}]`).forEach(el => el.addEventListener("click", () => {
       toggleSet(set, el.getAttribute(`data-${attr}`));
       applyFilters(); renderList(); renderLetterFacets(); updateFilterBadge();
@@ -7437,15 +7127,10 @@ WHERE {
   function pillCls(c) { return c ? c.cls : ""; }
 
   function updateMobCount() {
-    const inLetters = state.view === "letters";   // v88: count the ACTIVE corpus only
-    const t = state.items.filter(i => inLetters ? i.letter : !i.gated).length;
-    const f = state.filtered.length;
-    const txt = (f < t) ? `${f} / ${t}` : `${t}`;
-    const lf = document.getElementById("lf-count");   // LAB B v33: list-foot count
-    if (lf) lf.textContent = txt + (inLetters ? " letters" : " items");
     const el = document.getElementById("mob-count");
     if (!el) return;
-    el.textContent = txt;
+    const f = state.filtered.length, t = state.items.length;
+    el.textContent = (f < t) ? `${f} / ${t}` : `${t}`;
   }
 
   // ── Curated lens: threshold overlay, mode enter/exit, card, note ──
@@ -7612,8 +7297,6 @@ WHERE {
     if (panel) panel.innerHTML = "";
   }
 
-  const phaseExpanded = new Set();    // LAB B: opened groups (contracted by default, session-scope)
-  const phaseCollapsed = new Set();   // LAB B v36: manual closes that override auto-open (search/filter)
   function renderList() {
     if (state.view === "letters") { renderLettersList(); return; }
     const container = $("#rows");
@@ -7638,39 +7321,36 @@ WHERE {
       ["builtstatus", state.filterBuiltStatus],
     ];
     const afActive = !state.curation && AF_GROUPS.some(([,s]) => s.size);
-    const AF_PC = { collection:PC.denim, area:PC.sage, itype:PC.stone,
-                    drawtype:PC.slate, creator:PC.clay, builtstatus:PC.moss };   // LAB B: chip colours
-    const renderAfPills = () => {   // LAB B v34: pills render into the filter row
-      const slot = document.getElementById("lf-pills");
-      if (!slot) return;
-      const wrap = document.getElementById("lp-filter");
-      if (wrap) wrap.hidden = !afActive;   // v40: the tag row exists only while filters are active
-      if (!afActive) { slot.innerHTML = ""; return; }
-      slot.innerHTML =
+    const afBar = () => {
+      const bar = document.createElement("div");
+      bar.className = "af-bar";
+      bar.innerHTML =
+        `<span class="af-lbl">Filters</span>` +
         AF_GROUPS.flatMap(([g, s]) => [...s].map(v =>
-          `<button class="af-pill ${pillCls(AF_PC[g])}" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">×</span></button>`
+          `<button class="af-pill" data-af-g="${g}" data-af-v="${escapeHTML(v)}">${escapeHTML(v)}<span class="x">×</span></button>`
         )).join("") +
         `<button class="af-clear" id="filter-clear-all">✕ clear all</button>`;
-      slot.querySelectorAll(".af-pill").forEach(p => p.addEventListener("click", e => {
+      bar.querySelectorAll(".af-pill").forEach(p => p.addEventListener("click", e => {
         e.stopPropagation();
         const set = new Map(AF_GROUPS).get(p.dataset.afG);
         if (set) set.delete(p.dataset.afV);
         applyFilters(); renderList(); updateFilterBadge(); renderFilterPanel();
       }));
+      return bar;
     };
 
     if (state.filtered.length === 0) {
-      renderAfPills();
+      if (afActive) container.appendChild(afBar());
       const d = document.createElement("div");
       d.className = "empty";
       d.textContent = "No items match this combination";
       container.appendChild(d);
-      if (afActive) {   // LAB B v67: search-empty carries no hint
-        const hint = document.createElement("div");
-        hint.className = "empty-hint";
-        hint.textContent = "Remove a filter above to widen the selection — an empty result means these facets don't overlap in the catalogue.";
-        container.appendChild(hint);
-      }
+      const hint = document.createElement("div");
+      hint.className = "empty-hint";
+      hint.textContent = afActive
+        ? "Remove a filter above to widen the selection — an empty result means these facets don't overlap in the catalogue."
+        : "Try a different search term.";
+      container.appendChild(hint);
       const clearBtn0 = document.getElementById("filter-clear-all");
       if (clearBtn0) clearBtn0.addEventListener("click", e => {
         e.stopPropagation(); clearAllFilters();
@@ -7679,66 +7359,25 @@ WHERE {
       return;
     }
 
-    const grouped = !state.curation;   // LAB B v16: the bins ARE the list — sorting reorders within them, never dissolves them
+    const grouped = !state.curation && state.sortCol === "phase";
     const frag = document.createDocumentFragment();
     let lastPhase = null;
     const noted = rnNotedIds();   // items with a viewer-visible note
     const flags = canMark();      // the flag strip is a researcher workspace
 
-    renderAfPills();
+    if (afActive) frag.appendChild(afBar());
 
-    // LAB B: the COLLECTIONS are the shape. v40 (design 7a): chevron hangs
-    // in the gutter; name, gloss, ID and title share one left edge; count
-    // reads label-first; the Year control lives on the gloss line and
-    // cycles year-asc → year-desc → authored default (collection
-    // order, ID ascending). Bins: contracted at rest, auto-open under
-    // search/filter, manual close wins (v36). Glosses are AUTHORED —
-    // exactly 12 words each, ending in a contents list; never derived.
-    const GLOSS = {
-      CAA: "Richard Hunter's career donations to the University of Calgary, 1955–2010. Drawings; photographs.",
-      HHC: "The residence's own record, passed with the house in 2024. Drawings; documents.",
-      IHC: "Ivan Hunter's first photographic survey of the residence, captured February 2024. Photographs.",
-      EGC: "Furniture drawings gifted to cabinetmaker Eric Gesinger, photographed in situ. Drawings; photographs.",
-      FRH: "Papers of Frances Hunter; correspondence gated to researchers. Photographs; invitations; flyers; programs.",
-      FUL: "John Fulker's photographs, held at the West Vancouver Museum; catalogue pending. Photographs.",
-    };
-    const gkeyOf = it => (state.sortCol !== "phase"
-      ? (archiveAbbrev(collectionOf(it)) || "—")
-      : (it.phase || "—"));
-    const glabelOf = k => (state.sortCol !== "phase" && COLLECTION_INFO[k]?.title)
-      ? `${k} — ${COLLECTION_INFO[k].title}` : k;
-    const glossOf = k => (state.sortCol !== "phase" && GLOSS[k]) || "";
-    const emd = t => t.replace(/ - /g, " — ");   // v40h: display-only em dashes
-    const searchOpen = !!state.search.trim();
-    let groupOpen = true;
     state.filtered.forEach((it, _idx) => {
-      const gkey = gkeyOf(it);
-      if (grouped && gkey !== lastPhase) {
-        lastPhase = gkey;
-        const count = state.filtered.filter(x => gkeyOf(x) === gkey).length;
+      if (grouped && it.phase !== lastPhase) {
+        lastPhase = it.phase;
+        const count = state.filtered.filter(x => x.phase === lastPhase).length;
         const d = document.createElement("div");
-        const open = phaseExpanded.has(gkey) || ((searchOpen || afActive) && !phaseCollapsed.has(gkey));   // v36/v48: contracted at rest; search/filter auto-open; manual close wins
-        d.className = "phase-divider ph-head" + (open ? "" : " closed");
-        d.dataset.phase = gkey;
-        d.dataset.count = String(count).padStart(2,"0");   // the rail reads this
-        const gloss = glossOf(gkey);
-        const yrOn = state.sortCol === "year";
-        d.innerHTML =
-          `<span class="ph-chev">${open ? "⌄" : "›"}</span>` +
-          `<span class="ph-line1"><span class="ph-name">${escapeHTML(glabelOf(gkey))}</span><span class="ph-count">Items <b>${String(count).padStart(2,"0")}</b></span></span>` +
-          `<span class="ph-line2"><span class="ph-gloss">${gloss ? escapeHTML(gloss) : ""}</span></span>`;
-        d.addEventListener("click", () => {
-          if (open) { phaseExpanded.delete(gkey); phaseCollapsed.add(gkey); }
-          else { phaseCollapsed.delete(gkey); phaseExpanded.add(gkey); }
-          renderList();
-        });
+        d.className = "phase-divider";
+        d.innerHTML = `<span>${escapeHTML(lastPhase || "—")}</span><span class="r">${String(count).padStart(2,"0")} items</span>`;
         frag.appendChild(d);
-        groupOpen = open;
       }
-      if (grouped && !groupOpen) return;   // contracted = header only
       const row = document.createElement("div");
-      row.dataset.bin = gkey;   // v62: collection identity drives the colour
-      row.className = "row" + (grouped ? " in-bin" : "") + (it.id === state.selectedId ? " sel" : "") + (marksHas(it.id) ? " marked" : "") + (seen.has(it.id) ? " seen" : "") + (noted.has(it.id) ? " has-note" : "") + (state.bulkSel.has(it.id) ? " bulk-sel" : "");
+      row.className = "row" + (it.id === state.selectedId ? " sel" : "") + (marksHas(it.id) ? " marked" : "") + (seen.has(it.id) ? " seen" : "") + (noted.has(it.id) ? " has-note" : "") + (state.bulkSel.has(it.id) ? " bulk-sel" : "");
       row.dataset.id = it.id;
       // In curation mode: replace [LS]/[D] tmark chip with the 01/02/03
       // sequence number reflecting the curator's authored order, and move
@@ -7766,7 +7405,6 @@ WHERE {
       })() : "";
       row.innerHTML = `
         ${reorderHTML}
-        <span class="r-kick">
         <span class="col-id">
           ${idSlotHTML}
           ${flags ? `<span class="row-flags" aria-hidden="true">
@@ -7775,10 +7413,11 @@ WHERE {
             <span class="rf-slot rf-slot-note"><span class="rf-ico"><span class="rf-note" title="Has a researcher note"><svg viewBox="0 0 10 12" width="8" height="10" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 1h4l3 3v7H2z"/><path d="M6 1v3h3"/><path d="M3.7 6.6h3M3.7 8.6h3"/></svg></span></span></span>
           </span>` : ""}
         </span>
+        <div class="title-wrap">
+          <div class="title">${escapeHTML(it.title)}</div>
+          <div class="ph">${phSlotHTML}</div>
+        </div>
         <span class="year">${escapeHTML(yearOf(it.date))}</span>
-        </span>
-        <div class="r-title">${emd(escapeHTML(it.title))}</div>
-        ${phSlotHTML ? `<div class="r-note">${emd(phSlotHTML)}</div>` : ""}
       `;
       frag.appendChild(row);
     });
@@ -8135,7 +7774,7 @@ WHERE {
 
   // ── Meta pane ─────────────────────────────────────────────────────────────
   function renderMeta(item) {
-    const body = $("#meta-content");
+    const body = $("#meta-body");
 
     const areasHtml = (item.areas || []).map(a =>
       `<button class="pill area-pill ${pillCls(PC.sage)}${state.filterArea.has(a) ? " active" : ""}" data-area="${escapeHTML(a)}">${escapeHTML(a)}</button>`
@@ -8417,7 +8056,7 @@ WHERE {
         <div class="graph-path">${graphPathHTML}</div>
         ${siblingsHTML}
       </section>` : ""}
-      ${item.transcript ? `<section class="meta-section transcript-section${item.handwritten ? " open" : ""}">
+      ${(item.transcript && (!item.gated || canMark())) ? `<section class="meta-section transcript-section${item.handwritten ? " open" : ""}">
         <h3 class="ts-head"><span><span class="tw">▸</span>Transcript</span><span class="ct">${item.handwritten ? "handwritten" : "typed"}${item.gated ? " · researcher" : ""}</span></h3>
         <div class="ts-body">${transcriptToHTML(item.transcript)}</div>
       </section>` : ""}
@@ -8637,21 +8276,20 @@ WHERE {
     if (!panel) return;
     if (state.view === "letters") { renderLetterFacets(); return; }
 
-    // LAB: authored collection order (Brandon 2026-07-10).
-    const COLL_ORDER = ["CAA", "HHC", "IHC", "EGC", "FRH"];
+    // Collections in the filter panel mirror the catalogue list's order:
+    // tail collections (EGC) sort to the bottom regardless of alphabet.
     const uniqueCollections = [...new Set(
-      state.items.filter(i => !i.gated).map(i => archiveAbbrev(collectionOf(i))).filter(Boolean)
-    )].sort((a, b) => {
-      const ra = COLL_ORDER.indexOf(a), rb = COLL_ORDER.indexOf(b);
-      return (ra === -1 ? 99 : ra) - (rb === -1 ? 99 : rb) || a.localeCompare(b);
-    });
-    const pub = state.items.filter(i => !i.gated);   // LAB B v89: archive facets never see gated letters
-    const uniqueAreas       = uniqueSorted(pub.flatMap(i => i.areas || []));
-    const uniqueTypes       = uniqueSorted(pub.map(i => i.itemType).filter(Boolean));
-    const uniqueDrawTypes   = uniqueSorted(pub.flatMap(i => i.drawTypes || []));
-    const uniqueCreators    = uniqueSorted(pub.flatMap(i =>
+      state.items.map(i => archiveAbbrev(collectionOf(i))).filter(Boolean)
+    )].sort((a, b) =>
+      (isTailCollection(a) ? 1 : 0) - (isTailCollection(b) ? 1 : 0)
+      || a.localeCompare(b)
+    );
+    const uniqueAreas       = uniqueSorted(state.items.flatMap(i => i.areas || []));
+    const uniqueTypes       = uniqueSorted(state.items.map(i => i.itemType).filter(Boolean));
+    const uniqueDrawTypes   = uniqueSorted(state.items.flatMap(i => i.drawTypes || []));
+    const uniqueCreators    = uniqueSorted(state.items.flatMap(i =>
       [i.creator, i.designedBy, ...(i.builtBy || [])].filter(Boolean)));
-    const uniqueBuiltStatus = uniqueSorted(pub.map(i => i.builtStatus).filter(Boolean));
+    const uniqueBuiltStatus = uniqueSorted(state.items.map(i => i.builtStatus).filter(Boolean));
 
     const group = (label, vals, activeSet, cls, attr, color) => {
       if (!vals.length) return "";
@@ -8661,8 +8299,7 @@ WHERE {
       const chips = vals.map(v => {
         const n = match ? base.filter(it => match(it, v)).length : 0;
         const zero = n === 0 && !activeSet.has(v);   // active chips stay clickable (to deselect)
-        const lbl = (attr === "collection" && COLLECTION_INFO[v]?.title) ? `${v} — ${COLLECTION_INFO[v].title}` : v;   // LAB: legible collections
-        const chip = `<button class="fp-chip${activeSet.has(v) ? " on" : ""}${zero ? " zero" : ""}${pc}" data-${attr}="${escapeHTML(v)}">${escapeHTML(lbl)}<span class="fp-ct">${n}</span></button>`;
+        const chip = `<button class="fp-chip${activeSet.has(v) ? " on" : ""}${zero ? " zero" : ""}${pc}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}<span class="fp-ct">${n}</span></button>`;
         // Collection chips get an ⓘ for the per-collection blurb popover.
         const info = (attr === "collection" && COLLECTION_INFO[v])
           ? `<button class="fp-info" data-coll-info="${escapeHTML(v)}" title="About ${escapeHTML(v)}" aria-label="About ${escapeHTML(v)}">ⓘ</button>`
@@ -8680,7 +8317,7 @@ WHERE {
     // don't toggle a Set; clicking opens the curator threshold overlay.
     // Hidden while inside a curation (the card's exit is the way out).
     const curatedRow = (!state.curation && (state.curations || []).length)
-      ? `<div class="fp-group fp-grp-cur"><div class="fp-lbl">Curated selections by</div><div class="fp-chips">${
+      ? `<div class="fp-group fp-grp-cur"><div class="fp-lbl">Curators</div><div class="fp-chips">${
           state.curations.map(c =>
             `<button class="fp-chip ${pillCls(PC.red)}" data-cur-slug="${escapeHTML(c.slug)}">${escapeHTML(c.curator || c.title || c.slug)}</button>`
           ).join("")
@@ -8700,9 +8337,6 @@ WHERE {
         <button class="fp-show" id="fp-show-btn">Show ${state.filtered.length} →</button>
       </div>`;
 
-    const lfShow = document.getElementById("lf-show");
-    if (lfShow) lfShow.textContent = `Show ${state.filtered.length} →`;
-    requestAnimationFrame(() => updatePip("filter-panel", "filter-pip"));
     panel.querySelector("#fp-clear-btn")?.addEventListener("click", e => {
       e.stopPropagation();
       clearAllFilters();
@@ -9953,47 +9587,28 @@ WHERE {
     const keys = rows => `<div class="ip-keys">${rows.map(([k, d]) => `<b>${k}</b><span>${d}</span>`).join("")}</div>`;
     const html = `
       <p class="ip-grp">What this is</p>
-      <p class="ip-note">The archive of architect Richard Morrow Hunter (1930–2023)
-        and the Hunter Residence at 203 Goward Road, Saanich — drawings,
-        photographs, documents and correspondence spanning roughly 1955–2020,
-        kept by the Hunter House Foundation.</p>
+      <p class="ip-note">A live catalogue of the Richard Morrow Hunter architectural archive
+        (1970–2020). Drawings, photographs, publications, correspondence — organised by
+        the projects Hunter worked on across his career.</p>
 
-      <p class="ip-grp">The collections</p>
-      <p class="ip-note">The archive is organised as five collections, each a bar in
-        the left pane — click a bar to open its items, click again to close it.
-        Every collection has its own colour: the line down the left edge tells
-        you which collection you are inside as you scroll, and collections you
-        have scrolled past stack as a compact index at the top of the list —
-        click an entry there to jump back. Item IDs read
-        <b>HH-COLLECTION-NUMBER</b>.</p>
+      <p class="ip-grp">Finding your way</p>
+      <p class="ip-note">The left pane lists every item. The centre stage shows the
+        selected drawing or photograph; the right pane shows its record. Use the sort
+        header (ID / Phase / Year) and the filter button to narrow down, or type in
+        the search bar to match anything — titles, IDs, item types, materials.</p>
 
-      <p class="ip-grp">Search and filter</p>
-      <p class="ip-note">The search matches anything — titles, IDs, item types,
-        materials, places. <b>Filter</b> opens the facets, each value carrying a
-        live count; a greyed value means it does not overlap with what is
-        already selected. Active filters appear as tags under the bar — click a
-        tag's × to drop it. In an item's record, any chip — phase, area, item
-        type — filters to that value. The count at the bottom left always says
-        how many items you are looking at.</p>
+      <p class="ip-grp">Curated lenses</p>
+      <p class="ip-note">"Curated" entries in the filter panel open authored
+        selections — a curator's sequence of items with their own introduction and
+        notes. Inside one, normal sorting and filtering steps aside; click the exit
+        button on the intro card to return to the full catalogue.</p>
 
-      <p class="ip-grp">The item record</p>
-      <p class="ip-note">Select an item and its full record waits in the right
-        pane — open it from the <b>ITEM RECORD</b> strip on the right edge, or
-        its pull tab. At the end of the record sit the item's permanent link, a
-        ready-made citation, and the raw data (Wikibase · SPARQL · JSON).</p>
-
-      <p class="ip-grp">The viewer</p>
-      <p class="ip-note">Drag to pan; scroll or + − to zoom; F fits the frame;
-        1 is actual size. <b>↓ Original</b> downloads the full-resolution
-        file, and items with documents also carry <b>↓ PDF</b>. Multi-page
-        letters turn pages with the ‹ › control under the image.</p>
-
-      <p class="ip-grp">The letters</p>
-      <p class="ip-note">The envelope at the bottom left opens the correspondence —
-        Richard Hunter's letters, 1953–1980, with full transcripts and their
-        own filters (correspondent, subject, person). The letters are a private
-        family collection, opened to invited readers; the rest of the archive
-        is public.</p>
+      <p class="ip-grp">Reading the catalogue</p>
+      <p class="ip-note">Item IDs are <b>HH-COLLECTION-NUMBER</b> (HHC = Hunter House
+        Collection, CAA = Canadian Architectural Archives at UCalgary, EGC = Eric
+        Gesinger Collection, IHC = Ivan Hunter Collection). Click any chip —
+        phase, area, item type — to filter to that value. Click the wordmark
+        (top-left) for credits and project info.</p>
 
       <p class="ip-grp">Shortcuts</p>
       ${keys([
@@ -10007,8 +9622,14 @@ WHERE {
         ["Esc",    "Close · exit zen"],
       ])}
 
-      <p class="ip-foot">Click the wordmark — HUNTER HOUSE ARCHIVE, top left — for
-        credits and project information.</p>`;
+      <p class="ip-grp">Guided tour</p>
+      <p class="ip-note"><a href="#" onclick="hhReplayTour();return false;">Replay the interface walkthrough ↻</a> — a quick, spotlit tour of the controls.</p>
+
+      <p class="ip-grp">Platform</p>
+      <p class="ip-note"><a href="https://hunterhouse.wikibase.cloud/wiki/Main_Page" target="_blank" rel="noopener">Wikibase Main Page — archive structure, rights &amp; endpoints ↗</a></p>
+
+      <p class="ip-foot">Researchers: a second ? appears in the record bar with notes,
+        marking, and your own shortcuts.</p>`;
     document.getElementById("ip-inner").innerHTML = html;
   }
 
@@ -11174,7 +10795,8 @@ WHERE {
       }
       // ── Returning visitor: the original animated reveal into the bright archive.
       closeAboutPane();
-      leftP.classList.remove("out");   // LAB B v63: record stays collapsed by default
+      leftP.classList.remove("out");
+      rightP.classList.remove("out");
       syncFsBtn();
       // Hide the canvas while panels animate + fit settles; reveal once the
       // image is at the correct post-open size. Avoids the flash where the
@@ -11265,12 +10887,6 @@ WHERE {
       // always reflects the real panel state.
       document.getElementById("left-handle").addEventListener("click",  () => { togglePanel("left");  syncFsBtn(); });
       document.getElementById("right-handle").addEventListener("click", () => { if (document.body.classList.contains("lens-info")) { closeInfoPane(); return; } togglePanel("right"); syncFsBtn(); });
-      document.getElementById("panel-right").addEventListener("click", e => {   // LAB B v63: the collapsed sliver opens the record
-        if (e.currentTarget.classList.contains("out") && !e.target.closest(".panel-handle") && !e.target.closest(".meta-foot")) { togglePanel("right"); syncFsBtn(); }   // v77: the ? square handles itself
-      });
-      document.getElementById("panel-left").addEventListener("click", e => {   // LAB B v64: same for the catalogue sliver
-        if (e.currentTarget.classList.contains("out") && !e.target.closest(".panel-handle")) { togglePanel("left"); syncFsBtn(); }
-      });
 
       // Bottom-bar button: both hidden → reveal both; otherwise hide both.
       pfsBtn.addEventListener("click", () => {
@@ -11343,10 +10959,6 @@ WHERE {
     // ── Scroll pips ───────────────────────────────────────────────────────────
     document.getElementById("rows").addEventListener("scroll",
       () => updatePip("rows", "list-pip"), { passive: true });
-    document.getElementById("filter-panel").addEventListener("scroll",
-      () => updatePip("filter-panel", "filter-pip"), { passive: true });
-    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));
-    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());
     document.getElementById("meta-body").addEventListener("scroll",
       () => updatePip("meta-body", "meta-pip"), { passive: true });
 
@@ -11408,7 +11020,7 @@ WHERE {
       // Theodora" selection). Populates state.curations from curations/index.json
       // → the [Curated] filter row + the ?open=<slug> deep-entry. Live browse.html
       // keeps this commented (curator dormant there until the next promotion).
-      // LAB B v51: curation index not loaded — no curated-selections row in this lab.
+      await loadCurationIndex();   // populate [Curated] entry (tiny local JSON; no-op if absent)
       applyFilters();
       renderList();
       wireControls();
@@ -11526,7 +11138,7 @@ WHERE {
     function anchorTitle(){ var mk=document.querySelector('.markid'), tb=document.getElementById('site-titlebar'); if(mk&&tb) tb.style.left=Math.round(mk.getBoundingClientRect().right+16)+'px'; }
     // light the active view label beside the wordmark; dim the other two
     function updateMark(){ var cur=inMap()?'map':(inTL()?'tl':'archive');
-      var page=document.getElementById('mk-page'); if(page)page.textContent=(cur==='map'?'Site Plan':(cur==='tl'?'Timeline':''));
+      var page=document.getElementById('mk-page'); if(page)page.textContent=(cur==='map'?'Site Plan':(cur==='tl'?'Timeline':'Archive'));
       var mh=document.getElementById('mk-home'); if(mh)mh.style.color='var(--lens-'+cur+')';   // wordmark takes the active lens colour
       var lens={archive:'archive-toggle',map:'map-toggle',tl:'tl-toggle'};
       ['archive-toggle','map-toggle','tl-toggle'].forEach(function(id){ var el=document.getElementById(id); if(el)el.classList.toggle('cur',lens[cur]===id); }); }
@@ -11648,6 +11260,5 @@ WHERE {
   })();
 </script>
 
-<div id="splash-foot" aria-hidden="true"></div>
 </body>
 </html>
