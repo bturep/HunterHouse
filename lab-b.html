@@ -4088,7 +4088,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.86";
+  const VERSION      = "v1.09-test.79-labb.87";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7340,13 +7340,26 @@ WHERE {
     const corr = names(tally(L.map(letterCorrespondent)));
     const subj = names(tally(L.flatMap(i => i.subjects || [])));
     const ppl  = names(tally(L.flatMap(peopleNames))).slice(0, 40);
-    // Mirror the drawings filter exactly: .fp-group / .fp-chip + pillCls() colour
-    // + .on active state — the same bracketed, coloured chips as the record pills.
+    // LAB B v87: archive-facet parity — live counts under the OTHER
+    // active facets, zero-greys, Show-N footer.
+    const pass = (i, skip) =>
+      (skip === "corr"   || !state.filterCorrespondent.size || state.filterCorrespondent.has(letterCorrespondent(i))) &&
+      (skip === "subj"   || !state.filterSubject.size || (i.subjects || []).some(x => state.filterSubject.has(x))) &&
+      (skip === "person" || !state.filterPerson.size || peopleNames(i).some(x => state.filterPerson.has(x)));
+    const LF_MATCH = {
+      corr:   (i, v) => letterCorrespondent(i) === v,
+      subj:   (i, v) => (i.subjects || []).includes(v),
+      person: (i, v) => peopleNames(i).includes(v),
+    };
     const group = (label, vals, set, attr, color, cls) => {
       if (!vals.length) return "";
       const pc = ` ${pillCls(color)}`;
-      const chips = vals.map(v =>
-        `<button class="fp-chip${set.has(v) ? " on" : ""}${pc}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}</button>`).join("");
+      const base = L.filter(i => pass(i, cls));
+      const chips = vals.map(v => {
+        const n = base.filter(i => LF_MATCH[cls](i, v)).length;
+        const zero = n === 0 && !set.has(v);
+        return `<button class="fp-chip${set.has(v) ? " on" : ""}${zero ? " zero" : ""}${pc}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}<span class="fp-ct">${n}</span></button>`;
+      }).join("");
       return `<div class="fp-group fp-grp-${cls}"><div class="fp-lbl">${label}</div><div class="fp-chips">${chips}</div></div>`;
     };
     const hasActive = state.filterCorrespondent.size || state.filterSubject.size || state.filterPerson.size;
@@ -7354,7 +7367,10 @@ WHERE {
       group("Correspondent", corr, state.filterCorrespondent, "lfcorr", PC.clay, "corr") +
       group("Subject", subj, state.filterSubject, "lfsubj", PC.indigo, "subj") +
       group("Person", ppl, state.filterPerson, "lfperson", PC.clay, "person") +
-      `<div class="fp-footer">${hasActive ? `<button class="fp-clear" id="lf-clear">Clear all</button>` : `<span></span>`}<span class="fp-show" style="pointer-events:none">${L.length} letters</span></div>`;
+      `<div class="fp-footer">${hasActive ? `<button class="fp-clear" id="lf-clear">Clear all</button>` : `<span></span>`}<button class="fp-show" id="fp-show-btn">Show ${state.filtered.length} →</button></div>`;
+    const lfShow2 = document.getElementById("lf-show");
+    if (lfShow2) lfShow2.textContent = `Show ${state.filtered.length} →`;
+    requestAnimationFrame(() => updatePip("filter-panel", "filter-pip"));
     const wire = (attr, set) => panel.querySelectorAll(`[data-${attr}]`).forEach(el => el.addEventListener("click", () => {
       toggleSet(set, el.getAttribute(`data-${attr}`));
       applyFilters(); renderList(); renderLetterFacets(); updateFilterBadge();

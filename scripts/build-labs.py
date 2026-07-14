@@ -682,6 +682,66 @@ def main():
          '        <div class="r-title lr-fromto">${fromTo}</div>\n'
          '        ${sub ? `<div class="r-note">${sub}</div>` : ""}`;',
          "letter-row-restack"),
+        # v87: letter facets mimic the archive facets — live counts under
+        # the OTHER active facets, zero-greys, and a real Show N footer
+        # that keeps the foot button in sync.
+        ('    // tally returns sorted [name, count] entries; names() just extracts the labels.\n'
+         '    const names = entries => entries.map(e => e[0]);\n'
+         '    const corr = names(tally(L.map(letterCorrespondent)));\n'
+         '    const subj = names(tally(L.flatMap(i => i.subjects || [])));\n'
+         '    const ppl  = names(tally(L.flatMap(peopleNames))).slice(0, 40);\n'
+         '    // Mirror the drawings filter exactly: .fp-group / .fp-chip + pillCls() colour\n'
+         '    // + .on active state \u2014 the same bracketed, coloured chips as the record pills.\n'
+         '    const group = (label, vals, set, attr, color, cls) => {\n'
+         '      if (!vals.length) return "";\n'
+         '      const pc = ` ${pillCls(color)}`;\n'
+         '      const chips = vals.map(v =>\n'
+         '        `<button class="fp-chip${set.has(v) ? " on" : ""}${pc}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}</button>`).join("");\n'
+         '      return `<div class="fp-group fp-grp-${cls}"><div class="fp-lbl">${label}</div><div class="fp-chips">${chips}</div></div>`;\n'
+         '    };\n'
+         '    const hasActive = state.filterCorrespondent.size || state.filterSubject.size || state.filterPerson.size;\n'
+         '    panel.innerHTML =\n'
+         '      group("Correspondent", corr, state.filterCorrespondent, "lfcorr", PC.clay, "corr") +\n'
+         '      group("Subject", subj, state.filterSubject, "lfsubj", PC.indigo, "subj") +\n'
+         '      group("Person", ppl, state.filterPerson, "lfperson", PC.clay, "person") +\n'
+         '      `<div class="fp-footer">${hasActive ? `<button class="fp-clear" id="lf-clear">Clear all</button>` : `<span></span>`}<span class="fp-show" style="pointer-events:none">${L.length} letters</span></div>`;',
+         '    // tally returns sorted [name, count] entries; names() just extracts the labels.\n'
+         '    const names = entries => entries.map(e => e[0]);\n'
+         '    const corr = names(tally(L.map(letterCorrespondent)));\n'
+         '    const subj = names(tally(L.flatMap(i => i.subjects || [])));\n'
+         '    const ppl  = names(tally(L.flatMap(peopleNames))).slice(0, 40);\n'
+         '    // LAB B v87: archive-facet parity \u2014 live counts under the OTHER\n'
+         '    // active facets, zero-greys, Show-N footer.\n'
+         '    const pass = (i, skip) =>\n'
+         '      (skip === "corr"   || !state.filterCorrespondent.size || state.filterCorrespondent.has(letterCorrespondent(i))) &&\n'
+         '      (skip === "subj"   || !state.filterSubject.size || (i.subjects || []).some(x => state.filterSubject.has(x))) &&\n'
+         '      (skip === "person" || !state.filterPerson.size || peopleNames(i).some(x => state.filterPerson.has(x)));\n'
+         '    const LF_MATCH = {\n'
+         '      corr:   (i, v) => letterCorrespondent(i) === v,\n'
+         '      subj:   (i, v) => (i.subjects || []).includes(v),\n'
+         '      person: (i, v) => peopleNames(i).includes(v),\n'
+         '    };\n'
+         '    const group = (label, vals, set, attr, color, cls) => {\n'
+         '      if (!vals.length) return "";\n'
+         '      const pc = ` ${pillCls(color)}`;\n'
+         '      const base = L.filter(i => pass(i, cls));\n'
+         '      const chips = vals.map(v => {\n'
+         '        const n = base.filter(i => LF_MATCH[cls](i, v)).length;\n'
+         '        const zero = n === 0 && !set.has(v);\n'
+         '        return `<button class="fp-chip${set.has(v) ? " on" : ""}${zero ? " zero" : ""}${pc}" data-${attr}="${escapeHTML(v)}">${escapeHTML(v)}<span class="fp-ct">${n}</span></button>`;\n'
+         '      }).join("");\n'
+         '      return `<div class="fp-group fp-grp-${cls}"><div class="fp-lbl">${label}</div><div class="fp-chips">${chips}</div></div>`;\n'
+         '    };\n'
+         '    const hasActive = state.filterCorrespondent.size || state.filterSubject.size || state.filterPerson.size;\n'
+         '    panel.innerHTML =\n'
+         '      group("Correspondent", corr, state.filterCorrespondent, "lfcorr", PC.clay, "corr") +\n'
+         '      group("Subject", subj, state.filterSubject, "lfsubj", PC.indigo, "subj") +\n'
+         '      group("Person", ppl, state.filterPerson, "lfperson", PC.clay, "person") +\n'
+         '      `<div class="fp-footer">${hasActive ? `<button class="fp-clear" id="lf-clear">Clear all</button>` : `<span></span>`}<button class="fp-show" id="fp-show-btn">Show ${state.filtered.length} \u2192</button></div>`;\n'
+         '    const lfShow2 = document.getElementById("lf-show");\n'
+         '    if (lfShow2) lfShow2.textContent = `Show ${state.filtered.length} \u2192`;\n'
+         '    requestAnimationFrame(() => updatePip("filter-panel", "filter-pip"));',
+         "letter-facet-counts"),
         # v40b: the row restacks — kicker (ID + type mark left, year right),
         # title, note. Researcher furniture (flags, drag, curation seq) is
         # re-housed untouched; styling it is deferred (Brandon).
@@ -922,7 +982,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="86", tray=False)
+    ], version="87", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
