@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hunter House Foundation — home MOCK</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<!-- ════════════════════════════════════════════════════════════════════════
+     MOCK — main-site landing concept, 2026-07-14. DISPOSABLE, like the labs:
+     delete when the main-site design resolves. Not linked from anywhere.
+
+     The system under test (Brandon's brief, session of 2026-07-14):
+       · square modules, Socks-style left rail — type squares as nav/identity
+       · three registers: the INSTITUTION speaks in type squares; the HAND
+         speaks in small squares (drawing fragments, hand-lettering crops);
+         the PLACE speaks large (photographs, centre stage)
+       · no furniture imagery; no tree drawings (rejected)
+       · CCA citation discipline: every image carries its linked HH ID
+       · font question: Arial vs Inter Tight in the type squares — press [F]
+         or the toggle, top right.
+
+     HONEST CAVEAT: the "lettering" squares are blind CSS zoom-crops
+     (background-position guesses at title-block corners) — retune per image
+     once eyeballed. Preview images are the public R2 derivatives.
+     ═══════════════════════════════════════════════════════════════════════ -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f2efe8; --ink:#26221c; --rule:#d8d2c6; --muted:#8a8276;
+    --copper:#9a6b4f; --block:#26221c; --block-ink:#f2efe8;
+    --sq:118px; --gap:10px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:var(--paper)}
+  body{
+    font-family:"Inter Tight",Arial,sans-serif;color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    max-width:1180px;margin:0 auto;padding:34px 28px 60px;
+  }
+  body.f-arial .sq-type{font-family:Arial,Helvetica,sans-serif}
+
+  /* ── frame: rail + field ── */
+  .frame{display:grid;grid-template-columns:var(--sq) 1fr;gap:26px}
+
+  /* ── the rail: square modules ── */
+  .rail{display:flex;flex-direction:column;gap:var(--gap)}
+  .sq{width:var(--sq);height:var(--sq);display:block;position:relative;overflow:hidden}
+  .sq-type{
+    background:var(--block);color:var(--block-ink);text-decoration:none;
+    font-weight:800;text-transform:uppercase;letter-spacing:0.02em;
+    font-size:17px;line-height:1.12;
+    display:flex;align-items:flex-end;padding:10px 11px;
+    transition:background .15s;
+  }
+  .sq-type:hover{background:var(--copper)}
+  .sq-type small{
+    position:absolute;top:9px;left:11px;font-weight:400;
+    font-size:8.5px;letter-spacing:0.18em;opacity:.55;
+  }
+  .sq-img{background-color:#e7e2d6;background-size:cover;background-position:center}
+  /* fragments: zoomed into the sheet */
+  .sq-frag{background-size:340%;background-position:42% 38%;filter:contrast(1.04)}
+  /* lettering: hard zoom at title-block corners — BLIND GUESSES, retune */
+  .sq-hand{background-size:620%;background-position:97% 96%;filter:grayscale(.2) contrast(1.1)}
+  .sq-hand.alt{background-position:3% 96%}
+  .sq .cite{
+    position:absolute;left:0;right:0;bottom:0;padding:3px 6px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:7.5px;
+    letter-spacing:.06em;color:var(--block-ink);
+    background:linear-gradient(transparent,rgba(28,24,19,.62));
+    opacity:0;transition:opacity .15s;text-align:right;
+  }
+  .sq:hover .cite{opacity:1}
+
+  /* ── the field ── */
+  .field{display:flex;flex-direction:column;gap:26px;min-width:0}
+
+  header.masthead{display:flex;justify-content:space-between;align-items:baseline}
+  .wordmark{font-weight:800;text-transform:uppercase;font-size:13px;letter-spacing:.22em}
+  .wordmark span{color:var(--copper)}
+  #font-toggle{
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;
+    letter-spacing:.12em;color:var(--muted);background:none;
+    border:1px solid var(--rule);padding:4px 10px;cursor:pointer;
+  }
+  #font-toggle:hover{color:var(--ink);border-color:var(--ink)}
+
+  /* the place, centre stage */
+  .hero{position:relative}
+  .hero img{width:100%;height:56vh;min-height:380px;object-fit:cover;display:block;
+    background:#e7e2d6}
+  .hero .lede{
+    margin-top:14px;display:flex;justify-content:space-between;gap:24px;
+    align-items:baseline;flex-wrap:wrap;
+  }
+  .hero h1{font-weight:600;font-size:21px;line-height:1.35;max-width:560px}
+  .cite-line{
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;
+    letter-spacing:.06em;color:var(--muted);white-space:nowrap;
+  }
+  .cite-line a{color:var(--copper);text-decoration:none;border-bottom:1px solid var(--rule)}
+  .cite-line a:hover{border-bottom-color:var(--copper)}
+
+  /* the hand: a band of small squares */
+  .band{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:var(--gap)}
+  .band .sq{width:100%;height:auto;aspect-ratio:1}
+  .band-label{
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9px;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
+    margin-bottom:-16px;
+  }
+
+  /* photographs, again */
+  .photos{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gap)}
+  .photos figure{position:relative;overflow:hidden}
+  .photos img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:#e7e2d6}
+  .photos figcaption{
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:8.5px;
+    letter-spacing:.06em;color:var(--muted);padding-top:5px;
+  }
+
+  footer{
+    border-top:1px solid var(--rule);padding-top:16px;margin-top:14px;
+    display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;
+    font-size:11.5px;color:var(--muted);line-height:1.6;
+  }
+  footer .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9.5px;letter-spacing:.08em}
+
+  @media (max-width:760px){
+    .frame{grid-template-columns:1fr}
+    .rail{flex-direction:row;flex-wrap:wrap}
+    .sq{width:calc(33.3% - var(--gap))}
+    .sq-type{width:calc(33.3% - var(--gap));height:96px}
+    .hero img{height:44vh}
+    .photos{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+
+<div class="frame">
+
+  <!-- ── THE RAIL: the institution + the hand, interleaved ── -->
+  <nav class="rail" aria-label="Main">
+    <a class="sq sq-type" href="#"><small>HHF</small>Richard<br>Hunter</a>
+    <span class="sq sq-img sq-hand" style="background-image:url('https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0001_Pre-Scheme_I_Star_Form_1of2_1969-05-01_prev.jpg')"><span class="cite">HH-CAA-0001</span></span>
+    <a class="sq sq-type" href="#">The<br>House</a>
+    <span class="sq sq-img sq-frag" style="background-image:url('https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0010_Scheme_1A_East_Wing_Renovation_3of5_1981-06-21_prev.jpg')"><span class="cite">HH-CAA-0010</span></span>
+    <a class="sq sq-type" href="browse.html">Archive</a>
+    <span class="sq sq-img sq-hand alt" style="background-image:url('https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0019_Colour_Studies_Hunter_House_4of7_1992-05-01_prev.jpg')"><span class="cite">HH-CAA-0019</span></span>
+    <a class="sq sq-type" href="#">Stories</a>
+    <a class="sq sq-type" href="#">Found-<br>ation</a>
+  </nav>
+
+  <!-- ── THE FIELD ── -->
+  <main class="field">
+
+    <header class="masthead">
+      <div class="wordmark">Hunter House <span>Foundation</span></div>
+      <button id="font-toggle" type="button" title="Toggle type-square font [F]">TYPE: INTER TIGHT</button>
+    </header>
+
+    <!-- the place, centre stage -->
+    <section class="hero">
+      <img src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0026_Hunter_House_Photograph_Atrium_1970-01-01_prev.jpg" alt="The atrium of Hunter House, photographed around 1970">
+      <div class="lede">
+        <h1>The residence and archive of architect Richard Morrow Hunter
+        (1930–2023), built by his own hand over fifty years at
+        203&nbsp;Goward&nbsp;Road, Saanich.</h1>
+        <span class="cite-line">The atrium, c.&nbsp;1970 · <a href="browse.html">HH-CAA-0026, Hunter House Archive</a></span>
+      </div>
+    </section>
+
+    <!-- the hand -->
+    <section>
+      <p class="band-label">From the drawings</p>
+    </section>
+    <section class="band">
+      <span class="sq sq-img sq-frag" style="background-image:url('https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0001_Pre-Scheme_I_Star_Form_1of2_1969-05-01_prev.jpg');background-position:60% 30%"><span class="cite">HH-CAA-0001</span></span>
+      <span class="sq sq-img sq-hand" style="background-image:url('https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0010_Scheme_1A_East_Wing_Renovation_3of5_1981-06-21_prev.jpg')"><span class="cite">HH-CAA-0010</span></span>
+      <span class="sq sq-img sq-frag" style="background-image:url('https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0019_Colour_Studies_Hunter_House_4of7_1992-05-01_prev.jpg');background-position:30% 62%"><span class="cite">HH-CAA-0019</span></span>
+      <span class="sq sq-img sq-hand alt" style="background-image:url('https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0001_Pre-Scheme_I_Star_Form_1of2_1969-05-01_prev.jpg')"><span class="cite">HH-CAA-0001</span></span>
+      <span class="sq sq-img sq-frag" style="background-image:url('https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0010_Scheme_1A_East_Wing_Renovation_3of5_1981-06-21_prev.jpg');background-position:75% 20%"><span class="cite">HH-CAA-0010</span></span>
+      <span class="sq sq-img sq-frag" style="background-image:url('https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0019_Colour_Studies_Hunter_House_4of7_1992-05-01_prev.jpg');background-position:80% 75%"><span class="cite">HH-CAA-0019</span></span>
+    </section>
+
+    <!-- the place, again -->
+    <section class="photos">
+      <figure>
+        <img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0006_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024">
+        <figcaption>The house, 2024 · HH-IHC-0006</figcaption>
+      </figure>
+      <figure>
+        <img src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0035_Hunter_House_Photograph_Atrium_Construction_1970-01-01_prev.jpg" alt="Atrium under construction, c. 1970">
+        <figcaption>Atrium under construction, c.&nbsp;1970 · HH-CAA-0035</figcaption>
+      </figure>
+      <figure>
+        <img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0015_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024">
+        <figcaption>The house, 2024 · HH-IHC-0015</figcaption>
+      </figure>
+    </section>
+
+    <footer>
+      <div>
+        <strong style="color:var(--ink)">Hunter House Foundation</strong> —
+        stewarding the residence and architectural archive of Richard Morrow Hunter.<br>
+        The archive is open to all; research visits by arrangement.
+      </div>
+      <div class="mono">MOCK · not a published page · type [F] to toggle Arial / Inter&nbsp;Tight</div>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  // Font toggle: Inter Tight <-> Arial on the type squares (the one open question)
+  const btn = document.getElementById("font-toggle");
+  function setFont(arial){
+    document.body.classList.toggle("f-arial", arial);
+    btn.textContent = "TYPE: " + (arial ? "ARIAL" : "INTER TIGHT");
+    try { localStorage.setItem("hhf_mock_font", arial ? "a" : "i"); } catch(e){}
+  }
+  btn.addEventListener("click", () => setFont(!document.body.classList.contains("f-arial")));
+  document.addEventListener("keydown", e => {
+    if (e.key === "f" || e.key === "F") setFont(!document.body.classList.contains("f-arial"));
+  });
+  try { setFont(localStorage.getItem("hhf_mock_font") === "a"); } catch(e){}
+</script>
+</body>
+</html>
