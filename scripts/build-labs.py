@@ -242,9 +242,8 @@ CSS_LAB_B = """\
   .meta-foot button:hover{opacity:0.5}
   .meta-foot #rec-info{font-size:14px}
   .panel-right #info-pane{bottom:28px}
-  /* v56: signed-out unlock lives in ? now, not under the record */
-  body:not(.is-researcher) #meta-content #rn-panel{display:none}
-  #rn-unlock-ip{margin-top:22px;padding-top:16px;border-top:1px solid var(--rule)}
+  /* v85: public-only page — the record never shows the notes/unlock panel */
+  #meta-content #rn-panel{display:none}
   .panel-right #info-pane-close{display:none}
   #panel-right:has(#info-pane.open) #rec-info{font-size:0}
   #panel-right:has(#info-pane.open) #rec-info::after{content:"\u2715";font-size:13px}
@@ -520,16 +519,13 @@ def main():
          '\n',
          '',
          "no-tour-platform"),
-        # v56: research-mode unlock moves to the BOTTOM of the ? pane
-        # (renderRN already takes a target panel id); the record pane's
-        # signed-out unlock row is suppressed via CSS.
-        ('        marking, and your own shortcuts.</p>`;\n'
-         '    document.getElementById("ip-inner").innerHTML = html;',
-         '        marking, and your own shortcuts.</p>\n'
-         '      <div id="rn-unlock-ip"></div>`;\n'
-         '    document.getElementById("ip-inner").innerHTML = html;\n'
-         '    if (!rnSession()) renderRN(state.selectedId, "rn-unlock-ip");   // LAB B v56: unlock lives at the bottom of ?',
-         "unlock-in-info"),
+        # v56/v85: the ? pane carries no sign-in (the v56 unlock moved here,
+        # then v85 removed it — the shared page is public-only). The trailing
+        # "Researchers:" footnote goes too.
+        ('      <p class="ip-foot">Researchers: a second ? appears in the record bar with notes,\n'
+         '        marking, and your own shortcuts.</p>`;',
+         '`;',
+         "no-researcher-footnote"),
         # v40c: ONE chrome row — Catalogue · search · Filter behind full-
         # height separators; the active-tag row below exists only while
         # filters are active. #list-info survives for mobile. Replaces the
@@ -591,6 +587,20 @@ def main():
         ('  function renderMeta(item) {\n    const body = $("#meta-body");',
          '  function renderMeta(item) {\n    const body = $("#meta-content");',
          "meta-content-target"),
+        # v85: the SHARED page is public-only — no researcher/admin UI, no
+        # sign-in anywhere. rnRole is forced public at the root (flags,
+        # marks, notes, compose, proxy badge all key off it); the gated
+        # TOKEN travels separately, so letters still load. ADMIN mode will
+        # be a separate deliberate entry, designed with Brandon later.
+        ('  function rnRole()           { const s = rnSession(); return (s && s.role) || "public"; }',
+         '  function rnRole()           { return "public"; }   // LAB B v85: public-only page; admin entry comes later',
+         "public-only-role"),
+        ('    if (!canMark()) { hhToast("Researcher view \u2014 unlock with your PIN first"); return; }\n',
+         '',
+         "letters-ungate-view"),
+        ('    if (!canMark()) return;                         // researchers only\n',
+         '',
+         "letters-ungate-load"),
         # v63: record pane defaults CLOSED again (Brandon) — Continue opens
         # only the left panel; the collapsed sliver carries a vertical
         # ITEM RECORD label and opens on click.
@@ -907,7 +917,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="84", tray=False)
+    ], version="85", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.

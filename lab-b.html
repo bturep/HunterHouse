@@ -1128,9 +1128,8 @@
   .meta-foot button:hover{opacity:0.5}
   .meta-foot #rec-info{font-size:14px}
   .panel-right #info-pane{bottom:28px}
-  /* v56: signed-out unlock lives in ? now, not under the record */
-  body:not(.is-researcher) #meta-content #rn-panel{display:none}
-  #rn-unlock-ip{margin-top:22px;padding-top:16px;border-top:1px solid var(--rule)}
+  /* v85: public-only page — the record never shows the notes/unlock panel */
+  #meta-content #rn-panel{display:none}
   .panel-right #info-pane-close{display:none}
   #panel-right:has(#info-pane.open) #rec-info{font-size:0}
   #panel-right:has(#info-pane.open) #rec-info::after{content:"✕";font-size:13px}
@@ -4089,7 +4088,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.84";
+  const VERSION      = "v1.09-test.79-labb.85";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -4259,7 +4258,7 @@
   function rnUnlock(entry)    { sessionStorage.setItem("hhf_researcher", JSON.stringify(entry)); }
   function rnLockOut()        { sessionStorage.removeItem("hhf_researcher"); rnShowAll = false; }
   // Role / capability gate. Public = not unlocked.
-  function rnRole()           { const s = rnSession(); return (s && s.role) || "public"; }
+  function rnRole()           { return "public"; }   // LAB B v85: public-only page; admin entry comes later
   function canEditWikibase()  { return rnRole() === "admin"; }
 
   // Notes are private: a researcher sees only their own; an admin may toggle
@@ -6737,7 +6736,6 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     };
   }
   async function loadGatedLetters(announce) {
-    if (!canMark()) return;                         // researchers only
     const tok = gatedToken();
     if (!tok) { if (announce) hhToast("Enter the researcher token first (Letters ✉)"); return; }
     try {
@@ -7203,7 +7201,6 @@ WHERE {
 
   async function toggleLettersView() {
     if (state.view === "letters") { exitLetters(); return; }
-    if (!canMark()) { hhToast("Researcher view — unlock with your PIN first"); return; }
     if (!gatedToken()) {
       const t = window.prompt("Researcher token for the letters collection:", "");
       if (t === null) return;
@@ -9959,11 +9956,8 @@ WHERE {
         ["Esc",    "Close · exit zen"],
       ])}
 
-      <p class="ip-foot">Researchers: a second ? appears in the record bar with notes,
-        marking, and your own shortcuts.</p>
-      <div id="rn-unlock-ip"></div>`;
+`;
     document.getElementById("ip-inner").innerHTML = html;
-    if (!rnSession()) renderRN(state.selectedId, "rn-unlock-ip");   // LAB B v56: unlock lives at the bottom of ?
   }
 
   // Researcher help — opens from the ? button in the Item-record bar. Public
