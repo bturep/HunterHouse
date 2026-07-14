@@ -4096,7 +4096,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.94";
+  const VERSION      = "v1.09-test.79-labb.95";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -9953,28 +9953,47 @@ WHERE {
     const keys = rows => `<div class="ip-keys">${rows.map(([k, d]) => `<b>${k}</b><span>${d}</span>`).join("")}</div>`;
     const html = `
       <p class="ip-grp">What this is</p>
-      <p class="ip-note">A live catalogue of the Richard Morrow Hunter architectural archive
-        (1970–2020). Drawings, photographs, publications, correspondence — organised by
-        the projects Hunter worked on across his career.</p>
+      <p class="ip-note">The archive of architect Richard Morrow Hunter (1930–2023)
+        and the Hunter Residence at 203 Goward Road, Saanich — drawings,
+        photographs, documents and correspondence spanning roughly 1955–2020,
+        kept by the Hunter House Foundation.</p>
 
-      <p class="ip-grp">Finding your way</p>
-      <p class="ip-note">The left pane lists every item. The centre stage shows the
-        selected drawing or photograph; the right pane shows its record. Use the sort
-        header (ID / Phase / Year) and the filter button to narrow down, or type in
-        the search bar to match anything — titles, IDs, item types, materials.</p>
+      <p class="ip-grp">The collections</p>
+      <p class="ip-note">The archive is organised as five collections, each a bar in
+        the left pane — click a bar to open its items, click again to close it.
+        Every collection has its own colour: the line down the left edge tells
+        you which collection you are inside as you scroll, and collections you
+        have scrolled past stack as a compact index at the top of the list —
+        click an entry there to jump back. Item IDs read
+        <b>HH-COLLECTION-NUMBER</b>.</p>
 
-      <p class="ip-grp">Curated lenses</p>
-      <p class="ip-note">"Curated" entries in the filter panel open authored
-        selections — a curator's sequence of items with their own introduction and
-        notes. Inside one, normal sorting and filtering steps aside; click the exit
-        button on the intro card to return to the full catalogue.</p>
+      <p class="ip-grp">Search and filter</p>
+      <p class="ip-note">The search matches anything — titles, IDs, item types,
+        materials, places. <b>Filter</b> opens the facets, each value carrying a
+        live count; a greyed value means it does not overlap with what is
+        already selected. Active filters appear as tags under the bar — click a
+        tag's × to drop it. In an item's record, any chip — phase, area, item
+        type — filters to that value. The count at the bottom left always says
+        how many items you are looking at.</p>
 
-      <p class="ip-grp">Reading the catalogue</p>
-      <p class="ip-note">Item IDs are <b>HH-COLLECTION-NUMBER</b> (HHC = Hunter House
-        Collection, CAA = Canadian Architectural Archives at UCalgary, EGC = Eric
-        Gesinger Collection, IHC = Ivan Hunter Collection). Click any chip —
-        phase, area, item type — to filter to that value. Click the wordmark
-        (top-left) for credits and project info.</p>
+      <p class="ip-grp">The item record</p>
+      <p class="ip-note">Select an item and its full record waits in the right
+        pane — open it from the <b>ITEM RECORD</b> strip on the right edge, or
+        its pull tab. At the end of the record sit the item's permanent link, a
+        ready-made citation, and the raw data (Wikibase · SPARQL · JSON).</p>
+
+      <p class="ip-grp">The viewer</p>
+      <p class="ip-note">Drag to pan; scroll or + − to zoom; F fits the frame;
+        1 is actual size. <b>↓ Original</b> downloads the full-resolution
+        file, and items with documents also carry <b>↓ PDF</b>. Multi-page
+        letters turn pages with the ‹ › control under the image.</p>
+
+      <p class="ip-grp">The letters</p>
+      <p class="ip-note">The envelope at the bottom left opens the correspondence —
+        Richard Hunter's letters, 1953–1980, with full transcripts and their
+        own filters (correspondent, subject, person). The letters are a private
+        family collection, opened to invited readers; the rest of the archive
+        is public.</p>
 
       <p class="ip-grp">Shortcuts</p>
       ${keys([
@@ -9988,7 +10007,8 @@ WHERE {
         ["Esc",    "Close · exit zen"],
       ])}
 
-`;
+      <p class="ip-foot">Click the wordmark — HUNTER HOUSE ARCHIVE, top left — for
+        credits and project information.</p>`;
     document.getElementById("ip-inner").innerHTML = html;
   }
 

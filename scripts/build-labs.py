@@ -518,22 +518,6 @@ def main():
         ('      await loadCurationIndex();   // populate [Curated] entry (tiny local JSON; no-op if absent)',
          '      // LAB B v51: curation index not loaded — no curated-selections row in this lab.',
          "no-curations"),
-        # v56: Guided tour + Platform sections leave the ? pane.
-        ('      <p class="ip-grp">Guided tour</p>\n'
-         '      <p class="ip-note"><a href="#" onclick="hhReplayTour();return false;">Replay the interface walkthrough \u21bb</a> \u2014 a quick, spotlit tour of the controls.</p>\n'
-         '\n'
-         '      <p class="ip-grp">Platform</p>\n'
-         '      <p class="ip-note"><a href="https://hunterhouse.wikibase.cloud/wiki/Main_Page" target="_blank" rel="noopener">Wikibase Main Page \u2014 archive structure, rights &amp; endpoints \u2197</a></p>\n'
-         '\n',
-         '',
-         "no-tour-platform"),
-        # v56/v85: the ? pane carries no sign-in (the v56 unlock moved here,
-        # then v85 removed it — the shared page is public-only). The trailing
-        # "Researchers:" footnote goes too.
-        ('      <p class="ip-foot">Researchers: a second ? appears in the record bar with notes,\n'
-         '        marking, and your own shortcuts.</p>`;',
-         '`;',
-         "no-researcher-footnote"),
         # v40c: ONE chrome row — Catalogue · search · Filter behind full-
         # height separators; the active-tag row below exists only while
         # filters are active. #list-info survives for mobile. Replaces the
@@ -751,6 +735,92 @@ def main():
          '    if (lfShow2) lfShow2.textContent = `Show ${state.filtered.length} \u2192`;\n'
          '    requestAnimationFrame(() => updatePip("filter-panel", "filter-pip"));',
          "letter-facet-counts"),
+        # v95: the ? pane rewritten against the page AS BUILT — collections
+        # as bins with colour identity + the rail, live facet counts and
+        # grey-outs, the record's reference links, the viewer, the letters.
+        # Removed: curated lenses (disabled here), sort headers (gone),
+        # guided tour, platform links, researcher footnote.
+        ('      <p class="ip-grp">What this is</p>\n'
+         '      <p class="ip-note">A live catalogue of the Richard Morrow Hunter architectural archive\n'
+         '        (1970\u20132020). Drawings, photographs, publications, correspondence \u2014 organised by\n'
+         '        the projects Hunter worked on across his career.</p>\n'
+         '\n'
+         '      <p class="ip-grp">Finding your way</p>\n'
+         '      <p class="ip-note">The left pane lists every item. The centre stage shows the\n'
+         '        selected drawing or photograph; the right pane shows its record. Use the sort\n'
+         '        header (ID / Phase / Year) and the filter button to narrow down, or type in\n'
+         '        the search bar to match anything \u2014 titles, IDs, item types, materials.</p>\n'
+         '\n'
+         '      <p class="ip-grp">Curated lenses</p>\n'
+         '      <p class="ip-note">"Curated" entries in the filter panel open authored\n'
+         '        selections \u2014 a curator\'s sequence of items with their own introduction and\n'
+         '        notes. Inside one, normal sorting and filtering steps aside; click the exit\n'
+         '        button on the intro card to return to the full catalogue.</p>\n'
+         '\n'
+         '      <p class="ip-grp">Reading the catalogue</p>\n'
+         '      <p class="ip-note">Item IDs are <b>HH-COLLECTION-NUMBER</b> (HHC = Hunter House\n'
+         '        Collection, CAA = Canadian Architectural Archives at UCalgary, EGC = Eric\n'
+         '        Gesinger Collection, IHC = Ivan Hunter Collection). Click any chip \u2014\n'
+         '        phase, area, item type \u2014 to filter to that value. Click the wordmark\n'
+         '        (top-left) for credits and project info.</p>\n'
+         '\n'
+         '      <p class="ip-grp">Shortcuts</p>',
+         '      <p class="ip-grp">What this is</p>\n'
+         '      <p class="ip-note">The archive of architect Richard Morrow Hunter (1930\u20132023)\n'
+         '        and the Hunter Residence at 203 Goward Road, Saanich \u2014 drawings,\n'
+         '        photographs, documents and correspondence spanning roughly 1955\u20132020,\n'
+         '        kept by the Hunter House Foundation.</p>\n'
+         '\n'
+         '      <p class="ip-grp">The collections</p>\n'
+         '      <p class="ip-note">The archive is organised as five collections, each a bar in\n'
+         '        the left pane \u2014 click a bar to open its items, click again to close it.\n'
+         '        Every collection has its own colour: the line down the left edge tells\n'
+         '        you which collection you are inside as you scroll, and collections you\n'
+         '        have scrolled past stack as a compact index at the top of the list \u2014\n'
+         '        click an entry there to jump back. Item IDs read\n'
+         '        <b>HH-COLLECTION-NUMBER</b>.</p>\n'
+         '\n'
+         '      <p class="ip-grp">Search and filter</p>\n'
+         '      <p class="ip-note">The search matches anything \u2014 titles, IDs, item types,\n'
+         '        materials, places. <b>Filter</b> opens the facets, each value carrying a\n'
+         '        live count; a greyed value means it does not overlap with what is\n'
+         '        already selected. Active filters appear as tags under the bar \u2014 click a\n'
+         '        tag\'s \u00d7 to drop it. In an item\'s record, any chip \u2014 phase, area, item\n'
+         '        type \u2014 filters to that value. The count at the bottom left always says\n'
+         '        how many items you are looking at.</p>\n'
+         '\n'
+         '      <p class="ip-grp">The item record</p>\n'
+         '      <p class="ip-note">Select an item and its full record waits in the right\n'
+         '        pane \u2014 open it from the <b>ITEM RECORD</b> strip on the right edge, or\n'
+         '        its pull tab. At the end of the record sit the item\'s permanent link, a\n'
+         '        ready-made citation, and the raw data (Wikibase \u00b7 SPARQL \u00b7 JSON).</p>\n'
+         '\n'
+         '      <p class="ip-grp">The viewer</p>\n'
+         '      <p class="ip-note">Drag to pan; scroll or + \u2212 to zoom; F fits the frame;\n'
+         '        1 is actual size. <b>\u2193 Original</b> downloads the full-resolution\n'
+         '        file, and items with documents also carry <b>\u2193 PDF</b>. Multi-page\n'
+         '        letters turn pages with the \u2039 \u203a control under the image.</p>\n'
+         '\n'
+         '      <p class="ip-grp">The letters</p>\n'
+         '      <p class="ip-note">The envelope at the bottom left opens the correspondence \u2014\n'
+         '        Richard Hunter\'s letters, 1953\u20131980, with full transcripts and their\n'
+         '        own filters (correspondent, subject, person). The letters are a private\n'
+         '        family collection, opened to invited readers; the rest of the archive\n'
+         '        is public.</p>\n'
+         '\n'
+         '      <p class="ip-grp">Shortcuts</p>',
+         "info-pane-rewrite"),
+        ('      <p class="ip-grp">Guided tour</p>\n'
+         '      <p class="ip-note"><a href="#" onclick="hhReplayTour();return false;">Replay the interface walkthrough \u21bb</a> \u2014 a quick, spotlit tour of the controls.</p>\n'
+         '\n'
+         '      <p class="ip-grp">Platform</p>\n'
+         '      <p class="ip-note"><a href="https://hunterhouse.wikibase.cloud/wiki/Main_Page" target="_blank" rel="noopener">Wikibase Main Page \u2014 archive structure, rights &amp; endpoints \u2197</a></p>\n'
+         '\n'
+         '      <p class="ip-foot">Researchers: a second ? appears in the record bar with notes,\n'
+         '        marking, and your own shortcuts.</p>`;',
+         '      <p class="ip-foot">Click the wordmark \u2014 HUNTER HOUSE ARCHIVE, top left \u2014 for\n'
+         '        credits and project information.</p>`;',
+         "info-pane-tail"),
         # v89: the archive tray enumerates PUBLIC items only — loaded letters
         # were adding zero-count chips (Letter item type, letter people) that
         # a normal visitor never sees. facetBase already excluded gated;
@@ -1031,7 +1101,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="94", tray=False)
+    ], version="95", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
