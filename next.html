@@ -4128,7 +4128,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.85";
+  const VERSION      = "v1.09-test.86";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7297,7 +7297,7 @@ WHERE {
       return true;
     });
     const dir = state.sortDir === "asc" ? 1 : -1;
-    const dk = it => it.date || "9999-99-99";
+    const dk = it => it.date || (dir === 1 ? "9999-99-99" : "0000-00-00");   // test.86: undated letters sink to the END in either direction
     const byDate = (a, b) => dir * dk(a).localeCompare(dk(b)) || (a.id || "").localeCompare(b.id || "");
     const cmp = { id: (a, b) => dir * (a.id || "").localeCompare(b.id || ""), year: byDate, phase: byDate };
     state.filtered.sort(cmp[state.sortCol] || byDate);
