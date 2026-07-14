@@ -601,6 +601,11 @@ def main():
         ('    if (!canMark()) return;                         // researchers only\n',
          '',
          "letters-ungate-load"),
+        # v86: the transcript's own role gate is redundant here — a gated
+        # letter is only present at all if the token authorized it.
+        ('${(item.transcript && (!item.gated || canMark())) ? `<section class="meta-section transcript-section',
+         '${item.transcript ? `<section class="meta-section transcript-section',
+         "transcript-ungate"),
         # v63: record pane defaults CLOSED again (Brandon) — Continue opens
         # only the left panel; the collapsed sliver carries a vertical
         # ITEM RECORD label and opens on click.
@@ -917,7 +922,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="85", tray=False)
+    ], version="86", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.

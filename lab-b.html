@@ -4088,7 +4088,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.85";
+  const VERSION      = "v1.09-test.79-labb.86";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -8386,7 +8386,7 @@ WHERE {
         <div class="graph-path">${graphPathHTML}</div>
         ${siblingsHTML}
       </section>` : ""}
-      ${(item.transcript && (!item.gated || canMark())) ? `<section class="meta-section transcript-section${item.handwritten ? " open" : ""}">
+      ${item.transcript ? `<section class="meta-section transcript-section${item.handwritten ? " open" : ""}">
         <h3 class="ts-head"><span><span class="tw">▸</span>Transcript</span><span class="ct">${item.handwritten ? "handwritten" : "typed"}${item.gated ? " · researcher" : ""}</span></h3>
         <div class="ts-body">${transcriptToHTML(item.transcript)}</div>
       </section>` : ""}
