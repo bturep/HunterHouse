@@ -1189,6 +1189,11 @@
   html.text-xl .pane-meta .kv dd{font-size:14px}
   html.text-lg #list-foot,html.text-lg .br-row{font-size:11px}
   html.text-xl #list-foot,html.text-xl .br-row{font-size:11.5px}
+  /* test.84: the wordmark scales UP too — the base lg rule (written for the
+     old 11px mark) was dragging the 12.5px lab wordmark DOWN to 12 at the
+     middle size. */
+  html.text-lg .site-top .mk-static,html.text-lg .site-top .mk-page{font-size:13.5px}
+  html.text-xl .site-top .mk-static,html.text-xl .site-top .mk-page{font-size:14.5px}
   /* v63/v68: feet at 28px — the collapsed sliver width; the frame is
      one dimension all round (slivers, feet, splash strip). */
   .pane-image .image-foot{height:28px}
@@ -4123,7 +4128,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.83";
+  const VERSION      = "v1.09-test.84";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
