@@ -768,7 +768,8 @@ def main():
          '    state.sortCol = "year"; state.sortDir = "asc";\n'
          '    state.search = "";\n'
          '    const si = document.getElementById("search-input"); if (si) si.value = "";\n'
-         '    const lpi = document.getElementById("lp-search-input"); if (lpi) lpi.placeholder = "search the letters";   // LAB B v89',
+         '    const lpi = document.getElementById("lp-search-input"); if (lpi) lpi.placeholder = "search the letters";   // LAB B v89\n'
+         '    clearAllFilters();   // LAB B v90: archive filters never carry into the letters',
          "letters-search-placeholder"),
         ('  function exitLetters() {\n'
          '    state.view = "archive";\n'
@@ -776,7 +777,8 @@ def main():
          '  function exitLetters() {\n'
          '    state.view = "archive";\n'
          '    document.body.classList.remove("letters-view");\n'
-         '    const lpx = document.getElementById("lp-search-input"); if (lpx) lpx.placeholder = "search the archive";   // LAB B v89',
+         '    const lpx = document.getElementById("lp-search-input"); if (lpx) { lpx.placeholder = "search the archive"; lpx.value = ""; }   // LAB B v89/v90\n'
+         '    state.search = "";   // LAB B v90: a letters search term never carries back to the archive',
          "archive-search-placeholder"),
         # v40b: the row restacks — kicker (ID + type mark left, year right),
         # title, note. Researcher furniture (flags, drag, curation seq) is
@@ -1020,7 +1022,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="89", tray=False)
+    ], version="90", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.

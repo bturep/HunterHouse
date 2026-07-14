@@ -4088,7 +4088,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.89";
+  const VERSION      = "v1.09-test.79-labb.90";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7221,6 +7221,7 @@ WHERE {
     state.search = "";
     const si = document.getElementById("search-input"); if (si) si.value = "";
     const lpi = document.getElementById("lp-search-input"); if (lpi) lpi.placeholder = "search the letters";   // LAB B v89
+    clearAllFilters();   // LAB B v90: archive filters never carry into the letters
     applyFilters(); renderList(); renderFilterPanel(); updateFilterBadge();
     if (state.filtered.length) selectItem(state.filtered[0].id);
     hhToast(`Correspondence — ${state.filtered.length} letters`);
@@ -7228,7 +7229,8 @@ WHERE {
   function exitLetters() {
     state.view = "archive";
     document.body.classList.remove("letters-view");
-    const lpx = document.getElementById("lp-search-input"); if (lpx) lpx.placeholder = "search the archive";   // LAB B v89
+    const lpx = document.getElementById("lp-search-input"); if (lpx) { lpx.placeholder = "search the archive"; lpx.value = ""; }   // LAB B v89/v90
+    state.search = "";   // LAB B v90: a letters search term never carries back to the archive
     state.filterCorrespondent.clear(); state.filterSubject.clear(); state.filterPerson.clear();
     state.search = "";
     const si = document.getElementById("search-input"); if (si) si.value = "";
