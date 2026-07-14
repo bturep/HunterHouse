@@ -637,6 +637,7 @@ def main():
          '    const frag = document.createDocumentFragment();\n'
          '    const noted = rnNotedIds();\n'
          '    const flags = canMark();\n'
+         '    { const lpf = document.getElementById("lp-filter"); if (lpf) { lpf.hidden = true; } }   // LAB B v90: the archive tag row never shows over letters\n'
          '    {   // LAB B v84: the letters list opens with a collection-grammar header\n'
          '      const hd = document.createElement("div");\n'
          '      hd.className = "phase-divider ph-head";\n'

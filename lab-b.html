@@ -7278,6 +7278,7 @@ WHERE {
     const frag = document.createDocumentFragment();
     const noted = rnNotedIds();
     const flags = canMark();
+    { const lpf = document.getElementById("lp-filter"); if (lpf) { lpf.hidden = true; } }   // LAB B v90: the archive tag row never shows over letters
     {   // LAB B v84: the letters list opens with a collection-grammar header
       const hd = document.createElement("div");
       hd.className = "phase-divider ph-head";
