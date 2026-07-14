@@ -429,7 +429,7 @@ def build(lab, css_extra, extra_patches, version, tray=True):
         '    // LAB: authored collection order (Brandon 2026-07-10).\n'
         '    const COLL_ORDER = ["CAA", "HHC", "IHC", "EGC", "FRH"];\n'
         '    const uniqueCollections = [...new Set(\n'
-        '      state.items.map(i => archiveAbbrev(collectionOf(i))).filter(Boolean)\n'
+        '      state.items.filter(i => !i.gated).map(i => archiveAbbrev(collectionOf(i))).filter(Boolean)\n'
         '    )].sort((a, b) => {\n'
         '      const ra = COLL_ORDER.indexOf(a), rb = COLL_ORDER.indexOf(b);\n'
         '      return (ra === -1 ? 99 : ra) - (rb === -1 ? 99 : rb) || a.localeCompare(b);\n'
@@ -742,6 +742,42 @@ def main():
          '    if (lfShow2) lfShow2.textContent = `Show ${state.filtered.length} \u2192`;\n'
          '    requestAnimationFrame(() => updatePip("filter-panel", "filter-pip"));',
          "letter-facet-counts"),
+        # v89: the archive tray enumerates PUBLIC items only — loaded letters
+        # were adding zero-count chips (Letter item type, letter people) that
+        # a normal visitor never sees. facetBase already excluded gated;
+        # the value lists now match it.
+        ('    const uniqueAreas       = uniqueSorted(state.items.flatMap(i => i.areas || []));\n'
+         '    const uniqueTypes       = uniqueSorted(state.items.map(i => i.itemType).filter(Boolean));\n'
+         '    const uniqueDrawTypes   = uniqueSorted(state.items.flatMap(i => i.drawTypes || []));\n'
+         '    const uniqueCreators    = uniqueSorted(state.items.flatMap(i =>\n'
+         '      [i.creator, i.designedBy, ...(i.builtBy || [])].filter(Boolean)));\n'
+         '    const uniqueBuiltStatus = uniqueSorted(state.items.map(i => i.builtStatus).filter(Boolean));',
+         '    const pub = state.items.filter(i => !i.gated);   // LAB B v89: archive facets never see gated letters\n'
+         '    const uniqueAreas       = uniqueSorted(pub.flatMap(i => i.areas || []));\n'
+         '    const uniqueTypes       = uniqueSorted(pub.map(i => i.itemType).filter(Boolean));\n'
+         '    const uniqueDrawTypes   = uniqueSorted(pub.flatMap(i => i.drawTypes || []));\n'
+         '    const uniqueCreators    = uniqueSorted(pub.flatMap(i =>\n'
+         '      [i.creator, i.designedBy, ...(i.builtBy || [])].filter(Boolean)));\n'
+         '    const uniqueBuiltStatus = uniqueSorted(pub.map(i => i.builtStatus).filter(Boolean));',
+         "archive-facets-public-pool"),
+        # v89: the search names its corpus — "search the letters" in the
+        # correspondence view, back to the archive on exit.
+        ('    state.sortCol = "year"; state.sortDir = "asc";\n'
+         '    state.search = "";\n'
+         '    const si = document.getElementById("search-input"); if (si) si.value = "";',
+         '    state.sortCol = "year"; state.sortDir = "asc";\n'
+         '    state.search = "";\n'
+         '    const si = document.getElementById("search-input"); if (si) si.value = "";\n'
+         '    const lpi = document.getElementById("lp-search-input"); if (lpi) lpi.placeholder = "search the letters";   // LAB B v89',
+         "letters-search-placeholder"),
+        ('  function exitLetters() {\n'
+         '    state.view = "archive";\n'
+         '    document.body.classList.remove("letters-view");',
+         '  function exitLetters() {\n'
+         '    state.view = "archive";\n'
+         '    document.body.classList.remove("letters-view");\n'
+         '    const lpx = document.getElementById("lp-search-input"); if (lpx) lpx.placeholder = "search the archive";   // LAB B v89',
+         "archive-search-placeholder"),
         # v40b: the row restacks — kicker (ID + type mark left, year right),
         # title, note. Researcher furniture (flags, drag, curation seq) is
         # re-housed untouched; styling it is deferred (Brandon).
@@ -984,7 +1020,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="88", tray=False)
+    ], version="89", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.

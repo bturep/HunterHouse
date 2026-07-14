@@ -4088,7 +4088,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.88";
+  const VERSION      = "v1.09-test.79-labb.89";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7220,6 +7220,7 @@ WHERE {
     state.sortCol = "year"; state.sortDir = "asc";
     state.search = "";
     const si = document.getElementById("search-input"); if (si) si.value = "";
+    const lpi = document.getElementById("lp-search-input"); if (lpi) lpi.placeholder = "search the letters";   // LAB B v89
     applyFilters(); renderList(); renderFilterPanel(); updateFilterBadge();
     if (state.filtered.length) selectItem(state.filtered[0].id);
     hhToast(`Correspondence — ${state.filtered.length} letters`);
@@ -7227,6 +7228,7 @@ WHERE {
   function exitLetters() {
     state.view = "archive";
     document.body.classList.remove("letters-view");
+    const lpx = document.getElementById("lp-search-input"); if (lpx) lpx.placeholder = "search the archive";   // LAB B v89
     state.filterCorrespondent.clear(); state.filterSubject.clear(); state.filterPerson.clear();
     state.search = "";
     const si = document.getElementById("search-input"); if (si) si.value = "";
@@ -8627,17 +8629,18 @@ WHERE {
     // LAB: authored collection order (Brandon 2026-07-10).
     const COLL_ORDER = ["CAA", "HHC", "IHC", "EGC", "FRH"];
     const uniqueCollections = [...new Set(
-      state.items.map(i => archiveAbbrev(collectionOf(i))).filter(Boolean)
+      state.items.filter(i => !i.gated).map(i => archiveAbbrev(collectionOf(i))).filter(Boolean)
     )].sort((a, b) => {
       const ra = COLL_ORDER.indexOf(a), rb = COLL_ORDER.indexOf(b);
       return (ra === -1 ? 99 : ra) - (rb === -1 ? 99 : rb) || a.localeCompare(b);
     });
-    const uniqueAreas       = uniqueSorted(state.items.flatMap(i => i.areas || []));
-    const uniqueTypes       = uniqueSorted(state.items.map(i => i.itemType).filter(Boolean));
-    const uniqueDrawTypes   = uniqueSorted(state.items.flatMap(i => i.drawTypes || []));
-    const uniqueCreators    = uniqueSorted(state.items.flatMap(i =>
+    const pub = state.items.filter(i => !i.gated);   // LAB B v89: archive facets never see gated letters
+    const uniqueAreas       = uniqueSorted(pub.flatMap(i => i.areas || []));
+    const uniqueTypes       = uniqueSorted(pub.map(i => i.itemType).filter(Boolean));
+    const uniqueDrawTypes   = uniqueSorted(pub.flatMap(i => i.drawTypes || []));
+    const uniqueCreators    = uniqueSorted(pub.flatMap(i =>
       [i.creator, i.designedBy, ...(i.builtBy || [])].filter(Boolean)));
-    const uniqueBuiltStatus = uniqueSorted(state.items.map(i => i.builtStatus).filter(Boolean));
+    const uniqueBuiltStatus = uniqueSorted(pub.map(i => i.builtStatus).filter(Boolean));
 
     const group = (label, vals, activeSet, cls, attr, color) => {
       if (!vals.length) return "";
