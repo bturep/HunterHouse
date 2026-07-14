@@ -4128,7 +4128,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.84";
+  const VERSION      = "v1.09-test.85";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7257,7 +7257,7 @@ WHERE {
   function enterLetters() {
     state.view = "letters";
     document.body.classList.add("letters-view");
-    state.sortCol = "year"; state.sortDir = "asc";
+    if (state.sortCol !== "year") { state.sortCol = "year"; state.sortDir = "asc"; }   // test.85: a URL-restored year sort (e.g. dir=desc) survives entry
     state.search = "";
     const si = document.getElementById("search-input"); if (si) si.value = "";
     const lpi = document.getElementById("lp-search-input"); if (lpi) lpi.placeholder = "search the letters";   // LAB B v89
@@ -11473,7 +11473,12 @@ WHERE {
       // ?open=<curation-slug> lands in that curated selection (e.g. a shared link).
       const openSlug = params.get("open");
       if (openSlug === "letters") {
-        try { await toggleLettersView(); }
+        try {
+          await toggleLettersView();
+          // test.85: a shared ?id=L… resolves AFTER the letters merge —
+          // the earlier resolution ran against the public catalogue only.
+          if (urlId && state.items.some(i => i.id === urlId)) selectItem(urlId, { scrollIntoView: true, tap: true });
+        }
         catch (e) { console.warn("open letters failed", e); }
       } else if (openSlug) {
         try { enterCuration(await getCuration(openSlug)); }
