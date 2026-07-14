@@ -50,7 +50,10 @@ export async function handleGated(request, env) {
 
   // ── auth: shared researcher token ────────────────────────────────────────
   const tok = request.headers.get("X-Researcher-Token") || url.searchParams.get("t") || "";
-  if (!env.GATED_TOKEN || !ctEq(tok, env.GATED_TOKEN))
+  // GATED_TOKEN may hold several comma-separated credentials (legacy token +
+  // the speakable password), so old shared links survive a password add.
+  const valid = (env.GATED_TOKEN || "").split(",").map(s => s.trim()).filter(Boolean);
+  if (!valid.some(v => ctEq(tok, v)))
     return new Response("Unauthorized", { status: 401, headers: H });
 
   // ── the dataset (metadata + transcripts) ─────────────────────────────────
