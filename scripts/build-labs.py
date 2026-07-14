@@ -244,7 +244,7 @@ CSS_LAB_B = """\
   .meta-foot #rec-info{font-size:14px}
   /* v92: the ? pane wears the record body's own cloth — the recessed
      soft block inset between the 7px pip lanes, not a bare curtain. */
-  .panel-right #info-pane{bottom:28px;left:7px;right:7px;background:var(--soft)}
+  .panel-right #info-pane{top:41px;bottom:28px;left:7px;right:7px;background:var(--soft)}   /* v94: starts below the title bar (which reads ?) */
   html.dark body .panel-right #info-pane{background:#252220}
   /* v85: public-only page — the record never shows the notes/unlock panel */
   #meta-content #rn-panel{display:none}
@@ -1031,7 +1031,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="93", tray=False)
+    ], version="94", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.

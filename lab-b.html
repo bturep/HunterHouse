@@ -1130,7 +1130,7 @@
   .meta-foot #rec-info{font-size:14px}
   /* v92: the ? pane wears the record body's own cloth — the recessed
      soft block inset between the 7px pip lanes, not a bare curtain. */
-  .panel-right #info-pane{bottom:28px;left:7px;right:7px;background:var(--soft)}
+  .panel-right #info-pane{top:41px;bottom:28px;left:7px;right:7px;background:var(--soft)}   /* v94: starts below the title bar (which reads ?) */
   html.dark body .panel-right #info-pane{background:#252220}
   /* v85: public-only page — the record never shows the notes/unlock panel */
   #meta-content #rn-panel{display:none}
@@ -4096,7 +4096,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.93";
+  const VERSION      = "v1.09-test.79-labb.94";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
