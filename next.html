@@ -1162,6 +1162,33 @@
   .panel-handle:hover::before{background:var(--ink)}
   .panel-handle .handle-chevron{display:none}
   .panel-left.pane-list,.panel-right.pane-meta{overflow:visible}
+  /* test.83: Aa reaches the WHOLE type system — the lg/xl overrides were
+     written for the pre-lab classes, so only the legacy record-title rule
+     still connected. One step per size, whole reading surface. */
+  html.text-lg .r-title{font-size:13px}
+  html.text-xl .r-title{font-size:14px}
+  html.text-lg .r-kick,html.text-lg .pane-list .row .year,html.text-lg .r-note{font-size:11px}
+  html.text-xl .r-kick,html.text-xl .pane-list .row .year,html.text-xl .r-note{font-size:11.5px}
+  html.text-lg .ph-name{font-size:13.5px}
+  html.text-xl .ph-name{font-size:14.5px}
+  html.text-lg .ph-count{font-size:11px}
+  html.text-xl .ph-count{font-size:11.5px}
+  html.text-lg .ph-gloss{font-size:10px}
+  html.text-xl .ph-gloss{font-size:10.5px}
+  html.text-lg .lp-toolbar .lh-title{font-size:12.5px}
+  html.text-xl .lp-toolbar .lh-title{font-size:13.5px}
+  html.text-lg .lh-filter{font-size:12px}
+  html.text-xl .lh-filter{font-size:13px}
+  html.text-lg .lp-toolbar #lp-search-input{font-size:12px}
+  html.text-xl .lp-toolbar #lp-search-input{font-size:13px}
+  html.text-lg .af-pill{font-size:12px}
+  html.text-xl .af-pill{font-size:13px}
+  html.text-lg .panel-right.pane-meta .meta-title{font-size:15px}
+  html.text-xl .panel-right.pane-meta .meta-title{font-size:16px}
+  html.text-lg .pane-meta .kv dd{font-size:13px}
+  html.text-xl .pane-meta .kv dd{font-size:14px}
+  html.text-lg #list-foot,html.text-lg .br-row{font-size:11px}
+  html.text-xl #list-foot,html.text-xl .br-row{font-size:11.5px}
   /* v63/v68: feet at 28px — the collapsed sliver width; the frame is
      one dimension all round (slivers, feet, splash strip). */
   .pane-image .image-foot{height:28px}
@@ -4096,7 +4123,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.82";
+  const VERSION      = "v1.09-test.83";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
