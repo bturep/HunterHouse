@@ -1010,6 +1010,13 @@
   #lf-show{display:none;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.12em;
     text-transform:uppercase;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;margin-left:auto}
   #lf-show:hover{color:var(--copper-deep)}
+  /* v84: letters entry in the list foot's right corner */
+  #lf-letters{margin-left:auto;background:none;border:0;padding:0;cursor:pointer;
+    color:var(--muted);display:inline-flex;align-items:center}
+  #lf-letters:hover{color:var(--ink)}
+  #lf-letters svg{display:block;pointer-events:none}
+  body.letters-view #lf-letters{color:var(--red-deep)}
+  .panel-left:has(#filter-panel:not([hidden])) #lf-letters{margin-left:14px}   /* Show → owns the auto slot while the tray is open */
   .panel-left:has(#filter-panel:not([hidden])) #lf-count{display:none}
   .panel-left:has(#filter-panel:not([hidden])) #lf-show{display:inline-flex}
   /* applied tags — the browse chips' bracket convention, category colour */
@@ -3794,7 +3801,7 @@
       <div class="rows" id="rows"></div>
       <div class="scroll-pip" id="filter-pip" aria-hidden="true"></div>
       <div id="bin-rail-top" aria-hidden="true"></div>
-      <div id="list-foot"><span id="lf-count"></span><button id="lf-show" type="button" title="Apply and close the filter">Show →</button></div>
+      <div id="list-foot"><span id="lf-count"></span><button id="lf-show" type="button" title="Apply and close the filter">Show →</button><button id="lf-letters" type="button" title="Researcher letters" aria-label="Researcher letters" onclick="window.hhLetters && window.hhLetters()"><svg width="15" height="12" viewBox="0 0 16 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="2" width="14" height="9.5" rx="1"/><path d="M1.5 3l6.5 4.5L14.5 3"/></svg></button></div>
     </div>
     <button class="panel-handle" id="left-handle" aria-label="Toggle browse panel">
       <svg class="handle-chevron" width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2,1 5,5 2,9"/></svg>
@@ -4082,7 +4089,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.79-labb.83";
+  const VERSION      = "v1.09-test.79-labb.84";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -7270,6 +7277,16 @@ WHERE {
     const frag = document.createDocumentFragment();
     const noted = rnNotedIds();
     const flags = canMark();
+    {   // LAB B v84: the letters list opens with a collection-grammar header
+      const hd = document.createElement("div");
+      hd.className = "phase-divider ph-head";
+      hd.dataset.phase = "FRH";
+      hd.style.cursor = "default";
+      hd.innerHTML =
+        `<span class="ph-line1"><span class="ph-name">FRH — Correspondence</span><span class="ph-count">Items <b>${String(state.filtered.length).padStart(2,"0")}</b></span></span>` +
+        `<span class="ph-line2"><span class="ph-gloss">The letters of Richard Hunter, 1953–1980, mostly to Luise Mendelsohn. Transcripts; scans.</span></span>`;
+      frag.appendChild(hd);
+    }
     if (state.filterCorrespondent.size || state.filterSubject.size || state.filterPerson.size) {
       const d = document.createElement("div"); d.className = "phase-divider";
       d.innerHTML = `<span>Filtered <span style="color:var(--muted);font-weight:400">${String(state.filtered.length).padStart(2,"0")} letters</span></span><span class="r" style="cursor:pointer" id="lf-clear-inline">✕ clear</span>`;
@@ -7277,11 +7294,13 @@ WHERE {
     }
     state.filtered.forEach(it => {
       const row = document.createElement("div");
-      row.className = "row letter-row" + (it.id === state.selectedId ? " sel" : "") + (marksHas(it.id) ? " marked" : "") + (seen.has(it.id) ? " seen" : "") + (noted.has(it.id) ? " has-note" : "");
+      row.dataset.bin = "FRH";   // LAB B v84: FRH identity (plum spine)
+      row.className = "row letter-row in-bin" + (it.id === state.selectedId ? " sel" : "") + (marksHas(it.id) ? " marked" : "") + (seen.has(it.id) ? " seen" : "") + (noted.has(it.id) ? " has-note" : "");
       row.dataset.id = it.id;
       const fromTo = `${escapeHTML(it.letterFrom || "?")} <span class="lr-arrow">→</span> ${escapeHTML(it.letterTo || "?")}`;
       const sub = escapeHTML(it.letterPlace || docFormLabel(it.docForm) || "");
       row.innerHTML = `
+        <span class="r-kick">
         <span class="col-id">
           <span class="archid"><span class="tmark pc-stone" data-type="L" title="Letter">L</span></span>
           ${flags ? `<span class="row-flags" aria-hidden="true">
@@ -7290,11 +7309,10 @@ WHERE {
             <span class="rf-slot rf-slot-note"><span class="rf-ico"><span class="rf-note" title="Has a researcher note"><svg viewBox="0 0 10 12" width="8" height="10" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 1h4l3 3v7H2z"/><path d="M6 1v3h3"/><path d="M3.7 6.6h3M3.7 8.6h3"/></svg></span></span></span>
           </span>` : ""}
         </span>
-        <div class="title-wrap">
-          <div class="title lr-fromto">${fromTo}</div>
-          <div class="ph">${sub}</div>
-        </div>
-        <span class="year">${escapeHTML(condensedDate(it.date))}</span>`;
+        <span class="year">${escapeHTML(condensedDate(it.date))}</span>
+        </span>
+        <div class="r-title lr-fromto">${fromTo}</div>
+        ${sub ? `<div class="r-note">${sub}</div>` : ""}`;
       frag.appendChild(row);
     });
     container.appendChild(frag);

@@ -124,6 +124,13 @@ CSS_LAB_B = """\
   #lf-show{display:none;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.12em;
     text-transform:uppercase;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;margin-left:auto}
   #lf-show:hover{color:var(--copper-deep)}
+  /* v84: letters entry in the list foot's right corner */
+  #lf-letters{margin-left:auto;background:none;border:0;padding:0;cursor:pointer;
+    color:var(--muted);display:inline-flex;align-items:center}
+  #lf-letters:hover{color:var(--ink)}
+  #lf-letters svg{display:block;pointer-events:none}
+  body.letters-view #lf-letters{color:var(--red-deep)}
+  .panel-left:has(#filter-panel:not([hidden])) #lf-letters{margin-left:14px}   /* Show → owns the auto slot while the tray is open */
   .panel-left:has(#filter-panel:not([hidden])) #lf-count{display:none}
   .panel-left:has(#filter-panel:not([hidden])) #lf-show{display:inline-flex}
   /* applied tags — the browse chips' bracket convention, category colour */
@@ -604,6 +611,62 @@ def main():
          '        if (e.currentTarget.classList.contains("out") && !e.target.closest(".panel-handle")) { togglePanel("left"); syncFsBtn(); }\n'
          '      });',
          "sliver-opens-record"),
+        # v84: LETTERS port — the letters list speaks the bin grammar: a
+        # collection-style header (FRH identity, authored 12-word gloss),
+        # rows restacked to kicker / From→To title / place-form note, all
+        # carrying the FRH plum spine + row tint (in-bin + data-bin).
+        ('    const frag = document.createDocumentFragment();\n'
+         '    const noted = rnNotedIds();\n'
+         '    const flags = canMark();\n'
+         '    if (state.filterCorrespondent.size || state.filterSubject.size || state.filterPerson.size) {',
+         '    const frag = document.createDocumentFragment();\n'
+         '    const noted = rnNotedIds();\n'
+         '    const flags = canMark();\n'
+         '    {   // LAB B v84: the letters list opens with a collection-grammar header\n'
+         '      const hd = document.createElement("div");\n'
+         '      hd.className = "phase-divider ph-head";\n'
+         '      hd.dataset.phase = "FRH";\n'
+         '      hd.style.cursor = "default";\n'
+         '      hd.innerHTML =\n'
+         '        `<span class="ph-line1"><span class="ph-name">FRH \u2014 Correspondence</span><span class="ph-count">Items <b>${String(state.filtered.length).padStart(2,"0")}</b></span></span>` +\n'
+         '        `<span class="ph-line2"><span class="ph-gloss">The letters of Richard Hunter, 1953\u20131980, mostly to Luise Mendelsohn. Transcripts; scans.</span></span>`;\n'
+         '      frag.appendChild(hd);\n'
+         '    }\n'
+         '    if (state.filterCorrespondent.size || state.filterSubject.size || state.filterPerson.size) {',
+         "letters-header"),
+        ('      row.className = "row letter-row" + (it.id === state.selectedId ? " sel" : "")',
+         '      row.dataset.bin = "FRH";   // LAB B v84: FRH identity (plum spine)\n'
+         '      row.className = "row letter-row in-bin" + (it.id === state.selectedId ? " sel" : "")',
+         "letter-row-bin"),
+        ('      row.innerHTML = `\n'
+         '        <span class="col-id">\n'
+         '          <span class="archid"><span class="tmark pc-stone" data-type="L" title="Letter">L</span></span>\n'
+         '          ${flags ? `<span class="row-flags" aria-hidden="true">\n'
+         '            <span class="rf-slot rf-slot-mark"><span class="rf-ico"><span class="rf-mark" title="Click to unmark [M]"></span></span></span>\n'
+         '            <span class="rf-slot rf-slot-seen"><span class="rf-ico"><span class="rf-seen" title="Reviewed \u2014 click to clear [R]"><svg viewBox="0 0 14 10" width="10" height="7" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5s2.2-4 6-4 6 4 6 4-2.2 4-6 4-6-4-6-4z"/><circle cx="7" cy="5" r="1.7"/></svg></span></span></span>\n'
+         '            <span class="rf-slot rf-slot-note"><span class="rf-ico"><span class="rf-note" title="Has a researcher note"><svg viewBox="0 0 10 12" width="8" height="10" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 1h4l3 3v7H2z"/><path d="M6 1v3h3"/><path d="M3.7 6.6h3M3.7 8.6h3"/></svg></span></span></span>\n'
+         '          </span>` : ""}\n'
+         '        </span>\n'
+         '        <div class="title-wrap">\n'
+         '          <div class="title lr-fromto">${fromTo}</div>\n'
+         '          <div class="ph">${sub}</div>\n'
+         '        </div>\n'
+         '        <span class="year">${escapeHTML(condensedDate(it.date))}</span>`;',
+         '      row.innerHTML = `\n'
+         '        <span class="r-kick">\n'
+         '        <span class="col-id">\n'
+         '          <span class="archid"><span class="tmark pc-stone" data-type="L" title="Letter">L</span></span>\n'
+         '          ${flags ? `<span class="row-flags" aria-hidden="true">\n'
+         '            <span class="rf-slot rf-slot-mark"><span class="rf-ico"><span class="rf-mark" title="Click to unmark [M]"></span></span></span>\n'
+         '            <span class="rf-slot rf-slot-seen"><span class="rf-ico"><span class="rf-seen" title="Reviewed \u2014 click to clear [R]"><svg viewBox="0 0 14 10" width="10" height="7" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5s2.2-4 6-4 6 4 6 4-2.2 4-6 4-6-4-6-4z"/><circle cx="7" cy="5" r="1.7"/></svg></span></span></span>\n'
+         '            <span class="rf-slot rf-slot-note"><span class="rf-ico"><span class="rf-note" title="Has a researcher note"><svg viewBox="0 0 10 12" width="8" height="10" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 1h4l3 3v7H2z"/><path d="M6 1v3h3"/><path d="M3.7 6.6h3M3.7 8.6h3"/></svg></span></span></span>\n'
+         '          </span>` : ""}\n'
+         '        </span>\n'
+         '        <span class="year">${escapeHTML(condensedDate(it.date))}</span>\n'
+         '        </span>\n'
+         '        <div class="r-title lr-fromto">${fromTo}</div>\n'
+         '        ${sub ? `<div class="r-note">${sub}</div>` : ""}`;',
+         "letter-row-restack"),
         # v40b: the row restacks — kicker (ID + type mark left, year right),
         # title, note. Researcher furniture (flags, drag, curation seq) is
         # re-housed untouched; styling it is deferred (Brandon).
@@ -625,7 +688,7 @@ def main():
          '      <div class="rows" id="rows"></div>\n'
          '      <div class="scroll-pip" id="filter-pip" aria-hidden="true"></div>\n'
          '      <div id="bin-rail-top" aria-hidden="true"></div>\n'
-         '      <div id="list-foot"><span id="lf-count"></span><button id="lf-show" type="button" title="Apply and close the filter">Show \u2192</button></div>',
+         '      <div id="list-foot"><span id="lf-count"></span><button id="lf-show" type="button" title="Apply and close the filter">Show \u2192</button><button id="lf-letters" type="button" title="Researcher letters" aria-label="Researcher letters" onclick="window.hhLetters && window.hhLetters()"><svg width="15" height="12" viewBox="0 0 16 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="2" width="14" height="9.5" rx="1"/><path d="M1.5 3l6.5 4.5L14.5 3"/></svg></button></div>',
          "bin-rail-markup"),
         # v31: splash bottom strip — fixed, so DOM placement is free.
         ('</body>',
@@ -844,7 +907,7 @@ def main():
          '    document.addEventListener("click", () => requestAnimationFrame(() => updatePip("filter-panel", "filter-pip")));\n'
          '    document.getElementById("lf-show")?.addEventListener("click", () => document.getElementById("fp-show-btn")?.click());',
          "filter-pip-wiring"),
-    ], version="83", tray=False)
+    ], version="84", tray=False)
 
     # LAB D v02 — record pops up, never pulls out: public gets NO right pane;
     # caption under the image opens the full record as a card overlay.
