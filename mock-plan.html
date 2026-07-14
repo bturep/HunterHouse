@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hunter House Foundation — plan MOCK</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<!-- ════════════════════════════════════════════════════════════════════════
+     MOCK — landing concept 2, 2026-07-14 (Brandon): the site plan IS the
+     site. The 1969 full-site survey (HH-HHC-0001) fills the whole viewport,
+     always overfilled so its edges are never seen — contour lines everywhere.
+     A slow cursor drift makes the sheet feel continuous. Nothing else but
+     the wordmark, one line, and the citation. DISPOSABLE — delete with the
+     other mocks when the site design resolves.
+     ═══════════════════════════════════════════════════════════════════════ -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{ --paper:#f2efe8; --ink:#26221c; --muted:#7c7568; --copper:#9a6b4f; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden;background:var(--paper)}
+  body{font-family:"Inter Tight",Arial,sans-serif;color:var(--ink)}
+
+  /* ── the plan: overfilled, edges never visible ── */
+  #plan{
+    position:fixed;top:50%;left:50%;
+    min-width:150vw;min-height:150vh;
+    transform:translate(-50%,-50%);
+    object-fit:cover;
+    filter:sepia(.14) contrast(1.03);
+    will-change:transform;
+    user-select:none;-webkit-user-drag:none;
+  }
+
+  /* ── the only chrome ── */
+  .wordmark{
+    position:fixed;top:26px;left:30px;z-index:2;
+    font-weight:800;text-transform:uppercase;letter-spacing:.24em;
+    font-size:13px;line-height:1.7;color:var(--ink);
+    text-shadow:0 0 14px var(--paper),0 0 4px var(--paper);
+  }
+  .wordmark span{color:var(--copper)}
+
+  .enter{
+    position:fixed;bottom:26px;left:30px;z-index:2;
+    display:inline-block;background:var(--ink);color:var(--paper);
+    text-decoration:none;font-weight:800;text-transform:uppercase;
+    letter-spacing:.1em;font-size:13px;padding:14px 18px 12px;
+    transition:background .15s;
+  }
+  .enter:hover{background:var(--copper)}
+
+  .lede{
+    position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:2;
+    font-size:12.5px;color:var(--ink);letter-spacing:.01em;
+    text-shadow:0 0 12px var(--paper),0 0 4px var(--paper);
+    max-width:44ch;text-align:center;line-height:1.6;
+  }
+
+  .cite{
+    position:fixed;bottom:28px;right:30px;z-index:2;
+    font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:9.5px;letter-spacing:.07em;color:var(--muted);
+    text-shadow:0 0 10px var(--paper),0 0 4px var(--paper);
+    text-align:right;line-height:1.7;
+  }
+  .cite a{color:var(--copper);text-decoration:none;border-bottom:1px solid rgba(154,107,79,.35)}
+  .cite a:hover{border-bottom-color:var(--copper)}
+
+  .mock-tag{
+    position:fixed;top:28px;right:30px;z-index:2;
+    font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:8.5px;letter-spacing:.16em;color:var(--muted);
+    text-shadow:0 0 10px var(--paper);
+  }
+
+  @media (max-width:760px){
+    .lede{display:none}
+    #plan{min-width:220vw;min-height:220vh}
+  }
+</style>
+</head>
+<body>
+
+<img id="plan" alt="Full site survey for the original subdivision, 1969 — the land at 203 Goward Road drawn in contours"
+     src="https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0001_Land_Survey_Full_Site_Survey_for_Original_Subdivision_of_Bar_1969-02-12_prev.jpg">
+
+<div class="wordmark">Hunter House<br><span>Foundation</span></div>
+<span class="mock-tag">MOCK · 2 OF 2</span>
+
+<a class="enter" href="browse.html">Enter the archive →</a>
+
+<p class="lede">The residence and archive of architect Richard Morrow Hunter
+(1930–2023), built by his own hand at 203 Goward Road, Saanich.</p>
+
+<div class="cite">Full site survey, February 1969<br>
+<a href="browse.html">HH-HHC-0001 · Hunter House Archive</a></div>
+
+<script>
+  // Slow cursor drift — the sheet feels continuous past every edge.
+  // Lerped so it glides rather than tracks; ±2vw of travel keeps the
+  // 150% overfill safely edgeless.
+  const plan = document.getElementById("plan");
+  let tx = 0, ty = 0, cx = 0, cy = 0;
+  document.addEventListener("mousemove", e => {
+    tx = (e.clientX / innerWidth  - 0.5) * -4;   // vw
+    ty = (e.clientY / innerHeight - 0.5) * -4;   // vh
+  });
+  (function drift(){
+    cx += (tx - cx) * 0.03;
+    cy += (ty - cy) * 0.03;
+    plan.style.transform =
+      `translate(calc(-50% + ${cx}vw), calc(-50% + ${cy}vh))`;
+    requestAnimationFrame(drift);
+  })();
+</script>
+</body>
+</html>
