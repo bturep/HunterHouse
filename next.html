@@ -107,7 +107,7 @@
      paint instead of flashing visible-then-fading-out as the main JS init
      catches up. Mobile skips splash-mode (and thus this pre-init). -->
 <script>if(!matchMedia('(max-width:767px)').matches)document.documentElement.dataset.splashInit='1';</script>
-<script>try{var _ts=localStorage.getItem('hhf_text_size')||(localStorage.getItem('hhf_text_lg')==='1'?'lg':'');if(_ts==='lg')document.documentElement.classList.add('text-lg');else if(_ts==='xl')document.documentElement.classList.add('text-xl');}catch(e){}</script>
+<script>/* test.94: one type size — the Aa cycle is retired; stored sizes are ignored */</script>
 <!-- SPARQL warm-up. Wakes the Wikibase Cloud endpoint pool during HTML parse
      so the full CATALOGUE_QUERY fired by main() doesn't pay the ~30-60 s
      cold-start in series. Tiny LIMIT 1 query; fire-and-forget; we never
@@ -1177,6 +1177,13 @@
   .panel-handle:hover::before{background:var(--ink)}
   .panel-handle .handle-chevron{display:none}
   .panel-left.pane-list,.panel-right.pane-meta{overflow:visible}
+  /* test.94: Aa retired (one size); fullscreen takes the top-right CORNER
+     SQUARE — the top twin of the ? in the bottom-right foot, sitting in
+     the right sliver's own column. */
+  #text-toggle{display:none!important}
+  .site-top #fs-toggle{position:absolute;top:0;right:0;width:28px;height:100%;
+    border-left:1px solid var(--rule);margin:0;padding:0;
+    display:flex;align-items:center;justify-content:center}
   /* test.83: Aa reaches the WHOLE type system — the lg/xl overrides were
      written for the pre-lab classes, so only the legacy record-title rule
      still connected. One step per size, whole reading surface. */
@@ -4143,7 +4150,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.93";
+  const VERSION      = "v1.09-test.94";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
