@@ -1048,6 +1048,10 @@
   /* — tonal tiers (v21) + depth ladder (v25-v29): chrome > collections >
      rows > stage, warm near-black family (wider v28 steps reverted). — */
   .phase-divider.ph-head{background:var(--soft)}
+  /* test.89: an OPEN header tints faintly toward its collection colour —
+     the block itself confirms whose room you just opened. */
+  .phase-divider.ph-head:not(.closed){background:color-mix(in srgb, var(--soft) 88%, var(--bin, var(--copper)))}
+  html.dark body .phase-divider.ph-head:not(.closed){background:color-mix(in srgb, #252220 88%, var(--bin, var(--copper)))}
   .row.in-bin{background:color-mix(in srgb, var(--bg) 96.5%, var(--ink))}
   html.dark body .pane-image,html.dark body .image-stage{background:#191614}   /* v55: stage lifted a touch; the chosen item matches it */
   html.dark body .row.in-bin{background:#1e1b19}
@@ -4128,7 +4132,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.88";
+  const VERSION      = "v1.09-test.89";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
