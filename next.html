@@ -953,8 +953,8 @@
      hangs in the gutter so name/gloss/ID/title share one left edge;
      count reads label-first; Year sort lives on the gloss line. — */
   .phase-divider.ph-head{display:block;position:relative;cursor:pointer;
-    padding:13px 20px 13px;letter-spacing:normal;text-transform:none}   /* v58: same breathing as rows (14/20) */
-  .ph-chev{position:absolute;left:6px;top:15px;font-size:11px;color:var(--muted)}
+    padding:20px 20px 20px;letter-spacing:normal;text-transform:none}   /* test.88: the parent carries MORE weight than its rows */
+  .ph-chev{position:absolute;left:6px;top:22px;font-size:11px;color:var(--muted)}
   .ph-head:hover .ph-chev{color:var(--ink)}
   .ph-head.closed{border-bottom-style:dashed}
   .ph-line1,.ph-line2{display:flex;justify-content:space-between;align-items:baseline;gap:14px}
@@ -1032,7 +1032,7 @@
   /* — row (v40a/b/f): stacked block, all-mono, no separators — rhythm
      from padding; kicker holds ID (with the type mark) left, year right;
      subtitles wrap, never truncate. — */
-  .pane-list .row{display:flex;flex-direction:column;align-items:stretch;gap:5px;padding:14px 20px;
+  .pane-list .row{display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:12px 20px;   /* test.88: rows tightened under the headers */
     border-bottom:1px dashed color-mix(in srgb, var(--rule) 45%, transparent)}   /* v41: very light dashed dividers back between items */
   .pane-list .row:last-child,.pane-list .row.sel,.pane-list .row:has(+ .ph-head){border-bottom-color:transparent}
   .r-kick{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em}
@@ -4128,7 +4128,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.87";
+  const VERSION      = "v1.09-test.88";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
