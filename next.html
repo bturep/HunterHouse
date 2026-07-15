@@ -1057,10 +1057,12 @@
      copper and the header stays on plain soft. */
   body.letters-view .phase-divider.ph-head:not(.closed){background:var(--soft)}
   html.dark body.letters-view .phase-divider.ph-head:not(.closed){background:#252220}
-  body.letters-view .ph-head:not(.closed),body.letters-view .row.in-bin{border-left-color:color-mix(in srgb, var(--copper) 55%, transparent)}
-  body.letters-view .br-row.open{border-left-color:color-mix(in srgb, var(--copper) 55%, transparent)}
-  body.letters-view .pane-list .row.sel{box-shadow:inset 0 1px 0 color-mix(in srgb, var(--copper) 55%, transparent),
-    inset 0 -1px 0 color-mix(in srgb, var(--copper) 55%, transparent)}
+  /* test.91: copper is HHC's identity — the letters carry NO colour at
+     all: rule-grey structure, ink selection. */
+  body.letters-view .ph-head:not(.closed),body.letters-view .row.in-bin{border-left-color:var(--rule)}
+  body.letters-view .br-row.open{border-left-color:var(--rule)}
+  body.letters-view .pane-list .row.sel{box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 35%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--ink) 35%, transparent)}
   .row.in-bin{background:color-mix(in srgb, var(--bg) 96.5%, var(--ink))}
   html.dark body .pane-image,html.dark body .image-stage{background:#191614}   /* v55: stage lifted a touch; the chosen item matches it */
   html.dark body .row.in-bin{background:#1e1b19}
@@ -4141,7 +4143,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.90";
+  const VERSION      = "v1.09-test.91";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
