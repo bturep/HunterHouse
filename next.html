@@ -1036,7 +1036,7 @@
     border-bottom:1px dashed color-mix(in srgb, var(--rule) 45%, transparent)}   /* v41: very light dashed dividers back between items */
   .pane-list .row:last-child,.pane-list .row.sel,.pane-list .row:has(+ .ph-head){border-bottom-color:transparent}
   .r-kick{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em}
-  .r-kick .archid{font-size:10.5px;color:color-mix(in srgb, var(--ink) 72%, transparent)}
+  .r-kick .archid{font-size:10.5px;color:color-mix(in srgb, var(--ink) 52%, transparent)}   /* test.92: quieter item numbers */
   .pane-list .row .year{font-family:var(--mono);font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
   .r-title{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:0.01em;color:var(--ink);line-height:1.45}   /* v59: below the 12.5px collection name */
   .r-note{font-family:var(--mono);font-size:10.5px;color:var(--hint);line-height:1.5;white-space:normal}
@@ -4143,7 +4143,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09-test.91";
+  const VERSION      = "v1.09-test.92";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
