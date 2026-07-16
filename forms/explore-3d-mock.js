@@ -50,6 +50,7 @@
   // the real ground; everything drapes on it. Vertical exaggeration is ×VE.
   const SC=window.SITE_CONTOURS, DEM=SC.dem;
   const HOUSE=[701.56,434.57];
+  const TOWER=[695.3,410.2];   // the round room (drop point for the ripple), fitted from its arc walls
   const gdx=(DEM.x1-DEM.x0)/(DEM.nx-1), gdy=(DEM.y1-DEM.y0)/(DEM.ny-1);
   function elevAt(x,y){ const fi=(x-DEM.x0)/gdx, fj=(y-DEM.y0)/gdy;
     const i=Math.max(0,Math.min(DEM.nx-2,Math.floor(fi))), j=Math.max(0,Math.min(DEM.ny-2,Math.floor(fj)));
@@ -149,7 +150,7 @@
   // the fig and dies off outward (smoothstep inner→outer), gated by figAmt so it
   // only wakes when the fig is the focus. Driven per-frame from the render loop.
   const lakeUni={ uTime:{value:0}, uAmp:{value:0} };   // lake motion OFF (set figFx.lake>0 to enable)
-  const figUni={ uTime:{value:0}, uSwell:{value:0}, uMode:{value:0}, uCursor:{value:0},
+  const figUni={ uTime:{value:0}, uSwell:{value:0}, uMode:{value:0}, uCursor:{value:0}, uRAmp:{value:0}, uRT:{value:0},
     uFig:{value:new THREE.Vector2(G.points.fig.x-750, G.points.fig.y-525)},
     uInner:{value:6}, uOuter:{value:980},
     uBreeze:{value:1}, uWind:{value:new THREE.Vector2(1,0.42).normalize()} };
@@ -159,7 +160,8 @@
     sh.uniforms.uTime=figUni.uTime; sh.uniforms.uSwell=figUni.uSwell; sh.uniforms.uMode=figUni.uMode;
     sh.uniforms.uFig=figUni.uFig; sh.uniforms.uInner=figUni.uInner; sh.uniforms.uOuter=figUni.uOuter;
     sh.uniforms.uBreeze=figUni.uBreeze; sh.uniforms.uWind=figUni.uWind; sh.uniforms.uCursor=figUni.uCursor;
-    sh.vertexShader='uniform float uTime;uniform float uSwell;uniform float uMode;uniform vec2 uFig;uniform float uInner;uniform float uOuter;uniform float uBreeze;uniform vec2 uWind;uniform float uCursor;varying vec2 vWorldXZ;\n'+sh.vertexShader;
+    sh.uniforms.uRAmp=figUni.uRAmp; sh.uniforms.uRT=figUni.uRT;
+    sh.vertexShader='uniform float uTime;uniform float uSwell;uniform float uMode;uniform vec2 uFig;uniform float uInner;uniform float uOuter;uniform float uBreeze;uniform vec2 uWind;uniform float uCursor;uniform float uRAmp;uniform float uRT;varying vec2 vWorldXZ;\n'+sh.vertexShader;
     sh.vertexShader=sh.vertexShader.replace('#include <begin_vertex>',
       '#include <begin_vertex>\n'+
       // ambient breeze across the whole drawing — a gentle directional drift with
@@ -185,6 +187,15 @@
       // terrain in y. Detaches from fixed geometry, but kept for recall.
       '  float _w=sin(_d*0.042 - uTime*1.5)*11.0 + sin(_d*0.017 + uTime*0.8)*6.0;\n'+
       '  transformed.y += _w*_amp;\n'+
+      '}\n'+
+      // RIPPLE — a ball dropped on the tower (uFig): a single ring of radial
+      // displacement expanding outward at a fixed speed, a gaussian-windowed
+      // sinusoid so it reads as concentric waves. IN-PLANE (xz), not vertical,
+      // so it's visible looking straight down. uRAmp carries the settle (→0).
+      'if(uRAmp>0.0001){\n'+
+      '  float _rrel = _d - 200.0*uRT;\n'+                              // distance behind(-)/ahead(+) the wavefront (200 u/s)
+      '  float _rpk = exp(-_rrel*_rrel/(2.0*60.0*60.0));\n'+           // gaussian ring at the front (~120 wide)
+      '  transformed.xz += _dir * (sin(_rrel*0.085) * _rpk * uRAmp);\n'+ // a few longer waves within the ring
       '}\n'+
       // pass world xz to the fragment stage for the cursor GLOW (no displacement).
       'vWorldXZ = position.xz;');
@@ -931,7 +942,8 @@
   const houseFx={ t0:0, dur:0, active:false };
   function kickHouseFx(dur){ houseFx.t0=performance.now(); houseFx.dur=dur; houseFx.active=true; }
   function updFx(){
-    figUni.uSwell.value=0;       // contours held still (tremor disabled)
+    figUni.uSwell.value=0;       // contours held still (electric tremor retired)
+    figUni.uRAmp.value=0;        // ripple off unless a drop is running (below)
     figUni.uBreeze.value=0;
     figUni.uTime.value=performance.now()/1000;
     lakeUni.uTime.value=figUni.uTime.value;   // tiny lapping on Prospect Lake
@@ -944,14 +956,14 @@
     // house click → the whole contour field goes bonkers, then eases to calm as
     // the camera arrives above the roof (p:0→1 over the same dur as the fly-to).
     // env holds near-peak briefly (haywire) then smooth-decays to 0 (settle).
-    if(houseFx.active){ const p=Math.min(1,(performance.now()-houseFx.t0)/houseFx.dur);
-      const env=1.0-THREE.MathUtils.smoothstep(p,0.14,1.0);
-      figUni.uMode.value=0;                                        // electric radial tremor
-      figUni.uFig.value.set(HOUSE[0]-750, HOUSE[1]-525);           // centred on the house
-      figUni.uInner.value=0; figUni.uOuter.value=1600;             // wide — reaches the far contours
-      figUni.uSwell.value=2.6*env;                                 // haywire amplitude → 0
-      figUni.uCursor.value=Math.max(figUni.uCursor.value, 0.9*env);// glow pool pulses with it
-      if(p>=1) houseFx.active=false; }
+    // RIPPLE — a ball dropped on the tower: a ring expands from the round room
+    // and the water (the contour field) settles behind it. uRT drives the front
+    // outward; uRAmp fades over the life so it dies to flat.
+    if(houseFx.active){ const t=(performance.now()-houseFx.t0)/1000, LIFE=houseFx.dur/1000;
+      figUni.uFig.value.set(TOWER[0]-750, TOWER[1]-525);           // drop centred on the round room
+      figUni.uRT.value=t;                                          // seconds since the drop → wavefront radius
+      figUni.uRAmp.value=11.0*Math.max(0,1-t/LIFE);                // radial amplitude, easing to 0 (settle)
+      if(t>=LIFE){ houseFx.active=false; figUni.uRAmp.value=0; } }
 
     // fig sways in the breeze — slow lean with layered gusts, pivoting at its
     // planted base (tips travel, roots stay). Always on; a touch stronger when focused.
