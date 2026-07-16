@@ -331,38 +331,53 @@
   // contours (renderOrder above them) so the ground reads clean inside the
   // footprint. Host hover fades it to the slightest yellow + brightens the line.
   let houseFillMat=null, HOUSE_POLY=null, HOUSE_N=0, HOUSE_ERR='', houseMeshRef=null;
+  // mask-based inHouse() — filled by the fill builder below (grid + bbox in drawing coords)
+  let HMASK=null, HM_x0=0, HM_y0=0, HM_cell=1, HM_gw=0, HM_gh=0;
   (function(){ try{
-    // Use the EXACT floorplan outline: chain the wall segments end-to-end into
-    // connected rings (like the property line) and take the largest ring by area
-    // as the footprint. Fall back to that ring's convex hull only if it won't
-    // triangulate (self-intersecting / open).
-    const segs=G.house.map(d=>sample(d,6)).filter(s=>s.length>1);
-    const used=new Array(segs.length).fill(false), near=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]), TOL=8, rings=[];
-    for(let start=0;start<segs.length;start++){ if(used[start])continue; used[start]=true; const ring=segs[start].slice(); let grew=true;
-      while(grew){ grew=false; const tail=ring[ring.length-1], head=ring[0];
-        for(let i=0;i<segs.length;i++){ if(used[i])continue; const s=segs[i],a=s[0],b=s[s.length-1];
-          if(near(tail,a)<TOL){ ring.push(...s.slice(1)); used[i]=true; grew=true; break; }
-          else if(near(tail,b)<TOL){ ring.push(...s.slice(0,-1).reverse()); used[i]=true; grew=true; break; }
-          else if(near(head,b)<TOL){ ring.unshift(...s.slice(0,-1)); used[i]=true; grew=true; break; }
-          else if(near(head,a)<TOL){ ring.unshift(...s.slice(1).reverse()); used[i]=true; grew=true; break; } } }
-      rings.push(ring); }
-    const area=r=>{ let a=0; for(let i=0,j=r.length-1;i<r.length;j=i++)a+=(r[j][0]*r[i][1]-r[i][0]*r[j][1]); return Math.abs(a)/2; };
-    // fill EVERY enclosed shape (all the yellow rooms/wings), not just the biggest,
-    // combining them into one fill mesh. Tiny slivers (open wall chains) filtered by area.
-    const good=rings.filter(r=>r.length>=3 && area(r)>20).sort((A,B)=>area(B)-area(A));
-    HOUSE_N=good.length; if(!good.length){ HOUSE_ERR='no-rings'; return; } HOUSE_POLY=good[0];
-    const a=[]; let filled=0;
-    good.forEach(r=>{ const C=r.map(p=>new THREE.Vector2(p[0],p[1])); let tris=[];
-      try{ tris=THREE.ShapeUtils.triangulateShape(C,[]); }catch(e){ tris=[]; }
-      if(tris.length){ filled++; tris.forEach(t=>t.forEach(idx=>{ const p=C[idx]; a.push(p.x-750, ground(p.x,p.y)+1.0, p.y-525); })); } });
-    if(!a.length){ HOUSE_ERR='0tris'; return; }
+    // EXACT footprint by RASTER FLOOD-FILL, not ring-chaining. The old chain-and-
+    // triangulate method sampled walls at 6u and dropped every wall shorter than
+    // that (31 of 59) — so rings couldn't close at corners and closed with long
+    // chords (spikes + a triangular notch), and the round room filled as its own
+    // stray disc. Instead: sample ALL walls finely, paint them into a mask, flood
+    // the OUTSIDE from the border, and take the enclosed region as the footprint.
+    // Robust to open linework, interior partitions and the round room.
+    const segs=[]; G.house.forEach(d=>{ const s=sample(d,1.2); if(s.length)segs.push(s); });
+    if(!segs.length){ HOUSE_ERR='no-segs'; return; }
+    let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
+    segs.forEach(s=>s.forEach(p=>{ if(p[0]<minx)minx=p[0]; if(p[0]>maxx)maxx=p[0]; if(p[1]<miny)miny=p[1]; if(p[1]>maxy)maxy=p[1]; }));
+    const PAD=6, CELL=0.6, BRUSH=2.2, x0=minx-PAD, y0=miny-PAD;   // BRUSH bridges sampling gaps at wall joints
+    const gw=Math.ceil((maxx-minx+2*PAD)/CELL), gh=Math.ceil((maxy-miny+2*PAD)/CELL);
+    const cv=document.createElement('canvas'); cv.width=gw; cv.height=gh; const g2=cv.getContext('2d');
+    g2.fillStyle='#000'; g2.fillRect(0,0,gw,gh);
+    g2.strokeStyle='#fff'; g2.lineCap='round'; g2.lineJoin='round'; g2.lineWidth=Math.max(1,BRUSH/CELL);
+    const GX=x=>(x-x0)/CELL, GY=y=>(y-y0)/CELL;
+    segs.forEach(s=>{ g2.beginPath(); s.forEach((p,i)=>i?g2.lineTo(GX(p[0]),GY(p[1])):g2.moveTo(GX(p[0]),GY(p[1]))); g2.stroke(); });
+    const px=g2.getImageData(0,0,gw,gh).data, wall=new Uint8Array(gw*gh);
+    for(let i=0;i<gw*gh;i++) wall[i]=px[i*4]>80?1:0;
+    // flood the outside from every border cell
+    const out=new Uint8Array(gw*gh), st=[];
+    for(let x=0;x<gw;x++){ st.push(x,0,x,gh-1); } for(let y=0;y<gh;y++){ st.push(0,y,gw-1,y); }
+    while(st.length){ const y=st.pop(), x=st.pop(); if(x<0||y<0||x>=gw||y>=gh)continue; const i=y*gw+x; if(out[i]||wall[i])continue; out[i]=1; st.push(x+1,y,x-1,y,x,y+1,x,y-1); }
+    let inside=new Uint8Array(gw*gh); for(let i=0;i<gw*gh;i++) inside[i]=out[i]?0:1;   // wall + enclosed = inside (fills to outer wall edge)
+    // erode ~half the brush so the tint edge lands on the wall centre-line, not proud of it
+    const ER=Math.max(0,Math.round((BRUSH*0.5)/CELL));
+    for(let it=0;it<ER;it++){ const nx=new Uint8Array(gw*gh);
+      for(let y=1;y<gh-1;y++)for(let x=1;x<gw-1;x++){ const i=y*gw+x; if(inside[i]&&inside[i-1]&&inside[i+1]&&inside[i-gw]&&inside[i+gw]) nx[i]=1; } inside=nx; }
+    let icnt=0; for(let i=0;i<gw*gh;i++) if(inside[i])icnt++;
+    if(!icnt){ HOUSE_ERR='empty'; return; }
+    // fill mesh from horizontal runs of inside cells (one quad per run), draped on terrain
+    const a=[], WX=gx=>x0+gx*CELL, WY=gy=>y0+gy*CELL, V=(X,Y)=>[X-750, ground(X,Y)+1.0, Y-525];
+    for(let y=0;y<gh;y++){ let x=0; while(x<gw){ if(!inside[y*gw+x]){x++;continue;} let x2=x; while(x2<gw&&inside[y*gw+x2])x2++;
+      const X0=WX(x),X1=WX(x2),Y0=WY(y),Y1=WY(y+1), p00=V(X0,Y0),p10=V(X1,Y0),p11=V(X1,Y1),p01=V(X0,Y1);
+      a.push(...p00,...p10,...p11, ...p00,...p11,...p01); x=x2; } }
     const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(a,3));
     houseFillMat=new THREE.MeshBasicMaterial({color:0x242220,transparent:true,opacity:1,side:THREE.DoubleSide,depthWrite:false,depthTest:false});
-    const mesh=new THREE.Mesh(g,houseFillMat); mesh.renderOrder=-5; houseMeshRef=mesh; LAYERS.house.add(mesh); HOUSE_ERR='ok '+filled+'/'+good.length; }
+    const mesh=new THREE.Mesh(g,houseFillMat); mesh.renderOrder=-5; houseMeshRef=mesh; LAYERS.house.add(mesh);
+    HMASK=inside; HM_x0=x0; HM_y0=y0; HM_cell=CELL; HM_gw=gw; HM_gh=gh;
+    HOUSE_N=icnt; HOUSE_ERR='ok mask '+gw+'x'+gh+' in='+icnt; }
     catch(e){ HOUSE_ERR=(e&&e.message)||'throw'; console.warn('house fill failed',e); } })();
-  function inHouse(wx,wz){ if(!HOUSE_POLY)return false; const x=wx+750,y=wz+525; let c=false;
-    for(let i=0,j=HOUSE_POLY.length-1;i<HOUSE_POLY.length;j=i++){ const xi=HOUSE_POLY[i][0],yi=HOUSE_POLY[i][1],xj=HOUSE_POLY[j][0],yj=HOUSE_POLY[j][1];
-      if(((yi>y)!=(yj>y)) && (x<(xj-xi)*(y-yi)/(yj-yi)+xi)) c=!c; } return c; }
+  function inHouse(wx,wz){ if(!HMASK)return false; const gx=Math.floor((wx+750-HM_x0)/HM_cell), gy=Math.floor((wz+525-HM_y0)/HM_cell);
+    if(gx<0||gy<0||gx>=HM_gw||gy>=HM_gh)return false; return HMASK[gy*HM_gw+gx]===1; }
   // restored DWG layers (parsed but previously undrawn)
   if(G.covenant) G.covenant.forEach(d=>drape(d,mat.cov,7,0,false,LAYERS.covenant));   // covenant area
   // garden path near house — clamp inside the property line; its tail wandered SW
