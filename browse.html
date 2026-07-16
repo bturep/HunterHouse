@@ -27,7 +27,12 @@
      body so the header .markid renders at opacity:0 from the very first
      paint instead of flashing visible-then-fading-out as the main JS init
      catches up. Mobile skips splash-mode (and thus this pre-init). -->
-<script>if(!matchMedia('(max-width:767px)').matches)document.documentElement.dataset.splashInit='1';</script>
+<!-- Splash bypass: if the visitor arrived from elsewhere on this same site
+     (the home page / any internal link), skip the "Continue to archive"
+     title-wall and land straight in the archive. A direct or externally-shared
+     archive link (empty / off-site referrer) still gets the splash. Manual
+     overrides: ?enter=1 forces bypass, ?enter=0 forces the splash. -->
+<script>(function(){var q=new URLSearchParams(location.search),o=q.get('enter');var internal=false;try{internal=!!document.referrer&&new URL(document.referrer).origin===location.origin;}catch(e){}var enter=o==='1'||(internal&&o!=='0');if(enter)document.documentElement.dataset.enter='1';if(!enter&&!matchMedia('(max-width:767px)').matches)document.documentElement.dataset.splashInit='1';})();</script>
 <script>try{var _ts=localStorage.getItem('hhf_text_size')||(localStorage.getItem('hhf_text_lg')==='1'?'lg':'');if(_ts==='lg')document.documentElement.classList.add('text-lg');else if(_ts==='xl')document.documentElement.classList.add('text-xl');}catch(e){}</script>
 <!-- SPARQL warm-up. Wakes the Wikibase Cloud endpoint pool during HTML parse
      so the full CATALOGUE_QUERY fired by main() doesn't pay the ~30-60 s
@@ -3062,7 +3067,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.08.07";
+  const VERSION      = "v1.08.08";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -8622,7 +8627,14 @@ WHERE {
       // the HHFA about pane as a title-wall threshold. Desktop also collapses
       // both side panels; mobile uses its own #mob-about modal (no panels to
       // collapse — the tabs handle layout).
-      if (window.matchMedia("(max-width:767px)").matches) {
+      if (document.documentElement.dataset.enter === "1") {
+        // Arrived from within the site (same-origin referrer) or via ?enter=1 —
+        // skip the "Continue to archive" title-wall and land straight in the
+        // working configuration. The splash stays the default for direct or
+        // externally-shared archive links, so sending JUST the archive still
+        // gets its threshold. Panels default to expanded (no "out").
+        document.documentElement.removeAttribute("data-splash-init");
+      } else if (window.matchMedia("(max-width:767px)").matches) {
         document.body.classList.add("hh-splash");   // × hidden, Continue shown
         openMobAbout();
       } else {
