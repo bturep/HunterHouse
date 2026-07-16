@@ -91,18 +91,22 @@
   .knobs.collapsed .krow,.knobs.collapsed .kset{display:none}
   .knobs .kset{margin-top:12px;padding-top:9px;border-top:1px solid rgba(240,237,230,.14);
     font-size:8px;line-height:1.7;color:var(--gold);word-break:break-word;user-select:all;cursor:text}
+
+  /* hidden for now (Brandon, 2026-07-15): the tuning panel, the bottom-middle
+     lede, and the bottom-right "site contour model" line. Un-hide to bring back. */
+  #knobs, .lede, .cite{ display:none !important; }
 </style>
 </head>
 <body>
 
 <iframe id="lens" title="Hunter House site — contour model, held still"
-        src="forms/explore-3d-mock.html?intro=0&extendw=1&v=28" allow="fullscreen"></iframe>
+        src="forms/explore-3d-mock.html?intro=0&extendw=1&v=29" allow="fullscreen"></iframe>
 
 <div class="veil"></div>
 
 <div class="chrome">
   <div class="wordmark">Hunter House<br><span>Foundation</span></div>
-  <span class="mock-tag">MOCK · HOME 2 · THE TILT<br><span class="ver">v0.28</span><br><span class="ver" id="lens-status" style="opacity:.7">lens …</span></span>
+  <span class="mock-tag">MOCK · HOME 2 · THE TILT<br><span class="ver">v0.29</span><br><span class="ver" id="lens-status" style="opacity:.7">lens …</span></span>
   <div class="knobs collapsed" id="knobs"></div>
   <p class="lede">The residence and archive of architect Richard Morrow Hunter
      (1930–2023), built by his own hand at 203 Goward Road, Saanich.</p>
@@ -162,11 +166,20 @@
     if (st) { st.textContent = (hooksOK ? "lens ✓" : "lens ✗") + " · house " + hd.n + (hd.err ? " " + hd.err : "");
               st.style.color = hooksOK ? "var(--gold)" : "#d98"; }
 
-    // Swallow ALL pointer/scroll interactions so the lens can't pan, orbit, or
-    // click-to-fly — the map is a held frame, driven only by our tilt loop.
+    // Swallow pan/orbit/scroll so the lens stays a held frame — EXCEPT a click on
+    // the house footprint, which we route to the lens's cinematic zoom-in.
     // Capture phase → fires before the lens's own canvas listeners.
-    ["pointerdown","mousedown","touchstart","click","dblclick","wheel","contextmenu"]
+    ["pointerdown","mousedown","touchstart","dblclick","wheel","contextmenu"]
       .forEach(t => win.addEventListener(t, e => e.stopImmediatePropagation(), true));
+    let zoomed = false;
+    win.addEventListener("click", (e) => {
+      e.stopImmediatePropagation();                 // still don't let the lens's own handler double-fire
+      const mx = (e.clientX / win.innerWidth) * 2 - 1, my = (e.clientY / win.innerHeight) * 2 - 1;
+      rc.setFromCamera({ x: mx, y: -my }, cam);
+      const onHouse = houseMesh && rc.intersectObject(houseMesh, false).length > 0;
+      if (onHouse && !zoomed) { zoomed = true; if (V.zoomHouse) V.zoomHouse(); }   // haywire + ease in above the roof
+      else if (zoomed) { zoomed = false; if (V.backOverview) V.backOverview(); }   // click again → back out to the held frame
+    }, true);
 
     // locked faint lake (mock-only; the live archive keeps its normal lake).
     const LAKE0 = 0.01;
@@ -312,6 +325,7 @@
     // our own easing loop. explore-3d renders every frame regardless; we just
     // keep the camera pose current so it leans smoothly toward the cursor.
     (function frame(){
+      if (zoomed) { requestAnimationFrame(frame); return; }   // house zoom-in: the lens's flyTo owns the camera
       curX += (tgtX - curX) * EASE;
       curY += (tgtY - curY) * EASE;
       // house-footprint hover tint + outline glow.

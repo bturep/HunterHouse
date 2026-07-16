@@ -1005,6 +1005,7 @@
     matLake:mat.lake, matLakeFill:mat.lakeFill,
     labels:{goward:lblGoward, echo:lblEcho, lake:plLabel},
     houseFill:houseFillMat, houseLine:mat.house, houseMesh:houseMeshRef, inHouse:inHouse,
+    zoomHouse:enterHouse, backOverview:toOverview,   // host (mock-home2) triggers the cinematic zoom + burst
     houseDiag:{n:HOUSE_N, err:HOUSE_ERR}}; window.__liftoff=kinhinLiftoff;
   // ---------- the site as a sphere: a faint glass globe encloses the plan ----------
   // In plan view the globe's silhouette reads as a circle (its fresnel rim lights the
