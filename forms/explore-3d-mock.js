@@ -730,6 +730,19 @@
     panel.classList.remove('on'); bar.classList.remove('on'); walker.visible=false;
     PLACES.forEach(p=>{ p._lab.classList.remove('faded'); p._lab.classList.remove('hot'); });
   }
+  // click the house → contours go haywire, then the zoom tapers and eases into a
+  // near-top-down perch above the roof as the lines settle. Burst + fly share DUR.
+  function enterHouse(){ if(mode==='house')return; mode='house'; detail.deselect();
+    const DUR=2200;
+    kickHouseFx(DUR);
+    const dir=new THREE.Vector3(0, Math.cos(0.30), Math.sin(0.30)).normalize();   // mostly overhead, a slight south tilt
+    flyTo(P3(HOUSE[0],HOUSE[1],8), 285, DUR, dir);
+    crumbs.innerHTML=`<span class="root">Whole site</span><span class="sep">/</span><span class="here">Hunter House</span>`;
+    crumbs.classList.add('on'); backbtn.classList.add('on'); topbtn.classList.remove('on'); hint.classList.add('gone'); orbithint.classList.add('gone');
+    annos.forEach(a=>a.el.classList.add('gone'));
+    PLACES.forEach(p=>{ p._lab.classList.toggle('faded',p.id!=='house'); p._lab.classList.toggle('hot',p.id==='house'); });
+    if(window.parent!==window){ try{ parent.postMessage({type:'site-place', label:'Hunter House'},'*'); }catch(e){} }
+  }
   backbtn.addEventListener('click',toOverview);
 
   // ---- kinhin → timeline: project the trail's vertices to the exact pixels they
@@ -818,12 +831,13 @@
     if(raycaster.intersectObject(springIcon,true).length>0) return 'spring';
     if(raycaster.intersectObject(figIcon,true).length>0) return 'fig';
     if(raycaster.intersectObject(kinhinHit).length>0) return 'kinhin';
+    if(houseMeshRef && raycaster.intersectObject(houseMeshRef).length>0) return 'house';
     return null; }
   let downXY=null;
   renderer.domElement.addEventListener('pointerdown',e=>{downXY=[e.clientX,e.clientY];curDragging=true;curDragMode=(e.shiftKey||e.button===2)?'pan':'orbit';refreshCursor();});
   // hover tooltip for the point features (replaces the old focus-pull blur)
   const icontip=document.createElement('div'); icontip.className='icontip'; document.body.appendChild(icontip);
-  const ICONDESC={ fig:'Dead Fig Tree', spring:'A Spring', kinhin:'Kinhin trail' };
+  const ICONDESC={ fig:'Dead Fig Tree', spring:'A Spring', kinhin:'Kinhin trail', house:'Hunter House' };
   function descFor(id){ return ICONDESC[id] || (plMap[id]&&plMap[id].label) || ''; }
   renderer.domElement.addEventListener('pointermove',e=>{ if(introActive)return; if(curDragging)return;
     const h=hitIcon(e); curHover=!!h; refreshCursor();
@@ -833,6 +847,7 @@
     const hit=hitIcon(e); curHover=!!hit; refreshCursor();
     if(moved<5&&onCanvas){
       if(hit==='kinhin'){ if(window.parent!==window){ kinhinLiftoff(); } else if(mode!=='kinhin') enter(plMap.kinhin); return; }   // kinhin → lift-off → timeline
+      if(hit==='house'){ enterHouse(); return; }   // house → haywire contours + ease in above the roof
       if(hit&&mode!==hit){ enter(plMap[hit]); return; } if(mode!=='overview')toOverview(); else detail.deselect(); } });
 
   // ---------- layer control panel (persisted on/off state) ----------
@@ -911,6 +926,10 @@
   const cursorFx={x:0,z:0,amt:0,inner:4,outer:120};
   window.__setCursorFx=function(x,z,amt,outer){ cursorFx.x=x; cursorFx.z=z;
     cursorFx.amt=amt||0; if(outer)cursorFx.outer=outer; };
+  // house-click burst: kicked by enterHouse(), consumed each frame in updFx. One
+  // eased timeline (same dur as the fly-to) — contours go haywire, then settle.
+  const houseFx={ t0:0, dur:0, active:false };
+  function kickHouseFx(dur){ houseFx.t0=performance.now(); houseFx.dur=dur; houseFx.active=true; }
   function updFx(){
     figUni.uSwell.value=0;       // contours held still (tremor disabled)
     figUni.uBreeze.value=0;
@@ -922,6 +941,17 @@
     figUni.uCursor.value=0;
     if(cursorFx.amt>0){ figUni.uFig.value.set(cursorFx.x,cursorFx.z);
       figUni.uInner.value=cursorFx.inner; figUni.uOuter.value=cursorFx.outer; figUni.uCursor.value=cursorFx.amt; }
+    // house click → the whole contour field goes bonkers, then eases to calm as
+    // the camera arrives above the roof (p:0→1 over the same dur as the fly-to).
+    // env holds near-peak briefly (haywire) then smooth-decays to 0 (settle).
+    if(houseFx.active){ const p=Math.min(1,(performance.now()-houseFx.t0)/houseFx.dur);
+      const env=1.0-THREE.MathUtils.smoothstep(p,0.14,1.0);
+      figUni.uMode.value=0;                                        // electric radial tremor
+      figUni.uFig.value.set(HOUSE[0]-750, HOUSE[1]-525);           // centred on the house
+      figUni.uInner.value=0; figUni.uOuter.value=1600;             // wide — reaches the far contours
+      figUni.uSwell.value=2.6*env;                                 // haywire amplitude → 0
+      figUni.uCursor.value=Math.max(figUni.uCursor.value, 0.9*env);// glow pool pulses with it
+      if(p>=1) houseFx.active=false; }
 
     // fig sways in the breeze — slow lean with layered gusts, pivoting at its
     // planted base (tips travel, roots stay). Always on; a touch stronger when focused.
