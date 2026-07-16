@@ -1005,8 +1005,24 @@
     matLake:mat.lake, matLakeFill:mat.lakeFill,
     labels:{goward:lblGoward, echo:lblEcho, lake:plLabel},
     houseFill:houseFillMat, houseLine:mat.house, houseMesh:houseMeshRef, inHouse:inHouse,
-    zoomHouse:enterHouse, backOverview:toOverview,   // host (mock-home2) triggers the cinematic zoom + burst
+    zoomHouse:enterHouse, backOverview:toOverview,   // standalone lens: full cinematic (fly + burst)
+    houseBurst:kickHouseFx,                          // host-driven: contour haywire ONLY (host owns the camera)
     houseDiag:{n:HOUSE_N, err:HOUSE_ERR}}; window.__liftoff=kinhinLiftoff;
+  // host-driven context fade: on house zoom-in the host (mock-home2) calls this
+  // each frame with amt 0..1 — EVERYTHING except the contours + the house fades
+  // to 0 (property line, covenant + its label, kinhin trail, oaks, fig, Goward /
+  // covenant text, all place labels). Base opacities snapshotted on first call
+  // (after the host has set its resting dimness), then scaled by (1-amt).
+  window.__v.setHouseFocus=(function(){ let snap=null;
+    return function(amt){
+      if(!snap){ snap=[]; const keep={contours:1,house:1};
+        LK.forEach(k=>{ if(keep[k])return; const g=LAYERS[k];
+          if(g) g.traverse(o=>{ if(o.material&&o.material.opacity!==undefined) snap.push([o.material,o.material.opacity]); }); });
+        if(typeof figIcon!=='undefined'&&figIcon) figIcon.traverse(o=>{ if(o.material&&o.material.opacity!==undefined) snap.push([o.material,o.material.opacity]); });
+      }
+      const k=1-Math.max(0,Math.min(1,amt));
+      snap.forEach(e=>{ e[0].transparent=true; e[0].opacity=e[1]*k; });
+    }; })();
   // ---------- the site as a sphere: a faint glass globe encloses the plan ----------
   // In plan view the globe's silhouette reads as a circle (its fresnel rim lights the
   // edge); the framing below sizes that circle top-edge→bottom-edge. Tilt the camera
