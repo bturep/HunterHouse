@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hunter House Foundation — home MOCK 2 (tilt lens)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<!-- ════════════════════════════════════════════════════════════════════════
+     MOCK-HOME 2 — 2026-07-15. DISPOSABLE, like the other mocks.
+
+     Concept: the site-plan lens (forms/explore-3d.html — the contour model)
+     is the landing, but held STILL and zoomed all the way IN. It does not
+     orbit on drag; instead the whole map leans, ever so slightly, toward
+     wherever the mouse is. The edges of the drawing are never in frame — we
+     sit close enough that the model overfills the viewport, and the lean is
+     only a few degrees, so tilting never reveals the boundary.
+
+     How it works (no re-rendering of the mesh): explore-3d.js exposes its
+     Three.js objects as `window.__v = {camera, controls, ...}`. Same-origin,
+     so this parent page reaches into the iframe, disables OrbitControls, and
+     drives the camera itself in a small easing loop that follows the cursor.
+
+     Two tuning knobs live in the script below: DIST (zoom — smaller = closer)
+     and LEAN (max tilt in radians — larger = more lean). If edges ever peek
+     in, lower DIST and/or LEAN.
+     ═══════════════════════════════════════════════════════════════════════ -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{ --field:#242220; --paper:#f2efe8; --muted:#a49a89; --gold:#c9a44e; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden;background:var(--field)}
+  body{font-family:"Inter Tight",Arial,sans-serif;color:var(--paper)}
+
+  /* the lens, full-bleed. pointer stays default — there is nothing to drag. */
+  #lens{position:fixed;inset:0;width:100%;height:100%;border:0;display:block;
+    background:var(--field);cursor:default}
+
+  /* a whisper of vignette so the floating chrome reads over any contour density,
+     and so the (already off-frame) edges fall away into the dark even softer */
+  .veil{position:fixed;inset:0;pointer-events:none;z-index:1;
+    background:radial-gradient(120% 90% at 50% 45%,transparent 48%,rgba(18,16,14,.55) 100%)}
+
+  .chrome{position:fixed;inset:0;z-index:2;pointer-events:none}
+  .chrome a,.chrome button{pointer-events:auto}
+
+  .wordmark{position:absolute;top:26px;left:30px;
+    font-weight:800;text-transform:uppercase;letter-spacing:.24em;
+    font-size:13px;line-height:1.7;color:var(--paper);
+    text-shadow:0 2px 18px rgba(0,0,0,.6)}
+  .wordmark span{color:var(--gold)}
+
+  .enter{position:absolute;bottom:28px;left:30px;display:inline-block;
+    background:var(--paper);color:var(--field);text-decoration:none;
+    font-weight:800;text-transform:uppercase;letter-spacing:.1em;font-size:13px;
+    padding:14px 18px 12px;transition:background .15s,color .15s}
+  .enter:hover{background:var(--gold);color:#1a1712}
+
+  .lede{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
+    font-size:12.5px;color:var(--paper);opacity:.86;letter-spacing:.01em;
+    max-width:46ch;text-align:center;line-height:1.6;
+    text-shadow:0 2px 16px rgba(0,0,0,.7)}
+
+  .cite{position:absolute;bottom:30px;right:30px;text-align:right;line-height:1.7;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9.5px;
+    letter-spacing:.07em;color:var(--muted);text-shadow:0 2px 12px rgba(0,0,0,.7)}
+  .cite a{color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(201,164,78,.4)}
+  .cite a:hover{border-bottom-color:var(--gold)}
+
+  .mock-tag{position:absolute;top:28px;right:30px;text-align:right;line-height:1.7;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:8.5px;
+    letter-spacing:.16em;color:var(--muted)}
+  .mock-tag .ver{color:var(--gold);opacity:.85}
+
+  /* live tuning panel (mock-only; delete with the mock) */
+  .knobs{position:absolute;top:66px;left:30px;z-index:3;width:206px;pointer-events:auto;
+    background:rgba(20,18,16,.72);border:1px solid rgba(240,237,230,.14);border-radius:6px;
+    padding:11px 13px 13px;backdrop-filter:blur(6px);
+    font-family:ui-monospace,Menlo,Consolas,monospace}
+  .knobs .kh{display:flex;justify-content:space-between;align-items:center;
+    font-size:8.5px;letter-spacing:.22em;color:var(--muted);margin-bottom:4px}
+  .knobs .kh b{color:var(--gold);font-weight:400;cursor:pointer;font-size:10px;padding:0 2px}
+  .knobs .krow{margin-top:10px}
+  .knobs label{display:flex;justify-content:space-between;font-size:8.5px;letter-spacing:.05em;
+    color:#cfc8ba;margin-bottom:5px;text-transform:uppercase}
+  .knobs output{color:var(--gold)}
+  .knobs input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:2px;
+    background:rgba(240,237,230,.2);border-radius:2px;outline:none;cursor:pointer;margin:0}
+  .knobs input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;
+    border-radius:50%;background:var(--gold);cursor:pointer}
+  .knobs.collapsed .krow,.knobs.collapsed .kset{display:none}
+  .knobs .kset{margin-top:12px;padding-top:9px;border-top:1px solid rgba(240,237,230,.14);
+    font-size:8px;line-height:1.7;color:var(--gold);word-break:break-word;user-select:all;cursor:text}
+</style>
+</head>
+<body>
+
+<iframe id="lens" title="Hunter House site — contour model, held still"
+        src="forms/explore-3d-mock.html?intro=0&extendw=1&v=26" allow="fullscreen"></iframe>
+
+<div class="veil"></div>
+
+<div class="chrome">
+  <div class="wordmark">Hunter House<br><span>Foundation</span></div>
+  <span class="mock-tag">MOCK · HOME 2 · THE TILT<br><span class="ver">v0.27</span><br><span class="ver" id="lens-status" style="opacity:.7">lens …</span></span>
+  <div class="knobs collapsed" id="knobs"></div>
+  <p class="lede">The residence and archive of architect Richard Morrow Hunter
+     (1930–2023), built by his own hand at 203 Goward Road, Saanich.</p>
+  <div class="cite"><a href="browse.html">Site contour model · survey 2018 · Hunter House Archive</a></div>
+</div>
+
+<script>
+  // ── Drive the lens's camera from here ────────────────────────────────────
+  // Same-origin: once explore-3d loads, strip its chrome, freeze its controls,
+  // and take over the camera — parked close, leaning gently toward the mouse.
+  const lens = document.getElementById("lens");
+
+  let inited = false;
+  function initLens(){
+    if (inited) return;
+    let doc, win;
+    try { doc = lens.contentDocument; win = lens.contentWindow; } catch (e) { return; }
+    if (!doc || !win || doc.readyState !== "complete") return;   // not ready yet; load will retry
+    inited = true;
+
+    // 1) hide ALL of the lens's own chrome + interactive overlay — pure drawing.
+    try {
+      const s = doc.createElement("style");
+      s.textContent = `
+        .layers,.formtag,.hint,.orbithint,#topbtn,#recenterbtn,.i-prov,.intro,
+        .titleblock,.crumbs,.backbtn,.bar,.panel,.overlay3d,.icontip{
+          display:none !important; opacity:0 !important; pointer-events:none !important;
+        }
+        #scene{cursor:default !important}`;
+      doc.head.appendChild(s);
+    } catch (e) { /* leave chrome as-is if this ever fails */ }
+
+    // 2) wait for the lens to publish its Three.js handles, then take the wheel.
+    (function wait(tries){
+      const V = win.__v, THREE = win.THREE;
+      if (V && V.camera && THREE) { takeOver(win, V, THREE); }
+      else if (tries < 120) { setTimeout(() => wait(tries + 1), 40); }
+    })(0);
+  }
+  lens.addEventListener("load", initLens);
+  // in case the iframe already finished (e.g. served from cache) before the
+  // listener attached — otherwise the takeover would never fire.
+  initLens();
+
+  function takeOver(win, V, THREE){
+    const cam = V.camera, controls = V.controls;
+    controls.enabled = false;                 // no drag-orbit; we own the camera
+    cam.up.set(0, 0, -1);                      // north-up. Straight-down (0,1,0) up is
+                                              //   parallel to the view → undefined roll →
+                                              //   the plan spins. This pins the roll flat.
+
+    // Diagnostic: did the NEW lens JS (with parcel/cursor/lake hooks) load, or
+    // is the iframe still on an old cached build? Shown top-right.
+    const st = document.getElementById("lens-status");
+    const hooksOK = !!(V.parcel && win.__setCursorFx && V.matLakeFill && V.labels);
+    const hd = V.houseDiag || {n:"?", err:"no-diag(old cache)"};
+    if (st) { st.textContent = (hooksOK ? "lens ✓" : "lens ✗") + " · house " + hd.n + (hd.err ? " " + hd.err : "");
+              st.style.color = hooksOK ? "var(--gold)" : "#d98"; }
+
+    // Swallow ALL pointer/scroll interactions so the lens can't pan, orbit, or
+    // click-to-fly — the map is a held frame, driven only by our tilt loop.
+    // Capture phase → fires before the lens's own canvas listeners.
+    ["pointerdown","mousedown","touchstart","click","dblclick","wheel","contextmenu"]
+      .forEach(t => win.addEventListener(t, e => e.stopImmediatePropagation(), true));
+
+    // locked faint lake (mock-only; the live archive keeps its normal lake).
+    const LAKE0 = 0.01;
+    if (V.matLakeFill) V.matLakeFill.opacity = LAKE0;
+    if (V.matLake)     V.matLake.opacity = Math.min(1, LAKE0 * 1.7);
+
+    // house-footprint hover: fade the solid fill to the slightest yellow and
+    // brighten the outline while the cursor is over the footprint.
+    const houseFill = V.houseFill, houseLine = V.houseLine, houseMesh = V.houseMesh, rc = new THREE.Raycaster();
+    const bgCol = new THREE.Color(0x242220), tintCol = new THREE.Color(0xc9a44e), brightCol = new THREE.Color(0xfff1c6);
+    const houseLineBaseCol = houseLine ? houseLine.color.clone() : null;
+    let houseHover = 0, houseHoverT = 0;
+
+    // locked text-label opacity (Goward / Echo / Prospect).
+    const TXT0 = 0.32;
+    if (V.labels) ['goward','echo','lake'].forEach(k => { const m = V.labels[k] && V.labels[k].material; if (m) m.opacity = TXT0; });
+
+    // ── the knobs (all live-tunable from the TUNING panel, top-left) ──
+    let LEAN     = 0.096;  // max lean, radians. larger = more tilt.
+    let FILL     = 1.40;   // window framing: <1 zooms IN past the edges, 1.0 =
+                           //   whole parcel edge-to-edge, >1 pulls back w/ margin.
+    let EASE     = 0.0045; // lower = slower, more graduated correction (re-entry
+                           //   glides rather than snaps).
+    let EXCITE   = 0.00;   // cursor GLOW on the contour lines — OFF (too noisy).
+    let EXCITE_R = 250;    // radius of that glow, world units.
+    let PANX     = 8;      // manual re-centre of the framing, world units (x).
+    let PANZ     = -4;     // manual re-centre of the framing, world units (z).
+    let HOUSE_TINT = 0.24; // house hover: yellow bleed into the footprint (0..1).
+    let HOUSE_GLOW = 1.00; // house hover: how much the footprint outline brightens.
+
+    // Frame on the DRAWN parcel (from the lens), not the DEM box — otherwise the
+    // plan rides off to one side (the contours span the whole DEM but fade
+    // outside the parcel). This centres + sizes the view on the parcel itself.
+    const P = (win.__v && win.__v.parcel) || { cx:0, cz:0, w:1500, d:1050 };
+    const MODEL_W = P.w, MODEL_D = P.d;
+    const HALF_W = MODEL_W / 2, HALF_D = MODEL_D / 2;   // onMap bbox fallback only
+
+    // where we look. The map rests FLAT (a straight-down plan); the cursor tips
+    // it off flat by up to LEAN. Raise BASE_TILT above 0 for resting relief.
+    const T = new THREE.Vector3(P.cx, 24, P.cz);   // parcel centre
+    const BASE_TILT = 0;                       // resting tilt off top-down (0 = flat plan)
+    const PLANE_Y = T.y;                        // ground plane used to locate the cursor hit
+
+    // Fit the zoom to the window: the visible rectangle at the target plane is
+    // 2·D·tan(fov/2) tall × that·aspect wide. Solve for the D where the whole
+    // MODEL_W×MODEL_D·FILL rectangle fits INSIDE that view — the binding
+    // dimension wins (max), so the full plan is always contained at any shape.
+    function fitDist(){
+      const aspect = win.innerWidth / win.innerHeight;
+      const t = Math.tan((cam.fov * Math.PI / 180) / 2) * 2;
+      const dW = (MODEL_W * FILL) / (t * aspect);
+      const dH = (MODEL_D * FILL) / t;
+      return Math.max(200, dW, dH);   // max = contain BOTH dims (min would let one edge overflow)
+    }
+
+    let tgtX = 0, tgtY = 0, curX = 0, curY = 0;
+
+    // mouse lives over the IFRAME (full-bleed), so listen on the lens document.
+    const excite = (x, z, a, r) => { if (win.__setCursorFx) win.__setCursorFx(x, z, a, r); };
+    // Respond across the whole drawn contour field (the DEM rectangle), NOT just
+    // inside the property line — gating to the parcel polygon felt boxed-in.
+    const DEM_HW = 750, DEM_HD = 525;
+    const onMapAt = (x, z) => Math.abs(x) <= DEM_HW && Math.abs(z) <= DEM_HD;
+
+    win.document.addEventListener("mousemove", (e) => {
+      const mx = (e.clientX / win.innerWidth)  * 2 - 1;   // -1 (left)  … +1 (right)
+      const my = (e.clientY / win.innerHeight) * 2 - 1;   // -1 (top)   … +1 (bottom)
+
+      // Cast the cursor onto the ground plane to find the world point under it.
+      const ray = new THREE.Vector3(mx, -my, 0.5).unproject(cam).sub(cam.position).normalize();
+      let onMap = false, hx = 0, hz = 0;
+      if (Math.abs(ray.y) > 1e-4) {
+        const d = (PLANE_Y - cam.position.y) / ray.y;
+        if (d > 0) { hx = cam.position.x + ray.x * d; hz = cam.position.z + ray.z * d; onMap = onMapAt(hx, hz); }
+      }
+      // house hover: TRUE raycast against the footprint mesh (robust to elevation).
+      houseHoverT = 0;
+      if (houseMesh) { rc.setFromCamera({ x: mx, y: -my }, cam); if (rc.intersectObject(houseMesh, false).length) houseHoverT = 1; }
+
+      if (onMap) {
+        tgtX = -mx * LEAN;    // lean the map AWAY from the cursor's side
+        tgtY = -my * LEAN;    // tip the ground away from the cursor (vertical)
+        excite(hx, hz, EXCITE, EXCITE_R);
+      } else {
+        // off the map → HOLD the current tilt (leave tgtX/tgtY untouched); just
+        // quiet the contour lines. Re-entry eases to the new lean, no snap.
+        excite(0, 0, 0);
+      }
+    }, { passive: true });
+
+    // pointer leaves the window → quiet the lines, but keep the held tilt.
+    win.document.addEventListener("mouseleave", () => excite(0, 0, 0), { passive: true });
+
+    // ── live tuning panel: each slider mutates a knob in place ──
+    (function buildKnobs(){
+      const box = document.getElementById("knobs");
+      if (!box) return;
+      const lakeFill = win.__v && win.__v.matLakeFill, lakeLine = win.__v && win.__v.matLake;
+      const L = (win.__v && win.__v.labels) || {};
+      function lblOp(k, v){ const m = L[k] && L[k].material; if(!m) return 0; if(v!==undefined) m.opacity=v; return m.opacity; }
+      const K = [
+        { id:"fill", label:"Zoom",     min:0.35,max:1.4,  step:0.01,   get:()=>FILL,     set:v=>FILL=v,     fmt:v=>v.toFixed(2) },
+        { id:"panx", label:"Pan X",    min:-400,max:400,  step:2,      get:()=>PANX,     set:v=>PANX=v,     fmt:v=>v.toFixed(0) },
+        { id:"panz", label:"Pan Y",    min:-400,max:400,  step:2,      get:()=>PANZ,     set:v=>PANZ=v,     fmt:v=>v.toFixed(0) },
+        { id:"lean", label:"Tilt",     min:0,   max:0.20, step:0.002,  get:()=>LEAN,     set:v=>LEAN=v,     fmt:v=>v.toFixed(3) },
+        { id:"ease", label:"Ease",     min:0.002,max:0.012,step:0.0005,get:()=>EASE,     set:v=>EASE=v,     fmt:v=>v.toFixed(4) },
+        { id:"exc",  label:"Glow",     min:0,   max:4,    step:0.05,   get:()=>EXCITE,   set:v=>EXCITE=v,   fmt:v=>v.toFixed(2) },
+        { id:"excr", label:"Glow r",   min:40,  max:320,  step:5,      get:()=>EXCITE_R, set:v=>EXCITE_R=v, fmt:v=>v.toFixed(0) },
+        { id:"lake", label:"Lake",     min:0,   max:0.85, step:0.01,   get:()=>lakeFill?lakeFill.opacity:0,
+          set:v=>{ if(lakeFill)lakeFill.opacity=v; if(lakeLine)lakeLine.opacity=Math.min(1,v*1.7); }, fmt:v=>v.toFixed(2) },
+        { id:"txg",  label:"Txt Goward",min:0,  max:1,    step:0.02,   get:()=>lblOp('goward'), set:v=>lblOp('goward',v), fmt:v=>v.toFixed(2) },
+        { id:"txe",  label:"Txt Echo",  min:0,  max:1,    step:0.02,   get:()=>lblOp('echo'),   set:v=>lblOp('echo',v),   fmt:v=>v.toFixed(2) },
+        { id:"txl",  label:"Txt Lake",  min:0,  max:1,    step:0.02,   get:()=>lblOp('lake'),   set:v=>lblOp('lake',v),   fmt:v=>v.toFixed(2) },
+        { id:"htint",label:"House tint",min:0,  max:1,    step:0.02,   get:()=>HOUSE_TINT, set:v=>HOUSE_TINT=v, fmt:v=>v.toFixed(2) },
+        { id:"hglow",label:"House glow",min:0,  max:1,    step:0.02,   get:()=>HOUSE_GLOW, set:v=>HOUSE_GLOW=v, fmt:v=>v.toFixed(2) },
+      ];
+      box.innerHTML = '<div class="kh"><span>TUNING</span><b id="k-tog">▾</b></div>';
+      K.forEach(k=>{
+        const row = document.createElement("div"); row.className = "krow";
+        row.innerHTML = '<label>'+k.label+' <output id="o-'+k.id+'">'+k.fmt(k.get())+'</output></label>';
+        const inp = document.createElement("input");
+        inp.type="range"; inp.min=k.min; inp.max=k.max; inp.step=k.step; inp.value=k.get();
+        inp.addEventListener("input", ()=>{ const v=parseFloat(inp.value); k.set(v);
+          document.getElementById("o-"+k.id).textContent = k.fmt(v); dump(); });
+        row.appendChild(inp); box.appendChild(row);
+      });
+      // live copy-paste readout of the current settings (select the line to copy).
+      const setEl = document.createElement("div"); setEl.className = "kset"; box.appendChild(setEl);
+      function dump(){ setEl.textContent =
+        "FILL "+FILL.toFixed(2)+" · PAN "+PANX.toFixed(0)+","+PANZ.toFixed(0)+
+        " · LEAN "+LEAN.toFixed(3)+" · EASE "+EASE.toFixed(4)+
+        " · GLOW "+EXCITE.toFixed(2)+"/"+EXCITE_R.toFixed(0)+
+        " · LAKE "+(lakeFill?lakeFill.opacity:0).toFixed(2)+
+        " · TXT "+lblOp('goward').toFixed(2)+"/"+lblOp('echo').toFixed(2)+"/"+lblOp('lake').toFixed(2)+
+        " · HOUSE "+HOUSE_TINT.toFixed(2)+"/"+HOUSE_GLOW.toFixed(2); }
+      dump();
+      const tog = document.getElementById("k-tog");
+      tog.textContent = box.classList.contains("collapsed") ? "▸" : "▾";
+      tog.addEventListener("click", ()=>{ box.classList.toggle("collapsed");
+        tog.textContent = box.classList.contains("collapsed") ? "▸" : "▾"; });
+    })();
+
+    // our own easing loop. explore-3d renders every frame regardless; we just
+    // keep the camera pose current so it leans smoothly toward the cursor.
+    (function frame(){
+      curX += (tgtX - curX) * EASE;
+      curY += (tgtY - curY) * EASE;
+      // house-footprint hover tint + outline glow.
+      houseHover += (houseHoverT - houseHover) * 0.10;
+      if (houseFill) houseFill.color.copy(bgCol).lerp(tintCol, houseHover * HOUSE_TINT);
+      if (houseLine && houseLineBaseCol) houseLine.color.copy(houseLineBaseCol).lerp(brightCol, houseHover * HOUSE_GLOW);
+      // parcel centre, plus any manual pan offset.
+      const focus = new THREE.Vector3(P.cx + PANX, T.y, P.cz + PANZ);
+      // flat top-down at rest (0,1,0); the cursor tips the plane toward itself.
+      const dir = new THREE.Vector3(curX, 1, BASE_TILT + curY).normalize();
+      cam.position.copy(focus.clone().add(dir.multiplyScalar(fitDist())));  // re-fit every frame → tracks resize
+      cam.lookAt(focus);
+      requestAnimationFrame(frame);
+    })();
+  }
+</script>
+</body>
+</html>

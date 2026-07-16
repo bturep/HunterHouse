@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hunter House — Interactive Site (3D)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="helix-kit.css">
+<style>
+  html,body{overflow:hidden;background:#242220}
+  /* (vignette removed — keeps the background a flat #242220, consistent with the timeline) */
+  #scene{position:fixed;inset:0;z-index:0;cursor:grab}
+  #scene.grabbing{cursor:grabbing}
+  #scene canvas{display:block}
+  .overlay3d{position:fixed;inset:0;pointer-events:none;z-index:2}
+  .overlay3d > *{position:absolute}
+
+  /* projected place labels */
+  .plab{font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--ink);white-space:nowrap;
+    transform:translate(-50%,-50%);text-shadow:0 1px 8px rgba(0,0,0,.85);transition:opacity .3s,color .2s;cursor:pointer;pointer-events:auto}
+  .plab .dot{display:block;width:7px;height:7px;border-radius:50%;border:1.5px solid currentColor;margin:0 auto 7px;
+    background:var(--scene);box-shadow:0 0 0 4px rgba(20,18,16,.5)}
+  .plab.sq .dot{border-radius:1px;background:currentColor}
+  .plab .tx{display:block;text-align:center;opacity:0;transition:opacity .2s}
+  .plab:hover .tx,.plab.hot .tx{opacity:1}
+  .plab.showtext .tx{opacity:1}
+  .plab .tx b{display:block;font-size:7.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:2px}
+  .plab.faded{opacity:.12}
+  .plab.hot .dot{box-shadow:0 0 10px currentColor,0 0 0 4px rgba(20,18,16,.5)}
+  .plab.hot .tx b{color:var(--muted)}
+  .plab:hover .dot{box-shadow:0 0 10px currentColor,0 0 0 4px rgba(20,18,16,.5)}
+
+  /* layer panel */
+  .layers{position:fixed;top:24px;left:30px;z-index:13;width:188px;font-family:var(--mono);
+    background:rgba(20,18,16,0.72);border:1px solid var(--rule);border-radius:5px;padding:12px 13px;backdrop-filter:blur(6px)}
+  .layers .lh{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--hint);margin-bottom:9px}
+  .layers .llist{display:flex;flex-direction:column;gap:1px}
+  .layers .lrow{display:flex;align-items:center;gap:10px;background:none;border:0;padding:5px 4px;cursor:pointer;text-align:left;width:100%;border-radius:3px}
+  .layers .lrow:hover{background:rgba(240,237,230,0.05)}
+  .layers .lsw{width:22px;height:12px;border-radius:7px;background:var(--gold);position:relative;flex:none;transition:background .15s}
+  .layers .lsw::after{content:"";position:absolute;top:1.5px;left:11px;width:9px;height:9px;border-radius:50%;background:var(--scene);transition:left .15s}
+  .layers .lrow.off .lsw{background:rgba(240,237,230,0.18)}
+  .layers .lrow.off .lsw::after{left:1.5px}
+  .layers .lnm{font-size:10.5px;letter-spacing:.02em;color:var(--ink)}
+  .layers .lrow.off .lnm{color:var(--hint)}
+  .layers .lstate{margin-top:10px;border-top:1px solid var(--rule);padding-top:8px;font-size:8px;letter-spacing:.04em;
+    color:var(--hint);line-height:1.55;cursor:pointer;word-break:break-word}
+  .layers .lslider{margin-top:10px;border-top:1px solid var(--rule);padding-top:9px}
+  .layers .lsl-lab{font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--hint);margin-bottom:8px}
+  .layers .lsl-lab b{color:var(--ink);font-weight:500}
+  .layers .lslider input{width:100%;-webkit-appearance:none;appearance:none;height:2px;border-radius:2px;background:var(--rule);outline:none;cursor:pointer}
+  .layers .lslider input::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:var(--gold);cursor:pointer;box-shadow:0 0 6px var(--gold)}
+
+  /* projected timeline beads */
+  .bead{transform:translate(-50%,-50%);margin:0}
+  .blab{transform:translate(8px,-50%)}
+
+  /* state chrome (same family as 2D) */
+  .crumbs{position:fixed;left:50%;top:22px;transform:translateX(-50%);z-index:12;display:flex;align-items:center;gap:10px;
+    font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--hint);
+    opacity:0;transition:opacity .3s;pointer-events:none}
+  .crumbs.on{opacity:1}
+  .crumbs .here{color:var(--ink)}
+  .crumbs .sep{color:var(--rule)}
+
+  .backbtn{position:fixed;left:30px;bottom:34px;z-index:12;display:flex;align-items:center;gap:9px;
+    font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);
+    background:rgba(26,23,20,0.82);border:1px solid var(--rule);border-radius:24px;padding:9px 16px 9px 13px;cursor:pointer;
+    backdrop-filter:blur(5px);opacity:0;transform:translateY(8px);transition:opacity .3s,transform .3s,background .15s,border-color .15s;pointer-events:none}
+  .backbtn.on{opacity:1;transform:none;pointer-events:auto}
+  .backbtn:hover{background:rgba(201,164,78,0.14);border-color:rgba(201,164,78,0.5)}
+  .backbtn .arr{font-size:13px;line-height:1}
+  #recenterbtn{left:172px}
+
+  .panel{position:fixed;top:0;right:0;width:368px;max-width:42vw;height:100%;z-index:11;pointer-events:none;
+    display:flex;align-items:center;justify-content:flex-end;padding:0 30px}
+  .panel .card{width:100%;pointer-events:auto;background:rgba(20,18,16,0.9);border:1px solid var(--rule);border-radius:6px;
+    padding:0 0 20px;backdrop-filter:blur(8px);box-shadow:0 30px 70px rgba(0,0,0,0.6);overflow:hidden;
+    opacity:0;transform:translateX(28px);transition:opacity .35s,transform .35s}
+  .panel.on .card{opacity:1;transform:none}
+  .panel .ph{height:188px;background:#1a1714;position:relative;border-bottom:1px solid var(--rule);overflow:hidden}
+  .panel .ph img{width:100%;height:100%;object-fit:cover;opacity:.92;filter:saturate(.85)}
+  .panel .ph .ph-tag{position:absolute;left:14px;bottom:11px;font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--hint);background:rgba(20,18,16,.7);padding:3px 7px;border-radius:3px}
+  .panel .body{padding:18px 22px 0}
+  .panel .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:9px}
+  .panel .dt{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:7px}
+  .panel h2{font-size:25px;font-weight:300;letter-spacing:-.015em;line-height:1.15;margin:0 0 12px}
+  .panel p{font-size:13px;line-height:1.62;color:var(--muted);margin:0 0 14px}
+  .panel .stats{display:flex;gap:22px;border-top:1px solid var(--rule);padding-top:14px;margin-top:2px}
+  .panel .stat .n{font-size:21px;font-weight:300;color:var(--ink)}
+  .panel .stat .l{font-family:var(--mono);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--hint);margin-top:3px}
+  .panel .dx{position:absolute;top:12px;right:14px;z-index:2;background:rgba(20,18,16,.6);border:1px solid var(--rule);border-radius:50%;
+    width:26px;height:26px;color:var(--muted);font-size:16px;cursor:pointer;line-height:1}
+  .panel .dx:hover{color:var(--ink)}
+
+  .bar{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(12px);z-index:12;display:flex;align-items:center;gap:13px;
+    background:rgba(26,23,20,0.84);border:1px solid var(--rule);border-radius:30px;padding:9px 18px;backdrop-filter:blur(6px);
+    opacity:0;transition:opacity .35s,transform .35s;pointer-events:none}
+  .bar.on{opacity:1;transform:translateX(-50%);pointer-events:auto}
+  .bar .lab{font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--hint)}
+  .bar .now{font-family:var(--mono);font-size:14px;color:var(--gold);min-width:42px;text-align:center}
+  .bar input{width:min(320px,34vw);-webkit-appearance:none;appearance:none;height:2px;border-radius:2px;
+    background:linear-gradient(90deg,var(--gold) 0%,var(--gold) var(--p,100%),var(--rule) var(--p,100%));outline:none}
+  .bar input::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--gold);border:2px solid var(--scene);cursor:grab;box-shadow:0 0 8px var(--gold)}
+
+  .hint{transition:opacity .35s}
+  .hint.gone{opacity:0}
+  .orbithint{position:fixed;right:30px;bottom:34px;z-index:11;font-family:var(--mono);font-size:9px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--hint);text-align:right;line-height:1.8;pointer-events:none;transition:opacity .35s}
+  .orbithint.gone{opacity:0}
+
+  /* survey title block (the site-plan data box) */
+  .titleblock{position:fixed;left:30px;bottom:34px;z-index:11;width:330px;max-width:36vw;
+    background:rgba(20,18,16,0.82);border:1px solid var(--rule);border-radius:4px;padding:15px 17px 14px;
+    backdrop-filter:blur(6px);box-shadow:0 18px 44px rgba(0,0,0,0.5);transition:opacity .35s,transform .35s}
+  .titleblock.gone{opacity:0;transform:translateY(8px);pointer-events:none}
+  .titleblock .tb-eyebrow{font-family:var(--mono);font-size:8px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  .titleblock h3{font-size:15px;font-weight:400;letter-spacing:-.005em;line-height:1.28;margin:0 0 3px}
+  .titleblock .tb-sub{font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;color:var(--muted);margin-bottom:12px}
+  .titleblock dl{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin:0;border-top:1px solid var(--rule);padding-top:11px}
+  .titleblock dt{font-family:var(--mono);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--hint);white-space:nowrap;padding-top:1px}
+  .titleblock dd{margin:0;font-family:var(--mono);font-size:10px;letter-spacing:.02em;color:var(--ink);line-height:1.4}
+  .titleblock dd b{color:var(--gold);font-weight:500}
+
+  /* in-world annotation labels (meadow, north) */
+  .anno{font-family:var(--mono);letter-spacing:.42em;text-transform:uppercase;white-space:nowrap;pointer-events:none;
+    transform:translate(-50%,-50%);text-shadow:0 1px 8px rgba(0,0,0,.85);transition:opacity .3s}
+  .anno.meadow{font-size:11px;color:rgba(122,170,152,0.5)}
+  .anno.addr{font-size:9px;letter-spacing:.26em;color:var(--hint)}
+  .anno.north{font-size:13px;letter-spacing:0;color:var(--muted)}
+  .anno.gone{opacity:0}
+
+  /* layer toggles + opacity sliders removed — map runs on default layers */
+  .layers{display:none!important}
+  /* extraneous chrome removed: site tag, contour note, plan/recenter buttons,
+     and the in-map breadcrumb/back (the nav now lives in the browse top bar) */
+  .formtag,.orbithint,#topbtn,#recenterbtn,.crumbs,#backbtn{display:none!important}
+
+  /* hover tooltip for point features (fig / spring) */
+  .icontip{position:fixed;z-index:18;max-width:230px;pointer-events:none;
+    font-family:var(--mono);font-size:11px;line-height:1.5;letter-spacing:.01em;color:var(--ink);
+    background:rgba(20,18,16,0.92);border:1px solid var(--rule);border-radius:5px;padding:8px 11px;
+    opacity:0;transform:translateY(3px);transition:opacity .14s ease,transform .14s ease;
+    backdrop-filter:blur(4px);box-shadow:0 8px 24px rgba(0,0,0,.45)}
+  .icontip.on{opacity:1;transform:none}
+
+  /* ---- opening establishing splash ---- */
+  .intro{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+    text-align:center;padding:6.5vh 40px 5vh;pointer-events:none;opacity:1;transition:opacity 1.1s ease}
+  .intro.gone{opacity:0;pointer-events:none}
+  .intro.gone .i-enter{pointer-events:none}
+  .intro .i-top{max-width:840px;animation:introUp 1s .15s both cubic-bezier(.2,.7,.2,1)}
+  .intro .i-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.36em;text-transform:uppercase;color:var(--gold);margin-bottom:18px}
+  .intro h1{font-size:clamp(30px,5vw,52px);font-weight:200;letter-spacing:-.012em;line-height:1.04;margin:0;color:var(--ink)}
+  .intro h1 b{font-weight:300;font-style:italic;color:var(--gold)}
+  .intro .i-bottom{max-width:600px;display:flex;flex-direction:column;align-items:center;gap:22px;
+    animation:introUp 1s .42s both cubic-bezier(.2,.7,.2,1)}
+  .intro .i-stand{font-size:14.5px;line-height:1.72;color:var(--muted);margin:0;text-wrap:pretty}
+  .intro .i-stand b{color:var(--ink);font-weight:400}
+  .intro .i-enter{pointer-events:auto;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);
+    background:rgba(201,164,78,0.12);border:1px solid rgba(201,164,78,0.55);border-radius:26px;padding:13px 26px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:11px;transition:background .18s,border-color .18s,transform .18s,box-shadow .18s}
+  .intro .i-enter:hover{background:rgba(201,164,78,0.22);border-color:var(--gold);transform:translateY(-1px);box-shadow:0 8px 26px rgba(201,164,78,0.18)}
+  .intro .i-enter .ar{font-size:14px;transition:transform .18s}
+  .intro .i-enter:hover .ar{transform:translate(2px,2px)}
+  .intro .i-ctrls{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--hint)}
+  .intro .i-prov{position:absolute;left:30px;bottom:18px;font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--hint)}
+  @keyframes introUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  /* panels pull away to their own edges behind the splash; slide back on enter */
+  .layers,.formtag{transition:opacity .8s ease,transform .85s cubic-bezier(.4,0,.15,1)}
+  .hint,.orbithint{transition:opacity .6s ease,transform .8s cubic-bezier(.4,0,.15,1)}
+  .backbtn.topbtn{transition:opacity .7s ease,transform .8s cubic-bezier(.4,0,.15,1),background .15s,border-color .15s}
+  body.intro-active .layers{opacity:0;transform:translateX(-130%);pointer-events:none}
+  body.intro-active .formtag{opacity:0;transform:translateX(130%)}
+  body.intro-active .hint{opacity:0;transform:translateX(-50%) translateY(26px)}
+  body.intro-active .orbithint{opacity:0;transform:translateX(34px)}
+  body.intro-active #topbtn,body.intro-active #recenterbtn{opacity:0!important;transform:translateX(-64px)!important;pointer-events:none}
+</style>
+</head>
+<body class="intro-active">
+
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <rect width="100" height="100" fill="#16130f"/>
+    <g fill="none" stroke="#c9a44e" stroke-width="1.1" opacity="0.85">
+      <path d="M30 62 Q50 50 70 60"/>
+      <path d="M26 56 Q50 41 74 53"/>
+      <path d="M23 50 Q50 33 77 46"/>
+      <path d="M27 44 Q50 30 73 41"/>
+    </g>
+    <circle cx="50" cy="46" r="2.4" fill="#e6c067"/>
+  </svg>
+</template>
+<div id="scene"></div>
+<div class="overlay3d" id="overlay"></div>
+
+<div class="intro" id="intro">
+  <div class="i-top">
+    <div class="i-eyebrow">[ eyebrow / kicker ]</div>
+    <h1>[ Title placeholder ]</h1>
+  </div>
+  <div class="i-bottom">
+    <p class="i-stand">[ Standfirst placeholder — one or two lines of framing text go here. ]</p>
+    <button class="i-enter" id="i-enter">Enter <span class="ar">↘</span></button>
+    <div class="i-ctrls">drag to tilt · scroll to zoom</div>
+  </div>
+  <div class="i-prov">[ provenance line ]</div>
+</div>
+
+<div class="hud">
+  <div class="mast" style="display:none">
+    <div class="eyebrow">Hunter House Archive · 203 Goward Rd</div>
+    <h1>The ground, <b>in relief</b></h1>
+  </div>
+  <div class="formtag"><b>∞</b> · Site model<div class="sub">contour model · survey 2018</div></div>
+  <div class="legend" style="display:none">
+    <div>The walked loop / a life<i style="border-color:#f0ede6;background:#f0ede6"></i></div>
+    <div>The house & its record<i class="sq" style="border-color:#c9a44e;background:#c9a44e"></i></div>
+    <div>Garry oak / site feature<i style="border-color:#7aaa98;background:transparent"></i></div>
+  </div>
+  <div class="detail" id="detail"></div>
+</div>
+
+<div class="crumbs" id="crumbs"><span class="root">Whole site</span></div>
+<div class="panel" id="panel"><div class="card" id="panelcard"></div></div>
+
+<div class="bar" id="bar">
+  <span class="now" id="now">2024</span>
+  <input id="slider" type="range" min="0" max="1000" value="1000">
+</div>
+
+<button class="backbtn" id="backbtn"><span class="arr">⊖</span> Whole site</button>
+<button class="backbtn topbtn" id="topbtn"><span class="arr">⊞</span> Plan view</button>
+<button class="backbtn topbtn" id="recenterbtn"><span class="arr">⌂</span> Recenter</button>
+<div class="hint" id="hint"></div>
+<div class="orbithint" id="orbithint">1-ft contours<br>vertical ×2.4</div>
+
+<script src="../events-data.js?v=hd1"></script>
+<script src="site-geo.js"></script>
+<script src="site-contours.js"></script>
+<script src="helix-kit.js"></script>
+<script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="explore-3d-mock.js?v=7"></script>
+</body>
+</html>
