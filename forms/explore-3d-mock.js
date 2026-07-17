@@ -941,10 +941,14 @@
   // eased timeline (same dur as the fly-to) — contours go haywire, then settle.
   const houseFx={ t0:0, dur:0, active:false };
   function kickHouseFx(dur){ houseFx.t0=performance.now(); houseFx.dur=dur; houseFx.active=true; }
+  // host-driven ambient wind: a parent page (mock-home2) sets this 0..~1.6 to blow
+  // a gentle directional breeze across the contour field (the shader's uBreeze term,
+  // travelling gusts built in). 0 = still, so the standalone lens is unchanged.
+  let hostWind=0;
   function updFx(){
     figUni.uSwell.value=0;       // contours held still (electric tremor retired)
     figUni.uRAmp.value=0;        // ripple off unless a drop is running (below)
-    figUni.uBreeze.value=0;
+    figUni.uBreeze.value=hostWind;
     figUni.uTime.value=performance.now()/1000;
     lakeUni.uTime.value=figUni.uTime.value;   // tiny lapping on Prospect Lake
     const _t=figUni.uTime.value;
@@ -1019,6 +1023,7 @@
     houseFill:houseFillMat, houseLine:mat.house, houseMesh:houseMeshRef, inHouse:inHouse,
     zoomHouse:enterHouse, backOverview:toOverview,   // standalone lens: full cinematic (fly + burst)
     houseBurst:kickHouseFx,                          // host-driven: contour haywire ONLY (host owns the camera)
+    setWind:function(a){ hostWind=a||0; },           // host-driven: gentle breeze across the land (0 = still)
     houseDiag:{n:HOUSE_N, err:HOUSE_ERR}}; window.__liftoff=kinhinLiftoff;
   // host-driven context fade: on house zoom-in the host (mock-home2) calls this
   // each frame with amt 0..1 — EVERYTHING except the contours + the house fades
