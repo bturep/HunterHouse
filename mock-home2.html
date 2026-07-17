@@ -106,7 +106,7 @@
 
 <div class="chrome">
   <div class="wordmark">Hunter House<br><span>Foundation</span></div>
-  <span class="mock-tag">MOCK · HOME 2 · THE TILT<br><span class="ver">v0.33</span><br><span class="ver" id="lens-status" style="opacity:.7">lens …</span></span>
+  <span class="mock-tag">MOCK · HOME 2 · THE TILT<br><span class="ver">v0.34</span><br><span class="ver" id="lens-status" style="opacity:.7">lens …</span></span>
   <div class="knobs collapsed" id="knobs"></div>
   <p class="lede">The residence and archive of architect Richard Morrow Hunter
      (1930–2023), built by his own hand at 203 Goward Road, Saanich.</p>
@@ -172,13 +172,12 @@
     ["pointerdown","mousedown","touchstart","dblclick","wheel","contextmenu"]
       .forEach(t => win.addEventListener(t, e => e.stopImmediatePropagation(), true));
     let zoomed = false, zp = 0, zpTarget = 0;    // zoom progress: 0 = held frame, 1 = in above the house
-    let windLevel = 0, windGustT0 = 0;            // ambient wind that wakes on zoom-in (no drop)
     win.addEventListener("click", (e) => {
       e.stopImmediatePropagation();                 // still don't let the lens's own handler double-fire
       const mx = (e.clientX / win.innerWidth) * 2 - 1, my = (e.clientY / win.innerHeight) * 2 - 1;
       rc.setFromCamera({ x: mx, y: -my }, cam);
       const onHouse = houseMesh && rc.intersectObject(houseMesh, false).length > 0;
-      if (onHouse && !zoomed) { zoomed = true; zpTarget = 1; windGustT0 = performance.now(); }   // zoom in + fade linework + a gust of wind (no drop)
+      if (onHouse && !zoomed) { zoomed = true; zpTarget = 1; }   // zoom in + fade the other linework (no drop, no wind)
       else if (zoomed) { zoomed = false; zpTarget = 0; }                                               // click again → ease back out
     }, true);
 
@@ -351,14 +350,8 @@
       zp += (zpTarget - zp) * 0.05;
       // fade every other line/label out as we close in (contours + house stay).
       if (V.setHouseFocus) V.setHouseFocus(zp);
-      // WIND (replaces the old water-drop): on zoom-in a gust sweeps across the
-      // landscape and settles to a faint living breeze; on zoom-out it dies to
-      // still. The lens's shader carries the travelling gusts — we just set level.
-      const WIND_SUSTAIN = 0.4;                                  // resting breeze while lingering over the house
-      windLevel += ((zoomed ? WIND_SUSTAIN : 0) - windLevel) * 0.03;
-      let gust = 0;
-      if (zoomed) { const gt = (performance.now() - windGustT0) / 1000; gust = 1.1 * Math.exp(-gt / 2.0); }  // initial sweep, decays ~2s
-      if (V.setWind) V.setWind(windLevel + gust);
+      // (wind + water-drop both retired — plain zoom + linework fade. The lens
+      //  keeps V.setWind() dormant if we ever revisit an ambient effect.)
       // focus + distance lerp from the held parcel frame → a close top-down house frame.
       const fx = (P.cx + PANX) * (1 - zp) + houseCX * zp;
       const fz = (P.cz + PANZ) * (1 - zp) + houseCZ * zp;
