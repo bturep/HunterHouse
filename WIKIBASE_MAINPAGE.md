@@ -14,8 +14,8 @@ is needed to pick up.
 | | |
 |---|---|
 | Live page | https://hunterhouse.wikibase.cloud/wiki/Main_Page |
-| Current revision | **5950** |
-| Last edited | 2026-07-01 (no count change: EGC-0023 reverted to "East Wing Living Room Side Table" + stool split into its own phase Q616 — Q616 has no HH-PH prefix id so the displayed Phase count stays 38) |
+| Current revision | **5954** |
+| Last edited | 2026-07-15 (FRH 7→9: +2 sketchbooks HH-FRH-SKB-01/02; Archive Item 260→262; "sketchbook" added to the medium sub-type list) |
 | Working branch when edited | `v1.04` |
 | Editor | bot `MyBot@my-bot` via MediaWiki API |
 
@@ -23,7 +23,8 @@ is needed to pick up.
 
 | Rev | What |
 |---|---|
-| **5525** | Reverted an erroneous Phase 38→39 bump (rev 5524). No displayed count changed today: the stool split (0031 + 0032–0036 → new "Stool" phase Q616; EGC-0023 reverted to "East Wing Living Room Side Table") is a modeling change, and Q616 carries no HH-PH prefix id (like the EGC phases), so the prefix-based Phase count stays 38. **← current** |
+| **5954** | FRH public objects 7→9: +2 hand-bound sketchbooks of Richard Hunter's drawings (HH-FRH-SKB-01 "Arguments" Q630, HH-FRH-SKB-02 untitled Q631; new item type «Sketchbook» Q628). Archive Item 260→262; "sketchbook" added to the Archive-Item medium sub-type list. **← current** |
+| **5525** | Reverted an erroneous Phase 38→39 bump (rev 5524). No displayed count changed today: the stool split (0031 + 0032–0036 → new "Stool" phase Q616; EGC-0023 reverted to "East Wing Living Room Side Table") is a modeling change, and Q616 carries no HH-PH prefix id (like the EGC phases), so the prefix-based Phase count stays 38. |
 | **5950** | HH-HHC-0116 retired — duplicate of HH-HHC-0112 (its better 400dpi scan replaced 0112's image; Q627 = emptied tombstone). HHC 116→115, Archive Item 261→260. |
 | **5537** | FRH public objects catalogued (7: DOC-01..03 + PHOTO-01..04) + HHC 116 (HH-HHC-0116 Covenant Reference Plan); Archive Item 252→261 (count = catalogue query: P2 archive prefix + P79 present; the old 252/253 mismatch resolved to this method). |
 | **5479** | EGC 58→57: retired a 2nd near-dup during the subject-grouped renumber (photos now 0032–0057 contiguous); Archive Item 253→252. |
@@ -74,7 +75,7 @@ Roll back with: edit the page text back to a prior revision's content (history i
 5. **"Six source collections" de-determined.** Brandon: more collections will come. Page
    now says "a growing set of source collections; more are expected as material is
    processed." Don't reintroduce a hard count.
-6. **Source-collections table** shows *live catalogued counts* (HHC 115, CAA 36, EGC 57, IHC 45, FRH 7; others
+6. **Source-collections table** shows *live catalogued counts* (HHC 115, CAA 36, EGC 57, IHC 45, FRH 9; others
    pending), not physical-accession extents. The CAA physical accession figures (2019.61 —
    344 drawings / 62 photographs / 0.22 linear m. textual / 1955–2010) are kept inline in
    the intro paragraph instead.
@@ -112,14 +113,14 @@ Not yet in Wikibase: a dedicated "Hunter House Foundation" org item (use Q187 in
 | Work | 22 | `HH-W-1` (unpadded) |
 | Phase | 38 | `HH-PH-23` (unpadded) |
 | Area | 36 | `HH-A-1` (unpadded) |
-| Archive Item | 260 | `HH-HHC-0004` / `HH-CAA-0002` (**4-digit padded — the real scheme**) |
+| Archive Item | 262 | `HH-HHC-0004` / `HH-CAA-0002` (**4-digit padded — the real scheme**) |
 | Person | 33 | `HH-P-1` (unpadded) |
 | Event | 5 | `HH-E-8` (unpadded) |
 | Institution | 20 | `HH-I-1` (unpadded) |
 | Building | 3 | `HH-B-1` (unpadded) |
 | Place | — | no P2 (Wikidata-linked) |
 
-- Archive items by source collection: **HHC 115** · **CAA 36** · **EGC 57** · **IHC 45** · **FRH 7** = 260 archive items.
+- Archive items by source collection: **HHC 115** · **CAA 36** · **EGC 57** · **IHC 45** · **FRH 9** = 262 archive items.
   Remaining collections (Fulker): 0 catalogued yet. FRH correspondence stays researcher-gated outside the graph.
 - ~485 total entity items; only 382 carry any P2. ~225 are the browse.html-visible
   archive items (P2 + P96).
@@ -253,7 +254,7 @@ The archive draws on a growing set of source collections; more are expected as m
 |-
 | '''[[Item:Q182|Eric Gesinger Collection]]''' || [[Item:Q209|Eric Gesinger]] || 57 archive items || Catalogued
 |-
-| '''[[Item:Q181|Frances Hunter Collection]]''' || [[Item:Q202|Frances Hunter]] || 7 archive items || Public objects catalogued; correspondence researcher-gated, held outside this Wikibase
+| '''[[Item:Q181|Frances Hunter Collection]]''' || [[Item:Q202|Frances Hunter]] || 9 archive items || Public objects catalogued; correspondence researcher-gated, held outside this Wikibase
 |-
 | '''[[Item:Q183|Ivan Hunter Collection]]''' || [[Item:Q203|Ivan Hunter]] || 45 archive items || Catalogued
 |}
@@ -271,7 +272,7 @@ The archive is organized into nine Item Types, each with its own controlled voca
 |-
 | '''Area''' || Named architectural sub-parts of a Work — wings, rooms, towers, gardens, decks, built features || 36
 |-
-| '''Archive Item''' || The primary materials, sub-typed by medium: drawing, photograph, engineering document, land survey, permit set, ephemera || 260
+| '''Archive Item''' || The primary materials, sub-typed by medium: drawing, photograph, engineering document, land survey, permit set, sketchbook, ephemera || 262
 |-
 | '''Person''' || Individuals connected to Hunter's practice and to the archive || 34
 |-
