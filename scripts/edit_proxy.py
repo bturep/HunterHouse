@@ -197,7 +197,7 @@ class Handler(BaseHTTPRequestHandler):
             data = json.loads(self.rfile.read(n) or b"{}")
         except Exception:
             return self._json(400, {"error": "bad JSON"})
-        if data.get("secret") != SECRET:
+        if not secrets.compare_digest(str(data.get("secret") or ""), SECRET):
             return self._json(403, {"error": "bad secret"})
         params = data.get("params") or {}
         try:

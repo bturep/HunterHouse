@@ -37,7 +37,7 @@ for (const lab of ["lab-a.html", "lab-b.html", "lab-c.html", "lab-d.html"]) {
     HTMLS.push({ file: lab, versionRe: /^v\d+\.\d{2}-test\.\d{2,}-lab[a-z]\.\d{2}$/, kind: "lab" });
   }
 }
-const MANIFESTS = ["manifest.json", "manifest.next.json"];
+const MANIFESTS = ["manifest.json", "manifest.next.json", "manifest.baden.json", "manifest.baden.next.json"];
 
 // Inline <script> only — skip src=… loads. Greedy across newlines.
 const SCRIPT_BLOCK_RE = /<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi;
@@ -172,6 +172,11 @@ try {
   if (!/<title>\s*Hunter House Archive\s*<\/title>/.test(live))
     fail("browse.html: <title> is not the live title 'Hunter House Archive' — staging title shipped?");
   else pass("browse.html: live <title> intact");
+  // AUDIT-2026-07-19 M4: the v1.09 promotion shipped the "-next" page icons to
+  // live (manifests were repointed; the in-page <link> icons were missed).
+  if (/icon-1(80|92)-next\.png/.test(live))
+    fail("browse.html: page <link> icons reference the -next icon set — staging icons must not ship to live");
+  else pass("browse.html: page icon links are the live set");
 } catch (e) { fail("promotion-invariant checks: " + e.message); }
 
 // (6) sw.js must parse, and an assets/ or sw.js change should come with a
