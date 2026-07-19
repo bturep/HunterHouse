@@ -16,7 +16,7 @@ The catalogue browser reads its data at runtime from a public **Wikibase Cloud**
 HunterHouse/
 ├── index.html            Home — crawlable landing page (split-layout front door)
 ├── browse.html           The archive browser — single-file SPA (live SPARQL + R2 snapshot)
-├── next.html             Staging copy of browse.html, a version line ahead (v1.09-test.NN)
+├── next.html             Staging copy of browse.html, a version line ahead (v1.10-test.NN)
 ├── richard-hunter.html   Biography (schema.org Person + sameAs Wikidata)
 ├── the-house.html        Narrative on the Hunter Residence and the drawing record
 ├── archive.html          How the catalogue is organised
@@ -36,7 +36,7 @@ HunterHouse/
 
 ## Live ↔ staging
 
-`browse.html` is live; `next.html` is a parallel staging copy on its own version line, deployed alongside on the same Pages site (a duplicate *file*, not a branch — plain Pages serves only `main`). Develop in `next.html`; promote by copying it over `browse.html`, bumping `VERSION`, **swapping the manifest link to `manifest.json`**, re-applying any held-back feature gates, validating, and tagging. Full procedure in `ARCHITECTURE.md` §4.7.
+`browse.html` is live; `next.html` is a parallel staging copy on its own version line, deployed alongside on the same Pages site (a duplicate *file*, not a branch — plain Pages serves only `main`). Develop in `next.html`; promote by copying it over `browse.html`, bumping `VERSION`, **repointing the JS manifest injection to the live pair (`manifest.json` / `manifest.baden.json`)**, re-applying any held-back feature gates (and re-stripping the loopback CSP entries — live is public-only), validating, and tagging. Full procedure in `ARCHITECTURE.md` §4.7.
 
 ## Deploy
 

@@ -34,16 +34,21 @@ TIERS = {"_thumb.jpg": ("thumbs", 600, 75), "_prev.jpg": ("previews", 2000, 82),
          "_large.jpg": ("large", 3840, 85)}
 PDF_Q = 80
 
+# ⚠ IDs updated 2026-07-19: the FRH public objects were renumbered to generic
+# HH-FRH-#### (DOC/PHOTO/SKB series retired). Slugs unchanged — R2 filenames are
+# now {newID}_{slug}_pNN_*. Re-running is idempotent under the NEW names.
+# For a FUTURE multi-page item: add a dict here + its ID to PUBLIC_PAGES in
+# browse.html AND next.html (SYNC-MAP), then run --execute.
 ITEMS = [
-    dict(aid="HH-FRH-DOC-03", slug="UVicSonicLabConcertProgram_1986-11-14",
+    dict(aid="HH-FRH-0004", slug="UVicSonicLabConcertProgram_1986-11-14",   # was HH-FRH-DOC-03
          sources=[f"{FH}/May25_2026/FH_2026-05-25{n}.tif" for n in ("11", "12", "13", "14")],
          rebuild_pdf=True),
-    dict(aid="HH-FRH-SKB-01", slug="Arguments_2015-2022",
+    dict(aid="HH-FRH-0049", slug="Arguments_2015-2022",                     # was HH-FRH-SKB-01
          sources=[f"{SB}/Sketchbook_Arguments001.tif",
                   f"{SB}/Sketchbook_Arguments002.tif",
                   f"{SB}/Sketchbook_Arguments003-2.tif"],
          rebuild_pdf=False),   # pages all upright (o=1) — existing PDF fine
-    dict(aid="HH-FRH-SKB-02", slug="Sketchbook_2022",
+    dict(aid="HH-FRH-0050", slug="Sketchbook_2022",                         # was HH-FRH-SKB-02
          sources=[f"{SB}/Sketchbook2_Arguments001.tif",
                   f"{SB}/Sketchbook2_Arguments003.tif",   # crayon arches
                   f"{SB}/Sketchbook2_Arguments002.tif"],  # ink maze — last drawing

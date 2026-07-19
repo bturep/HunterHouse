@@ -44,8 +44,8 @@ For **bulk changes to many items at once**: use a SPARQL query to get the QIDs f
 
 | PID | Label | Type | Notes |
 |---|---|---|---|
-| P1 | instance of | Item | Q88=drawing · Q89=photograph · Q90=correspondence · Q91=publication · Q92=ephemera · Q93=report · Q94=permit |
-| P2 | HH archive ID | String | `HH-A-0001` format. **Required on all items.** |
+| P1 | instance of | Item | Q88=drawing · Q89=photograph · Q90=correspondence · Q91=publication · Q92=ephemera · Q93=report · Q94=permit · Q488=land survey · Q583=letter · Q617=invitation · Q618=flyer · Q619=program · Q628=sketchbook |
+| P2 | HH archive ID | String | `HH-{COLL}-####` (HHC/CAA/EGC/IHC/FRH). **Required on all archive items.** Legacy `HH-A-*` generation retired 2026-05-14 (preserved on P97). |
 | P62 | part of | Item | Project phase/set (primary). Link to a Q###. |
 | P64 | start date | Time | Drawing date (preferred over P82 when known precisely) |
 | P79 | source collection | Item | Q180=HHC · Q178=CAA · Q184=FUL · Q182=EGC · Q181=FRH · Q183=IHC |
@@ -155,10 +155,10 @@ For **bulk changes to many items at once**: use a SPARQL query to get the QIDs f
 | QID | Code | Name | Custodian | Count |
 |---|---|---|---|---|
 | Q180 | HHC | Hunter House Collection | Hunter House Foundation | 110 |
-| Q178 | CAA | Canadian Architectural Archives | University of Calgary | 18 |
-| Q184 | FUL | John Fulker Collection | West Vancouver Museum | 9 |
-| Q182 | EGC | Eric Gesinger Collection | Eric Gesinger | 30 (drawings; photos pending) |
-| Q181 | FRH | Frances Hunter Collection | Frances Hunter | pending |
+| Q178 | CAA | Canadian Architectural Archives | University of Calgary | 36 (⚠ duplicate entity Q116 tombstoned 2026-07-19 — Q178 is canonical, carries the Wikidata P139 back-ref) |
+| Q184 | FUL | John Fulker Collection | West Vancouver Museum | 0 (9 identified, not yet ingested) |
+| Q182 | EGC | Eric Gesinger Collection | Eric Gesinger | 57 (31 drawings + 26 Knowles photographs) |
+| Q181 | FRH | Frances Hunter Collection | Frances Hunter | 50 public (generic HH-FRH-0001..0050 since 2026-07-19) + 73 gated letters outside the graph |
 | Q183 | IHC | Ivan Hunter Collection | Ivan Hunter | 45 (HH-IHC-0001..0045; ingested 2026-05-25) |
 
 ### Project phases / sets (P62 / P84)
@@ -228,15 +228,17 @@ These are the QIDs for project sets that items belong to.
 
 ## Identifier schema
 
-| Prefix | Type | Example |
-|---|---|---|
-| `HH-A-####` | Architectural drawing | `HH-A-0001` |
-| `HH-P-####` | Photograph | `HH-P-0009` |
-| `HH-L-####` | Letter / correspondence | `HH-L-0004` |
-| `HH-E-####` | Engineering document | `HH-E-0002` |
-| `HH-N-####` | Notebook / sketch | `HH-N-0001` |
+Archive items: **`HH-{COLL}-####`** — collection code + 4-digit number, no type in the ID
+(type is metadata, P1). Codes: HHC · CAA · EGC · IHC · FRH. Non-catalogue entities use their
+own prefixes on P2 (HH-PH phases, HH-P persons, HH-W works, HH-I institutions, HH-E events,
+HH-B buildings, HH-A areas).
 
-IDs are zero-padded to four digits and run in order of cataloguing. They are never reassigned. P97 holds the legacy ID if an item was renumbered.
+Retired generations (values preserved on P97 when renumbered): the original typed scheme
+`HH-A/P/L/E/N-####` (retired 2026-05-14); `HH-IVH-*` (→ IHC, 2026-05-25); the FRH type
+sub-series `HH-FRH-{DOC,PHOTO,SKB}-##` (→ generic HH-FRH-####, 2026-07-19 — redirect stubs
+serve the old permalinks).
+
+IDs are zero-padded to four digits and run in authored order. They are never reassigned.
 
 ---
 
@@ -373,14 +375,15 @@ SELECT ?item ?id ?notes WHERE {
 
 | Collection | Target | Catalogued | Images | Notes |
 |---|---|---|---|---|
-| HHC | ~200+ | 110 | partial | Primary working collection |
-| CAA | ~344 drawings + 62 photos | 18 | partial | Early drawings donated 2019/2021 |
-| FUL | 9 (full set) | 9 | partial | Fulker photographs |
-| GES | unknown | 0 | none | Furniture drawings; pending ingest |
-| FRH | unknown | 0 | none | Frances Hunter materials; pending |
-| IHC | 45 | 45 | complete (3 tiers + master JPG) | Ivan Hunter photographs of the Hunter Residence (2024-02-11); ingested 2026-05-25 |
+| HHC | ~200+ | 115 | partial (3 stubs lack P96) | Primary working collection |
+| CAA | ~344 drawings + 62 photos | 36 | complete | Donated 2019/2021; renumbered 2026-05-21 |
+| FUL | 9 (full set) | 0 | none | Identified, not yet ingested |
+| EGC | 57+ | 57 | mixed (12 photos working-res) | 31 drawings + 26 Knowles photographs |
+| FRH | open | 50 public | complete | + 73 gated letters in R2, outside the graph |
+| IHC | 45 | 45 | complete (3 tiers + master JPG) | Ivan Hunter photographs (2024-02-11) |
 
-**Current Wikibase item count with P2 + P96:** 147 items shown in browse.html.
+**Current catalogue count (P2 + P79): 303 items** (2026-07-19). Detailed per-session state
+lives in the private CLAUDE.md; this table is refreshed opportunistically.
 
 **Known gaps (from browse.html):**  
 Items HH-A-80, HH-A-86 and others show "—" in the Year column — they have a P83 (date digitized) but no drawing date (P82/P64/P118). These need a drawing date added.

@@ -14,6 +14,17 @@ For a software engineer inspecting the live site. Scope = what `https://hunterho
 > *gate the instrument, not the collection*: public = narrative + curated selections + open per-item
 > pages; researcher = the full workbench (browse + letters + files). Full detail in `CLAUDE.md`;
 > `BACKLOG.md` indexes what's still pending. These ship at the next `browse.html` promotion.
+>
+> **→ 2026-07-19 (live `v1.09.05` / staging `v1.10-test.06`):** the promotion happened — live
+> `browse.html` is now the **lab-b redesign** (v1.09.00, 2026-07-16): all-mono type,
+> collections-as-shape, authored-order-only, **PUBLIC-ONLY** (`rnRole()` forced "public"; the
+> researcher/admin surface awaits a designed "admin entry"; gated letters reach the public page
+> only via the `?researcher=<token>` link, now session-scoped storage). Catalogue is **303**
+> items; the FRH public objects were renumbered to generic `HH-FRH-0001..0050` (old IDs on P97
+> + 50 redirect stubs in `archive/`); public multi-page objects (a program + two sketchbooks)
+> flip page-by-page via the generic `item.pages[]` pager. A seven-agent audit
+> (`AUDIT-2026-07-19.md`, private repo) drove description/link/security cleanups. The body below
+> still describes 2026-06-11 mechanics — trust it for architecture shape, not current counts.
 
 ---
 
