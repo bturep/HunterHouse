@@ -4151,7 +4151,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09.05";
+  const VERSION      = "v1.09.06";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6273,7 +6273,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       title: "Frances Hunter Collection",
       body:  "Correspondence and papers of Frances Hunter, including letters written by Richard Hunter, and photographs documenting the residence (1977–1998). Digitization in progress; most items are available to researchers by permission. The photographic prints were gifted to the Hunter House Foundation.",
       qid:   "Q181",
-      stats: "50 items · correspondence gated",
+      stats: "56 items · correspondence gated",
       custodian: "Hunter House Foundation",
     },
   };
@@ -6824,7 +6824,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   // escapeHTML stops markup injection but not a javascript: href (audit P2 L2).
   const httpUrl = u => { if (!u) return null; try { const p = new URL(u).protocol; return (p === "https:" || p === "http:") ? u : null; } catch (e) { return null; } };
 
-  const PUBLIC_PAGES = { "HH-FRH-0004": 4, "HH-FRH-0049": 3, "HH-FRH-0050": 3 };
+  const PUBLIC_PAGES = { "HH-FRH-0004": 4, "HH-FRH-0049": 3, "HH-FRH-0050": 3, "HH-FRH-0053": 4, "HH-FRH-0055": 10, "HH-FRH-0056": 3 };
 
   function processRows(rows) {
     const dateStr = v => v ? v.replace(/^\+/, "").split("T")[0] : null;

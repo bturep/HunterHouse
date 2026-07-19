@@ -44,7 +44,7 @@ For **bulk changes to many items at once**: use a SPARQL query to get the QIDs f
 
 | PID | Label | Type | Notes |
 |---|---|---|---|
-| P1 | instance of | Item | Q88=drawing · Q89=photograph · Q90=correspondence · Q91=publication · Q92=ephemera · Q93=report · Q94=permit · Q488=land survey · Q583=letter · Q617=invitation · Q618=flyer · Q619=program · Q628=sketchbook |
+| P1 | instance of | Item | Q88=drawing · Q89=photograph · Q90=correspondence · Q91=publication · Q92=ephemera · Q93=report · Q94=permit · Q488=land survey · Q583=letter · Q617=invitation · Q618=flyer · Q619=program · Q628=sketchbook · Q673=clipping · Q674=essay · Q675=card |
 | P2 | HH archive ID | String | `HH-{COLL}-####` (HHC/CAA/EGC/IHC/FRH). **Required on all archive items.** Legacy `HH-A-*` generation retired 2026-05-14 (preserved on P97). |
 | P62 | part of | Item | Project phase/set (primary). Link to a Q###. |
 | P64 | start date | Time | Drawing date (preferred over P82 when known precisely) |
@@ -158,7 +158,7 @@ For **bulk changes to many items at once**: use a SPARQL query to get the QIDs f
 | Q178 | CAA | Canadian Architectural Archives | University of Calgary | 36 (⚠ duplicate entity Q116 tombstoned 2026-07-19 — Q178 is canonical, carries the Wikidata P139 back-ref) |
 | Q184 | FUL | John Fulker Collection | West Vancouver Museum | 0 (9 identified, not yet ingested) |
 | Q182 | EGC | Eric Gesinger Collection | Eric Gesinger | 57 (31 drawings + 26 Knowles photographs) |
-| Q181 | FRH | Frances Hunter Collection | Frances Hunter | 50 public (generic HH-FRH-0001..0050 since 2026-07-19) + 73 gated letters outside the graph |
+| Q181 | FRH | Frances Hunter Collection | Frances Hunter | 56 public (generic HH-FRH-0001..0056) + 74 gated records outside the graph |
 | Q183 | IHC | Ivan Hunter Collection | Ivan Hunter | 45 (HH-IHC-0001..0045; ingested 2026-05-25) |
 
 ### Project phases / sets (P62 / P84)
@@ -379,10 +379,10 @@ SELECT ?item ?id ?notes WHERE {
 | CAA | ~344 drawings + 62 photos | 36 | complete | Donated 2019/2021; renumbered 2026-05-21 |
 | FUL | 9 (full set) | 0 | none | Identified, not yet ingested |
 | EGC | 57+ | 57 | mixed (12 photos working-res) | 31 drawings + 26 Knowles photographs |
-| FRH | open | 50 public | complete | + 73 gated letters in R2, outside the graph |
+| FRH | open | 56 public | complete | + 74 gated records in R2, outside the graph |
 | IHC | 45 | 45 | complete (3 tiers + master JPG) | Ivan Hunter photographs (2024-02-11) |
 
-**Current catalogue count (P2 + P79): 303 items** (2026-07-19). Detailed per-session state
+**Current catalogue count (P2 + P79): 309 items** (2026-07-19). Detailed per-session state
 lives in the private CLAUDE.md; this table is refreshed opportunistically.
 
 **Known gaps (from browse.html):**  

@@ -14,8 +14,8 @@ is needed to pick up.
 | | |
 |---|---|
 | Live page | https://hunterhouse.wikibase.cloud/wiki/Main_Page |
-| Current revision | **5998** |
-| Last edited | 2026-07-19 (FRH 9→50: 41-photo batch; Archive Item 262→303) |
+| Current revision | **6369** |
+| Last edited | 2026-07-19 (FRH 50→56: Keep/ batch; Archive Item 303→309) |
 | Working branch when edited | `v1.04` |
 | Editor | bot `MyBot@my-bot` via MediaWiki API |
 
@@ -23,7 +23,8 @@ is needed to pick up.
 
 | Rev | What |
 |---|---|
-| **5998** | FRH 9→50 (41 house-documentation photographs, Q632–Q672 — since renumbered with the whole public FRH set to generic HH-FRH-0001..0050, old IDs on P97); Archive Item 262→303. **← current** |
+| **6369** | FRH 50→56 (covenant clipping + 5 Keep/ documents, HH-FRH-0051..0056); Archive Item 303→309; clipping/essay added to the medium sub-type list. **← current** |
+| **5998** | FRH 9→50 (41 house-documentation photographs, Q632–Q672 — since renumbered with the whole public FRH set to generic HH-FRH-0001..0050, old IDs on P97); Archive Item 262→303. |
 | **5954** | FRH public objects 7→9: +2 hand-bound sketchbooks of Richard Hunter's drawings (HH-FRH-SKB-01 "Arguments" Q630, HH-FRH-SKB-02 untitled Q631; new item type «Sketchbook» Q628). Archive Item 260→262; "sketchbook" added to the Archive-Item medium sub-type list. |
 | **5525** | Reverted an erroneous Phase 38→39 bump (rev 5524). No displayed count changed today: the stool split (0031 + 0032–0036 → new "Stool" phase Q616; EGC-0023 reverted to "East Wing Living Room Side Table") is a modeling change, and Q616 carries no HH-PH prefix id (like the EGC phases), so the prefix-based Phase count stays 38. |
 | **5950** | HH-HHC-0116 retired — duplicate of HH-HHC-0112 (its better 400dpi scan replaced 0112's image; Q627 = emptied tombstone). HHC 116→115, Archive Item 261→260. |
@@ -200,7 +201,7 @@ print(r["edit"]["result"], "rev", r["edit"].get("newrevid"), "was", r["edit"].ge
 
 ---
 
-## Canonical current wikitext (= live rev 5998 — verbatim)
+## Canonical current wikitext (= live rev 6369 — verbatim)
 
 ```
 __NOTOC__
@@ -252,7 +253,7 @@ The archive draws on a growing set of source collections; more are expected as m
 |-
 | '''[[Item:Q182|Eric Gesinger Collection]]''' || [[Item:Q209|Eric Gesinger]] || 57 archive items || Catalogued
 |-
-| '''[[Item:Q181|Frances Hunter Collection]]''' || [[Item:Q202|Frances Hunter]] || 50 archive items || Public objects catalogued; correspondence researcher-gated, held outside this Wikibase
+| '''[[Item:Q181|Frances Hunter Collection]]''' || [[Item:Q202|Frances Hunter]] || 56 archive items || Public objects catalogued; correspondence researcher-gated, held outside this Wikibase
 |-
 | '''[[Item:Q183|Ivan Hunter Collection]]''' || [[Item:Q203|Ivan Hunter]] || 45 archive items || Catalogued
 |}
@@ -270,7 +271,7 @@ The archive is organized into nine Item Types, each with its own controlled voca
 |-
 | '''Area''' || Named architectural sub-parts of a Work — wings, rooms, towers, gardens, decks, built features || 36
 |-
-| '''Archive Item''' || The primary materials, sub-typed by medium: drawing, photograph, engineering document, land survey, permit set, sketchbook, ephemera || 303
+| '''Archive Item''' || The primary materials, sub-typed by medium: drawing, photograph, engineering document, land survey, permit set, sketchbook, clipping, essay, ephemera || 309
 |-
 | '''Person''' || Individuals connected to Hunter's practice and to the archive || 34
 |-
