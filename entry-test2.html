@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.29 — the convergence entry (Brandon, 2026-07-19):
+<!-- entry-test2 v0.30 — the convergence entry (Brandon, 2026-07-19):
      NO INTRO — the page lands directly: HUNTER HOUSE wordmark top-left,
      the menu on top, the 1970 drawing centred below. Scroll:
      text appears line by line BELOW the sketch, the sketch scrolls away,
@@ -99,10 +99,10 @@
   <a data-z="1.55" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">Archive</a>
   <a data-z="3.38" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.29</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.30</div>
 
 <script>
-// entry-test2 v0.29 — z: 0..1 convergence (film-in-type) · 1..2 the drawing ·
+// entry-test2 v0.30 — z: 0..1 convergence (film-in-type) · 1..2 the drawing ·
 // 2..2.15 a breath · 2.15..4.4 the scroll: lines in, sketch out, photo in.
 (function () {
   var z = 0, target = 0;
@@ -247,45 +247,47 @@
   // the site plan's house zoom, scroll-driven: the mock owns the zoom via its
   // click toggle — we synthesize clicks (at the house to go in, away to come
   // out) whenever the desired state flips
-  var siteZoomed = false, zoomBusy = false;
+  // house-zoom drive: an ARMED ASSERT LOOP, not a one-shot. Actual state
+  // derives from camera altitude (zoomed ≈ y<600, out ≈ y>800); while armed,
+  // the loop re-fires an aimed click until reality matches the want, then
+  // DISARMS — so a visitor's own exploring clicks are never fought.
+  var wantZoom = true, zoomArmed = true;      // arrival state: zoomed on the house
   function siteWantZoom(want) {
-    if (want === siteZoomed || zoomBusy) return;
+    if (want !== wantZoom) { wantZoom = want; zoomArmed = true; }
+  }
+  var zoomLastFire = 0, zoomLastY = null;
+  setInterval(function () {
+    if (!zoomArmed) return;
     var w = window.__lensWin;
     if (!w || !w.__v || !w.__v.houseMesh) return;
-    zoomBusy = true;
-    var V = w.__v, T = w.THREE;
-    var tries = 0;
-    function fire() {
-      var x = 8, y = 8;
-      try {
-        if (want) {
-          V.camera.updateMatrixWorld(true);
-          V.houseMesh.updateMatrixWorld(true);
-          var bb = new T.Box3().setFromObject(V.houseMesh);
-          var c = bb.getCenter(new T.Vector3());
-          c.project(V.camera);
-          x = (c.x + 1) / 2 * w.innerWidth + (tries % 3 - 1) * 12;   // jitter the aim on retries
-          y = (1 - c.y) / 2 * w.innerHeight + (Math.floor(tries / 3) % 3 - 1) * 12;
-        }
-        var y0 = V.camera.position.y;
-        w.dispatchEvent(new w.MouseEvent("click", { clientX: x, clientY: y }));
-        setTimeout(function () {
-          var moved = Math.abs(V.camera.position.y - y0) > 0.5;
-          if (moved) { siteZoomed = want; zoomBusy = false; }
-          else if (++tries < 9) fire();          // missed — re-aim, try again
-          else { zoomBusy = false; }             // give up quietly this round
-        }, 350);
-      } catch (e) { zoomBusy = false; }
-    }
-    fire();
-  }
-  // pre-arm: zoom onto the house while the site is still hidden, so it ARRIVES
-  // zoomed-in; the scroll past the threshold zooms out
-  (function armWhenReady(tries) {
-    var w = window.__lensWin;
-    if (w && w.__v && w.__v.houseMesh) { setTimeout(function () { siteWantZoom(true); }, 1200); return; }
-    if (tries < 200) setTimeout(function () { armWhenReady(tries + 1); }, 100);
-  })(0);
+    var V = w.__v, y = V.camera.position.y;
+    var moving = zoomLastY !== null && Math.abs(y - zoomLastY) > 3;
+    zoomLastY = y;
+    if (moving) return;                                  // mid-transition — wait
+    if (Date.now() - zoomLastFire < 2600) return;        // give the ease time to run
+    if ((y < 600) === wantZoom) { zoomArmed = false; return; }   // matched — disarm
+    try {
+      var T = w.THREE, x = 8, cy = 8;
+      if (wantZoom) {
+        // aim at the centroid of an ACTUAL TRIANGLE of the footprint mesh —
+        // the bbox centre falls in the plan's notch and the raycast misses
+        V.camera.updateMatrixWorld(true);
+        V.houseMesh.updateMatrixWorld(true);
+        var pos = V.houseMesh.geometry.attributes.position;
+        var ti = Math.floor(pos.count / 6) * 3;          // a mid-buffer triangle
+        var c = new T.Vector3().fromBufferAttribute(pos, ti)
+          .add(new T.Vector3().fromBufferAttribute(pos, ti + 1))
+          .add(new T.Vector3().fromBufferAttribute(pos, ti + 2))
+          .multiplyScalar(1 / 3)
+          .applyMatrix4(V.houseMesh.matrixWorld);
+        c.project(V.camera);
+        x = (c.x + 1) / 2 * w.innerWidth;
+        cy = (1 - c.y) / 2 * w.innerHeight;
+      }
+      zoomLastFire = Date.now();
+      w.dispatchEvent(new w.MouseEvent("click", { clientX: x, clientY: cy }));
+    } catch (e) {}
+  }, 900);
 
   // the site-plan iframe: strip the mock's chrome, then RE-INK the scene —
   // all linework to full white (the CSS invert renders it BLACK on paper),
@@ -317,7 +319,7 @@
               0xffffff: 0x0d0d0d,   // contours → black ink
               0xc4826e: 0xd44d14,   // property line → vivid burnt orange
               0xa78bbf: 0x8b30d9,   // covenant → vivid violet
-              0xe6c067: 0xd99000,   // house → vivid amber
+              0xe6c067: 0x0d0d0d,   // house → black (solid mass w/ the fill) → vivid amber
               0x7ba0d6: 0x1263e0,   // lake → vivid blue
               0x6f93c9: 0x1263e0,   // stream → vivid blue
               0xc9a44e: 0xcc7a00,   // kinhin/corr → orange-amber
@@ -377,17 +379,44 @@
             }
             window.__reink = function () {
               V.scene.background && V.scene.background.set(0x0a0a0a);
-              V.scene.traverse(function (o) {
+              // significant lines get THICKENED: WebGL line width is capped
+            // at 1px, so each is drawn 5x with sub-unit offsets (~3px stroke)
+            var THICK = { 0xc4826e: 1, 0xa78bbf: 1, 0xe6c067: 1 };   // property · covenant · house outline
+            var toThicken = [], houseFillMesh = null;
+            V.scene.traverse(function (o) {
                 if (!o.material) return;
-                // the aerial/hillshade planes: hide the OBJECT (the lens
-                // re-drives material opacity per frame, so visible=false is
-                // the only stable off-switch). ALL textured meshes go — the
-                // real place-labels are sprites, untouched by this.
                 var m0 = Array.isArray(o.material) ? o.material[0] : o.material;
+                if (m0 === V.houseFill || o.userData.__isHouseFill) { houseFillMesh = o; o.userData.__isHouseFill = true; }
                 if (m0 && m0.isMeshBasicMaterial && m0.map) { o.visible = false; return; }
+                var hex0 = (m0 && m0.isLineBasicMaterial && m0.color) ? m0.color.getHex() : null;
                 if (Array.isArray(o.material)) o.material = o.material.map(function (mm) { return remat(mm, o); });
                 else o.material = remat(o.material, o);
+                if (hex0 !== null && THICK[hex0] && !o.userData.__thickened) {
+                  o.userData.__thickened = true;
+                  toThicken.push(o);
+                }
               });
+            // add the offset copies AFTER the traverse (no mid-walk mutation)
+            toThicken.forEach(function (o) {
+              [[0.9,0],[  -0.9,0],[0,0.9],[0,-0.9]].forEach(function (d) {
+                var c = new w.THREE.Line(o.geometry, o.material);
+                c.position.copy(o.position); c.rotation.copy(o.rotation); c.scale.copy(o.scale);
+                c.position.x += d[0]; c.position.z += d[1];
+                c.userData.__thickened = true;
+                if (o.parent) o.parent.add(c);
+              });
+            });
+            // the HOUSE FOOTPRINT fills solid black: swap the fill mesh's
+            // material (the mock's hover keeps writing to its old ref)
+            if (houseFillMesh) {
+              var solid = new w.THREE.MeshBasicMaterial({ transparent: false, side: w.THREE.DoubleSide });
+              solid.color.setRGB(1, 1, 1);   // white → the CSS invert renders BLACK
+              // DoubleSide is LOAD-BEARING: the zoom raycast targets this mesh,
+              // and a FrontSide swap backface-culls it from above (no clicks land)
+              solid.userData.__inked = true;
+              houseFillMesh.material = solid;
+              houseFillMesh.visible = true;
+            }
             };
             // late passes: catch boot races + meshes added after first ink
             setTimeout(window.__reink, 1200);
@@ -414,11 +443,9 @@
                 });
               } catch (e) {}
             }, 120);
-            V.scene.traverse(function (o) {
-              if (!o.material) return;
-              if (Array.isArray(o.material)) o.material = o.material.map(remat);
-              else o.material = remat(o.material);
-            });
+            window.__reink();   // the FIRST pass must be the full one — it
+                                // captures original hexes (thicken) + the
+                                // house-fill ref before replacement orphans it
             return;
           }
         } catch (e) {}
@@ -461,7 +488,7 @@
   flow.querySelector(".sk").addEventListener("load", function () { centreSketch(); apply(); });
 
   apply();
-  console.log("entry-test2 v0.29");
+  console.log("entry-test2 v0.30");
 })();
 </script>
 </body>
