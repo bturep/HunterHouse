@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.23 — the convergence entry (Brandon, 2026-07-19):
-     HUNTER HOUSE — the letterforms a window onto film (canvas knockout) →
-     both words swallowed into the exact midline → the drawing arises (no
-     fade, always dark) → the menu arrives → then the window SCROLLS DOWN:
+<!-- entry-test2 v0.24 — the convergence entry (Brandon, 2026-07-19):
+     NO INTRO — the page lands directly: HUNTER HOUSE wordmark top-left,
+     the menu on top, the 1970 drawing centred below. Scroll:
      text appears line by line BELOW the sketch, the sketch scrolls away,
      all text — with a right-hand column where HH-FRH-0008 (the 1977 house
      photograph) fades in. The letter-fade phase is REMOVED (too complicated).
@@ -21,13 +20,6 @@
   html,body{height:100%;overflow:hidden}
   body{background:#f6f5f5;font-family:"Inter Tight",system-ui,sans-serif;color:#1b1918}
   #stage{position:fixed;inset:0}
-  /* the words — drawn on canvas so the film shows THROUGH the letterforms */
-  #wordcanvas{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);width:100%}
-  #typevid{display:none}
-  /* the drawing — always dark, no fade; arrives out of the point */
-  #draw{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    visibility:hidden;transform-origin:50% 50%;z-index:4;pointer-events:none}
-  #draw img{width:min(1100px,90vw);display:block}
   #menu a:hover{color:#1b1918}
   .st-term{color:#000;border-bottom:1px dashed rgba(27,25,24,.45);cursor:pointer}
   .st-term:hover{border-bottom-color:#000}
@@ -60,12 +52,6 @@
 </style>
 </head>
 <body>
-<div id="stage">
-  <video id="typevid" autoplay muted loop playsinline preload="auto"><source src="assets/entry/type-video.mp4" type="video/mp4"></video>
-  <canvas id="wordcanvas" aria-label="Hunter House"></canvas>
-  <div id="draw"><img id="draw-img" src="assets/entry/letter-elev-grey.png" alt="The house sketched in Ric's 1970 letter"></div>
-</div>
-
 <div id="reading" aria-label="Reading">
   <div id="flow">
     <img class="sk" src="assets/entry/letter-elev-grey.png" alt="">
@@ -92,120 +78,41 @@
 </div>
 <div id="site-cue">Site ↓</div>
 <div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
-<nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;opacity:0;pointer-events:none;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62)">
+<div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#1b1918">Hunter House</div>
+<nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62)">
   <a href="#" onclick="return false" style="padding:6px 15px">House</a>
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">Site</a>
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">Hunter</a>
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">Archive</a>
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.23</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.24</div>
 
 <script>
-// entry-test2 v0.23 — z: 0..1 convergence (film-in-type) · 1..2 the drawing ·
+// entry-test2 v0.24 — z: 0..1 convergence (film-in-type) · 1..2 the drawing ·
 // 2..2.15 a breath · 2.15..4.4 the scroll: lines in, sketch out, photo in.
 (function () {
   var z = 0, target = 0;
-  var draw = document.getElementById("draw");
-  var drawImg = document.getElementById("draw-img");
-  var S0 = 0.003;
   var ease = function (t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; };
-
-  // ── the words: canvas, film knocked out through the letterforms ────────
-  // PERFORMANCE: the canvas is only the TYPE'S BAND (not the viewport); the
-  // text mask is cached offscreen and rebuilt only when the words move; each
-  // frame composites the cached mask with just the SLICE of video the band
-  // sees (source-rect crop of the cover-fit frame). DPR capped at 1.5.
-  var cv = document.getElementById("wordcanvas");
-  var cx = cv.getContext("2d");
-  var vid = document.getElementById("typevid");
-  var maskCv = document.createElement("canvas");
-  var maskCx = maskCv.getContext("2d");
-  var maskKey = "";
-  try { document.fonts.load('800 140px "Inter Tight"').then(function(){ maskKey=""; }); } catch (e) {}
-  function bandMetrics() {
-    var W = window.innerWidth, fs = Math.min(140, Math.max(56, 0.09 * W));
-    return { W: W, fs: fs, bandH: Math.ceil(fs * 1.5) };
-  }
-  function buildMask(zA, bm, dpr) {
-    maskCv.width = Math.round(bm.W * dpr); maskCv.height = Math.round(bm.bandH * dpr);
-    maskCx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    maskCx.clearRect(0, 0, bm.W, bm.bandH);
-    maskCx.font = '800 ' + bm.fs + 'px "Inter Tight", sans-serif';
-    maskCx.textBaseline = "middle";
-    var gap = 0.34 * bm.fs;
-    var wH = maskCx.measureText("HUNTER").width, wO = maskCx.measureText("HOUSE").width;
-    var e = ease(zA);
-    var mid = bm.W / 2, cy = bm.bandH / 2;
-    var hx = mid - gap/2 - wH + e * (wH + gap/2);
-    var ox = mid + gap/2 - e * (wO + gap/2);
-    maskCx.save();
-    maskCx.beginPath(); maskCx.rect(0, 0, mid, bm.bandH); maskCx.clip();
-    maskCx.fillStyle = "#1b1918"; maskCx.fillText("HUNTER", hx, cy);
-    maskCx.restore();
-    maskCx.save();
-    maskCx.beginPath(); maskCx.rect(mid, 0, mid, bm.bandH); maskCx.clip();
-    maskCx.fillStyle = "#1b1918"; maskCx.fillText("HOUSE", ox, cy);
-    maskCx.restore();
-  }
-  function drawWords(zA) {
-    var bm = bandMetrics();
-    var dpr = Math.min(1.5, window.devicePixelRatio || 1);
-    if (cv.width !== Math.round(bm.W * dpr)) {
-      cv.width = Math.round(bm.W * dpr); cv.height = Math.round(bm.bandH * dpr);
-      cv.style.height = bm.bandH + "px";
-    }
-    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    cx.clearRect(0, 0, bm.W, bm.bandH);
-    if (zA >= 1) return;
-    var key = zA.toFixed(4) + "/" + bm.W + "/" + dpr;
-    if (key !== maskKey) { buildMask(zA, bm, dpr); maskKey = key; }
-    cx.drawImage(maskCv, 0, 0, bm.W, bm.bandH);
-    if (vid.readyState >= 2) {
-      cx.globalCompositeOperation = "source-in";
-      var vw = vid.videoWidth, vh = vid.videoHeight;
-      var W = bm.W, H = window.innerHeight;
-      var sc = Math.max(W / vw, H / vh);           // cover-fit for the full viewport
-      // the band sits at the viewport's vertical centre — take just that slice
-      var srcY = (vh - bm.bandH / sc) / 2;
-      var srcX = (vw - W / sc) / 2;
-      cx.drawImage(vid, srcX, srcY, W / sc, bm.bandH / sc, 0, 0, W, bm.bandH);
-      cx.globalCompositeOperation = "source-over";
-    }
-  }
 
   // ── the reading flow ───────────────────────────────────────────────────
   var reading = document.getElementById("reading");
   var flow = document.getElementById("flow");
   var ps = Array.prototype.slice.call(flow.querySelectorAll(".txt p"));
-  var Z_READ0 = 2.15, Z_END = 4.4;
+  var Z_READ0 = 0.0, Z_END = 2.25;
 
   function apply() {
-    var zA = Math.min(1, z);
-    var zB = Math.max(0, Math.min(1, z - 1));
-    if (zB > 0 && z < 2.0005) {
-      draw.style.visibility = "visible";
-      draw.style.transform = "scale(" + (S0 + ease(zB) * (1 - S0)) + ")";
-    } else if (zB <= 0) {
-      draw.style.visibility = "hidden";
+    // the page LANDS on the reading: menu on top, the drawing below
+    var reading = document.getElementById("reading");
+    if (reading.style.visibility !== "visible") {
+      var sk = flow.querySelector(".sk");
+      var h = sk.getBoundingClientRect().height || sk.naturalHeight;
+      flow.style.paddingTop = Math.max(24, (window.innerHeight - h) / 2) + "px";
+      reading.style.visibility = "visible";
     }
-    var menu = document.getElementById("menu");
-    var m = Math.max(0, (zB - 0.82) / 0.18);
-    menu.style.opacity = m;
-    menu.style.pointerEvents = m > 0.9 ? "auto" : "none";
-
-    // the reading swaps in silently at the zoom's true end
-    var on = z > 1.995;
-    if (on && reading.style.visibility !== "visible") {
-      var h = drawImg.getBoundingClientRect().height;
-      var pt = Math.max(24, (window.innerHeight - h) / 2);
-      flow.style.paddingTop = pt + "px";
-    }
-    reading.style.visibility = on ? "visible" : "hidden";
-    if (on) draw.style.visibility = "hidden";
 
     // the window scrolls down; lines arrive as it goes; the sketch departs
-    var zS = Math.max(0, Math.min(1, (Math.min(z, 3.4) - Z_READ0) / (Z_END - Z_READ0)));
+    var zS = Math.max(0, Math.min(1, (Math.min(z, 1.25) - Z_READ0) / (Z_END - Z_READ0)));
     var scrollMax = Math.max(0, flow.scrollHeight - window.innerHeight * 0.55);
     flow.style.transform = "translateY(" + (-zS * scrollMax) + "px)";
     var lineH = 17 * 1.7;
@@ -230,8 +137,8 @@
     // z 3.0..3.35 FRH-0008 flies from its column to centre (reading fades) ·
     // 3.5..3.9 it rolls aside, CAA-0018 in from the right · dwell (explore) ·
     // 4.3..4.7 CAA rolls aside, IHC-0038 in · then the SITE cue.
-    var G0 = 3.4;
-    var gal = document.getElementById("gallery");
+    var G0 = 1.25;
+    var gal = document.getElementById("gallery");  // (reading already in scope)
     var gOn = z > G0 - 0.001;
     gal.style.visibility = gOn ? "visible" : "hidden";
     reading.style.opacity = gOn ? Math.max(0, 1 - (z - G0) / 0.3) : 1;
@@ -242,7 +149,7 @@
       // FRH-0008: column rect → centre, then roll aside left
       var gf = document.getElementById("g-frh");
       var fIn = Math.max(0, Math.min(1, (z - G0) / 0.35));
-      var fOut = Math.max(0, Math.min(1, (z - 3.9) / 0.4));
+      var fOut = Math.max(0, Math.min(1, (z - 1.75) / 0.4));
       var colImg = colPhoto.querySelector("img");
       var r = colImg.getBoundingClientRect();
       var dx0 = (r.left + r.width/2) - W/2, dy0 = (r.top + r.height/2) - window.innerHeight/2;
@@ -251,18 +158,18 @@
       gf.style.opacity = fIn > 0 ? 1 : 0;
       // CAA-0018: in from the right; dwell for exploring; then roll aside
       var gc = document.getElementById("g-caa");
-      var cIn = Math.max(0, Math.min(1, (z - 3.9) / 0.4));
-      var cOut = Math.max(0, Math.min(1, (z - 4.7) / 0.4));
+      var cIn = Math.max(0, Math.min(1, (z - 1.75) / 0.4));
+      var cOut = Math.max(0, Math.min(1, (z - 2.55) / 0.4));
       gc.style.transform = "translate(-50%,-50%) translate(" + ((1-ease(cIn))*(W*0.75) - ease(cOut)*(W*0.75)) + "px,0) rotate(" + (-ease(cOut)*7) + "deg)";
       gc.style.opacity = cIn > 0 ? 1 : 0;
       gc.classList.toggle("zoomable", cIn >= 1 && cOut <= 0);
       // IHC-0038: in from the right; stays
       var gi = document.getElementById("g-ihc");
-      var iIn = Math.max(0, Math.min(1, (z - 4.7) / 0.4));
+      var iIn = Math.max(0, Math.min(1, (z - 2.55) / 0.4));
       gi.style.transform = "translate(-50%,-50%) translate(" + ((1-ease(iIn))*(W*0.75)) + "px,0)";
       gi.style.opacity = iIn > 0 ? 1 : 0;
       // then: SITE
-      document.getElementById("site-cue").style.opacity = Math.max(0, Math.min(1, (z - 5.15) / 0.2));
+      document.getElementById("site-cue").style.opacity = Math.max(0, Math.min(1, (z - 3.0) / 0.2));
     } else {
       document.getElementById("site-cue").style.opacity = 0;
     }
@@ -317,7 +224,7 @@
     apply();
   }
   function nudge(d) {
-    target = Math.max(0, Math.min(5.4, target + d));
+    target = Math.max(0, Math.min(3.25, target + d));
     if (!raf) raf = requestAnimationFrame(step);
   }
   window.addEventListener("wheel", function (e) { e.preventDefault(); nudge(e.deltaY / 900); }, { passive: false });
@@ -332,14 +239,8 @@
   });
   window.addEventListener("resize", apply);
 
-  // keep the film-in-type alive while the words are up (video frames advance)
-  (function loop() {
-    if (z < 1) drawWords(Math.min(1, z));
-    requestAnimationFrame(loop);
-  })();
-
   apply();
-  console.log("entry-test2 v0.23");
+  console.log("entry-test2 v0.24");
 })();
 </script>
 </body>
