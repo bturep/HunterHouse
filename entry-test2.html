@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.13 — the convergence entry (Brandon, 2026-07-19):
-     open on big blocky HUNTER HOUSE. Scroll: both words slide toward the EXACT
-     midline and are clipped INTO it — each swallowed by the centre as it
-     crosses. No dot. Then the 1970 elevation drawing rises from the middle —
-     always fully dark (no fade), arriving out of the point the text vanished into.
-     Reversible. noindex + unlinked (mock). -->
+<!-- entry-test2 v0.14 — the convergence entry (Brandon, 2026-07-19):
+     HUNTER HOUSE → both words swallowed into the exact midline → the 1970
+     elevation drawing arises from that point (no fade, always dark) → the top
+     menu arrives with the end of the zoom → a tad more scroll JUMPS the
+     reading in: ONE text block down the LEFT of the sketch (wrapping its
+     alpha shape) then running along the bottom to the edge; the top-right
+     corner stays clear → next scroll fills it with the cut-out typed text.
+     All reversible. noindex + unlinked (mock). -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -13,7 +15,7 @@
 <meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;overflow:hidden}
@@ -27,23 +29,20 @@
   .clip-r{right:0;justify-content:flex-start}
   #w-hunter{display:inline-block;will-change:transform;margin-right:.17em}
   #w-house{display:inline-block;will-change:transform;margin-left:.17em}
-  /* the drawing — always dark, no fade; enters at the type's height, rises */
+  /* the drawing — always dark, no fade; arrives out of the point */
   #draw{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     visibility:hidden;transform-origin:50% 50%;z-index:4;pointer-events:none}
   #draw img{width:min(1100px,90vw);display:block}
   #menu a:hover{color:#1b1918}
-  /* the reading — text wraps the sketch's own jagged alpha shape (both sides
-     via two half-floats that abut at the centre, forming the same image at
-     the same size) */
+  /* the reading — ONE text block: down the left of the sketch (wrapping its
+     alpha shape), then running along the bottom to the edge. The top-right
+     corner stays clear — the cut-out text fills it on the next scroll. */
   #reading{position:fixed;inset:0;z-index:6;overflow-y:auto;visibility:hidden;background:#f6f5f5}
-  #reading .cols{display:flex;max-width:1280px;margin:0 auto;padding:16vh 40px 12vh}  /* top padding overridden at open for exact registration */
-  #reading .col{width:50%;font-weight:400;font-size:15.5px;line-height:1.7;color:#1b1918;text-align:justify}
-  #reading .col-l{padding-right:0}
-  #reading .col-r{padding-left:0}
-  #reading .half{display:block}
-  #reading .col-l .half{float:right;width:min(550px,45vw);shape-outside:url("assets/entry/letter-elev-grey-L.png");shape-image-threshold:.08;shape-margin:22px}
-  #reading .col-r .half{float:left;width:min(550px,45vw);shape-outside:url("assets/entry/letter-elev-grey-R.png");shape-image-threshold:.08;shape-margin:22px}
+  #reading .cols{position:relative;max-width:1280px;margin:0 auto;padding:16vh 40px 12vh}
+  #reading .col{font-weight:500;font-size:17px;line-height:1.66;color:#000;text-align:justify}
+  #reading .sketch{float:right;width:min(1100px,90vw);shape-outside:url("assets/entry/letter-elev-grey.png");shape-image-threshold:.08;shape-margin:20px}
   #reading p{margin-bottom:1em}
+  #desc-cut{position:absolute;right:40px;width:min(520px,40vw);visibility:hidden}
 </style>
 </head>
 <body>
@@ -56,13 +55,14 @@
 </div>
 <div id="reading" aria-label="Reading">
   <div class="cols">
-    <div class="col col-l">
-      <img class="half" src="assets/entry/letter-elev-grey-L.png" alt="">
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p><p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt, neque porro quisquam est.</p>
-    </div>
-    <div class="col col-r">
-      <img class="half" src="assets/entry/letter-elev-grey-R.png" alt="">
-      <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    <img id="desc-cut" src="assets/entry/letter-desc-grey.png" alt="Ric's typed description, cut from the letter">
+    <div class="col">
+      <img class="sketch" src="assets/entry/letter-elev-grey.png" alt="">
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+      <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</p>
+      <p>Totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
+      <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.</p>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
     </div>
   </div>
 </div>
@@ -73,18 +73,19 @@
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">Archive</a>
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.13</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.14</div>
 
 <script>
-// entry-test2 v0.13 — scroll drives z: 0..1 convergence · 1..2 the drawing arises.
+// entry-test2 v0.14 — z: 0..1 convergence · 1..2 the drawing · 2..3 the
+// reading jumps in · 3..4 the cut-out text fills the top-right corner.
 (function () {
   var z = 0, target = 0;
   var hunter = document.getElementById("w-hunter");
   var house = document.getElementById("w-house");
   var draw = document.getElementById("draw");
   var drawImg = document.getElementById("draw-img");
+  var S0 = 0.003;
 
-  // each word travels its own width + its midline margin — fully INTO the line
   function travel() {
     var m = parseFloat(getComputedStyle(hunter).marginRight) || 0;
     return {
@@ -92,20 +93,15 @@
       house: house.getBoundingClientRect().width + m
     };
   }
-  // the drawing arrives out of the single abstract point the text vanished
-  // into — scale from ~nothing, never opacity
-  var S0 = 0.003;
   var ease = function (t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; };
 
   function apply() {
-    var zA = Math.min(1, z);              // convergence into the midline
-    var zB = Math.max(0, Math.min(1, z - 1));   // the drawing's rise
+    var zA = Math.min(1, z);
+    var zB = Math.max(0, Math.min(1, z - 1));
     var tv = travel();
     var e = ease(zA);
     hunter.style.transform = "translateX(" + (e * tv.hunter) + "px)";
     house.style.transform = "translateX(" + (-e * tv.house) + "px)";
-    // the drawing: no fade — always dark; present once the words are gone,
-    // entering at the type's height and rising to full
     if (zB > 0) {
       draw.style.visibility = "visible";
       draw.style.transform = "scale(" + (S0 + ease(zB) * (1 - S0)) + ")";
@@ -117,10 +113,7 @@
     var m = Math.max(0, (zB - 0.82) / 0.18);
     menu.style.opacity = m;
     menu.style.pointerEvents = m > 0.9 ? "auto" : "none";
-    // a tad more scroll: the text JUMPS in (keyed to scroll INTENT — the
-    // target, not the eased z — so there is zero lag), wrapping the sketch's
-    // shape; the reading rebuilds the image at the same size + the same
-    // vertical centre, so the drawing does not move
+    // the reading JUMPS in — keyed to scroll intent (target), zero lag
     var reading = document.getElementById("reading");
     var on = target > 2.02;
     if (on && reading.style.visibility !== "visible") {
@@ -131,9 +124,15 @@
     }
     reading.style.visibility = on ? "visible" : "hidden";
     if (on) draw.style.visibility = "hidden";
+    // next scroll: the cut-out typed text fills the top-right corner (instant)
+    var desc = document.getElementById("desc-cut");
+    desc.style.visibility = (target > 3.02) ? "visible" : "hidden";
+    if (target > 3.02) {
+      // sit it in the clear corner: aligned with the top of the text block
+      desc.style.top = reading.querySelector(".cols").style.paddingTop || "16vh";
+    }
   }
 
-  // wheel / touch / keys drive z (reversible)
   var raf = null;
   function step() {
     raf = null;
@@ -143,8 +142,9 @@
     apply();
   }
   function nudge(d) {
-    target = Math.max(0, Math.min(3, target + d));
+    target = Math.max(0, Math.min(4, target + d));
     if (!raf) raf = requestAnimationFrame(step);
+    apply();   // intent-keyed layers (reading / desc) react immediately
   }
   window.addEventListener("wheel", function (e) { e.preventDefault(); nudge(e.deltaY / 900); }, { passive: false });
   var ty = null;
@@ -158,7 +158,7 @@
   });
   window.addEventListener("resize", apply);
   apply();
-  console.log("entry-test2 v0.13");
+  console.log("entry-test2 v0.14");
 })();
 </script>
 </body>
