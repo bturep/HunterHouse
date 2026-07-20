@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.17 — the convergence entry (Brandon, 2026-07-19):
+<!-- entry-test2 v0.18 — the convergence entry (Brandon, 2026-07-19):
      HUNTER HOUSE → both words swallowed into the exact midline → the 1970
      elevation drawing arises from that point (no fade, always dark) → the top
      menu arrives with the end of the zoom → then a DEAD ZONE of scroll
      (nothing happens) → then the text TYPES IN character by character (typewriter), both sides,
-     surrounding the drawing (shape-wrapped). All reversible.
+     surrounding the drawing (shape-wrapped) → then THE LETTER ITSELF fades in, registered exactly on the drawing (re-cut from the same scan). All reversible.
      noindex + unlinked (mock). -->
 <html lang="en">
 <head>
@@ -44,6 +44,9 @@
   #reading p{margin-bottom:1em}
   #reading p .ch{visibility:hidden}
   #reading p .ch.on{visibility:visible}
+  /* the letter itself — fades in registered EXACTLY over the drawing (the
+     drawing was re-cut from this very scan, so registration is identity) */
+  #letterfull{position:fixed;opacity:0;z-index:7;pointer-events:none}
 </style>
 </head>
 <body>
@@ -66,6 +69,7 @@
     </div>
   </div>
 </div>
+<img id="letterfull" src="assets/entry/letter-full-grey.jpg" alt="The letter, 13 September 1970">
 <nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;opacity:0;pointer-events:none;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62)">
   <a href="#" onclick="return false" style="padding:6px 15px">House</a>
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">Site</a>
@@ -73,10 +77,10 @@
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">Archive</a>
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.17</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.18</div>
 
 <script>
-// entry-test2 v0.17 — z: 0..1 convergence · 1..2 the drawing · 2..3 the
+// entry-test2 v0.18 — z: 0..1 convergence · 1..2 the drawing · 2..3 the
 // reading jumps in · 3..4 the cut-out text fills the top-right corner.
 (function () {
   var z = 0, target = 0;
@@ -154,6 +158,22 @@
     if (shown > charsShown) { for (var i = charsShown; i < shown; i++) chars[i].classList.add("on"); }
     else if (shown < charsShown) { for (var j = shown; j < charsShown; j++) chars[j].classList.remove("on"); }
     charsShown = shown;
+    // the LETTER ITSELF fades in, registered on the drawing. The tight cutout
+    // is the canvas bbox (101,1033)-(2031,2168) of the 2400-wide letter — so
+    // lay the letter so that region coincides with the displayed halves.
+    var lf = document.getElementById("letterfull");
+    var zE = Math.max(0, Math.min(1, (z - 3.15) / 0.5));
+    if (zE > 0) {
+      var lhalf = reading.querySelector(".col-l .half");
+      var r = lhalf.getBoundingClientRect();          // top-left of the tight cutout
+      var f = (r.width * 2) / (2031 - 101);           // displayed px per canvas px
+      lf.style.width = (2400 * f) + "px";
+      lf.style.left = (r.left - 101 * f) + "px";
+      lf.style.top = (r.top - 1033 * f) + "px";
+      lf.style.opacity = zE;
+    } else {
+      lf.style.opacity = 0;
+    }
   }
 
   var raf = null;
@@ -165,7 +185,7 @@
     apply();
   }
   function nudge(d) {
-    target = Math.max(0, Math.min(3.15, target + d));
+    target = Math.max(0, Math.min(3.65, target + d));
     if (!raf) raf = requestAnimationFrame(step);
     apply();   // intent-keyed layers (reading / desc) react immediately
   }
@@ -181,7 +201,7 @@
   });
   window.addEventListener("resize", apply);
   apply();
-  console.log("entry-test2 v0.17");
+  console.log("entry-test2 v0.18");
 })();
 </script>
 </body>
