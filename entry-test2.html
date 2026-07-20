@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.24 — the convergence entry (Brandon, 2026-07-19):
+<!-- entry-test2 v0.25 — the convergence entry (Brandon, 2026-07-19):
      NO INTRO — the page lands directly: HUNTER HOUSE wordmark top-left,
      the menu on top, the 1970 drawing centred below. Scroll:
      text appears line by line BELOW the sketch, the sketch scrolls away,
@@ -47,6 +47,15 @@
   .gfig img{display:block;max-height:70vh;max-width:78vw;border:1px solid rgba(27,25,24,.14);background:#fff}
   .gfig .gcite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:9px;text-align:center}
   #g-caa.zoomable{pointer-events:auto;cursor:zoom-in;overflow:hidden}
+  /* the site plan — the contour lens, inverted into this page's aesthetic:
+     black lines on paper. Filter does the whole re-colour; label = black box
+     with the archive's mono. */
+  #siteplan{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5}
+  #siteplan iframe{position:absolute;inset:0;width:100%;height:100%;border:0;
+    filter:invert(1) grayscale(1)}
+  #siteplan .slabel{position:absolute;left:34px;bottom:26px;background:#1b1918;color:#f6f5f5;
+    font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.18em;
+    text-transform:uppercase;padding:7px 12px;pointer-events:none}
   #site-cue{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:8;opacity:0;
     font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(27,25,24,.6)}
 </style>
@@ -76,6 +85,10 @@
   <div class="gfig" id="g-caa"><img id="g-caa-img" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg" alt="Scheme II pencil studies, coloured legend, 1985"><div class="gcite">HH-CAA-0018 · 1985 · move over the drawing to explore</div></div>
   <div class="gfig" id="g-ihc"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="The residence, 2024"><div class="gcite">HH-IHC-0038 · 2024</div></div>
 </div>
+<div id="siteplan" aria-label="The site">
+  <iframe id="siteplan-lens" title="Hunter House site — contour model" src="mock-home2.html" allow="fullscreen"></iframe>
+  <div class="slabel">Site — 203 Goward Road</div>
+</div>
 <div id="site-cue">Site ↓</div>
 <div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
 <div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#1b1918">Hunter House</div>
@@ -86,10 +99,10 @@
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">Archive</a>
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.24</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.25</div>
 
 <script>
-// entry-test2 v0.24 — z: 0..1 convergence (film-in-type) · 1..2 the drawing ·
+// entry-test2 v0.25 — z: 0..1 convergence (film-in-type) · 1..2 the drawing ·
 // 2..2.15 a breath · 2.15..4.4 the scroll: lines in, sketch out, photo in.
 (function () {
   var z = 0, target = 0;
@@ -168,10 +181,18 @@
       var iIn = Math.max(0, Math.min(1, (z - 2.55) / 0.4));
       gi.style.transform = "translate(-50%,-50%) translate(" + ((1-ease(iIn))*(W*0.75)) + "px,0)";
       gi.style.opacity = iIn > 0 ? 1 : 0;
-      // then: SITE
-      document.getElementById("site-cue").style.opacity = Math.max(0, Math.min(1, (z - 3.0) / 0.2));
+      // then: SITE — the plan rises in, the gallery cedes
+      var zP = Math.max(0, Math.min(1, (z - 3.05) / 0.3));
+      document.getElementById("site-cue").style.opacity = Math.max(0, Math.min(1, (z - 3.0) / 0.2)) * (1 - zP);
+      var sp = document.getElementById("siteplan");
+      sp.style.visibility = zP > 0 ? "visible" : "hidden";
+      sp.style.opacity = zP;
+      sp.style.pointerEvents = zP >= 1 ? "auto" : "none";
+      gal.style.opacity = 1 - zP;
     } else {
       document.getElementById("site-cue").style.opacity = 0;
+      var sp2 = document.getElementById("siteplan");
+      sp2.style.visibility = "hidden"; sp2.style.opacity = 0;
     }
   }
 
@@ -215,6 +236,53 @@
     box.addEventListener("mouseleave", function () { img.style.transform = "scale(1)"; });
   })();
 
+  // the site-plan iframe: strip the mock's chrome, then RE-INK the scene —
+  // all linework to full white (the CSS invert renders it BLACK on paper),
+  // fills to a whisper, ground to 0x0a0a0a (inverts to exactly #f5f5f5)
+  (function () {
+    var f = document.getElementById("siteplan-lens");
+    var inked = false;
+    function strip() {
+      try {
+        var d = f.contentDocument;
+        if (!d || d.readyState !== "complete") return;
+        var st = d.createElement("style");
+        st.textContent = ".wordmark,.mock-tag{display:none !important}";
+        d.head.appendChild(st);
+      } catch (e) {}
+      (function wait(tries) {
+        if (inked) return;
+        try {
+          var w = f.contentDocument.getElementById("lens").contentWindow;
+          var V = w.__v;
+          if (V && V.scene) {
+            inked = true;
+            V.scene.background && V.scene.background.set(0x0a0a0a);
+            V.scene.traverse(function (o) {
+              var mats = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : [];
+              mats.forEach(function (mm) {
+                if (mm.isLineBasicMaterial) {
+                  mm.vertexColors = false;
+                  mm.color && mm.color.set(0xffffff);
+                  mm.opacity = Math.max(mm.opacity || 1, 0.9);
+                  mm.needsUpdate = true;
+                } else if (mm.isMeshBasicMaterial || mm.isSpriteMaterial) {
+                  if (mm.isSpriteMaterial) { mm.opacity = Math.max(mm.opacity || 1, 0.85); }
+                  else { mm.opacity = Math.min(mm.opacity || 1, 0.06); }   // fills → a wash
+                  mm.needsUpdate = true;
+                }
+              });
+            });
+            return;
+          }
+        } catch (e) {}
+        if (tries < 240) setTimeout(function () { wait(tries + 1); }, 50);
+      })(0);
+    }
+    f.addEventListener("load", strip);
+    strip();
+  })();
+
   var raf = null;
   function step() {
     raf = null;
@@ -224,7 +292,7 @@
     apply();
   }
   function nudge(d) {
-    target = Math.max(0, Math.min(3.25, target + d));
+    target = Math.max(0, Math.min(3.6, target + d));
     if (!raf) raf = requestAnimationFrame(step);
   }
   window.addEventListener("wheel", function (e) { e.preventDefault(); nudge(e.deltaY / 900); }, { passive: false });
@@ -240,7 +308,7 @@
   window.addEventListener("resize", apply);
 
   apply();
-  console.log("entry-test2 v0.24");
+  console.log("entry-test2 v0.25");
 })();
 </script>
 </body>
