@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test v0.04 — TEST SITE for the one-page public entry (design handoff
+<!-- entry-test v0.05 — TEST SITE for the one-page public entry (design handoff
      "Hunter House Entry Pages", 2026-07-19). Vanilla recreation of the hi-fi
      prototype per its README: high fidelity, copy is Brandon's own, counts
      verified against the live catalogue at build time. noindex + unlinked
@@ -29,7 +29,7 @@
 <body>
 <div style="position:relative">
   <!-- HEADER -->
-  <header style="position:fixed;top:0;left:0;right:0;z-index:40;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:15px 34px;background:linear-gradient(180deg,rgba(16,14,11,.82),rgba(16,14,11,0));backdrop-filter:blur(2px)">
+  <header id="hdr" style="opacity:0;transform:translateY(-10px);pointer-events:none;transition:opacity .5s ease,transform .5s ease;position:fixed;top:0;left:0;right:0;z-index:40;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:15px 34px;background:linear-gradient(180deg,rgba(16,14,11,.82),rgba(16,14,11,0));backdrop-filter:blur(2px)">
     <a href="#top"><span style="font-size:13px;font-weight:500;letter-spacing:.01em">Hunter House</span> <span class="st-mono" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(240,237,230,.55)">Foundation</span></a>
     <nav class="st-nav st-mono" style="display:flex;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(240,237,230,.62)">
       <a href="#top" style="padding:6px 15px">Entry</a>
@@ -46,12 +46,10 @@
   <section id="top" style="position:relative;height:100vh;min-height:640px;overflow:hidden">
     <img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0003_HunterHouse_2024_prev.jpg" alt="The site at Prospect Lake" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 48%">
     <div style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(16,14,11,.94) 2%,rgba(16,14,11,.2) 42%,rgba(16,14,11,.5) 100%)"></div>
-    <div style="position:absolute;left:44px;bottom:96px;max-width:680px">
-      <div class="st-mono" style="font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:#c9a44e;margin-bottom:22px;display:flex;align-items:center;gap:14px"><span style="width:44px;height:1px;background:#c9a44e"></span>The archive of Richard Morrow Hunter</div>
-      <h1 style="font-weight:200;font-size:clamp(48px,7vw,92px);line-height:.94;letter-spacing:-.035em">A house drawn<br>for fifty years.</h1>
-      <p style="font-size:18px;line-height:1.55;font-weight:300;color:rgba(240,237,230,.82);max-width:520px;margin-top:22px">The residence at 203 Goward Road, Saanich — and the working record of its making, openly catalogued and held in trust.</p>
+    <div style="position:absolute;left:44px;top:72px;max-width:46vw">
+      <h1 style="font-weight:200;font-size:clamp(44px,6vw,80px);line-height:.98;letter-spacing:-.01em;text-transform:uppercase">Hunter<br>House</h1>
     </div>
-    <div class="st-mono" style="position:absolute;left:44px;top:88px;font-size:9.5px;letter-spacing:.06em;color:rgba(240,237,230,.5)">HH-IHC-0003 · 2024</div>
+    <div class="st-mono" style="position:absolute;left:44px;bottom:30px;font-size:9.5px;letter-spacing:.06em;color:rgba(240,237,230,.5)">HH-IHC-0003 · 2024</div>
     <a href="#site" class="st-mono" style="position:absolute;left:50%;bottom:30px;transform:translateX(-50%);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(240,237,230,.7);text-align:center">Enter<br><span style="display:inline-block;margin-top:8px;font-size:15px;animation:stBob 2s ease-in-out infinite">↓</span></a>
   </section>
 
@@ -143,15 +141,15 @@
   <!-- FOOTER -->
   <footer style="border-top:1px solid rgba(240,237,230,.14);padding:30px 60px;display:flex;justify-content:space-between;align-items:center">
     <span class="st-mono" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(240,237,230,.42)">Hunter House Foundation · 203 Goward Road · Saanich BC</span>
-    <span class="st-mono" title="entry-test v0.04" style="font-size:10px;letter-spacing:.06em;color:rgba(240,237,230,.42)">Every image links to its catalogue record</span>
+    <span class="st-mono" title="entry-test v0.05" style="font-size:10px;letter-spacing:.06em;color:rgba(240,237,230,.42)">Every image links to its catalogue record</span>
   </footer>
 </div>
 
 <script>
-// entry-test v0.04 — vanilla port of the design prototype's component logic.
+// entry-test v0.05 — vanilla port of the design prototype's component logic.
 // State: active reference set + a live archive-ID → P96 image map (SPARQL).
 (function () {
-  var VERSION = "entry-test v0.04";
+  var VERSION = "entry-test v0.05";
   var imgMap = {};
   var activeRef = "1970";
 
@@ -256,6 +254,27 @@
     }
     lens.addEventListener("load", initLens);
     initLens();
+  })();
+
+  // Header stays hidden on the hero; first scroll or click brings it in.
+  (function () {
+    var hdr = document.getElementById("hdr");
+    var shown = false;
+    function reveal() {
+      if (shown) return;
+      shown = true;
+      hdr.style.opacity = "1";
+      hdr.style.transform = "translateY(0)";
+      hdr.style.pointerEvents = "auto";
+      window.removeEventListener("scroll", onScroll);
+      document.removeEventListener("click", reveal);
+    }
+    function onScroll() { if (window.scrollY > 10) reveal(); }
+    if (window.scrollY > 10 || location.hash) reveal();   // deep-links land with the menu on
+    else {
+      window.addEventListener("scroll", onScroll, { passive: true });
+      document.addEventListener("click", reveal);
+    }
   })();
 
   console.log(VERSION);
