@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.28 — the convergence entry (Brandon, 2026-07-19):
+<!-- entry-test2 v0.29 — the convergence entry (Brandon, 2026-07-19):
      NO INTRO — the page lands directly: HUNTER HOUSE wordmark top-left,
      the menu on top, the 1970 drawing centred below. Scroll:
      text appears line by line BELOW the sketch, the sketch scrolls away,
@@ -99,10 +99,10 @@
   <a data-z="1.55" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">Archive</a>
   <a data-z="3.38" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.28</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.29</div>
 
 <script>
-// entry-test2 v0.28 — z: 0..1 convergence (film-in-type) · 1..2 the drawing ·
+// entry-test2 v0.29 — z: 0..1 convergence (film-in-type) · 1..2 the drawing ·
 // 2..2.15 a breath · 2.15..4.4 the scroll: lines in, sketch out, photo in.
 (function () {
   var z = 0, target = 0;
@@ -196,7 +196,7 @@
       sp.style.pointerEvents = zP >= 1 ? "auto" : "none";
       gal.style.opacity = 1 - zP;
       // arrive zoomed IN on the house; more scroll zooms OUT to the full plan
-      siteWantZoom(zP > 0 && z < 3.42);
+      siteWantZoom(z < 3.42);
     } else {
       document.getElementById("site-cue").style.opacity = 0;
       var sp2 = document.getElementById("siteplan");
@@ -247,25 +247,45 @@
   // the site plan's house zoom, scroll-driven: the mock owns the zoom via its
   // click toggle — we synthesize clicks (at the house to go in, away to come
   // out) whenever the desired state flips
-  var siteZoomed = false;
+  var siteZoomed = false, zoomBusy = false;
   function siteWantZoom(want) {
-    if (want === siteZoomed) return;
+    if (want === siteZoomed || zoomBusy) return;
     var w = window.__lensWin;
     if (!w || !w.__v || !w.__v.houseMesh) return;
-    try {
-      var V = w.__v, T = w.THREE;
+    zoomBusy = true;
+    var V = w.__v, T = w.THREE;
+    var tries = 0;
+    function fire() {
       var x = 8, y = 8;
-      if (want) {
-        V.houseMesh.updateMatrixWorld(true);
-        var bb = new T.Box3().setFromObject(V.houseMesh);
-        var c = bb.getCenter(new T.Vector3());
-        c.project(V.camera);
-        x = (c.x + 1) / 2 * w.innerWidth; y = (1 - c.y) / 2 * w.innerHeight;
-      }
-      w.dispatchEvent(new w.MouseEvent("click", { clientX: x, clientY: y }));
-      siteZoomed = want;
-    } catch (e) {}
+      try {
+        if (want) {
+          V.camera.updateMatrixWorld(true);
+          V.houseMesh.updateMatrixWorld(true);
+          var bb = new T.Box3().setFromObject(V.houseMesh);
+          var c = bb.getCenter(new T.Vector3());
+          c.project(V.camera);
+          x = (c.x + 1) / 2 * w.innerWidth + (tries % 3 - 1) * 12;   // jitter the aim on retries
+          y = (1 - c.y) / 2 * w.innerHeight + (Math.floor(tries / 3) % 3 - 1) * 12;
+        }
+        var y0 = V.camera.position.y;
+        w.dispatchEvent(new w.MouseEvent("click", { clientX: x, clientY: y }));
+        setTimeout(function () {
+          var moved = Math.abs(V.camera.position.y - y0) > 0.5;
+          if (moved) { siteZoomed = want; zoomBusy = false; }
+          else if (++tries < 9) fire();          // missed — re-aim, try again
+          else { zoomBusy = false; }             // give up quietly this round
+        }, 350);
+      } catch (e) { zoomBusy = false; }
+    }
+    fire();
   }
+  // pre-arm: zoom onto the house while the site is still hidden, so it ARRIVES
+  // zoomed-in; the scroll past the threshold zooms out
+  (function armWhenReady(tries) {
+    var w = window.__lensWin;
+    if (w && w.__v && w.__v.houseMesh) { setTimeout(function () { siteWantZoom(true); }, 1200); return; }
+    if (tries < 200) setTimeout(function () { armWhenReady(tries + 1); }, 100);
+  })(0);
 
   // the site-plan iframe: strip the mock's chrome, then RE-INK the scene —
   // all linework to full white (the CSS invert renders it BLACK on paper),
@@ -279,6 +299,7 @@
         if (!d || d.readyState !== "complete") return;
         var st = d.createElement("style");
         st.textContent = ".wordmark,.mock-tag,.veil{display:none !important}";   // the veil inverts to a grey plaque — the v0.28 ghost-rectangle culprit
+
         d.head.appendChild(st);
       } catch (e) {}
       (function wait(tries) {
@@ -294,12 +315,12 @@
             // flips it back). Keyed by the lens's original palette hexes.
             var DISPLAY = {
               0xffffff: 0x0d0d0d,   // contours → black ink
-              0xc4826e: 0xa14f2f,   // property line → sienna
-              0xa78bbf: 0x7c5ea3,   // covenant → violet
-              0xe6c067: 0x8a6a1e,   // house → dark amber
-              0x7ba0d6: 0x3f6ea8,   // lake → blue
-              0x6f93c9: 0x3f6ea8,   // stream → blue
-              0xc9a44e: 0xb08430,   // kinhin/corr → amber
+              0xc4826e: 0xd44d14,   // property line → vivid burnt orange
+              0xa78bbf: 0x8b30d9,   // covenant → vivid violet
+              0xe6c067: 0xd99000,   // house → vivid amber
+              0x7ba0d6: 0x1263e0,   // lake → vivid blue
+              0x6f93c9: 0x1263e0,   // stream → vivid blue
+              0xc9a44e: 0xcc7a00,   // kinhin/corr → orange-amber
               0xb9b3a8: 0x3a3a3a,   // paths → dark grey
               0x9a958b: 0x555555    // rock / north → grey
             };
@@ -310,7 +331,7 @@
             // REPLACE materials (not mutate): mock-home2's hover system
             // rewrites its captured material refs every frame — fresh clones
             // orphan those writes while the meshes render our palette.
-            function remat(mm) {
+            function remat(mm, o) {
               if (mm.userData && mm.userData.__inked) return mm;
               if (mm.isLineBasicMaterial) {
                 var hex = mm.color ? mm.color.getHex() : 0xffffff;
@@ -336,8 +357,18 @@
                   mm.userData.__inked = true; return mm;
                 }
                 var fm = mm.clone();
-                if (fm.color) toSource(fm.color, 0x9fb5cd);   // washes stay faintly blue
-                fm.opacity = Math.min(mm.opacity || 1, 0.1);
+                // the GROUND / any huge plane must not get the wash — at house
+                // zoom it reads as a grey plaque. Small fills (lake, rooms) keep it.
+                var big = false;
+                try {
+                  if (o && o.geometry) {
+                    o.geometry.computeBoundingBox();
+                    var bb = o.geometry.boundingBox;
+                    big = Math.max(bb.max.x - bb.min.x, bb.max.z - bb.min.z) > 600;
+                  }
+                } catch (e) {}
+                if (fm.color) toSource(fm.color, 0x9fb5cd);
+                fm.opacity = big ? 0 : Math.min(mm.opacity || 1, 0.1);
                 fm.needsUpdate = true;
                 fm.userData.__inked = true;
                 return fm;
@@ -354,8 +385,8 @@
                 // real place-labels are sprites, untouched by this.
                 var m0 = Array.isArray(o.material) ? o.material[0] : o.material;
                 if (m0 && m0.isMeshBasicMaterial && m0.map) { o.visible = false; return; }
-                if (Array.isArray(o.material)) o.material = o.material.map(remat);
-                else o.material = remat(o.material);
+                if (Array.isArray(o.material)) o.material = o.material.map(function (mm) { return remat(mm, o); });
+                else o.material = remat(o.material, o);
               });
             };
             // late passes: catch boot races + meshes added after first ink
@@ -364,21 +395,25 @@
             setTimeout(window.__reink, 6000);
             // the lens re-shows the aerial planes on its own schedule —
             // enforce the hide continuously (cheap traverse, 4x/sec)
+            if (!window.__deadMat) window.__deadMat = new w.THREE.MeshBasicMaterial({ visible: false, transparent: true, opacity: 0 });
+            window.__deadMat.userData.__gone = true;
             if (!window.__inkGuard) window.__inkGuard = setInterval(function () {
               try {
                 V.scene.traverse(function (o) {
+                  if (o.userData.__gone) { o.material = window.__deadMat; return; }
                   var m0 = o.material && (Array.isArray(o.material) ? o.material[0] : o.material);
-                  if (!m0 || !o.visible) return;
-                  // the bisect-proven set: textured meshes + textured points +
-                  // shader/lit meshes (aerial, hillshade, globe) — all hidden
-                  // in the ink world; lines + sprites (labels) untouched
+                  if (!m0 || m0.userData.__gone) return;
+                  // aerial / hillshade / photo plates → one shared dead
+                  // material; the OBJECT is marked so re-assignments by the
+                  // lens get re-killed without new allocations
                   if ((m0.map && !m0.isSpriteMaterial) || m0.isShaderMaterial ||
                       m0.type === "MeshStandardMaterial" || m0.type === "MeshLambertMaterial") {
-                    o.visible = false;
+                    o.userData.__gone = true;
+                    o.material = window.__deadMat;
                   }
                 });
               } catch (e) {}
-            }, 250);
+            }, 120);
             V.scene.traverse(function (o) {
               if (!o.material) return;
               if (Array.isArray(o.material)) o.material = o.material.map(remat);
@@ -426,7 +461,7 @@
   flow.querySelector(".sk").addEventListener("load", function () { centreSketch(); apply(); });
 
   apply();
-  console.log("entry-test2 v0.28");
+  console.log("entry-test2 v0.29");
 })();
 </script>
 </body>
