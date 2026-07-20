@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.22 — the convergence entry (Brandon, 2026-07-19):
-     Ric's drawn NAME BLOCK (Hunter House · Victoria B.C. · 1970) collapses
-     into the exact centre point → the 1970 elevation drawing arises from it (no
+<!-- entry-test2 v0.23 — the convergence entry (Brandon, 2026-07-19):
+     HUNTER HOUSE — the letterforms a window onto film (canvas knockout) →
+     both words swallowed into the exact midline → the drawing arises (no
      fade, always dark) → the menu arrives → then the window SCROLLS DOWN:
      text appears line by line BELOW the sketch, the sketch scrolls away,
      all text — with a right-hand column where HH-FRH-0008 (the 1977 house
@@ -21,10 +21,9 @@
   html,body{height:100%;overflow:hidden}
   body{background:#f6f5f5;font-family:"Inter Tight",system-ui,sans-serif;color:#1b1918}
   #stage{position:fixed;inset:0}
-  /* the name block — Ric's own title block; collapses into the centre point */
-  #nameblock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    transform-origin:50% 50%;will-change:transform}
-  #nameblock img{height:min(74vh,998px);display:block}
+  /* the words — drawn on canvas so the film shows THROUGH the letterforms */
+  #wordcanvas{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);width:100%}
+  #typevid{display:none}
   /* the drawing — always dark, no fade; arrives out of the point */
   #draw{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     visibility:hidden;transform-origin:50% 50%;z-index:4;pointer-events:none}
@@ -62,10 +61,8 @@
 </head>
 <body>
 <div id="stage">
-  <!-- v0.21: Ric's drawn NAME BLOCK replaces the typeset words + film-in-type
-       (that whole canvas compositor lives in git @v0.20 for reinstatement;
-       assets/entry/type-video.mp4 kept in the repo). -->
-  <div id="nameblock"><img src="assets/entry/nameblock-grey.png" alt="Hunter House — Victoria B.C. 1970 — Ric Hunter, Architect"></div>
+  <video id="typevid" autoplay muted loop playsinline preload="auto"><source src="assets/entry/type-video.mp4" type="video/mp4"></video>
+  <canvas id="wordcanvas" aria-label="Hunter House"></canvas>
   <div id="draw"><img id="draw-img" src="assets/entry/letter-elev-grey.png" alt="The house sketched in Ric's 1970 letter"></div>
 </div>
 
@@ -102,10 +99,10 @@
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">Archive</a>
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.22</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.23</div>
 
 <script>
-// entry-test2 v0.22 — z: 0..1 convergence (film-in-type) · 1..2 the drawing ·
+// entry-test2 v0.23 — z: 0..1 convergence (film-in-type) · 1..2 the drawing ·
 // 2..2.15 a breath · 2.15..4.4 the scroll: lines in, sketch out, photo in.
 (function () {
   var z = 0, target = 0;
@@ -114,21 +111,78 @@
   var S0 = 0.003;
   var ease = function (t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; };
 
+  // ── the words: canvas, film knocked out through the letterforms ────────
+  // PERFORMANCE: the canvas is only the TYPE'S BAND (not the viewport); the
+  // text mask is cached offscreen and rebuilt only when the words move; each
+  // frame composites the cached mask with just the SLICE of video the band
+  // sees (source-rect crop of the cover-fit frame). DPR capped at 1.5.
+  var cv = document.getElementById("wordcanvas");
+  var cx = cv.getContext("2d");
+  var vid = document.getElementById("typevid");
+  var maskCv = document.createElement("canvas");
+  var maskCx = maskCv.getContext("2d");
+  var maskKey = "";
+  try { document.fonts.load('800 140px "Inter Tight"').then(function(){ maskKey=""; }); } catch (e) {}
+  function bandMetrics() {
+    var W = window.innerWidth, fs = Math.min(140, Math.max(56, 0.09 * W));
+    return { W: W, fs: fs, bandH: Math.ceil(fs * 1.5) };
+  }
+  function buildMask(zA, bm, dpr) {
+    maskCv.width = Math.round(bm.W * dpr); maskCv.height = Math.round(bm.bandH * dpr);
+    maskCx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    maskCx.clearRect(0, 0, bm.W, bm.bandH);
+    maskCx.font = '800 ' + bm.fs + 'px "Inter Tight", sans-serif';
+    maskCx.textBaseline = "middle";
+    var gap = 0.34 * bm.fs;
+    var wH = maskCx.measureText("HUNTER").width, wO = maskCx.measureText("HOUSE").width;
+    var e = ease(zA);
+    var mid = bm.W / 2, cy = bm.bandH / 2;
+    var hx = mid - gap/2 - wH + e * (wH + gap/2);
+    var ox = mid + gap/2 - e * (wO + gap/2);
+    maskCx.save();
+    maskCx.beginPath(); maskCx.rect(0, 0, mid, bm.bandH); maskCx.clip();
+    maskCx.fillStyle = "#1b1918"; maskCx.fillText("HUNTER", hx, cy);
+    maskCx.restore();
+    maskCx.save();
+    maskCx.beginPath(); maskCx.rect(mid, 0, mid, bm.bandH); maskCx.clip();
+    maskCx.fillStyle = "#1b1918"; maskCx.fillText("HOUSE", ox, cy);
+    maskCx.restore();
+  }
+  function drawWords(zA) {
+    var bm = bandMetrics();
+    var dpr = Math.min(1.5, window.devicePixelRatio || 1);
+    if (cv.width !== Math.round(bm.W * dpr)) {
+      cv.width = Math.round(bm.W * dpr); cv.height = Math.round(bm.bandH * dpr);
+      cv.style.height = bm.bandH + "px";
+    }
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cx.clearRect(0, 0, bm.W, bm.bandH);
+    if (zA >= 1) return;
+    var key = zA.toFixed(4) + "/" + bm.W + "/" + dpr;
+    if (key !== maskKey) { buildMask(zA, bm, dpr); maskKey = key; }
+    cx.drawImage(maskCv, 0, 0, bm.W, bm.bandH);
+    if (vid.readyState >= 2) {
+      cx.globalCompositeOperation = "source-in";
+      var vw = vid.videoWidth, vh = vid.videoHeight;
+      var W = bm.W, H = window.innerHeight;
+      var sc = Math.max(W / vw, H / vh);           // cover-fit for the full viewport
+      // the band sits at the viewport's vertical centre — take just that slice
+      var srcY = (vh - bm.bandH / sc) / 2;
+      var srcX = (vw - W / sc) / 2;
+      cx.drawImage(vid, srcX, srcY, W / sc, bm.bandH / sc, 0, 0, W, bm.bandH);
+      cx.globalCompositeOperation = "source-over";
+    }
+  }
+
   // ── the reading flow ───────────────────────────────────────────────────
   var reading = document.getElementById("reading");
   var flow = document.getElementById("flow");
   var ps = Array.prototype.slice.call(flow.querySelectorAll(".txt p"));
   var Z_READ0 = 2.15, Z_END = 4.4;
 
-  var nameblock = document.getElementById("nameblock");
   function apply() {
     var zA = Math.min(1, z);
     var zB = Math.max(0, Math.min(1, z - 1));
-    // the name block disappears into the exact centre point (no fade)
-    var e = ease(zA);
-    var sN = Math.max(0.001, 1 - e);
-    nameblock.style.transform = "scale(" + sN + ")";
-    nameblock.style.visibility = zA >= 1 ? "hidden" : "visible";
     if (zB > 0 && z < 2.0005) {
       draw.style.visibility = "visible";
       draw.style.transform = "scale(" + (S0 + ease(zB) * (1 - S0)) + ")";
@@ -278,8 +332,14 @@
   });
   window.addEventListener("resize", apply);
 
+  // keep the film-in-type alive while the words are up (video frames advance)
+  (function loop() {
+    if (z < 1) drawWords(Math.min(1, z));
+    requestAnimationFrame(loop);
+  })();
+
   apply();
-  console.log("entry-test2 v0.22");
+  console.log("entry-test2 v0.23");
 })();
 </script>
 </body>
