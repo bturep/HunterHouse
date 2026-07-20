@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.09 — the convergence entry (Brandon, 2026-07-19):
+<!-- entry-test2 v0.10 — the convergence entry (Brandon, 2026-07-19):
      open on big blocky HUNTER HOUSE. Scroll: both words slide toward the EXACT
      midline and are clipped INTO it — each swallowed by the centre as it
      crosses. No dot. Then the 1970 elevation drawing rises from the middle —
@@ -31,6 +31,7 @@
   #draw{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     visibility:hidden;transform-origin:50% 50%;z-index:4;pointer-events:none}
   #draw img{width:min(1100px,90vw);display:block}
+  #menu a:hover{color:#1b1918}
 </style>
 </head>
 <body>
@@ -41,10 +42,17 @@
   </div>
   <div id="draw"><img id="draw-img" src="assets/entry/letter-elev-grey.png" alt="The house sketched in Ric's 1970 letter"></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.09</div>
+<nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;opacity:0;pointer-events:none;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62)">
+  <a href="#" onclick="return false" style="padding:6px 15px">House</a>
+  <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">Site</a>
+  <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">Hunter</a>
+  <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">Archive</a>
+  <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">About</a>
+</nav>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.10</div>
 
 <script>
-// entry-test2 v0.09 — scroll drives z: 0..1 convergence · 1..2 the drawing arises.
+// entry-test2 v0.10 — scroll drives z: 0..1 convergence · 1..2 the drawing arises.
 (function () {
   var z = 0, target = 0;
   var hunter = document.getElementById("w-hunter");
@@ -80,6 +88,11 @@
     } else {
       draw.style.visibility = "hidden";
     }
+    // the top menu arrives with the end of the zoom
+    var menu = document.getElementById("menu");
+    var m = Math.max(0, (zB - 0.82) / 0.18);
+    menu.style.opacity = m;
+    menu.style.pointerEvents = m > 0.9 ? "auto" : "none";
   }
 
   // wheel / touch / keys drive z (reversible)
@@ -107,7 +120,7 @@
   });
   window.addEventListener("resize", apply);
   apply();
-  console.log("entry-test2 v0.09");
+  console.log("entry-test2 v0.10");
 })();
 </script>
 </body>
