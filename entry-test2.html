@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.16 — the convergence entry (Brandon, 2026-07-19):
+<!-- entry-test2 v0.17 — the convergence entry (Brandon, 2026-07-19):
      HUNTER HOUSE → both words swallowed into the exact midline → the 1970
      elevation drawing arises from that point (no fade, always dark) → the top
      menu arrives with the end of the zoom → then a DEAD ZONE of scroll
-     (nothing happens) → then the text FILTERS IN line by line, both sides,
+     (nothing happens) → then the text TYPES IN character by character (typewriter), both sides,
      surrounding the drawing (shape-wrapped). All reversible.
      noindex + unlinked (mock). -->
 <html lang="en">
@@ -42,6 +42,8 @@
   #reading .col-l .half{float:right;width:min(550px,45vw);shape-outside:url("assets/entry/letter-elev-grey-L.png");shape-image-threshold:.08;shape-margin:22px}
   #reading .col-r .half{float:left;width:min(550px,45vw);shape-outside:url("assets/entry/letter-elev-grey-R.png");shape-image-threshold:.08;shape-margin:22px}
   #reading p{margin-bottom:1em}
+  #reading p .ch{visibility:hidden}
+  #reading p .ch.on{visibility:visible}
 </style>
 </head>
 <body>
@@ -71,10 +73,10 @@
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">Archive</a>
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.16</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.17</div>
 
 <script>
-// entry-test2 v0.16 — z: 0..1 convergence · 1..2 the drawing · 2..3 the
+// entry-test2 v0.17 — z: 0..1 convergence · 1..2 the drawing · 2..3 the
 // reading jumps in · 3..4 the cut-out text fills the top-right corner.
 (function () {
   var z = 0, target = 0;
@@ -92,6 +94,27 @@
     };
   }
   var ease = function (t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; };
+
+  // typewriter prep: wrap every character of the reading in a hidden span,
+  // ordered by paragraph position (top-down, both columns interleaved)
+  var chars = [], charsShown = 0;
+  (function prepType() {
+    var ps = Array.prototype.slice.call(document.querySelectorAll("#reading p"));
+    ps.sort(function (a, b) { return a.getBoundingClientRect().top - b.getBoundingClientRect().top; });
+    ps.forEach(function (p) {
+      var text = p.textContent;
+      p.textContent = "";
+      var frag = document.createDocumentFragment();
+      for (var i = 0; i < text.length; i++) {
+        var sp = document.createElement("span");
+        sp.className = "ch";
+        sp.textContent = text[i];
+        frag.appendChild(sp);
+        chars.push(sp);
+      }
+      p.appendChild(frag);
+    });
+  })();
 
   function apply() {
     var zA = Math.min(1, z);
@@ -123,29 +146,14 @@
     }
     reading.style.visibility = on ? "visible" : "hidden";
     if (on) draw.style.visibility = "hidden";
-    // z 2.0..2.15 = a breath (the pause) · z 2.15..3.15 = the lines arrive
+    // z 2.0..2.15 = a breath (the pause) · z 2.15..3.15 = the TYPEWRITER:
+    // characters appear one by one onto the already-set page (layout is
+    // pre-rendered with every char in a hidden span — nothing reflows)
     var zD = Math.max(0, Math.min(1, (z - 2.15) / 1.0));
-    var ps = reading.querySelectorAll("p");
-    var lineH = 17 * 1.66;
-    var colsTop = reading.querySelector(".cols").getBoundingClientRect().top;
-    var total = 0, metrics = [];
-    ps.forEach(function (p) {
-      var r = p.getBoundingClientRect();
-      var lines = Math.max(1, Math.round(r.height / lineH));
-      metrics.push({ p: p, top: r.top - colsTop, lines: lines });
-      total += lines;
-    });
-    var shown = Math.floor(zD * total + 1e-6);   // whole lines only — they TICK in
-    // reveal in reading order interleaved by vertical position (surrounds the drawing)
-    metrics.sort(function (a, b) { return a.top - b.top; });
-    var left = shown;
-    metrics.forEach(function (mm) {
-      var take = Math.max(0, Math.min(mm.lines, left));
-      left -= take;
-      var frac = take / mm.lines;
-      mm.p.style.clipPath = "inset(0 0 " + ((1 - frac) * 100) + "% 0)";
-      mm.p.style.visibility = take > 0 ? "visible" : "hidden";
-    });
+    var shown = Math.floor(zD * chars.length + 1e-6);
+    if (shown > charsShown) { for (var i = charsShown; i < shown; i++) chars[i].classList.add("on"); }
+    else if (shown < charsShown) { for (var j = shown; j < charsShown; j++) chars[j].classList.remove("on"); }
+    charsShown = shown;
   }
 
   var raf = null;
@@ -173,7 +181,7 @@
   });
   window.addEventListener("resize", apply);
   apply();
-  console.log("entry-test2 v0.16");
+  console.log("entry-test2 v0.17");
 })();
 </script>
 </body>
