@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.07 — the convergence entry (Brandon, 2026-07-19):
+<!-- entry-test2 v0.08 — the convergence entry (Brandon, 2026-07-19):
      open on big blocky HUNTER HOUSE. Scroll: both words slide toward the EXACT
      midline and are clipped INTO it — each swallowed by the centre as it
      crosses. No dot. Then the 1970 elevation drawing rises from the middle —
-     always fully dark (no fade), entering at the type's own height.
+     always fully dark (no fade), arriving out of the point the text vanished into.
      Reversible. noindex + unlinked (mock). -->
 <html lang="en">
 <head>
@@ -43,7 +43,7 @@
 </div>
 
 <script>
-// entry-test2 v0.07 — scroll drives z: 0..1 convergence · 1..2 the drawing arises.
+// entry-test2 v0.08 — scroll drives z: 0..1 convergence · 1..2 the drawing arises.
 (function () {
   var z = 0, target = 0;
   var hunter = document.getElementById("w-hunter");
@@ -59,13 +59,9 @@
       house: house.getBoundingClientRect().width + m
     };
   }
-  // the drawing starts at the type's height (cap-height of HUNTER HOUSE)
-  function startScale() {
-    var fontH = hunter.getBoundingClientRect().height * 0.72;   // cap-height ≈ .72em
-    var imgH = drawImg.getBoundingClientRect().height / currentDrawScale;
-    return imgH > 0 ? Math.min(1, fontH / imgH) : 0.2;
-  }
-  var currentDrawScale = 1;
+  // the drawing arrives out of the single abstract point the text vanished
+  // into — scale from ~nothing, never opacity
+  var S0 = 0.003;
   var ease = function (t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; };
 
   function apply() {
@@ -78,13 +74,10 @@
     // the drawing: no fade — always dark; present once the words are gone,
     // entering at the type's height and rising to full
     if (zB > 0) {
-      var s0 = startScale();
-      currentDrawScale = s0 + ease(zB) * (1 - s0);
       draw.style.visibility = "visible";
-      draw.style.transform = "scale(" + currentDrawScale + ")";
+      draw.style.transform = "scale(" + (S0 + ease(zB) * (1 - S0)) + ")";
     } else {
       draw.style.visibility = "hidden";
-      currentDrawScale = 1;
     }
   }
 
@@ -113,7 +106,7 @@
   });
   window.addEventListener("resize", apply);
   apply();
-  console.log("entry-test2 v0.07");
+  console.log("entry-test2 v0.08");
 })();
 </script>
 </body>
