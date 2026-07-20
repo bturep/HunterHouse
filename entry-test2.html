@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.19 — the convergence entry (Brandon, 2026-07-19):
+<!-- entry-test2 v0.20 — the convergence entry (Brandon, 2026-07-19):
      HUNTER HOUSE — the letterforms are a WINDOW onto film (canvas knockout:
      the A005 clip plays inside the letters) → both words swallowed into the
      exact midline → the 1970 elevation drawing arises from the point (no
@@ -23,7 +23,7 @@
   body{background:#f6f5f5;font-family:"Inter Tight",system-ui,sans-serif;color:#1b1918}
   #stage{position:fixed;inset:0}
   /* the words — drawn on canvas so the film shows THROUGH the letterforms */
-  #wordcanvas{position:absolute;inset:0;width:100%;height:100%}
+  #wordcanvas{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);width:100%}
   #typevid{display:none}
   /* the drawing — always dark, no fade; arrives out of the point */
   #draw{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
@@ -39,7 +39,7 @@
   #flow .txt{flex:1;font-weight:500;font-size:17px;line-height:1.7;color:#000;max-width:660px}
   #flow .txt p{margin-bottom:1.1em}
   #flow .photocol{width:360px;flex:none}
-  #flow .photocol img{width:100%;display:block;filter:grayscale(1);border:1px solid rgba(27,25,24,.14);opacity:0;transition:opacity 1.1s ease}
+  #flow .photocol img{width:100%;display:block;border:1px solid rgba(27,25,24,.14);opacity:0;transition:opacity 1.1s ease}
   #flow .photocol .cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:9px;opacity:0;transition:opacity 1.1s ease}
   #flow.photo-on .photocol img, #flow.photo-on .photocol .cite{opacity:1}
 </style>
@@ -77,10 +77,10 @@
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">Archive</a>
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.19</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.20</div>
 
 <script>
-// entry-test2 v0.19 — z: 0..1 convergence (film-in-type) · 1..2 the drawing ·
+// entry-test2 v0.20 — z: 0..1 convergence (film-in-type) · 1..2 the drawing ·
 // 2..2.15 a breath · 2.15..4.4 the scroll: lines in, sketch out, photo in.
 (function () {
   var z = 0, target = 0;
@@ -90,40 +90,64 @@
   var ease = function (t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; };
 
   // ── the words: canvas, film knocked out through the letterforms ────────
+  // PERFORMANCE: the canvas is only the TYPE'S BAND (not the viewport); the
+  // text mask is cached offscreen and rebuilt only when the words move; each
+  // frame composites the cached mask with just the SLICE of video the band
+  // sees (source-rect crop of the cover-fit frame). DPR capped at 1.5.
   var cv = document.getElementById("wordcanvas");
   var cx = cv.getContext("2d");
   var vid = document.getElementById("typevid");
-  try { document.fonts.load('800 140px "Inter Tight"'); } catch (e) {}
-  function drawWords(zA) {
-    var W = window.innerWidth, H = window.innerHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
-    if (cv.width !== Math.round(W*dpr)) { cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr); }
-    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    cx.clearRect(0, 0, W, H);
-    if (zA >= 1) return;
-    var fs = Math.min(140, Math.max(56, 0.09 * W));
-    cx.font = '800 ' + fs + 'px "Inter Tight", sans-serif';
-    cx.textBaseline = "middle";
-    var gap = 0.34 * fs;
-    var wH = cx.measureText("HUNTER").width, wO = cx.measureText("HOUSE").width;
+  var maskCv = document.createElement("canvas");
+  var maskCx = maskCv.getContext("2d");
+  var maskKey = "";
+  try { document.fonts.load('800 140px "Inter Tight"').then(function(){ maskKey=""; }); } catch (e) {}
+  function bandMetrics() {
+    var W = window.innerWidth, fs = Math.min(140, Math.max(56, 0.09 * W));
+    return { W: W, fs: fs, bandH: Math.ceil(fs * 1.5) };
+  }
+  function buildMask(zA, bm, dpr) {
+    maskCv.width = Math.round(bm.W * dpr); maskCv.height = Math.round(bm.bandH * dpr);
+    maskCx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    maskCx.clearRect(0, 0, bm.W, bm.bandH);
+    maskCx.font = '800 ' + bm.fs + 'px "Inter Tight", sans-serif';
+    maskCx.textBaseline = "middle";
+    var gap = 0.34 * bm.fs;
+    var wH = maskCx.measureText("HUNTER").width, wO = maskCx.measureText("HOUSE").width;
     var e = ease(zA);
-    var mid = W / 2, cy = H / 2;
-    // words slide INTO the midline; each clipped by its own half
-    var hx = mid - gap/2 - wH + e * (wH + gap/2);   // HUNTER left edge
-    var ox = mid + gap/2 - e * (wO + gap/2);        // HOUSE left edge
-    cx.save();
-    cx.beginPath(); cx.rect(0, 0, mid, H); cx.clip();
-    cx.fillStyle = "#1b1918"; cx.fillText("HUNTER", hx, cy);
-    cx.restore();
-    cx.save();
-    cx.beginPath(); cx.rect(mid, 0, mid, H); cx.clip();
-    cx.fillStyle = "#1b1918"; cx.fillText("HOUSE", ox, cy);
-    cx.restore();
-    // the film shows through the letterforms
+    var mid = bm.W / 2, cy = bm.bandH / 2;
+    var hx = mid - gap/2 - wH + e * (wH + gap/2);
+    var ox = mid + gap/2 - e * (wO + gap/2);
+    maskCx.save();
+    maskCx.beginPath(); maskCx.rect(0, 0, mid, bm.bandH); maskCx.clip();
+    maskCx.fillStyle = "#1b1918"; maskCx.fillText("HUNTER", hx, cy);
+    maskCx.restore();
+    maskCx.save();
+    maskCx.beginPath(); maskCx.rect(mid, 0, mid, bm.bandH); maskCx.clip();
+    maskCx.fillStyle = "#1b1918"; maskCx.fillText("HOUSE", ox, cy);
+    maskCx.restore();
+  }
+  function drawWords(zA) {
+    var bm = bandMetrics();
+    var dpr = Math.min(1.5, window.devicePixelRatio || 1);
+    if (cv.width !== Math.round(bm.W * dpr)) {
+      cv.width = Math.round(bm.W * dpr); cv.height = Math.round(bm.bandH * dpr);
+      cv.style.height = bm.bandH + "px";
+    }
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cx.clearRect(0, 0, bm.W, bm.bandH);
+    if (zA >= 1) return;
+    var key = zA.toFixed(4) + "/" + bm.W + "/" + dpr;
+    if (key !== maskKey) { buildMask(zA, bm, dpr); maskKey = key; }
+    cx.drawImage(maskCv, 0, 0, bm.W, bm.bandH);
     if (vid.readyState >= 2) {
       cx.globalCompositeOperation = "source-in";
       var vw = vid.videoWidth, vh = vid.videoHeight;
-      var sc = Math.max(W / vw, H / vh);
-      cx.drawImage(vid, (W - vw*sc)/2, (H - vh*sc)/2, vw*sc, vh*sc);
+      var W = bm.W, H = window.innerHeight;
+      var sc = Math.max(W / vw, H / vh);           // cover-fit for the full viewport
+      // the band sits at the viewport's vertical centre — take just that slice
+      var srcY = (vh - bm.bandH / sc) / 2;
+      var srcX = (vw - W / sc) / 2;
+      cx.drawImage(vid, srcX, srcY, W / sc, bm.bandH / sc, 0, 0, W, bm.bandH);
       cx.globalCompositeOperation = "source-over";
     }
   }
@@ -212,7 +236,7 @@
   })();
 
   apply();
-  console.log("entry-test2 v0.19");
+  console.log("entry-test2 v0.20");
 })();
 </script>
 </body>
