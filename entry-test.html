@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test v0.06 — TEST SITE for the one-page public entry (design handoff
+<!-- entry-test v0.07 — TEST SITE for the one-page public entry (design handoff
      "Hunter House Entry Pages", 2026-07-19). Vanilla recreation of the hi-fi
      prototype per its README: high fidelity, copy is Brandon's own, counts
      verified against the live catalogue at build time. noindex + unlinked
@@ -58,9 +58,6 @@
        its wordmark + mock badge. Its lens iframe carries the ?v= cache trio.) -->
   <section id="site" style="position:relative;height:88vh;min-height:560px;overflow:hidden;border-top:1px solid rgba(240,237,230,.1);scroll-margin-top:60px;background:#100e0b">
     <iframe id="site-lens" title="Hunter House site — contour model, held still" src="mock-home2.html" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#100e0b" allow="fullscreen"></iframe>
-    <!-- ghost footage: barest opacity, screen-blended so it lives in the dark
-         behind the contour linework; pointer-events:none keeps the tilt alive -->
-    <video autoplay muted loop playsinline preload="metadata" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.14;mix-blend-mode:screen;pointer-events:none"><source src="assets/entry/site-bg.mp4" type="video/mp4"></video>
     <div style="position:absolute;left:44px;bottom:64px;max-width:600px;pointer-events:none">
       <div class="st-mono" style="font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:#c9a44e;margin-bottom:16px">The site</div>
       <h2 style="font-weight:200;font-size:clamp(36px,4.6vw,52px);letter-spacing:-.03em;line-height:1;margin-bottom:16px">Five acres at Prospect Lake</h2>
@@ -144,15 +141,15 @@
   <!-- FOOTER -->
   <footer style="border-top:1px solid rgba(240,237,230,.14);padding:30px 60px;display:flex;justify-content:space-between;align-items:center">
     <span class="st-mono" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(240,237,230,.42)">Hunter House Foundation · 203 Goward Road · Saanich BC</span>
-    <span class="st-mono" title="entry-test v0.06" style="font-size:10px;letter-spacing:.06em;color:rgba(240,237,230,.42)">Every image links to its catalogue record</span>
+    <span class="st-mono" title="entry-test v0.07" style="font-size:10px;letter-spacing:.06em;color:rgba(240,237,230,.42)">Every image links to its catalogue record</span>
   </footer>
 </div>
 
 <script>
-// entry-test v0.06 — vanilla port of the design prototype's component logic.
+// entry-test v0.07 — vanilla port of the design prototype's component logic.
 // State: active reference set + a live archive-ID → P96 image map (SPARQL).
 (function () {
-  var VERSION = "entry-test v0.06";
+  var VERSION = "entry-test v0.07";
   var imgMap = {};
   var activeRef = "1970";
 
