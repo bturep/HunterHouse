@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test v0.02 — TEST SITE for the one-page public entry (design handoff
+<!-- entry-test v0.03 — TEST SITE for the one-page public entry (design handoff
      "Hunter House Entry Pages", 2026-07-19). Vanilla recreation of the hi-fi
      prototype per its README: high fidelity, copy is Brandon's own, counts
      verified against the live catalogue at build time. noindex + unlinked
@@ -66,14 +66,15 @@
     <div class="st-mono" style="position:absolute;left:44px;top:26px;font-size:9.5px;letter-spacing:.06em;color:rgba(240,237,230,.5)">HH-IHC-0038 · 2024</div>
   </section>
 
-  <!-- THE SITE — 3D contour model (forms/explore-3d-mock lens, chrome-stripped;
-       drag to orbit, zoom disabled so the page keeps scrolling; ?v= cache trio) -->
+  <!-- THE SITE — the tilt site-plan (mock-home2 v0.34 embedded whole: its own
+       held-zoom camera, tilt-to-cursor, house hover/click zoom; we hide only
+       its wordmark + mock badge. Its lens iframe carries the ?v= cache trio.) -->
   <section id="site" style="position:relative;height:88vh;min-height:560px;overflow:hidden;border-top:1px solid rgba(240,237,230,.1);scroll-margin-top:60px;background:#100e0b">
-    <iframe id="site-lens" title="Hunter House site — contour model" src="forms/explore-3d-mock.html?intro=0&v=32" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#100e0b" allow="fullscreen"></iframe>
+    <iframe id="site-lens" title="Hunter House site — contour model, held still" src="mock-home2.html" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#100e0b" allow="fullscreen"></iframe>
     <div style="position:absolute;left:44px;bottom:64px;max-width:600px;pointer-events:none">
       <div class="st-mono" style="font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:#c9a44e;margin-bottom:16px">The site</div>
       <h2 style="font-weight:200;font-size:clamp(36px,4.6vw,52px);letter-spacing:-.03em;line-height:1;margin-bottom:16px">Five acres at Prospect Lake</h2>
-      <p style="font-size:15.5px;line-height:1.62;color:rgba(240,237,230,.82);font-weight:300">The land holds the house — contours, covenant, the kinhin trail through the forest. Drag to turn the model.</p>
+      <p style="font-size:15.5px;line-height:1.62;color:rgba(240,237,230,.82);font-weight:300">The land holds the house — contours, covenant, the kinhin trail through the forest. The model leans with your cursor; click the house to come closer.</p>
     </div>
     <div class="st-mono" style="position:absolute;left:44px;top:26px;font-size:9.5px;letter-spacing:.06em;color:rgba(240,237,230,.5);pointer-events:none">Site contour model · 2026</div>
   </section>
@@ -141,15 +142,15 @@
   <!-- FOOTER -->
   <footer style="border-top:1px solid rgba(240,237,230,.14);padding:30px 60px;display:flex;justify-content:space-between;align-items:center">
     <span class="st-mono" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(240,237,230,.42)">Hunter House Foundation · 203 Goward Road · Saanich BC</span>
-    <span class="st-mono" title="entry-test v0.02" style="font-size:10px;letter-spacing:.06em;color:rgba(240,237,230,.42)">Every image links to its catalogue record</span>
+    <span class="st-mono" title="entry-test v0.03" style="font-size:10px;letter-spacing:.06em;color:rgba(240,237,230,.42)">Every image links to its catalogue record</span>
   </footer>
 </div>
 
 <script>
-// entry-test v0.02 — vanilla port of the design prototype's component logic.
+// entry-test v0.03 — vanilla port of the design prototype's component logic.
 // State: active reference set + a live archive-ID → P96 image map (SPARQL).
 (function () {
-  var VERSION = "entry-test v0.02";
+  var VERSION = "entry-test v0.03";
   var imgMap = {};
   var activeRef = "1970";
 
@@ -233,35 +234,24 @@
   // first paint (before/without SPARQL)
   render();
 
-  // ── SITE lens: strip the mock's chrome, disable zoom/pan (page keeps
-  //    scrolling), keep drag-orbit + a slow ambient rotate ────────────────
+  // ── SITE: mock-home2 embedded whole (it drives its own camera + house
+  //    interactions). Hide only its wordmark + mock badge; the section's own
+  //    caption replaces them. ────────────────────────────────────────────
   (function () {
     var lens = document.getElementById("site-lens");
     if (!lens) return;
     var inited = false;
     function initLens() {
       if (inited) return;
-      var doc, win;
-      try { doc = lens.contentDocument; win = lens.contentWindow; } catch (e) { return; }
-      if (!doc || !win || doc.readyState !== "complete") return;
+      var doc;
+      try { doc = lens.contentDocument; } catch (e) { return; }
+      if (!doc || doc.readyState !== "complete") return;
       inited = true;
       try {
         var st = doc.createElement("style");
-        st.textContent = ".layers,.formtag,.hint,.orbithint,#topbtn,#recenterbtn,.i-prov,.intro," +
-          ".titleblock,.crumbs,.backbtn,.bar,.panel,.overlay3d,.icontip{display:none !important;opacity:0 !important;pointer-events:none !important}" +
-          "#scene{cursor:grab !important}";
+        st.textContent = ".wordmark,.mock-tag{display:none !important}";
         doc.head.appendChild(st);
       } catch (e) {}
-      (function wait(tries) {
-        var V = win.__v;
-        if (V && V.controls) {
-          V.controls.enableZoom = false;
-          V.controls.enablePan = false;
-          V.controls.autoRotate = true;
-          V.controls.autoRotateSpeed = 0.35;
-          lens.contentDocument.addEventListener("pointerdown", function () { V.controls.autoRotate = false; }, { once: true });
-        } else if (tries < 120) { setTimeout(function () { wait(tries + 1); }, 40); }
-      })(0);
     }
     lens.addEventListener("load", initLens);
     initLens();
