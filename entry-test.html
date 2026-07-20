@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<!-- entry-test v0.07 — TEST SITE for the one-page public entry (design handoff
-     "Hunter House Entry Pages", 2026-07-19). Vanilla recreation of the hi-fi
-     prototype per its README: high fidelity, copy is Brandon's own, counts
-     verified against the live catalogue at build time. noindex + unlinked
-     (mock pattern). Local assets: assets/entry/. -->
+<!-- entry-test v0.08 — TEST SITE for the one-page public entry.
+     v0.08 architecture (Brandon, 2026-07-19): the entry is a CLICK-gate (no
+     scroll) — the film + HUNTER HOUSE; click through → the video fades out,
+     the top bar fades in, and you land ON the site plan (mock-home2 embedded
+     full-viewport). The drawing is the interface: nav buttons zoom into the
+     drawing and open their space as a slide-over panel; clicking the house in
+     the drawing opens the House panel. Only the house has a mapped location so
+     far — Ric/Archive/About open their panels without a zoom target (TBD).
+     noindex + unlinked (mock pattern). Assets: assets/entry/. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -15,144 +19,134 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
+  html,body{height:100%;overflow:hidden}  /* click-through world — no page scroll */
   body{background:#141210;font-family:"Inter Tight",system-ui,sans-serif;-webkit-font-smoothing:antialiased;color:#f3efe6}
   a{color:inherit;text-decoration:none}
   .st-mono{font-family:"JetBrains Mono",Menlo,monospace}
+  .st-nav a{cursor:pointer}
   .st-nav a:hover{color:#c9a44e}
   .st-term{color:#f3efe6;border-bottom:1px dashed rgba(201,164,78,.6);cursor:pointer}
   .st-term:hover{color:#c9a44e;border-color:#c9a44e}
   #ref-body{transition:opacity 150ms ease}
   @keyframes stBob{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+  /* slide-over panels */
+  .panel{position:fixed;top:0;right:0;bottom:0;width:min(880px,94vw);z-index:45;
+    background:#141210;border-left:1px solid rgba(240,237,230,.14);
+    transform:translateX(102%);transition:transform .55s cubic-bezier(.25,.8,.25,1);
+    overflow-y:auto;padding:84px 56px 60px}
+  .panel.open{transform:translateX(0)}
+  .panel .close{position:absolute;top:22px;right:26px;font-size:18px;color:rgba(240,237,230,.5);
+    background:none;border:0;cursor:pointer;font-family:"JetBrains Mono",monospace}
+  .panel .close:hover{color:#c9a44e}
+  .eyebrow{font-family:"JetBrains Mono",Menlo,monospace;font-size:10.5px;letter-spacing:.26em;
+    text-transform:uppercase;color:#c9a44e;margin-bottom:22px}
+  /* the header strip is click-transparent — only its links take the pointer,
+     and only after entry (the gate owns all clicks before that) */
+  #hdr{pointer-events:none !important}
+  body.entered #hdr a{pointer-events:auto}
 </style>
 </head>
 <body>
-<div style="position:relative">
-  <!-- HEADER -->
-  <header id="hdr" style="opacity:0;transform:translateY(-10px);pointer-events:none;transition:opacity .5s ease,transform .5s ease;position:fixed;top:0;left:0;right:0;z-index:40;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:15px 34px;background:linear-gradient(180deg,rgba(16,14,11,.82),rgba(16,14,11,0));backdrop-filter:blur(2px)">
-    <a href="#top"><span style="font-size:13px;font-weight:500;letter-spacing:.01em">Hunter House</span> <span class="st-mono" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(240,237,230,.55)">Foundation</span></a>
-    <nav class="st-nav st-mono" style="display:flex;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(240,237,230,.62)">
-      <a href="#top" style="padding:6px 15px">Entry</a>
-      <a href="#site" style="padding:6px 15px;border-left:1px solid rgba(240,237,230,.16)">Site</a>
-      <a href="#house" style="padding:6px 15px;border-left:1px solid rgba(240,237,230,.16)">House</a>
-      <a href="#reading" style="padding:6px 15px;border-left:1px solid rgba(240,237,230,.16)">Ric</a>
-      <a href="#collection" style="padding:6px 15px;border-left:1px solid rgba(240,237,230,.16)">Archive</a>
-      <a href="#about" style="padding:6px 15px;border-left:1px solid rgba(240,237,230,.16)">About</a>
-    </nav>
-    <span></span>
-  </header>
 
-  <!-- HERO — THE LAND -->
-  <section id="top" style="position:relative;height:100vh;min-height:640px;overflow:hidden">
-    <video autoplay muted loop playsinline preload="auto" poster="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0003_HunterHouse_2024_prev.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 48%"><source src="assets/entry/hero.mp4" type="video/mp4"></video>
-    <div style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(16,14,11,.94) 2%,rgba(16,14,11,.2) 42%,rgba(16,14,11,.5) 100%)"></div>
-    <div style="position:absolute;left:44px;top:72px;max-width:46vw">
-      <h1 style="font-weight:200;font-size:clamp(44px,6vw,80px);line-height:.98;letter-spacing:-.01em;text-transform:uppercase">Hunter<br>House</h1>
-    </div>
-    <div class="st-mono" style="position:absolute;left:44px;bottom:30px;font-size:9.5px;letter-spacing:.06em;color:rgba(240,237,230,.5)">Film — preview cut · 2026</div>
-    <a href="#site" class="st-mono" style="position:absolute;left:50%;bottom:30px;transform:translateX(-50%);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(240,237,230,.7);text-align:center">Enter<br><span style="display:inline-block;margin-top:8px;font-size:15px;animation:stBob 2s ease-in-out infinite">↓</span></a>
-  </section>
+<!-- HEADER — hidden until you click through the entry -->
+<header id="hdr" style="opacity:0;transform:translateY(-10px);pointer-events:none;transition:opacity .6s ease,transform .6s ease;position:fixed;top:0;left:0;right:0;z-index:50;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:15px 34px;background:linear-gradient(180deg,rgba(16,14,11,.82),rgba(16,14,11,0));backdrop-filter:blur(2px)">
+  <a data-go="site"><span style="font-size:13px;font-weight:500;letter-spacing:.01em">Hunter House</span> <span class="st-mono" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(240,237,230,.55)">Foundation</span></a>
+  <nav class="st-nav st-mono" style="display:flex;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(240,237,230,.62)">
+    <a data-go="site" style="padding:6px 15px">Site</a>
+    <a data-go="house" style="padding:6px 15px;border-left:1px solid rgba(240,237,230,.16)">House</a>
+    <a data-go="reading" style="padding:6px 15px;border-left:1px solid rgba(240,237,230,.16)">Ric</a>
+    <a data-go="collection" style="padding:6px 15px;border-left:1px solid rgba(240,237,230,.16)">Archive</a>
+    <a data-go="about" style="padding:6px 15px;border-left:1px solid rgba(240,237,230,.16)">About</a>
+  </nav>
+  <span></span>
+</header>
 
-  <!-- THE SITE — the tilt site-plan (mock-home2 v0.34 embedded whole: its own
-       held-zoom camera, tilt-to-cursor, house hover/click zoom; we hide only
-       its wordmark + mock badge. Its lens iframe carries the ?v= cache trio.) -->
-  <section id="site" style="position:relative;height:88vh;min-height:560px;overflow:hidden;border-top:1px solid rgba(240,237,230,.1);scroll-margin-top:60px;background:#100e0b">
-    <iframe id="site-lens" title="Hunter House site — contour model, held still" src="mock-home2.html" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#100e0b" allow="fullscreen"></iframe>
-    <div style="position:absolute;left:44px;bottom:64px;max-width:600px;pointer-events:none">
-      <div class="st-mono" style="font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:#c9a44e;margin-bottom:16px">The site</div>
-      <h2 style="font-weight:200;font-size:clamp(36px,4.6vw,52px);letter-spacing:-.03em;line-height:1;margin-bottom:16px">Five acres at Prospect Lake</h2>
-      <p style="font-size:15.5px;line-height:1.62;color:rgba(240,237,230,.82);font-weight:300">The land holds the house — contours, covenant, the kinhin trail through the forest. The model leans with your cursor; click the house to come closer.</p>
-    </div>
-    <div class="st-mono" style="position:absolute;left:44px;top:26px;font-size:9.5px;letter-spacing:.06em;color:rgba(240,237,230,.5);pointer-events:none">Site contour model · 2026</div>
-  </section>
-
-  <!-- THE HOUSE -->
-  <section id="house" style="position:relative;height:88vh;min-height:560px;overflow:hidden;border-top:1px solid rgba(240,237,230,.1);scroll-margin-top:60px">
-    <img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="The residence" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 42%">
-    <div style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(16,14,11,.92) 2%,rgba(16,14,11,.08) 52%,rgba(16,14,11,.28) 100%)"></div>
-    <div style="position:absolute;left:44px;bottom:64px;max-width:600px">
-      <div class="st-mono" style="font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:#c9a44e;margin-bottom:16px">The house</div>
-      <h2 style="font-weight:200;font-size:clamp(36px,4.6vw,52px);letter-spacing:-.03em;line-height:1;margin-bottom:16px">Two wings, a generation apart</h2>
-      <p style="font-size:15.5px;line-height:1.62;color:rgba(240,237,230,.82);font-weight:300">Built into the slope from 1970 and never conventionally finished — an East Wing and a West Wing, architecturally distinct, drawn and redrawn across five decades.</p>
-    </div>
-    <div class="st-mono" style="position:absolute;left:44px;top:26px;font-size:9.5px;letter-spacing:.06em;color:rgba(240,237,230,.5)">HH-IHC-0038 · 2024</div>
-  </section>
-
-  <!-- THE READING — citational essay -->
-  <section id="reading" style="border-top:1px solid rgba(240,237,230,.1);display:grid;grid-template-columns:1fr 440px;scroll-margin-top:60px">
-    <div style="padding:80px 60px 84px">
-      <div class="st-mono" style="font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:#c9a44e;margin-bottom:30px">Richard Hunter · 203 Goward Road</div>
-      <div style="font-size:19px;line-height:1.82;color:rgba(240,237,230,.88);font-weight:300;max-width:620px">
-        <p style="margin-bottom:24px">The original house was built in <a class="st-term" data-ref="1970">1970</a> by the architect <a class="st-term" data-ref="ric">Richard Morrow Hunter</a>, a student of the American School architect Bruce Goff. Ric and his family built the house over fifty years — it was his ongoing life project and major work.</p>
-        <p style="margin-bottom:24px">The house underwent a major renovation and addition in the mid-1990s. In the mid-2000s the Hunters placed a <a class="st-term" data-ref="covenant">covenant</a> on the property — the first in the District of Saanich. The final major bout of work came in 2018, with the addition of a dining room to the original 1970 structure.</p>
-        <p style="margin-bottom:0">Ric was an ordained <a class="st-term" data-ref="zen">Zen monk</a> and, for a period, ran and facilitated the Victoria Zen Centre on the property. He died in 2023; the house was sold shortly after. Its new owners, Floyd Marinescu and Olivia Jol, have engaged the author for both research and design.</p>
-      </div>
-      <div class="st-mono" style="margin-top:40px;font-size:10px;letter-spacing:.06em;color:rgba(240,237,230,.4)">Hover a highlighted term to cite it in the margin. Images resolve live from the catalogue.</div>
-    </div>
-    <!-- MARGIN -->
-    <aside style="background:#1b1915;border-left:1px solid rgba(240,237,230,.12);padding:80px 36px 40px;position:sticky;top:0;align-self:start;min-height:100vh;display:flex;flex-direction:column">
-      <div class="st-mono" style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:rgba(240,237,230,.42);padding-bottom:12px;border-bottom:1px solid rgba(240,237,230,.14);margin-bottom:20px;display:flex;justify-content:space-between"><span>Reference</span><span id="ref-label" style="color:#c9a44e"></span></div>
-      <div id="ref-body">
-        <p id="ref-note" style="font-size:13px;line-height:1.64;color:rgba(240,237,230,.72);font-weight:300;margin-bottom:24px"></p>
-        <div id="ref-figs" style="display:flex;flex-direction:column;gap:22px"></div>
-      </div>
-    </aside>
-  </section>
-
-  <!-- THE COLLECTION -->
-  <section id="collection" style="position:relative;border-top:1px solid rgba(240,237,230,.1);overflow:hidden;scroll-margin-top:60px">
-    <img src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.16">
-    <div style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(16,14,11,.97),rgba(16,14,11,.9))"></div>
-    <div style="position:relative;padding:80px 60px 78px">
-      <div class="st-mono" style="font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:#c9a44e;margin-bottom:18px">The Archive</div>
-      <h2 style="font-weight:200;font-size:clamp(34px,4.4vw,50px);letter-spacing:-.03em;line-height:1;max-width:680px;margin-bottom:12px">Around 300 items, describing one house</h2>
-      <p style="font-size:16px;line-height:1.6;color:rgba(240,237,230,.78);font-weight:300;max-width:640px;margin-bottom:44px">Drawings, photographs, furniture and correspondence across fifty years. There are three ways in.</p>
-      <!-- three routes -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(240,237,230,.14);margin-bottom:52px;max-width:940px">
-        <a href="#" onclick="return false" style="background:#141210;padding:28px 26px"><div class="st-mono" style="font-size:10px;letter-spacing:.16em;color:#c9a44e;margin-bottom:10px">01 · OPEN</div><div style="font-size:18px;font-weight:400;margin-bottom:8px">Selections →</div><p style="font-size:13px;line-height:1.55;color:rgba(240,237,230,.6)">Curated doorways into the record, in the curators' voices.</p></a>
-        <a href="browse.html" style="background:#141210;padding:28px 26px"><div class="st-mono" style="font-size:10px;letter-spacing:.16em;color:rgba(240,237,230,.5);margin-bottom:10px">02 · RESEARCHERS 🔒</div><div style="font-size:18px;font-weight:400;margin-bottom:8px">Search the archive</div><p style="font-size:13px;line-height:1.55;color:rgba(240,237,230,.6)">The full instrument — filters, search, letters. By request.</p></a>
-        <a href="#" onclick="return false" style="background:#141210;padding:28px 26px"><div class="st-mono" style="font-size:10px;letter-spacing:.16em;color:rgba(240,237,230,.5);margin-bottom:10px">03 · ACCESS</div><div style="font-size:18px;font-weight:400;margin-bottom:8px">Research access →</div><p style="font-size:13px;line-height:1.55;color:rgba(240,237,230,.6)">A finding aid, and how to arrange study — by appointment.</p></a>
-      </div>
-      <!-- register -->
-      <div class="st-mono" style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(240,237,230,.5);padding-bottom:12px;border-bottom:1px solid rgba(240,237,230,.16)">Browse by collection</div>
-      <a style="display:grid;grid-template-columns:70px 1fr 240px 60px;gap:18px;align-items:baseline;padding:16px 0;border-bottom:1px solid rgba(240,237,230,.08)"><span class="st-mono" style="font-size:11px;color:#c9a44e">CAA</span><span style="font-size:16px">Canadian Architectural Archives</span><span class="st-mono" style="font-size:11px;color:rgba(240,237,230,.55)">original build</span><span class="st-mono" style="font-size:11px;color:rgba(240,237,230,.5);text-align:right">36</span></a>
-      <a style="display:grid;grid-template-columns:70px 1fr 240px 60px;gap:18px;align-items:baseline;padding:16px 0;border-bottom:1px solid rgba(240,237,230,.08)"><span class="st-mono" style="font-size:11px;color:#c9a44e">HHC</span><span style="font-size:16px">Hunter House Collection</span><span class="st-mono" style="font-size:11px;color:rgba(240,237,230,.55)">the working core</span><span class="st-mono" style="font-size:11px;color:rgba(240,237,230,.5);text-align:right">115</span></a>
-      <a style="display:grid;grid-template-columns:70px 1fr 240px 60px;gap:18px;align-items:baseline;padding:16px 0;border-bottom:1px solid rgba(240,237,230,.08)"><span class="st-mono" style="font-size:11px;color:#c9a44e">IHC</span><span style="font-size:16px">Ivan Hunter photographs</span><span class="st-mono" style="font-size:11px;color:rgba(240,237,230,.55)">the house today</span><span class="st-mono" style="font-size:11px;color:rgba(240,237,230,.5);text-align:right">45</span></a>
-      <a style="display:grid;grid-template-columns:70px 1fr 240px 60px;gap:18px;align-items:baseline;padding:16px 0;border-bottom:1px solid rgba(240,237,230,.08)"><span class="st-mono" style="font-size:11px;color:#c9a44e">EGC</span><span style="font-size:16px">Eric Gesinger Collection</span><span class="st-mono" style="font-size:11px;color:rgba(240,237,230,.55)">furniture &amp; objects</span><span class="st-mono" style="font-size:11px;color:rgba(240,237,230,.5);text-align:right">57</span></a>
-      <a style="display:grid;grid-template-columns:70px 1fr 240px 60px;gap:18px;align-items:baseline;padding:16px 0"><span class="st-mono" style="font-size:11px;color:rgba(240,237,230,.5)">FRH</span><span style="font-size:16px;color:rgba(240,237,230,.62)">Frances Hunter correspondence</span><span class="st-mono" style="font-size:11px;color:rgba(240,237,230,.5)">researcher-gated</span><span class="st-mono" style="font-size:11px;color:#c9a44e;text-align:right">🔒</span></a>
-    </div>
-  </section>
-
-  <!-- ABOUT -->
-  <section id="about" style="border-top:1px solid rgba(240,237,230,.1);padding:80px 60px 70px;scroll-margin-top:60px">
-    <div class="st-mono" style="font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:#c9a44e;margin-bottom:24px">About the Foundation</div>
-    <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:60px;align-items:start">
-      <p style="font-size:22px;line-height:1.5;font-weight:300;letter-spacing:-.01em;max-width:620px">The Hunter House Foundation stewards the residence at 203 Goward Road and its archive, and makes the record public without diminishing it.</p>
-      <div>
-        <div class="st-mono" style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(240,237,230,.45);padding-bottom:12px;border-bottom:1px solid rgba(240,237,230,.16);margin-bottom:4px">People</div>
-        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:12px 0;border-bottom:1px solid rgba(240,237,230,.08)"><span style="font-size:15px">Floyd Marinescu</span><span class="st-mono" style="font-size:10.5px;color:rgba(240,237,230,.5)">Owner</span></div>
-        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:12px 0;border-bottom:1px solid rgba(240,237,230,.08)"><span style="font-size:15px">Olivia Jol</span><span class="st-mono" style="font-size:10.5px;color:rgba(240,237,230,.5)">Owner</span></div>
-        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:12px 0"><span style="font-size:15px">Brandon Poole</span><span class="st-mono" style="font-size:10.5px;color:rgba(240,237,230,.5)">Research &amp; design</span></div>
-        <a href="mailto:archive@hunterhousefoundation.com" class="st-mono" style="display:inline-block;margin-top:22px;font-size:11px;letter-spacing:.06em;color:#c9a44e">archive@hunterhousefoundation.com →</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer style="border-top:1px solid rgba(240,237,230,.14);padding:30px 60px;display:flex;justify-content:space-between;align-items:center">
-    <span class="st-mono" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(240,237,230,.42)">Hunter House Foundation · 203 Goward Road · Saanich BC</span>
-    <span class="st-mono" title="entry-test v0.07" style="font-size:10px;letter-spacing:.06em;color:rgba(240,237,230,.42)">Every image links to its catalogue record</span>
-  </footer>
+<!-- THE SITE PLAN — the home surface (mock-home2 whole: tilt, house hover/zoom) -->
+<div id="site" style="position:fixed;inset:0;background:#100e0b">
+  <iframe id="site-lens" title="Hunter House site — contour model, held still" src="mock-home2.html" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#100e0b" allow="fullscreen"></iframe>
+  <div class="st-mono" style="position:absolute;left:44px;bottom:26px;font-size:9.5px;letter-spacing:.06em;color:rgba(240,237,230,.5);pointer-events:none">Site contour model · 2026</div>
 </div>
 
+<!-- THE ENTRY GATE — film + the name; CLICK through (no scroll) -->
+<div id="entry-gate" style="position:fixed;inset:0;z-index:60;cursor:pointer;transition:opacity 1s ease;background:#141210">
+  <video id="entry-video" autoplay muted loop playsinline preload="auto" poster="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0003_HunterHouse_2024_prev.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 48%"><source src="assets/entry/hero.mp4" type="video/mp4"></video>
+  <div style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(16,14,11,.94) 2%,rgba(16,14,11,.2) 42%,rgba(16,14,11,.5) 100%)"></div>
+  <div style="position:absolute;left:44px;top:72px;max-width:46vw">
+    <h1 style="font-weight:200;font-size:clamp(44px,6vw,80px);line-height:.98;letter-spacing:-.01em;text-transform:uppercase">Hunter<br>House</h1>
+  </div>
+  <div class="st-mono" style="position:absolute;left:44px;bottom:30px;font-size:9.5px;letter-spacing:.06em;color:rgba(240,237,230,.5)">Film — preview cut · 2026</div>
+  <span class="st-mono" style="position:absolute;left:50%;bottom:30px;transform:translateX(-50%);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(240,237,230,.7);text-align:center">Enter<br><span style="display:inline-block;margin-top:8px;font-size:15px;animation:stBob 2s ease-in-out infinite">↓</span></span>
+</div>
+
+<!-- PANELS — the spaces the drawing opens into -->
+<section id="panel-house" class="panel">
+  <button class="close" data-close aria-label="Close">✕</button>
+  <div class="eyebrow">The house</div>
+  <h2 style="font-weight:200;font-size:clamp(32px,3.6vw,46px);letter-spacing:-.03em;line-height:1;margin-bottom:22px">Two wings, a generation apart</h2>
+  <img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="The residence" style="width:100%;display:block;border:1px solid rgba(240,237,230,.14);background:#100e0b;margin-bottom:10px">
+  <div class="st-mono" style="font-size:10px;color:rgba(240,237,230,.68);margin-bottom:26px"><span style="color:#c9a44e">HH-IHC-0038</span> · 2024</div>
+  <p style="font-size:15.5px;line-height:1.62;color:rgba(240,237,230,.82);font-weight:300;max-width:620px">Built into the slope from 1970 and never conventionally finished — an East Wing and a West Wing, architecturally distinct, drawn and redrawn across five decades.</p>
+</section>
+
+<section id="panel-reading" class="panel">
+  <button class="close" data-close aria-label="Close">✕</button>
+  <div class="eyebrow">Richard Hunter · 203 Goward Road</div>
+  <div style="font-size:18px;line-height:1.8;color:rgba(240,237,230,.88);font-weight:300;max-width:640px">
+    <p style="margin-bottom:24px">The original house was built in <a class="st-term" data-ref="1970">1970</a> by the architect <a class="st-term" data-ref="ric">Richard Morrow Hunter</a>, a student of the American School architect Bruce Goff. Ric and his family built the house over fifty years — it was his ongoing life project and major work.</p>
+    <p style="margin-bottom:24px">The house underwent a major renovation and addition in the mid-1990s. In the mid-2000s the Hunters placed a <a class="st-term" data-ref="covenant">covenant</a> on the property — the first in the District of Saanich. The final major bout of work came in 2018, with the addition of a dining room to the original 1970 structure.</p>
+    <p style="margin-bottom:0">Ric was an ordained <a class="st-term" data-ref="zen">Zen monk</a> and, for a period, ran and facilitated the Victoria Zen Centre on the property. He died in 2023; the house was sold shortly after. Its new owners, Floyd Marinescu and Olivia Jol, have engaged the author for both research and design.</p>
+  </div>
+  <div class="st-mono" style="margin-top:32px;font-size:10px;letter-spacing:.06em;color:rgba(240,237,230,.4)">Hover a highlighted term to cite it below. Images resolve live from the catalogue.</div>
+  <!-- the reference margin, inset below the essay in panel form -->
+  <div style="margin-top:36px;background:#1b1915;border:1px solid rgba(240,237,230,.12);padding:30px 30px 26px">
+    <div class="st-mono" style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:rgba(240,237,230,.42);padding-bottom:12px;border-bottom:1px solid rgba(240,237,230,.14);margin-bottom:20px;display:flex;justify-content:space-between"><span>Reference</span><span id="ref-label" style="color:#c9a44e"></span></div>
+    <div id="ref-body">
+      <p id="ref-note" style="font-size:13px;line-height:1.64;color:rgba(240,237,230,.72);font-weight:300;margin-bottom:24px"></p>
+      <div id="ref-figs" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:22px"></div>
+    </div>
+  </div>
+</section>
+
+<section id="panel-collection" class="panel">
+  <button class="close" data-close aria-label="Close">✕</button>
+  <div class="eyebrow">The Archive</div>
+  <h2 style="font-weight:200;font-size:clamp(32px,3.6vw,46px);letter-spacing:-.03em;line-height:1;max-width:680px;margin-bottom:12px">Around 300 items, describing one house</h2>
+  <p style="font-size:15.5px;line-height:1.6;color:rgba(240,237,230,.78);font-weight:300;max-width:640px;margin-bottom:40px">Drawings, photographs, furniture and correspondence across fifty years. There are three ways in.</p>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(240,237,230,.14);margin-bottom:48px">
+    <a href="#" onclick="return false" style="background:#141210;padding:26px 24px"><div class="st-mono" style="font-size:10px;letter-spacing:.16em;color:#c9a44e;margin-bottom:10px">01 · OPEN</div><div style="font-size:17px;font-weight:400;margin-bottom:8px">Selections →</div><p style="font-size:13px;line-height:1.55;color:rgba(240,237,230,.6)">Curated doorways into the record, in the curators' voices.</p></a>
+    <a href="browse.html" style="background:#141210;padding:26px 24px"><div class="st-mono" style="font-size:10px;letter-spacing:.16em;color:rgba(240,237,230,.5);margin-bottom:10px">02 · RESEARCHERS 🔒</div><div style="font-size:17px;font-weight:400;margin-bottom:8px">Search the archive</div><p style="font-size:13px;line-height:1.55;color:rgba(240,237,230,.6)">The full instrument — filters, search, letters. By request.</p></a>
+    <a href="#" onclick="return false" style="background:#141210;padding:26px 24px"><div class="st-mono" style="font-size:10px;letter-spacing:.16em;color:rgba(240,237,230,.5);margin-bottom:10px">03 · ACCESS</div><div style="font-size:17px;font-weight:400;margin-bottom:8px">Research access →</div><p style="font-size:13px;line-height:1.55;color:rgba(240,237,230,.6)">A finding aid, and how to arrange study — by appointment.</p></a>
+  </div>
+  <div class="st-mono" style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(240,237,230,.5);padding-bottom:12px;border-bottom:1px solid rgba(240,237,230,.16)">Browse by collection</div>
+  <a style="display:grid;grid-template-columns:70px 1fr 200px 60px;gap:18px;align-items:baseline;padding:15px 0;border-bottom:1px solid rgba(240,237,230,.08)"><span class="st-mono" style="font-size:11px;color:#c9a44e">CAA</span><span style="font-size:15px">Canadian Architectural Archives</span><span class="st-mono" style="font-size:11px;color:rgba(240,237,230,.55)">original build</span><span class="st-mono" style="font-size:11px;color:rgba(240,237,230,.5);text-align:right">36</span></a>
+  <a style="display:grid;grid-template-columns:70px 1fr 200px 60px;gap:18px;align-items:baseline;padding:15px 0;border-bottom:1px solid rgba(240,237,230,.08)"><span class="st-mono" style="font-size:11px;color:#c9a44e">HHC</span><span style="font-size:15px">Hunter House Collection</span><span class="st-mono" style="font-size:11px;color:rgba(240,237,230,.55)">the working core</span><span class="st-mono" style="font-size:11px;color:rgba(240,237,230,.5);text-align:right">115</span></a>
+  <a style="display:grid;grid-template-columns:70px 1fr 200px 60px;gap:18px;align-items:baseline;padding:15px 0;border-bottom:1px solid rgba(240,237,230,.08)"><span class="st-mono" style="font-size:11px;color:#c9a44e">IHC</span><span style="font-size:15px">Ivan Hunter photographs</span><span class="st-mono" style="font-size:11px;color:rgba(240,237,230,.55)">the house today</span><span class="st-mono" style="font-size:11px;color:rgba(240,237,230,.5);text-align:right">45</span></a>
+  <a style="display:grid;grid-template-columns:70px 1fr 200px 60px;gap:18px;align-items:baseline;padding:15px 0;border-bottom:1px solid rgba(240,237,230,.08)"><span class="st-mono" style="font-size:11px;color:#c9a44e">EGC</span><span style="font-size:15px">Eric Gesinger Collection</span><span class="st-mono" style="font-size:11px;color:rgba(240,237,230,.55)">furniture &amp; objects</span><span class="st-mono" style="font-size:11px;color:rgba(240,237,230,.5);text-align:right">57</span></a>
+  <a style="display:grid;grid-template-columns:70px 1fr 200px 60px;gap:18px;align-items:baseline;padding:15px 0"><span class="st-mono" style="font-size:11px;color:rgba(240,237,230,.5)">FRH</span><span style="font-size:15px;color:rgba(240,237,230,.62)">Frances Hunter correspondence</span><span class="st-mono" style="font-size:11px;color:rgba(240,237,230,.5)">researcher-gated</span><span class="st-mono" style="font-size:11px;color:#c9a44e;text-align:right">🔒</span></a>
+</section>
+
+<section id="panel-about" class="panel">
+  <button class="close" data-close aria-label="Close">✕</button>
+  <div class="eyebrow">About the Foundation</div>
+  <p style="font-size:21px;line-height:1.5;font-weight:300;letter-spacing:-.01em;max-width:620px;margin-bottom:44px">The Hunter House Foundation stewards the residence at 203 Goward Road and its archive, and makes the record public without diminishing it.</p>
+  <div class="st-mono" style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(240,237,230,.45);padding-bottom:12px;border-bottom:1px solid rgba(240,237,230,.16);margin-bottom:4px;max-width:460px">People</div>
+  <div style="max-width:460px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;padding:12px 0;border-bottom:1px solid rgba(240,237,230,.08)"><span style="font-size:15px">Floyd Marinescu</span><span class="st-mono" style="font-size:10.5px;color:rgba(240,237,230,.5)">Owner</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;padding:12px 0;border-bottom:1px solid rgba(240,237,230,.08)"><span style="font-size:15px">Olivia Jol</span><span class="st-mono" style="font-size:10.5px;color:rgba(240,237,230,.5)">Owner</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;padding:12px 0"><span style="font-size:15px">Brandon Poole</span><span class="st-mono" style="font-size:10.5px;color:rgba(240,237,230,.5)">Research &amp; design</span></div>
+  </div>
+  <a href="mailto:archive@hunterhousefoundation.com" class="st-mono" style="display:inline-block;margin-top:22px;font-size:11px;letter-spacing:.06em;color:#c9a44e">archive@hunterhousefoundation.com →</a>
+  <div class="st-mono" style="margin-top:60px;padding-top:24px;border-top:1px solid rgba(240,237,230,.14);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(240,237,230,.42)">Hunter House Foundation · 203 Goward Road · Saanich BC</div>
+</section>
+
 <script>
-// entry-test v0.07 — vanilla port of the design prototype's component logic.
-// State: active reference set + a live archive-ID → P96 image map (SPARQL).
+// entry-test v0.08 — the drawing as the interface.
 (function () {
-  var VERSION = "entry-test v0.07";
+  var VERSION = "entry-test v0.08";
   var imgMap = {};
   var activeRef = "1970";
 
+  // ── reference sets (unchanged content) ────────────────────────────────
   var REF = {
     "1970": { label: "The 1970 house",
       note: "The first structure — a roughly forty-foot-square house Ric expected to build for under $12,000. Cedar boards of varying widths inside and out; irregular window widths \"like tree trunks in a forest\"; a Japanese-style bath and a central glass-domed garden; corner beams that doubled as rain scuppers.",
@@ -179,21 +173,14 @@
   };
 
   function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
-
   function figHTML(f) {
     var url = (f.id && imgMap[f.id]) || f.local || "";
-    var media;
-    if (url) {
-      media = '<img src="' + esc(url) + '" alt="" style="width:100%;display:block;border:1px solid rgba(240,237,230,.14);background:#100e0b">';
-    } else {
-      media = '<div style="position:relative;width:100%;height:150px;background:#100e0b;border:1px solid rgba(240,237,230,.14);display:flex;align-items:center;justify-content:center">' +
-        '<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%"><line x1="0" y1="0" x2="100" y2="100" stroke="rgba(240,237,230,.12)" stroke-width="0.5"/><line x1="100" y1="0" x2="0" y2="100" stroke="rgba(240,237,230,.12)" stroke-width="0.5"/></svg>' +
-        '<span class="st-mono" style="position:relative;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(240,237,230,.4)">image pending</span></div>';
-    }
+    var media = url
+      ? '<img src="' + esc(url) + '" alt="" style="width:100%;display:block;border:1px solid rgba(240,237,230,.14);background:#100e0b">'
+      : '<div style="position:relative;width:100%;height:150px;background:#100e0b;border:1px solid rgba(240,237,230,.14);display:flex;align-items:center;justify-content:center"><span class="st-mono" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(240,237,230,.4)">image pending</span></div>';
     return '<figure style="margin:0">' + media +
       '<figcaption class="st-mono" style="margin-top:9px;font-size:10px;line-height:1.55;color:rgba(240,237,230,.68)"><span style="color:#c9a44e">' + esc(f.cite) + '</span> · ' + esc(f.caption) + '</figcaption></figure>';
   }
-
   function render() {
     var r = REF[activeRef] || REF["1970"];
     var body = document.getElementById("ref-body");
@@ -205,15 +192,11 @@
       body.style.opacity = "1";
     }, 150);
   }
-
   document.querySelectorAll(".st-term").forEach(function (el) {
     var set = function () { if (activeRef !== el.dataset.ref) { activeRef = el.dataset.ref; render(); } };
     el.addEventListener("mouseenter", set);
     el.addEventListener("click", function (e) { e.preventDefault(); set(); });
   });
-
-  // Live archive resolution — cited items → exact catalogue image (P96).
-  // Silent fallback to local assets / "image pending" on any failure.
   var ids = ["HH-FRH-0008", "HH-HHC-0112", "HH-FRH-0054", "HH-CAA-0007"];
   var q = "PREFIX wdt: <https://hunterhouse.wikibase.cloud/prop/direct/>\n" +
     "SELECT ?archId ?img WHERE { VALUES ?archId { " +
@@ -223,59 +206,124 @@
     { headers: { Accept: "application/sparql-results+json" } })
     .then(function (r) { return r.json(); })
     .then(function (d) {
-      (d.results.bindings || []).forEach(function (b) {
-        if (b.archId && b.img) imgMap[b.archId.value] = b.img.value;
-      });
+      (d.results.bindings || []).forEach(function (b) { if (b.archId && b.img) imgMap[b.archId.value] = b.img.value; });
       render();
     })
     .catch(function () { render(); });
-
-  // first paint (before/without SPARQL)
   render();
 
-  // ── SITE: mock-home2 embedded whole (it drives its own camera + house
-  //    interactions). Hide only its wordmark + mock badge; the section's own
-  //    caption replaces them. ────────────────────────────────────────────
-  (function () {
-    var lens = document.getElementById("site-lens");
-    if (!lens) return;
-    var inited = false;
-    function initLens() {
-      if (inited) return;
-      var doc;
-      try { doc = lens.contentDocument; } catch (e) { return; }
-      if (!doc || doc.readyState !== "complete") return;
-      inited = true;
+  // ── the site-plan lens: hide mock chrome; reach the inner lens for
+  //    programmatic house zoom + drawing clicks ─────────────────────────
+  var siteFrame = document.getElementById("site-lens");
+  var lensWin = null, mockDoc = null;
+  function initLens() {
+    try { mockDoc = siteFrame.contentDocument; } catch (e) { return; }
+    if (!mockDoc || mockDoc.readyState !== "complete") return;
+    try {
+      var st = mockDoc.createElement("style");
+      st.textContent = ".wordmark,.mock-tag{display:none !important}";
+      mockDoc.head.appendChild(st);
+    } catch (e) {}
+    // the mock's own inner lens iframe (grandchild) — where __v lives
+    (function wait(tries) {
       try {
-        var st = doc.createElement("style");
-        st.textContent = ".wordmark,.mock-tag{display:none !important}";
-        doc.head.appendChild(st);
+        var inner = mockDoc.getElementById("lens");
+        var w = inner && inner.contentWindow;
+        if (w && w.__v && w.__v.camera && w.__v.houseMesh) {
+          lensWin = w;
+          hookDrawingClicks(w);
+          return;
+        }
       } catch (e) {}
-    }
-    lens.addEventListener("load", initLens);
-    initLens();
-  })();
+      if (tries < 200) setTimeout(function () { wait(tries + 1); }, 60);
+    })(0);
+  }
+  siteFrame.addEventListener("load", initLens);
+  initLens();
 
-  // Header stays hidden on the hero; first scroll or click brings it in.
-  (function () {
+  // project the house footprint centre to lens screen coords
+  function houseScreenPos(w) {
+    var V = w.__v, THREE = w.THREE;
+    // WORLD-space centre (the geometry bb is local; apply the mesh transform)
+    V.houseMesh.updateMatrixWorld(true);
+    var bb = new THREE.Box3().setFromObject(V.houseMesh);
+    var c = bb.getCenter(new THREE.Vector3());
+    c.project(V.camera);
+    return { x: (c.x + 1) / 2 * w.innerWidth, y: (1 - c.y) / 2 * w.innerHeight };
+  }
+  // drive the mock's own click handler (it owns the zoom state)
+  function clickLensAt(x, y) {
+    if (!lensWin) return;
+    try { lensWin.dispatchEvent(new lensWin.MouseEvent("click", { clientX: x, clientY: y })); } catch (e) {}
+  }
+  var houseZoomed = false;
+  function zoomHouse(on) {
+    if (!lensWin || houseZoomed === on) return;
+    if (on) { var p = houseScreenPos(lensWin); clickLensAt(p.x, p.y); }
+    else { clickLensAt(8, 8); }   // the mock toggles back out on any click while zoomed
+    houseZoomed = on;
+  }
+  // clicking the drawing: if the click lands on the house, open the House
+  // panel (the mock zooms on its own). pointerup is NOT swallowed by the mock.
+  function hookDrawingClicks(w) {
+    w.addEventListener("pointerup", function (e) {
+      if (!entered || paneOpen()) return;
+      try {
+        var V = w.__v, THREE = w.THREE;
+        var rc = new THREE.Raycaster();
+        rc.setFromCamera({ x: (e.clientX / w.innerWidth) * 2 - 1, y: -((e.clientY / w.innerHeight) * 2 - 1) }, V.camera);
+        if (rc.intersectObject(V.houseMesh, false).length > 0) {
+          houseZoomed = true;                  // the mock's own click handler is zooming in
+          setTimeout(function () { openPanel("house"); }, 650);   // let the zoom breathe first
+        }
+      } catch (err) {}
+    }, true);
+  }
+
+  // ── entry gate: CLICK through (no scroll) ─────────────────────────────
+  var entered = false;
+  var gate = document.getElementById("entry-gate");
+  gate.addEventListener("click", function () {
+    if (entered) return;
+    entered = true;
+    gate.style.opacity = "0";
     var hdr = document.getElementById("hdr");
-    var shown = false;
-    function reveal() {
-      if (shown) return;
-      shown = true;
-      hdr.style.opacity = "1";
-      hdr.style.transform = "translateY(0)";
-      hdr.style.pointerEvents = "auto";
-      window.removeEventListener("scroll", onScroll);
-      document.removeEventListener("click", reveal);
-    }
-    function onScroll() { if (window.scrollY > 10) reveal(); }
-    if (window.scrollY > 10 || location.hash) reveal();   // deep-links land with the menu on
-    else {
-      window.addEventListener("scroll", onScroll, { passive: true });
-      document.addEventListener("click", reveal);
-    }
-  })();
+    hdr.style.opacity = "1"; hdr.style.transform = "translateY(0)";
+    document.body.classList.add("entered");
+    setTimeout(function () {
+      gate.style.display = "none";
+      var v = document.getElementById("entry-video");
+      try { v.pause(); } catch (e) {}
+    }, 1000);
+  });
+
+  // ── panels: nav zooms into the drawing, then opens the space ──────────
+  var panels = { house: "panel-house", reading: "panel-reading", collection: "panel-collection", about: "panel-about" };
+  function paneOpen() { return !!document.querySelector(".panel.open"); }
+  function closePanels() {
+    document.querySelectorAll(".panel.open").forEach(function (p) { p.classList.remove("open"); });
+  }
+  function openPanel(key) {
+    closePanels();
+    var el = document.getElementById(panels[key]);
+    if (el) el.classList.add("open");
+  }
+  document.querySelectorAll("[data-go]").forEach(function (el) {
+    el.addEventListener("click", function (e) {
+      e.preventDefault();
+      var go = el.dataset.go;
+      if (go === "site") { closePanels(); zoomHouse(false); return; }
+      if (go === "house") { zoomHouse(true); setTimeout(function () { openPanel("house"); }, 650); return; }
+      // Ric / Archive / About: no mapped spot in the drawing yet — open directly
+      openPanel(go);
+    });
+  });
+  document.querySelectorAll("[data-close]").forEach(function (b) {
+    b.addEventListener("click", function () { closePanels(); zoomHouse(false); });
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") { closePanels(); zoomHouse(false); }
+  });
 
   console.log(VERSION);
 })();
