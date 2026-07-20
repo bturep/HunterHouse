@@ -1,21 +1,115 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.05 — white start. Empty page, just the first sketch.
-     (Brandon, 2026-07-19: a clean slate to build the next entry idea on.)
-     noindex + unlinked (mock pattern). -->
+<!-- entry-test2 v0.06 — the convergence entry (Brandon, 2026-07-19):
+     open on big blocky HUNTER HOUSE. Scroll: HOUSE slides left, HUNTER slides
+     right, meeting at the exact middle line — HOUSE disappears into HUNTER —
+     everything resolves to a point. Then the 1970 elevation drawing arises
+     from that point. Scroll is reversible. noindex + unlinked (mock). -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hunter House — Entry 2 (test)</title>
 <meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{background:#f6f5f5;display:flex;align-items:center;justify-content:center}
-  img{width:min(1100px,90vw);display:block}
+  html,body{height:100%;overflow:hidden}
+  body{background:#f6f5f5;font-family:"Inter Tight",system-ui,sans-serif;color:#1b1918}
+  /* the words — symmetric about the exact middle line */
+  #stage{position:fixed;inset:0}
+  #words{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:clamp(56px,9vw,140px);letter-spacing:-.02em;white-space:nowrap}
+  #w-hunter{position:relative;z-index:2;background:#f6f5f5}  /* HOUSE slides in UNDER it */
+  #w-house{position:relative;z-index:1}
+  #w-hunter,#w-house{will-change:transform;display:inline-block}
+  #gap{display:inline-block;width:.34em}
+  /* the point at the middle */
+  #dot{position:absolute;left:50%;top:50%;width:10px;height:10px;border-radius:50%;
+    background:#1b1918;transform:translate(-50%,-50%) scale(0);z-index:3}
+  /* the drawing, arising from the point */
+  #draw{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    opacity:0;transform:scale(.04);transform-origin:50% 50%;z-index:4;pointer-events:none}
+  #draw img{width:min(1100px,90vw);display:block}
 </style>
 </head>
 <body>
-<img src="assets/entry/letter-elev-grey.png" alt="The house sketched in Ric's 1970 letter">
+<div id="stage">
+  <div id="words" aria-label="Hunter House">
+    <span id="w-hunter">HUNTER</span><span id="gap"></span><span id="w-house">HOUSE</span>
+  </div>
+  <div id="dot"></div>
+  <div id="draw"><img src="assets/entry/letter-elev-grey.png" alt="The house sketched in Ric's 1970 letter"></div>
+</div>
+
+<script>
+// entry-test2 v0.06 — scroll drives z: 0..1 convergence · 1..2 the drawing arises.
+(function () {
+  var z = 0, target = 0;
+  var hunter = document.getElementById("w-hunter");
+  var house = document.getElementById("w-house");
+  var dot = document.getElementById("dot");
+  var draw = document.getElementById("draw");
+  var words = document.getElementById("words");
+
+  // distance each word must travel so its INNER edge lands on the middle line:
+  // half its own width + half the gap.
+  function travel() {
+    var gapW = document.getElementById("gap").getBoundingClientRect().width;
+    return {
+      hunter: hunter.getBoundingClientRect().width / 2 + gapW / 2,
+      house: house.getBoundingClientRect().width / 2 + gapW / 2
+    };
+  }
+  var ease = function (t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; };
+
+  function apply() {
+    var zA = Math.min(1, z);              // convergence
+    var zB = Math.max(0, Math.min(1, z - 1));   // the drawing
+    var tv = travel();
+    var e = ease(zA);
+    hunter.style.transform = "translateX(" + (e * tv.hunter) + "px)";
+    house.style.transform = "translateX(" + (-e * tv.house) + "px)";
+    // the words resolve to the point: fade as they fully meet
+    var wordsFade = zA < .92 ? 1 : 1 - (zA - .92) / .08;
+    words.style.opacity = wordsFade;
+    // the point: appears as the words meet, holds, then cedes to the drawing
+    var dotIn = zA < .7 ? 0 : (zA - .7) / .3;
+    var dotOut = 1 - Math.min(1, zB * 2.2);
+    dot.style.transform = "translate(-50%,-50%) scale(" + (dotIn * dotOut) + ")";
+    // the drawing arises from the point
+    draw.style.opacity = Math.min(1, zB * 1.6);
+    draw.style.transform = "scale(" + (0.04 + ease(zB) * 0.96) + ")";
+  }
+
+  // wheel / touch / keys drive z (reversible)
+  var raf = null;
+  function step() {
+    raf = null;
+    z += (target - z) * 0.16;
+    if (Math.abs(target - z) > 0.001) raf = requestAnimationFrame(step);
+    else z = target;
+    apply();
+  }
+  function nudge(d) {
+    target = Math.max(0, Math.min(2, target + d));
+    if (!raf) raf = requestAnimationFrame(step);
+  }
+  window.addEventListener("wheel", function (e) { e.preventDefault(); nudge(e.deltaY / 900); }, { passive: false });
+  var ty = null;
+  window.addEventListener("touchstart", function (e) { ty = e.touches[0].clientY; }, { passive: true });
+  window.addEventListener("touchmove", function (e) {
+    if (ty !== null) { nudge((ty - e.touches[0].clientY) / 300); ty = e.touches[0].clientY; }
+  }, { passive: true });
+  window.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); nudge(0.5); }
+    if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); nudge(-0.5); }
+  });
+  window.addEventListener("resize", apply);
+  apply();
+  console.log("entry-test2 v0.06");
+})();
+</script>
 </body>
 </html>
