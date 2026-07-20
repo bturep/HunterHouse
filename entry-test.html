@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test v0.03 — TEST SITE for the one-page public entry (design handoff
+<!-- entry-test v0.04 — TEST SITE for the one-page public entry (design handoff
      "Hunter House Entry Pages", 2026-07-19). Vanilla recreation of the hi-fi
      prototype per its README: high fidelity, copy is Brandon's own, counts
      verified against the live catalogue at build time. noindex + unlinked
@@ -32,9 +32,10 @@
   <header style="position:fixed;top:0;left:0;right:0;z-index:40;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:15px 34px;background:linear-gradient(180deg,rgba(16,14,11,.82),rgba(16,14,11,0));backdrop-filter:blur(2px)">
     <a href="#top"><span style="font-size:13px;font-weight:500;letter-spacing:.01em">Hunter House</span> <span class="st-mono" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(240,237,230,.55)">Foundation</span></a>
     <nav class="st-nav st-mono" style="display:flex;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(240,237,230,.62)">
-      <a href="#house" style="padding:6px 15px">House</a>
+      <a href="#top" style="padding:6px 15px">Entry</a>
       <a href="#site" style="padding:6px 15px;border-left:1px solid rgba(240,237,230,.16)">Site</a>
-      <a href="#reading" style="padding:6px 15px;border-left:1px solid rgba(240,237,230,.16)">Hunter</a>
+      <a href="#house" style="padding:6px 15px;border-left:1px solid rgba(240,237,230,.16)">House</a>
+      <a href="#reading" style="padding:6px 15px;border-left:1px solid rgba(240,237,230,.16)">Ric</a>
       <a href="#collection" style="padding:6px 15px;border-left:1px solid rgba(240,237,230,.16)">Archive</a>
       <a href="#about" style="padding:6px 15px;border-left:1px solid rgba(240,237,230,.16)">About</a>
     </nav>
@@ -51,19 +52,7 @@
       <p style="font-size:18px;line-height:1.55;font-weight:300;color:rgba(240,237,230,.82);max-width:520px;margin-top:22px">The residence at 203 Goward Road, Saanich — and the working record of its making, openly catalogued and held in trust.</p>
     </div>
     <div class="st-mono" style="position:absolute;left:44px;top:88px;font-size:9.5px;letter-spacing:.06em;color:rgba(240,237,230,.5)">HH-IHC-0003 · 2024</div>
-    <a href="#house" class="st-mono" style="position:absolute;left:50%;bottom:30px;transform:translateX(-50%);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(240,237,230,.7);text-align:center">Enter<br><span style="display:inline-block;margin-top:8px;font-size:15px;animation:stBob 2s ease-in-out infinite">↓</span></a>
-  </section>
-
-  <!-- THE HOUSE -->
-  <section id="house" style="position:relative;height:88vh;min-height:560px;overflow:hidden;border-top:1px solid rgba(240,237,230,.1);scroll-margin-top:60px">
-    <img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="The residence" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 42%">
-    <div style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(16,14,11,.92) 2%,rgba(16,14,11,.08) 52%,rgba(16,14,11,.28) 100%)"></div>
-    <div style="position:absolute;left:44px;bottom:64px;max-width:600px">
-      <div class="st-mono" style="font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:#c9a44e;margin-bottom:16px">The house</div>
-      <h2 style="font-weight:200;font-size:clamp(36px,4.6vw,52px);letter-spacing:-.03em;line-height:1;margin-bottom:16px">Two wings, a generation apart</h2>
-      <p style="font-size:15.5px;line-height:1.62;color:rgba(240,237,230,.82);font-weight:300">Built into the slope from 1970 and never conventionally finished — an East Wing and a West Wing, architecturally distinct, drawn and redrawn across five decades.</p>
-    </div>
-    <div class="st-mono" style="position:absolute;left:44px;top:26px;font-size:9.5px;letter-spacing:.06em;color:rgba(240,237,230,.5)">HH-IHC-0038 · 2024</div>
+    <a href="#site" class="st-mono" style="position:absolute;left:50%;bottom:30px;transform:translateX(-50%);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(240,237,230,.7);text-align:center">Enter<br><span style="display:inline-block;margin-top:8px;font-size:15px;animation:stBob 2s ease-in-out infinite">↓</span></a>
   </section>
 
   <!-- THE SITE — the tilt site-plan (mock-home2 v0.34 embedded whole: its own
@@ -77,6 +66,18 @@
       <p style="font-size:15.5px;line-height:1.62;color:rgba(240,237,230,.82);font-weight:300">The land holds the house — contours, covenant, the kinhin trail through the forest. The model leans with your cursor; click the house to come closer.</p>
     </div>
     <div class="st-mono" style="position:absolute;left:44px;top:26px;font-size:9.5px;letter-spacing:.06em;color:rgba(240,237,230,.5);pointer-events:none">Site contour model · 2026</div>
+  </section>
+
+  <!-- THE HOUSE -->
+  <section id="house" style="position:relative;height:88vh;min-height:560px;overflow:hidden;border-top:1px solid rgba(240,237,230,.1);scroll-margin-top:60px">
+    <img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="The residence" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 42%">
+    <div style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(16,14,11,.92) 2%,rgba(16,14,11,.08) 52%,rgba(16,14,11,.28) 100%)"></div>
+    <div style="position:absolute;left:44px;bottom:64px;max-width:600px">
+      <div class="st-mono" style="font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:#c9a44e;margin-bottom:16px">The house</div>
+      <h2 style="font-weight:200;font-size:clamp(36px,4.6vw,52px);letter-spacing:-.03em;line-height:1;margin-bottom:16px">Two wings, a generation apart</h2>
+      <p style="font-size:15.5px;line-height:1.62;color:rgba(240,237,230,.82);font-weight:300">Built into the slope from 1970 and never conventionally finished — an East Wing and a West Wing, architecturally distinct, drawn and redrawn across five decades.</p>
+    </div>
+    <div class="st-mono" style="position:absolute;left:44px;top:26px;font-size:9.5px;letter-spacing:.06em;color:rgba(240,237,230,.5)">HH-IHC-0038 · 2024</div>
   </section>
 
   <!-- THE READING — citational essay -->
@@ -142,15 +143,15 @@
   <!-- FOOTER -->
   <footer style="border-top:1px solid rgba(240,237,230,.14);padding:30px 60px;display:flex;justify-content:space-between;align-items:center">
     <span class="st-mono" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(240,237,230,.42)">Hunter House Foundation · 203 Goward Road · Saanich BC</span>
-    <span class="st-mono" title="entry-test v0.03" style="font-size:10px;letter-spacing:.06em;color:rgba(240,237,230,.42)">Every image links to its catalogue record</span>
+    <span class="st-mono" title="entry-test v0.04" style="font-size:10px;letter-spacing:.06em;color:rgba(240,237,230,.42)">Every image links to its catalogue record</span>
   </footer>
 </div>
 
 <script>
-// entry-test v0.03 — vanilla port of the design prototype's component logic.
+// entry-test v0.04 — vanilla port of the design prototype's component logic.
 // State: active reference set + a live archive-ID → P96 image map (SPARQL).
 (function () {
-  var VERSION = "entry-test v0.03";
+  var VERSION = "entry-test v0.04";
   var imgMap = {};
   var activeRef = "1970";
 
