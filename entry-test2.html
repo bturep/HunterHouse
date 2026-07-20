@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.25 — the convergence entry (Brandon, 2026-07-19):
+<!-- entry-test2 v0.27 — the convergence entry (Brandon, 2026-07-19):
      NO INTRO — the page lands directly: HUNTER HOUSE wordmark top-left,
      the menu on top, the 1970 drawing centred below. Scroll:
      text appears line by line BELOW the sketch, the sketch scrolls away,
@@ -52,7 +52,7 @@
      with the archive's mono. */
   #siteplan{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5}
   #siteplan iframe{position:absolute;inset:0;width:100%;height:100%;border:0;
-    filter:invert(1) grayscale(1)}
+    filter:invert(1)}
   #siteplan .slabel{position:absolute;left:34px;bottom:26px;background:#1b1918;color:#f6f5f5;
     font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.18em;
     text-transform:uppercase;padding:7px 12px;pointer-events:none}
@@ -99,10 +99,10 @@
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">Archive</a>
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.25</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.27</div>
 
 <script>
-// entry-test2 v0.25 — z: 0..1 convergence (film-in-type) · 1..2 the drawing ·
+// entry-test2 v0.27 — z: 0..1 convergence (film-in-type) · 1..2 the drawing ·
 // 2..2.15 a breath · 2.15..4.4 the scroll: lines in, sketch out, photo in.
 (function () {
   var z = 0, target = 0;
@@ -258,20 +258,52 @@
           if (V && V.scene) {
             inked = true;
             V.scene.background && V.scene.background.set(0x0a0a0a);
+            // DISPLAY colours (post-invert): contours black, features keep
+            // their identities. Source = inverse of display (the CSS invert
+            // flips it back). Keyed by the lens's original palette hexes.
+            var DISPLAY = {
+              0xffffff: 0x0d0d0d,   // contours → black ink
+              0xc4826e: 0xa14f2f,   // property line → sienna
+              0xa78bbf: 0x7c5ea3,   // covenant → violet
+              0xe6c067: 0x8a6a1e,   // house → dark amber
+              0x7ba0d6: 0x3f6ea8,   // lake → blue
+              0x6f93c9: 0x3f6ea8,   // stream → blue
+              0xc9a44e: 0xb08430,   // kinhin/corr → amber
+              0xb9b3a8: 0x3a3a3a,   // paths → dark grey
+              0x9a958b: 0x555555    // rock / north → grey
+            };
+            function toSource(c, hexDisplay) {
+              c.set(hexDisplay);
+              c.setRGB(1 - c.r, 1 - c.g, 1 - c.b);
+            }
+            // REPLACE materials (not mutate): mock-home2's hover system
+            // rewrites its captured material refs every frame — fresh clones
+            // orphan those writes while the meshes render our palette.
+            function remat(mm) {
+              if (mm.isLineBasicMaterial) {
+                var hex = mm.color ? mm.color.getHex() : 0xffffff;
+                var disp = DISPLAY[hex] !== undefined ? DISPLAY[hex] : 0x0d0d0d;
+                var nm = mm.clone();
+                nm.vertexColors = false;
+                toSource(nm.color, disp);
+                nm.opacity = Math.max(mm.opacity || 1, hex === 0xffffff ? 0.9 : 1);
+                nm.needsUpdate = true;
+                return nm;
+              }
+              if (mm.isSpriteMaterial) { mm.opacity = Math.max(mm.opacity || 1, 0.85); mm.needsUpdate = true; return mm; }
+              if (mm.isMeshBasicMaterial) {
+                var fm = mm.clone();
+                if (fm.color) toSource(fm.color, 0x9fb5cd);   // washes stay faintly blue
+                fm.opacity = Math.min(mm.opacity || 1, 0.1);
+                fm.needsUpdate = true;
+                return fm;
+              }
+              return mm;
+            }
             V.scene.traverse(function (o) {
-              var mats = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : [];
-              mats.forEach(function (mm) {
-                if (mm.isLineBasicMaterial) {
-                  mm.vertexColors = false;
-                  mm.color && mm.color.set(0xffffff);
-                  mm.opacity = Math.max(mm.opacity || 1, 0.9);
-                  mm.needsUpdate = true;
-                } else if (mm.isMeshBasicMaterial || mm.isSpriteMaterial) {
-                  if (mm.isSpriteMaterial) { mm.opacity = Math.max(mm.opacity || 1, 0.85); }
-                  else { mm.opacity = Math.min(mm.opacity || 1, 0.06); }   // fills → a wash
-                  mm.needsUpdate = true;
-                }
-              });
+              if (!o.material) return;
+              if (Array.isArray(o.material)) o.material = o.material.map(remat);
+              else o.material = remat(o.material);
             });
             return;
           }
@@ -308,7 +340,7 @@
   window.addEventListener("resize", apply);
 
   apply();
-  console.log("entry-test2 v0.25");
+  console.log("entry-test2 v0.27");
 })();
 </script>
 </body>
