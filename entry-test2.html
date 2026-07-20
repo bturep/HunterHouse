@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.21 — the convergence entry (Brandon, 2026-07-19):
+<!-- entry-test2 v0.22 — the convergence entry (Brandon, 2026-07-19):
      Ric's drawn NAME BLOCK (Hunter House · Victoria B.C. · 1970) collapses
      into the exact centre point → the 1970 elevation drawing arises from it (no
      fade, always dark) → the menu arrives → then the window SCROLLS DOWN:
@@ -30,6 +30,14 @@
     visibility:hidden;transform-origin:50% 50%;z-index:4;pointer-events:none}
   #draw img{width:min(1100px,90vw);display:block}
   #menu a:hover{color:#1b1918}
+  .st-term{color:#000;border-bottom:1px dashed rgba(27,25,24,.45);cursor:pointer}
+  .st-term:hover{border-bottom-color:#000}
+  /* close-up view of the column photograph */
+  #closeup{position:fixed;inset:0;z-index:10;background:rgba(246,245,245,.97);display:none;
+    align-items:center;justify-content:center;flex-direction:column;cursor:zoom-out}
+  #closeup.on{display:flex}
+  #closeup img{max-width:92vw;max-height:84vh;border:1px solid rgba(27,25,24,.14)}
+  #closeup .ccite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:10px}
   /* the reading — a scrolling flow: sketch, then text below (line by line),
      with the photograph column on the right */
   #reading{position:fixed;inset:0;z-index:6;overflow:hidden;visibility:hidden;background:#f6f5f5}
@@ -42,6 +50,14 @@
   #flow .photocol img{width:100%;display:block;border:1px solid rgba(27,25,24,.14);opacity:0;transition:opacity 1.1s ease}
   #flow .photocol .cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:9px;opacity:0;transition:opacity 1.1s ease}
   #flow.photo-on .photocol img, #flow.photo-on .photocol .cite{opacity:1}
+  /* the gallery — photos take the centre one by one; CAA-0018 is explorable */
+  #gallery{position:fixed;inset:0;z-index:7;visibility:hidden;pointer-events:none;background:transparent}
+  .gfig{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);will-change:transform,opacity}
+  .gfig img{display:block;max-height:70vh;max-width:78vw;border:1px solid rgba(27,25,24,.14);background:#fff}
+  .gfig .gcite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:9px;text-align:center}
+  #g-caa.zoomable{pointer-events:auto;cursor:zoom-in;overflow:hidden}
+  #site-cue{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:8;opacity:0;
+    font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(27,25,24,.6)}
 </style>
 </head>
 <body>
@@ -58,9 +74,9 @@
     <img class="sk" src="assets/entry/letter-elev-grey.png" alt="">
     <div class="body">
       <div class="txt">
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
-        <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-        <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod <a class="st-term" data-ph="frh8">tempor incididunt</a> ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+        <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde <a class="st-term" data-ph="caa7">omnis iste natus</a> error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+        <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur <a class="st-term" data-ph="hhc112">magni dolores</a> eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
         <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga.</p>
         <p>Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet.</p>
       </div>
@@ -72,6 +88,13 @@
   </div>
 </div>
 
+<div id="gallery" aria-label="Photographs">
+  <div class="gfig" id="g-frh"><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0008_HunterHouse_1977_prev.jpg" alt="The house, 1977"><div class="gcite">HH-FRH-0008 · 1977</div></div>
+  <div class="gfig" id="g-caa"><img id="g-caa-img" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg" alt="Scheme II pencil studies, coloured legend, 1985"><div class="gcite">HH-CAA-0018 · 1985 · move over the drawing to explore</div></div>
+  <div class="gfig" id="g-ihc"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="The residence, 2024"><div class="gcite">HH-IHC-0038 · 2024</div></div>
+</div>
+<div id="site-cue">Site ↓</div>
+<div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
 <nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;opacity:0;pointer-events:none;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62)">
   <a href="#" onclick="return false" style="padding:6px 15px">House</a>
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">Site</a>
@@ -79,10 +102,10 @@
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">Archive</a>
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.21</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.22</div>
 
 <script>
-// entry-test2 v0.21 — z: 0..1 convergence (film-in-type) · 1..2 the drawing ·
+// entry-test2 v0.22 — z: 0..1 convergence (film-in-type) · 1..2 the drawing ·
 // 2..2.15 a breath · 2.15..4.4 the scroll: lines in, sketch out, photo in.
 (function () {
   var z = 0, target = 0;
@@ -128,7 +151,7 @@
     if (on) draw.style.visibility = "hidden";
 
     // the window scrolls down; lines arrive as it goes; the sketch departs
-    var zS = Math.max(0, Math.min(1, (z - Z_READ0) / (Z_END - Z_READ0)));
+    var zS = Math.max(0, Math.min(1, (Math.min(z, 3.4) - Z_READ0) / (Z_END - Z_READ0)));
     var scrollMax = Math.max(0, flow.scrollHeight - window.innerHeight * 0.55);
     flow.style.transform = "translateY(" + (-zS * scrollMax) + "px)";
     var lineH = 17 * 1.7;
@@ -147,8 +170,89 @@
       mm.p.style.visibility = take > 0 ? "visible" : "hidden";
     });
     // the photograph fades in once the sketch has scrolled away
-    flow.classList.toggle("photo-on", zS > 0.42);
+    flow.classList.toggle("photo-on", zS > 0.30);
+
+    // ── the gallery: at the text's middle the photos take over ────────────
+    // z 3.0..3.35 FRH-0008 flies from its column to centre (reading fades) ·
+    // 3.5..3.9 it rolls aside, CAA-0018 in from the right · dwell (explore) ·
+    // 4.3..4.7 CAA rolls aside, IHC-0038 in · then the SITE cue.
+    var G0 = 3.4;
+    var gal = document.getElementById("gallery");
+    var gOn = z > G0 - 0.001;
+    gal.style.visibility = gOn ? "visible" : "hidden";
+    reading.style.opacity = gOn ? Math.max(0, 1 - (z - G0) / 0.3) : 1;
+    var colPhoto = flow.querySelector(".photocol");
+    colPhoto.style.visibility = gOn ? "hidden" : "visible";
+    if (gOn) {
+      var W = window.innerWidth;
+      // FRH-0008: column rect → centre, then roll aside left
+      var gf = document.getElementById("g-frh");
+      var fIn = Math.max(0, Math.min(1, (z - G0) / 0.35));
+      var fOut = Math.max(0, Math.min(1, (z - 3.9) / 0.4));
+      var colImg = colPhoto.querySelector("img");
+      var r = colImg.getBoundingClientRect();
+      var dx0 = (r.left + r.width/2) - W/2, dy0 = (r.top + r.height/2) - window.innerHeight/2;
+      var e1 = ease(fIn), e2 = ease(fOut);
+      gf.style.transform = "translate(-50%,-50%) translate(" + ((1-e1)*dx0 - e2*(W*0.75)) + "px," + ((1-e1)*dy0) + "px) rotate(" + (-e2*7) + "deg)";
+      gf.style.opacity = fIn > 0 ? 1 : 0;
+      // CAA-0018: in from the right; dwell for exploring; then roll aside
+      var gc = document.getElementById("g-caa");
+      var cIn = Math.max(0, Math.min(1, (z - 3.9) / 0.4));
+      var cOut = Math.max(0, Math.min(1, (z - 4.7) / 0.4));
+      gc.style.transform = "translate(-50%,-50%) translate(" + ((1-ease(cIn))*(W*0.75) - ease(cOut)*(W*0.75)) + "px,0) rotate(" + (-ease(cOut)*7) + "deg)";
+      gc.style.opacity = cIn > 0 ? 1 : 0;
+      gc.classList.toggle("zoomable", cIn >= 1 && cOut <= 0);
+      // IHC-0038: in from the right; stays
+      var gi = document.getElementById("g-ihc");
+      var iIn = Math.max(0, Math.min(1, (z - 4.7) / 0.4));
+      gi.style.transform = "translate(-50%,-50%) translate(" + ((1-ease(iIn))*(W*0.75)) + "px,0)";
+      gi.style.opacity = iIn > 0 ? 1 : 0;
+      // then: SITE
+      document.getElementById("site-cue").style.opacity = Math.max(0, Math.min(1, (z - 5.15) / 0.2));
+    } else {
+      document.getElementById("site-cue").style.opacity = 0;
+    }
   }
+
+  // key terms swap the column photograph; clicking it opens the close-up
+  var PH = {
+    frh8:  { src: "https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0008_HunterHouse_1977_prev.jpg", cite: "HH-FRH-0008 · 1977" },
+    caa7:  { src: "https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0007_OG_Build_1970_Scheme_1_1of3_1970-08-25_prev.jpg", cite: "HH-CAA-0007 · 1970" },
+    hhc112:{ src: "https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0112_CovenantSitePlanWithAnnotations_2006_prev.jpg", cite: "HH-HHC-0112 · 2006" }
+  };
+  var colImgEl = document.querySelector("#flow .photocol img");
+  var colCiteEl = document.querySelector("#flow .photocol .cite");
+  document.querySelectorAll(".st-term").forEach(function (t) {
+    t.addEventListener("mouseenter", function () {
+      var ph = PH[t.dataset.ph];
+      if (ph) { colImgEl.src = ph.src; colCiteEl.textContent = ph.cite; }
+    });
+    t.addEventListener("click", function (e) { e.preventDefault(); });
+  });
+  var closeup = document.getElementById("closeup");
+  colImgEl.style.cursor = "zoom-in";
+  colImgEl.addEventListener("click", function () {
+    document.getElementById("closeup-img").src = colImgEl.src;
+    document.getElementById("closeup-cite").textContent = colCiteEl.textContent;
+    closeup.classList.add("on");
+  });
+  closeup.addEventListener("click", function () { closeup.classList.remove("on"); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeup.classList.remove("on"); });
+
+  // CAA-0018 explore — hover zooms in, the pan follows the cursor
+  (function () {
+    var box = document.getElementById("g-caa");
+    var img = document.getElementById("g-caa-img");
+    box.addEventListener("mousemove", function (e) {
+      if (!box.classList.contains("zoomable")) return;
+      var r = img.getBoundingClientRect();
+      var px = ((e.clientX - r.left) / r.width) * 100;
+      var py = ((e.clientY - r.top) / r.height) * 100;
+      img.style.transformOrigin = px + "% " + py + "%";
+      img.style.transform = "scale(2.3)";
+    });
+    box.addEventListener("mouseleave", function () { img.style.transform = "scale(1)"; });
+  })();
 
   var raf = null;
   function step() {
@@ -159,7 +263,7 @@
     apply();
   }
   function nudge(d) {
-    target = Math.max(0, Math.min(4.4, target + d));
+    target = Math.max(0, Math.min(5.4, target + d));
     if (!raf) raf = requestAnimationFrame(step);
   }
   window.addEventListener("wheel", function (e) { e.preventDefault(); nudge(e.deltaY / 900); }, { passive: false });
@@ -175,7 +279,7 @@
   window.addEventListener("resize", apply);
 
   apply();
-  console.log("entry-test2 v0.21");
+  console.log("entry-test2 v0.22");
 })();
 </script>
 </body>
