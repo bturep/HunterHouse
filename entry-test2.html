@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.06 — the convergence entry (Brandon, 2026-07-19):
-     open on big blocky HUNTER HOUSE. Scroll: HOUSE slides left, HUNTER slides
-     right, meeting at the exact middle line — HOUSE disappears into HUNTER —
-     everything resolves to a point. Then the 1970 elevation drawing arises
-     from that point. Scroll is reversible. noindex + unlinked (mock). -->
+<!-- entry-test2 v0.07 — the convergence entry (Brandon, 2026-07-19):
+     open on big blocky HUNTER HOUSE. Scroll: both words slide toward the EXACT
+     midline and are clipped INTO it — each swallowed by the centre as it
+     crosses. No dot. Then the 1970 elevation drawing rises from the middle —
+     always fully dark (no fade), entering at the type's own height.
+     Reversible. noindex + unlinked (mock). -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -17,70 +18,74 @@
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;overflow:hidden}
   body{background:#f6f5f5;font-family:"Inter Tight",system-ui,sans-serif;color:#1b1918}
-  /* the words — symmetric about the exact middle line */
+  /* the words — each clipped at the exact midline; they disappear INTO it */
   #stage{position:fixed;inset:0}
-  #words{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    font-weight:800;font-size:clamp(56px,9vw,140px);letter-spacing:-.02em;white-space:nowrap}
-  #w-hunter{position:relative;z-index:2;background:#f6f5f5}  /* HOUSE slides in UNDER it */
-  #w-house{position:relative;z-index:1}
-  #w-hunter,#w-house{will-change:transform;display:inline-block}
-  #gap{display:inline-block;width:.34em}
-  /* the point at the middle */
-  #dot{position:absolute;left:50%;top:50%;width:10px;height:10px;border-radius:50%;
-    background:#1b1918;transform:translate(-50%,-50%) scale(0);z-index:3}
-  /* the drawing, arising from the point */
+  #words{position:absolute;inset:0;font-weight:800;font-size:clamp(56px,9vw,140px);
+    letter-spacing:-.02em;white-space:nowrap}
+  .clip{position:absolute;top:0;bottom:0;width:50%;overflow:hidden;display:flex;align-items:center}
+  .clip-l{left:0;justify-content:flex-end}
+  .clip-r{right:0;justify-content:flex-start}
+  #w-hunter{display:inline-block;will-change:transform;margin-right:.17em}
+  #w-house{display:inline-block;will-change:transform;margin-left:.17em}
+  /* the drawing — always dark, no fade; enters at the type's height, rises */
   #draw{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    opacity:0;transform:scale(.04);transform-origin:50% 50%;z-index:4;pointer-events:none}
+    visibility:hidden;transform-origin:50% 50%;z-index:4;pointer-events:none}
   #draw img{width:min(1100px,90vw);display:block}
 </style>
 </head>
 <body>
 <div id="stage">
   <div id="words" aria-label="Hunter House">
-    <span id="w-hunter">HUNTER</span><span id="gap"></span><span id="w-house">HOUSE</span>
+    <div class="clip clip-l"><span id="w-hunter">HUNTER</span></div>
+    <div class="clip clip-r"><span id="w-house">HOUSE</span></div>
   </div>
-  <div id="dot"></div>
-  <div id="draw"><img src="assets/entry/letter-elev-grey.png" alt="The house sketched in Ric's 1970 letter"></div>
+  <div id="draw"><img id="draw-img" src="assets/entry/letter-elev-grey.png" alt="The house sketched in Ric's 1970 letter"></div>
 </div>
 
 <script>
-// entry-test2 v0.06 — scroll drives z: 0..1 convergence · 1..2 the drawing arises.
+// entry-test2 v0.07 — scroll drives z: 0..1 convergence · 1..2 the drawing arises.
 (function () {
   var z = 0, target = 0;
   var hunter = document.getElementById("w-hunter");
   var house = document.getElementById("w-house");
-  var dot = document.getElementById("dot");
   var draw = document.getElementById("draw");
-  var words = document.getElementById("words");
+  var drawImg = document.getElementById("draw-img");
 
-  // distance each word must travel so its INNER edge lands on the middle line:
-  // half its own width + half the gap.
+  // each word travels its own width + its midline margin — fully INTO the line
   function travel() {
-    var gapW = document.getElementById("gap").getBoundingClientRect().width;
+    var m = parseFloat(getComputedStyle(hunter).marginRight) || 0;
     return {
-      hunter: hunter.getBoundingClientRect().width / 2 + gapW / 2,
-      house: house.getBoundingClientRect().width / 2 + gapW / 2
+      hunter: hunter.getBoundingClientRect().width + m,
+      house: house.getBoundingClientRect().width + m
     };
   }
+  // the drawing starts at the type's height (cap-height of HUNTER HOUSE)
+  function startScale() {
+    var fontH = hunter.getBoundingClientRect().height * 0.72;   // cap-height ≈ .72em
+    var imgH = drawImg.getBoundingClientRect().height / currentDrawScale;
+    return imgH > 0 ? Math.min(1, fontH / imgH) : 0.2;
+  }
+  var currentDrawScale = 1;
   var ease = function (t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; };
 
   function apply() {
-    var zA = Math.min(1, z);              // convergence
-    var zB = Math.max(0, Math.min(1, z - 1));   // the drawing
+    var zA = Math.min(1, z);              // convergence into the midline
+    var zB = Math.max(0, Math.min(1, z - 1));   // the drawing's rise
     var tv = travel();
     var e = ease(zA);
     hunter.style.transform = "translateX(" + (e * tv.hunter) + "px)";
     house.style.transform = "translateX(" + (-e * tv.house) + "px)";
-    // the words resolve to the point: fade as they fully meet
-    var wordsFade = zA < .92 ? 1 : 1 - (zA - .92) / .08;
-    words.style.opacity = wordsFade;
-    // the point: appears as the words meet, holds, then cedes to the drawing
-    var dotIn = zA < .7 ? 0 : (zA - .7) / .3;
-    var dotOut = 1 - Math.min(1, zB * 2.2);
-    dot.style.transform = "translate(-50%,-50%) scale(" + (dotIn * dotOut) + ")";
-    // the drawing arises from the point
-    draw.style.opacity = Math.min(1, zB * 1.6);
-    draw.style.transform = "scale(" + (0.04 + ease(zB) * 0.96) + ")";
+    // the drawing: no fade — always dark; present once the words are gone,
+    // entering at the type's height and rising to full
+    if (zB > 0) {
+      var s0 = startScale();
+      currentDrawScale = s0 + ease(zB) * (1 - s0);
+      draw.style.visibility = "visible";
+      draw.style.transform = "scale(" + currentDrawScale + ")";
+    } else {
+      draw.style.visibility = "hidden";
+      currentDrawScale = 1;
+    }
   }
 
   // wheel / touch / keys drive z (reversible)
@@ -108,7 +113,7 @@
   });
   window.addEventListener("resize", apply);
   apply();
-  console.log("entry-test2 v0.06");
+  console.log("entry-test2 v0.07");
 })();
 </script>
 </body>
