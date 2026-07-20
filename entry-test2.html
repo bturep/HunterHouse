@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.11 — the convergence entry (Brandon, 2026-07-19):
+<!-- entry-test2 v0.12 — the convergence entry (Brandon, 2026-07-19):
      open on big blocky HUNTER HOUSE. Scroll: both words slide toward the EXACT
      midline and are clipped INTO it — each swallowed by the centre as it
      crosses. No dot. Then the 1970 elevation drawing rises from the middle —
@@ -36,8 +36,8 @@
      via two half-floats that abut at the centre, forming the same image at
      the same size) */
   #reading{position:fixed;inset:0;z-index:6;overflow-y:auto;visibility:hidden;background:#f6f5f5}
-  #reading .cols{display:flex;max-width:1700px;margin:0 auto;padding:16vh 40px 12vh}
-  #reading .col{width:50%;font-weight:300;font-size:15.5px;line-height:1.72;color:rgba(27,25,24,.78);text-align:justify}
+  #reading .cols{display:flex;max-width:1700px;margin:0 auto;padding:16vh 40px 12vh}  /* top padding overridden at open for exact registration */
+  #reading .col{width:50%;font-weight:400;font-size:15.5px;line-height:1.7;color:#1b1918;text-align:justify}
   #reading .col-l{padding-right:0}
   #reading .col-r{padding-left:0}
   #reading .half{display:block}
@@ -73,10 +73,10 @@
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">Archive</a>
   <a href="#" onclick="return false" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.11</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.12</div>
 
 <script>
-// entry-test2 v0.11 — scroll drives z: 0..1 convergence · 1..2 the drawing arises.
+// entry-test2 v0.12 — scroll drives z: 0..1 convergence · 1..2 the drawing arises.
 (function () {
   var z = 0, target = 0;
   var hunter = document.getElementById("w-hunter");
@@ -117,12 +117,18 @@
     var m = Math.max(0, (zB - 0.82) / 0.18);
     menu.style.opacity = m;
     menu.style.pointerEvents = m > 0.9 ? "auto" : "none";
-    // a tad more scroll: the text POPS in, wrapping the sketch's shape —
-    // the reading layer carries the same image at the same size (two abutting
-    // halves), so the swap is seamless; #draw hides beneath it
-    var zC = Math.max(0, z - 2);
+    // a tad more scroll: the text JUMPS in (keyed to scroll INTENT — the
+    // target, not the eased z — so there is zero lag), wrapping the sketch's
+    // shape; the reading rebuilds the image at the same size + the same
+    // vertical centre, so the drawing does not move
     var reading = document.getElementById("reading");
-    var on = zC > 0.08;
+    var on = target > 2.02;
+    if (on && reading.style.visibility !== "visible") {
+      var h = drawImg.getBoundingClientRect().height;
+      var pt = Math.max(24, (window.innerHeight - h) / 2);
+      reading.querySelector(".cols").style.paddingTop = pt + "px";
+      reading.scrollTop = 0;
+    }
     reading.style.visibility = on ? "visible" : "hidden";
     if (on) draw.style.visibility = "hidden";
   }
@@ -152,7 +158,7 @@
   });
   window.addEventListener("resize", apply);
   apply();
-  console.log("entry-test2 v0.11");
+  console.log("entry-test2 v0.12");
 })();
 </script>
 </body>
