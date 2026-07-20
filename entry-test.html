@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<!-- entry-test v0.08 — TEST SITE for the one-page public entry.
-     v0.08 architecture (Brandon, 2026-07-19): the entry is a CLICK-gate (no
-     scroll) — the film + HUNTER HOUSE; click through → the video fades out,
-     the top bar fades in, and you land ON the site plan (mock-home2 embedded
-     full-viewport). The drawing is the interface: nav buttons zoom into the
-     drawing and open their space as a slide-over panel; clicking the house in
-     the drawing opens the House panel. Only the house has a mapped location so
-     far — Ric/Archive/About open their panels without a zoom target (TBD).
+<!-- entry-test v0.09 — TEST SITE for the one-page public entry.
+     v0.09 (Brandon, 2026-07-19): entry gate dismisses on SCROLL (not click) →
+     you land on the site plan. Clicking the house zooms into the footprint,
+     then THROUGH it into the 1970 letter — a light paper world (the shift):
+     the elevation sketch arrives zoomed-out, zooms in and stops; scrolling
+     descends the letter — the plan comes into view, then Ric's typed
+     description below. Nav panels unchanged (House/Ric/Archive/About).
      noindex + unlinked (mock pattern). Assets: assets/entry/. -->
 <html lang="en">
 <head>
@@ -44,6 +43,21 @@
      and only after entry (the gate owns all clicks before that) */
   #hdr{pointer-events:none !important}
   body.entered #hdr a{pointer-events:auto}
+  /* the letter world — light paper, entered by zooming through the footprint */
+  #letter-view{position:fixed;inset:0;z-index:55;background:#f6f4ef;display:none;
+    opacity:0;transition:opacity .9s ease}
+  #letter-view.on{opacity:1}
+  #letter-scroll{position:absolute;inset:0;overflow-y:auto;scroll-behavior:smooth}
+  #letter-zoomwrap{transform-origin:50% 18vh;transform:scale(.3);
+    transition:transform 1.6s cubic-bezier(.22,.8,.24,1)}
+  #letter-view.on #letter-zoomwrap{transform:scale(1)}
+  .letter-fig{display:flex;align-items:center;justify-content:center}
+  .letter-fig img{width:min(1080px,88vw);display:block}
+  #letter-close{position:fixed;top:20px;right:26px;z-index:56;font-size:18px;
+    color:rgba(30,28,24,.55);background:none;border:0;cursor:pointer;
+    font-family:"JetBrains Mono",monospace;display:none}
+  #letter-close:hover{color:#8a6a1e}
+  #letter-view.on ~ #letter-close, #letter-close.on{display:block}
 </style>
 </head>
 <body>
@@ -77,6 +91,21 @@
   <div class="st-mono" style="position:absolute;left:44px;bottom:30px;font-size:9.5px;letter-spacing:.06em;color:rgba(240,237,230,.5)">Film — preview cut · 2026</div>
   <span class="st-mono" style="position:absolute;left:50%;bottom:30px;transform:translateX(-50%);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(240,237,230,.7);text-align:center">Enter<br><span style="display:inline-block;margin-top:8px;font-size:15px;animation:stBob 2s ease-in-out infinite">↓</span></span>
 </div>
+
+<!-- THE LETTER — through the footprint into 13 Sep 1970 -->
+<div id="letter-view" aria-label="The 1970 letter">
+  <div id="letter-scroll">
+    <div id="letter-zoomwrap">
+      <div class="letter-fig" style="min-height:100vh"><img src="assets/entry/letter-elev.jpg" alt="The house sketched in Ric's 1970 letter"></div>
+      <div class="letter-fig" style="min-height:92vh"><img src="assets/entry/letter-plan.jpg" alt="The plan drawn in the letter"></div>
+      <div class="letter-fig" style="min-height:92vh;flex-direction:column;gap:34px;padding-bottom:12vh">
+        <img src="assets/entry/letter-desc.jpg" alt="Ric's typed description of the house">
+        <div class="st-mono" style="font-size:10px;letter-spacing:.08em;color:rgba(30,28,24,.5)">HH-FRH · letter to “Luischen” · 13 September 1970</div>
+      </div>
+    </div>
+  </div>
+</div>
+<button id="letter-close" aria-label="Close the letter">✕</button>
 
 <!-- PANELS — the spaces the drawing opens into -->
 <section id="panel-house" class="panel">
@@ -140,9 +169,9 @@
 </section>
 
 <script>
-// entry-test v0.08 — the drawing as the interface.
+// entry-test v0.09 — the drawing as the interface.
 (function () {
-  var VERSION = "entry-test v0.08";
+  var VERSION = "entry-test v0.09";
   var imgMap = {};
   var activeRef = "1970";
 
@@ -274,16 +303,16 @@
         rc.setFromCamera({ x: (e.clientX / w.innerWidth) * 2 - 1, y: -((e.clientY / w.innerHeight) * 2 - 1) }, V.camera);
         if (rc.intersectObject(V.houseMesh, false).length > 0) {
           houseZoomed = true;                  // the mock's own click handler is zooming in
-          setTimeout(function () { openPanel("house"); }, 650);   // let the zoom breathe first
+          setTimeout(openLetter, 900);         // through the footprint, into the letter
         }
       } catch (err) {}
     }, true);
   }
 
-  // ── entry gate: CLICK through (no scroll) ─────────────────────────────
+  // ── entry gate: SCROLL through (wheel / touch / keys — not click) ─────
   var entered = false;
   var gate = document.getElementById("entry-gate");
-  gate.addEventListener("click", function () {
+  function enterSite() {
     if (entered) return;
     entered = true;
     gate.style.opacity = "0";
@@ -295,6 +324,20 @@
       var v = document.getElementById("entry-video");
       try { v.pause(); } catch (e) {}
     }, 1000);
+  }
+  var wheelAcc = 0;
+  gate.addEventListener("wheel", function (e) {
+    e.preventDefault();
+    wheelAcc += e.deltaY;
+    if (wheelAcc > 60) enterSite();
+  }, { passive: false });
+  var touchY = null;
+  gate.addEventListener("touchstart", function (e) { touchY = e.touches[0].clientY; }, { passive: true });
+  gate.addEventListener("touchmove", function (e) {
+    if (touchY !== null && touchY - e.touches[0].clientY > 40) enterSite();
+  }, { passive: true });
+  document.addEventListener("keydown", function (e) {
+    if (!entered && (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ")) { e.preventDefault(); enterSite(); }
   });
 
   // ── panels: nav zooms into the drawing, then opens the space ──────────
@@ -312,7 +355,7 @@
     el.addEventListener("click", function (e) {
       e.preventDefault();
       var go = el.dataset.go;
-      if (go === "site") { closePanels(); zoomHouse(false); return; }
+      if (go === "site") { closePanels(); closeLetter(); zoomHouse(false); return; }
       if (go === "house") { zoomHouse(true); setTimeout(function () { openPanel("house"); }, 650); return; }
       // Ric / Archive / About: no mapped spot in the drawing yet — open directly
       openPanel(go);
@@ -321,8 +364,29 @@
   document.querySelectorAll("[data-close]").forEach(function (b) {
     b.addEventListener("click", function () { closePanels(); zoomHouse(false); });
   });
+
+  // ── the letter world ──────────────────────────────────────────────────
+  var letterEl = document.getElementById("letter-view");
+  var letterClose = document.getElementById("letter-close");
+  function openLetter() {
+    closePanels();
+    letterEl.style.display = "block";
+    document.getElementById("letter-scroll").scrollTop = 0;
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      letterEl.classList.add("on");            // fade in + the zoom-in to the sketch
+      letterClose.classList.add("on");
+    }); });
+  }
+  function closeLetter() {
+    if (!letterEl.classList.contains("on")) return;
+    letterEl.classList.remove("on");
+    letterClose.classList.remove("on");
+    setTimeout(function () { letterEl.style.display = "none"; }, 900);
+    zoomHouse(false);
+  }
+  letterClose.addEventListener("click", closeLetter);
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") { closePanels(); zoomHouse(false); }
+    if (e.key === "Escape") { closeLetter(); closePanels(); zoomHouse(false); }
   });
 
   console.log(VERSION);
