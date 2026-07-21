@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.53 — the sectioned entry (Brandon, 2026-07-21):
-     HERO (IHC-0038 photo, title -> wordmark) ->
+<!-- entry-test2 v0.54 — the sectioned entry (Brandon, 2026-07-21):
+     HERO (IHC-0003 photo, no scrim, ink title -> wordmark) ->
      HOUSE: the 1970 letter sketch + Hunter's OWN WORDS (L001) beside the
        letter's plan sketch -> the sketch dissolves into CAA-0008 FULLSCREEN,
        zoomed to its square plan; scroll pans to the south band, then rotates
@@ -127,7 +127,7 @@
   /* the entry photograph — full-bleed, scrolled past; the title rides above it */
   #hero{position:fixed;inset:0;z-index:7;background:#1b1918;pointer-events:none;will-change:transform}
   #hero img{width:100%;height:100%;object-fit:cover;display:block}
-  #hero::after{content:"";position:absolute;inset:0;background:rgba(243,241,236,.4)}
+  #hero::after{content:"";position:absolute;inset:0;background:transparent}
   #hero .hcite{position:absolute;left:34px;bottom:22px;z-index:1;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
   /* the subtext under the centred title — stays put and fades as scroll starts */
@@ -230,10 +230,9 @@
 <div id="site-cue">Site ↓</div>
 <div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
 <div id="hero" aria-hidden="true">
-  <!-- IHC-0038 per Brandon 2026-07-21 (FRH-0008 1977 + IHC-0003 both tried
-       earlier). Swap = this src + cite. -->
-  <img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="">
-  <div class="hcite">HH-IHC-0038 · 2024</div>
+  <!-- IHC-0003, no scrim (Brandon 2026-07-21). Swap = this src + cite. -->
+  <img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0003_HunterHouse_2024_prev.jpg" alt="">
+  <div class="hcite">HH-IHC-0003 · 2024</div>
 </div>
 <div id="hero-sub">203 Goward Road · Designed by Richard Morrow Hunter</div>
 <div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#1b1918;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
@@ -244,7 +243,7 @@
   <a style="padding:6px 15px">Archive</a>
   <a style="padding:6px 15px">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.53</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.54</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -710,7 +709,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.53");
+  console.log("entry-test2 v0.54");
 })();
 </script>
 </body>
