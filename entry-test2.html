@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.36 — the convergence entry (Brandon, 2026-07-19; photo
-     entry added 2026-07-21): the page lands on the ENTRY PHOTOGRAPH
-     (HH-FRH-0008, 1977 — Brandon's pick; the contemporary IHC-0003 was
-     tried at v0.32 and reverted) full-bleed with HUNTER HOUSE centred
-     over it.
-     Scroll: the photograph scrolls past, the menu comes in, and the centre
-     title shrinks into the EXACT top-left wordmark position (same element —
-     identity transform IS the landing spot). Then as before: the 1970
-     drawing centred, text line by line below, the photo column, the
-     gallery, the site plan. All reversible. noindex + unlinked (mock). -->
+<!-- entry-test2 v0.37 — the sectioned entry (Brandon, 2026-07-21):
+     HERO (FRH-0008 photo, title -> wordmark) ->
+     HOUSE: the 1970 letter sketch + Hunter's OWN WORDS (L001) beside the
+       letter's plan sketch -> the column crosses right->left and becomes
+       CAA-0018 (Studio and Garden; click to enlarge; addition text right)
+       -> a grid of six Ivan Hunter photographs ->
+     HUNTER: portrait (FRH-0001) + short biography ->
+     SITE: the SIMPLEST plan — static opening, all-black linework, no house
+       infill, no colour/thickening; scroll reveals the place labels
+       (Goward Rd, Echo Rd, Prospect Lake ...).
+     The menu brackets the active section: [ House ] — the running motif.
+     All reversible. noindex + unlinked (mock). -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -46,12 +48,42 @@
   #flow .photocol img{width:100%;display:block;border:1px solid rgba(27,25,24,.14);opacity:0;transition:opacity 1.1s ease}
   #flow .photocol .cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:9px;opacity:0;transition:opacity 1.1s ease}
   #flow.photo-on .photocol img, #flow.photo-on .photocol .cite{opacity:1}
-  /* the gallery — photos take the centre one by one; CAA-0018 is explorable */
-  #gallery{position:fixed;inset:0;z-index:7;visibility:hidden;pointer-events:none;background:transparent}
-  .gfig{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);will-change:transform,opacity}
-  .gfig img{display:block;max-height:70vh;max-width:78vw;border:1px solid rgba(27,25,24,.14);background:#fff}
-  .gfig .gcite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:9px;text-align:center}
-  #g-caa.zoomable{pointer-events:auto;cursor:zoom-in;overflow:hidden}
+  /* shared column cite (the reading's own is scoped to #flow) */
+  .pcite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:9px}
+  .txt-cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
+  /* the study — the column crosses right → left and becomes CAA-0018; text right */
+  #study{position:fixed;inset:0;z-index:7;visibility:hidden;display:flex;align-items:center;justify-content:center;background:transparent}
+  #study .sbody{display:flex;gap:64px;max-width:1240px;padding:0 40px;align-items:flex-start}
+  #study .photocol{width:360px;flex:none;position:relative;will-change:transform}
+  #study .photocol img{width:100%;display:block;border:1px solid rgba(27,25,24,.14)}
+  #study .photocol #study-caa{cursor:zoom-in}
+  #study .photocol .plan-over{position:absolute;left:0;top:0;pointer-events:none;background:#f6f5f5}
+  #study .txt{flex:1;max-width:660px;font-weight:500;font-size:17px;line-height:1.7;color:#000;opacity:0}
+  #study .txt p{margin-bottom:1.1em}
+  /* the Ivan Hunter selection — a quiet grid */
+  #ihc{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px}
+  #ihc .ihead{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(27,25,24,.55)}
+  #ihc .igrid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px 22px;width:min(1150px,92vw);padding:0 40px}
+  #ihc .ifig{will-change:transform,opacity}
+  #ihc .ifig img{width:100%;height:30vh;object-fit:cover;display:block;border:1px solid rgba(27,25,24,.14)}
+  #ihc .ifig .icite{font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.45);margin-top:6px;text-align:center}
+  /* HUNTER — the man behind the file */
+  #hunter{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5;
+    display:flex;align-items:center;justify-content:center}
+  #hunter .hbody{display:flex;gap:64px;max-width:1240px;padding:0 40px;align-items:flex-start}
+  #hunter .photocol{width:360px;flex:none}
+  #hunter .photocol img{width:100%;display:block;border:1px solid rgba(27,25,24,.14)}
+  #hunter h2{font-weight:800;font-size:28px;letter-spacing:.01em;margin-bottom:6px}
+  #hunter .hsub{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(27,25,24,.55);margin-bottom:22px}
+  #hunter .htxt{flex:1;max-width:660px;font-weight:500;font-size:17px;line-height:1.7;color:#000}
+  #hunter .htxt p{margin-bottom:1.1em}
+  #hunter a.more{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(27,25,24,.6);text-decoration:none;border-bottom:1px dashed rgba(27,25,24,.4)}
+  /* the menu carries the section — bracket marks the one you're in */
+  #menu a{position:relative}
+  #menu a.on{color:#1b1918}
+  #menu a.on::before{content:"[";position:absolute;left:4px;top:6px}
+  #menu a.on::after{content:"]";position:absolute;right:4px;top:6px}
   /* the site plan — the contour lens, inverted into this page's aesthetic:
      black lines on paper. Filter does the whole re-colour; label = black box
      with the archive's mono. */
@@ -82,24 +114,59 @@
     <div class="skcite">Letter L001 · Hunter to Luise Mendelsohn · 13 September 1970</div>
     <div class="body">
       <div class="txt">
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod <a class="st-term" data-ph="frh8">tempor incididunt</a> ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
-        <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde <a class="st-term" data-ph="caa7">omnis iste natus</a> error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-        <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur <a class="st-term" data-ph="hhc112">magni dolores</a> eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
-        <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga.</p>
-        <p>Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet.</p>
+        <!-- Hunter's own words — Letter L001, lightly normalized for display -->
+        <p>“… I am taking the day off from my most recent job of being ankle deep in the dirt of the forty foot square ugly excavation for a little house we'll start building next week on our land. Looks like this:”</p>
+        <p>“Nothing extraordinary in an absolute sense but if it comes off as I expect the total cost of less than $12,000 will make it very extraordinary. I never thought I'd do anything so simple and boxy but here it is! Inside and out covered alike with cedar boards of various widths and thicknesses. Irregular window widths — rhythm of tree trunks in a forest. Large Japanese style bath and central glass domed garden. I'll do all the finishing as well as manufacturing (manual) of doors and windows.”</p>
+        <p class="txt-cite">— Richard Hunter to Luise Mendelsohn · 13 September 1970 · Letter L001</p>
       </div>
       <div class="photocol">
-        <img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0008_HunterHouse_1977_prev.jpg" alt="The house, 1977">
-        <div class="cite">HH-FRH-0008 · 1977</div>
+        <img src="assets/entry/letter-plan.png" alt="Plan sketch from the letter — IVAN, SHAN, WEAVE, DRAW, LIVING, GARDEN">
+        <div class="cite">Plan sketch · Letter L001 · 1970</div>
       </div>
     </div>
   </div>
 </div>
 
-<div id="gallery" aria-label="Photographs">
-  <div class="gfig" id="g-frh"><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0008_HunterHouse_1977_prev.jpg" alt="The house, 1977"><div class="gcite">The house from the entry walk, 1977 · HH-FRH-0008</div></div>
-  <div class="gfig" id="g-caa"><img id="g-caa-img" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg" alt="Scheme II pencil studies, coloured legend, 1985"><div class="gcite">Scheme II pencil studies, coloured legend, 1985 · HH-CAA-0018 · move over the drawing to explore</div></div>
-  <div class="gfig" id="g-ihc"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="The residence, 2024"><div class="gcite">The residence photographed by Ivan Hunter, 2024 · HH-IHC-0038</div></div>
+<div id="study" aria-label="The studio addition">
+  <div class="sbody">
+    <div class="photocol" id="study-col">
+      <img id="study-caa" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg" alt="Hunter House, Studio and Garden — coloured drawing">
+      <img class="plan-over" id="study-plan" src="assets/entry/letter-plan.png" alt="">
+      <div class="pcite">Hunter House, Studio and Garden · HH-CAA-0018 · Canadian Architectural Archives</div>
+    </div>
+    <div class="txt" id="study-txt">
+      <!-- DRAFT copy — Brandon to rewrite in his own register -->
+      <p>Twenty years on, the house was still being drawn. This coloured study — <em>Hunter House, Studio and Garden</em> — is one of the schemes Hunter worked through around 1990 for a studio addition and a reworked garden, extending the cedar house he had described to Luise Mendelsohn as “simple and boxy.”</p>
+      <p>The sheet is held in the Canadian Architectural Archives at the University of Calgary, part of the Richard Hunter fonds.</p>
+      <p class="txt-cite">Click the drawing to view it large</p>
+    </div>
+  </div>
+</div>
+<div id="ihc" aria-label="Photographs by Ivan Hunter">
+  <div class="ihead">The house photographed by Ivan Hunter · 2024</div>
+  <div class="igrid">
+    <div class="ifig"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0003_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024"><div class="icite">HH-IHC-0003</div></div>
+    <div class="ifig"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0009_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024"><div class="icite">HH-IHC-0009</div></div>
+    <div class="ifig"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0016_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024"><div class="icite">HH-IHC-0016</div></div>
+    <div class="ifig"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0022_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024"><div class="icite">HH-IHC-0022</div></div>
+    <div class="ifig"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0031_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024"><div class="icite">HH-IHC-0031</div></div>
+    <div class="ifig"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024"><div class="icite">HH-IHC-0038</div></div>
+  </div>
+</div>
+<div id="hunter" aria-label="Richard Morrow Hunter">
+  <div class="hbody">
+    <div class="photocol">
+      <img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0001_RickWorkingOnSquare_1978-08_prev.jpg" alt="Rick working on Square, August 1978">
+      <div class="pcite">Rick working on Square, August 1978 · HH-FRH-0001</div>
+    </div>
+    <div class="htxt">
+      <h2>Richard Morrow Hunter</h2>
+      <div class="hsub">1930 – 2023 · Architect</div>
+      <p>Trained at the University of Colorado and the University of Oklahoma, Hunter practised in California and Alaska before relocating to Victoria, British Columbia, in 1968.</p>
+      <p>His residence at 203 Goward Road occupied him from 1970 until 2020 — five decades of continuous design on a single site. Across those years he remained its sole architect, sole client, and sole resident. The working file he kept of its drawings is the principal subject of this Foundation.</p>
+      <p><a class="more" href="richard-hunter.html">Read the full biography →</a></p>
+    </div>
+  </div>
 </div>
 <div id="siteplan" aria-label="The site">
   <iframe id="siteplan-lens" title="Hunter House site — contour model" src="mock-home2.html" allow="fullscreen"></iframe>
@@ -117,12 +184,12 @@
 <div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#f6f5f5;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
 <nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62);transform:translateY(-110%);opacity:0;will-change:transform,opacity">
   <a data-z="1" style="padding:6px 15px;cursor:pointer">House</a>
-  <a data-z="4.38" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">Site</a>
-  <a data-z="1.55" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">Hunter</a>
-  <a data-z="2.55" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">Archive</a>
-  <a data-z="4.38" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">About</a>
+  <a data-z="4.95" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">Hunter</a>
+  <a data-z="6.5" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">Site</a>
+  <a style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">Archive</a>
+  <a style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.36</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.37</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -146,6 +213,9 @@
   var flow = document.getElementById("flow");
   var ps = Array.prototype.slice.call(flow.querySelectorAll(".txt p"));
   var Z_READ0 = 0.0, Z_END = 2.25;
+  var studyTX = 0, studyTY = 0;
+  var ihcFigs = Array.prototype.slice.call(document.querySelectorAll("#ihc .ifig"));
+  var menuLinks = Array.prototype.slice.call(document.querySelectorAll("#menu a"));
 
   function apply() {
     // ── the entry photograph: HUNTER HOUSE centred, scrolled past ──────────
@@ -200,161 +270,98 @@
     // the photograph fades in once the sketch has scrolled away
     flow.classList.toggle("photo-on", zS > 0.30);
 
-    // ── the gallery: at the text's middle the photos take over ────────────
-    // z 3.0..3.35 FRH-0008 flies from its column to centre (reading fades) ·
-    // 3.5..3.9 it rolls aside, CAA-0018 in from the right · dwell (explore) ·
-    // 4.3..4.7 CAA rolls aside, IHC-0038 in · then the SITE cue.
-    var G0 = 1.25;
-    var gal = document.getElementById("gallery");  // (reading already in scope)
-    var gOn = zr > G0 - 0.001;
-    gal.style.visibility = gOn ? "visible" : "hidden";
-    reading.style.opacity = gOn ? Math.max(0, 1 - (zr - G0) / 0.3) : 1;
+    // ── the spreads: STUDY (CAA addition) → IHC grid → HUNTER → SITE ──────
+    // zr 1.25..1.75 the column crosses right → left, plan gives way to
+    // CAA-0018, addition text in · dwell · 2.45..2.85 IHC grid rises ·
+    // 3.55..3.95 HUNTER · 4.65..4.95 the site plan, bare; labels write in.
+    var T0 = 1.25;
+    var study = document.getElementById("study");
     var colPhoto = flow.querySelector(".photocol");
-    colPhoto.style.visibility = gOn ? "hidden" : "visible";
-    if (gOn) {
-      var W = window.innerWidth;
-      // FRH-0008: column rect → centre, then roll aside left
-      var gf = document.getElementById("g-frh");
-      var fIn = Math.max(0, Math.min(1, (zr - G0) / 0.35));
-      var fOut = Math.max(0, Math.min(1, (zr - 1.75) / 0.4));
-      var colImg = colPhoto.querySelector("img");
-      var r = colImg.getBoundingClientRect();
-      var dx0 = (r.left + r.width/2) - W/2, dy0 = (r.top + r.height/2) - window.innerHeight/2;
-      var e1 = ease(fIn), e2 = ease(fOut);
-      // grow from the COLUMN's size, not snap to full — the size jump was the
-      // "jumps up". Scale about the fig centre, so the centre-match holds.
-      var figW = gf.querySelector("img").offsetWidth || 1;
-      var sc0 = Math.min(1, r.width / figW);
-      var k = sc0 + (1 - sc0) * e1;
-      gf.style.transform = "translate(-50%,-50%) translate(" + ((1-e1)*dx0 - e2*(W*0.75)) + "px," + ((1-e1)*dy0) + "px) rotate(" + (-e2*7) + "deg) scale(" + k + ")";
-      gf.style.opacity = fIn > 0 ? 1 : 0;
-      // CAA-0018: in from the right; dwell for exploring; then roll aside
-      var gc = document.getElementById("g-caa");
-      var cIn = Math.max(0, Math.min(1, (zr - 1.75) / 0.4));
-      var cOut = Math.max(0, Math.min(1, (zr - 2.55) / 0.4));
-      gc.style.transform = "translate(-50%,-50%) translate(" + ((1-ease(cIn))*(W*0.75) - ease(cOut)*(W*0.75)) + "px,0) rotate(" + (-ease(cOut)*7) + "deg)";
-      gc.style.opacity = cIn > 0 ? 1 : 0;
-      gc.classList.toggle("zoomable", cIn >= 1 && cOut <= 0);
-      // IHC-0038: in from the right; stays
-      var gi = document.getElementById("g-ihc");
-      var iIn = Math.max(0, Math.min(1, (zr - 2.55) / 0.4));
-      gi.style.transform = "translate(-50%,-50%) translate(" + ((1-ease(iIn))*(W*0.75)) + "px,0)";
-      gi.style.opacity = iIn > 0 ? 1 : 0;
-      // then: SITE — the plan rises in, the gallery cedes
-      var zP = Math.max(0, Math.min(1, (zr - 3.05) / 0.3));
-      document.getElementById("site-cue").style.opacity = Math.max(0, Math.min(1, (zr - 3.0) / 0.2)) * (1 - zP);
-      var sp = document.getElementById("siteplan");
-      sp.style.visibility = zP > 0 ? "visible" : "hidden";
-      sp.style.opacity = zP;
-      sp.style.pointerEvents = zP >= 1 ? "auto" : "none";
-      gal.style.opacity = 1 - zP;
-      // arrive zoomed IN on the house; more scroll zooms OUT to the full plan
-      siteWantZoom(zr < 3.42);
-    } else {
-      document.getElementById("site-cue").style.opacity = 0;
-      var sp2 = document.getElementById("siteplan");
-      sp2.style.visibility = "hidden"; sp2.style.opacity = 0;
+    var sOn = zr > T0 - 0.001 && zr < 2.9;
+    study.style.visibility = sOn ? "visible" : "hidden";
+    reading.style.opacity = zr > T0 ? Math.max(0, 1 - (zr - T0) / 0.3) : 1;
+    colPhoto.style.visibility = zr > T0 ? "hidden" : "visible";
+    if (sOn) {
+      // FLIP the column from the reading's right slot to its natural left
+      // slot — natural position recovered from the rect minus the last
+      // applied translate (rects include transforms).
+      var e = ease(Math.max(0, Math.min(1, (zr - T0) / 0.5)));
+      var scEl = document.getElementById("study-col");
+      var rNow = scEl.getBoundingClientRect();
+      var natLeft = rNow.left - studyTX, natTop = rNow.top - studyTY;
+      var r0 = colPhoto.querySelector("img").getBoundingClientRect();
+      studyTX = (r0.left - natLeft) * (1 - e);
+      studyTY = (r0.top - natTop) * (1 - e);
+      scEl.style.transform = "translate(" + studyTX + "px," + studyTY + "px)";
+      // the sketch plan gives way to the CAA drawing mid-crossing
+      document.getElementById("study-plan").style.opacity = Math.max(0, 1 - e * 2);
+      document.getElementById("study-txt").style.opacity = Math.max(0, Math.min(1, (zr - T0 - 0.35) / 0.25));
+      study.style.opacity = Math.max(0, Math.min(1, 1 - (zr - 2.45) / 0.4));
     }
+    // the Ivan Hunter selection — staggered rise
+    var ihc = document.getElementById("ihc");
+    var iIn = Math.max(0, Math.min(1, (zr - 2.45) / 0.4));
+    var iOut = Math.max(0, Math.min(1, (zr - 3.55) / 0.4));
+    ihc.style.visibility = (iIn > 0 && iOut < 1) ? "visible" : "hidden";
+    ihc.style.opacity = iIn * (1 - iOut);
+    ihcFigs.forEach(function (fg, i) {
+      var d = Math.max(0, Math.min(1, (iIn * 1.5 - i * 0.09)));
+      fg.style.opacity = d;
+      fg.style.transform = "translateY(" + ((1 - ease(d)) * 26) + "px)";
+    });
+    // HUNTER
+    var hu = document.getElementById("hunter");
+    var hIn = Math.max(0, Math.min(1, (zr - 3.55) / 0.4));
+    var hOut = Math.max(0, Math.min(1, (zr - 4.65) / 0.3));
+    hu.style.visibility = (hIn > 0 && hOut < 1) ? "visible" : "hidden";
+    hu.style.opacity = hIn * (1 - hOut);
+    // SITE — a static opening on the bare plan; scroll writes the labels in
+    var zP = Math.max(0, Math.min(1, (zr - 4.65) / 0.3));
+    document.getElementById("site-cue").style.opacity = Math.max(0, Math.min(1, (zr - 4.5) / 0.2)) * (1 - zP);
+    var sp = document.getElementById("siteplan");
+    sp.style.visibility = zP > 0 ? "visible" : "hidden";
+    sp.style.opacity = zP;
+    sp.style.pointerEvents = zP >= 1 ? "auto" : "none";
+    var zL = Math.max(0, Math.min(1, (zr - 5.15) / 0.6));
+    if (window.__labelReveal) { try { window.__labelReveal(zL); } catch (e2) {} }
+    // the menu carries the section — bracket the one you're in. Keyed to the
+    // scroll TARGET, not the eased z, so the indicator never lags the intent.
+    var zrT = Math.max(0, target - Z_HERO);
+    var sec = zrT < 3.55 ? 0 : (zrT < 4.8 ? 1 : 2);
+    menuLinks.forEach(function (a, i) { a.classList.toggle("on", i === sec); });
   }
 
-  // key terms swap the column photograph; clicking it opens the close-up
-  var PH = {
-    frh8:  { src: "https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0008_HunterHouse_1977_prev.jpg", cite: "HH-FRH-0008 · 1977" },
-    caa7:  { src: "https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0007_OG_Build_1970_Scheme_1_1of3_1970-08-25_prev.jpg", cite: "HH-CAA-0007 · 1970" },
-    hhc112:{ src: "https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0112_CovenantSitePlanWithAnnotations_2006_prev.jpg", cite: "HH-HHC-0112 · 2006" }
-  };
+  // click-to-enlarge: the reading's plan sketch and the study's CAA drawing
   var colImgEl = document.querySelector("#flow .photocol img");
   var colCiteEl = document.querySelector("#flow .photocol .cite");
-  document.querySelectorAll(".st-term").forEach(function (t) {
-    t.addEventListener("mouseenter", function () {
-      var ph = PH[t.dataset.ph];
-      if (ph) { colImgEl.src = ph.src; colCiteEl.textContent = ph.cite; }
-    });
-    t.addEventListener("click", function (e) { e.preventDefault(); });
-  });
   var closeup = document.getElementById("closeup");
-  colImgEl.style.cursor = "zoom-in";
-  colImgEl.addEventListener("click", function () {
-    document.getElementById("closeup-img").src = colImgEl.src;
-    document.getElementById("closeup-cite").textContent = colCiteEl.textContent;
+  function openCloseup(src, cite) {
+    document.getElementById("closeup-img").src = src;
+    document.getElementById("closeup-cite").textContent = cite;
     closeup.classList.add("on");
+  }
+  colImgEl.style.cursor = "zoom-in";
+  colImgEl.addEventListener("click", function () { openCloseup(colImgEl.src, colCiteEl.textContent); });
+  var studyImgEl = document.getElementById("study-caa");
+  studyImgEl.addEventListener("click", function () {
+    openCloseup(studyImgEl.src, "Hunter House, Studio and Garden · HH-CAA-0018");
   });
   closeup.addEventListener("click", function () { closeup.classList.remove("on"); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeup.classList.remove("on"); });
 
-  // CAA-0018 explore — hover zooms in, the pan follows the cursor
-  (function () {
-    var box = document.getElementById("g-caa");
-    var img = document.getElementById("g-caa-img");
-    box.addEventListener("mousemove", function (e) {
-      if (!box.classList.contains("zoomable")) return;
-      var r = img.getBoundingClientRect();
-      var px = ((e.clientX - r.left) / r.width) * 100;
-      var py = ((e.clientY - r.top) / r.height) * 100;
-      img.style.transformOrigin = px + "% " + py + "%";
-      img.style.transform = "scale(2.3)";
-    });
-    box.addEventListener("mouseleave", function () { img.style.transform = "scale(1)"; });
-  })();
-
-  // the site plan's house zoom, scroll-driven: the mock owns the zoom via its
-  // click toggle — we synthesize clicks (at the house to go in, away to come
-  // out) whenever the desired state flips
-  // house-zoom drive: an ARMED ASSERT LOOP, not a one-shot. Actual state
-  // derives from camera altitude (zoomed ≈ y<600, out ≈ y>800); while armed,
-  // the loop re-fires an aimed click until reality matches the want, then
-  // DISARMS — so a visitor's own exploring clicks are never fought.
-  var wantZoom = true, zoomArmed = true;      // arrival state: zoomed on the house
-  function siteWantZoom(want) {
-    if (want !== wantZoom) { wantZoom = want; zoomArmed = true; }
-  }
-  var zoomLastFire = 0, zoomLastY = null;
-  setInterval(function () {
-    if (!zoomArmed) return;
-    var w = window.__lensWin;
-    if (!w || !w.__v || !w.__v.houseMesh) return;
-    var V = w.__v, y = V.camera.position.y;
-    var moving = zoomLastY !== null && Math.abs(y - zoomLastY) > 3;
-    zoomLastY = y;
-    if (moving) return;                                  // mid-transition — wait
-    if (Date.now() - zoomLastFire < 2600) return;        // give the ease time to run
-    if ((y < 600) === wantZoom) { zoomArmed = false; return; }   // matched — disarm
-    try {
-      var T = w.THREE, x = 8, cy = 8;
-      if (wantZoom) {
-        // aim at the centroid of an ACTUAL TRIANGLE of the footprint mesh —
-        // the bbox centre falls in the plan's notch and the raycast misses
-        V.camera.updateMatrixWorld(true);
-        V.houseMesh.updateMatrixWorld(true);
-        var pos = V.houseMesh.geometry.attributes.position;
-        var ti = Math.floor(pos.count / 6) * 3;          // a mid-buffer triangle
-        var c = new T.Vector3().fromBufferAttribute(pos, ti)
-          .add(new T.Vector3().fromBufferAttribute(pos, ti + 1))
-          .add(new T.Vector3().fromBufferAttribute(pos, ti + 2))
-          .multiplyScalar(1 / 3)
-          .applyMatrix4(V.houseMesh.matrixWorld);
-        c.project(V.camera);
-        x = (c.x + 1) / 2 * w.innerWidth;
-        cy = (1 - c.y) / 2 * w.innerHeight;
-      }
-      zoomLastFire = Date.now();
-      w.dispatchEvent(new w.MouseEvent("click", { clientX: x, clientY: cy }));
-    } catch (e) {}
-  }, 900);
-
-  // the site-plan iframe: strip the mock's chrome, then RE-INK the scene —
-  // all linework to full white (the CSS invert renders it BLACK on paper),
-  // fills to a whisper, ground to 0x0a0a0a (inverts to exactly #f5f5f5)
+  // the site-plan iframe: strip the mock's chrome, then re-ink to the
+  // SIMPLEST plan — every line black on paper (the CSS invert does the flip),
+  // no fills, no house infill, no thickening, no colour identities, no zoom
+  // choreography (static opening). Place labels (Goward Rd, Echo Rd, Prospect
+  // Lake …) are KEPT but start at 0 — scroll writes them in via __labelReveal.
   (function () {
     var f = document.getElementById("siteplan-lens");
-    var inked = false;
     function strip() {
       try {
         var d = f.contentDocument;
         if (!d || d.readyState !== "complete") return;
         var st = d.createElement("style");
-        st.textContent = ".wordmark,.mock-tag,.veil{display:none !important}";   // the veil inverts to a grey plaque — the v0.28 ghost-rectangle culprit
-
+        st.textContent = ".wordmark,.mock-tag,.veil{display:none !important}";   // the veil inverts to a grey plaque
         d.head.appendChild(st);
       } catch (e) {}
       (function wait(tries) {
@@ -362,132 +369,76 @@
           var w = f.contentDocument.getElementById("lens").contentWindow;
           var V = w.__v;
           if (V && V.scene) {
-            window.__lensWin = w;   // for the house zoom + late re-ink passes
-            inked = true;
-            V.scene.background && V.scene.background.set(0x0a0a0a);
-            // DISPLAY colours (post-invert): contours black, features keep
-            // their identities. Source = inverse of display (the CSS invert
-            // flips it back). Keyed by the lens's original palette hexes.
-            var DISPLAY = {
-              0xffffff: 0x0d0d0d,   // contours → black ink
-              0xc4826e: 0xd44d14,   // property line → vivid burnt orange
-              0xa78bbf: 0x8b30d9,   // covenant → vivid violet
-              0xe6c067: 0x0d0d0d,   // house → black (solid mass w/ the fill) → vivid amber
-              0x7ba0d6: 0x1263e0,   // lake → vivid blue
-              0x6f93c9: 0x1263e0,   // stream → vivid blue
-              0xc9a44e: 0xcc7a00,   // kinhin/corr → orange-amber
-              0xb9b3a8: 0x3a3a3a,   // paths → dark grey
-              0x9a958b: 0x555555    // rock / north → grey
-            };
-            function toSource(c, hexDisplay) {
-              c.set(hexDisplay);
-              c.setRGB(1 - c.r, 1 - c.g, 1 - c.b);
-            }
-            // REPLACE materials (not mutate): mock-home2's hover system
-            // rewrites its captured material refs every frame — fresh clones
-            // orphan those writes while the meshes render our palette.
+            window.__lensWin = w;
+            var labels = [];
+            // REPLACE materials (not mutate): the mock's hover system rewrites
+            // its captured material refs every frame — fresh clones orphan
+            // those writes while the meshes render our ink.
             function remat(mm, o) {
               if (mm.userData && mm.userData.__inked) return mm;
               if (mm.isLineBasicMaterial) {
-                var hex = mm.color ? mm.color.getHex() : 0xffffff;
-                var disp = DISPLAY[hex] !== undefined ? DISPLAY[hex] : 0x0d0d0d;
                 var nm = mm.clone();
                 nm.vertexColors = false;
-                toSource(nm.color, disp);
-                nm.opacity = Math.max(mm.opacity || 1, hex === 0xffffff ? 0.9 : 1);
-                nm.needsUpdate = true;
-                nm.userData.__inked = true;
+                nm.color.setRGB(1, 1, 1);              // white → inverts to black ink
+                nm.opacity = Math.max(mm.opacity || 1, 0.9);
+                nm.needsUpdate = true; nm.userData.__inked = true;
                 return nm;
               }
-              if (mm.isSpriteMaterial) { mm.opacity = Math.max(mm.opacity || 1, 0.85); mm.needsUpdate = true; mm.userData.__inked = true; return mm; }
+              if (mm.isSpriteMaterial) {               // sprite labels/markers — scroll-revealed
+                mm.userData.__labelOrig = Math.max(mm.opacity || 1, 0.85);
+                mm.opacity = 0; mm.needsUpdate = true;
+                mm.userData.__inked = true; mm.userData.__isLabel = true;
+                if (o) o.userData.__isLabel = true;
+                labels.push(mm);
+                return mm;
+              }
               if (mm.isMeshBasicMaterial) {
-                if (mm.opacity === 0) { mm.userData.__inked = true; return mm; }
-                // textured planes: the faint hillshade/aerial washes (op<.5)
-                // become a grey plaque under inversion — hide them; the
-                // higher-opacity textured planes are the place LABELS — keep.
                 if (mm.map) {
+                  // faint hillshade/aerial washes → gone (grey plaque under
+                  // inversion); the higher-opacity textured planes are the
+                  // place LABELS — kept, starting invisible
                   if ((mm.opacity === undefined ? 1 : mm.opacity) < 0.5) {
                     var hm = mm.clone(); hm.opacity = 0; hm.userData.__inked = true; return hm;
                   }
-                  mm.userData.__inked = true; return mm;
+                  mm.userData.__labelOrig = Math.max(mm.opacity === undefined ? 1 : mm.opacity, 0.9);
+                  mm.transparent = true; mm.opacity = 0; mm.needsUpdate = true;
+                  mm.userData.__inked = true; mm.userData.__isLabel = true;
+                  if (o) o.userData.__isLabel = true;
+                  labels.push(mm);
+                  return mm;
                 }
-                var fm = mm.clone();
-                // the GROUND / any huge plane must not get the wash — at house
-                // zoom it reads as a grey plaque. Small fills (lake, rooms) keep it.
-                var big = false;
-                try {
-                  if (o && o.geometry) {
-                    o.geometry.computeBoundingBox();
-                    var bb = o.geometry.boundingBox;
-                    big = Math.max(bb.max.x - bb.min.x, bb.max.z - bb.min.z) > 600;
-                  }
-                } catch (e) {}
-                if (fm.color) toSource(fm.color, 0x9fb5cd);
-                fm.opacity = big ? 0 : Math.min(mm.opacity || 1, 0.1);
-                fm.needsUpdate = true;
-                fm.userData.__inked = true;
+                var fm = mm.clone();                   // fills (house, lake, rooms) → none: pure linework
+                fm.transparent = true; fm.opacity = 0; fm.needsUpdate = true; fm.userData.__inked = true;
                 return fm;
               }
               return mm;
             }
             window.__reink = function () {
-              V.scene.background && V.scene.background.set(0x0a0a0a);
-              // significant lines get THICKENED: WebGL line width is capped
-            // at 1px, so each is drawn 5x with sub-unit offsets (~3px stroke)
-            var THICK = { 0xc4826e: 1, 0xa78bbf: 1, 0xe6c067: 1 };   // property · covenant · house outline
-            var toThicken = [], houseFillMesh = null;
-            V.scene.traverse(function (o) {
+              V.scene.background && V.scene.background.set(0x0a0a0a);   // inverts to the paper tone
+              V.scene.traverse(function (o) {
                 if (!o.material) return;
-                var m0 = Array.isArray(o.material) ? o.material[0] : o.material;
-                if (m0 === V.houseFill || o.userData.__isHouseFill) { houseFillMesh = o; o.userData.__isHouseFill = true; }
-                if (m0 && m0.isMeshBasicMaterial && m0.map) { o.visible = false; return; }
-                var hex0 = (m0 && m0.isLineBasicMaterial && m0.color) ? m0.color.getHex() : null;
                 if (Array.isArray(o.material)) o.material = o.material.map(function (mm) { return remat(mm, o); });
                 else o.material = remat(o.material, o);
-                if (hex0 !== null && THICK[hex0] && !o.userData.__thickened) {
-                  o.userData.__thickened = true;
-                  toThicken.push(o);
-                }
               });
-            // add the offset copies AFTER the traverse (no mid-walk mutation)
-            toThicken.forEach(function (o) {
-              [[0.9,0],[  -0.9,0],[0,0.9],[0,-0.9]].forEach(function (d) {
-                var c = new w.THREE.Line(o.geometry, o.material);
-                c.position.copy(o.position); c.rotation.copy(o.rotation); c.scale.copy(o.scale);
-                c.position.x += d[0]; c.position.z += d[1];
-                c.userData.__thickened = true;
-                if (o.parent) o.parent.add(c);
-              });
-            });
-            // the HOUSE FOOTPRINT fills solid black: swap the fill mesh's
-            // material (the mock's hover keeps writing to its old ref)
-            if (houseFillMesh) {
-              var solid = new w.THREE.MeshBasicMaterial({ transparent: false, side: w.THREE.DoubleSide });
-              solid.color.setRGB(1, 1, 1);   // white → the CSS invert renders BLACK
-              // DoubleSide is LOAD-BEARING: the zoom raycast targets this mesh,
-              // and a FrontSide swap backface-culls it from above (no clicks land)
-              solid.userData.__inked = true;
-              houseFillMesh.material = solid;
-              houseFillMesh.visible = true;
-            }
+            };
+            window.__labelReveal = function (amt) {
+              labels.forEach(function (mm) { mm.opacity = (mm.userData.__labelOrig || 1) * amt; });
             };
             // late passes: catch boot races + meshes added after first ink
             setTimeout(window.__reink, 1200);
             setTimeout(window.__reink, 3000);
             setTimeout(window.__reink, 6000);
-            // the lens re-shows the aerial planes on its own schedule —
-            // enforce the hide continuously (cheap traverse, 4x/sec)
+            // the lens re-shows the aerial plates on its own schedule — keep
+            // them dead (labels exempt), cheap traverse 4x/sec
             if (!window.__deadMat) window.__deadMat = new w.THREE.MeshBasicMaterial({ visible: false, transparent: true, opacity: 0 });
             window.__deadMat.userData.__gone = true;
             if (!window.__inkGuard) window.__inkGuard = setInterval(function () {
               try {
                 V.scene.traverse(function (o) {
+                  if (o.userData.__isLabel) return;
                   if (o.userData.__gone) { o.material = window.__deadMat; return; }
                   var m0 = o.material && (Array.isArray(o.material) ? o.material[0] : o.material);
-                  if (!m0 || m0.userData.__gone) return;
-                  // aerial / hillshade / photo plates → one shared dead
-                  // material; the OBJECT is marked so re-assignments by the
-                  // lens get re-killed without new allocations
+                  if (!m0 || m0.userData.__gone || m0.userData.__isLabel) return;
                   if ((m0.map && !m0.isSpriteMaterial) || m0.isShaderMaterial ||
                       m0.type === "MeshStandardMaterial" || m0.type === "MeshLambertMaterial") {
                     o.userData.__gone = true;
@@ -496,9 +447,7 @@
                 });
               } catch (e) {}
             }, 120);
-            window.__reink();   // the FIRST pass must be the full one — it
-                                // captures original hexes (thicken) + the
-                                // house-fill ref before replacement orphans it
+            window.__reink();
             return;
           }
         } catch (e) {}
@@ -518,7 +467,7 @@
     apply();
   }
   function nudge(d) {
-    target = Math.max(0, Math.min(4.75, target + d));
+    target = Math.max(0, Math.min(6.9, target + d));
     if (!raf) raf = requestAnimationFrame(step);
   }
   window.addEventListener("wheel", function (e) { e.preventDefault(); nudge(e.deltaY / 900); }, { passive: false });
@@ -544,7 +493,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.36");
+  console.log("entry-test2 v0.37");
 })();
 </script>
 </body>
