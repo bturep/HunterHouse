@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.42 — the sectioned entry (Brandon, 2026-07-21):
+<!-- entry-test2 v0.44 — the sectioned entry (Brandon, 2026-07-21):
      HERO (FRH-0008 photo, title -> wordmark) ->
      HOUSE: the 1970 letter sketch + Hunter's OWN WORDS (L001) beside the
        letter's plan sketch -> the sketch dissolves into CAA-0008 FULLSCREEN,
@@ -40,8 +40,8 @@
   #reading{position:fixed;inset:0;z-index:6;overflow:hidden;visibility:hidden;background:#f6f5f5}
   #flow{position:absolute;left:0;right:0;top:0;will-change:transform}
   #flow .sk{display:block;width:min(1100px,90vw);margin:0 auto}
-  #flow .skcite{width:min(1100px,90vw);margin:6px auto 0;text-align:right;
-    font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.45)}
+  #flow .skcite{width:min(1100px,90vw);margin:6px auto 0;text-align:left;
+    font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.05em;color:rgba(27,25,24,.3)}
   #flow .body{display:flex;gap:64px;max-width:1240px;margin:9vh auto 0;padding:0 40px 18vh}
   #flow .txt{flex:1;font-weight:500;font-size:17px;line-height:1.7;color:#000;max-width:660px}
   #flow .txt p{margin-bottom:1.1em}
@@ -185,7 +185,7 @@
   <a style="padding:6px 15px">Archive</a>
   <a style="padding:6px 15px">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.42</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.44</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -216,7 +216,7 @@
   // across the viewport height. Pairs of identical views = dwells.
   var SHEET_VIEWS = [
     { z: 1.50, cx: 814,  cy: 669,  rot: 0,    fit: 830 },   // the square plan, filling the vertical
-    { z: 2.20, cx: 814,  cy: 669,  rot: 0,    fit: 830 },   // (held through the pause + crossfade)
+    { z: 2.00, cx: 814,  cy: 669,  rot: 0,    fit: 830 },   // (held through the crossfade)
     { z: 2.60, cx: 760,  cy: 1290, rot: 0,    fit: 490 },   // the lower band — south elevation
     { z: 2.80, cx: 760,  cy: 1290, rot: 0,    fit: 490 },
     { z: 3.20, cx: 267,  cy: 670,  rot: -90,  fit: 430 },   // CCW: west elevation upright
@@ -307,10 +307,10 @@
     colPhoto.style.visibility = zr > T0 ? "hidden" : "visible";
     if (shOn) {
       // zr 1.25..1.55 the sketch FLIES to centre, growing, as the text fades ·
-      // 1.55..1.75 PAUSE (the sketch alone on the paper) · 1.75..2.05 the
-      // crossfade: measured plan in, sketch out · then the camera moves.
+      // the moment it takes full presence the crossfade begins (1.55..1.85):
+      // measured plan in, sketch out · then the camera moves.
       sheet.style.opacity = Math.min(1, (zr - T0) / 0.3) * Math.max(0, Math.min(1, 1 - (zr - 4.7) / 0.4));
-      document.getElementById("sheet-wrap").style.opacity = Math.max(0, Math.min(1, (zr - 1.75) / 0.3));
+      document.getElementById("sheet-wrap").style.opacity = Math.max(0, Math.min(1, (zr - 1.55) / 0.3));
       var po = document.getElementById("sheet-plan-over");
       var eM = ease(Math.max(0, Math.min(1, (zr - T0) / 0.3)));
       var r0 = colPhoto.querySelector("img").getBoundingClientRect();
@@ -319,7 +319,7 @@
       po.style.left  = (r0.left + ((window.innerWidth  - Wt) / 2 - r0.left) * eM) + "px";
       po.style.top   = (r0.top  + ((window.innerHeight - Ht) / 2 - r0.top)  * eM) + "px";
       po.style.width = (r0.width + (Wt - r0.width) * eM) + "px";
-      po.style.opacity = Math.max(0, Math.min(1, 1 - (zr - 1.75) / 0.3));
+      po.style.opacity = Math.max(0, Math.min(1, 1 - (zr - 1.55) / 0.3));
       var v = sheetView(zr);
       var scl = window.innerHeight / v.fit;
       document.getElementById("sheet-wrap").style.transform =
@@ -535,7 +535,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.42");
+  console.log("entry-test2 v0.44");
 })();
 </script>
 </body>
