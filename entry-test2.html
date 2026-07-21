@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.33 — the convergence entry (Brandon, 2026-07-19; photo
+<!-- entry-test2 v0.34 — the convergence entry (Brandon, 2026-07-19; photo
      entry added 2026-07-21): the page lands on the ENTRY PHOTOGRAPH
      (HH-FRH-0008, 1977 — Brandon's pick; the contemporary IHC-0003 was
      tried at v0.32 and reverted) full-bleed with HUNTER HOUSE centred
@@ -67,6 +67,10 @@
   #hero::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.22)}
   #hero .hcite{position:absolute;left:34px;bottom:22px;z-index:1;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.06em;color:rgba(246,245,245,.55)}
+  /* the subtext under the centred title — stays put and fades as scroll starts */
+  #hero-sub{position:fixed;left:0;right:0;z-index:8;text-align:center;pointer-events:none;
+    font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.24em;
+    text-transform:uppercase;color:rgba(246,245,245,.8)}
 </style>
 </head>
 <body>
@@ -106,6 +110,7 @@
   <img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0008_HunterHouse_1977_prev.jpg" alt="">
   <div class="hcite">HH-FRH-0008 · 1977</div>
 </div>
+<div id="hero-sub">203 Goward Road · Designed by Richard Morrow Hunter</div>
 <div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#f6f5f5;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
 <nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62);transform:translateY(-110%);opacity:0;will-change:transform,opacity">
   <a data-z="1" style="padding:6px 15px;cursor:pointer">House</a>
@@ -114,10 +119,10 @@
   <a data-z="2.55" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">Archive</a>
   <a data-z="4.38" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.33</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.34</div>
 
 <script>
-// entry-test2 v0.33 — z: 0..1 the entry photograph (title → wordmark) ·
+// entry-test2 v0.34 — z: 0..1 the entry photograph (title → wordmark) ·
 // then the v0.30 phases shifted +1: reading scroll · gallery · site plan.
 (function () {
   var z = 0, target = 0, Z_HERO = 1;
@@ -125,6 +130,7 @@
   var hero = document.getElementById("hero");
   var menuEl = document.getElementById("menu");
   var wm = document.getElementById("wordmark");
+  var heroSub = document.getElementById("hero-sub");
 
   function centreSketch() {
     var w = Math.min(1100, window.innerWidth * 0.9);
@@ -156,6 +162,10 @@
     wm.style.transform = "translate(" + (tx * (1 - eH)) + "px," + (ty * (1 - eH)) + "px) scale(" + (1 + (S0 - 1) * (1 - eH)) + ")";
     var cw = Math.max(0, Math.min(1, (eH - 0.55) / 0.3));   // paper → ink as the photo clears
     wm.style.color = "rgb(" + Math.round(246 + (27 - 246) * cw) + "," + Math.round(245 + (25 - 245) * cw) + "," + Math.round(245 + (24 - 245) * cw) + ")";
+    // the subtext sits just below the scaled title (7*S0 = half its scaled
+    // text height); it stays put and is gone within the first breath of scroll
+    heroSub.style.top = (window.innerHeight / 2 + 7 * S0 + 30) + "px";
+    heroSub.style.opacity = Math.max(0, 1 - z / 0.25);
 
     // ── the reading (everything below runs in zr = z - Z_HERO space) ───────
     var zr = Math.max(0, z - Z_HERO);
@@ -526,7 +536,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.33");
+  console.log("entry-test2 v0.34");
 })();
 </script>
 </body>
