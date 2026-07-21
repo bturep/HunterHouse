@@ -166,10 +166,13 @@
     if (st) { st.textContent = (hooksOK ? "lens ✓" : "lens ✗") + " · house " + hd.n + (hd.err ? " " + hd.err : "");
               st.style.color = hooksOK ? "var(--gold)" : "#d98"; }
 
-    // Swallow pan/orbit/scroll so the lens stays a held frame — EXCEPT a click on
+    // Swallow pan/orbit so the lens stays a held frame — EXCEPT a click on
     // the house footprint, which we route to the lens's cinematic zoom-in.
     // Capture phase → fires before the lens's own canvas listeners.
-    ["pointerdown","mousedown","touchstart","dblclick","wheel","contextmenu"]
+    // NB: "wheel" is deliberately NOT swallowed — orbit controls are disabled
+    // so it does nothing here, and a host page (entry-test2) forwards it for
+    // its own scroll. stopImmediatePropagation would starve that forwarder.
+    ["pointerdown","mousedown","touchstart","dblclick","contextmenu"]
       .forEach(t => win.addEventListener(t, e => e.stopImmediatePropagation(), true));
     let zoomed = false, zp = 0, zpTarget = 0;    // zoom progress: 0 = held frame, 1 = in above the house
     win.addEventListener("click", (e) => {

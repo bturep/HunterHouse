@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.37 — the sectioned entry (Brandon, 2026-07-21):
+<!-- entry-test2 v0.38 — the sectioned entry (Brandon, 2026-07-21):
      HERO (FRH-0008 photo, title -> wordmark) ->
      HOUSE: the 1970 letter sketch + Hunter's OWN WORDS (L001) beside the
        letter's plan sketch -> the column crosses right->left and becomes
@@ -44,8 +44,8 @@
   #flow .body{display:flex;gap:64px;max-width:1240px;margin:9vh auto 0;padding:0 40px 18vh}
   #flow .txt{flex:1;font-weight:500;font-size:17px;line-height:1.7;color:#000;max-width:660px}
   #flow .txt p{margin-bottom:1.1em}
-  #flow .photocol{width:360px;flex:none}
-  #flow .photocol img{width:100%;display:block;border:1px solid rgba(27,25,24,.14);opacity:0;transition:opacity 1.1s ease}
+  #flow .photocol{width:460px;flex:none}
+  #flow .photocol img{width:100%;display:block;opacity:0;transition:opacity 1.1s ease}
   #flow .photocol .cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:9px;opacity:0;transition:opacity 1.1s ease}
   #flow.photo-on .photocol img, #flow.photo-on .photocol .cite{opacity:1}
   /* shared column cite (the reading's own is scoped to #flow) */
@@ -54,10 +54,10 @@
   /* the study — the column crosses right → left and becomes CAA-0018; text right */
   #study{position:fixed;inset:0;z-index:7;visibility:hidden;display:flex;align-items:center;justify-content:center;background:transparent}
   #study .sbody{display:flex;gap:64px;max-width:1240px;padding:0 40px;align-items:flex-start}
-  #study .photocol{width:360px;flex:none;position:relative;will-change:transform}
+  #study .photocol{width:460px;flex:none;position:relative;will-change:transform}
   #study .photocol img{width:100%;display:block;border:1px solid rgba(27,25,24,.14)}
   #study .photocol #study-caa{cursor:zoom-in}
-  #study .photocol .plan-over{position:absolute;left:0;top:0;pointer-events:none;background:#f6f5f5}
+  #study .photocol .plan-over{position:absolute;left:0;top:0;pointer-events:none;background:#f6f5f5;border:none}
   #study .txt{flex:1;max-width:660px;font-weight:500;font-size:17px;line-height:1.7;color:#000;opacity:0}
   #study .txt p{margin-bottom:1.1em}
   /* the Ivan Hunter selection — a quiet grid */
@@ -118,6 +118,10 @@
         <p>“… I am taking the day off from my most recent job of being ankle deep in the dirt of the forty foot square ugly excavation for a little house we'll start building next week on our land. Looks like this:”</p>
         <p>“Nothing extraordinary in an absolute sense but if it comes off as I expect the total cost of less than $12,000 will make it very extraordinary. I never thought I'd do anything so simple and boxy but here it is! Inside and out covered alike with cedar boards of various widths and thicknesses. Irregular window widths — rhythm of tree trunks in a forest. Large Japanese style bath and central glass domed garden. I'll do all the finishing as well as manufacturing (manual) of doors and windows.”</p>
         <p class="txt-cite">— Richard Hunter to Luise Mendelsohn · 13 September 1970 · Letter L001</p>
+        <!-- placeholder narrative below — restores the reading's length until real copy is written -->
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+        <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+        <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
       </div>
       <div class="photocol">
         <img src="assets/entry/letter-plan.png" alt="Plan sketch from the letter — IVAN, SHAN, WEAVE, DRAW, LIVING, GARDEN">
@@ -184,12 +188,12 @@
 <div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#f6f5f5;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
 <nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62);transform:translateY(-110%);opacity:0;will-change:transform,opacity">
   <a data-z="1" style="padding:6px 15px;cursor:pointer">House</a>
-  <a data-z="4.95" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">Hunter</a>
-  <a data-z="6.5" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">Site</a>
-  <a style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">Archive</a>
-  <a style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16)">About</a>
+  <a data-z="4.95" style="padding:6px 15px;cursor:pointer">Hunter</a>
+  <a data-z="6.5" style="padding:6px 15px;cursor:pointer">Site</a>
+  <a style="padding:6px 15px">Archive</a>
+  <a style="padding:6px 15px">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.37</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.38</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -370,6 +374,24 @@
           var V = w.__v;
           if (V && V.scene) {
             window.__lensWin = w;
+            // once the site plan is interactive (pointer-events:auto) the
+            // iframe swallows wheel/keys — forward them so scroll-BACK works
+            var fwWheel = function (ev) { ev.preventDefault(); nudge(ev.deltaY / 900); };
+            var fwKeys = function (ev) {
+              if (ev.key === "ArrowDown" || ev.key === "PageDown" || ev.key === " ") { ev.preventDefault(); nudge(0.5); }
+              if (ev.key === "ArrowUp" || ev.key === "PageUp") { ev.preventDefault(); nudge(-0.5); }
+            };
+            try {
+              var dd = f.contentDocument;
+              if (dd && !dd.__hhFwd) { dd.__hhFwd = 1;
+                dd.addEventListener("wheel", fwWheel, { passive: false, capture: true });
+                dd.addEventListener("keydown", fwKeys, true); }
+            } catch (e0) {}
+            try {
+              if (!w.__hhFwd) { w.__hhFwd = 1;
+                w.addEventListener("wheel", fwWheel, { passive: false, capture: true });
+                w.addEventListener("keydown", fwKeys, true); }
+            } catch (e1) {}
             var labels = [];
             // REPLACE materials (not mutate): the mock's hover system rewrites
             // its captured material refs every frame — fresh clones orphan
@@ -493,7 +515,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.37");
+  console.log("entry-test2 v0.38");
 })();
 </script>
 </body>
