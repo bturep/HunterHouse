@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.52 — the sectioned entry (Brandon, 2026-07-21):
+<!-- entry-test2 v0.53 — the sectioned entry (Brandon, 2026-07-21):
      HERO (IHC-0038 photo, title -> wordmark) ->
      HOUSE: the 1970 letter sketch + Hunter's OWN WORDS (L001) beside the
        letter's plan sketch -> the sketch dissolves into CAA-0008 FULLSCREEN,
@@ -127,13 +127,13 @@
   /* the entry photograph — full-bleed, scrolled past; the title rides above it */
   #hero{position:fixed;inset:0;z-index:7;background:#1b1918;pointer-events:none;will-change:transform}
   #hero img{width:100%;height:100%;object-fit:cover;display:block}
-  #hero::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.22)}
+  #hero::after{content:"";position:absolute;inset:0;background:rgba(243,241,236,.4)}
   #hero .hcite{position:absolute;left:34px;bottom:22px;z-index:1;font-family:'JetBrains Mono',Menlo,monospace;
-    font-size:10px;letter-spacing:.06em;color:rgba(246,245,245,.55)}
+    font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
   /* the subtext under the centred title — stays put and fades as scroll starts */
   #hero-sub{position:fixed;left:0;right:0;z-index:8;text-align:center;pointer-events:none;
     font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.24em;
-    text-transform:uppercase;color:rgba(246,245,245,.8)}
+    text-transform:uppercase;color:rgba(27,25,24,.75)}
 </style>
 </head>
 <body>
@@ -236,7 +236,7 @@
   <div class="hcite">HH-IHC-0038 · 2024</div>
 </div>
 <div id="hero-sub">203 Goward Road · Designed by Richard Morrow Hunter</div>
-<div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#f6f5f5;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
+<div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#1b1918;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
 <nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62);transform:translateY(-110%);opacity:0;will-change:transform,opacity">
   <a data-z="1" style="padding:6px 15px;cursor:pointer">House</a>
   <a data-z="13.1" style="padding:6px 15px;cursor:pointer">Hunter</a>
@@ -244,7 +244,7 @@
   <a style="padding:6px 15px">Archive</a>
   <a style="padding:6px 15px">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.52</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.53</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -321,8 +321,7 @@
     var S0 = Math.max(3, Math.min(9, (window.innerWidth * 0.62) / Math.max(1, ow - 68)));
     var tx = window.innerWidth / 2 - ow / 2, ty = window.innerHeight / 2 - oh / 2;
     wm.style.transform = "translate(" + (tx * (1 - eH)) + "px," + (ty * (1 - eH)) + "px) scale(" + (1 + (S0 - 1) * (1 - eH)) + ")";
-    var cw = Math.max(0, Math.min(1, (eH - 0.55) / 0.3));   // paper → ink as the photo clears
-    wm.style.color = "rgb(" + Math.round(246 + (27 - 246) * cw) + "," + Math.round(245 + (25 - 245) * cw) + "," + Math.round(245 + (24 - 245) * cw) + ")";
+    // (title is ink throughout — the K paper-wash treatment; no colour lerp)
     // the subtext sits just below the scaled title (7*S0 = half its scaled
     // text height); it stays put and is gone within the first breath of scroll
     heroSub.style.top = (window.innerHeight / 2 + 7 * S0 + 30) + "px";
@@ -711,7 +710,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.52");
+  console.log("entry-test2 v0.53");
 })();
 </script>
 </body>
