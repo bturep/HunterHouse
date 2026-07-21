@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.34 — the convergence entry (Brandon, 2026-07-19; photo
+<!-- entry-test2 v0.35 — the convergence entry (Brandon, 2026-07-19; photo
      entry added 2026-07-21): the page lands on the ENTRY PHOTOGRAPH
      (HH-FRH-0008, 1977 — Brandon's pick; the contemporary IHC-0003 was
      tried at v0.32 and reverted) full-bleed with HUNTER HOUSE centred
@@ -37,6 +37,8 @@
   #reading{position:fixed;inset:0;z-index:6;overflow:hidden;visibility:hidden;background:#f6f5f5}
   #flow{position:absolute;left:0;right:0;top:0;will-change:transform}
   #flow .sk{display:block;width:min(1100px,90vw);margin:0 auto}
+  #flow .skcite{width:min(1100px,90vw);margin:6px auto 0;text-align:right;
+    font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.45)}
   #flow .body{display:flex;gap:64px;max-width:1240px;margin:9vh auto 0;padding:0 40px 18vh}
   #flow .txt{flex:1;font-weight:500;font-size:17px;line-height:1.7;color:#000;max-width:660px}
   #flow .txt p{margin-bottom:1.1em}
@@ -77,6 +79,7 @@
 <div id="reading" aria-label="Reading">
   <div id="flow">
     <img class="sk" src="assets/entry/letter-elev-grey.png" alt="">
+    <div class="skcite">Letter L001 · Hunter to Luise Mendelsohn · 13 September 1970</div>
     <div class="body">
       <div class="txt">
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod <a class="st-term" data-ph="frh8">tempor incididunt</a> ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
@@ -119,10 +122,10 @@
   <a data-z="2.55" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">Archive</a>
   <a data-z="4.38" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.34</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.35</div>
 
 <script>
-// entry-test2 v0.34 — z: 0..1 the entry photograph (title → wordmark) ·
+// entry-test2 v0.35 — z: 0..1 the entry photograph (title → wordmark) ·
 // then the v0.30 phases shifted +1: reading scroll · gallery · site plan.
 (function () {
   var z = 0, target = 0, Z_HERO = 1;
@@ -536,7 +539,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.34");
+  console.log("entry-test2 v0.35");
 })();
 </script>
 </body>
