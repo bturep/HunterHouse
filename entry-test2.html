@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.39 — the sectioned entry (Brandon, 2026-07-21):
+<!-- entry-test2 v0.40 — the sectioned entry (Brandon, 2026-07-21):
      HERO (FRH-0008 photo, title -> wordmark) ->
      HOUSE: the 1970 letter sketch + Hunter's OWN WORDS (L001) beside the
-       letter's plan sketch -> the column crosses right->left and becomes
-       CAA-0018 (Studio and Garden; click to enlarge; addition text right)
-       -> a grid of six Ivan Hunter photographs ->
+       letter's plan sketch -> the sketch dissolves into CAA-0008 FULLSCREEN,
+       zoomed to its square plan; scroll pans to the south band, then rotates
+       the sheet COUNTER-CLOCKWISE so east, north, west elevations each read
+       upright -> a grid of six Ivan Hunter photographs ->
      HUNTER: portrait (FRH-0001) + short biography ->
      SITE: the SIMPLEST plan — static opening, all-black linework, no house
        infill, no colour/thickening; scroll reveals the place labels
@@ -51,15 +52,15 @@
   /* shared column cite (the reading's own is scoped to #flow) */
   .pcite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:9px}
   .txt-cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
-  /* the study — the column crosses right → left and becomes CAA-0018; text right */
-  #study{position:fixed;inset:0;z-index:7;visibility:hidden;display:flex;align-items:center;justify-content:center;background:transparent}
-  #study .sbody{display:flex;gap:64px;max-width:1240px;padding:0 40px;align-items:flex-start}
-  #study .photocol{width:460px;flex:none;position:relative;will-change:transform}
-  #study .photocol img{width:100%;display:block;border:1px solid rgba(27,25,24,.14)}
-  #study .photocol #study-caa{cursor:zoom-in}
-  #study .photocol .plan-over{position:absolute;left:0;top:0;pointer-events:none;background:#f6f5f5;border:none}
-  #study .txt{flex:1;max-width:660px;font-weight:500;font-size:17px;line-height:1.7;color:#000;opacity:0}
-  #study .txt p{margin-bottom:1.1em}
+  /* the sheet — CAA-0008 fullscreen: plan first, then the frame travels the
+     fold-out elevations, rotating counter-clockwise to read each upright */
+  #sheet{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5;overflow:hidden}
+  #sheet-wrap{position:absolute;left:0;top:0;width:2000px;height:1530px;transform-origin:0 0;will-change:transform}
+  #sheet-img{position:absolute;left:0;top:0;width:2000px;height:1530px;display:block}
+  #sheet-plan-over{position:absolute;left:516px;top:332px;width:596px;height:674px;object-fit:contain;
+    mix-blend-mode:multiply;pointer-events:none}
+  #sheet .scite{position:fixed;left:34px;bottom:22px;font-family:'JetBrains Mono',Menlo,monospace;
+    font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
   /* the Ivan Hunter selection — a quiet grid */
   #ihc{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px}
@@ -131,20 +132,12 @@
   </div>
 </div>
 
-<div id="study" aria-label="The studio addition">
-  <div class="sbody">
-    <div class="photocol" id="study-col">
-      <img id="study-caa" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg" alt="Hunter House, Studio and Garden — coloured drawing">
-      <img class="plan-over" id="study-plan" src="assets/entry/letter-plan-crop.png" alt="">
-      <div class="pcite">Hunter House, Studio and Garden · HH-CAA-0018 · Canadian Architectural Archives</div>
-    </div>
-    <div class="txt" id="study-txt">
-      <!-- DRAFT copy — Brandon to rewrite in his own register -->
-      <p>Twenty years on, the house was still being drawn. This coloured study — <em>Hunter House, Studio and Garden</em> — is one of the schemes Hunter worked through around 1990 for a studio addition and a reworked garden, extending the cedar house he had described to Luise Mendelsohn as “simple and boxy.”</p>
-      <p>The sheet is held in the Canadian Architectural Archives at the University of Calgary, part of the Richard Hunter fonds.</p>
-      <p class="txt-cite">Click the drawing to view it large</p>
-    </div>
+<div id="sheet" aria-label="Cottage for Ric and Frances Hunter — plan and elevations">
+  <div id="sheet-wrap">
+    <img id="sheet-img" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0008_OG_Build_1970_Scheme_1_2of3_1970-08-25_prev.jpg" alt="Cottage for Ric and Frances Hunter — plan and elevations, 1970">
+    <img id="sheet-plan-over" src="assets/entry/letter-plan-crop.png" alt="">
   </div>
+  <div class="scite">Cottage for Ric &amp; Frances Hunter — plan &amp; elevations, 25 August 1970 · HH-CAA-0008</div>
 </div>
 <div id="ihc" aria-label="Photographs by Ivan Hunter">
   <div class="ihead">The house photographed by Ivan Hunter · 2024</div>
@@ -188,12 +181,12 @@
 <div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#f6f5f5;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
 <nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62);transform:translateY(-110%);opacity:0;will-change:transform,opacity">
   <a data-z="1" style="padding:6px 15px;cursor:pointer">House</a>
-  <a data-z="4.95" style="padding:6px 15px;cursor:pointer">Hunter</a>
-  <a data-z="6.5" style="padding:6px 15px;cursor:pointer">Site</a>
+  <a data-z="6.9" style="padding:6px 15px;cursor:pointer">Hunter</a>
+  <a data-z="8.5" style="padding:6px 15px;cursor:pointer">Site</a>
   <a style="padding:6px 15px">Archive</a>
   <a style="padding:6px 15px">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.39</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.40</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -217,9 +210,37 @@
   var flow = document.getElementById("flow");
   var ps = Array.prototype.slice.call(flow.querySelectorAll(".txt p"));
   var Z_READ0 = 0.0, Z_END = 2.25;
-  var studyTX = 0, studyTY = 0;
   var ihcFigs = Array.prototype.slice.call(document.querySelectorAll("#ihc .ifig"));
   var menuLinks = Array.prototype.slice.call(document.querySelectorAll("#menu a"));
+  // the sheet's camera keyframes — source coords on the 2000x1530 preview.
+  // rot is CSS degrees (negative = counter-clockwise); fit = source px shown
+  // across the viewport height. Pairs of identical views = dwells.
+  var SHEET_VIEWS = [
+    { z: 1.50, cx: 814,  cy: 669,  rot: 0,    fit: 740 },   // the square plan, filling the vertical
+    { z: 1.90, cx: 814,  cy: 669,  rot: 0,    fit: 740 },
+    { z: 2.30, cx: 760,  cy: 1290, rot: 0,    fit: 430 },   // the lower band — south elevation
+    { z: 2.50, cx: 760,  cy: 1290, rot: 0,    fit: 430 },
+    { z: 2.90, cx: 1375, cy: 670,  rot: -90,  fit: 430 },   // CCW: east elevation upright
+    { z: 3.10, cx: 1375, cy: 670,  rot: -90,  fit: 430 },
+    { z: 3.50, cx: 810,  cy: 190,  rot: -180, fit: 430 },   // CCW: north elevation upright
+    { z: 3.70, cx: 810,  cy: 190,  rot: -180, fit: 430 },
+    { z: 4.10, cx: 267,  cy: 670,  rot: -270, fit: 430 },   // CCW: west elevation upright
+    { z: 4.40, cx: 267,  cy: 670,  rot: -270, fit: 430 }
+  ];
+  function sheetView(zv) {
+    var V = SHEET_VIEWS;
+    if (zv <= V[0].z) return V[0];
+    if (zv >= V[V.length - 1].z) return V[V.length - 1];
+    for (var i = 0; i < V.length - 1; i++) {
+      if (zv >= V[i].z && zv <= V[i + 1].z) {
+        var t = ease((zv - V[i].z) / (V[i + 1].z - V[i].z));
+        var a = V[i], bb = V[i + 1];
+        return { cx: a.cx + (bb.cx - a.cx) * t, cy: a.cy + (bb.cy - a.cy) * t,
+                 rot: a.rot + (bb.rot - a.rot) * t, fit: a.fit + (bb.fit - a.fit) * t };
+      }
+    }
+    return V[V.length - 1];
+  }
 
   function apply() {
     // ── the entry photograph: HUNTER HOUSE centred, scrolled past ──────────
@@ -274,38 +295,31 @@
     // the photograph fades in once the sketch has scrolled away
     flow.classList.toggle("photo-on", zS > 0.30);
 
-    // ── the spreads: STUDY (CAA addition) → IHC grid → HUNTER → SITE ──────
-    // zr 1.25..1.75 the column crosses right → left, plan gives way to
-    // CAA-0018, addition text in · dwell · 2.45..2.85 IHC grid rises ·
-    // 3.55..3.95 HUNTER · 4.65..4.95 the site plan, bare; labels write in.
+    // ── the SHEET (CAA-0008 fullscreen) → IHC grid → HUNTER → SITE ────────
+    // zr 1.25..1.5 the letter plan dissolves into the sheet's square plan ·
+    // 1.9..2.3 pan down to the south band · then CCW rotations: east (2.9),
+    // north (3.5), west (4.1) · 4.4..4.8 IHC grid · 5.5 HUNTER · 6.6 SITE.
     var T0 = 1.25;
-    var study = document.getElementById("study");
+    var sheet = document.getElementById("sheet");
     var colPhoto = flow.querySelector(".photocol");
-    var sOn = zr > T0 - 0.001 && zr < 2.9;
-    study.style.visibility = sOn ? "visible" : "hidden";
+    var shOn = zr > T0 - 0.001 && zr < 4.85;
+    sheet.style.visibility = shOn ? "visible" : "hidden";
     reading.style.opacity = zr > T0 ? Math.max(0, 1 - (zr - T0) / 0.3) : 1;
     colPhoto.style.visibility = zr > T0 ? "hidden" : "visible";
-    if (sOn) {
-      // FLIP the column from the reading's right slot to its natural left
-      // slot — natural position recovered from the rect minus the last
-      // applied translate (rects include transforms).
-      var e = ease(Math.max(0, Math.min(1, (zr - T0) / 0.5)));
-      var scEl = document.getElementById("study-col");
-      var rNow = scEl.getBoundingClientRect();
-      var natLeft = rNow.left - studyTX, natTop = rNow.top - studyTY;
-      var r0 = colPhoto.querySelector("img").getBoundingClientRect();
-      studyTX = (r0.left - natLeft) * (1 - e);
-      studyTY = (r0.top - natTop) * (1 - e);
-      scEl.style.transform = "translate(" + studyTX + "px," + studyTY + "px)";
-      // the sketch plan gives way to the CAA drawing mid-crossing
-      document.getElementById("study-plan").style.opacity = Math.max(0, 1 - e * 2);
-      document.getElementById("study-txt").style.opacity = Math.max(0, Math.min(1, (zr - T0 - 0.35) / 0.25));
-      study.style.opacity = Math.max(0, Math.min(1, 1 - (zr - 2.45) / 0.4));
+    if (shOn) {
+      sheet.style.opacity = Math.min(1, (zr - T0) / 0.25) * Math.max(0, Math.min(1, 1 - (zr - 4.4) / 0.4));
+      // the letter's plan sketch dissolves into the measured plan beneath it
+      document.getElementById("sheet-plan-over").style.opacity = Math.max(0, 1 - (zr - 1.35) / 0.3);
+      var v = sheetView(zr);
+      var scl = window.innerHeight / v.fit;
+      document.getElementById("sheet-wrap").style.transform =
+        "translate(" + (window.innerWidth / 2) + "px," + (window.innerHeight / 2) + "px) " +
+        "rotate(" + v.rot + "deg) scale(" + scl + ") translate(" + (-v.cx) + "px," + (-v.cy) + "px)";
     }
     // the Ivan Hunter selection — staggered rise
     var ihc = document.getElementById("ihc");
-    var iIn = Math.max(0, Math.min(1, (zr - 2.45) / 0.4));
-    var iOut = Math.max(0, Math.min(1, (zr - 3.55) / 0.4));
+    var iIn = Math.max(0, Math.min(1, (zr - 4.4) / 0.4));
+    var iOut = Math.max(0, Math.min(1, (zr - 5.5) / 0.4));
     ihc.style.visibility = (iIn > 0 && iOut < 1) ? "visible" : "hidden";
     ihc.style.opacity = iIn * (1 - iOut);
     ihcFigs.forEach(function (fg, i) {
@@ -315,27 +329,27 @@
     });
     // HUNTER
     var hu = document.getElementById("hunter");
-    var hIn = Math.max(0, Math.min(1, (zr - 3.55) / 0.4));
-    var hOut = Math.max(0, Math.min(1, (zr - 4.65) / 0.3));
+    var hIn = Math.max(0, Math.min(1, (zr - 5.5) / 0.4));
+    var hOut = Math.max(0, Math.min(1, (zr - 6.6) / 0.3));
     hu.style.visibility = (hIn > 0 && hOut < 1) ? "visible" : "hidden";
     hu.style.opacity = hIn * (1 - hOut);
     // SITE — a static opening on the bare plan; scroll writes the labels in
-    var zP = Math.max(0, Math.min(1, (zr - 4.65) / 0.3));
-    document.getElementById("site-cue").style.opacity = Math.max(0, Math.min(1, (zr - 4.5) / 0.2)) * (1 - zP);
+    var zP = Math.max(0, Math.min(1, (zr - 6.6) / 0.3));
+    document.getElementById("site-cue").style.opacity = Math.max(0, Math.min(1, (zr - 6.45) / 0.2)) * (1 - zP);
     var sp = document.getElementById("siteplan");
     sp.style.visibility = zP > 0 ? "visible" : "hidden";
     sp.style.opacity = zP;
     sp.style.pointerEvents = zP >= 1 ? "auto" : "none";
-    var zL = Math.max(0, Math.min(1, (zr - 5.15) / 0.6));
+    var zL = Math.max(0, Math.min(1, (zr - 7.1) / 0.6));
     if (window.__labelReveal) { try { window.__labelReveal(zL); } catch (e2) {} }
     // the menu carries the section — bracket the one you're in. Keyed to the
     // scroll TARGET, not the eased z, so the indicator never lags the intent.
     var zrT = Math.max(0, target - Z_HERO);
-    var sec = zrT < 3.55 ? 0 : (zrT < 4.8 ? 1 : 2);
+    var sec = zrT < 5.5 ? 0 : (zrT < 6.75 ? 1 : 2);
     menuLinks.forEach(function (a, i) { a.classList.toggle("on", i === sec); });
   }
 
-  // click-to-enlarge: the reading's plan sketch and the study's CAA drawing
+  // click-to-enlarge: the reading's plan sketch
   var colImgEl = document.querySelector("#flow .photocol img");
   var colCiteEl = document.querySelector("#flow .photocol .cite");
   var closeup = document.getElementById("closeup");
@@ -346,10 +360,6 @@
   }
   colImgEl.style.cursor = "zoom-in";
   colImgEl.addEventListener("click", function () { openCloseup(colImgEl.src, colCiteEl.textContent); });
-  var studyImgEl = document.getElementById("study-caa");
-  studyImgEl.addEventListener("click", function () {
-    openCloseup(studyImgEl.src, "Hunter House, Studio and Garden · HH-CAA-0018");
-  });
   closeup.addEventListener("click", function () { closeup.classList.remove("on"); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeup.classList.remove("on"); });
 
@@ -489,7 +499,7 @@
     apply();
   }
   function nudge(d) {
-    target = Math.max(0, Math.min(6.9, target + d));
+    target = Math.max(0, Math.min(8.9, target + d));
     if (!raf) raf = requestAnimationFrame(step);
   }
   window.addEventListener("wheel", function (e) { e.preventDefault(); nudge(e.deltaY / 900); }, { passive: false });
@@ -515,7 +525,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.39");
+  console.log("entry-test2 v0.40");
 })();
 </script>
 </body>
