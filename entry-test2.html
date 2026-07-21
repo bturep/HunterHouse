@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.47 — the sectioned entry (Brandon, 2026-07-21):
+<!-- entry-test2 v0.48 — the sectioned entry (Brandon, 2026-07-21):
      HERO (FRH-0008 photo, title -> wordmark) ->
      HOUSE: the 1970 letter sketch + Hunter's OWN WORDS (L001) beside the
        letter's plan sketch -> the sketch dissolves into CAA-0008 FULLSCREEN,
@@ -57,10 +57,10 @@
   .txt-cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
   /* the sheet — CAA-0008 fullscreen: plan first, then the frame travels the
      fold-out elevations, rotating clockwise to read each upright */
-  #sheet{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5;overflow:hidden}
+  #sheet{position:fixed;inset:0;z-index:8;visibility:hidden;opacity:0;background:transparent;overflow:hidden}
   #sheet-wrap{position:absolute;left:0;top:0;width:2000px;height:1530px;transform-origin:0 0;will-change:transform}
   #sheet-img{position:absolute;left:0;top:0;width:2000px;height:1530px;display:block}
-  #sheet-plan-over{position:fixed;z-index:7;visibility:hidden;height:auto;mix-blend-mode:multiply;pointer-events:none;will-change:left,top,width,opacity}
+  #sheet-plan-over{position:fixed;z-index:8;visibility:hidden;height:auto;mix-blend-mode:multiply;pointer-events:none;will-change:left,top,width,opacity}
   #sheet .scite{position:fixed;left:34px;bottom:22px;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
   /* the period gallery — photographs of the original house, to select from */
@@ -207,7 +207,7 @@
   <a style="padding:6px 15px">Archive</a>
   <a style="padding:6px 15px">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.47</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.48</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -233,6 +233,9 @@
   var Z_READ0 = 0.0, Z_END = 2.25;
   var ihcFigs = Array.prototype.slice.call(document.querySelectorAll("#ihc .ifig"));
   var pgalFigs = Array.prototype.slice.call(document.querySelectorAll("#pgal .pfig"));
+  // drag-to-look on the sheet: click-drag pans freely; release snaps back
+  // (eased) to the set elevation view — so the plan is always reachable.
+  var dragX = 0, dragY = 0, dragging = false, dragPX = 0, dragPY = 0, dragRaf = null;
   var menuLinks = Array.prototype.slice.call(document.querySelectorAll("#menu a"));
   // the sheet's camera keyframes — source coords on the 2000x1530 preview.
   // rot is CSS degrees (positive = clockwise); fit = source px shown
@@ -334,7 +337,10 @@
       // zr 1.25..1.55 the sketch FLIES to centre, growing, as the text fades ·
       // the moment it takes full presence the crossfade begins (1.55..1.85):
       // measured plan in, sketch out · then the camera moves.
-      sheet.style.opacity = Math.min(1, (zr - T0) / 0.3) * Math.max(0, Math.min(1, 1 - (zr - 4.7) / 0.4));
+      sheet.style.opacity = Math.min(1, (zr - T0) / 0.3);
+      // the last elevation PUSHES UP off the top to reveal the gallery
+      var exitP = ease(Math.max(0, Math.min(1, (zr - 4.7) / 0.4)));
+      document.querySelector("#sheet .scite").style.opacity = 1 - exitP;
       document.getElementById("sheet-wrap").style.opacity = Math.max(0, Math.min(1, (zr - 1.55) / 0.3));
       var eM = ease(Math.max(0, Math.min(1, (zr - T0) / 0.3)));
       var r0 = colPhoto.querySelector("img").getBoundingClientRect();
@@ -347,7 +353,7 @@
       var v = sheetView(zr);
       var scl = window.innerHeight / v.fit;
       document.getElementById("sheet-wrap").style.transform =
-        "translate(" + (window.innerWidth / 2) + "px," + (window.innerHeight / 2) + "px) " +
+        "translate(" + (window.innerWidth / 2 + dragX) + "px," + (window.innerHeight / 2 + dragY - exitP * window.innerHeight * 1.55) + "px) " +
         "rotate(" + v.rot + "deg) scale(" + scl + ") translate(" + (-v.cx) + "px," + (-v.cy) + "px)";
     }
     // the period gallery — photographs of the original house, to select from
@@ -355,7 +361,7 @@
     var pIn = Math.max(0, Math.min(1, (zr - 4.7) / 0.4));
     var pOut = Math.max(0, Math.min(1, (zr - 5.9) / 0.4));
     pg.style.visibility = (pIn > 0 && pOut < 1) ? "visible" : "hidden";
-    pg.style.opacity = pIn * (1 - pOut);
+    pg.style.opacity = (pIn > 0 ? 1 : 0) * (1 - pOut);   // revealed by the curtain, not faded
     pgalFigs.forEach(function (fg, i) {
       var d = Math.max(0, Math.min(1, (pIn * 1.5 - i * 0.09)));
       fg.style.opacity = d;
@@ -393,6 +399,37 @@
     var sec = zrT < 7.0 ? 0 : (zrT < 8.25 ? 1 : 2);
     menuLinks.forEach(function (a, i) { a.classList.toggle("on", i === sec); });
   }
+
+  // drag-to-look wiring for the sheet
+  var sheetEl = document.getElementById("sheet");
+  sheetEl.style.cursor = "grab";
+  sheetEl.addEventListener("dragstart", function (e) { e.preventDefault(); });
+  sheetEl.addEventListener("pointerdown", function (e) {
+    if (e.pointerType !== "mouse" || e.button !== 0) return;
+    dragging = true; dragPX = e.clientX; dragPY = e.clientY;
+    sheetEl.style.cursor = "grabbing";
+    if (dragRaf) { cancelAnimationFrame(dragRaf); dragRaf = null; }
+    e.preventDefault();
+  });
+  window.addEventListener("pointermove", function (e) {
+    if (!dragging) return;
+    dragX += e.clientX - dragPX; dragY += e.clientY - dragPY;
+    dragPX = e.clientX; dragPY = e.clientY;
+    apply();
+  });
+  function dragRelease() {
+    if (!dragging) return;
+    dragging = false;
+    sheetEl.style.cursor = "grab";
+    (function settle() {
+      dragX *= 0.85; dragY *= 0.85;
+      if (Math.abs(dragX) < 0.5 && Math.abs(dragY) < 0.5) { dragX = 0; dragY = 0; apply(); dragRaf = null; return; }
+      apply();
+      dragRaf = requestAnimationFrame(settle);
+    })();
+  }
+  window.addEventListener("pointerup", dragRelease);
+  window.addEventListener("pointercancel", dragRelease);
 
   // click-to-enlarge: the reading's plan sketch
   var colImgEl = document.querySelector("#flow .photocol img");
@@ -577,7 +614,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.47");
+  console.log("entry-test2 v0.48");
 })();
 </script>
 </body>
