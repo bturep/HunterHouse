@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.35 — the convergence entry (Brandon, 2026-07-19; photo
+<!-- entry-test2 v0.36 — the convergence entry (Brandon, 2026-07-19; photo
      entry added 2026-07-21): the page lands on the ENTRY PHOTOGRAPH
      (HH-FRH-0008, 1977 — Brandon's pick; the contemporary IHC-0003 was
      tried at v0.32 and reverted) full-bleed with HUNTER HOUSE centred
@@ -97,9 +97,9 @@
 </div>
 
 <div id="gallery" aria-label="Photographs">
-  <div class="gfig" id="g-frh"><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0008_HunterHouse_1977_prev.jpg" alt="The house, 1977"><div class="gcite">HH-FRH-0008 · 1977</div></div>
-  <div class="gfig" id="g-caa"><img id="g-caa-img" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg" alt="Scheme II pencil studies, coloured legend, 1985"><div class="gcite">HH-CAA-0018 · 1985 · move over the drawing to explore</div></div>
-  <div class="gfig" id="g-ihc"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="The residence, 2024"><div class="gcite">HH-IHC-0038 · 2024</div></div>
+  <div class="gfig" id="g-frh"><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0008_HunterHouse_1977_prev.jpg" alt="The house, 1977"><div class="gcite">The house from the entry walk, 1977 · HH-FRH-0008</div></div>
+  <div class="gfig" id="g-caa"><img id="g-caa-img" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg" alt="Scheme II pencil studies, coloured legend, 1985"><div class="gcite">Scheme II pencil studies, coloured legend, 1985 · HH-CAA-0018 · move over the drawing to explore</div></div>
+  <div class="gfig" id="g-ihc"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="The residence, 2024"><div class="gcite">The residence photographed by Ivan Hunter, 2024 · HH-IHC-0038</div></div>
 </div>
 <div id="siteplan" aria-label="The site">
   <iframe id="siteplan-lens" title="Hunter House site — contour model" src="mock-home2.html" allow="fullscreen"></iframe>
@@ -122,10 +122,10 @@
   <a data-z="2.55" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">Archive</a>
   <a data-z="4.38" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.35</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.36</div>
 
 <script>
-// entry-test2 v0.35 — z: 0..1 the entry photograph (title → wordmark) ·
+// entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
 // then the v0.30 phases shifted +1: reading scroll · gallery · site plan.
 (function () {
   var z = 0, target = 0, Z_HERO = 1;
@@ -221,7 +221,12 @@
       var r = colImg.getBoundingClientRect();
       var dx0 = (r.left + r.width/2) - W/2, dy0 = (r.top + r.height/2) - window.innerHeight/2;
       var e1 = ease(fIn), e2 = ease(fOut);
-      gf.style.transform = "translate(-50%,-50%) translate(" + ((1-e1)*dx0 - e2*(W*0.75)) + "px," + ((1-e1)*dy0) + "px) rotate(" + (-e2*7) + "deg)";
+      // grow from the COLUMN's size, not snap to full — the size jump was the
+      // "jumps up". Scale about the fig centre, so the centre-match holds.
+      var figW = gf.querySelector("img").offsetWidth || 1;
+      var sc0 = Math.min(1, r.width / figW);
+      var k = sc0 + (1 - sc0) * e1;
+      gf.style.transform = "translate(-50%,-50%) translate(" + ((1-e1)*dx0 - e2*(W*0.75)) + "px," + ((1-e1)*dy0) + "px) rotate(" + (-e2*7) + "deg) scale(" + k + ")";
       gf.style.opacity = fIn > 0 ? 1 : 0;
       // CAA-0018: in from the right; dwell for exploring; then roll aside
       var gc = document.getElementById("g-caa");
@@ -539,7 +544,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.35");
+  console.log("entry-test2 v0.36");
 })();
 </script>
 </body>
