@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.49 — the sectioned entry (Brandon, 2026-07-21):
+<!-- entry-test2 v0.50 — the sectioned entry (Brandon, 2026-07-21):
      HERO (FRH-0008 photo, title -> wordmark) ->
      HOUSE: the 1970 letter sketch + Hunter's OWN WORDS (L001) beside the
        letter's plan sketch -> the sketch dissolves into CAA-0008 FULLSCREEN,
        zoomed to its square plan; scroll pans to the south band, then rotates
        the sheet CLOCKWISE so east, north, west elevations each read
-       upright -> a selectable gallery of period photographs (CAA-0028
-       levelled +2deg CW, 0029, 0031, FRH-0009, FRH-0010; click to view;
-       the 1990s addition drawings will follow here) -> a grid of six
+       upright -> a vertical gallery of period photographs (CAA-0028
+       level-cropped, 0031, FRH-0009, FRH-0010, 0029; click to view) ->
+       the 1990s ADDITION: FRH-0022 left + placeholder text (line by
+       line) -> CAA-0018 fullscreen, click-to-explore -> a grid of six
        Ivan Hunter photographs ->
      HUNTER: portrait (FRH-0001) + short biography ->
      SITE: the SIMPLEST plan — static opening, all-black linework, no house
@@ -71,8 +72,23 @@
   #pgal .ihead-row{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(27,25,24,.55)}
   #pgal .pfig{cursor:zoom-in}
   #pgal .pfig img{max-height:72vh;max-width:74vw;width:auto;height:auto;display:block;border:1px solid rgba(27,25,24,.14)}
-  #pgal .pfig.rot img{transform:rotate(2deg)}
   #pgal .icite{font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.45);margin-top:8px;text-align:center}
+  /* the second reading — image left (FRH-0022), text down the centre */
+  #reading2{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5;
+    display:flex;align-items:center;justify-content:center}
+  #reading2 .r2body{display:flex;gap:64px;max-width:1240px;padding:0 40px;align-items:flex-start}
+  #reading2 .photocol{width:460px;flex:none}
+  #reading2 .photocol img{width:100%;display:block;border:1px solid rgba(27,25,24,.14)}
+  #reading2 .txt{flex:1;max-width:660px;font-weight:500;font-size:17px;line-height:1.7;color:#000}
+  #reading2 .txt p{margin-bottom:1.1em}
+  /* CAA-0018 fullscreen — click zooms at the cursor; move pans; click again out */
+  #caa18{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5;
+    display:flex;align-items:center;justify-content:center;overflow:hidden}
+  #caa18 img{max-width:92vw;max-height:84vh;display:block;border:1px solid rgba(27,25,24,.14);
+    cursor:zoom-in;transition:transform .45s ease;will-change:transform}
+  #caa18.zoomed img{cursor:zoom-out}
+  #caa18 .ccite18{position:fixed;left:34px;bottom:22px;font-family:'JetBrains Mono',Menlo,monospace;
+    font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
   /* the Ivan Hunter selection — a quiet grid */
   #ihc{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px}
@@ -154,12 +170,31 @@
 <div id="pgal" aria-label="Photographs of the original house">
   <div id="pgal-col">
     <div class="ihead-row">The original house · photographs 1970 – 1986</div>
-    <div class="pfig rot" data-rot="2" data-cite="Hunter House, exterior, south-west side, c.1970 · HH-CAA-0028"><img src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0028_Hunter_House_Photograph_Exterior_SW_1970-01-01_prev.jpg" alt="Hunter House, exterior, south-west side"><div class="icite">HH-CAA-0028 · c.1970</div></div>
+    <div class="pfig" data-cite="Hunter House, exterior, south-west side, c.1970 · HH-CAA-0028"><img src="assets/entry/caa-0028-level.jpg" alt="Hunter House, exterior, south-west side"><div class="icite">HH-CAA-0028 · c.1970</div></div>
     <div class="pfig" data-cite="Exterior, south-west side — Frances and child, c.1970 · HH-CAA-0031"><img src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0031_Hunter_House_Photograph_Exterior_Frances_Child_1970-01-01_prev.jpg" alt="Exterior — Frances and child"><div class="icite">HH-CAA-0031 · c.1970</div></div>
     <div class="pfig" data-cite="The house, 1977 · HH-FRH-0009"><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0009_HunterHouse_1977_prev.jpg" alt="The house, 1977"><div class="icite">HH-FRH-0009 · 1977</div></div>
     <div class="pfig" data-cite="Wood stove added, 1986 · HH-FRH-0010"><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0010_WoodStoveAdded_1986_prev.jpg" alt="Wood stove added, 1986"><div class="icite">HH-FRH-0010 · 1986</div></div>
     <div class="pfig" data-cite="Living room, dining room, kotatsu, c.1970 · HH-CAA-0029"><img src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0029_Hunter_House_Photograph_Living_Dining_Kotatsu_1970-01-01_prev.jpg" alt="Living room, dining room, kotatsu"><div class="icite">HH-CAA-0029 · c.1970</div></div>
   </div>
+</div>
+<div id="reading2" aria-label="The addition">
+  <div class="r2body">
+    <div class="photocol">
+      <img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0022_HunterHouse_1991-02_prev.jpg" alt="The house, February 1991">
+      <div class="pcite">HH-FRH-0022 · February 1991</div>
+    </div>
+    <div class="txt" id="r2txt">
+      <!-- placeholder narrative — the 1990s addition; Brandon to write -->
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+      <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+      <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
+      <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga.</p>
+    </div>
+  </div>
+</div>
+<div id="caa18" aria-label="Hunter House, Studio and Garden — coloured drawing">
+  <img id="caa18-img" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/large/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_large.jpg" alt="Hunter House, Studio and Garden — coloured drawing">
+  <div class="ccite18">Hunter House, Studio and Garden · HH-CAA-0018 · click the drawing to explore</div>
 </div>
 <div id="ihc" aria-label="Photographs by Ivan Hunter">
   <div class="ihead">The house photographed by Ivan Hunter · 2024</div>
@@ -203,12 +238,12 @@
 <div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#f6f5f5;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
 <nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62);transform:translateY(-110%);opacity:0;will-change:transform,opacity">
   <a data-z="1" style="padding:6px 15px;cursor:pointer">House</a>
-  <a data-z="9.6" style="padding:6px 15px;cursor:pointer">Hunter</a>
-  <a data-z="11.2" style="padding:6px 15px;cursor:pointer">Site</a>
+  <a data-z="13.1" style="padding:6px 15px;cursor:pointer">Hunter</a>
+  <a data-z="14.7" style="padding:6px 15px;cursor:pointer">Site</a>
   <a style="padding:6px 15px">Archive</a>
   <a style="padding:6px 15px">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.49</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.50</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -234,6 +269,7 @@
   var Z_READ0 = 0.0, Z_END = 2.25;
   var ihcFigs = Array.prototype.slice.call(document.querySelectorAll("#ihc .ifig"));
   var pgalFigs = Array.prototype.slice.call(document.querySelectorAll("#pgal .pfig"));
+  var ps2 = Array.prototype.slice.call(document.querySelectorAll("#reading2 .txt p"));
   // drag-to-look on the sheet: click-drag pans freely; release snaps back
   // (eased) to the set elevation view — so the plan is always reachable.
   var dragX = 0, dragY = 0, dragging = false, dragPX = 0, dragPY = 0, dragRaf = null;
@@ -371,10 +407,39 @@
       var pT = Math.max(0, Math.min(1, (zr - 5.1) / 2.0));
       pcol.style.transform = "translateY(" + (-pT * pMax) + "px)";
     }
+    // the second reading — FRH-0022 left, the addition text line by line
+    var r2 = document.getElementById("reading2");
+    var r2In = Math.max(0, Math.min(1, (zr - 7.1) / 0.4));
+    var r2Out = Math.max(0, Math.min(1, (zr - 9.2) / 0.4));
+    r2.style.visibility = (r2In > 0 && r2Out < 1) ? "visible" : "hidden";
+    r2.style.opacity = r2In * (1 - r2Out);
+    if (r2In > 0 && r2Out < 1) {
+      var z2 = Math.max(0, Math.min(1, (zr - 7.5) / 1.4));
+      var lineH2 = 17 * 1.7, total2 = 0, met2 = [];
+      ps2.forEach(function (pp) {
+        var lines = Math.max(1, Math.round(pp.getBoundingClientRect().height / lineH2));
+        met2.push({ p: pp, lines: lines });
+        total2 += lines;
+      });
+      var shown2 = Math.floor(Math.min(1, z2 * 1.15) * total2 + 1e-6);
+      var left2 = shown2;
+      met2.forEach(function (mm) {
+        var take = Math.max(0, Math.min(mm.lines, left2));
+        left2 -= take;
+        mm.p.style.clipPath = "inset(0 0 " + ((1 - take / mm.lines) * 100) + "% 0)";
+        mm.p.style.visibility = take > 0 ? "visible" : "hidden";
+      });
+    }
+    // CAA-0018 fullscreen — the addition drawing, explorable
+    var c18 = document.getElementById("caa18");
+    var cIn18 = Math.max(0, Math.min(1, (zr - 9.2) / 0.4));
+    var cOut18 = Math.max(0, Math.min(1, (zr - 10.6) / 0.4));
+    c18.style.visibility = (cIn18 > 0 && cOut18 < 1) ? "visible" : "hidden";
+    c18.style.opacity = cIn18 * (1 - cOut18);
     // the Ivan Hunter selection — staggered rise
     var ihc = document.getElementById("ihc");
-    var iIn = Math.max(0, Math.min(1, (zr - 7.1) / 0.4));
-    var iOut = Math.max(0, Math.min(1, (zr - 8.2) / 0.4));
+    var iIn = Math.max(0, Math.min(1, (zr - 10.6) / 0.4));
+    var iOut = Math.max(0, Math.min(1, (zr - 11.7) / 0.4));
     ihc.style.visibility = (iIn > 0 && iOut < 1) ? "visible" : "hidden";
     ihc.style.opacity = iIn * (1 - iOut);
     ihcFigs.forEach(function (fg, i) {
@@ -384,25 +449,52 @@
     });
     // HUNTER
     var hu = document.getElementById("hunter");
-    var hIn = Math.max(0, Math.min(1, (zr - 8.2) / 0.4));
-    var hOut = Math.max(0, Math.min(1, (zr - 9.3) / 0.3));
+    var hIn = Math.max(0, Math.min(1, (zr - 11.7) / 0.4));
+    var hOut = Math.max(0, Math.min(1, (zr - 12.8) / 0.3));
     hu.style.visibility = (hIn > 0 && hOut < 1) ? "visible" : "hidden";
     hu.style.opacity = hIn * (1 - hOut);
     // SITE — a static opening on the bare plan; scroll writes the labels in
-    var zP = Math.max(0, Math.min(1, (zr - 9.3) / 0.3));
-    document.getElementById("site-cue").style.opacity = Math.max(0, Math.min(1, (zr - 9.15) / 0.2)) * (1 - zP);
+    var zP = Math.max(0, Math.min(1, (zr - 12.8) / 0.3));
+    document.getElementById("site-cue").style.opacity = Math.max(0, Math.min(1, (zr - 12.65) / 0.2)) * (1 - zP);
     var sp = document.getElementById("siteplan");
     sp.style.visibility = zP > 0 ? "visible" : "hidden";
     sp.style.opacity = zP;
     sp.style.pointerEvents = zP >= 1 ? "auto" : "none";
-    var zL = Math.max(0, Math.min(1, (zr - 9.8) / 0.6));
+    var zL = Math.max(0, Math.min(1, (zr - 13.3) / 0.6));
     if (window.__labelReveal) { try { window.__labelReveal(zL); } catch (e2) {} }
     // the menu carries the section — bracket the one you're in. Keyed to the
     // scroll TARGET, not the eased z, so the indicator never lags the intent.
     var zrT = Math.max(0, target - Z_HERO);
-    var sec = zrT < 8.2 ? 0 : (zrT < 9.45 ? 1 : 2);
+    var sec = zrT < 11.7 ? 0 : (zrT < 12.95 ? 1 : 2);
     menuLinks.forEach(function (a, i) { a.classList.toggle("on", i === sec); });
   }
+
+  // CAA-0018 explore: click zooms at the cursor; while zoomed the pan
+  // follows the mouse; click again to fit. (First-pass mechanic.)
+  (function () {
+    var box = document.getElementById("caa18");
+    var img = document.getElementById("caa18-img");
+    box.addEventListener("click", function (e) {
+      if (e.target !== img) return;
+      var zoomed = box.classList.toggle("zoomed");
+      if (zoomed) {
+        var r = img.getBoundingClientRect();
+        img.style.transformOrigin = ((e.clientX - r.left) / r.width * 100) + "% " + ((e.clientY - r.top) / r.height * 100) + "%";
+        img.style.transform = "scale(2.4)";
+      } else {
+        img.style.transform = "scale(1)";
+      }
+    });
+    box.addEventListener("mousemove", function (e) {
+      if (!box.classList.contains("zoomed")) return;
+      var r0 = img.getBoundingClientRect();
+      // origin in the UNSCALED box: use the layout rect via offset metrics
+      var w = img.offsetWidth, h = img.offsetHeight;
+      var cx = Math.max(0, Math.min(1, e.clientX / window.innerWidth));
+      var cy = Math.max(0, Math.min(1, e.clientY / window.innerHeight));
+      img.style.transformOrigin = (cx * 100) + "% " + (cy * 100) + "%";
+    });
+  })();
 
   // drag-to-look wiring for the sheet
   var sheetEl = document.getElementById("sheet");
@@ -592,7 +684,7 @@
     apply();
   }
   function nudge(d) {
-    target = Math.max(0, Math.min(11.6, target + d));
+    target = Math.max(0, Math.min(15.0, target + d));
     if (!raf) raf = requestAnimationFrame(step);
   }
   window.addEventListener("wheel", function (e) { e.preventDefault(); nudge(e.deltaY / 900); }, { passive: false });
@@ -618,7 +710,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.49");
+  console.log("entry-test2 v0.50");
 })();
 </script>
 </body>
