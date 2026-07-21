@@ -4032,7 +4032,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.10-test.09";
+  const VERSION      = "v1.10-test.10";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6679,21 +6679,21 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       rotation: 0, phase: null, phaseQID: null,
     };
   }
+  // No letters toasts at all (Brandon, 2026-07-21) — the background revalidation
+  // used to surface transient Worker/network failures as an unprompted error
+  // tag. All load outcomes are silent now; failures log to the console only.
   async function loadGatedLetters(announce) {
     const tok = gatedToken();
-    if (!tok) { if (announce) hhToast("Enter the researcher token first (Letters ✉)"); return; }
+    if (!tok) return;
     try {
       const res = await fetch(GATED_BASE + "/letters", { headers: { "X-Researcher-Token": tok }, cache: "no-store" });
-      if (res.status === 401) { hhToast("Letters: token rejected", "err"); return; }
-      if (!res.ok) { hhToast("Letters: load failed (" + res.status + ")", "err"); return; }
+      if (res.status === 401) { console.warn("gated letters: token rejected"); return; }
+      if (!res.ok) { console.warn("gated letters: load failed", res.status); return; }
       const data = await res.json();
       const recs = (data.records || []).map(gatedRecToItem);
       state.items = state.items.filter(i => !i.gated).concat(recs);   // idempotent re-load
       applyFilters(); renderList();
-      // No toast on the silent auto-load (boot / preview link) — only on an
-      // explicit manual token entry. Opening the ✉ view shows its own confirmation.
-      if (announce) hhToast(`Loaded ${recs.length} researcher letters`);
-    } catch (e) { console.warn("gated letters load failed", e); hhToast("Letters: load error", "err"); }
+    } catch (e) { console.warn("gated letters load failed", e); }
   }
 
   // Public multi-page objects (documents / sketchbooks): archive ID → page count.
@@ -7171,7 +7171,7 @@ WHERE {
     }
     if (!state.items.some(i => i.letter)) {
       await loadGatedLetters(false);
-      if (!state.items.some(i => i.letter)) return;   // load failed; toast already shown
+      if (!state.items.some(i => i.letter)) return;   // load failed; silent (console.warn only)
     }
     if (state.curation) exitCuration();   // curation + letters view are mutually exclusive
     enterLetters();

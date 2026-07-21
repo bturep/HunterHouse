@@ -1458,7 +1458,11 @@
   .cur-pager .cp-count{color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:0.04em}
   .pane-image.pdf-mode .cur-pager{display:none}
   /* ── Correspondence view (letters) ── */
-  .letter-row .title.lr-fromto{font-weight:500}
+  /* v1.09.08: letter rows carry no [L] chip line — every row in this view IS a
+     letter; the date sits on the from→to line, one line saved per row */
+  .letter-row .r-title.lr-fromto{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .letter-row .lr-fromto .lr-names{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .letter-row .lr-fromto .year{flex:none}
   .letter-row .lr-arrow{color:var(--hint);margin:0 4px;font-weight:400}
   body.letters-view .site-topright #letters-toggle{color:var(--red-deep)}
   /* Letter facets reuse the drawings filter chips (.fp-group/.fp-chip + pillCls). */
@@ -4029,7 +4033,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09.07";
+  const VERSION      = "v1.09.08";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6676,21 +6680,21 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       rotation: 0, phase: null, phaseQID: null,
     };
   }
+  // No letters toasts at all (Brandon, 2026-07-21) — the background revalidation
+  // used to surface transient Worker/network failures as an unprompted error
+  // tag. All load outcomes are silent now; failures log to the console only.
   async function loadGatedLetters(announce) {
     const tok = gatedToken();
-    if (!tok) { if (announce) hhToast("Enter the researcher token first (Letters ✉)"); return; }
+    if (!tok) return;
     try {
       const res = await fetch(GATED_BASE + "/letters", { headers: { "X-Researcher-Token": tok }, cache: "no-store" });
-      if (res.status === 401) { hhToast("Letters: token rejected", "err"); return; }
-      if (!res.ok) { hhToast("Letters: load failed (" + res.status + ")", "err"); return; }
+      if (res.status === 401) { console.warn("gated letters: token rejected"); return; }
+      if (!res.ok) { console.warn("gated letters: load failed", res.status); return; }
       const data = await res.json();
       const recs = (data.records || []).map(gatedRecToItem);
       state.items = state.items.filter(i => !i.gated).concat(recs);   // idempotent re-load
       applyFilters(); renderList();
-      // No toast on the silent auto-load (boot / preview link) — only on an
-      // explicit manual token entry. Opening the ✉ view shows its own confirmation.
-      if (announce) hhToast(`Loaded ${recs.length} researcher letters`);
-    } catch (e) { console.warn("gated letters load failed", e); hhToast("Letters: load error", "err"); }
+    } catch (e) { console.warn("gated letters load failed", e); }
   }
 
   // Public multi-page objects (documents / sketchbooks): archive ID → page count.
@@ -7168,7 +7172,7 @@ WHERE {
     }
     if (!state.items.some(i => i.letter)) {
       await loadGatedLetters(false);
-      if (!state.items.some(i => i.letter)) return;   // load failed; toast already shown
+      if (!state.items.some(i => i.letter)) return;   // load failed; silent (console.warn only)
     }
     if (state.curation) exitCuration();   // curation + letters view are mutually exclusive
     enterLetters();
@@ -7265,18 +7269,16 @@ WHERE {
       const fromTo = `${escapeHTML(it.letterFrom || "?")} <span class="lr-arrow">→</span> ${escapeHTML(it.letterTo || "?")}`;
       const sub = escapeHTML(it.letterPlace || docFormLabel(it.docForm) || "");
       row.innerHTML = `
-        <span class="r-kick">
+        ${flags ? `<span class="r-kick">
         <span class="col-id">
-          <span class="archid"><span class="tmark pc-stone" data-type="L" title="Letter">L</span></span>
-          ${flags ? `<span class="row-flags" aria-hidden="true">
+          <span class="row-flags" aria-hidden="true">
             <span class="rf-slot rf-slot-mark"><span class="rf-ico"><span class="rf-mark" title="Click to unmark [M]"></span></span></span>
             <span class="rf-slot rf-slot-seen"><span class="rf-ico"><span class="rf-seen" title="Reviewed — click to clear [R]"><svg viewBox="0 0 14 10" width="10" height="7" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5s2.2-4 6-4 6 4 6 4-2.2 4-6 4-6-4-6-4z"/><circle cx="7" cy="5" r="1.7"/></svg></span></span></span>
             <span class="rf-slot rf-slot-note"><span class="rf-ico"><span class="rf-note" title="Has a researcher note"><svg viewBox="0 0 10 12" width="8" height="10" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 1h4l3 3v7H2z"/><path d="M6 1v3h3"/><path d="M3.7 6.6h3M3.7 8.6h3"/></svg></span></span></span>
-          </span>` : ""}
+          </span>
         </span>
-        <span class="year">${escapeHTML(condensedDate(it.date))}</span>
-        </span>
-        <div class="r-title lr-fromto">${fromTo}</div>
+        </span>` : ""}
+        <div class="r-title lr-fromto"><span class="lr-names">${fromTo}</span><span class="year">${escapeHTML(condensedDate(it.date))}</span></div>
         ${sub ? `<div class="r-note">${sub}</div>` : ""}`;
       frag.appendChild(row);
     });
