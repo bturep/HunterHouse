@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.45 — the sectioned entry (Brandon, 2026-07-21):
+<!-- entry-test2 v0.46 — the sectioned entry (Brandon, 2026-07-21):
      HERO (FRH-0008 photo, title -> wordmark) ->
      HOUSE: the 1970 letter sketch + Hunter's OWN WORDS (L001) beside the
        letter's plan sketch -> the sketch dissolves into CAA-0008 FULLSCREEN,
@@ -57,7 +57,7 @@
   #sheet{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5;overflow:hidden}
   #sheet-wrap{position:absolute;left:0;top:0;width:2000px;height:1530px;transform-origin:0 0;will-change:transform}
   #sheet-img{position:absolute;left:0;top:0;width:2000px;height:1530px;display:block}
-  #sheet-plan-over{position:fixed;height:auto;mix-blend-mode:multiply;pointer-events:none;will-change:left,top,width,opacity}
+  #sheet-plan-over{position:fixed;z-index:7;visibility:hidden;height:auto;mix-blend-mode:multiply;pointer-events:none;will-change:left,top,width,opacity}
   #sheet .scite{position:fixed;left:34px;bottom:22px;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
   /* the Ivan Hunter selection — a quiet grid */
@@ -135,9 +135,9 @@
   <div id="sheet-wrap">
     <img id="sheet-img" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/large/HH-CAA-0008_OG_Build_1970_Scheme_1_2of3_1970-08-25_large.jpg" alt="Cottage for Ric and Frances Hunter — plan and elevations, 1970">
   </div>
-  <img id="sheet-plan-over" src="assets/entry/letter-plan-crop.png" alt="">
   <div class="scite">Cottage for Ric &amp; Frances Hunter — plan &amp; elevations, 25 August 1970 · HH-CAA-0008</div>
 </div>
+<img id="sheet-plan-over" src="assets/entry/letter-plan-crop.png" alt="">
 <div id="ihc" aria-label="Photographs by Ivan Hunter">
   <div class="ihead">The house photographed by Ivan Hunter · 2024</div>
   <div class="igrid">
@@ -185,7 +185,7 @@
   <a style="padding:6px 15px">Archive</a>
   <a style="padding:6px 15px">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.45</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.46</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -303,6 +303,8 @@
     var colPhoto = flow.querySelector(".photocol");
     var shOn = zr > T0 - 0.001 && zr < 5.15;
     sheet.style.visibility = shOn ? "visible" : "hidden";
+    var po = document.getElementById("sheet-plan-over");
+    po.style.visibility = (shOn && zr < 2.2) ? "visible" : "hidden";
     reading.style.opacity = zr > T0 ? Math.max(0, 1 - (zr - T0) / 0.3) : 1;
     colPhoto.style.visibility = zr > T0 ? "hidden" : "visible";
     if (shOn) {
@@ -311,7 +313,6 @@
       // measured plan in, sketch out · then the camera moves.
       sheet.style.opacity = Math.min(1, (zr - T0) / 0.3) * Math.max(0, Math.min(1, 1 - (zr - 4.7) / 0.4));
       document.getElementById("sheet-wrap").style.opacity = Math.max(0, Math.min(1, (zr - 1.55) / 0.3));
-      var po = document.getElementById("sheet-plan-over");
       var eM = ease(Math.max(0, Math.min(1, (zr - T0) / 0.3)));
       var r0 = colPhoto.querySelector("img").getBoundingClientRect();
       var Ht = window.innerHeight * (674 / 830);           // the plan region at the plan keyframe
@@ -535,7 +536,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.45");
+  console.log("entry-test2 v0.46");
 })();
 </script>
 </body>
