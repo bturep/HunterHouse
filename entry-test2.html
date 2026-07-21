@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.30 — the convergence entry (Brandon, 2026-07-19):
-     NO INTRO — the page lands directly: HUNTER HOUSE wordmark top-left,
-     the menu on top, the 1970 drawing centred below. Scroll:
-     text appears line by line BELOW the sketch, the sketch scrolls away,
-     all text — with a right-hand column where HH-FRH-0008 (the 1977 house
-     photograph) fades in. The letter-fade phase is REMOVED (too complicated).
-     All reversible. noindex + unlinked (mock). -->
+<!-- entry-test2 v0.31 — the convergence entry (Brandon, 2026-07-19; photo
+     entry added 2026-07-21): the page lands on the ENTRY PHOTOGRAPH
+     (HH-FRH-0008, 1977) full-bleed with HUNTER HOUSE centred over it.
+     Scroll: the photograph scrolls past, the menu comes in, and the centre
+     title shrinks into the EXACT top-left wordmark position (same element —
+     identity transform IS the landing spot). Then as before: the 1970
+     drawing centred, text line by line below, the photo column, the
+     gallery, the site plan. All reversible. noindex + unlinked (mock). -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -58,6 +59,12 @@
     text-transform:uppercase;padding:7px 12px;pointer-events:none}
   #site-cue{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:8;opacity:0;
     font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(27,25,24,.6)}
+  /* the entry photograph — full-bleed, scrolled past; the title rides above it */
+  #hero{position:fixed;inset:0;z-index:7;background:#1b1918;pointer-events:none;will-change:transform}
+  #hero img{width:100%;height:100%;object-fit:cover;display:block}
+  #hero::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.22)}
+  #hero .hcite{position:absolute;left:34px;bottom:22px;z-index:1;font-family:'JetBrains Mono',Menlo,monospace;
+    font-size:10px;letter-spacing:.06em;color:rgba(246,245,245,.55)}
 </style>
 </head>
 <body>
@@ -91,22 +98,29 @@
 </div>
 <div id="site-cue">Site ↓</div>
 <div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
-<div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#1b1918">Hunter House</div>
-<nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62)">
-  <a data-z="0" style="padding:6px 15px;cursor:pointer">House</a>
-  <a data-z="3.38" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">Site</a>
-  <a data-z="0.55" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">Hunter</a>
-  <a data-z="1.55" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">Archive</a>
-  <a data-z="3.38" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">About</a>
+<div id="hero" aria-hidden="true">
+  <img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0008_HunterHouse_1977_prev.jpg" alt="">
+  <div class="hcite">HH-FRH-0008 · 1977</div>
+</div>
+<div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#f6f5f5;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
+<nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62);transform:translateY(-110%);opacity:0;will-change:transform,opacity">
+  <a data-z="1" style="padding:6px 15px;cursor:pointer">House</a>
+  <a data-z="4.38" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">Site</a>
+  <a data-z="1.55" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">Hunter</a>
+  <a data-z="2.55" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">Archive</a>
+  <a data-z="4.38" style="padding:6px 15px;border-left:1px solid rgba(27,25,24,.16);cursor:pointer">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.30</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.31</div>
 
 <script>
-// entry-test2 v0.30 — z: 0..1 convergence (film-in-type) · 1..2 the drawing ·
-// 2..2.15 a breath · 2.15..4.4 the scroll: lines in, sketch out, photo in.
+// entry-test2 v0.31 — z: 0..1 the entry photograph (title → wordmark) ·
+// then the v0.30 phases shifted +1: reading scroll · gallery · site plan.
 (function () {
-  var z = 0, target = 0;
+  var z = 0, target = 0, Z_HERO = 1;
   var ease = function (t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; };
+  var hero = document.getElementById("hero");
+  var menuEl = document.getElementById("menu");
+  var wm = document.getElementById("wordmark");
 
   function centreSketch() {
     var w = Math.min(1100, window.innerWidth * 0.9);
@@ -121,9 +135,26 @@
   var Z_READ0 = 0.0, Z_END = 2.25;
 
   function apply() {
-    // the page LANDS on the reading: menu on top, the drawing below.
-    // Centre from the ASPECT (1930x1135), not the loaded rect — the image may
-    // not have arrived yet (that was the off-centre/oversize landing bug).
+    // ── the entry photograph: HUNTER HOUSE centred, scrolled past ──────────
+    var eH = ease(Math.max(0, Math.min(1, z / Z_HERO)));
+    hero.style.transform = "translateY(" + (-eH * 104) + "vh)";
+    hero.style.visibility = eH >= 1 ? "hidden" : "visible";
+    // the menu arrives the moment scroll starts
+    var mIn = Math.max(0, Math.min(1, z / 0.22));
+    menuEl.style.transform = "translateY(" + ((1 - mIn) * -110) + "%)";
+    menuEl.style.opacity = mIn;
+    // the centre title shrinks into the wordmark's EXACT spot — same element,
+    // so the identity transform at eH=1 IS the top-left label. offsetWidth/
+    // Height are layout metrics (transform-free); the natural box sits at 0,0.
+    var ow = wm.offsetWidth, oh = wm.offsetHeight;
+    var S0 = Math.max(3, Math.min(9, (window.innerWidth * 0.62) / Math.max(1, ow - 68)));
+    var tx = window.innerWidth / 2 - ow / 2, ty = window.innerHeight / 2 - oh / 2;
+    wm.style.transform = "translate(" + (tx * (1 - eH)) + "px," + (ty * (1 - eH)) + "px) scale(" + (1 + (S0 - 1) * (1 - eH)) + ")";
+    var cw = Math.max(0, Math.min(1, (eH - 0.55) / 0.3));   // paper → ink as the photo clears
+    wm.style.color = "rgb(" + Math.round(246 + (27 - 246) * cw) + "," + Math.round(245 + (25 - 245) * cw) + "," + Math.round(245 + (24 - 245) * cw) + ")";
+
+    // ── the reading (everything below runs in zr = z - Z_HERO space) ───────
+    var zr = Math.max(0, z - Z_HERO);
     var reading = document.getElementById("reading");
     if (reading.style.visibility !== "visible") {
       centreSketch();
@@ -131,7 +162,7 @@
     }
 
     // the window scrolls down; lines arrive as it goes; the sketch departs
-    var zS = Math.max(0, Math.min(1, (Math.min(z, 1.25) - Z_READ0) / (Z_END - Z_READ0)));
+    var zS = Math.max(0, Math.min(1, (Math.min(zr, 1.25) - Z_READ0) / (Z_END - Z_READ0)));
     var scrollMax = Math.max(0, flow.scrollHeight - window.innerHeight * 0.55);
     flow.style.transform = "translateY(" + (-zS * scrollMax) + "px)";
     var lineH = 17 * 1.7;
@@ -158,17 +189,17 @@
     // 4.3..4.7 CAA rolls aside, IHC-0038 in · then the SITE cue.
     var G0 = 1.25;
     var gal = document.getElementById("gallery");  // (reading already in scope)
-    var gOn = z > G0 - 0.001;
+    var gOn = zr > G0 - 0.001;
     gal.style.visibility = gOn ? "visible" : "hidden";
-    reading.style.opacity = gOn ? Math.max(0, 1 - (z - G0) / 0.3) : 1;
+    reading.style.opacity = gOn ? Math.max(0, 1 - (zr - G0) / 0.3) : 1;
     var colPhoto = flow.querySelector(".photocol");
     colPhoto.style.visibility = gOn ? "hidden" : "visible";
     if (gOn) {
       var W = window.innerWidth;
       // FRH-0008: column rect → centre, then roll aside left
       var gf = document.getElementById("g-frh");
-      var fIn = Math.max(0, Math.min(1, (z - G0) / 0.35));
-      var fOut = Math.max(0, Math.min(1, (z - 1.75) / 0.4));
+      var fIn = Math.max(0, Math.min(1, (zr - G0) / 0.35));
+      var fOut = Math.max(0, Math.min(1, (zr - 1.75) / 0.4));
       var colImg = colPhoto.querySelector("img");
       var r = colImg.getBoundingClientRect();
       var dx0 = (r.left + r.width/2) - W/2, dy0 = (r.top + r.height/2) - window.innerHeight/2;
@@ -177,26 +208,26 @@
       gf.style.opacity = fIn > 0 ? 1 : 0;
       // CAA-0018: in from the right; dwell for exploring; then roll aside
       var gc = document.getElementById("g-caa");
-      var cIn = Math.max(0, Math.min(1, (z - 1.75) / 0.4));
-      var cOut = Math.max(0, Math.min(1, (z - 2.55) / 0.4));
+      var cIn = Math.max(0, Math.min(1, (zr - 1.75) / 0.4));
+      var cOut = Math.max(0, Math.min(1, (zr - 2.55) / 0.4));
       gc.style.transform = "translate(-50%,-50%) translate(" + ((1-ease(cIn))*(W*0.75) - ease(cOut)*(W*0.75)) + "px,0) rotate(" + (-ease(cOut)*7) + "deg)";
       gc.style.opacity = cIn > 0 ? 1 : 0;
       gc.classList.toggle("zoomable", cIn >= 1 && cOut <= 0);
       // IHC-0038: in from the right; stays
       var gi = document.getElementById("g-ihc");
-      var iIn = Math.max(0, Math.min(1, (z - 2.55) / 0.4));
+      var iIn = Math.max(0, Math.min(1, (zr - 2.55) / 0.4));
       gi.style.transform = "translate(-50%,-50%) translate(" + ((1-ease(iIn))*(W*0.75)) + "px,0)";
       gi.style.opacity = iIn > 0 ? 1 : 0;
       // then: SITE — the plan rises in, the gallery cedes
-      var zP = Math.max(0, Math.min(1, (z - 3.05) / 0.3));
-      document.getElementById("site-cue").style.opacity = Math.max(0, Math.min(1, (z - 3.0) / 0.2)) * (1 - zP);
+      var zP = Math.max(0, Math.min(1, (zr - 3.05) / 0.3));
+      document.getElementById("site-cue").style.opacity = Math.max(0, Math.min(1, (zr - 3.0) / 0.2)) * (1 - zP);
       var sp = document.getElementById("siteplan");
       sp.style.visibility = zP > 0 ? "visible" : "hidden";
       sp.style.opacity = zP;
       sp.style.pointerEvents = zP >= 1 ? "auto" : "none";
       gal.style.opacity = 1 - zP;
       // arrive zoomed IN on the house; more scroll zooms OUT to the full plan
-      siteWantZoom(z < 3.42);
+      siteWantZoom(zr < 3.42);
     } else {
       document.getElementById("site-cue").style.opacity = 0;
       var sp2 = document.getElementById("siteplan");
@@ -465,7 +496,7 @@
     apply();
   }
   function nudge(d) {
-    target = Math.max(0, Math.min(3.75, target + d));
+    target = Math.max(0, Math.min(4.75, target + d));
     if (!raf) raf = requestAnimationFrame(step);
   }
   window.addEventListener("wheel", function (e) { e.preventDefault(); nudge(e.deltaY / 900); }, { passive: false });
@@ -486,9 +517,12 @@
   });
   window.addEventListener("resize", function () { centreSketch(); apply(); });
   flow.querySelector(".sk").addEventListener("load", function () { centreSketch(); apply(); });
+  // the title's centring transform is measured from its text width — re-apply
+  // once the webfont arrives (fallback-font metrics left it ~4px off centre)
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.30");
+  console.log("entry-test2 v0.31");
 })();
 </script>
 </body>
