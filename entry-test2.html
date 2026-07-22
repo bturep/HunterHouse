@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.69 — the sectioned entry (Brandon, 2026-07-21):
+<!-- entry-test2 v0.70 — the sectioned entry (Brandon, 2026-07-21):
      HERO (film loop, no scrim; Hunter's 1970 NAMEBLOCK centred,
        riding off with the photo; wordmark fades in top-left) ->
      HOUSE: the 1970 letter sketch + Hunter's OWN WORDS (L001) beside the
@@ -247,7 +247,7 @@
   <a style="padding:6px 15px">Archive</a>
   <a style="padding:6px 15px">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.69</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.70</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -324,6 +324,8 @@
     document.querySelector("#hero .hlogo").style.transform = "translate(-50%,-50%) " + counter;
     // the top-left wordmark fades in as the photo clears
     wm.style.opacity = Math.max(0, Math.min(1, (z - 0.45) / 0.3));
+    // the version badge reads paper-white over the entry footage, ink after
+    document.getElementById("ver").style.color = eH < 0.6 ? "rgba(246,245,245,.6)" : "rgba(27,25,24,.35)";
 
     // ── the reading (everything below runs in zr = z - Z_HERO space) ───────
     var zr = Math.max(0, z - Z_HERO);
@@ -729,7 +731,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.69");
+  console.log("entry-test2 v0.70");
 })();
 </script>
 </body>
