@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.64 — the sectioned entry (Brandon, 2026-07-21):
+<!-- entry-test2 v0.66 — the sectioned entry (Brandon, 2026-07-21):
      HERO (film loop, no scrim; Hunter's 1970 NAMEBLOCK centred,
        riding off with the photo; wordmark fades in top-left) ->
      HOUSE: the 1970 letter sketch + Hunter's OWN WORDS (L001) beside the
@@ -26,6 +26,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500;800&display=swap" rel="stylesheet">
+<link rel="preload" as="image" fetchpriority="high" href="https://archive.hunterhousefoundation.com/canadian-architecture-archive/thumbs/HH-CAA-0008_OG_Build_1970_Scheme_1_2of3_1970-08-25_thumb.jpg">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;overflow:hidden}
@@ -162,7 +163,7 @@
 
 <div id="sheet" aria-label="Cottage for Ric and Frances Hunter — plan and elevations">
   <div id="sheet-wrap">
-    <img id="sheet-img" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/large/HH-CAA-0008_OG_Build_1970_Scheme_1_2of3_1970-08-25_large.jpg" alt="Cottage for Ric and Frances Hunter — plan and elevations, 1970">
+    <img id="sheet-img" fetchpriority="high" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/thumbs/HH-CAA-0008_OG_Build_1970_Scheme_1_2of3_1970-08-25_thumb.jpg" data-mid="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0008_OG_Build_1970_Scheme_1_2of3_1970-08-25_prev.jpg" data-large="https://archive.hunterhousefoundation.com/canadian-architecture-archive/large/HH-CAA-0008_OG_Build_1970_Scheme_1_2of3_1970-08-25_large.jpg" alt="Cottage for Ric and Frances Hunter — plan and elevations, 1970">
   </div>
   <div class="scite">Cottage for Ric &amp; Frances Hunter — plan &amp; elevations, 25 August 1970 · HH-CAA-0008</div>
 </div>
@@ -194,7 +195,7 @@
   </div>
 </div>
 <div id="caa18" aria-label="Hunter House, Studio and Garden — coloured drawing">
-  <img id="caa18-img" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/large/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_large.jpg" alt="Hunter House, Studio and Garden — coloured drawing">
+  <img id="caa18-img" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg" data-large="https://archive.hunterhousefoundation.com/canadian-architecture-archive/large/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_large.jpg" alt="Hunter House, Studio and Garden — coloured drawing">
   <div class="ccite18">Hunter House, Studio and Garden · HH-CAA-0018 · click the drawing to explore</div>
 </div>
 <div id="ihc" aria-label="Photographs by Ivan Hunter">
@@ -232,7 +233,7 @@
 <div id="hero" aria-hidden="true">
   <!-- Brandon's film footage (Sequence 01, 11:36-11:48 loop), no scrim.
        Poster = the 11:38:05 still, so the entry opens on his chosen frame. -->
-  <video autoplay muted loop playsinline poster="assets/entry/entry-still.jpg">
+  <video autoplay muted loop playsinline fetchpriority="low" poster="assets/entry/entry-still.jpg">
     <source src="assets/entry/entry-loop.mp4" type="video/mp4">
   </video>
   <img class="hlogo" src="assets/entry/nameblock-1970.png" alt="Hunter House · Victoria B.C. · 1970 · Ric Hunter Architect">
@@ -246,7 +247,7 @@
   <a style="padding:6px 15px">Archive</a>
   <a style="padding:6px 15px">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.64</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.66</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -527,6 +528,24 @@
   window.addEventListener("pointerup", dragRelease);
   window.addEventListener("pointercancel", dragRelease);
 
+  // the heavy drawings climb a tier ladder — a tiny thumb paints instantly,
+  // then the 2000px preview, then the 3840px large as each arrives; the
+  // sheet is never blank even while the entry video streams
+  ["sheet-img", "caa18-img"].forEach(function (id) {
+    var el = document.getElementById(id);
+    function climb(attr) {
+      var url = el.getAttribute(attr);
+      if (!url) { if (attr === "data-mid") climb("data-large"); return; }
+      var im = new Image();
+      im.onload = function () {
+        el.src = url;
+        if (attr === "data-mid") climb("data-large");
+      };
+      im.src = url;
+    }
+    climb(el.getAttribute("data-mid") ? "data-mid" : "data-large");
+  });
+
   // click-to-enlarge: the reading's plan sketch
   var colImgEl = document.querySelector("#flow .photocol img");
   var colCiteEl = document.querySelector("#flow .photocol .cite");
@@ -710,7 +729,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.64");
+  console.log("entry-test2 v0.66");
 })();
 </script>
 </body>
