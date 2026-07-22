@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.72 — the sectioned entry (Brandon, 2026-07-21):
+<!-- entry-test2 v0.73 — the sectioned entry (Brandon, 2026-07-21):
      HERO (film loop, no scrim; Hunter's 1970 NAMEBLOCK centred,
        riding off with the photo; wordmark fades in top-left) ->
      HOUSE: the 1970 letter sketch + Hunter's OWN WORDS (L001) beside the
@@ -134,8 +134,6 @@
   /* Hunter's own 1970 nameblock (CAA-0007 title block), centred; it rides
      off with the photograph — no flight, no fade choreography */
   #hero img.hlogo{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:auto;height:min(62vh,700px);object-fit:contain;z-index:1}
-  #hlogo-ink{position:fixed;left:50%;top:46%;transform:translate(-50%,-50%);width:auto;height:min(62vh,700px);
-    filter:invert(1);z-index:7;visibility:hidden;pointer-events:none}
 </style>
 </head>
 <body>
@@ -231,7 +229,6 @@
 </div>
 <div id="site-cue">Site ↓</div>
 <div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
-<img id="hlogo-ink" src="assets/entry/nameblock-1970.png" alt="">
 <div id="hero" aria-hidden="true">
   <!-- Brandon's film footage (Sequence 01, 11:36-11:48 loop), no scrim.
        Poster = the 11:38:05 still, so the entry opens on his chosen frame. -->
@@ -249,7 +246,7 @@
   <a style="padding:6px 15px">Archive</a>
   <a style="padding:6px 15px">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.72</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.73</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -318,12 +315,6 @@
     // white on paper would merge, so the photo is the mark's only ground
     var counter = "translateY(" + (eH * 104) + "vh)";
     document.querySelector("#hero .hlogo").style.transform = "translate(-50%,-50%) " + counter;
-    // the INK twin beneath: unveiled by the video's rising edge, holds a
-    // moment over the elevation, then fades — a beat of the sketch alone
-    var hlInk = document.getElementById("hlogo-ink");
-    var zrq = Math.max(0, z - Z_HERO);
-    hlInk.style.opacity = Math.max(0, Math.min(1, 1 - (zrq - 0.12) / 0.25));
-    hlInk.style.visibility = (z > 0.02 && zrq < 0.4) ? "visible" : "hidden";
     // the top-left wordmark fades in as the photo clears
     wm.style.opacity = Math.max(0, Math.min(1, (z - 0.45) / 0.3));
     // the version badge reads paper-white over the entry footage, ink after
@@ -739,7 +730,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.72");
+  console.log("entry-test2 v0.73");
 })();
 </script>
 </body>
