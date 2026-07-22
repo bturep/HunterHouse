@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.70 — the sectioned entry (Brandon, 2026-07-21):
+<!-- entry-test2 v0.71 — the sectioned entry (Brandon, 2026-07-21):
      HERO (film loop, no scrim; Hunter's 1970 NAMEBLOCK centred,
        riding off with the photo; wordmark fades in top-left) ->
      HOUSE: the 1970 letter sketch + Hunter's OWN WORDS (L001) beside the
@@ -154,7 +154,7 @@
         <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
       </div>
       <div class="photocol">
-        <img src="assets/entry/letter-plan-crop.png" alt="Plan sketch from the letter — IVAN, SHAN, WEAVE, DRAW, LIVING, GARDEN">
+        <img src="assets/entry/letter-plan-match.png" alt="Plan sketch from the letter — IVAN, SHAN, WEAVE, DRAW, LIVING, GARDEN">
         <div class="cite">Plan sketch · Letter L001 · 1970</div>
       </div>
     </div>
@@ -167,7 +167,7 @@
   </div>
   <div class="scite">Cottage for Ric &amp; Frances Hunter — plan &amp; elevations, 25 August 1970 · HH-CAA-0008</div>
 </div>
-<img id="sheet-plan-over" src="assets/entry/letter-plan-crop.png" alt="">
+<img id="sheet-plan-over" src="assets/entry/letter-plan-match.png" alt="">
 <div id="pgal" aria-label="Photographs of the original house">
   <div id="pgal-col">
     <div class="ihead-row">The original house · photographs 1970 – 1986</div>
@@ -247,7 +247,7 @@
   <a style="padding:6px 15px">Archive</a>
   <a style="padding:6px 15px">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.70</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.71</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -381,11 +381,17 @@
       document.getElementById("sheet-wrap").style.opacity = Math.max(0, Math.min(1, (zr - 1.55) / 0.3));
       var eM = ease(Math.max(0, Math.min(1, (zr - T0) / 0.3)));
       var r0 = colPhoto.querySelector("img").getBoundingClientRect();
-      var Ht = window.innerHeight * (674 / 830);           // the plan region at the plan keyframe
-      var Wt = Ht * (488 / 486);
-      po.style.left  = (r0.left + ((window.innerWidth  - Wt) / 2 - r0.left) * eM) + "px";
-      po.style.top   = (r0.top  + ((window.innerHeight - Ht) / 2 - r0.top)  * eM) + "px";
-      po.style.width = (r0.width + (Wt - r0.width) * eM) + "px";
+      // Brandon's registered crop rect (sheet units) projected through the
+      // plan-view camera (cx 814, cy 669, fit 830) — the landing IS the
+      // registration he set in the drawing file
+      var SKB = { x0: 499.6, y0: 378.4, x1: 1121.3, y1: 1010.6 };
+      var s0 = window.innerHeight / 830;
+      var tL = (SKB.x0 - 814) * s0 + window.innerWidth / 2;
+      var tT = (SKB.y0 - 669) * s0 + window.innerHeight / 2;
+      var tW = (SKB.x1 - SKB.x0) * s0;
+      po.style.left  = (r0.left + (tL - r0.left) * eM) + "px";
+      po.style.top   = (r0.top  + (tT - r0.top)  * eM) + "px";
+      po.style.width = (r0.width + (tW - r0.width) * eM) + "px";
       po.style.opacity = Math.max(0, Math.min(1, 1 - (zr - 1.55) / 0.3));
       var v = sheetView(zr);
       var scl = window.innerHeight / v.fit;
@@ -731,7 +737,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.70");
+  console.log("entry-test2 v0.71");
 })();
 </script>
 </body>
