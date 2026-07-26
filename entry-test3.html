@@ -134,6 +134,42 @@
   /* Hunter's own 1970 nameblock (CAA-0007 title block), centred; it rides
      off with the photograph — no flight, no fade choreography */
   #hero img.hlogo{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:auto;height:min(62vh,700px);object-fit:contain;z-index:1}
+  /* ── the SURVEY: video + 5 section cards, native scroll-snap ────────────── */
+  #survey{position:fixed;inset:0;z-index:6;overflow-y:auto;overflow-x:hidden;
+    scroll-snap-type:y mandatory;background:#f6f5f5;-webkit-overflow-scrolling:touch}
+  body.in-section #survey{display:none}
+  #svid{height:100dvh;scroll-snap-align:start;position:relative;overflow:hidden;background:#1b1918}
+  #svid video{width:100%;height:100%;object-fit:cover;display:block}
+  #svid .vname{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);height:min(56vh,640px);width:auto}
+  #svid .vcue{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);font-family:'JetBrains Mono',Menlo,monospace;
+    font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(246,245,245,.7)}
+  .scard{height:100dvh;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    position:relative;padding:0 40px;cursor:pointer;text-align:center}
+  .scard .snum{position:absolute;left:34px;top:92px;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.2em;color:rgba(27,25,24,.4)}
+  .scard .stitle{font-weight:800;font-size:min(13vw,150px);letter-spacing:.005em;line-height:.9;text-transform:uppercase;color:#1b1918}
+  .scard .sblurb{margin-top:20px;max-width:540px;font-weight:500;font-size:15px;line-height:1.6;color:rgba(27,25,24,.62)}
+  .scard .senter{margin-top:24px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    color:rgba(27,25,24,.5);border-bottom:1px solid rgba(27,25,24,.28);padding-bottom:3px;transition:color .2s,border-color .2s}
+  .scard:hover .senter{color:#1b1918;border-bottom-color:#1b1918}
+  .scard.house .skprev{width:min(560px,72vw);display:block;margin:0 auto 4px}
+  /* deep-experience close (×) — persistent inside any section */
+  #sec-close{position:fixed;top:12px;right:16px;z-index:13;font-family:'JetBrains Mono',Menlo,monospace;font-size:20px;
+    color:#1b1918;cursor:pointer;display:none;width:36px;height:36px;line-height:34px;text-align:center;border:1px solid rgba(27,25,24,.2);border-radius:50%;background:rgba(246,245,245,.7)}
+  body.in-section #sec-close{display:block}
+  #sec-close:hover{background:#1b1918;color:#f6f5f5}
+  /* placeholder deep panels (HUNTER via #hunter; SITE/ARCHIVE/ABOUT here) */
+  #sec-panel{position:fixed;inset:0;z-index:9;background:#f6f5f5;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:0 40px}
+  #sec-panel.on{display:flex}
+  #sec-panel .pt{font-weight:800;font-size:min(11vw,130px);text-transform:uppercase;color:#1b1918;line-height:.9}
+  #sec-panel .pb{font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(27,25,24,.5);max-width:420px;line-height:2}
+  /* the designed HOUSE sequence is hidden until a section is entered */
+  body:not(.in-house) #reading, body:not(.in-house) #sheet, body:not(.in-house) #sheet-plan-over,
+  body:not(.in-house) #pgal, body:not(.in-house) #reading2, body:not(.in-house) #caa18,
+  body:not(.in-house) #ihc, body:not(.in-house) #hero{display:none !important}
+  /* the menu is the persistent spine — visible in the survey too */
+  body.survey-ready #menu{transform:none !important;opacity:1 !important}
+  #menu a{cursor:pointer}
+  #menu a.on{color:#1b1918}
 </style>
 </head>
 <body>
@@ -240,13 +276,57 @@
 </div>
 <div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#1b1918;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
 <nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62);transform:translateY(-110%);opacity:0;will-change:transform,opacity">
-  <a data-z="1" style="padding:6px 15px;cursor:pointer">House</a>
-  <a data-z="12.2" style="padding:6px 15px;cursor:pointer">Hunter</a>
-  <a data-z="13.8" style="padding:6px 15px;cursor:pointer">Site</a>
-  <a style="padding:6px 15px">Archive</a>
-  <a style="padding:6px 15px">About</a>
+  <a data-section="house" style="padding:6px 15px;cursor:pointer">House</a>
+  <a data-section="hunter" style="padding:6px 15px;cursor:pointer">Hunter</a>
+  <a data-section="site" style="padding:6px 15px;cursor:pointer">Site</a>
+  <a data-section="archive" style="padding:6px 15px;cursor:pointer">Archive</a>
+  <a data-section="about" style="padding:6px 15px;cursor:pointer">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e3-v0.01</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e3-v0.02</div>
+
+<!-- ── THE SURVEY (calder-style): film, then 5 section cards you scroll past;
+     each card opens its own deep experience. HOUSE = the designed sequence. ── -->
+<div id="survey" aria-label="Project survey">
+  <section id="svid">
+    <video autoplay muted loop playsinline poster="assets/entry/entry-still.jpg">
+      <source src="assets/entry/entry-loop.mp4" type="video/mp4">
+    </video>
+    <img class="vname" src="assets/entry/nameblock-1970.png" alt="Hunter House · Victoria B.C. · 1970 · Ric Hunter Architect">
+    <div class="vcue">Scroll ↓</div>
+  </section>
+  <section class="scard house" data-section="house">
+    <div class="snum">01 / HOUSE</div>
+    <img class="skprev" src="assets/entry/letter-elev-2.png" alt="Sketch elevation of the house">
+    <div class="sblurb">“… a little house we'll start building next week on our land.” The 1970 sketch, the working drawings, the house as built.</div>
+    <div class="senter">Enter the house →</div>
+  </section>
+  <section class="scard" data-section="hunter">
+    <div class="snum">02 / HUNTER</div>
+    <div class="stitle">Hunter</div>
+    <div class="sblurb">Richard Morrow Hunter, 1930–2023 — architect, sole client, sole resident of his own five-decade project.</div>
+    <div class="senter">Enter →</div>
+  </section>
+  <section class="scard" data-section="site">
+    <div class="snum">03 / SITE</div>
+    <div class="stitle">Site</div>
+    <div class="sblurb">203 Goward Road, Saanich — the knoll above Prospect Lake, its covenant, its trees.</div>
+    <div class="senter">Enter →</div>
+  </section>
+  <section class="scard" data-section="archive">
+    <div class="snum">04 / ARCHIVE</div>
+    <div class="stitle">Archive</div>
+    <div class="sblurb">The drawings, photographs, and correspondence — the working file Hunter kept, catalogued.</div>
+    <div class="senter">Enter →</div>
+  </section>
+  <section class="scard" data-section="about">
+    <div class="snum">05 / ABOUT</div>
+    <div class="stitle">About</div>
+    <div class="sblurb">The Hunter House Foundation — mandate, people, contact.</div>
+    <div class="senter">Enter →</div>
+  </section>
+</div>
+<div id="sec-panel"><div class="pt"></div><div class="pb"></div></div>
+<div id="sec-close" title="Close (Esc)" role="button" tabindex="0">×</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -703,26 +783,77 @@
     else z = target;
     apply();
   }
+  // ── the survey / section state machine ─────────────────────────────────
+  // mode: "survey" (native-scroll the cards) | "house" (the designed z-driven
+  // sequence) | "hunter"|"site"|"archive"|"about" (placeholder panels).
+  var mode = "survey";
+  var HOUSE_MAX = 11.5;   // the HOUSE experience ends after the Ivan Hunter grid
+  var PLACEHOLDER = {
+    hunter: ["Hunter", "Richard Morrow Hunter · 1930 – 2023 · in development"],
+    site:   ["Site", "203 Goward Road · in development"],
+    archive:["Archive", "The catalogue · in development"],
+    about:  ["About", "Hunter House Foundation · in development"]
+  };
+  var survey = document.getElementById("survey");
+  var secPanel = document.getElementById("sec-panel");
+
+  function openSection(name) {
+    mode = name;
+    document.body.classList.add("in-section");
+    if (name === "house") {
+      document.body.classList.add("in-house");
+      secPanel.classList.remove("on");
+      target = z = 1;                 // start at the reading (the video is skipped)
+      apply();
+    } else {
+      document.body.classList.remove("in-house");
+      var d = PLACEHOLDER[name] || [name, ""];
+      secPanel.querySelector(".pt").textContent = d[0];
+      secPanel.querySelector(".pb").textContent = d[1];
+      secPanel.classList.add("on");
+    }
+    menuLinks.forEach(function (a) { a.classList.toggle("on", a.dataset.section === name); });
+    window.scrollTo(0, 0);
+  }
+  function closeSection() {
+    mode = "survey";
+    document.body.classList.remove("in-section", "in-house");
+    secPanel.classList.remove("on");
+    menuLinks.forEach(function (a) { a.classList.remove("on"); });
+  }
+
   function nudge(d) {
-    target = Math.max(0, Math.min(14.1, target + d));
+    target = Math.max(0, Math.min(HOUSE_MAX, target + d));
     if (!raf) raf = requestAnimationFrame(step);
   }
-  window.addEventListener("wheel", function (e) { e.preventDefault(); nudge(e.deltaY / 900); }, { passive: false });
+  // wheel/touch/keys drive the z-sequence ONLY in house mode; otherwise the
+  // survey's native scroll handles it
+  window.addEventListener("wheel", function (e) {
+    if (mode !== "house") return;
+    e.preventDefault(); nudge(e.deltaY / 900);
+  }, { passive: false });
   var ty = null;
-  window.addEventListener("touchstart", function (e) { ty = e.touches[0].clientY; }, { passive: true });
+  window.addEventListener("touchstart", function (e) { if (mode === "house") ty = e.touches[0].clientY; }, { passive: true });
   window.addEventListener("touchmove", function (e) {
-    if (ty !== null) { nudge((ty - e.touches[0].clientY) / 300); ty = e.touches[0].clientY; }
+    if (mode === "house" && ty !== null) { nudge((ty - e.touches[0].clientY) / 300); ty = e.touches[0].clientY; }
   }, { passive: true });
   window.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && mode !== "survey") { closeSection(); return; }
+    if (mode !== "house") return;
     if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); nudge(0.5); }
     if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); nudge(-0.5); }
   });
-  document.querySelectorAll("#menu a[data-z]").forEach(function (a) {
-    a.addEventListener("click", function () {
-      target = parseFloat(a.dataset.z);
-      if (!raf) raf = requestAnimationFrame(step);
-    });
+  // menu = the persistent spine: jump straight to any section from anywhere
+  menuLinks.forEach(function (a) {
+    a.addEventListener("click", function () { if (a.dataset.section) openSection(a.dataset.section); });
   });
+  // each survey card opens its section
+  document.querySelectorAll("#survey .scard[data-section]").forEach(function (c) {
+    c.addEventListener("click", function () { openSection(c.dataset.section); });
+  });
+  document.getElementById("sec-close").addEventListener("click", closeSection);
+  // the menu appears once the survey is up
+  document.body.classList.add("survey-ready");
   window.addEventListener("resize", function () { centreSketch(); apply(); });
   flow.querySelector(".sk").addEventListener("load", function () { centreSketch(); apply(); });
   // the title's centring transform is measured from its text width — re-apply
@@ -730,7 +861,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test3 e3-v0.01");
+  console.log("entry-test3 e3-v0.02");
 })();
 </script>
 </body>
