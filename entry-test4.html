@@ -109,11 +109,11 @@
   #hunter .htxt{flex:1;max-width:660px;font-weight:500;font-size:17px;line-height:1.7;color:#000}
   #hunter .htxt p{margin-bottom:1.1em}
   #hunter a.more{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(27,25,24,.6);text-decoration:none;border-bottom:1px dashed rgba(27,25,24,.4)}
-  /* the menu carries the section — bracket marks the one you're in */
+  /* the menu is minimal — a small dot beside the current section, nothing else */
   #menu a{position:relative}
   #menu a.on{color:#1b1918}
-  #menu a.on::before{content:"[";position:absolute;left:4px;top:6px}
-  #menu a.on::after{content:"]";position:absolute;right:4px;top:6px}
+  #menu a.on::before{content:"";position:absolute;right:100%;top:50%;margin-top:-2.5px;margin-right:11px;
+    width:5px;height:5px;border-radius:50%;background:#1b1918}
   /* the site plan — the contour lens, inverted into this page's aesthetic:
      black lines on paper. Filter does the whole re-colour; label = black box
      with the archive's mono. */
@@ -142,7 +142,10 @@
   .scard img{max-height:62vh;max-width:70vw;width:auto;display:block}
   /* HOUSE card sketch = EXACTLY the reading's .sk (same width, centred) so
      entering the section is seamless — nothing changes scale */
-  .scard.house img{max-height:none;max-width:none;width:min(1100px,90vw)}
+  .scard.house img:not(.stitle){max-height:none;max-width:none;width:min(1100px,90vw)}
+  /* Hunter's own hand-lettering as each card's title (placement refined later) */
+  .scard .stitle{position:absolute;left:50%;top:13vh;transform:translateX(-50%);
+    height:58px;width:auto;max-width:74vw;max-height:none;pointer-events:none;z-index:3}
   .scard .cx{position:absolute;left:34px;top:96px;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(27,25,24,.42)}
   /* the film INTRO panel — first in the survey scroll */
@@ -158,13 +161,12 @@
   #menu a{padding:1px 0 !important;position:relative;white-space:nowrap}
   #menu a.on{color:#1b1918}
   /* the running bracket motif on the active menu item */
-  #menu a.on::before{content:"[ ";position:static;left:auto;top:auto}
-  #menu a.on::after{content:" ]";position:static;left:auto;top:auto}
+  #menu a.on::after{content:none}
   /* the wordmark: HUNTER HOUSE, black bold, top-left — shown past the film intro (opacity driven in JS) */
   #wordmark{transition:opacity .4s ease}
   /* the DOT RAIL — position within the current section, just left of the menu */
   #dots{position:fixed;top:50%;right:148px;transform:translateY(-50%);z-index:8;display:none;flex-direction:column;gap:9px;align-items:center}
-  body.in-section #dots{display:flex}
+  #dots{display:none !important}
   #dots .dot{width:6px;height:6px;border-radius:50%;background:rgba(27,25,24,.24);transition:background .25s,transform .25s;cursor:pointer}
   #dots .dot.on{background:#1b1918;transform:scale(1.55)}
   /* the designed HOUSE sequence is hidden until a section is entered */
@@ -302,14 +304,14 @@
     <img class="vname" src="assets/entry/nameblock-1970-v2.png" alt="Hunter House · Victoria B.C. · 1970 · Ric Hunter Architect">
     <div class="vcue">Scroll ↓ · or click to enter</div>
   </section>
-  <section class="scard house" data-section="house"><img src="assets/entry/letter-elev-2.png" alt="The house — sketch elevation"></section>
-  <section class="scard" data-section="hunter"><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0001_RickWorkingOnSquare_1978-08_prev.jpg" alt="Richard Hunter"></section>
-  <section class="scard" data-section="site"><img src="https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0112_CovenantSitePlanWithAnnotations_2006_prev.jpg" alt="Site — covenant plan"></section>
-  <section class="scard" data-section="archive"><img src="assets/entry/caa8-sheet_prev.jpg" alt="The archive — a working drawing"></section>
-  <section class="scard" data-section="about"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
+  <section class="scard house" data-section="house"><img class="stitle" src="assets/entry/title-house.png" alt="House"><img src="assets/entry/letter-elev-2.png" alt="The house — sketch elevation"></section>
+  <section class="scard" data-section="hunter"><img class="stitle" src="assets/entry/title-hunter.png" alt="Hunter"><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0001_RickWorkingOnSquare_1978-08_prev.jpg" alt="Richard Hunter"></section>
+  <section class="scard" data-section="site"><img class="stitle" src="assets/entry/title-site.png" alt="Site"><img src="https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0112_CovenantSitePlanWithAnnotations_2006_prev.jpg" alt="Site — covenant plan"></section>
+  <section class="scard" data-section="archive"><img class="stitle" src="assets/entry/title-archive.png" alt="Archive"><img src="assets/entry/caa8-sheet_prev.jpg" alt="The archive — a working drawing"></section>
+  <section class="scard" data-section="about"><img class="stitle" src="assets/entry/title-about.png" alt="About"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.06</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.07</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -827,14 +829,13 @@
     }
     window.scrollTo(0, 0);
     wm.style.opacity = 1;                          // wordmark stays lit inside a section
-    clearProminence();                             // inside a section: bracket only, no scaling
   }
   function closeSection() {
     mode = "survey";
     document.body.classList.remove("in-section", "in-house");
     secPanel.classList.remove("on");
     menuLinks.forEach(function (a) { a.classList.remove("on"); });
-    updateWordmark(); menuProminence();
+    updateWordmark(); setSurveyActive();
   }
   // HUNTER HOUSE shows once past the film intro; always on inside a section
   function updateWordmark() {
@@ -848,78 +849,77 @@
     if (mode === "house" && target >= HOUSE_MAX - 0.001 && d > 0) {
       var card = document.querySelector('#survey .scard[data-section="house"]');
       closeSection();
+      pageIdx = 1;
       if (card) document.getElementById("survey").scrollTo(0, card.offsetTop);
       return;
     }
     target = Math.max(1, Math.min(HOUSE_MAX, target + d));
     if (!raf) raf = requestAnimationFrame(step);
   }
-  // wheel / touch / keys drive the HOUSE z-sequence only; the survey + static
-  // panels use native scroll (nothing to drive)
-  window.addEventListener("wheel", function (e) {
-    if (mode !== "house") return;
-    e.preventDefault(); nudge(e.deltaY / 900);
-  }, { passive: false });
-  var ty = null;
-  window.addEventListener("touchstart", function (e) { if (mode === "house") ty = e.touches[0].clientY; }, { passive: true });
-  window.addEventListener("touchmove", function (e) {
-    if (mode === "house" && ty !== null) { nudge((ty - e.touches[0].clientY) / 300); ty = e.touches[0].clientY; }
-  }, { passive: true });
-  window.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && mode !== "survey") { closeSection(); return; }
-    if (mode !== "house") return;
-    if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); nudge(0.5); }
-    if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); nudge(-0.5); }
-  });
-  // the right menu = the persistent spine: jump to any section from anywhere
-  menuLinks.forEach(function (a) {
-    a.addEventListener("click", function () { if (a.dataset.section) openSection(a.dataset.section); });
-  });
-  // each survey card enters its section
-  document.querySelectorAll("#survey .scard[data-section]").forEach(function (c) {
-    c.addEventListener("click", function () { openSection(c.dataset.section); });
-  });
-  // the wordmark is the way home (back to the survey)
-  // ── the film intro + the wordmark ──────────────────────────────────────
+  // ── the survey: one scroll / swipe = one card (full-page paging) ─────────
   var surveyEl = document.getElementById("survey");
-  var houseCard = document.querySelector("#survey .scard.house");
-  // click the film → autoscroll down to the HOUSE card (same end as scrolling)
-  document.getElementById("svid").addEventListener("click", function () {
-    surveyEl.scrollTo({ top: houseCard.offsetTop, behavior: "smooth" });
-  });
-  // the entry nameblock stays STATIC while the film scrolls up, so the film's
-  // rising bottom edge (overflow:hidden) clips it away — the OG behaviour —
-  // then HUNTER HOUSE fades in top-left. Driven by the survey's scrollTop.
+  var pages = [document.getElementById("svid")];
+  document.querySelectorAll("#survey .scard").forEach(function (c) { pages.push(c); });
+  var pageIdx = 0, paging = false, wheelLock = false;
   var vname = document.querySelector("#svid .vname");
-  // scroll-linked menu: the card you're on has its menu item BIG + BOLD, juts
-  // LEFT of the list; scrolling to the next hands the prominence over (this
-  // one contracts back into the list as the next grows out), settling on land
-  function menuProminence() {
-    var s = surveyEl.scrollTop, vh = window.innerHeight;
-    menuLinks.forEach(function (a) {
-      var card = document.querySelector('#survey .scard[data-section="' + a.dataset.section + '"]');
-      if (!card) { a.style.transform = ""; a.style.fontWeight = ""; return; }
-      var p = Math.max(0, 1 - Math.abs(card.offsetTop - s) / vh);   // 1 = centred on this card
-      a.style.transformOrigin = "right center";
-      a.style.transform = "translateX(" + (-p * 78) + "px) scale(" + (1 + p * 0.9) + ")";
-      a.style.fontWeight = Math.round(400 + p * 400);               // Inter Tight interpolates
-    });
+  // the menu's only indicator: a small dot beside the current section
+  function setSurveyActive() {
+    var sec = mode === "survey" ? (pages[pageIdx].dataset ? pages[pageIdx].dataset.section : null) : mode;
+    menuLinks.forEach(function (a) { a.classList.toggle("on", a.dataset.section === sec); });
   }
-  function clearProminence() {
-    menuLinks.forEach(function (a) { a.style.transform = ""; a.style.fontWeight = ""; });
+  function goPage(i) {
+    pageIdx = Math.max(0, Math.min(pages.length - 1, i));
+    paging = true;
+    surveyEl.scrollTo({ top: pages[pageIdx].offsetTop, behavior: "smooth" });
+    setSurveyActive();
+    setTimeout(function () { paging = false; }, 640);
   }
+  // the nameblock stays static while the film scrolls up so its rising edge
+  // clips it away (OG) — driven by scrollTop during the page glide
   function onSurveyScroll() {
     updateWordmark();
     if (vname) {
       var s = Math.max(0, Math.min(surveyEl.scrollTop, window.innerHeight));
       vname.style.transform = "translate(-50%,-50%) translateY(" + s + "px)";
     }
-    if (mode === "survey") menuProminence();
   }
   surveyEl.addEventListener("scroll", onSurveyScroll, { passive: true });
-  // wordmark click returns home
+
+  // wheel: HOUSE drives the z-sequence; the survey advances ONE card per gesture
+  window.addEventListener("wheel", function (e) {
+    if (mode === "house") { e.preventDefault(); nudge(e.deltaY / 900); return; }
+    if (mode !== "survey") return;
+    e.preventDefault();
+    if (paging || wheelLock || Math.abs(e.deltaY) < 6) return;
+    wheelLock = true; setTimeout(function () { wheelLock = false; }, 150);
+    goPage(pageIdx + (e.deltaY > 0 ? 1 : -1));
+  }, { passive: false });
+  var ty = null;
+  window.addEventListener("touchstart", function (e) { ty = e.touches[0].clientY; }, { passive: true });
+  window.addEventListener("touchmove", function (e) {
+    if (mode === "house" && ty !== null) { nudge((ty - e.touches[0].clientY) / 300); ty = e.touches[0].clientY; }
+  }, { passive: true });
+  window.addEventListener("touchend", function (e) {
+    if (mode !== "survey" || ty === null) { ty = null; return; }
+    var dy = ty - e.changedTouches[0].clientY; ty = null;
+    if (Math.abs(dy) > 40) goPage(pageIdx + (dy > 0 ? 1 : -1));
+  }, { passive: true });
+  window.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && mode !== "survey") { closeSection(); return; }
+    if (mode === "house") {
+      if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); nudge(0.5); }
+      if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); nudge(-0.5); }
+    } else if (mode === "survey") {
+      if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); goPage(pageIdx + 1); }
+      if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); goPage(pageIdx - 1); }
+    }
+  });
+  // menu = the persistent spine (jump anywhere); each card enters its section
+  menuLinks.forEach(function (a) { a.addEventListener("click", function () { if (a.dataset.section) openSection(a.dataset.section); }); });
+  document.querySelectorAll("#survey .scard[data-section]").forEach(function (c) { c.addEventListener("click", function () { openSection(c.dataset.section); }); });
+  document.getElementById("svid").addEventListener("click", function () { goPage(1); });
   wm.addEventListener("click", closeSection);
-  updateWordmark(); menuProminence();
+  updateWordmark(); setSurveyActive();
   window.addEventListener("resize", function () { centreSketch(); apply(); });
   flow.querySelector(".sk").addEventListener("load", function () { centreSketch(); apply(); });
   // the title's centring transform is measured from its text width — re-apply
@@ -927,7 +927,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.06 — scroll-linked prominent menu; bigger wordmark");
+  console.log("entry-test4 e4-v0.07 — minimal dot menu; one-scroll paging; Hunter hand-lettered titles");
 })();
 </script>
 </body>
