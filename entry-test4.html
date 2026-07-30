@@ -118,8 +118,6 @@
   #menu.mfocus a img.mi{opacity:.2}
   #menu.mfocus a.on img.mi{opacity:1}
   #menu a.on{color:#1b1918}
-  #menu a.on::before{content:"";position:absolute;right:100%;top:50%;margin-top:-2.5px;margin-right:11px;
-    width:5px;height:5px;border-radius:50%;background:#1b1918}
   /* the site plan — the contour lens, inverted into this page's aesthetic:
      black lines on paper. Filter does the whole re-colour; label = black box
      with the archive's mono. */
@@ -159,7 +157,9 @@
     font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(246,245,245,.72)}
   /* the persistent MENU — moved from top-centre to the RIGHT, vertical */
   #menu{top:50% !important;left:auto !important;right:34px !important;bottom:auto !important;
-    transform:translateY(-50%) !important;flex-direction:column !important;align-items:flex-start !important;
+    transform:translateY(calc(-50% + var(--menu-shift,0px))) !important;
+    transition:transform .6s cubic-bezier(.22,.61,.36,1) !important;
+    flex-direction:column !important;align-items:flex-start !important;
     justify-content:center !important;gap:18px !important;padding:0 !important;opacity:1 !important;text-align:right}
   #menu a{padding:1px 0 !important;position:relative;white-space:nowrap}
   #menu a.on{color:#1b1918}
@@ -314,7 +314,7 @@
   <section class="scard" data-section="about"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.09</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.10</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -873,21 +873,20 @@
     menuLinks.forEach(function (a) { a.classList.toggle("on", a.dataset.section === sec); });
     flyMenu();
   }
-  // the active label leaves the vertical stack and glides along the horizontal
-  // centre line to nestle by its (centred) card; the others recede
+  // the whole LIST slides up/down so the active item sits on the horizontal
+  // centre line; the active item then only moves horizontally, out to the card
   function flyMenu() {
     var focused = mode === "survey" && pageIdx >= 1;   // a real card is centred (not the film intro)
     menuEl.classList.toggle("mfocus", focused);
-    menuLinks.forEach(function (a) { if (!a.classList.contains("on")) a.style.transform = ""; });
+    menuLinks.forEach(function (a) { a.style.transform = ""; });
     var on = menuEl.querySelector("a.on");
     if (focused && on) {
-      on.style.transform = "";                          // reset so we measure the resting position
-      var r = on.getBoundingClientRect();
-      var dy = Math.round(window.innerHeight / 2 - (r.top + r.height / 2));
-      void on.offsetWidth;                              // commit the reset so the move animates
-      on.style.transform = "translate(" + FLY_X + "px," + dy + "px)";
-    } else if (on) {
-      on.style.transform = "";
+      // shift the list so the active item's centre lands at the list's centre
+      var shift = Math.round(menuEl.offsetHeight / 2 - (on.offsetTop + on.offsetHeight / 2));
+      menuEl.style.setProperty("--menu-shift", shift + "px");
+      on.style.transform = "translateX(" + FLY_X + "px)";   // horizontal only
+    } else {
+      menuEl.style.setProperty("--menu-shift", "0px");
     }
   }
   function goPage(i) {
@@ -950,7 +949,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.09 — bigger menu; active label flies to card centre-line");
+  console.log("entry-test4 e4-v0.10 — list slides to centre active; active moves horizontal only; dot removed");
 })();
 </script>
 </body>
