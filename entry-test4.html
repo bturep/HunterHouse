@@ -110,7 +110,10 @@
   #hunter .htxt p{margin-bottom:1.1em}
   #hunter a.more{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(27,25,24,.6);text-decoration:none;border-bottom:1px dashed rgba(27,25,24,.4)}
   /* the menu is minimal — a small dot beside the current section, nothing else */
-  #menu a{position:relative}
+  #menu a{position:relative;display:block}
+  #menu a img.mi{height:15px;width:auto;display:block;opacity:.5;transition:opacity .25s ease}
+  #menu a:hover img.mi{opacity:.8}
+  #menu a.on img.mi{opacity:1}
   #menu a.on{color:#1b1918}
   #menu a.on::before{content:"";position:absolute;right:100%;top:50%;margin-top:-2.5px;margin-right:11px;
     width:5px;height:5px;border-radius:50%;background:#1b1918}
@@ -142,10 +145,7 @@
   .scard img{max-height:62vh;max-width:70vw;width:auto;display:block}
   /* HOUSE card sketch = EXACTLY the reading's .sk (same width, centred) so
      entering the section is seamless — nothing changes scale */
-  .scard.house img:not(.stitle){max-height:none;max-width:none;width:min(1100px,90vw)}
-  /* Hunter's own hand-lettering as each card's title (placement refined later) */
-  .scard .stitle{position:absolute;left:50%;top:13vh;transform:translateX(-50%);
-    height:58px;width:auto;max-width:74vw;max-height:none;pointer-events:none;z-index:3}
+  .scard.house img{max-height:none;max-width:none;width:min(1100px,90vw)}
   .scard .cx{position:absolute;left:34px;top:96px;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(27,25,24,.42)}
   /* the film INTRO panel — first in the survey scroll */
@@ -156,7 +156,7 @@
     font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(246,245,245,.72)}
   /* the persistent MENU — moved from top-centre to the RIGHT, vertical */
   #menu{top:50% !important;left:auto !important;right:34px !important;bottom:auto !important;
-    transform:translateY(-50%) !important;flex-direction:column !important;align-items:flex-end !important;
+    transform:translateY(-50%) !important;flex-direction:column !important;align-items:flex-start !important;
     justify-content:center !important;gap:13px !important;padding:0 !important;opacity:1 !important;text-align:right}
   #menu a{padding:1px 0 !important;position:relative;white-space:nowrap}
   #menu a.on{color:#1b1918}
@@ -286,11 +286,11 @@
 </div>
 <div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:18px;letter-spacing:.04em;text-transform:uppercase;color:#1b1918;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
 <nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62);transform:translateY(-110%);opacity:0;will-change:transform,opacity">
-  <a data-section="house" style="padding:6px 15px;cursor:pointer">House</a>
-  <a data-section="hunter" style="padding:6px 15px;cursor:pointer">Hunter</a>
-  <a data-section="site" style="padding:6px 15px;cursor:pointer">Site</a>
-  <a data-section="archive" style="padding:6px 15px;cursor:pointer">Archive</a>
-  <a data-section="about" style="padding:6px 15px;cursor:pointer">About</a>
+  <a data-section="house" style="padding:0;cursor:pointer" aria-label="House"><img class="mi" src="assets/entry/title-house.png" alt="House"></a>
+  <a data-section="hunter" style="padding:0;cursor:pointer" aria-label="Hunter"><img class="mi" src="assets/entry/title-hunter.png" alt="Hunter"></a>
+  <a data-section="site" style="padding:0;cursor:pointer" aria-label="Site"><img class="mi" src="assets/entry/title-site.png" alt="Site"></a>
+  <a data-section="archive" style="padding:0;cursor:pointer" aria-label="Archive"><img class="mi" src="assets/entry/title-archive.png" alt="Archive"></a>
+  <a data-section="about" style="padding:0;cursor:pointer" aria-label="About"><img class="mi" src="assets/entry/title-about.png" alt="About"></a>
 </nav>
 <div id="dots" aria-hidden="true"></div>
 
@@ -304,14 +304,14 @@
     <img class="vname" src="assets/entry/nameblock-1970-v2.png" alt="Hunter House · Victoria B.C. · 1970 · Ric Hunter Architect">
     <div class="vcue">Scroll ↓ · or click to enter</div>
   </section>
-  <section class="scard house" data-section="house"><img class="stitle" src="assets/entry/title-house.png" alt="House"><img src="assets/entry/letter-elev-2.png" alt="The house — sketch elevation"></section>
-  <section class="scard" data-section="hunter"><img class="stitle" src="assets/entry/title-hunter.png" alt="Hunter"><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0001_RickWorkingOnSquare_1978-08_prev.jpg" alt="Richard Hunter"></section>
-  <section class="scard" data-section="site"><img class="stitle" src="assets/entry/title-site.png" alt="Site"><img src="https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0112_CovenantSitePlanWithAnnotations_2006_prev.jpg" alt="Site — covenant plan"></section>
-  <section class="scard" data-section="archive"><img class="stitle" src="assets/entry/title-archive.png" alt="Archive"><img src="assets/entry/caa8-sheet_prev.jpg" alt="The archive — a working drawing"></section>
-  <section class="scard" data-section="about"><img class="stitle" src="assets/entry/title-about.png" alt="About"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
+  <section class="scard house" data-section="house"><img src="assets/entry/letter-elev-2.png" alt="The house — sketch elevation"></section>
+  <section class="scard" data-section="hunter"><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0001_RickWorkingOnSquare_1978-08_prev.jpg" alt="Richard Hunter"></section>
+  <section class="scard" data-section="site"><img src="https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0112_CovenantSitePlanWithAnnotations_2006_prev.jpg" alt="Site — covenant plan"></section>
+  <section class="scard" data-section="archive"><img src="assets/entry/caa8-sheet_prev.jpg" alt="The archive — a working drawing"></section>
+  <section class="scard" data-section="about"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.07</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.08</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -927,7 +927,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.07 — minimal dot menu; one-scroll paging; Hunter hand-lettered titles");
+  console.log("entry-test4 e4-v0.08 — hand-lettered menu items, left-aligned; cards title-free");
 })();
 </script>
 </body>
