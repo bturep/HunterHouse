@@ -140,15 +140,28 @@
   body.in-section #survey{display:none}
   .scard{height:100dvh;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer}
   .scard img{max-height:62vh;max-width:70vw;width:auto;display:block}
-  .scard.house img{max-height:none;width:min(760px,78vw)}
+  /* HOUSE card sketch = EXACTLY the reading's .sk (same width, centred) so
+     entering the section is seamless — nothing changes scale */
+  .scard.house img{max-height:none;max-width:none;width:min(1100px,90vw)}
   .scard .cx{position:absolute;left:34px;top:96px;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(27,25,24,.42)}
+  /* the film INTRO panel — first in the survey scroll */
+  #svid{height:100dvh;scroll-snap-align:start;position:relative;overflow:hidden;background:#1b1918;cursor:pointer}
+  #svid video{width:100%;height:100%;object-fit:cover;display:block}
+  #svid .vname{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);height:min(58vh,660px);width:auto}
+  #svid .vcue{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);font-family:'JetBrains Mono',Menlo,monospace;
+    font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(246,245,245,.72)}
   /* the persistent MENU — moved from top-centre to the RIGHT, vertical */
   #menu{top:50% !important;left:auto !important;right:34px !important;bottom:auto !important;
     transform:translateY(-50%) !important;flex-direction:column !important;align-items:flex-end !important;
     justify-content:center !important;gap:13px !important;padding:0 !important;opacity:1 !important;text-align:right}
-  #menu a{padding:1px 0 !important;position:relative}
+  #menu a{padding:1px 0 !important;position:relative;white-space:nowrap}
   #menu a.on{color:#1b1918}
+  /* the running bracket motif on the active menu item */
+  #menu a.on::before{content:"[ ";position:static;left:auto;top:auto}
+  #menu a.on::after{content:" ]";position:static;left:auto;top:auto}
+  /* the wordmark: HUNTER HOUSE, black bold, top-left — shown past the film intro (opacity driven in JS) */
+  #wordmark{transition:opacity .4s ease}
   /* the DOT RAIL — position within the current section, just left of the menu */
   #dots{position:fixed;top:50%;right:148px;transform:translateY(-50%);z-index:8;display:none;flex-direction:column;gap:9px;align-items:center}
   body.in-section #dots{display:flex}
@@ -282,6 +295,13 @@
 <!-- ── SURVEY: one contracted key-frame card per section (scroll for the whole
      architecture); click / menu enters a section in place. ── -->
 <div id="survey" aria-label="Project survey">
+  <section id="svid" title="Enter">
+    <video autoplay muted loop playsinline poster="assets/entry/entry-still.jpg">
+      <source src="assets/entry/entry-loop.mp4" type="video/mp4">
+    </video>
+    <img class="vname" src="assets/entry/nameblock-1970-v2.png" alt="Hunter House · Victoria B.C. · 1970 · Ric Hunter Architect">
+    <div class="vcue">Scroll ↓ · or click to enter</div>
+  </section>
   <section class="scard house" data-section="house"><div class="cx">01 / House</div>
     <img src="assets/entry/letter-elev-2.png" alt="The house — sketch elevation"></section>
   <section class="scard" data-section="hunter"><div class="cx">02 / Hunter</div>
@@ -294,7 +314,7 @@
     <img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.02</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.03</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -811,16 +831,23 @@
       buildDots(1); setActiveDot(0);
     }
     window.scrollTo(0, 0);
+    wm.style.opacity = 1;                          // wordmark stays lit inside a section
   }
   function closeSection() {
     mode = "survey";
     document.body.classList.remove("in-section", "in-house");
     secPanel.classList.remove("on");
     menuLinks.forEach(function (a) { a.classList.remove("on"); });
+    updateWordmark();
+  }
+  // HUNTER HOUSE shows once past the film intro; always on inside a section
+  function updateWordmark() {
+    var el = document.getElementById("survey");
+    wm.style.opacity = (mode !== "survey" || (el && el.scrollTop > window.innerHeight * 0.55)) ? 1 : 0;
   }
 
   function nudge(d) {
-    target = Math.max(0, Math.min(HOUSE_MAX, target + d));
+    target = Math.max(1, Math.min(HOUSE_MAX, target + d));
     if (!raf) raf = requestAnimationFrame(step);
   }
   // wheel / touch / keys drive the HOUSE z-sequence only; the survey + static
@@ -849,7 +876,18 @@
     c.addEventListener("click", function () { openSection(c.dataset.section); });
   });
   // the wordmark is the way home (back to the survey)
-  document.getElementById("wordmark").addEventListener("click", closeSection);
+  // ── the film intro + the wordmark ──────────────────────────────────────
+  var surveyEl = document.getElementById("survey");
+  var houseCard = document.querySelector("#survey .scard.house");
+  // click the film → autoscroll down to the HOUSE card (same end as scrolling)
+  document.getElementById("svid").addEventListener("click", function () {
+    surveyEl.scrollTo({ top: houseCard.offsetTop, behavior: "smooth" });
+  });
+  // HUNTER HOUSE (top-left) appears once past the film; always on inside a section
+  surveyEl.addEventListener("scroll", updateWordmark, { passive: true });
+  // wordmark click returns home
+  wm.addEventListener("click", closeSection);
+  updateWordmark();
   window.addEventListener("resize", function () { centreSketch(); apply(); });
   flow.querySelector(".sk").addEventListener("load", function () { centreSketch(); apply(); });
   // the title's centring transform is measured from its text width — re-apply
@@ -857,7 +895,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.02 — survey + right-menu + dot rail");
+  console.log("entry-test4 e4-v0.03 — film intro + brackets + wordmark + seamless house scale");
 })();
 </script>
 </body>
