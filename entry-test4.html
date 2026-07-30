@@ -118,9 +118,12 @@
   #menu a.on{color:#1b1918}
   #menu a.on::after{content:"";position:absolute;left:100%;top:50%;transform:translateY(-50%);
     margin-left:12px;width:5px;height:5px;border-radius:50%;background:#1b1918}
-  /* the flyer: a section title en route from its card centre to the menu slot */
+  /* the flyer: a section title (typeset) en route from its card centre to the
+     menu slot; it crossfades to the hand-lettered menu word on arrival */
   #titlefly{position:fixed;left:0;top:0;z-index:9;opacity:0;pointer-events:none;
-    will-change:transform,opacity;display:block}
+    will-change:transform,opacity;white-space:nowrap;
+    font-family:"Inter Tight",system-ui,sans-serif;font-weight:800;
+    font-size:min(6.4vh,64px);line-height:.92;letter-spacing:.005em;text-transform:uppercase;color:#1b1918}
   /* the site plan — the contour lens, inverted into this page's aesthetic:
      black lines on paper. Filter does the whole re-colour; label = black box
      with the archive's mono. */
@@ -150,11 +153,15 @@
   /* HOUSE card sketch = EXACTLY the reading's .sk (same width, centred) so
      entering the section is seamless — nothing changes scale */
   .scard.house img:not(.bigtitle){max-height:none;max-width:none;width:min(1100px,90vw)}
-  /* the section title — centred, overlaying the card image; sized so the word
-     matches "HOUSE" in the 1970 nameblock (83/908 of the nameblock's min(58vh,660px)).
-     On entry it flies to its slot in the right menu (see #titlefly). */
-  .scard .bigtitle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    height:min(5.3vh,60px);width:auto;max-height:none;z-index:4;pointer-events:none}
+  /* the section title-block — typeset (scales cleanly), centred over the card
+     image, with the leader text beneath. Title sized ~ the nameblock's HOUSE.
+     On entry the title flies to its menu slot (see #titlefly). */
+  .scard .titleblock{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;
+    text-align:center;pointer-events:none;width:min(600px,84vw)}
+  .scard .stitle{font-weight:800;font-size:min(6.4vh,64px);line-height:.92;letter-spacing:.005em;
+    text-transform:uppercase;color:#1b1918}
+  .scard .sblurb{margin:16px auto 0;max-width:460px;font-weight:400;font-size:15px;line-height:1.6;
+    color:rgba(27,25,24,.66)}
   .scard .cx{position:absolute;left:34px;top:96px;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(27,25,24,.42)}
   /* the film INTRO panel — first in the survey scroll */
@@ -302,7 +309,7 @@
   <a data-section="archive" style="padding:0;cursor:pointer" aria-label="Archive"><img class="mi" src="assets/entry/title-archive.png" alt="Archive"></a>
   <a data-section="about" style="padding:0;cursor:pointer" aria-label="About"><img class="mi" src="assets/entry/title-about.png" alt="About"></a>
 </nav>
-<img id="titlefly" alt="" aria-hidden="true">
+<div id="titlefly" aria-hidden="true"></div>
 <div id="dots" aria-hidden="true"></div>
 
 <!-- ── SURVEY: one contracted key-frame card per section (scroll for the whole
@@ -315,14 +322,14 @@
     <img class="vname" src="assets/entry/nameblock-1970-v2.png" alt="Hunter House · Victoria B.C. · 1970 · Ric Hunter Architect">
     <div class="vcue">Scroll ↓ · or click to enter</div>
   </section>
-  <section class="scard house" data-section="house"><img class="bigtitle" src="assets/entry/title-house.png" alt="House"><img src="assets/entry/letter-elev-2.png" alt="The house — sketch elevation"></section>
-  <section class="scard" data-section="hunter"><img class="bigtitle" src="assets/entry/title-hunter.png" alt="Hunter"><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0001_RickWorkingOnSquare_1978-08_prev.jpg" alt="Richard Hunter"></section>
-  <section class="scard" data-section="site"><img class="bigtitle" src="assets/entry/title-site.png" alt="Site"><img src="https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0112_CovenantSitePlanWithAnnotations_2006_prev.jpg" alt="Site — covenant plan"></section>
-  <section class="scard" data-section="archive"><img class="bigtitle" src="assets/entry/title-archive.png" alt="Archive"><img src="assets/entry/caa8-sheet_prev.jpg" alt="The archive — a working drawing"></section>
-  <section class="scard" data-section="about"><img class="bigtitle" src="assets/entry/title-about.png" alt="About"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
+  <section class="scard house" data-section="house"><div class="titleblock"><div class="stitle">House</div><div class="sblurb">“… a little house we'll start building next week on our land.” The 1970 sketch, the working drawings, the house as built.</div></div><img src="assets/entry/letter-elev-2.png" alt="The house — sketch elevation"></section>
+  <section class="scard" data-section="hunter"><div class="titleblock"><div class="stitle">Hunter</div><div class="sblurb">Richard Morrow Hunter, 1930–2023 — architect, sole client, sole resident of his own five-decade project.</div></div><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0001_RickWorkingOnSquare_1978-08_prev.jpg" alt="Richard Hunter"></section>
+  <section class="scard" data-section="site"><div class="titleblock"><div class="stitle">Site</div><div class="sblurb">203 Goward Road, Saanich — the knoll above Prospect Lake, its covenant, its trees.</div></div><img src="https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0112_CovenantSitePlanWithAnnotations_2006_prev.jpg" alt="Site — covenant plan"></section>
+  <section class="scard" data-section="archive"><div class="titleblock"><div class="stitle">Archive</div><div class="sblurb">The drawings, photographs, and correspondence — the working file Hunter kept, catalogued.</div></div><img src="assets/entry/caa8-sheet_prev.jpg" alt="The archive — a working drawing"></section>
+  <section class="scard" data-section="about"><div class="titleblock"><div class="stitle">About</div><div class="sblurb">The Hunter House Foundation — mandate, people, contact.</div></div><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.13</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.14</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -883,29 +890,30 @@
     var sec = mode === "survey" ? (pages[pageIdx].dataset ? pages[pageIdx].dataset.section : null) : mode;
     menuLinks.forEach(function (a) { a.classList.toggle("on", a.dataset.section === sec); });
   }
-  // on entering a section, the card's BIG centred title flies to its menu slot
-  // (FLIP: from the big-centred rect to the small menu-item rect, top-left origin)
+  // on entering a section, the card's typeset title flies to its menu slot
+  // (FLIP from big-centred to the small menu-item rect) and crossfades to the
+  // hand-lettered menu word as it lands
   function flyTitleToMenu(name) {
     var item = menuEl.querySelector('a[data-section="' + name + '"]');
     if (!item) return;
     var mi = item.querySelector("img.mi");
-    var aspect = (mi.naturalWidth && mi.naturalHeight) ? mi.naturalWidth / mi.naturalHeight : 3;
-    var h = Math.min(0.053 * window.innerHeight, 60), w = h * aspect;   // = the card's .bigtitle (nameblock-HOUSE size)
-    var cx = window.innerWidth / 2, cy = window.innerHeight / 2;
     var t = mi.getBoundingClientRect();                     // menu slot (laid out even while hidden)
-    item.style.visibility = "hidden";                       // keep the real slot dark until it lands
-    titlefly.src = mi.src;
+    item.style.visibility = "hidden";                       // keep the real word dark until it lands
+    titlefly.textContent = name.charAt(0).toUpperCase() + name.slice(1);
     titlefly.style.transition = "none";
     titlefly.style.transformOrigin = "top left";
-    titlefly.style.height = h + "px";
     titlefly.style.left = "0px"; titlefly.style.top = "0px";
     titlefly.style.opacity = "1";
-    titlefly.style.transform = "translate(" + (cx - w / 2) + "px," + (cy - h / 2) + "px) scale(1)";
-    void titlefly.offsetWidth;                              // commit the big state
-    titlefly.style.transition = "transform .72s cubic-bezier(.4,0,.2,1)";
-    titlefly.style.transform = "translate(" + t.left + "px," + t.top + "px) scale(" + (t.height / h) + ")";
-    var done = function () {
-      titlefly.style.opacity = "0";
+    titlefly.style.transform = "none";
+    var f = titlefly.getBoundingClientRect();               // natural size of the big typeset title
+    var cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+    titlefly.style.transform = "translate(" + (cx - f.width / 2) + "px," + (cy - f.height / 2) + "px) scale(1)";
+    void titlefly.offsetWidth;                              // commit the big-centred state
+    titlefly.style.transition = "transform .72s cubic-bezier(.4,0,.2,1), opacity .3s ease .48s";
+    titlefly.style.transform = "translate(" + t.left + "px," + t.top + "px) scale(" + (t.height / f.height) + ")";
+    titlefly.style.opacity = "0";                           // fade out over the last third → crossfade to the hand-lettered word
+    var done = function (e) {
+      if (e.propertyName !== "transform") return;
       item.style.visibility = "";
       titlefly.removeEventListener("transitionend", done);
     };
@@ -971,7 +979,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.13 — card title sized to match HOUSE in the 1970 nameblock");
+  console.log("entry-test4 e4-v0.14 — typeset section titles (scale cleanly) + leader text; menu stays hand-lettered");
 })();
 </script>
 </body>
