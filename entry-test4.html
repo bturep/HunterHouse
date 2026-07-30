@@ -109,15 +109,18 @@
   #hunter .htxt{flex:1;max-width:660px;font-weight:500;font-size:17px;line-height:1.7;color:#000}
   #hunter .htxt p{margin-bottom:1.1em}
   #hunter a.more{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(27,25,24,.6);text-decoration:none;border-bottom:1px dashed rgba(27,25,24,.4)}
-  /* the menu — hand-lettered words; the active one flies out to the centre
-     line to nestle by its card, the rest recede */
-  #menu a{position:relative;display:block;transition:transform .6s cubic-bezier(.22,.61,.36,1)}
-  #menu a img.mi{height:20px;width:auto;display:block;opacity:.5;transition:opacity .35s ease}
+  /* the menu — hand-lettered words, a static vertical list (appears only
+     inside a section); a dot to the RIGHT marks the active one */
+  #menu a{position:relative;display:block}
+  #menu a img.mi{height:20px;width:auto;display:block;opacity:.45;transition:opacity .35s ease}
   #menu a:hover img.mi{opacity:.8}
   #menu a.on img.mi{opacity:1}
-  #menu.mfocus a img.mi{opacity:.2}
-  #menu.mfocus a.on img.mi{opacity:1}
   #menu a.on{color:#1b1918}
+  #menu a.on::after{content:"";position:absolute;left:100%;top:50%;transform:translateY(-50%);
+    margin-left:12px;width:5px;height:5px;border-radius:50%;background:#1b1918}
+  /* the flyer: a section title en route from its card centre to the menu slot */
+  #titlefly{position:fixed;left:0;top:0;z-index:9;opacity:0;pointer-events:none;
+    will-change:transform,opacity;display:block}
   /* the site plan — the contour lens, inverted into this page's aesthetic:
      black lines on paper. Filter does the whole re-colour; label = black box
      with the archive's mono. */
@@ -143,10 +146,14 @@
     scroll-snap-type:y proximity;background:#f6f5f5;-webkit-overflow-scrolling:touch}
   body.in-section #survey{display:none}
   .scard{height:100dvh;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer}
-  .scard img{max-height:62vh;max-width:70vw;width:auto;display:block}
+  .scard img:not(.bigtitle){max-height:62vh;max-width:70vw;width:auto;display:block}
   /* HOUSE card sketch = EXACTLY the reading's .sk (same width, centred) so
      entering the section is seamless — nothing changes scale */
-  .scard.house img{max-height:none;max-width:none;width:min(1100px,90vw)}
+  .scard.house img:not(.bigtitle){max-height:none;max-width:none;width:min(1100px,90vw)}
+  /* the section title — VERY big, centred, overlaying the card image; on entry
+     it flies to its slot in the right menu (see #titlefly) */
+  .scard .bigtitle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    height:32vh;width:auto;max-height:none;z-index:4;pointer-events:none}
   .scard .cx{position:absolute;left:34px;top:96px;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(27,25,24,.42)}
   /* the film INTRO panel — first in the survey scroll */
@@ -155,16 +162,15 @@
   #svid .vname{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);height:min(58vh,660px);width:auto;will-change:transform}
   #svid .vcue{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(246,245,245,.72)}
-  /* the persistent MENU — moved from top-centre to the RIGHT, vertical */
+  /* the MENU — right, vertical, static; hidden in the survey, fades in on entry */
   #menu{top:50% !important;left:auto !important;right:34px !important;bottom:auto !important;
-    transform:translateY(calc(-50% + var(--menu-shift,0px))) !important;
-    transition:transform .6s cubic-bezier(.22,.61,.36,1) !important;
+    transform:translateY(-50%) !important;
+    transition:opacity .5s ease !important;
     flex-direction:column !important;align-items:flex-start !important;
-    justify-content:center !important;gap:18px !important;padding:0 !important;opacity:1 !important;text-align:right}
+    justify-content:center !important;gap:18px !important;padding:0 !important;
+    opacity:0 !important;pointer-events:none !important;text-align:right}
+  body.in-section #menu{opacity:1 !important;pointer-events:auto !important}
   #menu a{padding:1px 0 !important;position:relative;white-space:nowrap}
-  #menu a.on{color:#1b1918}
-  /* the running bracket motif on the active menu item */
-  #menu a.on::after{content:none}
   /* the wordmark: HUNTER HOUSE, black bold, top-left — shown past the film intro (opacity driven in JS) */
   #wordmark{transition:opacity .4s ease}
   /* the DOT RAIL — position within the current section, just left of the menu */
@@ -295,6 +301,7 @@
   <a data-section="archive" style="padding:0;cursor:pointer" aria-label="Archive"><img class="mi" src="assets/entry/title-archive.png" alt="Archive"></a>
   <a data-section="about" style="padding:0;cursor:pointer" aria-label="About"><img class="mi" src="assets/entry/title-about.png" alt="About"></a>
 </nav>
+<img id="titlefly" alt="" aria-hidden="true">
 <div id="dots" aria-hidden="true"></div>
 
 <!-- ── SURVEY: one contracted key-frame card per section (scroll for the whole
@@ -307,14 +314,14 @@
     <img class="vname" src="assets/entry/nameblock-1970-v2.png" alt="Hunter House · Victoria B.C. · 1970 · Ric Hunter Architect">
     <div class="vcue">Scroll ↓ · or click to enter</div>
   </section>
-  <section class="scard house" data-section="house"><img src="assets/entry/letter-elev-2.png" alt="The house — sketch elevation"></section>
-  <section class="scard" data-section="hunter"><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0001_RickWorkingOnSquare_1978-08_prev.jpg" alt="Richard Hunter"></section>
-  <section class="scard" data-section="site"><img src="https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0112_CovenantSitePlanWithAnnotations_2006_prev.jpg" alt="Site — covenant plan"></section>
-  <section class="scard" data-section="archive"><img src="assets/entry/caa8-sheet_prev.jpg" alt="The archive — a working drawing"></section>
-  <section class="scard" data-section="about"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
+  <section class="scard house" data-section="house"><img class="bigtitle" src="assets/entry/title-house.png" alt="House"><img src="assets/entry/letter-elev-2.png" alt="The house — sketch elevation"></section>
+  <section class="scard" data-section="hunter"><img class="bigtitle" src="assets/entry/title-hunter.png" alt="Hunter"><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0001_RickWorkingOnSquare_1978-08_prev.jpg" alt="Richard Hunter"></section>
+  <section class="scard" data-section="site"><img class="bigtitle" src="assets/entry/title-site.png" alt="Site"><img src="https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0112_CovenantSitePlanWithAnnotations_2006_prev.jpg" alt="Site — covenant plan"></section>
+  <section class="scard" data-section="archive"><img class="bigtitle" src="assets/entry/title-archive.png" alt="Archive"><img src="assets/entry/caa8-sheet_prev.jpg" alt="The archive — a working drawing"></section>
+  <section class="scard" data-section="about"><img class="bigtitle" src="assets/entry/title-about.png" alt="About"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.10</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.11</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -815,6 +822,7 @@
   }
 
   function openSection(name) {
+    var fromSurvey = (mode === "survey");
     mode = name;
     document.body.classList.add("in-section");
     menuLinks.forEach(function (a) { a.classList.toggle("on", a.dataset.section === name); });
@@ -832,12 +840,14 @@
     }
     window.scrollTo(0, 0);
     wm.style.opacity = 1;                          // wordmark stays lit inside a section
+    if (fromSurvey) flyTitleToMenu(name);          // the big title animates into its menu slot
   }
   function closeSection() {
     mode = "survey";
     document.body.classList.remove("in-section", "in-house");
     secPanel.classList.remove("on");
-    menuLinks.forEach(function (a) { a.classList.remove("on"); });
+    menuLinks.forEach(function (a) { a.classList.remove("on"); a.style.visibility = ""; });
+    titlefly.style.opacity = "0";
     updateWordmark(); setSurveyActive();
   }
   // HUNTER HOUSE shows once past the film intro; always on inside a section
@@ -865,29 +875,40 @@
   document.querySelectorAll("#survey .scard").forEach(function (c) { pages.push(c); });
   var pageIdx = 0, paging = false, wheelLock = false;
   var vname = document.querySelector("#svid .vname");
-  // the menu's only indicator: a small dot beside the current section
   var menuEl = document.getElementById("menu");
-  var FLY_X = -150;   // how far left the active label travels toward the card
+  var titlefly = document.getElementById("titlefly");
+  // the menu is static; it only marks which section is active (dot to the right)
   function setSurveyActive() {
     var sec = mode === "survey" ? (pages[pageIdx].dataset ? pages[pageIdx].dataset.section : null) : mode;
     menuLinks.forEach(function (a) { a.classList.toggle("on", a.dataset.section === sec); });
-    flyMenu();
   }
-  // the whole LIST slides up/down so the active item sits on the horizontal
-  // centre line; the active item then only moves horizontally, out to the card
-  function flyMenu() {
-    var focused = mode === "survey" && pageIdx >= 1;   // a real card is centred (not the film intro)
-    menuEl.classList.toggle("mfocus", focused);
-    menuLinks.forEach(function (a) { a.style.transform = ""; });
-    var on = menuEl.querySelector("a.on");
-    if (focused && on) {
-      // shift the list so the active item's centre lands at the list's centre
-      var shift = Math.round(menuEl.offsetHeight / 2 - (on.offsetTop + on.offsetHeight / 2));
-      menuEl.style.setProperty("--menu-shift", shift + "px");
-      on.style.transform = "translateX(" + FLY_X + "px)";   // horizontal only
-    } else {
-      menuEl.style.setProperty("--menu-shift", "0px");
-    }
+  // on entering a section, the card's BIG centred title flies to its menu slot
+  // (FLIP: from the big-centred rect to the small menu-item rect, top-left origin)
+  function flyTitleToMenu(name) {
+    var item = menuEl.querySelector('a[data-section="' + name + '"]');
+    if (!item) return;
+    var mi = item.querySelector("img.mi");
+    var aspect = (mi.naturalWidth && mi.naturalHeight) ? mi.naturalWidth / mi.naturalHeight : 3;
+    var h = 0.32 * window.innerHeight, w = h * aspect;      // big state = the card's .bigtitle
+    var cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+    var t = mi.getBoundingClientRect();                     // menu slot (laid out even while hidden)
+    item.style.visibility = "hidden";                       // keep the real slot dark until it lands
+    titlefly.src = mi.src;
+    titlefly.style.transition = "none";
+    titlefly.style.transformOrigin = "top left";
+    titlefly.style.height = h + "px";
+    titlefly.style.left = "0px"; titlefly.style.top = "0px";
+    titlefly.style.opacity = "1";
+    titlefly.style.transform = "translate(" + (cx - w / 2) + "px," + (cy - h / 2) + "px) scale(1)";
+    void titlefly.offsetWidth;                              // commit the big state
+    titlefly.style.transition = "transform .72s cubic-bezier(.4,0,.2,1)";
+    titlefly.style.transform = "translate(" + t.left + "px," + t.top + "px) scale(" + (t.height / h) + ")";
+    var done = function () {
+      titlefly.style.opacity = "0";
+      item.style.visibility = "";
+      titlefly.removeEventListener("transitionend", done);
+    };
+    titlefly.addEventListener("transitionend", done);
   }
   function goPage(i) {
     pageIdx = Math.max(0, Math.min(pages.length - 1, i));
@@ -949,7 +970,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.10 — list slides to centre active; active moves horizontal only; dot removed");
+  console.log("entry-test4 e4-v0.11 — big centred card titles; menu on entry only; title flies to menu; static right dot");
 })();
 </script>
 </body>
