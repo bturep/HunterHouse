@@ -134,6 +134,37 @@
   /* Hunter's own 1970 nameblock (CAA-0007 title block), centred; it rides
      off with the photograph — no flight, no fade choreography */
   #hero img.hlogo{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:auto;height:min(62vh,700px);object-fit:contain;z-index:1}
+  /* ── SURVEY (contracted): one key-frame card per section ──────────────── */
+  #survey{position:fixed;inset:0;z-index:6;overflow-y:auto;overflow-x:hidden;
+    scroll-snap-type:y mandatory;background:#f6f5f5;-webkit-overflow-scrolling:touch}
+  body.in-section #survey{display:none}
+  .scard{height:100dvh;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer}
+  .scard img{max-height:62vh;max-width:70vw;width:auto;display:block}
+  .scard.house img{max-height:none;width:min(760px,78vw)}
+  .scard .cx{position:absolute;left:34px;top:96px;font-family:'JetBrains Mono',Menlo,monospace;
+    font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(27,25,24,.42)}
+  /* the persistent MENU — moved from top-centre to the RIGHT, vertical */
+  #menu{top:50% !important;left:auto !important;right:34px !important;bottom:auto !important;
+    transform:translateY(-50%) !important;flex-direction:column !important;align-items:flex-end !important;
+    justify-content:center !important;gap:13px !important;padding:0 !important;opacity:1 !important;text-align:right}
+  #menu a{padding:1px 0 !important;position:relative}
+  #menu a.on{color:#1b1918}
+  /* the DOT RAIL — position within the current section, just left of the menu */
+  #dots{position:fixed;top:50%;right:148px;transform:translateY(-50%);z-index:8;display:none;flex-direction:column;gap:9px;align-items:center}
+  body.in-section #dots{display:flex}
+  #dots .dot{width:6px;height:6px;border-radius:50%;background:rgba(27,25,24,.24);transition:background .25s,transform .25s;cursor:pointer}
+  #dots .dot.on{background:#1b1918;transform:scale(1.55)}
+  /* the designed HOUSE sequence is hidden until a section is entered */
+  body:not(.in-house) #reading, body:not(.in-house) #sheet, body:not(.in-house) #sheet-plan-over,
+  body:not(.in-house) #pgal, body:not(.in-house) #reading2, body:not(.in-house) #caa18,
+  body:not(.in-house) #ihc, body:not(.in-house) #hunter, body:not(.in-house) #siteplan,
+  body:not(.in-house) #site-cue, body:not(.in-house) #hero{display:none !important}
+  /* static section panel for the non-HOUSE sections (their key frame) */
+  #sec-panel{position:fixed;inset:0;z-index:7;background:#f6f5f5;display:none;align-items:center;justify-content:center}
+  #sec-panel.on{display:flex}
+  #sec-panel img{max-height:70vh;max-width:70vw;width:auto;display:block}
+  /* return to the survey — the wordmark is the way home */
+  #wordmark{cursor:pointer}
 </style>
 </head>
 <body>
@@ -240,13 +271,30 @@
 </div>
 <div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#1b1918;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
 <nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62);transform:translateY(-110%);opacity:0;will-change:transform,opacity">
-  <a data-z="1" style="padding:6px 15px;cursor:pointer">House</a>
-  <a data-z="12.2" style="padding:6px 15px;cursor:pointer">Hunter</a>
-  <a data-z="13.8" style="padding:6px 15px;cursor:pointer">Site</a>
-  <a style="padding:6px 15px">Archive</a>
-  <a style="padding:6px 15px">About</a>
+  <a data-section="house" style="padding:6px 15px;cursor:pointer">House</a>
+  <a data-section="hunter" style="padding:6px 15px;cursor:pointer">Hunter</a>
+  <a data-section="site" style="padding:6px 15px;cursor:pointer">Site</a>
+  <a data-section="archive" style="padding:6px 15px;cursor:pointer">Archive</a>
+  <a data-section="about" style="padding:6px 15px;cursor:pointer">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.01</div>
+<div id="dots" aria-hidden="true"></div>
+
+<!-- ── SURVEY: one contracted key-frame card per section (scroll for the whole
+     architecture); click / menu enters a section in place. ── -->
+<div id="survey" aria-label="Project survey">
+  <section class="scard house" data-section="house"><div class="cx">01 / House</div>
+    <img src="assets/entry/letter-elev-2.png" alt="The house — sketch elevation"></section>
+  <section class="scard" data-section="hunter"><div class="cx">02 / Hunter</div>
+    <img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0001_RickWorkingOnSquare_1978-08_prev.jpg" alt="Richard Hunter"></section>
+  <section class="scard" data-section="site"><div class="cx">03 / Site</div>
+    <img src="https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0112_CovenantSitePlanWithAnnotations_2006_prev.jpg" alt="Site — covenant plan"></section>
+  <section class="scard" data-section="archive"><div class="cx">04 / Archive</div>
+    <img src="assets/entry/caa8-sheet_prev.jpg" alt="The archive — a working drawing"></section>
+  <section class="scard" data-section="about"><div class="cx">05 / About</div>
+    <img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
+</div>
+<div id="sec-panel"><img alt=""></div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.02</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -464,11 +512,11 @@
     sp.style.pointerEvents = zP >= 1 ? "auto" : "none";
     var zL = Math.max(0, Math.min(1, (zr - 12.4) / 0.6));
     if (window.__labelReveal) { try { window.__labelReveal(zL); } catch (e2) {} }
-    // the menu carries the section — bracket the one you're in. Keyed to the
-    // scroll TARGET, not the eased z, so the indicator never lags the intent.
-    var zrT = Math.max(0, target - Z_HERO);
-    var sec = zrT < 10.8 ? 0 : (zrT < 12.05 ? 1 : 2);
-    menuLinks.forEach(function (a, i) { a.classList.toggle("on", i === sec); });
+    // inside HOUSE, the dot rail tracks the sub-position; HOUSE stays lit
+    if (typeof mode !== "undefined" && mode === "house") {
+      updateDots();
+      menuLinks.forEach(function (a) { a.classList.toggle("on", a.dataset.section === "house"); });
+    }
   }
 
   // CAA-0018 explore: click zooms at the cursor; while zoomed the pan
@@ -703,26 +751,105 @@
     else z = target;
     apply();
   }
+  // ── survey / section state machine + the dot rail ──────────────────────
+  var mode = "survey";                 // "survey" | "house" | "hunter" | "site" | "archive" | "about"
+  var HOUSE_MAX = 11.5;                 // the HOUSE experience ends after the Ivan Hunter grid
+  // HOUSE sub-positions -> one dot each, keyed to z thresholds (z = zr + 1)
+  var HOUSE_DOTS = [
+    { z: 1.0,  label: "The letter" },
+    { z: 3.0,  label: "The plan" },
+    { z: 3.7,  label: "The elevation" },
+    { z: 4.7,  label: "The house, in photographs" },
+    { z: 7.2,  label: "The addition" },
+    { z: 9.3,  label: "Studio & garden" },
+    { z: 10.7, label: "The house today" }
+  ];
+  var SEC_IMG = {
+    hunter:  "https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0001_RickWorkingOnSquare_1978-08_prev.jpg",
+    site:    "https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0112_CovenantSitePlanWithAnnotations_2006_prev.jpg",
+    archive: "assets/entry/caa8-sheet_prev.jpg",
+    about:   "https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg"
+  };
+  var dotsEl = document.getElementById("dots");
+  var secPanel = document.getElementById("sec-panel");
+
+  function buildDots(n, onClick) {
+    dotsEl.innerHTML = "";
+    for (var i = 0; i < n; i++) {
+      var d = document.createElement("div"); d.className = "dot"; d.dataset.i = i;
+      if (onClick) d.addEventListener("click", (function (idx) { return function () { onClick(idx); }; })(i));
+      dotsEl.appendChild(d);
+    }
+  }
+  function setActiveDot(i) {
+    var ds = dotsEl.children;
+    for (var k = 0; k < ds.length; k++) ds[k].classList.toggle("on", k === i);
+  }
+  function houseDotIndex() {                     // which HOUSE dot the scroll is on
+    var idx = 0;
+    for (var i = 0; i < HOUSE_DOTS.length; i++) if (z >= HOUSE_DOTS[i].z - 0.15) idx = i;
+    return idx;
+  }
+  function updateDots() {
+    if (mode === "house") setActiveDot(houseDotIndex());
+  }
+
+  function openSection(name) {
+    mode = name;
+    document.body.classList.add("in-section");
+    menuLinks.forEach(function (a) { a.classList.toggle("on", a.dataset.section === name); });
+    if (name === "house") {
+      document.body.classList.add("in-house");
+      secPanel.classList.remove("on");
+      buildDots(HOUSE_DOTS.length, function (i) { target = HOUSE_DOTS[i].z; if (!raf) raf = requestAnimationFrame(step); });
+      target = z = 1;                            // start at the reading (the video is skipped)
+      apply(); setActiveDot(0);
+    } else {
+      document.body.classList.remove("in-house");
+      secPanel.querySelector("img").src = SEC_IMG[name] || "";
+      secPanel.classList.add("on");
+      buildDots(1); setActiveDot(0);
+    }
+    window.scrollTo(0, 0);
+  }
+  function closeSection() {
+    mode = "survey";
+    document.body.classList.remove("in-section", "in-house");
+    secPanel.classList.remove("on");
+    menuLinks.forEach(function (a) { a.classList.remove("on"); });
+  }
+
   function nudge(d) {
-    target = Math.max(0, Math.min(14.1, target + d));
+    target = Math.max(0, Math.min(HOUSE_MAX, target + d));
     if (!raf) raf = requestAnimationFrame(step);
   }
-  window.addEventListener("wheel", function (e) { e.preventDefault(); nudge(e.deltaY / 900); }, { passive: false });
+  // wheel / touch / keys drive the HOUSE z-sequence only; the survey + static
+  // panels use native scroll (nothing to drive)
+  window.addEventListener("wheel", function (e) {
+    if (mode !== "house") return;
+    e.preventDefault(); nudge(e.deltaY / 900);
+  }, { passive: false });
   var ty = null;
-  window.addEventListener("touchstart", function (e) { ty = e.touches[0].clientY; }, { passive: true });
+  window.addEventListener("touchstart", function (e) { if (mode === "house") ty = e.touches[0].clientY; }, { passive: true });
   window.addEventListener("touchmove", function (e) {
-    if (ty !== null) { nudge((ty - e.touches[0].clientY) / 300); ty = e.touches[0].clientY; }
+    if (mode === "house" && ty !== null) { nudge((ty - e.touches[0].clientY) / 300); ty = e.touches[0].clientY; }
   }, { passive: true });
   window.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && mode !== "survey") { closeSection(); return; }
+    if (mode !== "house") return;
     if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); nudge(0.5); }
     if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); nudge(-0.5); }
   });
-  document.querySelectorAll("#menu a[data-z]").forEach(function (a) {
-    a.addEventListener("click", function () {
-      target = parseFloat(a.dataset.z);
-      if (!raf) raf = requestAnimationFrame(step);
-    });
+  // the right menu = the persistent spine: jump to any section from anywhere
+  menuLinks.forEach(function (a) {
+    a.addEventListener("click", function () { if (a.dataset.section) openSection(a.dataset.section); });
   });
+  // each survey card enters its section
+  document.querySelectorAll("#survey .scard[data-section]").forEach(function (c) {
+    c.addEventListener("click", function () { openSection(c.dataset.section); });
+  });
+  // the wordmark is the way home (back to the survey)
+  document.getElementById("wordmark").addEventListener("click", closeSection);
   window.addEventListener("resize", function () { centreSketch(); apply(); });
   flow.querySelector(".sk").addEventListener("load", function () { centreSketch(); apply(); });
   // the title's centring transform is measured from its text width — re-apply
@@ -730,7 +857,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.01 (dup of entry-test2 v0.88)");
+  console.log("entry-test4 e4-v0.02 — survey + right-menu + dot rail");
 })();
 </script>
 </body>
