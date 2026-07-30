@@ -150,10 +150,11 @@
   /* HOUSE card sketch = EXACTLY the reading's .sk (same width, centred) so
      entering the section is seamless — nothing changes scale */
   .scard.house img:not(.bigtitle){max-height:none;max-width:none;width:min(1100px,90vw)}
-  /* the section title — VERY big, centred, overlaying the card image; on entry
-     it flies to its slot in the right menu (see #titlefly) */
+  /* the section title — centred, overlaying the card image; sized so the word
+     matches "HOUSE" in the 1970 nameblock (83/908 of the nameblock's min(58vh,660px)).
+     On entry it flies to its slot in the right menu (see #titlefly). */
   .scard .bigtitle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    height:32vh;width:auto;max-height:none;z-index:4;pointer-events:none}
+    height:min(5.3vh,60px);width:auto;max-height:none;z-index:4;pointer-events:none}
   .scard .cx{position:absolute;left:34px;top:96px;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(27,25,24,.42)}
   /* the film INTRO panel — first in the survey scroll */
@@ -321,7 +322,7 @@
   <section class="scard" data-section="about"><img class="bigtitle" src="assets/entry/title-about.png" alt="About"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.12</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.13</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -889,7 +890,7 @@
     if (!item) return;
     var mi = item.querySelector("img.mi");
     var aspect = (mi.naturalWidth && mi.naturalHeight) ? mi.naturalWidth / mi.naturalHeight : 3;
-    var h = 0.32 * window.innerHeight, w = h * aspect;      // big state = the card's .bigtitle
+    var h = Math.min(0.053 * window.innerHeight, 60), w = h * aspect;   // = the card's .bigtitle (nameblock-HOUSE size)
     var cx = window.innerWidth / 2, cy = window.innerHeight / 2;
     var t = mi.getBoundingClientRect();                     // menu slot (laid out even while hidden)
     item.style.visibility = "hidden";                       // keep the real slot dark until it lands
@@ -970,7 +971,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.12 — intro is a snap target — can scroll back up to the film");
+  console.log("entry-test4 e4-v0.13 — card title sized to match HOUSE in the 1970 nameblock");
 })();
 </script>
 </body>
