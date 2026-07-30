@@ -109,11 +109,14 @@
   #hunter .htxt{flex:1;max-width:660px;font-weight:500;font-size:17px;line-height:1.7;color:#000}
   #hunter .htxt p{margin-bottom:1.1em}
   #hunter a.more{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(27,25,24,.6);text-decoration:none;border-bottom:1px dashed rgba(27,25,24,.4)}
-  /* the menu is minimal — a small dot beside the current section, nothing else */
-  #menu a{position:relative;display:block}
-  #menu a img.mi{height:15px;width:auto;display:block;opacity:.5;transition:opacity .25s ease}
+  /* the menu — hand-lettered words; the active one flies out to the centre
+     line to nestle by its card, the rest recede */
+  #menu a{position:relative;display:block;transition:transform .6s cubic-bezier(.22,.61,.36,1)}
+  #menu a img.mi{height:20px;width:auto;display:block;opacity:.5;transition:opacity .35s ease}
   #menu a:hover img.mi{opacity:.8}
   #menu a.on img.mi{opacity:1}
+  #menu.mfocus a img.mi{opacity:.2}
+  #menu.mfocus a.on img.mi{opacity:1}
   #menu a.on{color:#1b1918}
   #menu a.on::before{content:"";position:absolute;right:100%;top:50%;margin-top:-2.5px;margin-right:11px;
     width:5px;height:5px;border-radius:50%;background:#1b1918}
@@ -157,7 +160,7 @@
   /* the persistent MENU — moved from top-centre to the RIGHT, vertical */
   #menu{top:50% !important;left:auto !important;right:34px !important;bottom:auto !important;
     transform:translateY(-50%) !important;flex-direction:column !important;align-items:flex-start !important;
-    justify-content:center !important;gap:13px !important;padding:0 !important;opacity:1 !important;text-align:right}
+    justify-content:center !important;gap:18px !important;padding:0 !important;opacity:1 !important;text-align:right}
   #menu a{padding:1px 0 !important;position:relative;white-space:nowrap}
   #menu a.on{color:#1b1918}
   /* the running bracket motif on the active menu item */
@@ -311,7 +314,7 @@
   <section class="scard" data-section="about"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.08</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.09</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -863,9 +866,29 @@
   var pageIdx = 0, paging = false, wheelLock = false;
   var vname = document.querySelector("#svid .vname");
   // the menu's only indicator: a small dot beside the current section
+  var menuEl = document.getElementById("menu");
+  var FLY_X = -150;   // how far left the active label travels toward the card
   function setSurveyActive() {
     var sec = mode === "survey" ? (pages[pageIdx].dataset ? pages[pageIdx].dataset.section : null) : mode;
     menuLinks.forEach(function (a) { a.classList.toggle("on", a.dataset.section === sec); });
+    flyMenu();
+  }
+  // the active label leaves the vertical stack and glides along the horizontal
+  // centre line to nestle by its (centred) card; the others recede
+  function flyMenu() {
+    var focused = mode === "survey" && pageIdx >= 1;   // a real card is centred (not the film intro)
+    menuEl.classList.toggle("mfocus", focused);
+    menuLinks.forEach(function (a) { if (!a.classList.contains("on")) a.style.transform = ""; });
+    var on = menuEl.querySelector("a.on");
+    if (focused && on) {
+      on.style.transform = "";                          // reset so we measure the resting position
+      var r = on.getBoundingClientRect();
+      var dy = Math.round(window.innerHeight / 2 - (r.top + r.height / 2));
+      void on.offsetWidth;                              // commit the reset so the move animates
+      on.style.transform = "translate(" + FLY_X + "px," + dy + "px)";
+    } else if (on) {
+      on.style.transform = "";
+    }
   }
   function goPage(i) {
     pageIdx = Math.max(0, Math.min(pages.length - 1, i));
@@ -927,7 +950,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.08 — hand-lettered menu items, left-aligned; cards title-free");
+  console.log("entry-test4 e4-v0.09 — bigger menu; active label flies to card centre-line");
 })();
 </script>
 </body>
