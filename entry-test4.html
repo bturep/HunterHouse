@@ -150,6 +150,8 @@
   body.in-section #survey{display:none}
   .scard{height:100dvh;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer}
   .scard img:not(.bigtitle){max-height:62vh;max-width:70vw;width:auto;display:block}
+  /* HUNTER card image spans the full screen width */
+  .scard[data-section="hunter"] img{max-height:none;max-width:none;width:100vw;height:auto}
   /* HOUSE card sketch = EXACTLY the reading's .sk (same width, centred) so
      entering the section is seamless — nothing changes scale */
   .scard.house img:not(.bigtitle){max-height:none;max-width:none;width:min(1100px,90vw)}
@@ -329,7 +331,7 @@
   <section class="scard" data-section="about"><div class="titleblock"><div class="stitle">About</div><div class="sblurb">The Hunter House Foundation — mandate, people, contact.</div></div><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.14</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.15</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -979,7 +981,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.14 — typeset section titles (scale cleanly) + leader text; menu stays hand-lettered");
+  console.log("entry-test4 e4-v0.15 — HUNTER card image full screen width");
 })();
 </script>
 </body>
