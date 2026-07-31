@@ -179,17 +179,18 @@
   /* the film INTRO panel — first in the survey scroll */
   #svid{height:100dvh;position:relative;overflow:hidden;background:#1b1918;cursor:pointer;scroll-snap-align:start}
   #svid video{width:100%;height:100%;object-fit:cover;display:block}
-  /* the two nameblock squares — fixed overlays. Stacked & white over the film;
-     on scroll they separate (house left, architect right), take the archive
-     colours, and flank the sketch. Filled via CSS mask so colour is free. */
-  #nbHouse,#nbArch{position:fixed;left:0;top:0;z-index:8;transform-origin:top left;pointer-events:none;
-    background-color:#fff;will-change:transform,background-color}
-  #nbHouse{-webkit-mask:url(assets/entry/nb-house.png) center/contain no-repeat;
-    mask:url(assets/entry/nb-house.png) center/contain no-repeat;cursor:pointer}
-  #nbArch{-webkit-mask:url(assets/entry/nb-architect.png) center/contain no-repeat;
-    mask:url(assets/entry/nb-architect.png) center/contain no-repeat;cursor:pointer}
-  #nbSketch{position:fixed;left:0;top:0;z-index:7;pointer-events:none;opacity:0;
-    transform-origin:top left;will-change:transform,opacity}
+  /* the two nameblock squares — fixed overlays, stacked vertically. White ink
+     over the film; on scroll the ink turns black and a photo (sized to each
+     square) fades in behind the lettering. Each square links to its section. */
+  #nbHouse,#nbArch{position:fixed;left:0;top:0;z-index:8;transform-origin:top left;
+    pointer-events:none;overflow:hidden;cursor:pointer;will-change:transform}
+  #nbHouse .nbimg,#nbArch .nbimg{position:absolute;inset:0;width:100%;height:100%;
+    object-fit:cover;opacity:0;will-change:opacity}
+  #nbHouse .nbink,#nbArch .nbink{position:absolute;inset:0;background-color:#fff;will-change:background-color}
+  #nbHouse .nbink{-webkit-mask:url(assets/entry/nb-house.png) center/contain no-repeat;
+    mask:url(assets/entry/nb-house.png) center/contain no-repeat}
+  #nbArch .nbink{-webkit-mask:url(assets/entry/nb-architect.png) center/contain no-repeat;
+    mask:url(assets/entry/nb-architect.png) center/contain no-repeat}
   .scard.split{background:#f6f5f5}
   #svid .vcue{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(246,245,245,.72)}
@@ -325,9 +326,8 @@
   <div class="hcite">Film footage · 2026 · nameblock from HH-CAA-0007, 1970</div>
 </div>
 <div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:18px;letter-spacing:.04em;text-transform:uppercase;color:#1b1918;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
-<a id="nbHouse" href="#" aria-label="The House"></a>
-<a id="nbArch" href="#" aria-label="Richard Hunter, Architect"></a>
-<img id="nbSketch" src="assets/entry/letter-elev-2.png" alt="" aria-hidden="true">
+<a id="nbHouse" href="#" aria-label="The House"><img class="nbimg" src="assets/entry/caa-0028-level.jpg" alt=""><span class="nbink"></span></a>
+<a id="nbArch" href="#" aria-label="Richard Hunter, Architect"><img class="nbimg" src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0001_RickWorkingOnSquare_1978-08_prev.jpg" alt=""><span class="nbink"></span></a>
 <nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62);transform:translateY(-110%);opacity:0;will-change:transform,opacity">
   <a data-section="house" style="padding:0;cursor:pointer" aria-label="House"><img class="mi" src="assets/entry/title-house.png" alt="House"></a>
   <a data-section="hunter" style="padding:0;cursor:pointer" aria-label="Hunter"><img class="mi" src="assets/entry/title-hunter.png" alt="Hunter"></a>
@@ -352,7 +352,7 @@
   <section class="scard" data-section="about"><div class="titleblock"><div class="stitle">About</div><div class="sblurb">The Hunter House Foundation — mandate, people, contact.</div></div><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.19</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.20</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -907,40 +907,31 @@
   var pageIdx = 0, paging = false, wheelLock = false;
   var nbHouse = document.getElementById("nbHouse");
   var nbArch = document.getElementById("nbArch");
-  var nbSketch = document.getElementById("nbSketch");
-  var sketchAspect = 3;
-  nbSketch.addEventListener("load", function () {
-    if (nbSketch.naturalWidth) sketchAspect = nbSketch.naturalWidth / nbSketch.naturalHeight;
-    layoutNameblocks();
-  });
+  var nbHouseInk = nbHouse.querySelector(".nbink"), nbArchInk = nbArch.querySelector(".nbink");
+  var nbHouseImg = nbHouse.querySelector(".nbimg"), nbArchImg = nbArch.querySelector(".nbimg");
   function mixColor(a, b, t) {
     return "rgb(" + Math.round(a[0] + (b[0]-a[0])*t) + "," + Math.round(a[1] + (b[1]-a[1])*t) + "," + Math.round(a[2] + (b[2]-a[2])*t) + ")";
   }
-  // the intro nameblock, scroll-driven: two squares stacked & white over the
-  // film → separate (house left / architect right), take the archive colours,
-  // and flank the fading-in sketch. p = 0 at the film, 1 at the split screen.
+  // the intro nameblock, scroll-driven: two squares STACKED (house over
+  // architect), white ink over the film → ink turns black on the paper and a
+  // photo fades in behind each square. p = 0 at the film, 1 at the split screen.
   function layoutNameblocks() {
     var st = surveyEl.scrollTop, vw = window.innerWidth, vh = window.innerHeight;
     var p = Math.max(0, Math.min(1, st / vh));
     var off = Math.max(0, st - vh);                       // past the split → scroll it away
     var NB = Math.min(0.58 * vh, 660), BH = 0.46 * NB, gap = 0.10 * NB;
-    var cx = vw / 2, cy = vh / 2, SEP = Math.min(0.30 * vw, 460);
+    var cx = vw / 2, cy = vh / 2;
     var hw = BH * (407 / 420), aw = BH * (407 / 421);
-    function L(a, b) { return a + (b - a) * p; }
-    var hcx = L(cx, cx - SEP), hcy = L(cy - (BH + gap) / 2, cy) - off;
-    var acx = L(cx, cx + SEP), acy = L(cy + (BH + gap) / 2, cy) - off;
-    var cf = Math.max(0, Math.min(1, (p - 0.15) / 0.6));  // white → colour as they cross onto paper
+    var hcy = cy - (BH + gap) / 2 - off, acy = cy + (BH + gap) / 2 - off;
     nbHouse.style.width = hw + "px"; nbHouse.style.height = BH + "px";
-    nbHouse.style.transform = "translate(" + (hcx - hw / 2) + "px," + (hcy - BH / 2) + "px)";
-    nbHouse.style.backgroundColor = mixColor([255, 255, 255], [139, 58, 42], cf);   // --red #8b3a2a
+    nbHouse.style.transform = "translate(" + (cx - hw / 2) + "px," + (hcy - BH / 2) + "px)";
     nbArch.style.width = aw + "px"; nbArch.style.height = BH + "px";
-    nbArch.style.transform = "translate(" + (acx - aw / 2) + "px," + (acy - BH / 2) + "px)";
-    nbArch.style.backgroundColor = mixColor([255, 255, 255], [79, 122, 107], cf);   // --copper #4f7a6b
-    var so = Math.max(0, Math.min(1, (p - 0.4) / 0.6));
-    var skH = 0.34 * vh, skW = skH * sketchAspect;
-    nbSketch.style.width = skW + "px"; nbSketch.style.height = skH + "px";
-    nbSketch.style.transform = "translate(" + (cx - skW / 2) + "px," + (cy - skH / 2 - off) + "px)";
-    nbSketch.style.opacity = so;
+    nbArch.style.transform = "translate(" + (cx - aw / 2) + "px," + (acy - BH / 2) + "px)";
+    var cf = Math.max(0, Math.min(1, (p - 0.15) / 0.6));  // white ink → black ink onto the paper
+    var ink = mixColor([255, 255, 255], [27, 25, 24], cf);
+    nbHouseInk.style.backgroundColor = ink; nbArchInk.style.backgroundColor = ink;
+    var io = Math.max(0, Math.min(1, (p - 0.3) / 0.5));   // the photos fade in behind each square
+    nbHouseImg.style.opacity = io; nbArchImg.style.opacity = io;
     var pe = (mode === "survey" && p > 0.75) ? "auto" : "none";
     nbHouse.style.pointerEvents = pe; nbArch.style.pointerEvents = pe;
   }
@@ -1053,7 +1044,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.19 — nameblock splits into two colour squares (house rust left, architect copper right) flanking the sketch, as section links");
+  console.log("entry-test4 e4-v0.20 — nameblock stays vertical B&W; each square reveals a photo behind it (house exterior, Hunter square-photo) as ink turns black");
 })();
 </script>
 </body>
