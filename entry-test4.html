@@ -357,7 +357,7 @@
   <section class="scard" data-section="about"><div class="titleblock"><div class="stitle">About</div><div class="sblurb">The Hunter House Foundation — mandate, people, contact.</div></div><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.21</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.22</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -974,28 +974,23 @@
       var s = Math.max(0, Math.min(surveyEl.scrollTop, window.innerHeight));
       vname.style.transform = "translate(-50%,-50%) translateY(" + s + "px)";
     }
+    // keep pageIdx roughly in sync with the free scroll (menu + auto-return)
+    var idx = Math.max(0, Math.min(pages.length - 1, Math.round(surveyEl.scrollTop / window.innerHeight)));
+    if (idx !== pageIdx) { pageIdx = idx; setSurveyActive(); }
   }
   surveyEl.addEventListener("scroll", onSurveyScroll, { passive: true });
 
-  // wheel: HOUSE drives the z-sequence; the survey advances ONE card per gesture
+  // HOUSE drives the z-sequence; the SURVEY is left to native scroll + CSS
+  // proximity snap — free control of the range, a gentle snap onto each card
   window.addEventListener("wheel", function (e) {
-    if (mode === "house") { e.preventDefault(); nudge(e.deltaY / 900); return; }
-    if (mode !== "survey") return;
-    e.preventDefault();
-    if (paging || wheelLock || Math.abs(e.deltaY) < 6) return;
-    wheelLock = true; setTimeout(function () { wheelLock = false; }, 150);
-    goPage(pageIdx + (e.deltaY > 0 ? 1 : -1));
+    if (mode === "house") { e.preventDefault(); nudge(e.deltaY / 900); }
   }, { passive: false });
   var ty = null;
   window.addEventListener("touchstart", function (e) { ty = e.touches[0].clientY; }, { passive: true });
   window.addEventListener("touchmove", function (e) {
     if (mode === "house" && ty !== null) { nudge((ty - e.touches[0].clientY) / 300); ty = e.touches[0].clientY; }
   }, { passive: true });
-  window.addEventListener("touchend", function (e) {
-    if (mode !== "survey" || ty === null) { ty = null; return; }
-    var dy = ty - e.changedTouches[0].clientY; ty = null;
-    if (Math.abs(dy) > 40) goPage(pageIdx + (dy > 0 ? 1 : -1));
-  }, { passive: true });
+  window.addEventListener("touchend", function () { ty = null; }, { passive: true });
   window.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && mode !== "survey") { closeSection(); return; }
     if (mode === "house") {
@@ -1020,7 +1015,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.21 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
+  console.log("entry-test4 e4-v0.22 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
 })();
 </script>
 </body>
