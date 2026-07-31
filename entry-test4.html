@@ -152,9 +152,6 @@
   .scard img:not(.stitle){display:block}
   /* ── per-card image size — set each card's height (or width) independently ──
      Edit the value on any one line to tune that card alone. */
-  .scard[data-section="house"]   img:not(.stitle){max-height:none;max-width:none;width:min(1100px,90vw);height:auto}
-  .scard[data-section="hunter"]  img:not(.stitle){max-height:none;max-width:none;width:auto;height:62vh}
-  .scard[data-section="site"]    img:not(.stitle){max-height:none;max-width:none;width:auto;height:62vh}
   .scard[data-section="archive"] img:not(.stitle){max-height:none;max-width:none;width:auto;height:62vh}
   .scard[data-section="about"]   img:not(.stitle){max-height:none;max-width:none;width:auto;height:62vh}
   /* the section title-block — typeset (scales cleanly), centred over the card
@@ -166,6 +163,17 @@
     text-transform:uppercase;color:#1b1918}
   .scard .sblurb{margin:16px auto 0;max-width:460px;font-weight:400;font-size:15px;line-height:1.6;
     color:rgba(27,25,24,.66)}
+  /* the grouped "choose" card — House · Hunter · Site as three clickable columns */
+  .scard.group{align-items:center}
+  .gopts{display:flex;gap:min(4.5vw,64px);align-items:flex-start;justify-content:center;width:min(1500px,92vw)}
+  .gopt{flex:1 1 0;max-width:430px;display:flex;flex-direction:column;align-items:center;text-align:center;
+    cursor:pointer;text-decoration:none;color:inherit}
+  .gopt img{height:34vh;width:auto;max-width:100%;object-fit:contain;display:block;transition:opacity .25s}
+  .gopt:hover img{opacity:.82}
+  .gopt .stitle{margin-top:18px;font-weight:800;font-size:min(4vh,38px);line-height:.95;
+    text-transform:uppercase;letter-spacing:.005em;color:#1b1918}
+  .gopt .sblurb{margin:10px auto 0;max-width:340px;font-weight:400;font-size:13.5px;line-height:1.55;
+    color:rgba(27,25,24,.62)}
   .scard .cx{position:absolute;left:34px;top:96px;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(27,25,24,.42)}
   /* the film INTRO panel — first in the survey scroll */
@@ -326,14 +334,30 @@
     <img class="vname" src="assets/entry/nameblock-1970-v2.png" alt="Hunter House · Victoria B.C. · 1970 · Ric Hunter Architect">
     <div class="vcue">Scroll ↓ · or click to enter</div>
   </section>
-  <section class="scard house" data-section="house"><div class="titleblock"><div class="stitle">House</div><div class="sblurb">“… a little house we'll start building next week on our land.” The 1970 sketch, the working drawings, the house as built.</div></div><img src="assets/entry/letter-elev-2.png" alt="The house — sketch elevation"></section>
-  <section class="scard" data-section="hunter"><div class="titleblock"><div class="stitle">Hunter</div><div class="sblurb">Richard Morrow Hunter, 1930–2023 — architect, sole client, sole resident of his own five-decade project.</div></div><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0001_RickWorkingOnSquare_1978-08_prev.jpg" alt="Richard Hunter"></section>
-  <section class="scard" data-section="site"><div class="titleblock"><div class="stitle">Site</div><div class="sblurb">203 Goward Road, Saanich — the knoll above Prospect Lake, its covenant, its trees.</div></div><img src="https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0112_CovenantSitePlanWithAnnotations_2006_prev.jpg" alt="Site — covenant plan"></section>
+  <section class="scard group">
+    <div class="gopts">
+      <a class="gopt" data-section="house">
+        <img src="assets/entry/letter-elev-2.png" alt="The house — sketch elevation">
+        <div class="stitle">House</div>
+        <div class="sblurb">“… a little house we'll start building next week on our land.” The 1970 sketch, the working drawings, the house as built.</div>
+      </a>
+      <a class="gopt" data-section="hunter">
+        <img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0001_RickWorkingOnSquare_1978-08_prev.jpg" alt="Richard Hunter">
+        <div class="stitle">Hunter</div>
+        <div class="sblurb">Richard Morrow Hunter, 1930–2023 — architect, sole client, sole resident of his own five-decade project.</div>
+      </a>
+      <a class="gopt" data-section="site">
+        <img src="https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0112_CovenantSitePlanWithAnnotations_2006_prev.jpg" alt="Site — covenant plan">
+        <div class="stitle">Site</div>
+        <div class="sblurb">203 Goward Road, Saanich — the knoll above Prospect Lake, its covenant, its trees.</div>
+      </a>
+    </div>
+  </section>
   <section class="scard" data-section="archive"><div class="titleblock"><div class="stitle">Archive</div><div class="sblurb">The drawings, photographs, and correspondence — the working file Hunter kept, catalogued.</div></div><img src="assets/entry/caa8-sheet_prev.jpg" alt="The archive — a working drawing"></section>
   <section class="scard" data-section="about"><div class="titleblock"><div class="stitle">About</div><div class="sblurb">The Hunter House Foundation — mandate, people, contact.</div></div><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.17</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.18</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -833,7 +857,7 @@
     if (mode === "house") setActiveDot(houseDotIndex());
   }
 
-  function openSection(name) {
+  function openSection(name, srcTitleEl) {
     var fromSurvey = (mode === "survey");
     mode = name;
     document.body.classList.add("in-section");
@@ -852,7 +876,7 @@
     }
     window.scrollTo(0, 0);
     wm.style.opacity = 1;                          // wordmark stays lit inside a section
-    if (fromSurvey) flyTitleToMenu(name);          // the big title animates into its menu slot
+    if (fromSurvey) flyTitleToMenu(name, srcTitleEl);   // the clicked title animates into its menu slot
   }
   function closeSection() {
     mode = "survey";
@@ -872,7 +896,7 @@
     // reached the bottom of the section + still scrolling down -> auto-return
     // to the contracted survey, landing on this section's card
     if (mode === "house" && target >= HOUSE_MAX - 0.001 && d > 0) {
-      var card = document.querySelector('#survey .scard[data-section="house"]');
+      var card = document.querySelector('#survey .scard.group');   // the House·Hunter·Site card
       closeSection();
       pageIdx = 1;
       if (card) document.getElementById("survey").scrollTo(0, card.offsetTop);
@@ -897,7 +921,7 @@
   // on entering a section, the card's typeset title flies to its menu slot
   // (FLIP from big-centred to the small menu-item rect) and crossfades to the
   // hand-lettered menu word as it lands
-  function flyTitleToMenu(name) {
+  function flyTitleToMenu(name, srcTitleEl) {
     var item = menuEl.querySelector('a[data-section="' + name + '"]');
     if (!item) return;
     var mi = item.querySelector("img.mi");
@@ -909,10 +933,22 @@
     titlefly.style.left = "0px"; titlefly.style.top = "0px";
     titlefly.style.opacity = "1";
     titlefly.style.transform = "none";
-    var f = titlefly.getBoundingClientRect();               // natural size of the big typeset title
-    var cx = window.innerWidth / 2, cy = window.innerHeight / 2;
-    titlefly.style.transform = "translate(" + (cx - f.width / 2) + "px," + (cy - f.height / 2) + "px) scale(1)";
-    void titlefly.offsetWidth;                              // commit the big-centred state
+    // start from the clicked title (matched size + position); else big-centred
+    var f, startLeft, startTop;
+    if (srcTitleEl) {
+      titlefly.style.fontSize = getComputedStyle(srcTitleEl).fontSize;
+      var sr = srcTitleEl.getBoundingClientRect();
+      f = titlefly.getBoundingClientRect();
+      startLeft = sr.left + (sr.width - f.width) / 2;
+      startTop = sr.top + (sr.height - f.height) / 2;
+    } else {
+      titlefly.style.fontSize = "";
+      f = titlefly.getBoundingClientRect();
+      startLeft = window.innerWidth / 2 - f.width / 2;
+      startTop = window.innerHeight / 2 - f.height / 2;
+    }
+    titlefly.style.transform = "translate(" + startLeft + "px," + startTop + "px) scale(1)";
+    void titlefly.offsetWidth;                              // commit the start state
     titlefly.style.transition = "transform .72s cubic-bezier(.4,0,.2,1), opacity .3s ease .48s";
     titlefly.style.transform = "translate(" + t.left + "px," + t.top + "px) scale(" + (t.height / f.height) + ")";
     titlefly.style.opacity = "0";                           // fade out over the last third → crossfade to the hand-lettered word
@@ -972,7 +1008,8 @@
   });
   // menu = the persistent spine (jump anywhere); each card enters its section
   menuLinks.forEach(function (a) { a.addEventListener("click", function () { if (a.dataset.section) openSection(a.dataset.section); }); });
-  document.querySelectorAll("#survey .scard[data-section]").forEach(function (c) { c.addEventListener("click", function () { openSection(c.dataset.section); }); });
+  document.querySelectorAll("#survey .scard[data-section]").forEach(function (c) { c.addEventListener("click", function () { openSection(c.dataset.section, c.querySelector(".stitle")); }); });
+  document.querySelectorAll("#survey .gopt[data-section]").forEach(function (o) { o.addEventListener("click", function (e) { e.preventDefault(); openSection(o.dataset.section, o.querySelector(".stitle")); }); });
   document.getElementById("svid").addEventListener("click", function () { goPage(1); });
   wm.addEventListener("click", closeSection);
   updateWordmark(); setSurveyActive();
@@ -983,7 +1020,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.17 — HUNTER card height 62vh");
+  console.log("entry-test4 e4-v0.18 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
 })();
 </script>
 </body>
