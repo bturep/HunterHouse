@@ -179,19 +179,7 @@
   /* the film INTRO panel — first in the survey scroll */
   #svid{height:100dvh;position:relative;overflow:hidden;background:#1b1918;cursor:pointer;scroll-snap-align:start}
   #svid video{width:100%;height:100%;object-fit:cover;display:block}
-  /* the two nameblock squares — fixed overlays, stacked vertically. White ink
-     over the film; on scroll the ink turns black and a photo (sized to each
-     square) fades in behind the lettering. Each square links to its section. */
-  #nbHouse,#nbArch{position:fixed;left:0;top:0;z-index:8;transform-origin:top left;
-    pointer-events:none;overflow:hidden;cursor:pointer;will-change:transform}
-  #nbHouse .nbimg,#nbArch .nbimg{position:absolute;inset:0;width:100%;height:100%;
-    object-fit:cover;opacity:0;will-change:opacity}
-  #nbHouse .nbink,#nbArch .nbink{position:absolute;inset:0;background-color:#fff;will-change:background-color}
-  #nbHouse .nbink{-webkit-mask:url(assets/entry/nb-house.png) center/contain no-repeat;
-    mask:url(assets/entry/nb-house.png) center/contain no-repeat}
-  #nbArch .nbink{-webkit-mask:url(assets/entry/nb-architect.png) center/contain no-repeat;
-    mask:url(assets/entry/nb-architect.png) center/contain no-repeat}
-  .scard.split{background:#f6f5f5}
+  #svid .vname{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);height:min(58vh,660px);width:auto;will-change:transform}
   #svid .vcue{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(246,245,245,.72)}
   /* the MENU — right, vertical, static; hidden in the survey, fades in on entry */
@@ -326,8 +314,6 @@
   <div class="hcite">Film footage · 2026 · nameblock from HH-CAA-0007, 1970</div>
 </div>
 <div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:18px;letter-spacing:.04em;text-transform:uppercase;color:#1b1918;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
-<a id="nbHouse" href="#" aria-label="The House"><img class="nbimg" src="assets/entry/caa-0028-level.jpg" alt=""><span class="nbink"></span></a>
-<a id="nbArch" href="#" aria-label="Richard Hunter, Architect"><img class="nbimg" src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0001_RickWorkingOnSquare_1978-08_prev.jpg" alt=""><span class="nbink"></span></a>
 <nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62);transform:translateY(-110%);opacity:0;will-change:transform,opacity">
   <a data-section="house" style="padding:0;cursor:pointer" aria-label="House"><img class="mi" src="assets/entry/title-house.png" alt="House"></a>
   <a data-section="hunter" style="padding:0;cursor:pointer" aria-label="Hunter"><img class="mi" src="assets/entry/title-hunter.png" alt="Hunter"></a>
@@ -345,14 +331,33 @@
     <video autoplay muted loop playsinline poster="assets/entry/entry-still.jpg">
       <source src="assets/entry/entry-loop.mp4" type="video/mp4">
     </video>
+    <img class="vname" src="assets/entry/nameblock-1970-v2.png" alt="Hunter House · Victoria B.C. · 1970 · Ric Hunter Architect">
     <div class="vcue">Scroll ↓ · or click to enter</div>
   </section>
-  <section class="scard split" aria-label="House and Architect"></section>
+  <section class="scard group">
+    <div class="gopts">
+      <a class="gopt" data-section="house">
+        <img src="assets/entry/letter-elev-2.png" alt="The house — sketch elevation">
+        <div class="stitle">House</div>
+        <div class="sblurb">“… a little house we'll start building next week on our land.” The 1970 sketch, the working drawings, the house as built.</div>
+      </a>
+      <a class="gopt" data-section="hunter">
+        <img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0001_RickWorkingOnSquare_1978-08_prev.jpg" alt="Richard Hunter">
+        <div class="stitle">Hunter</div>
+        <div class="sblurb">Richard Morrow Hunter, 1930–2023 — architect, sole client, sole resident of his own five-decade project.</div>
+      </a>
+      <a class="gopt" data-section="site">
+        <img src="https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0112_CovenantSitePlanWithAnnotations_2006_prev.jpg" alt="Site — covenant plan">
+        <div class="stitle">Site</div>
+        <div class="sblurb">203 Goward Road, Saanich — the knoll above Prospect Lake, its covenant, its trees.</div>
+      </a>
+    </div>
+  </section>
   <section class="scard" data-section="archive"><div class="titleblock"><div class="stitle">Archive</div><div class="sblurb">The drawings, photographs, and correspondence — the working file Hunter kept, catalogued.</div></div><img src="assets/entry/caa8-sheet_prev.jpg" alt="The archive — a working drawing"></section>
   <section class="scard" data-section="about"><div class="titleblock"><div class="stitle">About</div><div class="sblurb">The Hunter House Foundation — mandate, people, contact.</div></div><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.20</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.21</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -884,14 +889,14 @@
   // HUNTER HOUSE shows once past the film intro; always on inside a section
   function updateWordmark() {
     var el = document.getElementById("survey");
-    wm.style.opacity = (mode !== "survey") ? 1 : 0;   // house box already reads HUNTER HOUSE on the split
+    wm.style.opacity = (mode !== "survey" || (el && el.scrollTop > window.innerHeight * 0.55)) ? 1 : 0;
   }
 
   function nudge(d) {
     // reached the bottom of the section + still scrolling down -> auto-return
     // to the contracted survey, landing on this section's card
     if (mode === "house" && target >= HOUSE_MAX - 0.001 && d > 0) {
-      var card = document.querySelector('#survey .scard.split');   // the House | sketch | Architect screen
+      var card = document.querySelector('#survey .scard.group');   // the House·Hunter·Site card
       closeSection();
       pageIdx = 1;
       if (card) document.getElementById("survey").scrollTo(0, card.offsetTop);
@@ -905,36 +910,7 @@
   var pages = [document.getElementById("svid")];
   document.querySelectorAll("#survey .scard").forEach(function (c) { pages.push(c); });
   var pageIdx = 0, paging = false, wheelLock = false;
-  var nbHouse = document.getElementById("nbHouse");
-  var nbArch = document.getElementById("nbArch");
-  var nbHouseInk = nbHouse.querySelector(".nbink"), nbArchInk = nbArch.querySelector(".nbink");
-  var nbHouseImg = nbHouse.querySelector(".nbimg"), nbArchImg = nbArch.querySelector(".nbimg");
-  function mixColor(a, b, t) {
-    return "rgb(" + Math.round(a[0] + (b[0]-a[0])*t) + "," + Math.round(a[1] + (b[1]-a[1])*t) + "," + Math.round(a[2] + (b[2]-a[2])*t) + ")";
-  }
-  // the intro nameblock, scroll-driven: two squares STACKED (house over
-  // architect), white ink over the film → ink turns black on the paper and a
-  // photo fades in behind each square. p = 0 at the film, 1 at the split screen.
-  function layoutNameblocks() {
-    var st = surveyEl.scrollTop, vw = window.innerWidth, vh = window.innerHeight;
-    var p = Math.max(0, Math.min(1, st / vh));
-    var off = Math.max(0, st - vh);                       // past the split → scroll it away
-    var NB = Math.min(0.58 * vh, 660), BH = 0.46 * NB, gap = 0.10 * NB;
-    var cx = vw / 2, cy = vh / 2;
-    var hw = BH * (407 / 420), aw = BH * (407 / 421);
-    var hcy = cy - (BH + gap) / 2 - off, acy = cy + (BH + gap) / 2 - off;
-    nbHouse.style.width = hw + "px"; nbHouse.style.height = BH + "px";
-    nbHouse.style.transform = "translate(" + (cx - hw / 2) + "px," + (hcy - BH / 2) + "px)";
-    nbArch.style.width = aw + "px"; nbArch.style.height = BH + "px";
-    nbArch.style.transform = "translate(" + (cx - aw / 2) + "px," + (acy - BH / 2) + "px)";
-    var cf = Math.max(0, Math.min(1, (p - 0.15) / 0.6));  // white ink → black ink onto the paper
-    var ink = mixColor([255, 255, 255], [27, 25, 24], cf);
-    nbHouseInk.style.backgroundColor = ink; nbArchInk.style.backgroundColor = ink;
-    var io = Math.max(0, Math.min(1, (p - 0.3) / 0.5));   // the photos fade in behind each square
-    nbHouseImg.style.opacity = io; nbArchImg.style.opacity = io;
-    var pe = (mode === "survey" && p > 0.75) ? "auto" : "none";
-    nbHouse.style.pointerEvents = pe; nbArch.style.pointerEvents = pe;
-  }
+  var vname = document.querySelector("#svid .vname");
   var menuEl = document.getElementById("menu");
   var titlefly = document.getElementById("titlefly");
   // the menu is static; it only marks which section is active (dot to the right)
@@ -994,7 +970,10 @@
   // clips it away (OG) — driven by scrollTop during the page glide
   function onSurveyScroll() {
     updateWordmark();
-    layoutNameblocks();
+    if (vname) {
+      var s = Math.max(0, Math.min(surveyEl.scrollTop, window.innerHeight));
+      vname.style.transform = "translate(-50%,-50%) translateY(" + s + "px)";
+    }
   }
   surveyEl.addEventListener("scroll", onSurveyScroll, { passive: true });
 
@@ -1031,20 +1010,17 @@
   menuLinks.forEach(function (a) { a.addEventListener("click", function () { if (a.dataset.section) openSection(a.dataset.section); }); });
   document.querySelectorAll("#survey .scard[data-section]").forEach(function (c) { c.addEventListener("click", function () { openSection(c.dataset.section, c.querySelector(".stitle")); }); });
   document.querySelectorAll("#survey .gopt[data-section]").forEach(function (o) { o.addEventListener("click", function (e) { e.preventDefault(); openSection(o.dataset.section, o.querySelector(".stitle")); }); });
-  // the two nameblock squares link into their sections
-  nbHouse.addEventListener("click", function (e) { e.preventDefault(); if (mode === "survey") openSection("house"); });
-  nbArch.addEventListener("click", function (e) { e.preventDefault(); if (mode === "survey") openSection("hunter"); });
   document.getElementById("svid").addEventListener("click", function () { goPage(1); });
   wm.addEventListener("click", closeSection);
-  updateWordmark(); setSurveyActive(); layoutNameblocks();
-  window.addEventListener("resize", function () { centreSketch(); apply(); layoutNameblocks(); });
+  updateWordmark(); setSurveyActive();
+  window.addEventListener("resize", function () { centreSketch(); apply(); });
   flow.querySelector(".sk").addEventListener("load", function () { centreSketch(); apply(); });
   // the title's centring transform is measured from its text width — re-apply
   // once the webfont arrives (fallback-font metrics left it ~4px off centre)
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.20 — nameblock stays vertical B&W; each square reveals a photo behind it (house exterior, Hunter square-photo) as ink turns black");
+  console.log("entry-test4 e4-v0.21 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
 })();
 </script>
 </body>
