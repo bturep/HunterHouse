@@ -153,7 +153,7 @@
   /* ── per-card image size — set each card's height (or width) independently ──
      Edit the value on any one line to tune that card alone. */
   .scard[data-section="house"]   img:not(.stitle){max-height:none;max-width:none;width:min(1100px,90vw);height:auto}
-  .scard[data-section="hunter"]  img:not(.stitle){max-height:none;max-width:none;width:100vw;height:auto}
+  .scard[data-section="hunter"]  img:not(.stitle){max-height:none;max-width:none;width:auto;height:62vh}
   .scard[data-section="site"]    img:not(.stitle){max-height:none;max-width:none;width:auto;height:62vh}
   .scard[data-section="archive"] img:not(.stitle){max-height:none;max-width:none;width:auto;height:62vh}
   .scard[data-section="about"]   img:not(.stitle){max-height:none;max-width:none;width:auto;height:62vh}
@@ -333,7 +333,7 @@
   <section class="scard" data-section="about"><div class="titleblock"><div class="stitle">About</div><div class="sblurb">The Hunter House Foundation — mandate, people, contact.</div></div><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.16</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.17</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -983,7 +983,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.16 — per-card image sizing scaffold (height settable per section)");
+  console.log("entry-test4 e4-v0.17 — HUNTER card height 62vh");
 })();
 </script>
 </body>
