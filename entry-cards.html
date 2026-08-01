@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<!-- entry-cards ec-v0.01 — PS-composed section title cards, layer-stacked.
+     Workflow: compose a card in Photoshop at 3840x2159 (16:9), export each
+     element as a full-canvas PNG (BACKGROUND / SKETCH / TITLE / TEXT / …),
+     drop the folder in assets/entry/cards/<name>/, add it to CARDS below.
+     Disposable mock — noindex, unlinked. NOT the live site. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Hunter House — section cards (mock)</title>
+<style>
+  html,body{margin:0;height:100%;background:#f4f4f4;overflow-x:hidden;overflow-y:auto;
+    scroll-snap-type:y proximity;-webkit-overflow-scrolling:touch}
+  /* each card is a full-screen frame; its PS layers stack, scaled to fit so the
+     composition is preserved on any screen shape (paper fills the letterbox) */
+  .card{position:relative;height:100dvh;scroll-snap-align:start}
+  .card .layer{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
+  #ver{position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;
+    font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none}
+</style>
+</head>
+<body>
+<div id="deck"></div>
+<div id="ver">ec-v0.01</div>
+<script>
+  // the deck — add a card by dropping its layer folder in and listing it here.
+  // layers render back-to-front in this order.
+  var CARDS = [
+    { name: "home", layers: ["BACKGROUND", "SKETCH", "TITLE", "TEXT"] }
+  ];
+  var deck = document.getElementById("deck");
+  CARDS.forEach(function (c) {
+    var card = document.createElement("section");
+    card.className = "card";
+    card.dataset.card = c.name;
+    c.layers.forEach(function (l) {
+      var img = document.createElement("img");
+      img.className = "layer";
+      img.src = "assets/entry/cards/" + c.name + "/" + l + ".png";
+      img.alt = "";
+      card.appendChild(img);
+    });
+    deck.appendChild(card);
+  });
+</script>
+</body>
+</html>
