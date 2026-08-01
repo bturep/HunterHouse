@@ -154,6 +154,9 @@
      Layers scale to fit so the Photoshop composition is preserved on any screen. */
   .scard.ps{padding:0;cursor:pointer}
   .scard.ps .layer{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
+  /* a second background that fades in smoothly once the card is selected */
+  .scard.ps .bg2{opacity:0;transition:opacity .7s ease}
+  .scard.ps.selected .bg2{opacity:1}
   /* full-bleed cards (a photo composition) fill the frame edge-to-edge */
   .scard.ps.cover .layer{object-fit:cover}
   /* ── per-card image size — set each card's height (or width) independently ──
@@ -191,15 +194,19 @@
     font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(246,245,245,.72);
     transition:opacity .12s ease}
   #svid .vcue.gone{opacity:0}
-  /* the MENU — right, vertical, static; hidden in the survey, fades in on entry */
-  #menu{top:50% !important;left:auto !important;right:34px !important;bottom:auto !important;
-    transform:translateY(-50%) !important;
-    transition:opacity .5s ease !important;
+  /* the MENU — top-left, vertical; the section labels STACK IN as you scroll
+     through the cards. Current section full, earlier ones dimmed, later hidden. */
+  #menu{top:30px !important;left:34px !important;right:auto !important;bottom:auto !important;
+    transform:none !important;transition:none !important;
     flex-direction:column !important;align-items:flex-start !important;
-    justify-content:center !important;gap:18px !important;padding:0 !important;
-    opacity:0 !important;pointer-events:none !important;text-align:right}
-  body.in-section #menu{opacity:1 !important;pointer-events:auto !important}
-  #menu a{padding:1px 0 !important;position:relative;white-space:nowrap}
+    justify-content:flex-start !important;gap:9px !important;padding:0 !important;
+    opacity:1 !important;pointer-events:auto !important;text-align:left;z-index:9}
+  #menu a{padding:1px 0 !important;position:relative;white-space:nowrap;
+    opacity:0;transform:translateY(-6px);transition:opacity .5s ease,transform .5s ease}
+  #menu a.revealed{opacity:.38;transform:none}
+  #menu a.on{opacity:1;transform:none}
+  #menu a img.mi{opacity:1}
+  #menu a.on::after{content:none}
   /* the wordmark: HUNTER HOUSE, black bold, top-left — shown past the film intro (opacity driven in JS) */
   #wordmark{transition:opacity .4s ease;display:none}
   /* the DOT RAIL — position within the current section, just left of the menu */
@@ -345,8 +352,9 @@
   </section>
   <!-- HOME: PS-composed layer-stack card (assets/entry/cards/home/) -->
   <section class="scard ps" data-section="house">
-    <img class="layer" src="assets/entry/cards/home/BACKGROUND.png?v=3" alt="">
-    <img class="layer" src="assets/entry/cards/home/TITLE.png?v=3" alt="The house">
+    <img class="layer" src="assets/entry/cards/home/BACKGROUND.png?v=4" alt="">
+    <img class="layer bg2" src="assets/entry/cards/home/BACKGROUND2.png?v=4" alt="">
+    <img class="layer" src="assets/entry/cards/home/TITLE.png?v=4" alt="The house">
   </section>
   <!-- Hunter / Site: placeholder cards until composed in Photoshop -->
   <!-- HUNTER: PS-composed full-bleed card (assets/entry/cards/hunter/) -->
@@ -359,7 +367,7 @@
   <section class="scard" data-section="about"><div class="titleblock"><div class="stitle">About</div><div class="sblurb">The Hunter House Foundation — mandate, people, contact.</div></div><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.29</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.30</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -863,7 +871,7 @@
     var fromSurvey = (mode === "survey");
     mode = name;
     document.body.classList.add("in-section");
-    menuLinks.forEach(function (a) { a.classList.toggle("on", a.dataset.section === name); });
+    setSurveyActive();   // reveal the full nav + mark the entered section
     if (name === "house") {
       document.body.classList.add("in-house");
       secPanel.classList.remove("on");
@@ -915,10 +923,16 @@
   var vname = document.querySelector("#svid .vname");
   var menuEl = document.getElementById("menu");
   var titlefly = document.getElementById("titlefly");
-  // the menu is static; it only marks which section is active (dot to the right)
+  // top-left nav: labels stack in as you scroll the cards. Menu item i belongs
+  // to card page i+1 (page 0 is the film). Current = full, past = dimmed, later = hidden.
   function setSurveyActive() {
-    var sec = mode === "survey" ? (pages[pageIdx].dataset ? pages[pageIdx].dataset.section : null) : mode;
-    menuLinks.forEach(function (a) { a.classList.toggle("on", a.dataset.section === sec); });
+    var inSurvey = (mode === "survey");
+    menuLinks.forEach(function (a, i) {
+      var current = inSurvey ? (pageIdx === i + 1) : (a.dataset.section === mode);
+      var reached = inSurvey ? (pageIdx >= i + 1) : true;
+      a.classList.toggle("on", current);
+      a.classList.toggle("revealed", reached && !current);
+    });
   }
   // on entering a section, the card's typeset title flies to its menu slot
   // (FLIP from big-centred to the small menu-item rect) and crossfades to the
@@ -1007,7 +1021,12 @@
   });
   // menu = the persistent spine (jump anywhere); each card enters its section
   menuLinks.forEach(function (a) { a.addEventListener("click", function () { if (a.dataset.section) openSection(a.dataset.section); }); });
-  document.querySelectorAll("#survey .scard[data-section]").forEach(function (c) { c.addEventListener("click", function () { openSection(c.dataset.section, c.querySelector(".stitle")); }); });
+  document.querySelectorAll("#survey .scard[data-section]").forEach(function (c) {
+    c.addEventListener("click", function () {
+      if (c.dataset.section === "house") { c.classList.toggle("selected"); return; }   // HOME: fade BACKGROUND2 in/out
+      openSection(c.dataset.section, c.querySelector(".stitle"));
+    });
+  });
   document.querySelectorAll("#survey .gopt[data-section]").forEach(function (o) { o.addEventListener("click", function (e) { e.preventDefault(); openSection(o.dataset.section, o.querySelector(".stitle")); }); });
   document.getElementById("svid").addEventListener("click", function () { goPage(1); });
   wm.addEventListener("click", closeSection);
@@ -1019,7 +1038,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.29 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
+  console.log("entry-test4 e4-v0.30 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
 })();
 </script>
 </body>
