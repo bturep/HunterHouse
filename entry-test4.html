@@ -150,8 +150,14 @@
   body.in-section #survey{display:none}
   .scard{height:100dvh;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer}
   .scard img:not(.stitle){display:block}
+  /* PS-composed card — full-canvas layer PNGs stacked (see assets/entry/cards/<name>/).
+     Layers scale to fit so the Photoshop composition is preserved on any screen. */
+  .scard.ps{padding:0;cursor:pointer}
+  .scard.ps .layer{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
   /* ── per-card image size — set each card's height (or width) independently ──
      Edit the value on any one line to tune that card alone. */
+  .scard[data-section="hunter"]  img:not(.stitle){max-height:none;max-width:none;width:auto;height:62vh}
+  .scard[data-section="site"]    img:not(.stitle){max-height:none;max-width:none;width:auto;height:62vh}
   .scard[data-section="archive"] img:not(.stitle){max-height:none;max-width:none;width:auto;height:62vh}
   .scard[data-section="about"]   img:not(.stitle){max-height:none;max-width:none;width:auto;height:62vh}
   /* the section title-block — typeset (scales cleanly), centred over the card
@@ -334,30 +340,21 @@
     <img class="vname" src="assets/entry/nameblock-1970-v2.png" alt="Hunter House · Victoria B.C. · 1970 · Ric Hunter Architect">
     <div class="vcue">Scroll ↓ · or click to enter</div>
   </section>
-  <section class="scard group">
-    <div class="gopts">
-      <a class="gopt" data-section="house">
-        <img src="assets/entry/letter-elev-2.png" alt="The house — sketch elevation">
-        <div class="stitle">House</div>
-        <div class="sblurb">“… a little house we'll start building next week on our land.” The 1970 sketch, the working drawings, the house as built.</div>
-      </a>
-      <a class="gopt" data-section="hunter">
-        <img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0001_RickWorkingOnSquare_1978-08_prev.jpg" alt="Richard Hunter">
-        <div class="stitle">Hunter</div>
-        <div class="sblurb">Richard Morrow Hunter, 1930–2023 — architect, sole client, sole resident of his own five-decade project.</div>
-      </a>
-      <a class="gopt" data-section="site">
-        <img src="https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0112_CovenantSitePlanWithAnnotations_2006_prev.jpg" alt="Site — covenant plan">
-        <div class="stitle">Site</div>
-        <div class="sblurb">203 Goward Road, Saanich — the knoll above Prospect Lake, its covenant, its trees.</div>
-      </a>
-    </div>
+  <!-- HOME: PS-composed layer-stack card (assets/entry/cards/home/) -->
+  <section class="scard ps" data-section="house">
+    <img class="layer" src="assets/entry/cards/home/BACKGROUND.png" alt="">
+    <img class="layer" src="assets/entry/cards/home/SKETCH.png" alt="">
+    <img class="layer" src="assets/entry/cards/home/TITLE.png" alt="">
+    <img class="layer" src="assets/entry/cards/home/TEXT.png" alt="The house — 1970, 1991, 2018">
   </section>
+  <!-- Hunter / Site: placeholder cards until composed in Photoshop -->
+  <section class="scard" data-section="hunter"><div class="titleblock"><div class="stitle">Hunter</div><div class="sblurb">Richard Morrow Hunter, 1930–2023 — architect, sole client, sole resident of his own five-decade project.</div></div><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0001_RickWorkingOnSquare_1978-08_prev.jpg" alt="Richard Hunter"></section>
+  <section class="scard" data-section="site"><div class="titleblock"><div class="stitle">Site</div><div class="sblurb">203 Goward Road, Saanich — the knoll above Prospect Lake, its covenant, its trees.</div></div><img src="https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0112_CovenantSitePlanWithAnnotations_2006_prev.jpg" alt="Site — covenant plan"></section>
   <section class="scard" data-section="archive"><div class="titleblock"><div class="stitle">Archive</div><div class="sblurb">The drawings, photographs, and correspondence — the working file Hunter kept, catalogued.</div></div><img src="assets/entry/caa8-sheet_prev.jpg" alt="The archive — a working drawing"></section>
   <section class="scard" data-section="about"><div class="titleblock"><div class="stitle">About</div><div class="sblurb">The Hunter House Foundation — mandate, people, contact.</div></div><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.22</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.23</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -896,7 +893,7 @@
     // reached the bottom of the section + still scrolling down -> auto-return
     // to the contracted survey, landing on this section's card
     if (mode === "house" && target >= HOUSE_MAX - 0.001 && d > 0) {
-      var card = document.querySelector('#survey .scard.group');   // the House·Hunter·Site card
+      var card = document.querySelector('#survey .scard[data-section="house"]');   // the HOME card
       closeSection();
       pageIdx = 1;
       if (card) document.getElementById("survey").scrollTo(0, card.offsetTop);
@@ -1015,7 +1012,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.22 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
+  console.log("entry-test4 e4-v0.23 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
 })();
 </script>
 </body>
