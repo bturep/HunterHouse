@@ -1102,7 +1102,7 @@
   /* — bin rail (v23/v32): passed collections stack compact at the top;
      the pane ends in a 41px chrome foot carrying the item count (v33). — */
   #bin-rail-top{position:absolute;left:7px;right:7px;z-index:8;overflow:hidden;background:var(--bg)}
-  .rail-clip{visibility:hidden}   /* v83 fix: the single row/header straddling the rail's bottom edge is hidden so its lower slice can't orphan below the strips */
+  /* v83 fix: rows emerging from under the rail fade in (mask set per-scroll in updateBinRails) — no orphaned line, no hard void */
   .br-row{display:flex;justify-content:space-between;align-items:center;height:25px;box-sizing:border-box;
     padding:0 20px 0 12px;background:var(--soft);border-bottom:1px solid var(--rule);
     border-left:2px solid transparent;cursor:pointer;
@@ -4034,7 +4034,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.09.09";
+  const VERSION      = "v1.09.10";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -6457,23 +6457,19 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       return el;
     };
     railT.replaceChildren(...above.map(brRow));
-    // v83 fix (1.09.09): the rail compacts each passed collection (~90px card)
-    // into a 25px strip, so its bottom edge always lands mid-element — the one
-    // row/header straddling that edge would show its lower slice below the
-    // strips as orphaned text (a title with no ID, a gloss with no name). Give
-    // the rail an opaque reserved height so it occludes everything above its
-    // bottom (also lag-proof: a momentum frame that draws before the strips
-    // repaint still can't bleed), then hide the single straddling element so
-    // the first thing below the rail reads clean.
+    // v83 fix (1.09.10): the rail compacts each passed collection (~90px card)
+    // into a 25px strip, so its bottom edge always lands mid-element — the row
+    // straddling that edge used to show its lower slice below the strips as
+    // orphaned text (a title with no ID). Give the rail an opaque reserved
+    // height so it hard-occludes everything above its bottom (also lag-proof:
+    // a momentum frame that draws before the strips repaint still can't bleed),
+    // then fade the list content in over the ~1½ rows just below the rail so a
+    // row emerging from under it dissolves (the sticky-header idiom) instead of
+    // orphaning a stray line or leaving a hard void.
     const H = above.length * BR_H;
     railT.style.height = H + "px";
-    document.querySelectorAll("#rows .rail-clip").forEach(e => e.classList.remove("rail-clip"));
-    if (H > 0) {
-      const yBottom = rect.top + H;
-      const under = document.elementFromPoint(rect.left + 20, yBottom + 1);
-      const straddler = under && under.closest("#rows .row, #rows .ph-head");
-      if (straddler && straddler.getBoundingClientRect().top < yBottom) straddler.classList.add("rail-clip");
-    }
+    rows.style.webkitMaskImage = rows.style.maskImage =
+      H > 0 ? `linear-gradient(to bottom, transparent ${H}px, #000 ${H + 56}px)` : "";
   }
   // v24: re-run the pip after the left panel finishes its width
   // transition — it gets sized during the splash-collapsed layout and
