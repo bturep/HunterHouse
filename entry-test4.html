@@ -148,7 +148,9 @@
   #survey{position:fixed;inset:0;z-index:6;overflow-y:auto;overflow-x:hidden;
     scroll-snap-type:none;background:#f6f5f5;-webkit-overflow-scrolling:touch}
   body.in-section #survey{display:none}
-  .scard{height:100dvh;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer}
+  /* every card PINS (sticky) and the next one rises up from the bottom to cover
+     it — a stacking deck, same effect as the pinned intro video */
+  .scard{height:100dvh;position:sticky;top:0;display:flex;align-items:center;justify-content:center;cursor:pointer}
   .scard img:not(.stitle){display:block}
   /* PS-composed card — full-canvas layer PNGs stacked (see assets/entry/cards/<name>/).
      Layers scale to fit so the Photoshop composition is preserved on any screen. */
@@ -375,7 +377,7 @@
     <img class="layer" src="assets/entry/cards/about/BACKGROUND.jpg" alt="Elevation of the house among the firs"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.55</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.56</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1067,6 +1069,32 @@
     if (st !== _lastST) { _lastST = st; onSurveyScroll(); }
   })();
 
+  // gentle DIRECTIONAL snap: a decisive scroll (>60% toward the next card in the
+  // direction you're going) completes into place; a small scroll rests free. It
+  // never pulls backward against your scroll → no drift.
+  var _snapDir = 1, _snapLast = surveyEl.scrollTop, _snapTimer = null, _snapping = false;
+  function doSnap() {
+    if (mode !== "survey" || _snapping) return;
+    var vh = window.innerHeight, st = surveyEl.scrollTop, idx = st / vh, frac = idx - Math.floor(idx), target;
+    if (frac === 0) return;
+    if (_snapDir >= 0) { if (frac < 0.6) return; target = Math.ceil(idx); }
+    else { if (frac > 0.4) return; target = Math.floor(idx); }
+    target = Math.max(0, Math.min(pages.length - 1, target));
+    var top = pages[target].offsetTop;
+    if (Math.abs(top - st) < 2) return;
+    _snapping = true;
+    surveyEl.scrollTo({ top: top, behavior: "smooth" });
+    setTimeout(function () { _snapping = false; }, 460);
+  }
+  surveyEl.addEventListener("scroll", function () {
+    if (mode !== "survey" || _snapping) return;
+    var st = surveyEl.scrollTop;
+    if (st > _snapLast + 0.5) _snapDir = 1; else if (st < _snapLast - 0.5) _snapDir = -1;
+    _snapLast = st;
+    clearTimeout(_snapTimer);
+    _snapTimer = setTimeout(doSnap, 150);
+  }, { passive: true });
+
   // HOUSE drives the z-sequence; the SURVEY is left to native scroll + CSS
   // proximity snap — free control of the range, a gentle snap onto each card
   window.addEventListener("wheel", function (e) {
@@ -1107,7 +1135,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.55 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
+  console.log("entry-test4 e4-v0.56 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
 })();
 </script>
 </body>
