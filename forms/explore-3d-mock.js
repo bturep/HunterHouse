@@ -1029,7 +1029,7 @@
     setScrollPose:function(p){
       p=Math.max(0,Math.min(1,p));
       var a=0.80*(1-p)+0.02*p;                 // tilt: oblique → overhead
-      var dist=760*(1-p)+1450*p;               // zoom: in → out
+      var dist=760;                            // hold zoom constant — tilt only
       var dir=new THREE.Vector3(0,Math.cos(a),Math.sin(a)).normalize();
       introActive=false; controls.enabled=false;
       var tar=new THREE.Vector3(this.parcel.cx, OVR.tar.y, this.parcel.cz);   // centre on the PROPERTY, not the DEM
