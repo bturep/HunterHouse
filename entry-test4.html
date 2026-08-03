@@ -24,7 +24,7 @@
 <meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="preload" as="image" fetchpriority="high" href="assets/entry/caa8-sheet_thumb.jpg">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
@@ -170,12 +170,15 @@
   /* ── per-card image size — set each card's height (or width) independently ──
      Edit the value on any one line to tune that card alone. */
   .scard[data-section="about"]{background:#fff}   /* the elevation drawing sits on white */
-  /* ABOUT foundation text — Arial 10pt, a quiet block lower-left */
-  .about-text{position:absolute;left:44px;bottom:50px;max-width:300px;z-index:5;
-    font-family:Arial,Helvetica,sans-serif;font-size:10pt;line-height:1.55;color:#1b1918;text-align:left}
-  .about-text p{margin:0 0 13px}
-  .about-text .at-meta{color:#8a8a86;font-size:8.5pt;letter-spacing:.02em}
-  .about-text .at-contact{margin:0;font-size:9.5pt;line-height:1.7}
+  /* on ABOUT the drawing sits in the lower band so the text has a clean field above */
+  .scard[data-section="about"] .layer{top:auto;bottom:0;height:54%;object-position:center bottom}
+  /* ABOUT — a large sans statement over a two-column monospace foot */
+  .about-text{position:absolute;left:150px;top:8vh;width:min(760px,60vw);z-index:5;color:#1b1918}
+  .at-statement{font-family:Arial,Helvetica,sans-serif;font-weight:400;
+    font-size:clamp(20px,2.5vw,38px);line-height:1.3;letter-spacing:-.006em;margin:0 0 clamp(28px,5vh,52px)}
+  .at-foot{display:flex;gap:min(7vw,96px);font-family:'JetBrains Mono',Menlo,monospace;
+    font-size:11px;letter-spacing:.02em;line-height:1.85;color:#9a978f}
+  .at-contact a{color:#1b1918;text-decoration:underline;text-underline-offset:3px}
   /* the section title-block — typeset (scales cleanly), centred over the card
      image, with the leader text beneath. Title sized ~ the nameblock's HOUSE.
      On entry the title flies to its menu slot (see #titlefly). */
@@ -382,14 +385,16 @@
   <section class="scard ps" data-section="about">
     <img class="layer" src="assets/entry/cards/about/BACKGROUND.jpg" alt="Elevation of the house among the firs">
     <div class="about-text">
-      <p>The Hunter House Foundation stewards the residence at 203 Goward Road and the architectural archive of Richard Morrow Hunter (1930–2023) — an openly catalogued, queryable record of a life's practice, opened to scholars, students, and the public.</p>
-      <p class="at-meta">Established 2026 · Victoria, British Columbia · not-for-profit</p>
-      <p class="at-contact">contact@hunterhouse.org<br>203 Goward Road · Saanich · British Columbia</p>
+      <p class="at-statement">The Hunter House Foundation stewards the residence at 203 Goward Road and the architectural archive of Richard Morrow Hunter (1930–2023) — an openly catalogued, queryable record of a life's practice, opened to scholars, students, and the public.</p>
+      <div class="at-foot">
+        <div class="at-meta">Established 2026 · Victoria, British Columbia<br>not-for-profit</div>
+        <div class="at-contact"><a href="mailto:contact@hunterhouse.org">contact@hunterhouse.org</a><br>203 Goward Road · Saanich · British Columbia</div>
+      </div>
     </div>
   </section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.59</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.60</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1148,7 +1153,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.59 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
+  console.log("entry-test4 e4-v0.60 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
 })();
 </script>
 </body>
