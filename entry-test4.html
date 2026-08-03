@@ -112,7 +112,7 @@
   /* the menu — hand-lettered words, a static vertical list (appears only
      inside a section); a dot to the RIGHT marks the active one */
   #menu a{position:relative;display:block}
-  #menu a img.mi{height:46px;width:auto;display:block;opacity:.45;transition:opacity .35s ease}
+  #menu a img.mi{height:30px;width:auto;display:block;opacity:.45;transition:opacity .35s ease}
   #menu a:hover img.mi{opacity:.8}
   #menu a.on img.mi{opacity:1}
   #menu a.on{color:#1b1918}
@@ -154,8 +154,11 @@
      Layers scale to fit so the Photoshop composition is preserved on any screen. */
   .scard.ps{padding:0;cursor:pointer}
   .scard.ps .layer{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
+  /* vertical pointer parallax — depth-tagged layers drift with the cursor (Y only),
+     slightly overscanned so the drift never exposes an edge */
+  .scard.ps .layer[data-depth]{transform:scale(1.06);transition:transform .3s ease-out;will-change:transform}
   /* a second background that fades in smoothly once the card is selected */
-  .scard.ps .bg2{opacity:0;transition:opacity .7s ease}
+  .scard.ps .bg2{opacity:0;transition:opacity .7s ease,transform .3s ease-out}
   .scard.ps.selected .bg2{opacity:1}
   /* full-bleed cards (a photo composition) fill the frame edge-to-edge */
   .scard.ps.cover .layer{object-fit:cover}
@@ -201,10 +204,7 @@
     flex-direction:column !important;align-items:flex-start !important;
     justify-content:flex-start !important;gap:9px !important;padding:0 !important;
     opacity:1 !important;pointer-events:auto !important;text-align:left;z-index:9}
-  #menu a{padding:1px 0 !important;position:relative;white-space:nowrap;
-    opacity:0;transform:translateY(-6px);transition:opacity .5s ease,transform .5s ease}
-  #menu a.revealed{opacity:.38;transform:none}
-  #menu a.on{opacity:1;transform:none}
+  #menu a{padding:1px 0 !important;position:relative;white-space:nowrap;opacity:0}
   #menu a img.mi{opacity:1}
   #menu a.on::after{content:none}
   /* the wordmark: HUNTER HOUSE, black bold, top-left — shown past the film intro (opacity driven in JS) */
@@ -352,20 +352,20 @@
   </section>
   <!-- HOME: PS-composed layer-stack card (assets/entry/cards/home/) -->
   <section class="scard ps" data-section="house">
-    <img class="layer" src="assets/entry/cards/home/BACKGROUND.png?v=4" alt="">
-    <img class="layer bg2" src="assets/entry/cards/home/BACKGROUND2.png?v=4" alt="">
+    <img class="layer" data-depth="0.5" src="assets/entry/cards/home/BACKGROUND.png?v=4" alt="">
+    <img class="layer bg2" data-depth="0.5" src="assets/entry/cards/home/BACKGROUND2.png?v=4" alt="">
   </section>
   <!-- Hunter / Site: placeholder cards until composed in Photoshop -->
   <!-- HUNTER: PS-composed full-bleed card (assets/entry/cards/hunter/) -->
   <section class="scard ps cover" data-section="hunter">
-    <img class="layer" src="assets/entry/cards/hunter/BACKGROUND.png?v=1" alt="">
+    <img class="layer" data-depth="0.8" src="assets/entry/cards/hunter/BACKGROUND.png?v=1" alt="">
   </section>
   <section class="scard" data-section="site"><div class="titleblock"><div class="stitle">Site</div><div class="sblurb">203 Goward Road, Saanich — the knoll above Prospect Lake, its covenant, its trees.</div></div><img src="https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0112_CovenantSitePlanWithAnnotations_2006_prev.jpg" alt="Site — covenant plan"></section>
   <section class="scard" data-section="archive"><div class="titleblock"><div class="stitle">Archive</div><div class="sblurb">The drawings, photographs, and correspondence — the working file Hunter kept, catalogued.</div></div><img src="assets/entry/caa8-sheet_prev.jpg" alt="The archive — a working drawing"></section>
   <section class="scard" data-section="about"><div class="titleblock"><div class="stitle">About</div><div class="sblurb">The Hunter House Foundation — mandate, people, contact.</div></div><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.31</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.32</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -923,13 +923,17 @@
   var titlefly = document.getElementById("titlefly");
   // top-left nav: labels stack in as you scroll the cards. Menu item i belongs
   // to card page i+1 (page 0 is the film). Current = full, past = dimmed, later = hidden.
+  // each title emerges at the edge of its card and disappears at the edge —
+  // opacity tracks scroll: full when the card fills the frame, 0 at its boundaries
   function setSurveyActive() {
-    var inSurvey = (mode === "survey");
+    if (mode !== "survey") {
+      menuLinks.forEach(function (a) { a.style.opacity = (a.dataset.section === mode) ? 1 : 0; });
+      return;
+    }
+    var p = surveyEl.scrollTop / window.innerHeight;
     menuLinks.forEach(function (a, i) {
-      var current = inSurvey ? (pageIdx === i + 1) : (a.dataset.section === mode);
-      var reached = inSurvey ? (pageIdx >= i + 1) : true;
-      a.classList.toggle("on", current);
-      a.classList.toggle("revealed", reached && !current);
+      var d = Math.abs(p - (i + 1));                                 // 0 when card i+1 is centred
+      a.style.opacity = Math.max(0, Math.min(1, (0.5 - d) / 0.3));   // full in the middle, fades to 0 at the edges
     });
   }
   // on entering a section, the card's typeset title flies to its menu slot
@@ -990,11 +994,25 @@
       var s = Math.max(0, Math.min(surveyEl.scrollTop, window.innerHeight));
       vname.style.transform = "translate(-50%,-50%) translateY(" + s + "px)";
     }
-    // keep pageIdx roughly in sync with the free scroll (menu + auto-return)
-    var idx = Math.max(0, Math.min(pages.length - 1, Math.round(surveyEl.scrollTop / window.innerHeight)));
-    if (idx !== pageIdx) { pageIdx = idx; setSurveyActive(); }
+    // keep pageIdx in sync (auto-return) and update the scroll-tied title emergence
+    pageIdx = Math.max(0, Math.min(pages.length - 1, Math.round(surveyEl.scrollTop / window.innerHeight)));
+    setSurveyActive();
   }
   surveyEl.addEventListener("scroll", onSurveyScroll, { passive: true });
+
+  // vertical-only pointer parallax on depth-tagged card layers
+  var depthLayers = document.querySelectorAll(".scard.ps .layer[data-depth]");
+  var PARALLAX_AMP = 46;   // px of vertical drift at full cursor offset, per unit depth
+  function parallax(ny) {
+    depthLayers.forEach(function (l) {
+      var d = parseFloat(l.dataset.depth) || 0;
+      l.style.transform = "translateY(" + (ny * d * PARALLAX_AMP).toFixed(1) + "px) scale(1.06)";
+    });
+  }
+  surveyEl.addEventListener("mousemove", function (e) {
+    parallax(Math.max(-0.5, Math.min(0.5, e.clientY / window.innerHeight - 0.5)));
+  }, { passive: true });
+  surveyEl.addEventListener("mouseleave", function () { parallax(0); });
 
   // HOUSE drives the z-sequence; the SURVEY is left to native scroll + CSS
   // proximity snap — free control of the range, a gentle snap onto each card
@@ -1036,7 +1054,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.31 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
+  console.log("entry-test4 e4-v0.32 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
 })();
 </script>
 </body>
