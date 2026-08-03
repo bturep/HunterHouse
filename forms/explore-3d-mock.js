@@ -1025,21 +1025,20 @@
     houseBurst:kickHouseFx,                          // host-driven: contour haywire ONLY (host owns the camera)
     setWind:function(a){ hostWind=a||0; },           // host-driven: gentle breeze across the land (0 = still)
     houseDiag:{n:HOUSE_N, err:HOUSE_ERR},
-    // host-driven scroll camera: p=0 oblique & zoomed in → p=1 flat top-down & out
-    setScrollPose:function(p){
-      p=Math.max(0,Math.min(1,p));
-      var a=0.80*(1-p)+0.02*p;                 // tilt: oblique → overhead
-      var dist=760;                            // hold zoom constant — tilt only
-      var dir=new THREE.Vector3(0,Math.cos(a),Math.sin(a)).normalize();
-      introActive=false; controls.enabled=false;
-      var tar=new THREE.Vector3(this.parcel.cx, OVR.tar.y, this.parcel.cz);   // centre on the PROPERTY, not the DEM
-      controls.target.copy(tar);
-      camera.position.copy(tar.clone().add(dir.multiplyScalar(dist)));
-      camera.lookAt(controls.target); controls.update();
-    }}; window.__liftoff=kinhinLiftoff;
-  // scroll-cam mode: the host drives the camera via __v.setScrollPose; open oblique
+    // host-driven scroll camera: stores a TARGET; the loop eases toward it (smooth)
+    setScrollPose:function(p){ _scTarget=Math.max(0,Math.min(1,p)); _scOn=true; introActive=false; controls.enabled=false; }
+    }; window.__liftoff=kinhinLiftoff;
+  // smooth scroll-cam: ease the tilt toward the scroll target each frame (no per-event jump)
+  var _scP=0,_scTarget=0,_scOn=false,_PTAR=new THREE.Vector3(window.__v.parcel.cx, OVR.tar.y, window.__v.parcel.cz);
+  function _applyScrollPose(p){
+    var a=0.80*(1-p)+0.02*p;                   // tilt: oblique → overhead (zoom held at 760)
+    var dir=new THREE.Vector3(0,Math.cos(a),Math.sin(a)).normalize();
+    controls.target.copy(_PTAR);
+    camera.position.copy(_PTAR.clone().add(dir.multiplyScalar(760)));
+    camera.lookAt(controls.target);
+  }
   if(new URLSearchParams(location.search).get('scrollcam')==='1'){
-    introActive=false; controls.enabled=false; window.__v.setScrollPose(0);
+    introActive=false; controls.enabled=false; _scOn=true; _scP=0; _scTarget=0; _applyScrollPose(0);
   }
   // host-driven context fade: on house zoom-in the host (mock-home2) calls this
   // each frame with amt 0..1 — EVERYTHING except the contours + the house fades
@@ -1211,6 +1210,7 @@
       const dir=new THREE.Vector3(s*Math.sin(introAz),c,s*Math.cos(introAz));
       const want=INTRO.tar.clone().add(dir.multiplyScalar(INTRO.dist));
       camera.position.lerp(want,0.045); controls.target.lerp(INTRO.tar,0.08); camera.lookAt(controls.target);
-    } else if(controls.enabled){ controls.update(); }
+    } else if(_scOn){ _scP += (_scTarget-_scP)*0.14; _applyScrollPose(_scP); }
+    else if(controls.enabled){ controls.update(); }
     updFx(); projectOverlays(); composer.render(); })();
 })();
