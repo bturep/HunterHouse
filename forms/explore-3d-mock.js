@@ -1024,7 +1024,22 @@
     zoomHouse:enterHouse, backOverview:toOverview,   // standalone lens: full cinematic (fly + burst)
     houseBurst:kickHouseFx,                          // host-driven: contour haywire ONLY (host owns the camera)
     setWind:function(a){ hostWind=a||0; },           // host-driven: gentle breeze across the land (0 = still)
-    houseDiag:{n:HOUSE_N, err:HOUSE_ERR}}; window.__liftoff=kinhinLiftoff;
+    houseDiag:{n:HOUSE_N, err:HOUSE_ERR},
+    // host-driven scroll camera: p=0 oblique & zoomed in → p=1 flat top-down & out
+    setScrollPose:function(p){
+      p=Math.max(0,Math.min(1,p));
+      var a=0.80*(1-p)+0.02*p;                 // tilt: oblique → overhead
+      var dist=760*(1-p)+1980*p;               // zoom: in → out
+      var dir=new THREE.Vector3(0,Math.cos(a),Math.sin(a)).normalize();
+      introActive=false; controls.enabled=false;
+      controls.target.copy(OVR.tar);
+      camera.position.copy(OVR.tar.clone().add(dir.multiplyScalar(dist)));
+      camera.lookAt(controls.target); controls.update();
+    }}; window.__liftoff=kinhinLiftoff;
+  // scroll-cam mode: the host drives the camera via __v.setScrollPose; open oblique
+  if(new URLSearchParams(location.search).get('scrollcam')==='1'){
+    introActive=false; controls.enabled=false; window.__v.setScrollPose(0);
+  }
   // host-driven context fade: on house zoom-in the host (mock-home2) calls this
   // each frame with amt 0..1 — EVERYTHING except the contours + the house fades
   // to 0 (property line, covenant + its label, kinhin trail, oaks, fig, Goward /
