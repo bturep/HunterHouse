@@ -194,15 +194,14 @@
     font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(246,245,245,.72);
     transition:opacity .12s ease}
   #svid .vcue.gone{opacity:0}
-  /* the MENU — a single accumulating stack, top-left. Each label appears ONCE,
-     when you reach its card, and persists; current full, earlier ones dimmed.
-     By ABOUT the whole stack is present. Padded off the corner. */
-  #menu{top:46px !important;left:46px !important;right:auto !important;bottom:auto !important;
-    transform:none !important;transition:none !important;
-    flex-direction:column !important;align-items:flex-start !important;
-    justify-content:flex-start !important;gap:11px !important;padding:0 !important;
-    opacity:1 !important;pointer-events:auto !important;text-align:left;z-index:9}
-  #menu a{padding:0 !important;position:relative;white-space:nowrap;opacity:0;transition:opacity .4s ease}
+  /* the MENU — a single accumulating stack. Each title rides UP anchored to its
+     card as the card comes into view, then DOCKS at its top-left slot and stays
+     (a sticky that never releases). top is driven per-scroll in JS; opacity fades. */
+  #menu{position:fixed !important;top:0 !important;left:0 !important;right:auto !important;bottom:auto !important;
+    transform:none !important;display:block !important;padding:0 !important;gap:0 !important;
+    opacity:1 !important;pointer-events:none !important;z-index:9}
+  #menu a{position:fixed;left:46px;top:46px;padding:0 !important;white-space:nowrap;
+    opacity:0;pointer-events:auto;transition:opacity .3s ease}
   #menu a img.mi{opacity:1}
   /* the wordmark: HUNTER HOUSE, black bold, top-left — shown past the film intro (opacity driven in JS) */
   #wordmark{transition:opacity .4s ease;display:none}
@@ -362,7 +361,7 @@
   <section class="scard" data-section="about"><div class="titleblock"><div class="stitle">About</div><div class="sblurb">The Hunter House Foundation — mandate, people, contact.</div></div><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.36</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.37</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -923,18 +922,25 @@
   // the menu collects items as you scroll: each label appears once you reach its
   // card and PERSISTS (single instance). Current section full, earlier ones dimmed.
   var DIM = 0.34;
+  var ROW0 = 46, ROWSTEP = 42;   // dock position of the top item, and per-item stacking step
   function setSurveyActive() {
-    var here;
-    if (mode === "survey") {
-      // a label only appears once ITS OWN card has arrived (~85% in view) — so it
-      // stays anchored to its card instead of fading in over the card above
-      here = Math.max(0, Math.min(pages.length - 1, Math.floor(surveyEl.scrollTop / window.innerHeight + 0.15)));
-    } else {
-      here = menuLinks.findIndex(function (a) { return a.dataset.section === mode; }) + 1;
-    }
+    var vh = window.innerHeight;
+    var inSurvey = (mode === "survey");
+    var st = inSurvey ? surveyEl.scrollTop : 0;
+    var here = inSurvey ? Math.round(st / vh)
+                        : (menuLinks.findIndex(function (a) { return a.dataset.section === mode; }) + 1);
     menuLinks.forEach(function (a, i) {
       var n = i + 1;                                   // this label's card page
-      a.style.opacity = (n > here) ? 0 : (n === here ? 1 : DIM);
+      var dock = ROW0 + i * ROWSTEP;                   // its final slot in the stack
+      if (inSurvey) {
+        var cardTop = n * vh - st;                     // this card's top edge in the viewport
+        // ride anchored to the card (cardTop + ROW0), but never fall below the dock → it sticks
+        a.style.top = Math.max(dock, cardTop + ROW0) + "px";
+        a.style.opacity = (n < here) ? DIM : 1;        // full while arriving/current, dimmed once passed
+      } else {
+        a.style.top = dock + "px";
+        a.style.opacity = (n > here) ? 0 : (n === here ? 1 : DIM);
+      }
     });
   }
   // on entering a section, the card's typeset title flies to its menu slot
@@ -1041,7 +1047,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.36 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
+  console.log("entry-test4 e4-v0.37 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
 })();
 </script>
 </body>
