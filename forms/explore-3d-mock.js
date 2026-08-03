@@ -456,7 +456,7 @@
   }
   const lblGoward=roadLabel('GOWARD RD', 669, 302, 360, {rot:5.9, h:26});   // aligned to north frontage (seg5), tucked just outside
   const lblEcho=roadLabel('ECHO DR', 1014, 564, 120, {rot:-40.4, h:22});    // seated on the long SE property line (139.6° axis), running SW→NE
-  const plLabel=roadLabel('PROSPECT LAKE', 255, 775, 232, {rot:50, h:22, color:'rgba(132,168,224,0.85)', layer:LAYERS.lake});  // blue, 50°, SW of polygon centre
+  const plLabel=roadLabel('PROSPECT LAKE', 360, 690, 158, {rot:50, h:15, color:'rgba(132,168,224,0.85)', layer:LAYERS.lake});  // blue, 50°, smaller, nudged up-right toward the shore
 
   // text running ALONG a path (centered), draped on terrain — used for the covenant line
   function pathLabel(text, d, opt={}){
