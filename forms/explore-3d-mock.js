@@ -1032,8 +1032,9 @@
       var dist=760*(1-p)+1980*p;               // zoom: in → out
       var dir=new THREE.Vector3(0,Math.cos(a),Math.sin(a)).normalize();
       introActive=false; controls.enabled=false;
-      controls.target.copy(OVR.tar);
-      camera.position.copy(OVR.tar.clone().add(dir.multiplyScalar(dist)));
+      var tar=new THREE.Vector3(this.parcel.cx, OVR.tar.y, this.parcel.cz);   // centre on the PROPERTY, not the DEM
+      controls.target.copy(tar);
+      camera.position.copy(tar.clone().add(dir.multiplyScalar(dist)));
       camera.lookAt(controls.target); controls.update();
     }}; window.__liftoff=kinhinLiftoff;
   // scroll-cam mode: the host drives the camera via __v.setScrollPose; open oblique
