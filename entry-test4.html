@@ -159,11 +159,11 @@
   .scard.ps.selected .bg2{opacity:1}
   /* full-bleed cards (a photo composition) fill the frame edge-to-edge */
   .scard.ps.cover .layer{object-fit:cover}
-  /* SITE: the live contour-lens iframe, inverted to black-on-paper. pointer-events
-     off so the survey still scrolls cleanly (click enters for full interaction). */
-  .scard.site-card{padding:0;background:#f6f5f5}
+  /* SITE: the live contour-lens iframe — full natural colour on its dark ground.
+     pointer-events off so the survey still scrolls cleanly (click enters for interaction). */
+  .scard.site-card{padding:0;background:#242220}
   .scard.site-card .siteframe{position:absolute;inset:0;width:100%;height:100%;border:0;
-    filter:invert(1);pointer-events:none;display:block}
+    pointer-events:none;display:block}
   /* ── per-card image size — set each card's height (or width) independently ──
      Edit the value on any one line to tune that card alone. */
   .scard[data-section="about"]   img:not(.stitle){max-height:none;max-width:none;width:auto;height:62vh}
@@ -205,7 +205,9 @@
     opacity:1 !important;pointer-events:none !important;z-index:9}
   #menu a{position:fixed;left:46px;top:46px;padding:0 !important;white-space:nowrap;
     opacity:0;pointer-events:auto;transition:opacity .3s ease}
-  #menu a img.mi{opacity:1}
+  #menu a img.mi{opacity:1;transition:filter .3s ease}
+  /* over a dark card the ink labels flip to light so they stay legible */
+  #menu.mdark a img.mi{filter:invert(1)}
   /* the wordmark: HUNTER HOUSE, black bold, top-left — shown past the film intro (opacity driven in JS) */
   #wordmark{transition:opacity .4s ease;display:none}
   /* the DOT RAIL — position within the current section, just left of the menu */
@@ -359,8 +361,8 @@
     <img class="layer" src="assets/entry/cards/hunter/BACKGROUND.png?v=1" alt="">
   </section>
   <!-- SITE: the contour site-plan lens (inverted to black-on-paper) -->
-  <section class="scard site-card" data-section="site">
-    <iframe class="siteframe" src="mock-home2.html" title="Hunter House site — contour plan" allow="fullscreen" loading="lazy"></iframe>
+  <section class="scard site-card dark-card" data-section="site">
+    <iframe id="siteframe" class="siteframe" src="forms/explore-3d-mock.html?intro=0&extendw=1&v=32" title="Hunter House site — contour plan" allow="fullscreen" loading="lazy"></iframe>
   </section>
   <!-- ARCHIVE: PS-composed card (the collections envelope) -->
   <section class="scard ps" data-section="archive">
@@ -369,7 +371,7 @@
   <section class="scard" data-section="about"><div class="titleblock"><div class="stitle">About</div><div class="sblurb">The Hunter House Foundation — mandate, people, contact.</div></div><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.41</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.42</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -399,6 +401,21 @@
   // (eased) to the set elevation view — so the plan is always reachable.
   var dragX = 0, dragY = 0, dragging = false, dragPX = 0, dragPY = 0, dragRaf = null;
   var menuLinks = Array.prototype.slice.call(document.querySelectorAll("#menu a"));
+  // strip the SITE lens's own HUD/chrome so only the contour model shows (same-origin)
+  (function stripSiteChrome() {
+    var f = document.getElementById("siteframe");
+    if (!f) return;
+    function strip() {
+      try {
+        var d = f.contentDocument; if (!d || !d.head) return;
+        var st = d.getElementById("hh-entry-strip");
+        if (!st) { st = d.createElement("style"); st.id = "hh-entry-strip"; d.head.appendChild(st); }
+        st.textContent = "#intro,.hud,.crumbs,.bar,.backbtn,.topbtn,.hint,.orbithint,.i-stand,.i-ctrls,.i-prov,.mock-tag,.wordmark{display:none !important}";
+      } catch (e) {}
+    }
+    f.addEventListener("load", function () { strip(); setTimeout(strip, 400); setTimeout(strip, 1500); });
+    strip();
+  })();
   // the sheet's camera keyframes — source coords on the 2000x1530 preview.
   // rot is CSS degrees (positive = clockwise); fit = source px shown
   // across the viewport height. Pairs of identical views = dwells.
@@ -935,7 +952,11 @@
     var vh = window.innerHeight;
     var inSurvey = (mode === "survey");
     var st = inSurvey ? surveyEl.scrollTop : 0;
-    var here = inSurvey ? 0 : (menuLinks.findIndex(function (a) { return a.dataset.section === mode; }) + 1);
+    var here = inSurvey ? Math.max(0, Math.min(pages.length - 1, Math.floor(st / vh)))
+                        : (menuLinks.findIndex(function (a) { return a.dataset.section === mode; }) + 1);
+    // flip the menu to light while the current card is a dark one (the site lens)
+    var cur = pages[here];
+    menuEl.classList.toggle("mdark", !!(cur && cur.classList && cur.classList.contains("dark-card")));
     menuLinks.forEach(function (a, i) {
       var n = i + 1;                                   // this label's card page
       var dock = ROW0 + i * ROWSTEP;                   // its final slot in the stack
@@ -1060,7 +1081,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.41 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
+  console.log("entry-test4 e4-v0.42 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
 })();
 </script>
 </body>
