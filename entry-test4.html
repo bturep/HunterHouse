@@ -159,10 +159,13 @@
   .scard.ps.selected .bg2{opacity:1}
   /* full-bleed cards (a photo composition) fill the frame edge-to-edge */
   .scard.ps.cover .layer{object-fit:cover}
+  /* SITE: the live contour-lens iframe, inverted to black-on-paper. pointer-events
+     off so the survey still scrolls cleanly (click enters for full interaction). */
+  .scard.site-card{padding:0;background:#f6f5f5}
+  .scard.site-card .siteframe{position:absolute;inset:0;width:100%;height:100%;border:0;
+    filter:invert(1);pointer-events:none;display:block}
   /* ── per-card image size — set each card's height (or width) independently ──
      Edit the value on any one line to tune that card alone. */
-  .scard[data-section="site"]    img:not(.stitle){max-height:none;max-width:none;width:auto;height:62vh}
-  .scard[data-section="archive"] img:not(.stitle){max-height:none;max-width:none;width:auto;height:62vh}
   .scard[data-section="about"]   img:not(.stitle){max-height:none;max-width:none;width:auto;height:62vh}
   /* the section title-block — typeset (scales cleanly), centred over the card
      image, with the leader text beneath. Title sized ~ the nameblock's HOUSE.
@@ -311,7 +314,7 @@
   </div>
 </div>
 <div id="siteplan" aria-label="The site">
-  <iframe id="siteplan-lens" title="Hunter House site — contour model" src="mock-home2.html" allow="fullscreen"></iframe>
+  <iframe id="siteplan-lens" title="Hunter House site — contour model" src="about:blank" allow="fullscreen"></iframe>
   <div class="slabel">Site — 203 Goward Road</div>
 </div>
 <div id="site-cue">Site ↓</div>
@@ -355,12 +358,18 @@
   <section class="scard ps cover" data-section="hunter">
     <img class="layer" src="assets/entry/cards/hunter/BACKGROUND.png?v=1" alt="">
   </section>
-  <section class="scard" data-section="site"><div class="titleblock"><div class="stitle">Site</div><div class="sblurb">203 Goward Road, Saanich — the knoll above Prospect Lake, its covenant, its trees.</div></div><img src="https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0112_CovenantSitePlanWithAnnotations_2006_prev.jpg" alt="Site — covenant plan"></section>
-  <section class="scard" data-section="archive"><div class="titleblock"><div class="stitle">Archive</div><div class="sblurb">The drawings, photographs, and correspondence — the working file Hunter kept, catalogued.</div></div><img src="assets/entry/caa8-sheet_prev.jpg" alt="The archive — a working drawing"></section>
+  <!-- SITE: the contour site-plan lens (inverted to black-on-paper) -->
+  <section class="scard site-card" data-section="site">
+    <iframe class="siteframe" src="mock-home2.html" title="Hunter House site — contour plan" allow="fullscreen" loading="lazy"></iframe>
+  </section>
+  <!-- ARCHIVE: PS-composed card (the collections envelope) -->
+  <section class="scard ps" data-section="archive">
+    <img class="layer" src="assets/entry/cards/archive/BACKGROUND.png?v=1" alt="383 drawings, photographs, and letters from five collections">
+  </section>
   <section class="scard" data-section="about"><div class="titleblock"><div class="stitle">About</div><div class="sblurb">The Hunter House Foundation — mandate, people, contact.</div></div><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="About — the house today"></section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.40</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.41</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1051,7 +1060,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.40 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
+  console.log("entry-test4 e4-v0.41 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
 })();
 </script>
 </body>
