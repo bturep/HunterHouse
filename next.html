@@ -4033,7 +4033,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.10-test.12";
+  const VERSION      = "v1.10-test.13";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -11021,7 +11021,12 @@ WHERE {
       // the HHFA about pane as a title-wall threshold. Desktop also collapses
       // both side panels; mobile uses its own #mob-about modal (no panels to
       // collapse — the tabs handle layout).
-      if (window.matchMedia("(max-width:767px)").matches) {
+      // FRONT-DOOR ENTRY: ?enter (used by the entry site's "Browse the archive")
+      // skips the title-wall and lands straight on the grid — the entry already
+      // was the threshold, so a second splash is redundant.
+      if (new URLSearchParams(location.search).has("enter")) {
+        document.documentElement.removeAttribute("data-splash-init");
+      } else if (window.matchMedia("(max-width:767px)").matches) {
         document.body.classList.add("hh-splash");   // × hidden, Continue shown
         openMobAbout();
       } else {
