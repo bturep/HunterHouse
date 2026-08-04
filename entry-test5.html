@@ -312,6 +312,9 @@
     font-family:'JetBrains Mono',Menlo,monospace;font-size:14px;font-weight:500;letter-spacing:.26em;
     text-transform:uppercase;color:#1b1918;pointer-events:none;transition:opacity .3s}
   .enter-cue::after{content:"+";font-size:19px;font-weight:400;letter-spacing:0;line-height:1}
+  /* ARCHIVE leaf: same button, but a REAL link out to the instrument (↗, not +) */
+  .enter-cue.leaf{pointer-events:auto;cursor:pointer;text-decoration:none}
+  .enter-cue.leaf::after{content:"↗";font-size:17px}
   .scard.cover .enter-cue{color:#f6f5f5;text-shadow:0 1px 16px rgba(0,0,0,.55);
     background:rgba(20,18,16,.34);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
   @media (max-width:767px){ .enter-cue{right:5vw;font-size:12px;padding:11px 16px} }
@@ -483,10 +486,10 @@
     <div class="about-text">
       <p class="at-statement">An openly catalogued, queryable record of the practice — drawings, photographs, correspondence, and models, arranged by collection and free to explore.</p>
       <div class="at-foot">
-        <div class="at-contact"><a href="next.html?enter" target="_blank" rel="noopener">Browse the archive →</a></div>
         <div class="at-meta">HH-FRH-0009<br>Central glass-domed garden, 1977</div>
       </div>
     </div>
+    <a class="enter-cue leaf" href="next.html?enter" target="_blank" rel="noopener">Browse the Archive</a>
   </section>
   <!-- ABOUT: coloured elevation of the house among the firs + foundation text -->
   <section class="scard ps" data-section="about">
@@ -507,7 +510,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.06</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.07</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1351,7 +1354,8 @@
     // about: the endpoint card — the survey scroll reaches it
   }); });
   document.querySelectorAll("#survey .scard[data-section]").forEach(function (c) {
-    c.addEventListener("click", function () {
+    c.addEventListener("click", function (e) {
+      if (e.target.closest("a")) return;   // a real link inside the card (e.g. Browse the Archive) handles itself
       var s = c.dataset.section;
       if (s === "house" || s === "hunter") { openRoom(s); return; }   // deep sections → lateral room
       if (s === "archive") { window.open("next.html?enter", "_blank", "noopener"); return; }   // leaf → the instrument, new tab (splash skipped)
@@ -1369,7 +1373,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.06 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.07 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
