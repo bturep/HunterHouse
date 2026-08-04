@@ -152,6 +152,14 @@
      it — a stacking deck, same effect as the pinned intro video */
   .scard{height:100dvh;position:sticky;top:0;display:flex;align-items:center;justify-content:center;cursor:pointer}
   .scard img:not(.stitle){display:block}
+  /* the scroll-linked cards ride on their own compositor layer so the pinning
+     transform tracks the scroll tightly */
+  .scard[data-section="hunter"],.scard[data-section="archive"]{will-change:transform;backface-visibility:hidden}
+  /* ACT 1 runway: film + HOUSE share 200vh. HOUSE is pulled up over the film
+     (margin) and STICKS natively for the first viewport — the film (on top,
+     z:7) slides up to reveal the compositor-pinned HOUSE. No JS pin → no shimmer. */
+  #act1{position:relative;height:200dvh}
+  #act1 .scard[data-section="house"]{margin-top:-100dvh;z-index:1}
   /* PS-composed card — full-canvas layer PNGs stacked (see assets/entry/cards/<name>/).
      Layers scale to fit so the Photoshop composition is preserved on any screen. */
   .scard.ps{padding:0;cursor:pointer;background:#f6f5f5}   /* opaque backing so the card covers the pinned intro */
@@ -429,6 +437,10 @@
 <!-- ── SURVEY: one contracted key-frame card per section (scroll for the whole
      architecture); click / menu enters a section in place. ── -->
 <div id="survey" aria-label="Project survey">
+  <!-- ACT 1: the film + HOUSE share one 200vh runway. HOUSE sticks natively
+       (compositor-pinned) beneath the film; the film slides up over it (JS) to
+       reveal it. Pinning HOUSE in CSS, not JS, kills the seg0 shimmer. -->
+  <div id="act1">
   <section id="svid" title="Enter">
     <video autoplay muted loop playsinline poster="assets/entry/entry-still.jpg">
       <source src="assets/entry/entry-loop.mp4" type="video/mp4">
@@ -447,6 +459,7 @@
     </div>
     <div class="enter-cue">Enter</div>
   </section>
+  </div><!-- /#act1 -->
   <!-- Hunter / Site: placeholder cards until composed in Photoshop -->
   <!-- HUNTER: PS-composed full-bleed card (assets/entry/cards/hunter/) -->
   <section class="scard ps cover" data-section="hunter">
@@ -494,7 +507,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.02</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.03</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1061,6 +1074,9 @@
   var surveyEl = document.getElementById("survey");
   var pages = [document.getElementById("svid")];
   document.querySelectorAll("#survey .scard").forEach(function (c) { pages.push(c); });
+  // every page's scroll STOP is a whole viewport (0,V,2V,3V,4V) — read it this way
+  // rather than offsetTop, since ACT 1 nests svid+HOUSE (their offsetTop is local).
+  function stopOf(i) { return i * window.innerHeight; }
   var pageIdx = 0, paging = false, wheelLock = false;
   var vname = document.querySelector("#svid .vname");
   var menuEl = document.getElementById("menu");
@@ -1077,7 +1093,7 @@
     var here;
     if (inSurvey) {                                    // current card = last one whose top we've passed
       here = 0;
-      for (var k = 0; k < pages.length; k++) { if (pages[k].offsetTop <= st + 2) here = k; }
+      for (var k = 0; k < pages.length; k++) { if (stopOf(k) <= st + 2) here = k; }
     } else {
       here = menuLinks.findIndex(function (a) { return a.dataset.section === mode; }) + 1;
     }
@@ -1088,11 +1104,11 @@
       var n = i + 1;                                   // this label's card page (pages[n])
       var dock = ROW0 + i * ROWSTEP;                   // its final slot in the stack
       if (inSurvey) {
-        var cardTop = pages[n].offsetTop - st;         // this card's top edge in the viewport (height-aware)
+        var cardTop = stopOf(n) - st;                  // this card's top edge in the viewport (height-aware)
         // ride anchored to the card (cardTop + ROW0), but never fall below the dock → it sticks
         a.style.top = Math.max(dock, cardTop + ROW0) + "px";
         // dim once you cross the edge of the NEXT card (i.e. it fills the frame)
-        var dimNow = (i + 1 < menuLinks.length) && (st >= pages[n + 1].offsetTop - 1);
+        var dimNow = (i + 1 < menuLinks.length) && (st >= stopOf(n + 1) - 1);
         a.style.opacity = dimNow ? DIM : 1;
       } else {
         a.style.top = dock + "px";
@@ -1159,7 +1175,7 @@
   function goPage(i) {
     pageIdx = Math.max(0, Math.min(pages.length - 1, i));
     paging = true;
-    surveyEl.scrollTo({ top: pages[pageIdx].offsetTop, behavior: "smooth" });
+    surveyEl.scrollTo({ top: stopOf(pageIdx), behavior: "smooth" });
     setSurveyActive();
     setTimeout(function () { paging = false; }, 640);
   }
@@ -1178,16 +1194,14 @@
   function driveReveal() {
     var vh = window.innerHeight, st = surveyEl.scrollTop;
     var sv = Math.min(st, vh);                                   // film slide across the first viewport
-    svidEl.style.transform = "translateY(" + (-sv) + "px)";
-    if (vname) vname.style.transform = "translate(-50%,-50%) translateY(" + sv + "px)";   // hold the nameblock static
-    // HOUSE: held pinned across seg0 (revealed), then slides up across seg1
-    var hy = st <= vh ? (st - vh) : (st <= 2 * vh ? (vh - st) : -vh);
-    if (pages[1]) pages[1].style.transform = "translateY(" + hy + "px)";
+    svidEl.style.transform = "translate3d(0," + (-sv) + "px,0)";
+    if (vname) vname.style.transform = "translate(-50%,-50%) translate3d(0," + sv + "px,0)";   // hold the nameblock static
+    // HOUSE pins/scrolls natively via #act1 (compositor) — no JS transform (no shimmer)
     // HUNTER: stays pinned so ARCHIVE COVERS it (the 2→1 depth step) — no transform
     if (pages[2]) pages[2].style.transform = "none";
     // ARCHIVE: pinned through the cover, then slides up into a flat scroll → ABOUT
     var ay = st <= 3 * vh ? 0 : (st <= 4 * vh ? -(st - 3 * vh) : -vh);
-    if (pages[3]) pages[3].style.transform = "translateY(" + ay + "px)";
+    if (pages[3]) pages[3].style.transform = "translate3d(0," + ay + "px,0)";
   }
   function onSurveyScroll() {
     updateWordmark();
@@ -1221,7 +1235,7 @@
     if (_snapDir >= 0) { if (frac < 0.6) return; target = Math.ceil(idx); }
     else { if (frac > 0.4) return; target = Math.floor(idx); }
     target = Math.max(0, Math.min(pages.length - 1, target));
-    var top = pages[target].offsetTop;
+    var top = stopOf(target);
     if (Math.abs(top - st) < 2) return;
     _snapping = true;
     surveyEl.scrollTo({ top: top, behavior: "smooth" });
@@ -1330,7 +1344,12 @@
     }
   });
   // menu = the persistent spine (jump anywhere); each card enters its section
-  menuLinks.forEach(function (a) { a.addEventListener("click", function () { if (a.dataset.section) openSection(a.dataset.section); }); });
+  menuLinks.forEach(function (a) { a.addEventListener("click", function () {
+    var s = a.dataset.section; if (!s) return;
+    if (s === "house" || s === "hunter") { openRoom(s); }             // deep → lateral room
+    else if (s === "archive") { window.open("browse.html", "_blank", "noopener"); }   // leaf → instrument
+    // about: the endpoint card — the survey scroll reaches it
+  }); });
   document.querySelectorAll("#survey .scard[data-section]").forEach(function (c) {
     c.addEventListener("click", function () {
       var s = c.dataset.section;
@@ -1350,7 +1369,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.02 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.03 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
