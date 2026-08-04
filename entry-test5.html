@@ -305,13 +305,13 @@
   .room-pager button:hover{opacity:1}
   .room-pager button:disabled{opacity:.22;cursor:default}
   body.room-open #menu{opacity:0 !important;pointer-events:none}   /* corridor nav suspended inside a room */
-  /* the ENTER cue — a deep card opens laterally (2b). Parked on the RIGHT edge,
-     vertically centred, pointing toward where the room slides in from. */
+  /* the MORE cue — a deep card has more behind it (2b). Right edge, vertically
+     centred. "More +" reads as additional content, not a spatial move. */
   .enter-cue{position:absolute;right:4.5vw;top:50%;transform:translateY(-50%);z-index:6;
-    display:inline-flex;align-items:center;gap:14px;padding:13px 22px;border:1.5px solid currentColor;
+    display:inline-flex;align-items:center;gap:12px;padding:13px 22px;border:1.5px solid currentColor;
     font-family:'JetBrains Mono',Menlo,monospace;font-size:14px;font-weight:500;letter-spacing:.26em;
     text-transform:uppercase;color:#1b1918;pointer-events:none;transition:opacity .3s}
-  .enter-cue::after{content:"→";font-size:22px;font-weight:400;letter-spacing:0;line-height:1}
+  .enter-cue::after{content:"+";font-size:19px;font-weight:400;letter-spacing:0;line-height:1}
   .scard.cover .enter-cue{color:#f6f5f5;text-shadow:0 1px 16px rgba(0,0,0,.55);
     background:rgba(20,18,16,.34);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
   @media (max-width:767px){ .enter-cue{right:5vw;font-size:12px;padding:11px 16px} }
@@ -457,7 +457,7 @@
         <div class="at-meta">HH-FRH-•••• &nbsp;(to confirm)<br>Photograph, Frances Hunter Collection</div>
       </div>
     </div>
-    <div class="enter-cue">Enter</div>
+    <div class="enter-cue">More</div>
   </section>
   </div><!-- /#act1 -->
   <!-- HOME: PS-composed layer-stack card (assets/entry/cards/home/) -->
@@ -470,7 +470,7 @@
         <div class="at-meta">HH-FRH · L001 &nbsp;(correspondence)<br>Letter with a sketch of the house, c.1969</div>
       </div>
     </div>
-    <div class="enter-cue">Enter</div>
+    <div class="enter-cue">More</div>
   </section>
   <!-- SITE section removed (saved for reinstatement); the driveSiteCam/scrollcam code + forms/explore-3d-mock lens stay dormant. To restore, uncomment this + the SITE menu item:
   <section class="scard site-card dark-card" data-section="site">
@@ -507,7 +507,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.05</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.06</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1369,7 +1369,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.05 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.06 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
