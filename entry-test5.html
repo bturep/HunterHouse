@@ -159,7 +159,7 @@
      (margin) and STICKS natively for the first viewport — the film (on top,
      z:7) slides up to reveal the compositor-pinned HOUSE. No JS pin → no shimmer. */
   #act1{position:relative;height:200dvh}
-  #act1 .scard[data-section="house"]{margin-top:-100dvh;z-index:1}
+  #act1 .scard{margin-top:-100dvh;z-index:1}   /* the one card in act1 (the reveal card) sits over the film */
   /* PS-composed card — full-canvas layer PNGs stacked (see assets/entry/cards/<name>/).
      Layers scale to fit so the Photoshop composition is preserved on any screen. */
   .scard.ps{padding:0;cursor:pointer;background:#f6f5f5}   /* opaque backing so the card covers the pinned intro */
@@ -425,8 +425,8 @@
 </div>
 <div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:18px;letter-spacing:.04em;text-transform:uppercase;color:#1b1918;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
 <nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62);transform:translateY(-110%);opacity:0;will-change:transform,opacity">
-  <a data-section="house" style="padding:0;cursor:pointer" aria-label="House"><img class="mi" src="assets/entry/title-house.png" alt="House"></a>
   <a data-section="hunter" style="padding:0;cursor:pointer" aria-label="Hunter"><img class="mi" src="assets/entry/title-hunter.png" alt="Hunter"></a>
+  <a data-section="house" style="padding:0;cursor:pointer" aria-label="House"><img class="mi" src="assets/entry/title-house.png" alt="House"></a>
   <!-- SITE removed (saved for reinstatement): <a data-section="site" style="padding:0;cursor:pointer" aria-label="Site"><img class="mi" src="assets/entry/title-site.png" alt="Site"></a> -->
   <a data-section="archive" style="padding:0;cursor:pointer" aria-label="Archive"><img class="mi" src="assets/entry/title-archive.png" alt="Archive"></a>
   <a data-section="about" style="padding:0;cursor:pointer" aria-label="About"><img class="mi" src="assets/entry/title-about.png" alt="About"></a>
@@ -447,6 +447,19 @@
     </video>
     <img class="vname" src="assets/entry/nameblock-1970-v3.png" alt="Hunter House · Victoria B.C. · 1970 · Ric Hunter Architect">
   </section>
+  <!-- HUNTER: revealed first (in #act1) so the menu reads HUNTER · HOUSE · ARCHIVE.
+       PS-composed full-bleed card (assets/entry/cards/hunter/) -->
+  <section class="scard ps cover" data-section="hunter">
+    <img class="layer" src="assets/entry/cards/hunter/BACKGROUND.jpg" alt="">
+    <div class="about-text">
+      <p class="at-statement">Richard Morrow Hunter, 1930–2023 — architect. A West Coast life measured in houses, drawings, and the company he kept.</p>
+      <div class="at-foot">
+        <div class="at-meta">HH-FRH-•••• &nbsp;(to confirm)<br>Photograph, Frances Hunter Collection</div>
+      </div>
+    </div>
+    <div class="enter-cue">Enter</div>
+  </section>
+  </div><!-- /#act1 -->
   <!-- HOME: PS-composed layer-stack card (assets/entry/cards/home/) -->
   <section class="scard ps" data-section="house">
     <img class="layer" src="assets/entry/cards/home/BACKGROUND.jpg?v=2" alt="">
@@ -455,19 +468,6 @@
       <p class="at-statement">A house for Ric and Frances Hunter at 203 Goward Road — sketched in a letter before the ground was broken, then built by the architect's own hands, 1970–1974.</p>
       <div class="at-foot">
         <div class="at-meta">HH-FRH · L001 &nbsp;(correspondence)<br>Letter with a sketch of the house, c.1969</div>
-      </div>
-    </div>
-    <div class="enter-cue">Enter</div>
-  </section>
-  </div><!-- /#act1 -->
-  <!-- Hunter / Site: placeholder cards until composed in Photoshop -->
-  <!-- HUNTER: PS-composed full-bleed card (assets/entry/cards/hunter/) -->
-  <section class="scard ps cover" data-section="hunter">
-    <img class="layer" src="assets/entry/cards/hunter/BACKGROUND.jpg" alt="">
-    <div class="about-text">
-      <p class="at-statement">Richard Morrow Hunter, 1930–2023 — architect. A West Coast life measured in houses, drawings, and the company he kept.</p>
-      <div class="at-foot">
-        <div class="at-meta">HH-FRH-•••• &nbsp;(to confirm)<br>Photograph, Frances Hunter Collection</div>
       </div>
     </div>
     <div class="enter-cue">Enter</div>
@@ -507,7 +507,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.04</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.05</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1369,7 +1369,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.04 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.05 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
