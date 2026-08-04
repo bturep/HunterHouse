@@ -184,6 +184,13 @@
   .scard.cover .about-text{color:#f6f5f5;text-shadow:0 1px 22px rgba(0,0,0,.6)}
   .scard.cover .at-foot{color:rgba(246,245,245,.85)}
   .scard.cover .at-contact a{color:#f6f5f5}
+  /* each card carries the caption in its own corner — not always top-left —
+     placed into that image's clearer / darker negative space. ABOUT = top-left (base). */
+  .scard[data-section="house"]   .about-text{top:auto;bottom:8vh}                     /* bottom-left  */
+  .scard[data-section="hunter"]  .about-text{top:auto;bottom:8vh;left:auto;right:6vw;
+    justify-content:flex-end;text-align:right}                                        /* bottom-right */
+  .scard[data-section="archive"] .about-text{left:auto;right:6vw;
+    justify-content:flex-end;text-align:right}                                        /* top-right    */
   /* the section title-block — typeset (scales cleanly), centred over the card
      image, with the leader text beneath. Title sized ~ the nameblock's HOUSE.
      On entry the title flies to its menu slot (see #titlefly). */
@@ -419,7 +426,7 @@
   </section>
 </div>
 <div id="sec-panel"><img alt=""></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.66</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e4-v0.67</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1178,7 +1185,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test4 e4-v0.66 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
+  console.log("entry-test4 e4-v0.67 — survey to 3 cards: House·Hunter·Site grouped, then Archive, then About");
 })();
 </script>
 </body>
