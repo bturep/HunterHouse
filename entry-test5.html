@@ -180,12 +180,13 @@
   .scard[data-section="about"]{background:#fff}   /* the elevation drawing sits on white, full height */
   /* the shared caption form — a large sans statement beside a mono detail column.
      Reused on every card (ABOUT foundation text · HOUSE/HUNTER/ARCHIVE image details). */
-  .about-text{position:absolute;left:50%;transform:translateX(-50%);top:46px;width:min(760px,88vw);
-    display:flex;flex-direction:column;align-items:center;gap:min(3.4vh,32px);
-    text-align:center;z-index:5;color:#1b1918}
-  .at-statement{max-width:660px;font-family:Arial,Helvetica,sans-serif;font-weight:400;
+  /* the paragraph BLOCK is centred on the card; the text inside stays LEFT-justified */
+  .about-text{position:absolute;left:50%;transform:translateX(-50%);top:46px;width:min(560px,86vw);
+    display:flex;flex-direction:column;align-items:flex-start;gap:min(3.4vh,30px);
+    text-align:left;z-index:5;color:#1b1918}
+  .at-statement{font-family:Arial,Helvetica,sans-serif;font-weight:400;
     font-size:clamp(16px,1.7vw,26px);line-height:1.32;letter-spacing:-.004em;margin:0}
-  .at-foot{display:flex;flex-direction:column;align-items:center;gap:14px;font-family:'JetBrains Mono',Menlo,monospace;
+  .at-foot{display:flex;flex-direction:column;align-items:flex-start;gap:14px;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:11px;letter-spacing:.02em;line-height:1.85;color:#9a978f}
   .at-contact a{color:#1b1918;text-decoration:underline;text-underline-offset:3px}
   .at-meta a{color:inherit;text-decoration:underline;text-underline-offset:3px}
@@ -272,13 +273,16 @@
     transition:transform .5s cubic-bezier(.4,0,.2,1);will-change:transform}
   .plate{flex:0 0 100%;width:100%;height:100%;position:relative;overflow-y:auto;
     -webkit-overflow-scrolling:touch;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;text-align:center;padding:8vh 250px;box-sizing:border-box}
+    align-items:center;justify-content:center;text-align:left;padding:8vh 250px;box-sizing:border-box}
+  /* the text column is centred as a block; the text inside stays left-justified
+     (shared width → the blocks share a left edge instead of ragged-centring) */
+  .plate .pk,.plate .pt,.plate .pb,.plate .pq,.plate .pqa{width:min(680px,100%)}
   .plate.img{padding:0;align-items:stretch;justify-content:stretch;background:#111}
   .plate .pimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
   .plate.img::after{content:"";position:absolute;left:0;right:0;bottom:0;height:44%;z-index:1;
     background:linear-gradient(to top,rgba(0,0,0,.52),rgba(0,0,0,0));pointer-events:none}
   .plate .pcap{position:absolute;left:50%;transform:translateX(-50%);bottom:8vh;z-index:2;
-    max-width:min(560px,80vw);text-align:center;
+    width:min(560px,80vw);text-align:left;
     font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.02em;line-height:1.85;
     color:#f6f5f5;text-shadow:0 1px 22px rgba(0,0,0,.6)}
   .plate .pk{font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;
@@ -286,9 +290,9 @@
   .plate .pt{font-weight:800;font-size:clamp(30px,4.4vw,60px);line-height:1.02;letter-spacing:.004em;
     text-transform:uppercase;color:#1b1918;margin:0 0 24px}
   .plate .pb{font-family:Arial,Helvetica,sans-serif;font-size:clamp(16px,1.5vw,22px);line-height:1.4;
-    max-width:640px;color:#3a372f;margin:0}
+    color:#3a372f;margin:0}
   .plate .pq{font-family:Arial,Helvetica,sans-serif;font-weight:400;font-size:clamp(22px,3vw,40px);
-    line-height:1.22;max-width:820px;color:#1b1918;margin:0 0 20px}
+    line-height:1.22;color:#1b1918;margin:0 0 20px}
   .plate .pqa{font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.06em;
     text-transform:uppercase;color:#76726a}
   /* controls live in the top-right "control corner"; the pager sits bottom-centre */
@@ -509,7 +513,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.08</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.09</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1372,7 +1376,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.08 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.09 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
