@@ -194,10 +194,15 @@
   .scard.cover .about-text{color:#f6f5f5;text-shadow:0 1px 22px rgba(0,0,0,.6)}
   .scard.cover .at-foot{color:rgba(246,245,245,.85)}
   .scard.cover .at-contact a{color:#f6f5f5}
-  /* horizontally centred on every card; vary only the vertical band (top vs bottom). */
-  .scard[data-section="house"]  .about-text{top:auto;bottom:8vh}
-  .scard[data-section="hunter"] .about-text{top:auto;bottom:8vh}
-  /* archive + about keep the base top-centre */
+  /* each caption sits in that image's most readable zone (block centred, text left):
+     HOUSE = base top-centre (the sketch's upper half is clear white)
+     HUNTER = bottom (the dark lower band of the drum photo)
+     ARCHIVE = vertical middle · ABOUT = shifted left, clear of the centred elevation */
+  .scard[data-section="hunter"]  .about-text{top:auto;bottom:8vh}
+  .scard[data-section="archive"] .about-text{top:50%;transform:translate(-50%,-50%);
+    background:rgba(18,16,14,.30);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+    padding:20px 24px;border-radius:2px}   /* soft scrim — legible over the bright dome */
+  .scard[data-section="about"]   .about-text{left:6vw;top:26vh;transform:none}   /* left + below the menu stack */
   /* the section title-block — typeset (scales cleanly), centred over the card
      image, with the leader text beneath. Title sized ~ the nameblock's HOUSE.
      On entry the title flies to its menu slot (see #titlefly). */
@@ -513,7 +518,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.09</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.11</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1376,7 +1381,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.09 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.11 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
