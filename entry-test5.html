@@ -297,11 +297,16 @@
   .room-pager button:hover{opacity:1}
   .room-pager button:disabled{opacity:.22;cursor:default}
   body.room-open #menu{opacity:0 !important;pointer-events:none}   /* corridor nav suspended inside a room */
-  /* the ENTER cue — signals a deep card opens laterally (2b) */
-  .enter-cue{position:absolute;left:50%;bottom:4.5vh;transform:translateX(-50%);z-index:6;
-    font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;
-    color:rgba(27,25,24,.5);pointer-events:none;transition:opacity .3s}
-  .scard.cover .enter-cue{color:rgba(246,245,245,.82);text-shadow:0 1px 14px rgba(0,0,0,.5)}
+  /* the ENTER cue — a deep card opens laterally (2b). Parked on the RIGHT edge,
+     vertically centred, pointing toward where the room slides in from. */
+  .enter-cue{position:absolute;right:4.5vw;top:50%;transform:translateY(-50%);z-index:6;
+    display:inline-flex;align-items:center;gap:14px;padding:13px 22px;border:1.5px solid currentColor;
+    font-family:'JetBrains Mono',Menlo,monospace;font-size:14px;font-weight:500;letter-spacing:.26em;
+    text-transform:uppercase;color:#1b1918;pointer-events:none;transition:opacity .3s}
+  .enter-cue::after{content:"→";font-size:22px;font-weight:400;letter-spacing:0;line-height:1}
+  .scard.cover .enter-cue{color:#f6f5f5;text-shadow:0 1px 16px rgba(0,0,0,.55);
+    background:rgba(20,18,16,.34);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+  @media (max-width:767px){ .enter-cue{right:5vw;font-size:12px;padding:11px 16px} }
   @media (max-width:767px){
     .plate{padding:12vh 26px}
     .plate .pcap{left:26px;max-width:82vw}
@@ -440,7 +445,7 @@
         <div class="at-meta">HH-FRH · L001 &nbsp;(correspondence)<br>Letter with a sketch of the house, c.1969</div>
       </div>
     </div>
-    <div class="enter-cue">Enter →</div>
+    <div class="enter-cue">Enter</div>
   </section>
   <!-- Hunter / Site: placeholder cards until composed in Photoshop -->
   <!-- HUNTER: PS-composed full-bleed card (assets/entry/cards/hunter/) -->
@@ -452,7 +457,7 @@
         <div class="at-meta">HH-FRH-•••• &nbsp;(to confirm)<br>Photograph, Frances Hunter Collection</div>
       </div>
     </div>
-    <div class="enter-cue">Enter →</div>
+    <div class="enter-cue">Enter</div>
   </section>
   <!-- SITE section removed (saved for reinstatement); the driveSiteCam/scrollcam code + forms/explore-3d-mock lens stay dormant. To restore, uncomment this + the SITE menu item:
   <section class="scard site-card dark-card" data-section="site">
@@ -489,7 +494,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.01</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.02</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1163,12 +1168,12 @@
   var vcue = document.querySelector("#svid .vcue");
   // ── per-transition motion (the deck stays a uniform sticky stack — offsets,
   //    snap and the menu are untouched; only the visual motion is driven here) ──
-  //  seg0  intro→house   REVEAL : film slides up, nameblock static+clipped,
-  //                               HOUSE held full-screen beneath it
-  //  seg1  house→hunter   SCROLL : HOUSE slides up and off
-  //  seg2  hunter→archive SCROLL : HUNTER slides up and off
-  //  seg3  archive→about  COVER  : ABOUT rises over the pinned ARCHIVE (default;
-  //                               no transform — ARCHIVE/ABOUT are left alone)
+  //  DEPTH 1,2,2,1,1 — a layered move at every depth CHANGE, a flat scroll when
+  //  depth holds:
+  //  seg0  film→house    REVEAL (1→2): film slides up, HOUSE held beneath it
+  //  seg1  house→hunter   SCROLL (2→2): HOUSE slides up and off
+  //  seg2  hunter→archive COVER  (2→1): ARCHIVE rises over the STATIC HUNTER
+  //  seg3  archive→about  SCROLL (1→1): ARCHIVE slides up, ABOUT rises
   var svidEl = document.getElementById("svid");
   function driveReveal() {
     var vh = window.innerHeight, st = surveyEl.scrollTop;
@@ -1178,9 +1183,11 @@
     // HOUSE: held pinned across seg0 (revealed), then slides up across seg1
     var hy = st <= vh ? (st - vh) : (st <= 2 * vh ? (vh - st) : -vh);
     if (pages[1]) pages[1].style.transform = "translateY(" + hy + "px)";
-    // HUNTER: natural until it pins at 2·vh, then slides up across seg2
-    var ny = st <= 2 * vh ? 0 : (st <= 3 * vh ? -(st - 2 * vh) : -vh);
-    if (pages[2]) pages[2].style.transform = "translateY(" + ny + "px)";
+    // HUNTER: stays pinned so ARCHIVE COVERS it (the 2→1 depth step) — no transform
+    if (pages[2]) pages[2].style.transform = "none";
+    // ARCHIVE: pinned through the cover, then slides up into a flat scroll → ABOUT
+    var ay = st <= 3 * vh ? 0 : (st <= 4 * vh ? -(st - 3 * vh) : -vh);
+    if (pages[3]) pages[3].style.transform = "translateY(" + ay + "px)";
   }
   function onSurveyScroll() {
     updateWordmark();
@@ -1343,7 +1350,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.01 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.02 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
