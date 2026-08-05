@@ -523,7 +523,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.21</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.22</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1238,8 +1238,9 @@
   function onSurveyScroll() {
     updateWordmark();
     if (vcue) vcue.classList.toggle("gone", surveyEl.scrollTop > 4);   // fast fade the moment scrolling starts
-    // keep pageIdx in sync (auto-return) and update the scroll-tied title emergence
-    pageIdx = Math.max(0, Math.min(pages.length - 1, Math.round(surveyEl.scrollTop / window.innerHeight)));
+    // keep pageIdx in sync with the scroll — but NOT mid page-animation, so a swipe
+    // during the glide still advances from the committed target (not the live position)
+    if (!paging) pageIdx = Math.max(0, Math.min(pages.length - 1, Math.round(surveyEl.scrollTop / window.innerHeight)));
     setSurveyActive();
     driveReveal();
     driveSiteCam();
@@ -1287,26 +1288,30 @@
   //    that locks the card to the frame). A slow, deliberate drag scrubs between them,
   //    overriding the snap. Native momentum is taken over so a flick can't skip pages.
   var ty = null;
-  var _wLock = false, _wTimer = null, _tY0 = 0, _tLastY = 0, _tT0 = 0, _tActive = false;
-  function _pageFrom(dir) {                        // one page from the current position, in dir
-    var idx = surveyEl.scrollTop / window.innerHeight;
-    goPage(dir > 0 ? Math.floor(idx + 0.001) + 1 : Math.ceil(idx - 0.001) - 1);
-  }
+  var _wLock = false, _wTimer = null, _wLastT = 0, _wPrevAbs = 0, _tY0 = 0, _tLastY = 0, _tT0 = 0, _tActive = false;
+  function _pageFrom(dir) { goPage(pageIdx + dir); }   // one page from the COMMITTED page (not the mid-animation scroll)
   window.addEventListener("wheel", function (e) {
     if (mode === "house") { e.preventDefault(); nudge(e.deltaY / 900); return; }
     if (mode !== "survey" || document.body.classList.contains("room-open")) return;
     e.preventDefault();                            // take over vertical navigation
-    if (_wLock) {                                  // gesture + momentum tail still arriving → absorb it,
-      clearTimeout(_wTimer);                       // keep the lock alive so no late event leaks into a scrub (the "peek")
-      _wTimer = setTimeout(function () { _wLock = false; }, 260);
+    var now = Date.now(), gap = now - _wLastT, ad = Math.abs(e.deltaY), dir = e.deltaY > 0 ? 1 : -1;
+    _wLastT = now;
+    // a NEW gesture = a pause since the last event, OR a fresh delta spiking up out of the
+    // decaying momentum tail. This is what lets a second swipe page while the previous
+    // flick's momentum is still trickling in (rather than being absorbed as tail).
+    var fresh = (gap > 120) || (ad >= 30 && ad > _wPrevAbs * 2);
+    _wPrevAbs = ad;
+    if (_wLock) {                                  // inside the previous gesture's momentum tail
+      clearTimeout(_wTimer); _wTimer = setTimeout(function () { _wLock = false; }, 180);   // keep absorbing the tail
+      if (fresh && ad >= 18) _pageFrom(dir);       // ...unless a genuine new swipe broke through → page again
       return;
     }
-    if (Math.abs(e.deltaY) >= 22) {                // decisive → snap one page, lock the gesture
-      _wLock = true; _pageFrom(e.deltaY > 0 ? 1 : -1);
-      clearTimeout(_wTimer); _wTimer = setTimeout(function () { _wLock = false; }, 720);
+    if (ad >= 22) {                                // decisive → snap one page, then absorb its tail
+      _wLock = true; _pageFrom(dir);
+      clearTimeout(_wTimer); _wTimer = setTimeout(function () { _wLock = false; }, 180);
     } else {                                       // gentle → scrub freely, then settle
       surveyEl.scrollTop += e.deltaY * 1.15;
-      _snapDir = e.deltaY > 0 ? 1 : -1;
+      _snapDir = dir;
       clearTimeout(_snapTimer); _snapTimer = setTimeout(doSnap, 200);
     }
   }, { passive: false });
@@ -1438,7 +1443,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.21 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.22 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
