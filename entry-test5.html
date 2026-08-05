@@ -245,8 +245,9 @@
   #menu.mhide{opacity:0 !important}   /* the nav is hidden on the ABOUT endpoint */
   #menu a{position:fixed;left:46px;top:46px;padding:0 !important;white-space:nowrap;text-decoration:none;
     font-family:Arial,Helvetica,sans-serif;font-weight:700;font-size:22px;letter-spacing:.01em;text-transform:uppercase;
-    color:#1b1918;opacity:0;pointer-events:auto;transition:opacity .3s ease,color .25s ease}
-  /* colour is set PER-LABEL in setSurveyActive (docked→top-card ink · riding→own-card ink) */
+    color:#1b1918;opacity:0;pointer-events:auto;transition:opacity .3s ease}
+  /* colour is set PER-LABEL in setSurveyActive — an INSTANT black/white swap at the
+     card edge (no colour transition), tracking whatever card is painted behind it */
   #menu a img.mi{opacity:1}   /* (dead while labels are text — kept for a quick swap-back) */
   /* the wordmark: HUNTER HOUSE, black bold, top-left — shown past the film intro (opacity driven in JS) */
   #wordmark{transition:opacity .4s ease;display:none}
@@ -520,7 +521,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.16</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.17</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1099,7 +1100,7 @@
   // the menu collects items as you scroll: each label appears once you reach its
   // card and PERSISTS (single instance). Current section full, earlier ones dimmed.
   var DIM = 0.34;
-  var ROW0 = 46, ROWSTEP = 30;   // dock position of the top item, and per-item stacking step
+  var ROW0 = 32, ROWSTEP = 26;   // dock position of the top item, and per-item stacking step
   function setSurveyActive() {
     var inSurvey = (mode === "survey");
     var st = inSurvey ? surveyEl.scrollTop : 0;
@@ -1111,21 +1112,30 @@
       here = menuLinks.findIndex(function (a) { return a.dataset.section === mode; }) + 1;
     }
     // dark cards (white ink): the film · the HUNTER photo · the ARCHIVE black field
-    var DARK = { hunter: 1, archive: 1 }, INK = "#1b1918", PAPER = "#f6f5f5";
+    var DARK = { hunter: 1, archive: 1 }, INK = "#1b1918", PAPER = "#f6f5f5", V = window.innerHeight;
     function pDark(k) { var p = pages[k]; return (k === 0) || !!(p && p.dataset && DARK[p.dataset.section]) ||
                         !!(p && p.classList && p.classList.contains("dark-card")); }
     var onDark = pDark(here);
+    // which card is PAINTED at viewport-y? (mirrors driveReveal's card motion + z-order)
+    // → a label swaps ink the instant the card edge crosses it: seamless, no fade
+    function inkAt(y) {
+      var sv = Math.min(st, V);
+      if (y >= -sv && y < V - sv) return true;                        // the film, on top during the reveal (dark)
+      var t1 = (st <= V ? 0 : V - st), t2 = (st <= 2 * V ? 2 * V - st : 0), t3 = 3 * V - st, t4 = 4 * V - st;
+      if (t4 <= y && y < t4 + V) return pDark(4);                     // topmost first: about → archive → house → hunter
+      if (t3 <= y && y < t3 + V) return pDark(3);
+      if (t2 <= y && y < t2 + V) return pDark(2);
+      if (t1 <= y && y < t1 + V) return pDark(1);
+      return onDark;
+    }
     menuLinks.forEach(function (a, i) {
       var n = i + 1;                                   // this label's card page (pages[n])
       var dock = ROW0 + i * ROWSTEP;                   // its final slot in the stack
       if (inSurvey) {
         var cardTop = stopOf(n) - st;                  // this card's top edge in the viewport (height-aware)
-        var docked = (cardTop + ROW0) <= dock + 0.5;   // has it reached its docked slot?
-        // ride anchored to the card (cardTop + ROW0), but never fall below the dock → it sticks
-        a.style.top = Math.max(dock, cardTop + ROW0) + "px";
-        // docked labels take the current top card's ink; a label still RIDING into its
-        // own card takes THAT card's ink → it stays legible on the incoming background
-        a.style.color = (docked ? onDark : pDark(n)) ? PAPER : INK;
+        var ytop = Math.max(dock, cardTop + ROW0);     // ride anchored to the card, but never below the dock
+        a.style.top = ytop + "px";
+        a.style.color = inkAt(ytop + 10) ? PAPER : INK;   // instant swap at the edge (sampled at the label's centre)
         // dim once you cross the edge of the NEXT card (i.e. it fills the frame)
         var dimNow = (i + 1 < menuLinks.length) && (st >= stopOf(n + 1) - 1);
         a.style.opacity = dimNow ? DIM : 1;
@@ -1391,7 +1401,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.16 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.17 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
