@@ -31,7 +31,9 @@
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;overflow:hidden}
-  body{background:#f6f5f5;font-family:"Inter Tight",system-ui,sans-serif;color:#1b1918}
+  /* VOICE A — one Helvetica-family grotesque, one weight (500). Inter Tight retired.
+     VOICE B — JetBrains Mono (the index/archive register) stays untouched. */
+  body{background:#f6f5f5;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;color:#1b1918}
   #stage{position:fixed;inset:0}
   #menu a:hover{color:#1b1918}
   .st-term{color:#000;border-bottom:1px dashed rgba(27,25,24,.45);cursor:pointer}
@@ -186,8 +188,8 @@
   .about-text{position:absolute;left:50%;transform:translateX(-50%);top:46px;width:min(560px,86vw);
     display:flex;flex-direction:column;align-items:flex-start;gap:min(3.4vh,30px);
     text-align:left;z-index:5;color:#1b1918}
-  .at-statement{font-family:Arial,Helvetica,sans-serif;font-weight:400;
-    font-size:clamp(16px,1.7vw,26px);line-height:1.32;letter-spacing:-.004em;margin:0}
+  .at-statement{font-weight:500;
+    font-size:clamp(18px,1.7vw,26px);line-height:1.14;letter-spacing:-.006em;margin:0}
   .at-foot{display:flex;flex-direction:column;align-items:flex-start;gap:14px;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:11px;letter-spacing:.02em;line-height:1.85;color:#9a978f}
   .at-contact a{color:#1b1918;text-decoration:underline;text-underline-offset:3px}
@@ -246,7 +248,7 @@
     opacity:1 !important;pointer-events:none !important;z-index:9;transition:opacity .4s ease}
   #menu.mhide{opacity:0 !important}   /* the nav is hidden on the ABOUT endpoint */
   #menu a{position:fixed;left:46px;top:46px;padding:0 !important;white-space:nowrap;text-decoration:none;
-    font-family:Arial,Helvetica,sans-serif;font-weight:700;font-size:22px;letter-spacing:.01em;text-transform:uppercase;
+    font-weight:500;font-size:22px;letter-spacing:.005em;text-transform:uppercase;
     color:#1b1918;opacity:0;pointer-events:auto}
   /* colour AND dim are set PER-LABEL in setSurveyActive — an INSTANT swap at the card
      edge (no transitions), tracking whatever card is painted behind each label */
@@ -296,12 +298,12 @@
     color:#f6f5f5;text-shadow:0 1px 22px rgba(0,0,0,.6)}
   .plate .pk{font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;
     text-transform:uppercase;color:#a8a59c;margin:0 0 20px}
-  .plate .pt{font-weight:800;font-size:clamp(30px,4.4vw,60px);line-height:1.02;letter-spacing:.004em;
-    text-transform:uppercase;color:#1b1918;margin:0 0 24px}
-  .plate .pb{font-family:Arial,Helvetica,sans-serif;font-size:clamp(16px,1.5vw,22px);line-height:1.4;
+  .plate .pt{font-weight:500;font-size:clamp(26px,3vw,38px);line-height:1.06;letter-spacing:-.012em;
+    color:#1b1918;margin:0 0 22px}
+  .plate .pb{font-weight:500;font-size:clamp(17px,1.5vw,22px);line-height:1.25;
     color:#3a372f;margin:0}
-  .plate .pq{font-family:Arial,Helvetica,sans-serif;font-weight:400;font-size:clamp(22px,3vw,40px);
-    line-height:1.22;color:#1b1918;margin:0 0 20px}
+  .plate .pq{font-weight:500;font-size:clamp(20px,2.4vw,32px);
+    line-height:1.18;letter-spacing:-.006em;color:#1b1918;margin:0 0 20px}
   .plate .pqa{font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.06em;
     text-transform:uppercase;color:#76726a}
   /* controls live in the top-right "control corner"; the pager sits bottom-centre */
@@ -438,7 +440,7 @@
   <img class="hlogo" src="assets/entry/nameblock-1970.png" alt="Hunter House · Victoria B.C. · 1970 · Ric Hunter Architect">
   <div class="hcite">Film footage · 2026 · nameblock from HH-CAA-0007, 1970</div>
 </div>
-<div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:18px;letter-spacing:.04em;text-transform:uppercase;color:#1b1918;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
+<div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:500;font-size:18px;letter-spacing:.02em;text-transform:uppercase;color:#1b1918;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
 <nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62);transform:translateY(-110%);opacity:0;will-change:transform,opacity">
   <!-- ARIAL-bold text labels (was hand-lettered PNGs — img.mi kept in CSS for a quick swap-back) -->
   <a data-section="hunter" style="cursor:pointer" aria-label="Hunter">Hunter</a>
@@ -523,7 +525,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.22</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.23</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1443,7 +1445,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.22 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.23 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
