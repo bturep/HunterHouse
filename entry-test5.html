@@ -521,7 +521,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.18</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.19</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1260,7 +1260,7 @@
   var _snapDir = 1, _snapLast = surveyEl.scrollTop, _snapTimer = null, _snapping = false;
   var SNAP_ADV = 0.66;   // how far you must scroll toward the next card before it advances
   function doSnap() {
-    if (mode !== "survey" || _snapping) return;
+    if (mode !== "survey" || _snapping || paging || _wLock) return;
     var vh = window.innerHeight, st = surveyEl.scrollTop, idx = st / vh, frac = idx - Math.floor(idx), target;
     if (frac < 0.002 || frac > 0.998) return;   // already parked on a card
     if (_snapDir >= 0) target = (frac >= SNAP_ADV)       ? Math.ceil(idx)  : Math.floor(idx);   // down: advance only past ADV, else settle back
@@ -1281,17 +1281,48 @@
     _snapTimer = setTimeout(doSnap, 180);   // a touch more dwell before it settles
   }, { passive: true });
 
-  // HOUSE drives the z-sequence; the SURVEY is left to native scroll + CSS
-  // proximity snap — free control of the range, a gentle snap onto each card
-  window.addEventListener("wheel", function (e) {
-    if (mode === "house") { e.preventDefault(); nudge(e.deltaY / 900); }
-  }, { passive: false });
+  // ── SURVEY paging: one swipe / wheel gesture = one full-screen card (a quick snap
+  //    that locks the card to the frame). A slow, deliberate drag scrubs between them,
+  //    overriding the snap. Native momentum is taken over so a flick can't skip pages.
   var ty = null;
-  window.addEventListener("touchstart", function (e) { ty = e.touches[0].clientY; }, { passive: true });
-  window.addEventListener("touchmove", function (e) {
-    if (mode === "house" && ty !== null) { nudge((ty - e.touches[0].clientY) / 300); ty = e.touches[0].clientY; }
+  var _wLock = false, _wTimer = null, _tY0 = 0, _tLastY = 0, _tT0 = 0, _tActive = false;
+  function _pageFrom(dir) {                        // one page from the current position, in dir
+    var idx = surveyEl.scrollTop / window.innerHeight;
+    goPage(dir > 0 ? Math.floor(idx + 0.001) + 1 : Math.ceil(idx - 0.001) - 1);
+  }
+  window.addEventListener("wheel", function (e) {
+    if (mode === "house") { e.preventDefault(); nudge(e.deltaY / 900); return; }
+    if (mode !== "survey" || document.body.classList.contains("room-open")) return;
+    e.preventDefault();                            // take over vertical navigation
+    if (_wLock) return;
+    if (Math.abs(e.deltaY) >= 22) {                // decisive → snap one page, lock the gesture
+      _wLock = true; _pageFrom(e.deltaY > 0 ? 1 : -1);
+      clearTimeout(_wTimer); _wTimer = setTimeout(function () { _wLock = false; }, 720);
+    } else {                                       // gentle → scrub freely, then settle
+      surveyEl.scrollTop += e.deltaY * 1.15;
+      _snapDir = e.deltaY > 0 ? 1 : -1;
+      clearTimeout(_snapTimer); _snapTimer = setTimeout(doSnap, 200);
+    }
+  }, { passive: false });
+  window.addEventListener("touchstart", function (e) {
+    if (mode === "house") { ty = e.touches[0].clientY; return; }
+    if (mode !== "survey" || document.body.classList.contains("room-open")) return;
+    _tY0 = _tLastY = e.touches[0].clientY; _tT0 = Date.now(); _tActive = true;
   }, { passive: true });
-  window.addEventListener("touchend", function () { ty = null; }, { passive: true });
+  window.addEventListener("touchmove", function (e) {
+    if (mode === "house" && ty !== null) { nudge((ty - e.touches[0].clientY) / 300); ty = e.touches[0].clientY; return; }
+    if (!_tActive) return;
+    e.preventDefault();                            // manual drag → a precise scrub, no native momentum
+    var y = e.touches[0].clientY;
+    surveyEl.scrollTop += (_tLastY - y); _tLastY = y;
+  }, { passive: false });
+  window.addEventListener("touchend", function (e) {
+    if (mode === "house") { ty = null; return; }
+    if (!_tActive) return; _tActive = false;
+    var dy = e.changedTouches[0].clientY - _tY0, dt = Math.max(1, Date.now() - _tT0), v = dy / dt;   // dy<0 = swipe up = next
+    if (Math.abs(dy) > 24 && Math.abs(v) > 0.3) _pageFrom(dy < 0 ? 1 : -1);                          // quick flick → one page
+    else { _snapDir = dy < 0 ? 1 : -1; clearTimeout(_snapTimer); _snapTimer = setTimeout(doSnap, 40); }   // slow drag → settle
+  }, { passive: true });
   // ── THE ROOM (1C): full-bleed lateral takeover, horizontal plate paging (3b).
   //    Content is data-driven so HOUSE and HUNTER reuse one component. Placeholder
   //    plates for now — swap real content in ROOMS below. ────────────────────────
@@ -1401,7 +1432,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.18 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.19 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
