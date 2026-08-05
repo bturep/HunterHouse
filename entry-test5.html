@@ -521,7 +521,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.19</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.20</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1294,7 +1294,11 @@
     if (mode === "house") { e.preventDefault(); nudge(e.deltaY / 900); return; }
     if (mode !== "survey" || document.body.classList.contains("room-open")) return;
     e.preventDefault();                            // take over vertical navigation
-    if (_wLock) return;
+    if (_wLock) {                                  // gesture + momentum tail still arriving → absorb it,
+      clearTimeout(_wTimer);                       // keep the lock alive so no late event leaks into a scrub (the "peek")
+      _wTimer = setTimeout(function () { _wLock = false; }, 260);
+      return;
+    }
     if (Math.abs(e.deltaY) >= 22) {                // decisive → snap one page, lock the gesture
       _wLock = true; _pageFrom(e.deltaY > 0 ? 1 : -1);
       clearTimeout(_wTimer); _wTimer = setTimeout(function () { _wLock = false; }, 720);
@@ -1432,7 +1436,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.19 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.20 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
