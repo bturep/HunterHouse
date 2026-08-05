@@ -31,9 +31,9 @@
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;overflow:hidden}
-  /* VOICE A — one Helvetica-family grotesque, one weight (500). Inter Tight retired.
+  /* VOICE A — one grotesque, Arial (the previous face Brandon preferred over Helvetica Neue).
      VOICE B — JetBrains Mono (the index/archive register) stays untouched. */
-  body{background:#f6f5f5;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;color:#1b1918}
+  body{background:#f6f5f5;font-family:Arial,"Helvetica Neue",Helvetica,sans-serif;color:#1b1918}
   #stage{position:fixed;inset:0}
   #menu a:hover{color:#1b1918}
   .st-term{color:#000;border-bottom:1px dashed rgba(27,25,24,.45);cursor:pointer}
@@ -497,7 +497,7 @@
   -->
   <!-- ARCHIVE: the studio nameblock on black -->
   <section class="scard ps cover" data-section="archive">
-    <img class="layer" src="assets/entry/cards/archive/nameblock.jpg" alt="Richard Hunter Architect — studio nameblock">
+    <img class="layer" src="assets/entry/cards/archive/nameblock.jpg?v=2" alt="Richard Hunter Architect — studio nameblock">
     <div class="about-text">
       <p class="at-statement">An openly catalogued, queryable record of the practice — drawings, photographs, correspondence, and models, arranged by collection and free to explore.</p>
       <div class="at-foot">
@@ -525,7 +525,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.23</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.25</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1265,7 +1265,7 @@
   var _snapDir = 1, _snapLast = surveyEl.scrollTop, _snapTimer = null, _snapping = false;
   var SNAP_ADV = 0.66;   // how far you must scroll toward the next card before it advances
   function doSnap() {
-    if (mode !== "survey" || _snapping || paging || _wLock) return;
+    if (mode !== "survey" || _snapping || paging || _locked) return;
     var vh = window.innerHeight, st = surveyEl.scrollTop, idx = st / vh, frac = idx - Math.floor(idx), target;
     if (frac < 0.002 || frac > 0.998) return;   // already parked on a card
     if (_snapDir >= 0) target = (frac >= SNAP_ADV)       ? Math.ceil(idx)  : Math.floor(idx);   // down: advance only past ADV, else settle back
@@ -1286,36 +1286,34 @@
     _snapTimer = setTimeout(doSnap, 180);   // a touch more dwell before it settles
   }, { passive: true });
 
-  // ── SURVEY paging: one swipe / wheel gesture = one full-screen card (a quick snap
-  //    that locks the card to the frame). A slow, deliberate drag scrubs between them,
-  //    overriding the snap. Native momentum is taken over so a flick can't skip pages.
-  var ty = null;
-  var _wLock = false, _wTimer = null, _wLastT = 0, _wPrevAbs = 0, _tY0 = 0, _tLastY = 0, _tT0 = 0, _tActive = false;
-  function _pageFrom(dir) { goPage(pageIdx + dir); }   // one page from the COMMITTED page (not the mid-animation scroll)
+  // ── SURVEY paging — audited ───────────────────────────────────────────────
+  //  Doubling cause (old code): the "new swipe?" test was an OR — (gap>120) OR a
+  //  delta spike. Momentum trips EITHER alone (a stutter gap in the tail; a ramp-up
+  //  at the start), so a momentum event paged a 2nd time.
+  //  Fix: a new swipe must show a real pause AND a strong delta AT ONCE — momentum
+  //  never does. The cooldown extends while wheel events keep arriving, so the whole
+  //  momentum tail is absorbed as ONE page; only a genuine new swipe breaks it.
+  //  Wheel is a pure pager (no scrub → nothing to leak). Touch keeps its drag-scrub.
+  var ty = null, _locked = false, _lockT = null, _wLastT = 0, _decayed = false;
+  var _tY0 = 0, _tLastY = 0, _tT0 = 0, _tActive = false;
+  function _pageFrom(dir) { goPage(pageIdx + dir); }   // one page from the COMMITTED page (not the mid-glide scroll)
+  function _cool() { clearTimeout(_lockT); _lockT = setTimeout(function () { _locked = false; }, 260); }   // extends over momentum gaps
   window.addEventListener("wheel", function (e) {
     if (mode === "house") { e.preventDefault(); nudge(e.deltaY / 900); return; }
     if (mode !== "survey" || document.body.classList.contains("room-open")) return;
-    e.preventDefault();                            // take over vertical navigation
+    e.preventDefault();
     var now = Date.now(), gap = now - _wLastT, ad = Math.abs(e.deltaY), dir = e.deltaY > 0 ? 1 : -1;
     _wLastT = now;
-    // a NEW gesture = a pause since the last event, OR a fresh delta spiking up out of the
-    // decaying momentum tail. This is what lets a second swipe page while the previous
-    // flick's momentum is still trickling in (rather than being absorbed as tail).
-    var fresh = (gap > 120) || (ad >= 30 && ad > _wPrevAbs * 2);
-    _wPrevAbs = ad;
-    if (_wLock) {                                  // inside the previous gesture's momentum tail
-      clearTimeout(_wTimer); _wTimer = setTimeout(function () { _wLock = false; }, 180);   // keep absorbing the tail
-      if (fresh && ad >= 18) _pageFrom(dir);       // ...unless a genuine new swipe broke through → page again
+    if (_locked) {                                 // still inside the last gesture's momentum tail
+      _cool();                                     // keep absorbing while events keep arriving
+      if (ad < 15) _decayed = true;                // momentum has decayed toward stop (it can't climb back)
+      // a genuine NEW swipe = a strong delta AFTER momentum has decayed. Momentum
+      // physically can't produce a strong delta once decayed → this can NOT double.
+      if (ad >= 45 && _decayed) { _pageFrom(dir); _decayed = false; }
       return;
     }
-    if (ad >= 22) {                                // decisive → snap one page, then absorb its tail
-      _wLock = true; _pageFrom(dir);
-      clearTimeout(_wTimer); _wTimer = setTimeout(function () { _wLock = false; }, 180);
-    } else {                                       // gentle → scrub freely, then settle
-      surveyEl.scrollTop += e.deltaY * 1.15;
-      _snapDir = dir;
-      clearTimeout(_snapTimer); _snapTimer = setTimeout(doSnap, 200);
-    }
+    if (ad < 20) return;                           // ignore noise
+    _pageFrom(dir); _locked = true; _decayed = false; _cool();
   }, { passive: false });
   window.addEventListener("touchstart", function (e) {
     if (mode === "house") { ty = e.touches[0].clientY; return; }
@@ -1333,8 +1331,8 @@
     if (mode === "house") { ty = null; return; }
     if (!_tActive) return; _tActive = false;
     var dy = e.changedTouches[0].clientY - _tY0, dt = Math.max(1, Date.now() - _tT0), v = dy / dt;   // dy<0 = swipe up = next
-    if (Math.abs(dy) > 24 && Math.abs(v) > 0.3) _pageFrom(dy < 0 ? 1 : -1);                          // quick flick → one page
-    else { _snapDir = dy < 0 ? 1 : -1; clearTimeout(_snapTimer); _snapTimer = setTimeout(doSnap, 40); }   // slow drag → settle
+    if (!_locked && Math.abs(dy) > 24 && Math.abs(v) > 0.3) { _pageFrom(dy < 0 ? 1 : -1); _locked = true; _cool(); }   // quick flick → one page
+    else { _snapDir = dy < 0 ? 1 : -1; clearTimeout(_snapTimer); _snapTimer = setTimeout(doSnap, 40); }               // slow drag → settle
   }, { passive: true });
   // ── THE ROOM (1C): full-bleed lateral takeover, horizontal plate paging (3b).
   //    Content is data-driven so HOUSE and HUNTER reuse one component. Placeholder
@@ -1445,7 +1443,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.23 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.25 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
