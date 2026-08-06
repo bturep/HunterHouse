@@ -527,7 +527,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.35</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.36</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1459,7 +1459,11 @@
       "#place-bar .g{display:flex;gap:4px;align-items:center;padding-left:8px;border-left:1px solid #3a3a38}" +
       "#place-bar button{font:inherit;background:#333;color:#f6f5f5;border:0;padding:4px 8px;border-radius:3px;cursor:pointer}" +
       "#place-bar button.on{background:#2b8fff}#place-bar button.copy{background:#f6f5f5;color:#1b1918}" +
-      "#place-bar #pr{min-width:150px}#place-bar #pr b{color:#7fc7e6}";
+      "#place-bar #pr{min-width:150px}#place-bar #pr b{color:#7fc7e6}" +
+      /* clean-preview: hide every placement outline + the resize handle so the
+         composition reads as it really will (the bar stays, to toggle back) */
+      "body.p-clean .about-text,body.p-clean .enter-cue,body.p-clean #film-cite,body.p-clean .p-sel{outline:none!important;cursor:default}" +
+      "body.p-clean .p-wh{display:none!important}";
     document.head.appendChild(st);
     var SELS = [
       '.scard[data-section="hunter"] .about-text', '.scard[data-section="house"] .about-text',
@@ -1475,6 +1479,7 @@
       '<span class="g"><button data-a="f-">A–</button><button data-a="f+">A+</button></span>' +
       '<span class="g"><button data-a="col1">1 col</button><button data-a="col2">2 col</button></span>' +
       '<span class="g"><button data-a="edit">Edit text</button></span>' +
+      '<span class="g"><button data-a="boxes" class="on">Boxes</button></span>' +
       '<span class="g"><button class="copy" data-a="copy">Copy</button></span>';
     document.body.appendChild(bar);
     var pr = document.getElementById("pr");
@@ -1523,6 +1528,7 @@
       var a = e.target.getAttribute && e.target.getAttribute("data-a"); if (!a) return;
       if (a === "copy") return doCopy();
       if (a === "edit") { editing = !editing; toggleEdit(editing); e.target.classList.toggle("on", editing); return; }
+      if (a === "boxes") { var clean = document.body.classList.toggle("p-clean"); e.target.classList.toggle("on", !clean); e.target.textContent = clean ? "Boxes off" : "Boxes"; return; }
       if (!sel) { pr.textContent = "select an element first"; return; }
       var fe = fontEl(sel);
       if (a === "w-" || a === "w+") sel.el.style.width = Math.max(80, sel.el.getBoundingClientRect().width + (a === "w+" ? 20 : -20)) + "px";
@@ -1549,7 +1555,12 @@
       console.log("%c[place] paste to Claude:\n" + out, "color:#7fc7e6");
       pr.textContent = "copied → clipboard + console";
     }
-    console.log("[place] mode ON. Click to select · drag to move · blue handle or ±w = width · A± = font · 1/2 col · Edit text · Copy.");
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "h" && e.key !== "H") return;
+      var tg = e.target; if (tg && (tg.isContentEditable || tg.tagName === "INPUT" || tg.tagName === "TEXTAREA")) return;
+      e.preventDefault(); var btn = bar.querySelector('[data-a="boxes"]'); if (btn) btn.click();
+    }, true);
+    console.log("[place] mode ON. Click to select · drag to move · blue handle or ±w = width · A± = font · 1/2 col · Edit text · Boxes (H) hides outlines · Copy.");
   })();
   updateWordmark(); setSurveyActive(); driveReveal();
   window.addEventListener("resize", function () { centreSketch(); apply(); driveReveal(); });
@@ -1559,7 +1570,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.35 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.36 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
