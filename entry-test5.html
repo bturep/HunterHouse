@@ -202,15 +202,19 @@
   .scard.cover .at-foot{color:rgba(246,245,245,.85)}
   .scard.cover .at-contact a{color:#f6f5f5}
   /* placement — set by Brandon in ?place mode (2026-08-06) */
-  .scard[data-section="hunter"]  .about-text{left:15.84vw; top:6.64vh;  width:384px;  right:auto; bottom:auto; transform:none}
-  .scard[data-section="house"]   .about-text{left:9.40vw;  top:32.06vh; width:455px;  right:auto; bottom:auto; transform:none}
-  .scard[data-section="archive"] .about-text{left:14.69vw; top:3.42vh;  width:385px;  right:auto; bottom:auto; transform:none}
-  .scard[data-section="about"]   .about-text{left:30.73vw; top:4.16vh;  width:1042px; right:auto; bottom:auto; transform:none; flex-direction:row; gap:min(4vw,44px); align-items:flex-start}
-  .scard[data-section="about"] .at-statement{flex:1 1 auto; max-width:62%}
-  .scard[data-section="about"] .at-foot{flex:0 0 auto}
+  .scard[data-section="hunter"]  .about-text{left:15.84vw; top:6.64vh;  width:384px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="house"]   .about-text{left:9.58vw;  top:35.72vh; width:455px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="archive"] .about-text{left:14.69vw; top:3.42vh;  width:385px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="about"]   .about-text{left:14.57vw; top:3.66vh;  width:842px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="about"] .at-statement{font-size:25px}
   .scard[data-section="hunter"]  .enter-cue{left:91.39vw; top:33.94vh; right:auto; bottom:auto; transform:none}
   .scard[data-section="house"]   .enter-cue{left:27.76vw; top:53.82vh; right:auto; bottom:auto; transform:none}
   .scard[data-section="archive"] .enter-cue{left:14.87vw; top:55.62vh; right:auto; bottom:auto; transform:none}
+  /* background-image framing (?place: pan/fit/zoom) */
+  .scard[data-section="hunter"]  .layer{object-position:50% 50%; object-fit:contain}
+  .scard[data-section="house"]   .layer{object-position:50% 50%; object-fit:cover}
+  .scard[data-section="archive"] .layer{object-position:50% 50%; object-fit:cover}
+  .scard[data-section="about"]   .layer{object-position:68.2% 300.4%; object-fit:cover; transform:scale(1.30)}
   /* the section title-block — typeset (scales cleanly), centred over the card
      image, with the leader text beneath. Title sized ~ the nameblock's HOUSE.
      On entry the title flies to its menu slot (see #titlefly). */
@@ -530,7 +534,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.40</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.41</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1599,7 +1603,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.40 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.41 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
