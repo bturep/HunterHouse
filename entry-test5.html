@@ -183,7 +183,7 @@
     pointer-events:none;display:block}
   /* ── per-card image size — set each card's height (or width) independently ──
      Edit the value on any one line to tune that card alone. */
-  .scard[data-section="hunter"]{background:#fff}  /* elevation-among-firs on white (moved from ABOUT) — contained, dark text */
+  .scard[data-section="hunter"]{background:#2a2622}  /* FRH-0001 photo (Rick building the deck, 1978) — full-bleed cover, light text */
   .scard[data-section="about"]{background:#fff}   /* the elevation drawing sits on white, full height */
   /* the shared caption form — a large sans statement beside a mono detail column.
      Reused on every card (ABOUT foundation text · HOUSE/HUNTER/ARCHIVE image details). */
@@ -211,7 +211,7 @@
   .scard[data-section="house"]   .enter-cue{left:27.76vw; top:53.82vh; right:auto; bottom:auto; transform:none}
   .scard[data-section="archive"] .enter-cue{left:14.87vw; top:55.62vh; right:auto; bottom:auto; transform:none}
   /* background-image framing (?place: pan/fit/zoom) */
-  .scard[data-section="hunter"]  .layer{object-position:50% 50%; object-fit:contain}
+  .scard[data-section="hunter"]  .layer{object-position:58% 72%; object-fit:cover; transform:scale(1.12)}
   .scard[data-section="house"]   .layer{object-position:50% 50%; object-fit:cover}
   .scard[data-section="archive"] .layer{object-position:50% 50%; object-fit:cover}
   .scard[data-section="about"]   .layer{object-position:68.2% 300.4%; object-fit:cover; transform:scale(1.30)}
@@ -477,12 +477,12 @@
   </section>
   <!-- HUNTER: revealed first (in #act1) so the menu reads HUNTER · HOUSE · ARCHIVE.
        PS-composed full-bleed card (assets/entry/cards/hunter/) -->
-  <section class="scard ps" data-section="hunter">
-    <div class="bgclip"><img class="layer" src="assets/entry/cards/hunter/BACKGROUND.jpg?v=3" alt=""></div>
+  <section class="scard ps cover" data-section="hunter">
+    <div class="bgclip"><img class="layer" src="assets/entry/cards/hunter/BACKGROUND.jpg?v=4" alt="Richard Hunter building the deck of his house, 1978"></div>
     <div class="about-text">
       <p class="at-statement">Richard Morrow Hunter<br>Architect. 1930–2023<br><br>Fifty years designing one house.</p>
       <div class="at-foot">
-        <div class="at-meta">HH-FRH-0005<br>Photograph, Frances Hunter Collection</div>
+        <div class="at-meta">HH-FRH-0001<br>Photograph, Frances Hunter Collection</div>
       </div>
     </div>
     <div class="enter-cue">More</div>
@@ -534,7 +534,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.41</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.42</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1125,7 +1125,7 @@
       here = menuLinks.findIndex(function (a) { return a.dataset.section === mode; }) + 1;
     }
     // dark cards (white ink): the film · the HUNTER photo · the ARCHIVE black field
-    var DARK = { house: 1, archive: 1 }, INK = "#1b1918", PAPER = "#f6f5f5", V = window.innerHeight;
+    var DARK = { hunter: 1, house: 1, archive: 1 }, INK = "#1b1918", PAPER = "#f6f5f5", V = window.innerHeight;
     function pDark(k) { var p = pages[k]; return (k === 0) || !!(p && p.dataset && DARK[p.dataset.section]) ||
                         !!(p && p.classList && p.classList.contains("dark-card")); }
     var onDark = pDark(here);
@@ -1603,7 +1603,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.41 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.42 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
