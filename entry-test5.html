@@ -526,7 +526,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.28</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.29</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1446,10 +1446,17 @@
     document.body.classList.add("place-mode");
     var st = document.createElement("style");
     st.textContent =
-      "body.place-mode .about-text,body.place-mode .enter-cue,body.place-mode #film-cite{pointer-events:auto!important;cursor:move;outline:1.5px dashed rgba(220,40,40,.85);outline-offset:5px}" +
-      "#place-bar{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:9999;background:#1b1918;color:#f6f5f5;font:12px/1.5 'JetBrains Mono',Menlo,monospace;padding:8px 12px;border-radius:4px;display:flex;gap:12px;align-items:center;box-shadow:0 6px 28px rgba(0,0,0,.45)}" +
-      "#place-bar #place-read b{color:#7fc7e6}" +
-      "#place-bar button{font:inherit;background:#f6f5f5;color:#1b1918;border:0;padding:5px 11px;border-radius:3px;cursor:pointer}";
+      "body.place-mode .about-text,body.place-mode .enter-cue,body.place-mode #film-cite{pointer-events:auto!important;cursor:move;outline:1.5px dashed rgba(220,40,40,.55);outline-offset:5px}" +
+      "body.place-mode .p-sel{outline:2px solid #2b8fff!important;outline-offset:5px}" +
+      "body.place-mode .p-edit{cursor:text!important;outline:2px solid #2fb46a!important}" +
+      ".p-wh{position:absolute;right:-7px;top:50%;width:12px;height:44px;transform:translateY(-50%);background:#2b8fff;border-radius:3px;cursor:ew-resize;z-index:70}" +
+      ".about-text.p-2col{flex-direction:row!important;gap:min(4vw,44px)!important;align-items:flex-start!important}" +
+      ".about-text.p-2col .at-statement{flex:1 1 auto;max-width:62%}.about-text.p-2col .at-foot{flex:0 0 auto}" +
+      "#place-bar{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:9999;background:#1b1918;color:#f6f5f5;font:12px/1.4 'JetBrains Mono',Menlo,monospace;padding:7px 10px;border-radius:6px;display:flex;gap:7px;align-items:center;box-shadow:0 6px 30px rgba(0,0,0,.5);flex-wrap:wrap;max-width:96vw}" +
+      "#place-bar .g{display:flex;gap:4px;align-items:center;padding-left:8px;border-left:1px solid #3a3a38}" +
+      "#place-bar button{font:inherit;background:#333;color:#f6f5f5;border:0;padding:4px 8px;border-radius:3px;cursor:pointer}" +
+      "#place-bar button.on{background:#2b8fff}#place-bar button.copy{background:#f6f5f5;color:#1b1918}" +
+      "#place-bar #pr{min-width:150px}#place-bar #pr b{color:#7fc7e6}";
     document.head.appendChild(st);
     var SELS = [
       '.scard[data-section="hunter"] .about-text', '.scard[data-section="house"] .about-text',
@@ -1458,42 +1465,88 @@
       '.scard[data-section="archive"] .enter-cue', '#film-cite'
     ];
     var targets = [];
-    SELS.forEach(function (sel) { var el = document.querySelector(sel); if (el) targets.push({ sel: sel, el: el }); });
+    SELS.forEach(function (sel) { var el = document.querySelector(sel); if (el) targets.push({ sel: sel, el: el, isText: /about-text/.test(sel) }); });
     var bar = document.createElement("div"); bar.id = "place-bar";
-    bar.innerHTML = 'PLACE · drag captions &amp; buttons · <span id="place-read">—</span> <button id="place-copy">Copy CSS</button>';
+    bar.innerHTML = 'PLACE <span id="pr">— select an element</span>' +
+      '<span class="g"><button data-a="w-">– w</button><button data-a="w+">+ w</button></span>' +
+      '<span class="g"><button data-a="f-">A–</button><button data-a="f+">A+</button></span>' +
+      '<span class="g"><button data-a="col1">1 col</button><button data-a="col2">2 col</button></span>' +
+      '<span class="g"><button data-a="edit">Edit text</button></span>' +
+      '<span class="g"><button class="copy" data-a="copy">Copy</button></span>';
     document.body.appendChild(bar);
-    var read = document.getElementById("place-read");
+    var pr = document.getElementById("pr");
+    var sel = null, editing = false, drag = null, resizing = null;
+    var wh = document.createElement("div"); wh.className = "p-wh"; wh.style.display = "none";
     function cardOf(el) { return el.closest(".scard") || el.closest("#svid") || el.parentElement; }
-    function relOf(t) {   // position RELATIVE TO ITS CARD (cancels the card's scroll/transform)
-      var cr = cardOf(t.el).getBoundingClientRect(), er = t.el.getBoundingClientRect();
-      return { L: (er.left - cr.left) / window.innerWidth * 100, T: (er.top - cr.top) / window.innerHeight * 100 };
+    function relOf(t) { var cr = cardOf(t.el).getBoundingClientRect(), er = t.el.getBoundingClientRect(); return { L: (er.left - cr.left) / window.innerWidth * 100, T: (er.top - cr.top) / window.innerHeight * 100 }; }
+    function nameOf(t) { var m = t.sel.match(/section="(\w+)"/); var p = m ? m[1] : "film"; return p + (/enter-cue/.test(t.sel) ? " button" : (/#film/.test(t.sel) ? " caption" : " text")); }
+    function fontEl(t) { return t.isText ? t.el.querySelector(".at-statement") : t.el; }
+    function readEl(t) {
+      var r = relOf(t), w = Math.round(t.el.getBoundingClientRect().width), fe = fontEl(t);
+      var fs = fe ? Math.round(parseFloat(getComputedStyle(fe).fontSize)) : 0;
+      pr.innerHTML = "<b>" + nameOf(t) + "</b> " + r.L.toFixed(1) + "vw," + r.T.toFixed(1) + "vh · " + w + "px · " + fs + "px" + (t.isText ? " · " + (t.el.classList.contains("p-2col") ? "2col" : "1col") : "");
     }
-    function label(t) { var m = t.sel.match(/section="(\w+)"/); var p = m ? m[1] : "film"; return p + (/enter-cue/.test(t.sel) ? " button" : (/#film/.test(t.sel) ? " caption" : " text")); }
-    function show(t) { var r = relOf(t); read.innerHTML = "<b>" + label(t) + "</b> &nbsp;left:" + r.L.toFixed(1) + "vw &nbsp;top:" + r.T.toFixed(1) + "vh"; }
-    var drag = null;
+    function select(t) {
+      if (sel) sel.el.classList.remove("p-sel");
+      sel = t;
+      if (!t) { wh.remove(); pr.textContent = "— select an element"; return; }
+      t.el.classList.add("p-sel");
+      if (t.isText) { t.el.appendChild(wh); wh.style.display = "block"; } else { wh.remove(); }
+      readEl(t);
+    }
     document.addEventListener("pointerdown", function (e) {
+      if (e.target === wh && sel) { e.preventDefault(); e.stopPropagation(); resizing = { t: sel, sx: e.clientX, sw: sel.el.getBoundingClientRect().width }; try { wh.setPointerCapture(e.pointerId); } catch (x) {} return; }
+      if (editing) return;   // in edit mode, clicks go to the text
       var t = null; for (var i = 0; i < targets.length; i++) { if (targets[i].el === e.target || targets[i].el.contains(e.target)) { t = targets[i]; break; } }
       if (!t) return;
       e.preventDefault(); e.stopPropagation();
+      select(t);
       var r = t.el.getBoundingClientRect();
       drag = { t: t, ox: e.clientX - r.left, oy: e.clientY - r.top };
       try { t.el.setPointerCapture(e.pointerId); } catch (x) {}
     }, true);
     document.addEventListener("pointermove", function (e) {
+      if (resizing) { resizing.t.el.style.width = Math.max(80, resizing.sw + (e.clientX - resizing.sx)) + "px"; readEl(resizing.t); return; }
       if (!drag) return;
       var el = drag.t.el;
       el.style.left = (e.clientX - drag.ox) + "px"; el.style.top = (e.clientY - drag.oy) + "px";
       el.style.right = "auto"; el.style.bottom = "auto"; el.style.transform = "none";
-      show(drag.t);
+      readEl(drag.t);
     }, true);
-    document.addEventListener("pointerup", function () { if (drag) { show(drag.t); drag = null; } }, true);
-    document.getElementById("place-copy").addEventListener("click", function () {
-      var css = targets.map(function (t) { var r = relOf(t); return t.sel + " { left:" + r.L.toFixed(2) + "vw; top:" + r.T.toFixed(2) + "vh; right:auto; bottom:auto; transform:none; }"; }).join("\n");
-      try { navigator.clipboard.writeText(css); } catch (x) {}
-      console.log("%c[place] copy this to Claude:\n" + css, "color:#7fc7e6");
-      read.textContent = "copied " + targets.length + " rules → clipboard + console";
+    document.addEventListener("pointerup", function () { if (drag) { readEl(drag.t); drag = null; } resizing = null; }, true);
+    function editables() { var l = []; targets.forEach(function (t) { if (t.isText) l = l.concat(Array.prototype.slice.call(t.el.querySelectorAll(".at-statement,.at-meta,.at-contact"))); else l.push(t.el); }); return l; }
+    function toggleEdit(on) { editables().forEach(function (el) { el.contentEditable = on ? "true" : "false"; el.classList.toggle("p-edit", on); }); pr.textContent = on ? "EDIT: click into any text to change it" : "edit off"; }
+    bar.addEventListener("click", function (e) {
+      var a = e.target.getAttribute && e.target.getAttribute("data-a"); if (!a) return;
+      if (a === "copy") return doCopy();
+      if (a === "edit") { editing = !editing; toggleEdit(editing); e.target.classList.toggle("on", editing); return; }
+      if (!sel) { pr.textContent = "select an element first"; return; }
+      var fe = fontEl(sel);
+      if (a === "w-" || a === "w+") sel.el.style.width = Math.max(80, sel.el.getBoundingClientRect().width + (a === "w+" ? 20 : -20)) + "px";
+      else if ((a === "f-" || a === "f+") && fe) fe.style.fontSize = Math.max(8, parseFloat(getComputedStyle(fe).fontSize) + (a === "f+" ? 1 : -1)) + "px";
+      else if (a === "col1") sel.el.classList.remove("p-2col");
+      else if (a === "col2") sel.el.classList.add("p-2col");
+      readEl(sel);
     });
-    console.log("[place] mode ON — drag captions/buttons, then Copy CSS. Targets: " + targets.length);
+    function doCopy() {
+      var css = [], txt = [];
+      targets.forEach(function (t) {
+        var r = relOf(t), w = Math.round(t.el.getBoundingClientRect().width), fe = fontEl(t);
+        css.push(t.sel + " { left:" + r.L.toFixed(2) + "vw; top:" + r.T.toFixed(2) + "vh;" + (t.isText ? " width:" + w + "px;" : "") + " right:auto; bottom:auto; transform:none;" + (t.isText && t.el.classList.contains("p-2col") ? " flex-direction:row;" : "") + " }");
+        if (fe && fe.style.fontSize) css.push(t.sel + (t.isText ? " .at-statement" : "") + " { font-size:" + fe.style.fontSize + "; }");
+      });
+      targets.forEach(function (t) {
+        if (t.isText) {
+          var s = t.el.querySelector(".at-statement"); if (s) txt.push(nameOf(t) + " statement: " + s.innerText.trim());
+          Array.prototype.forEach.call(t.el.querySelectorAll(".at-meta,.at-contact"), function (m) { txt.push(nameOf(t) + " detail: " + m.innerText.replace(/\n+/g, " / ").trim()); });
+        } else txt.push(nameOf(t) + ": " + t.el.innerText.trim());
+      });
+      var out = "/* CSS */\n" + css.join("\n") + "\n\n/* TEXT (only what changed matters) */\n" + txt.join("\n");
+      try { navigator.clipboard.writeText(out); } catch (x) {}
+      console.log("%c[place] paste to Claude:\n" + out, "color:#7fc7e6");
+      pr.textContent = "copied → clipboard + console";
+    }
+    console.log("[place] mode ON. Click to select · drag to move · blue handle or ±w = width · A± = font · 1/2 col · Edit text · Copy.");
   })();
   updateWordmark(); setSurveyActive(); driveReveal();
   window.addEventListener("resize", function () { centreSketch(); apply(); driveReveal(); });
@@ -1503,7 +1556,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.28 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.29 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
