@@ -198,14 +198,14 @@
   .scard.cover .about-text{color:#f6f5f5;text-shadow:0 1px 22px rgba(0,0,0,.6)}
   .scard.cover .at-foot{color:rgba(246,245,245,.85)}
   .scard.cover .at-contact a{color:#f6f5f5}
-  /* each caption sits in that image's most readable zone (block centred, text left):
-     HOUSE = base top-centre (the sketch's upper half is clear white)
-     HUNTER = bottom (the dark lower band of the drum photo)
-     ARCHIVE = vertical middle · ABOUT = shifted left, clear of the centred elevation */
-  .scard[data-section="hunter"]  .about-text{top:auto;bottom:8vh}
-  .scard[data-section="archive"] .about-text{left:6vw;top:50%;transform:translateY(-50%)}   /* left of the nameblock, on the black field */
-  .scard[data-section="archive"] .enter-cue{left:6vw;right:auto;top:auto;bottom:16vh}       /* button under the caption, also left */
-  .scard[data-section="about"]   .about-text{left:6vw;top:26vh;transform:none}   /* left + below the menu stack */
+  /* placement — set by Brandon in ?place mode (2026-08-06) */
+  .scard[data-section="hunter"]  .about-text{left:1.70vw;  top:52.51vh; width:232px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="house"]   .about-text{left:2.59vw;  top:73.73vh; width:455px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="archive"] .about-text{left:6.00vw;  top:39.51vh; width:351px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="about"]   .about-text{left:23.50vw; top:23.01vh; width:355px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="hunter"]  .enter-cue{left:89.13vw; top:80.99vh; right:auto; bottom:auto; transform:none}
+  .scard[data-section="house"]   .enter-cue{left:74.22vw; top:49.18vh; right:auto; bottom:auto; transform:none}
+  .scard[data-section="archive"] .enter-cue{left:6.00vw;  top:76.02vh; right:auto; bottom:auto; transform:none}
   /* the section title-block — typeset (scales cleanly), centred over the card
      image, with the leader text beneath. Title sized ~ the nameblock's HOUSE.
      On entry the title flies to its menu slot (see #titlefly). */
@@ -464,7 +464,7 @@
       <source src="assets/entry/entry-loop.mp4?v=2" type="video/mp4">
     </video>
     <img class="vname" src="assets/entry/nameblock-1970-v3.png" alt="Hunter House · Victoria B.C. · 1970 · Ric Hunter Architect">
-    <div id="film-cite" style="position:absolute;left:34px;bottom:24px;z-index:2;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(246,245,245,.62);pointer-events:none">Brandon Poole, Film Excerpt · 2026</div>
+    <div id="film-cite" style="position:absolute;left:2.02vw;top:95.84vh;z-index:2;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(246,245,245,.62);pointer-events:none">Brandon Poole, Film Excerpt · 2026</div>
   </section>
   <!-- HUNTER: revealed first (in #act1) so the menu reads HUNTER · HOUSE · ARCHIVE.
        PS-composed full-bleed card (assets/entry/cards/hunter/) -->
@@ -484,7 +484,7 @@
     <img class="layer" src="assets/entry/cards/home/BACKGROUND.jpg?v=3" alt="">
     <img class="layer bg2" src="assets/entry/cards/home/BACKGROUND2.jpg" alt="">
     <div class="about-text">
-      <p class="at-statement">Ric and Frances Hunter's house at 203 Goward Road. Raised 1970, extended west 1991, dining room 2018.</p>
+      <p class="at-statement">A Cottage for Ric and Frances Hunter.<br>The house at 203 Goward Road. Raised 1970; Extended 1991 &amp; 2018.</p>
       <div class="at-foot">
         <div class="at-meta">HH-FRH · L001 &nbsp;(correspondence)<br>Letter with a sketch of the house, c.1969</div>
       </div>
@@ -526,7 +526,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.32</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.33</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1558,7 +1558,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.32 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.33 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
