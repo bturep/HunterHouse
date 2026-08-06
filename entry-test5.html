@@ -528,7 +528,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.38</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.39</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1451,6 +1451,7 @@
     var st = document.createElement("style");
     st.textContent =
       "body.place-mode .about-text,body.place-mode .enter-cue,body.place-mode #film-cite{pointer-events:auto!important;cursor:move;outline:1.5px dashed rgba(220,40,40,.55);outline-offset:5px}" +
+      "body.place-mode .scard .layer{pointer-events:auto!important;cursor:move;outline:1.5px dashed rgba(43,143,255,.5);outline-offset:-3px}" +
       "body.place-mode .p-sel{outline:2px solid #2b8fff!important;outline-offset:5px}" +
       "body.place-mode .p-edit{cursor:text!important;outline:2px solid #2fb46a!important}" +
       ".p-wh{position:absolute;right:-7px;top:50%;width:12px;height:44px;transform:translateY(-50%);background:#2b8fff;border-radius:3px;cursor:ew-resize;z-index:70}" +
@@ -1463,34 +1464,46 @@
       "#place-bar #pr{min-width:150px}#place-bar #pr b{color:#7fc7e6}" +
       /* clean-preview: hide every placement outline + the resize handle so the
          composition reads as it really will (the bar stays, to toggle back) */
-      "body.p-clean .about-text,body.p-clean .enter-cue,body.p-clean #film-cite,body.p-clean .p-sel{outline:none!important;cursor:default}" +
+      "body.p-clean .about-text,body.p-clean .enter-cue,body.p-clean #film-cite,body.p-clean .scard .layer,body.p-clean .p-sel{outline:none!important;cursor:default}" +
       "body.p-clean .p-wh{display:none!important}";
     document.head.appendChild(st);
     var SELS = [
       '.scard[data-section="hunter"] .about-text', '.scard[data-section="house"] .about-text',
       '.scard[data-section="archive"] .about-text', '.scard[data-section="about"] .about-text',
       '.scard[data-section="hunter"] .enter-cue', '.scard[data-section="house"] .enter-cue',
-      '.scard[data-section="archive"] .enter-cue', '#film-cite'
+      '.scard[data-section="archive"] .enter-cue', '#film-cite',
+      // background images last, so text/buttons win the click-hit test
+      '.scard[data-section="hunter"] .layer', '.scard[data-section="house"] .layer',
+      '.scard[data-section="archive"] .layer', '.scard[data-section="about"] .layer'
     ];
     var targets = [];
-    SELS.forEach(function (sel) { var el = document.querySelector(sel); if (el) targets.push({ sel: sel, el: el, isText: /about-text/.test(sel) }); });
+    SELS.forEach(function (sel) {
+      var el = document.querySelector(sel); if (!el) return;
+      var isImg = / \.layer$/.test(sel);
+      var t = { sel: sel, el: el, isText: /about-text/.test(sel), isImg: isImg };
+      if (isImg) { var op = (getComputedStyle(el).objectPosition || "50% 50%").split(" "); t.op = { x: parseFloat(op[0]) || 50, y: parseFloat(op[1]) || 50 }; }
+      targets.push(t);
+    });
     var bar = document.createElement("div"); bar.id = "place-bar";
     bar.innerHTML = 'PLACE <span id="pr">— select an element</span>' +
       '<span class="g"><button data-a="w-">– w</button><button data-a="w+">+ w</button></span>' +
       '<span class="g"><button data-a="f-">A–</button><button data-a="f+">A+</button></span>' +
       '<span class="g"><button data-a="col1">1 col</button><button data-a="col2">2 col</button></span>' +
+      '<span class="g"><button data-a="fit">Fit/Fill</button></span>' +
       '<span class="g"><button data-a="edit">Edit text</button></span>' +
       '<span class="g"><button data-a="boxes" class="on">Boxes</button></span>' +
       '<span class="g"><button class="copy" data-a="copy">Copy</button></span>';
     document.body.appendChild(bar);
     var pr = document.getElementById("pr");
-    var sel = null, editing = false, drag = null, resizing = null;
+    var sel = null, editing = false, drag = null, resizing = null, imgDrag = null;
     var wh = document.createElement("div"); wh.className = "p-wh"; wh.style.display = "none";
     function cardOf(el) { return el.closest(".scard") || el.closest("#svid") || el.parentElement; }
     function relOf(t) { var cr = cardOf(t.el).getBoundingClientRect(), er = t.el.getBoundingClientRect(); return { L: (er.left - cr.left) / window.innerWidth * 100, T: (er.top - cr.top) / window.innerHeight * 100 }; }
-    function nameOf(t) { var m = t.sel.match(/section="(\w+)"/); var p = m ? m[1] : "film"; return p + (/enter-cue/.test(t.sel) ? " button" : (/#film/.test(t.sel) ? " caption" : " text")); }
+    function nameOf(t) { var m = t.sel.match(/section="(\w+)"/); var p = m ? m[1] : "film"; return p + (t.isImg ? " image" : /enter-cue/.test(t.sel) ? " button" : /#film/.test(t.sel) ? " caption" : " text"); }
     function fontEl(t) { return t.isText ? t.el.querySelector(".at-statement") : t.el; }
+    function objFit(t) { return t.el.style.objectFit || getComputedStyle(t.el).objectFit; }
     function readEl(t) {
+      if (t.isImg) { pr.innerHTML = "<b>" + nameOf(t) + "</b> pos " + t.op.x.toFixed(0) + "% " + t.op.y.toFixed(0) + "% · " + objFit(t) + " · drag to pan"; return; }
       var r = relOf(t), w = Math.round(t.el.getBoundingClientRect().width), fe = fontEl(t);
       var fs = fe ? Math.round(parseFloat(getComputedStyle(fe).fontSize)) : 0;
       pr.innerHTML = "<b>" + nameOf(t) + "</b> " + r.L.toFixed(1) + "vw," + r.T.toFixed(1) + "vh · " + w + "px · " + fs + "px" + (t.isText ? " · " + (t.el.classList.contains("p-2col") ? "2col" : "1col") : "");
@@ -1510,27 +1523,31 @@
       if (!t) return;
       e.preventDefault(); e.stopPropagation();
       select(t);
+      if (t.isImg) { imgDrag = { t: t, sx: e.clientX, sy: e.clientY, ox: t.op.x, oy: t.op.y }; try { t.el.setPointerCapture(e.pointerId); } catch (x) {} return; }
       var r = t.el.getBoundingClientRect();
       drag = { t: t, ox: e.clientX - r.left, oy: e.clientY - r.top };
       try { t.el.setPointerCapture(e.pointerId); } catch (x) {}
     }, true);
     document.addEventListener("pointermove", function (e) {
       if (resizing) { resizing.t.el.style.width = Math.max(80, resizing.sw + (e.clientX - resizing.sx)) + "px"; readEl(resizing.t); return; }
+      if (imgDrag) { var it = imgDrag.t, s = (objFit(it) === "contain") ? 1 : -1; it.op.x = imgDrag.ox + s * (e.clientX - imgDrag.sx) / window.innerWidth * 100; it.op.y = imgDrag.oy + s * (e.clientY - imgDrag.sy) / window.innerHeight * 100; it.el.style.objectPosition = it.op.x.toFixed(1) + "% " + it.op.y.toFixed(1) + "%"; readEl(it); return; }
       if (!drag) return;
       var el = drag.t.el;
       el.style.left = (e.clientX - drag.ox) + "px"; el.style.top = (e.clientY - drag.oy) + "px";
       el.style.right = "auto"; el.style.bottom = "auto"; el.style.transform = "none";
       readEl(drag.t);
     }, true);
-    document.addEventListener("pointerup", function () { if (drag) { readEl(drag.t); drag = null; } resizing = null; }, true);
-    function editables() { var l = []; targets.forEach(function (t) { if (t.isText) l = l.concat(Array.prototype.slice.call(t.el.querySelectorAll(".at-statement,.at-meta,.at-contact"))); else l.push(t.el); }); return l; }
+    document.addEventListener("pointerup", function () { if (drag) { readEl(drag.t); drag = null; } if (imgDrag) { readEl(imgDrag.t); imgDrag = null; } resizing = null; }, true);
+    function editables() { var l = []; targets.forEach(function (t) { if (t.isText) l = l.concat(Array.prototype.slice.call(t.el.querySelectorAll(".at-statement,.at-meta,.at-contact"))); else if (!t.isImg) l.push(t.el); }); return l; }
     function toggleEdit(on) { editables().forEach(function (el) { el.contentEditable = on ? "true" : "false"; el.classList.toggle("p-edit", on); }); pr.textContent = on ? "EDIT: click into any text to change it" : "edit off"; }
     bar.addEventListener("click", function (e) {
       var a = e.target.getAttribute && e.target.getAttribute("data-a"); if (!a) return;
       if (a === "copy") return doCopy();
       if (a === "edit") { editing = !editing; toggleEdit(editing); e.target.classList.toggle("on", editing); return; }
       if (a === "boxes") { var clean = document.body.classList.toggle("p-clean"); e.target.classList.toggle("on", !clean); e.target.textContent = clean ? "Boxes off" : "Boxes"; return; }
+      if (a === "fit") { if (!sel || !sel.isImg) { pr.textContent = "select a background image first"; return; } sel.el.style.objectFit = (objFit(sel) === "cover" ? "contain" : "cover"); readEl(sel); return; }
       if (!sel) { pr.textContent = "select an element first"; return; }
+      if (sel.isImg) { pr.textContent = "image: drag to pan · Fit/Fill to change fit"; return; }
       var fe = fontEl(sel);
       if (a === "w-" || a === "w+") sel.el.style.width = Math.max(80, sel.el.getBoundingClientRect().width + (a === "w+" ? 20 : -20)) + "px";
       else if ((a === "f-" || a === "f+") && fe) fe.style.fontSize = Math.max(8, parseFloat(getComputedStyle(fe).fontSize) + (a === "f+" ? 1 : -1)) + "px";
@@ -1541,11 +1558,13 @@
     function doCopy() {
       var css = [], txt = [];
       targets.forEach(function (t) {
+        if (t.isImg) { css.push(t.sel + " { object-position:" + t.op.x.toFixed(1) + "% " + t.op.y.toFixed(1) + "%; object-fit:" + objFit(t) + "; }"); return; }
         var r = relOf(t), w = Math.round(t.el.getBoundingClientRect().width), fe = fontEl(t);
         css.push(t.sel + " { left:" + r.L.toFixed(2) + "vw; top:" + r.T.toFixed(2) + "vh;" + (t.isText ? " width:" + w + "px;" : "") + " right:auto; bottom:auto; transform:none;" + (t.isText && t.el.classList.contains("p-2col") ? " flex-direction:row;" : "") + " }");
         if (fe && fe.style.fontSize) css.push(t.sel + (t.isText ? " .at-statement" : "") + " { font-size:" + fe.style.fontSize + "; }");
       });
       targets.forEach(function (t) {
+        if (t.isImg) return;
         if (t.isText) {
           var s = t.el.querySelector(".at-statement"); if (s) txt.push(nameOf(t) + " statement: " + s.innerText.trim());
           Array.prototype.forEach.call(t.el.querySelectorAll(".at-meta,.at-contact"), function (m) { txt.push(nameOf(t) + " detail: " + m.innerText.replace(/\n+/g, " / ").trim()); });
@@ -1561,7 +1580,7 @@
       var tg = e.target; if (tg && (tg.isContentEditable || tg.tagName === "INPUT" || tg.tagName === "TEXTAREA")) return;
       e.preventDefault(); var btn = bar.querySelector('[data-a="boxes"]'); if (btn) btn.click();
     }, true);
-    console.log("[place] mode ON. Click to select · drag to move · blue handle or ±w = width · A± = font · 1/2 col · Edit text · Boxes (H) hides outlines · Copy.");
+    console.log("[place] mode ON. Click to select · drag to move · blue handle or ±w = width · A± = font · 1/2 col · Edit text · Boxes (H) hides outlines · backgrounds: drag to pan + Fit/Fill · Copy.");
   })();
   updateWordmark(); setSurveyActive(); driveReveal();
   window.addEventListener("resize", function () { centreSketch(); apply(); driveReveal(); });
@@ -1571,7 +1590,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.38 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.39 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
