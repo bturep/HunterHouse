@@ -481,9 +481,8 @@
   </section>
   </div><!-- /#act1 -->
   <!-- HOME: PS-composed layer-stack card (assets/entry/cards/home/) -->
-  <section class="scard ps" data-section="house">
-    <img class="layer" src="assets/entry/cards/home/BACKGROUND.jpg?v=3" alt="">
-    <img class="layer bg2" src="assets/entry/cards/home/BACKGROUND2.jpg" alt="">
+  <section class="scard ps cover" data-section="house">
+    <img class="layer" src="assets/entry/cards/home/BACKGROUND.jpg?v=4" alt="">
     <div class="about-text">
       <p class="at-statement">A Cottage for Ric and Frances Hunter.<br>The house at 203 Goward Road. Raised 1970; Extended 1991 &amp; 2018.</p>
       <div class="at-foot">
@@ -527,7 +526,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.36</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.37</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1118,7 +1117,7 @@
       here = menuLinks.findIndex(function (a) { return a.dataset.section === mode; }) + 1;
     }
     // dark cards (white ink): the film · the HUNTER photo · the ARCHIVE black field
-    var DARK = { archive: 1 }, INK = "#1b1918", PAPER = "#f6f5f5", V = window.innerHeight;
+    var DARK = { house: 1, archive: 1 }, INK = "#1b1918", PAPER = "#f6f5f5", V = window.innerHeight;
     function pDark(k) { var p = pages[k]; return (k === 0) || !!(p && p.dataset && DARK[p.dataset.section]) ||
                         !!(p && p.classList && p.classList.contains("dark-card")); }
     var onDark = pDark(here);
@@ -1570,7 +1569,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.36 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.37 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
