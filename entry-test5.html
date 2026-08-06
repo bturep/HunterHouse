@@ -464,7 +464,7 @@
       <source src="assets/entry/entry-loop.mp4" type="video/mp4">
     </video>
     <img class="vname" src="assets/entry/nameblock-1970-v3.png" alt="Hunter House · Victoria B.C. · 1970 · Ric Hunter Architect">
-    <div style="position:absolute;left:34px;bottom:24px;z-index:2;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(246,245,245,.62);pointer-events:none">Brandon Poole, Film Excerpt · 2026</div>
+    <div id="film-cite" style="position:absolute;left:34px;bottom:24px;z-index:2;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(246,245,245,.62);pointer-events:none">Brandon Poole, Film Excerpt · 2026</div>
   </section>
   <!-- HUNTER: revealed first (in #act1) so the menu reads HUNTER · HOUSE · ARCHIVE.
        PS-composed full-bleed card (assets/entry/cards/hunter/) -->
@@ -526,7 +526,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.27</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.28</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1419,6 +1419,7 @@
   });
   // menu = the persistent spine (jump anywhere); each card enters its section
   menuLinks.forEach(function (a) { a.addEventListener("click", function () {
+    if (document.body.classList.contains("place-mode")) return;
     var s = a.dataset.section; if (!s) return;
     if (s === "house" || s === "hunter") { openRoom(s); }             // deep → lateral room
     else if (s === "archive") { window.open("next.html?enter", "_blank", "noopener"); }   // leaf → instrument (splash skipped)
@@ -1426,6 +1427,7 @@
   }); });
   document.querySelectorAll("#survey .scard[data-section]").forEach(function (c) {
     c.addEventListener("click", function (e) {
+      if (document.body.classList.contains("place-mode")) return;
       if (e.target.closest("a")) return;   // a real link inside the card (e.g. Browse the Archive) handles itself
       var s = c.dataset.section;
       if (s === "house" || s === "hunter") { openRoom(s); return; }   // deep sections → lateral room
@@ -1434,8 +1436,65 @@
     });
   });
   document.querySelectorAll("#survey .gopt[data-section]").forEach(function (o) { o.addEventListener("click", function (e) { e.preventDefault(); openSection(o.dataset.section, o.querySelector(".stitle")); }); });
-  document.getElementById("svid").addEventListener("click", function () { goPage(1); });
+  document.getElementById("svid").addEventListener("click", function () { if (document.body.classList.contains("place-mode")) return; goPage(1); });
   wm.addEventListener("click", closeSection);
+  // ── ?place — PLACEMENT MODE (dev only): drag every caption/button where you want
+  //    it, then "Copy CSS" to get the exact rules (positions relative to each card,
+  //    in vw/vh, so they hold on resize). Paste back to me and I bake them in. ──────
+  (function placeMode() {
+    if (!new URLSearchParams(location.search).has("place")) return;
+    document.body.classList.add("place-mode");
+    var st = document.createElement("style");
+    st.textContent =
+      "body.place-mode .about-text,body.place-mode .enter-cue,body.place-mode #film-cite{pointer-events:auto!important;cursor:move;outline:1.5px dashed rgba(220,40,40,.85);outline-offset:5px}" +
+      "#place-bar{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:9999;background:#1b1918;color:#f6f5f5;font:12px/1.5 'JetBrains Mono',Menlo,monospace;padding:8px 12px;border-radius:4px;display:flex;gap:12px;align-items:center;box-shadow:0 6px 28px rgba(0,0,0,.45)}" +
+      "#place-bar #place-read b{color:#7fc7e6}" +
+      "#place-bar button{font:inherit;background:#f6f5f5;color:#1b1918;border:0;padding:5px 11px;border-radius:3px;cursor:pointer}";
+    document.head.appendChild(st);
+    var SELS = [
+      '.scard[data-section="hunter"] .about-text', '.scard[data-section="house"] .about-text',
+      '.scard[data-section="archive"] .about-text', '.scard[data-section="about"] .about-text',
+      '.scard[data-section="hunter"] .enter-cue', '.scard[data-section="house"] .enter-cue',
+      '.scard[data-section="archive"] .enter-cue', '#film-cite'
+    ];
+    var targets = [];
+    SELS.forEach(function (sel) { var el = document.querySelector(sel); if (el) targets.push({ sel: sel, el: el }); });
+    var bar = document.createElement("div"); bar.id = "place-bar";
+    bar.innerHTML = 'PLACE · drag captions &amp; buttons · <span id="place-read">—</span> <button id="place-copy">Copy CSS</button>';
+    document.body.appendChild(bar);
+    var read = document.getElementById("place-read");
+    function cardOf(el) { return el.closest(".scard") || el.closest("#svid") || el.parentElement; }
+    function relOf(t) {   // position RELATIVE TO ITS CARD (cancels the card's scroll/transform)
+      var cr = cardOf(t.el).getBoundingClientRect(), er = t.el.getBoundingClientRect();
+      return { L: (er.left - cr.left) / window.innerWidth * 100, T: (er.top - cr.top) / window.innerHeight * 100 };
+    }
+    function label(t) { var m = t.sel.match(/section="(\w+)"/); var p = m ? m[1] : "film"; return p + (/enter-cue/.test(t.sel) ? " button" : (/#film/.test(t.sel) ? " caption" : " text")); }
+    function show(t) { var r = relOf(t); read.innerHTML = "<b>" + label(t) + "</b> &nbsp;left:" + r.L.toFixed(1) + "vw &nbsp;top:" + r.T.toFixed(1) + "vh"; }
+    var drag = null;
+    document.addEventListener("pointerdown", function (e) {
+      var t = null; for (var i = 0; i < targets.length; i++) { if (targets[i].el === e.target || targets[i].el.contains(e.target)) { t = targets[i]; break; } }
+      if (!t) return;
+      e.preventDefault(); e.stopPropagation();
+      var r = t.el.getBoundingClientRect();
+      drag = { t: t, ox: e.clientX - r.left, oy: e.clientY - r.top };
+      try { t.el.setPointerCapture(e.pointerId); } catch (x) {}
+    }, true);
+    document.addEventListener("pointermove", function (e) {
+      if (!drag) return;
+      var el = drag.t.el;
+      el.style.left = (e.clientX - drag.ox) + "px"; el.style.top = (e.clientY - drag.oy) + "px";
+      el.style.right = "auto"; el.style.bottom = "auto"; el.style.transform = "none";
+      show(drag.t);
+    }, true);
+    document.addEventListener("pointerup", function () { if (drag) { show(drag.t); drag = null; } }, true);
+    document.getElementById("place-copy").addEventListener("click", function () {
+      var css = targets.map(function (t) { var r = relOf(t); return t.sel + " { left:" + r.L.toFixed(2) + "vw; top:" + r.T.toFixed(2) + "vh; right:auto; bottom:auto; transform:none; }"; }).join("\n");
+      try { navigator.clipboard.writeText(css); } catch (x) {}
+      console.log("%c[place] copy this to Claude:\n" + css, "color:#7fc7e6");
+      read.textContent = "copied " + targets.length + " rules → clipboard + console";
+    });
+    console.log("[place] mode ON — drag captions/buttons, then Copy CSS. Targets: " + targets.length);
+  })();
   updateWordmark(); setSurveyActive(); driveReveal();
   window.addEventListener("resize", function () { centreSketch(); apply(); driveReveal(); });
   flow.querySelector(".sk").addEventListener("load", function () { centreSketch(); apply(); });
@@ -1444,7 +1503,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.27 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.28 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
