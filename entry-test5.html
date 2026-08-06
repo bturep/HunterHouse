@@ -202,19 +202,19 @@
   .scard.cover .at-foot{color:rgba(246,245,245,.85)}
   .scard.cover .at-contact a{color:#f6f5f5}
   /* placement — set by Brandon in ?place mode (2026-08-06) */
-  .scard[data-section="hunter"]  .about-text{left:15.84vw; top:6.64vh;  width:384px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="hunter"]  .about-text{left:37.40vw; top:4.42vh;  width:626px; right:auto; bottom:auto; transform:none}
   .scard[data-section="house"]   .about-text{left:9.58vw;  top:35.72vh; width:455px; right:auto; bottom:auto; transform:none}
   .scard[data-section="archive"] .about-text{left:14.69vw; top:3.42vh;  width:385px; right:auto; bottom:auto; transform:none}
-  .scard[data-section="about"]   .about-text{left:14.57vw; top:3.66vh;  width:842px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="about"]   .about-text{left:13.77vw; top:3.60vh;  width:535px; right:auto; bottom:auto; transform:none}
   .scard[data-section="about"] .at-statement{font-size:25px}
-  .scard[data-section="hunter"]  .enter-cue{left:91.39vw; top:33.94vh; right:auto; bottom:auto; transform:none}
+  .scard[data-section="hunter"]  .enter-cue{left:85.02vw; top:43.97vh; right:auto; bottom:auto; transform:none}
   .scard[data-section="house"]   .enter-cue{left:27.76vw; top:53.82vh; right:auto; bottom:auto; transform:none}
   .scard[data-section="archive"] .enter-cue{left:14.87vw; top:55.62vh; right:auto; bottom:auto; transform:none}
   /* background-image framing (?place: pan/fit/zoom) */
-  .scard[data-section="hunter"]  .layer{object-position:58% 72%; object-fit:cover; transform:scale(1.12)}
+  .scard[data-section="hunter"]  .layer{object-position:50% 50%; object-fit:cover}
   .scard[data-section="house"]   .layer{object-position:50% 50%; object-fit:cover}
   .scard[data-section="archive"] .layer{object-position:50% 50%; object-fit:cover}
-  .scard[data-section="about"]   .layer{object-position:68.2% 300.4%; object-fit:cover; transform:scale(1.30)}
+  .scard[data-section="about"]   .layer{object-position:62.5% 300.0%; object-fit:cover; transform:scale(1.30)}
   /* the section title-block — typeset (scales cleanly), centred over the card
      image, with the leader text beneath. Title sized ~ the nameblock's HOUSE.
      On entry the title flies to its menu slot (see #titlefly). */
@@ -478,9 +478,9 @@
   <!-- HUNTER: revealed first (in #act1) so the menu reads HUNTER · HOUSE · ARCHIVE.
        PS-composed full-bleed card (assets/entry/cards/hunter/) -->
   <section class="scard ps cover" data-section="hunter">
-    <div class="bgclip"><img class="layer" src="assets/entry/cards/hunter/BACKGROUND.jpg?v=4" alt="Richard Hunter building the deck of his house, 1978"></div>
+    <div class="bgclip"><img class="layer" src="assets/entry/cards/hunter/BACKGROUND.jpg?v=5" alt="Richard Hunter building the deck of his house, 1978"></div>
     <div class="about-text">
-      <p class="at-statement">Richard Morrow Hunter<br>Architect. 1930–2023<br><br>Fifty years designing one house.</p>
+      <p class="at-statement">"Architecture, the sheltering art,<br>is a repository of human experience."<br><br>Richard Morrow Hunter, 1930–2023.<br>Architect, schooled at Oklahoma under Bruce Goff. Fifty years designing one house at 203 Goward Road.</p>
       <div class="at-foot">
         <div class="at-meta">HH-FRH-0001<br>Photograph, Frances Hunter Collection</div>
       </div>
@@ -534,7 +534,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.42</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.43</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1603,7 +1603,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.42 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.43 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
