@@ -85,12 +85,14 @@ function corsHeaders(origin) {
 // NOTE on catalogue/: the folder is intentionally VISIBLE because catalogue.csv
 // is the public, human-readable finding aid. Only catalogue.json (raw SPARQL
 // plumbing the app uses as an offline fallback) is hidden, via HIDDEN_FILES.
-// frances-hunter-collection/: correspondence is researcher-gated content served
-// ONLY via the /gated/* endpoints from the private hhf-gated bucket. Nothing under
-// a correspondence prefix should ever be reachable through the public bucket browser
-// — hidden here as belt-and-braces so a stray upload to the public bucket can't be
-// enumerated via /list. (Standing rule: letters never go in the public bucket.)
-const HIDDEN_PREFIXES = ["web/", "_wikibase/", "frances-hunter-collection/"];
+// frances-hunter-collection/: the PUBLIC tiers (photos, documents — masters/
+// previews/large/thumbs/pdf) are downloadable like every other collection. Only
+// correspondence subpaths are hidden here as belt-and-braces against a stray
+// upload. The actual gated letters live ONLY in the private hhf-gated bucket,
+// served via /gated/*, and are never in this public bucket. (Was the whole
+// FRH subtree — over-broad; it blocked the public photo downloads. 2026-08-06.)
+const HIDDEN_PREFIXES = ["web/", "_wikibase/",
+  "frances-hunter-collection/correspondence/", "frances-hunter-collection/letters/"];
 const HIDDEN_SEGMENTS = new Set(["metadata", "intake"]);
 const HIDDEN_FILES = new Set(["catalogue/catalogue.json"]);
 
