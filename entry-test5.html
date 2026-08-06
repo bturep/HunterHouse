@@ -167,7 +167,9 @@
   /* PS-composed card — full-canvas layer PNGs stacked (see assets/entry/cards/<name>/).
      Layers scale to fit so the Photoshop composition is preserved on any screen. */
   .scard.ps{padding:0;cursor:pointer;background:#f6f5f5}   /* opaque backing so the card covers the pinned intro */
-  .scard.ps .layer{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
+  /* clip container so a zoomed background bleeds off the card edges, never over the captions */
+  .scard .bgclip{position:absolute;inset:0;overflow:hidden;z-index:0}
+  .scard.ps .layer{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;transform-origin:50% 50%}
   /* a second background that fades in smoothly once the card is selected */
   .scard.ps .bg2{opacity:0;transition:opacity .7s ease}
   .scard.ps.selected .bg2{opacity:1}
@@ -472,7 +474,7 @@
   <!-- HUNTER: revealed first (in #act1) so the menu reads HUNTER · HOUSE · ARCHIVE.
        PS-composed full-bleed card (assets/entry/cards/hunter/) -->
   <section class="scard ps" data-section="hunter">
-    <img class="layer" src="assets/entry/cards/hunter/BACKGROUND.jpg?v=3" alt="">
+    <div class="bgclip"><img class="layer" src="assets/entry/cards/hunter/BACKGROUND.jpg?v=3" alt=""></div>
     <div class="about-text">
       <p class="at-statement">Richard Morrow Hunter<br>Architect. 1930–2023<br><br>Fifty years designing one house.</p>
       <div class="at-foot">
@@ -484,7 +486,7 @@
   </div><!-- /#act1 -->
   <!-- HOME: PS-composed layer-stack card (assets/entry/cards/home/) -->
   <section class="scard ps cover" data-section="house">
-    <img class="layer" src="assets/entry/cards/home/BACKGROUND.jpg?v=4" alt="">
+    <div class="bgclip"><img class="layer" src="assets/entry/cards/home/BACKGROUND.jpg?v=4" alt=""></div>
     <div class="about-text">
       <p class="at-statement">A Cottage for Ric and Frances Hunter.<br>Raised 1970; Extended 1991; 2018.</p>
       <div class="at-foot">
@@ -500,7 +502,7 @@
   -->
   <!-- ARCHIVE: the studio nameblock on black -->
   <section class="scard ps cover" data-section="archive">
-    <img class="layer" src="assets/entry/cards/archive/nameblock.jpg?v=2" alt="Richard Hunter Architect — studio nameblock">
+    <div class="bgclip"><img class="layer" src="assets/entry/cards/archive/nameblock.jpg?v=2" alt="Richard Hunter Architect — studio nameblock"></div>
     <div class="about-text">
       <p class="at-statement">The full record of the house — drawings, photographs, and correspondence.</p>
       <div class="at-foot">
@@ -511,7 +513,7 @@
   </section>
   <!-- ABOUT: coloured elevation of the house among the firs + foundation text -->
   <section class="scard ps" data-section="about">
-    <img class="layer" src="assets/entry/cards/about/BACKGROUND.jpg" alt="Elevation of the house among the firs">
+    <div class="bgclip"><img class="layer" src="assets/entry/cards/about/BACKGROUND.jpg" alt="Elevation of the house among the firs"></div>
     <div class="about-text">
       <p class="at-statement">The Hunter House Foundation stewards the residence at 203 Goward Road and its archive — keeping the house and its record open to scholars, students, and the public.</p>
       <div class="at-foot">
@@ -528,7 +530,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.39</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.40</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1481,7 +1483,10 @@
       var el = document.querySelector(sel); if (!el) return;
       var isImg = / \.layer$/.test(sel);
       var t = { sel: sel, el: el, isText: /about-text/.test(sel), isImg: isImg };
-      if (isImg) { var op = (getComputedStyle(el).objectPosition || "50% 50%").split(" "); t.op = { x: parseFloat(op[0]) || 50, y: parseFloat(op[1]) || 50 }; }
+      if (isImg) {
+        var op = (getComputedStyle(el).objectPosition || "50% 50%").split(" "); t.op = { x: parseFloat(op[0]) || 50, y: parseFloat(op[1]) || 50 };
+        var m = getComputedStyle(el).transform; t.scale = 1; if (m && m !== "none") { var mm = m.match(/matrix\(([^,]+)/); if (mm) t.scale = parseFloat(mm[1]) || 1; }
+      }
       targets.push(t);
     });
     var bar = document.createElement("div"); bar.id = "place-bar";
@@ -1503,7 +1508,7 @@
     function fontEl(t) { return t.isText ? t.el.querySelector(".at-statement") : t.el; }
     function objFit(t) { return t.el.style.objectFit || getComputedStyle(t.el).objectFit; }
     function readEl(t) {
-      if (t.isImg) { pr.innerHTML = "<b>" + nameOf(t) + "</b> pos " + t.op.x.toFixed(0) + "% " + t.op.y.toFixed(0) + "% · " + objFit(t) + " · drag to pan"; return; }
+      if (t.isImg) { pr.innerHTML = "<b>" + nameOf(t) + "</b> pos " + t.op.x.toFixed(0) + "% " + t.op.y.toFixed(0) + "% · " + objFit(t) + " · z=" + (t.scale || 1).toFixed(2) + " · drag=pan, ±w=zoom"; return; }
       var r = relOf(t), w = Math.round(t.el.getBoundingClientRect().width), fe = fontEl(t);
       var fs = fe ? Math.round(parseFloat(getComputedStyle(fe).fontSize)) : 0;
       pr.innerHTML = "<b>" + nameOf(t) + "</b> " + r.L.toFixed(1) + "vw," + r.T.toFixed(1) + "vh · " + w + "px · " + fs + "px" + (t.isText ? " · " + (t.el.classList.contains("p-2col") ? "2col" : "1col") : "");
@@ -1547,7 +1552,11 @@
       if (a === "boxes") { var clean = document.body.classList.toggle("p-clean"); e.target.classList.toggle("on", !clean); e.target.textContent = clean ? "Boxes off" : "Boxes"; return; }
       if (a === "fit") { if (!sel || !sel.isImg) { pr.textContent = "select a background image first"; return; } sel.el.style.objectFit = (objFit(sel) === "cover" ? "contain" : "cover"); readEl(sel); return; }
       if (!sel) { pr.textContent = "select an element first"; return; }
-      if (sel.isImg) { pr.textContent = "image: drag to pan · Fit/Fill to change fit"; return; }
+      if (sel.isImg) {
+        if (a === "w-" || a === "w+") { sel.scale = Math.max(0.2, (sel.scale || 1) + (a === "w+" ? 0.1 : -0.1)); sel.el.style.transform = "scale(" + sel.scale.toFixed(2) + ")"; readEl(sel); }
+        else pr.textContent = "image: ±w = zoom · drag = pan · Fit/Fill";
+        return;
+      }
       var fe = fontEl(sel);
       if (a === "w-" || a === "w+") sel.el.style.width = Math.max(80, sel.el.getBoundingClientRect().width + (a === "w+" ? 20 : -20)) + "px";
       else if ((a === "f-" || a === "f+") && fe) fe.style.fontSize = Math.max(8, parseFloat(getComputedStyle(fe).fontSize) + (a === "f+" ? 1 : -1)) + "px";
@@ -1558,7 +1567,7 @@
     function doCopy() {
       var css = [], txt = [];
       targets.forEach(function (t) {
-        if (t.isImg) { css.push(t.sel + " { object-position:" + t.op.x.toFixed(1) + "% " + t.op.y.toFixed(1) + "%; object-fit:" + objFit(t) + "; }"); return; }
+        if (t.isImg) { var z = (t.scale && t.scale !== 1) ? " transform:scale(" + t.scale.toFixed(2) + ");" : ""; css.push(t.sel + " { object-position:" + t.op.x.toFixed(1) + "% " + t.op.y.toFixed(1) + "%; object-fit:" + objFit(t) + ";" + z + " }"); return; }
         var r = relOf(t), w = Math.round(t.el.getBoundingClientRect().width), fe = fontEl(t);
         css.push(t.sel + " { left:" + r.L.toFixed(2) + "vw; top:" + r.T.toFixed(2) + "vh;" + (t.isText ? " width:" + w + "px;" : "") + " right:auto; bottom:auto; transform:none;" + (t.isText && t.el.classList.contains("p-2col") ? " flex-direction:row;" : "") + " }");
         if (fe && fe.style.fontSize) css.push(t.sel + (t.isText ? " .at-statement" : "") + " { font-size:" + fe.style.fontSize + "; }");
@@ -1590,7 +1599,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.39 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.40 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
