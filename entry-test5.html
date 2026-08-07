@@ -274,7 +274,7 @@
     transform:none !important;display:block !important;padding:0 !important;gap:0 !important;
     opacity:1 !important;pointer-events:none !important;z-index:9;transition:opacity .4s ease}
   #menu.mhide{opacity:0 !important}   /* the nav is hidden on the ABOUT endpoint */
-  #menu a{position:fixed;left:46px;top:46px;padding:0 !important;white-space:nowrap;text-decoration:none;
+  #menu a{position:fixed;left:var(--menu-x,46px);top:46px;padding:0 !important;white-space:nowrap;text-decoration:none;
     font-weight:700;font-size:22px;letter-spacing:.04em;text-transform:uppercase;
     color:#1b1918;opacity:0;pointer-events:auto}
   /* colour AND dim are set PER-LABEL in setSurveyActive — an INSTANT swap at the card
@@ -366,25 +366,28 @@
   /* ── MOBILE entry layout: name-square centred + smaller in the upper area
      (driveNameSquare mirrors size + LS=0); captions drop full-width below. ── */
   @media (max-width:767px){
+    /* ── ONE knob: the shared left edge. The menu links AND every caption/button
+       align to --menu-x, so changing this single value moves them together. ── */
+    html{ --menu-x:46px }
     #namesq .nsq{top:50%;width:min(29vh,200px);height:min(29vh,200px)}   /* centred vertically on mobile */
     .scard[data-section="hunter"] .at-statement{font-size:22px}
     .scard[data-section="house"]  .at-statement,
     .scard[data-section="archive"] .at-statement,
     .scard[data-section="about"]  .at-statement{font-size:19px}
     .scard[data-section="about"] .at-statement{max-width:none !important}
-    /* ── composed mobile layout (?place · MOBILE save) ── */
-    .scard[data-section="hunter"] .about-text { left:7.00vw !important; top:66.00vh !important; width:430px !important; right:auto !important; bottom:auto !important; transform:none !important }
-    .scard[data-section="house"]  .about-text { left:7.00vw !important; top:66.00vh !important; width:430px !important; right:auto !important; bottom:auto !important; transform:none !important }
-    .scard[data-section="archive"] .about-text { left:7.00vw !important; top:28.00vh !important; width:430px !important; right:auto !important; bottom:auto !important; transform:none !important }
-    .scard[data-section="about"]  .about-text { left:7.00vw !important; top:17.00vh !important; width:430px !important; right:auto !important; bottom:auto !important; transform:none !important; flex-direction:column !important }
-    .scard[data-section="hunter"] .enter-cue { left:7.00vw !important; top:87.32vh !important; right:auto !important; bottom:auto !important; transform:none !important }
-    .scard[data-section="house"]  .enter-cue { left:7.00vw !important; top:87.32vh !important; right:auto !important; bottom:auto !important; transform:none !important }
-    .scard[data-section="archive"] .enter-cue { left:7.00vw !important; top:87.53vh !important; right:auto !important; bottom:auto !important; transform:none !important }
+    /* ── composed mobile layout (?place · MOBILE save). All lefts = --menu-x. ── */
+    .scard[data-section="hunter"] .about-text { left:var(--menu-x) !important; top:67.70vh !important; width:370px !important; right:auto !important; bottom:auto !important; transform:none !important }
+    .scard[data-section="house"]  .about-text { left:var(--menu-x) !important; top:67.12vh !important; width:430px !important; right:auto !important; bottom:auto !important; transform:none !important }
+    .scard[data-section="archive"] .about-text { left:var(--menu-x) !important; top:54.06vh !important; width:343px !important; right:auto !important; bottom:auto !important; transform:none !important }
+    .scard[data-section="about"]  .about-text { left:var(--menu-x) !important; top:17.00vh !important; width:430px !important; right:auto !important; bottom:auto !important; transform:none !important; flex-direction:column !important }
+    .scard[data-section="hunter"] .enter-cue { left:var(--menu-x) !important; top:89.87vh !important; right:auto !important; bottom:auto !important; transform:none !important }
+    .scard[data-section="house"]  .enter-cue { left:var(--menu-x) !important; top:84.66vh !important; right:auto !important; bottom:auto !important; transform:none !important }
+    .scard[data-section="archive"] .enter-cue { left:var(--menu-x) !important; top:71.15vh !important; right:auto !important; bottom:auto !important; transform:none !important }
     #film-cite { left:2.02vw !important; top:95.84vh !important; right:auto !important; bottom:auto !important; transform:none !important; font-size:10px !important }
-    .scard[data-section="hunter"] .layer { object-position:45.7% 36.1% !important; object-fit:cover !important }
+    .scard[data-section="hunter"] .layer { object-position:45.6% 51.3% !important; object-fit:cover !important }
     .scard[data-section="house"]  .layer { object-position:9.0% 52.0% !important; object-fit:cover !important }
     .scard[data-section="archive"] .layer { object-position:12.9% 49.6% !important; object-fit:cover !important }
-    .scard[data-section="about"]  .layer { object-position:50.0% 100.0% !important; object-fit:contain !important; transform:translate(-11px,1px) scale(1.15) !important }
+    .scard[data-section="about"]  .layer { object-position:50.0% 100.0% !important; object-fit:contain !important; transform:scale(1.15) !important }
     .scard[data-section="about"] { --about-h:64dvh !important }
   }
 </style>
@@ -583,7 +586,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.84</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.85</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1730,7 +1733,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.84 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.85 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
