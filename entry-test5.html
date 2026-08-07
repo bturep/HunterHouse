@@ -206,12 +206,12 @@
      in one place to shift the whole column. */
   .scard{--edge:12vw}   /* shared left margin for captions AND left-aligned buttons */
   .scard[data-section="hunter"]  .about-text{left:var(--edge); top:63.79vh; width:626px; right:auto; bottom:auto; transform:none}
-  .scard[data-section="house"]   .about-text{left:var(--edge); top:43.65vh; width:455px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="house"]   .about-text{left:var(--edge); top:36.17vh; width:455px; right:auto; bottom:auto; transform:none}
   .scard[data-section="archive"] .about-text{left:var(--edge); top:41.28vh; width:385px; right:auto; bottom:auto; transform:none}
   .scard[data-section="about"]   .about-text{left:var(--edge); top:3.95vh;  width:535px; right:auto; bottom:auto; transform:none}  /* top aligned to menu HUNTER */
   .scard[data-section="about"] .at-statement{font-size:25px}
   .scard[data-section="hunter"]  .enter-cue{left:82.79vw; top:87.07vh; right:auto; bottom:auto; transform:none}  /* bottom aligned to Goward Road line */
-  .scard[data-section="house"]   .enter-cue{left:82.79vw; top:61.75vh; right:auto; bottom:auto; transform:none}  /* right edge aligned to HUNTER's MORE */
+  .scard[data-section="house"]   .enter-cue{left:var(--edge); top:62.14vh; right:auto; bottom:auto; transform:none}  /* on the shared left margin, under the caption */
   .scard[data-section="archive"] .enter-cue{left:var(--edge); top:72.19vh; right:auto; bottom:auto; transform:none}  /* left on the shared margin */
   /* background-image framing (?place: pan/fit/zoom) */
   .scard[data-section="hunter"]  .layer{object-position:50% 50%; object-fit:cover}
@@ -537,7 +537,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.45</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.46</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1606,7 +1606,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.45 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.46 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
