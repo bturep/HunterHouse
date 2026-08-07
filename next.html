@@ -6,7 +6,7 @@
 <!-- maximum-scale removed 2026-06-11 (Baden mode / AUDIT.md §1.1): it blocked
      iPadOS pinch-zoom + system "Larger Text" (WCAG 1.4.4). Affects all visitors. -->
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#1a1816">
+<meta name="theme-color" content="#2a2a2a">
 <meta name="color-scheme" content="dark light">
 <!-- Referrer policy: never send path/query (which can carry a ?researcher= token or
      ?id=) to cross-origin hosts. Explicit rather than relying on the browser default. -->
@@ -30,7 +30,7 @@
 <link rel="apple-touch-icon" href="assets/icon-180-next.png">
 <link rel="icon" type="image/png" href="assets/icon-192-next.png">
 <!-- Paint holdout: sets dark bg before render-blocking external CSS resolves -->
-<style>html{background:#1a1816}</style>
+<style>html{background:#2a2a2a}</style>
 <!-- ════════════════════════════════════════════════════════════════════════
      BADEN MODE — entry + persistence (Mowry Baden viewing room).
      Runs in <head> so html.baden is set before first paint → the desktop SPA
@@ -245,7 +245,7 @@
     flex-direction:column;align-items:center;justify-content:center;
     background:var(--soft);padding:48px 40px 64px;
   }
-  html.dark #about-pane{background:#242220}
+  html.dark #about-pane{background:#2e2e2e}
   #about-pane.open{display:flex}
   /* Header title swap: when the about-pane is open, the .markid in the
      header bar is hidden — the pane's big ap-title is the only title.
@@ -609,7 +609,7 @@
   /* 28px left matches .site-top and .list-head, so the curator name in the
      card lines up vertically under the "Hunter House Archive"
      mark in the header. Right stays 20px, mirroring .list-head's right side. */
-  html.dark .curation-card{background:#242220}
+  html.dark .curation-card{background:#2e2e2e}
   .curation-card[hidden]{display:none}
   .cc-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:8px}
   .cc-curator{font-family:var(--mono);font-size:9px;letter-spacing:0.18em;
@@ -913,7 +913,7 @@
   }
   .fpi-meta a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
   .fpi-meta a:hover{border-bottom-color:var(--copper-deep)}
-  html.dark #fp-info-pop{background:#1f1d1a;border-color:#3a3733}
+  html.dark #fp-info-pop{background:#2e2e2e;border-color:#3a3733}
 
   /* ── Facet counts + zero-greys (promoted from lab-a 2026-07-10) ── */
   .fp-chip .fp-ct{margin-left:7px;font-size:9.5px;opacity:0.85;letter-spacing:0.02em;color:var(--muted)}
@@ -1788,7 +1788,7 @@
   /* dark mode overrides for hardcoded colours */
   /* dark mode: image pane goes black, structural borders go black */
   html.dark .pane-image,
-  html.dark .image-stage{background:#242220}
+  html.dark .image-stage{background:#2e2e2e}
 
   .btn{
     display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 14px;
@@ -1891,7 +1891,7 @@
     padding:max(48px, calc(env(safe-area-inset-top, 0px) + 24px)) 28px 64px;
     -webkit-text-size-adjust:100%;text-size-adjust:100%;
   }
-  html.dark #mob-about{background:#242220}
+  html.dark #mob-about{background:#2e2e2e}
   #mob-about.open{display:flex}
   /* × close button mirrors #about-pane-close — same shape, same position
      relative to .ap-inner — so the mobile HHFA pane reads identical. */
@@ -1918,7 +1918,7 @@
     flex-direction:column;align-items:center;justify-content:center;
     background:var(--soft);
   }
-  html.dark #load-screen{background:#242220}
+  html.dark #load-screen{background:#2e2e2e}
   body.loading #load-screen{display:flex}
   .load-mark{
     width:60px;height:60px;opacity:0.15;margin-bottom:22px;
@@ -1965,7 +1965,7 @@
       overflow:hidden;
     }
     .rows{background:var(--soft);position:relative;z-index:1}
-    html.dark .rows{background:#0f0e0d}
+    html.dark .rows{background:#232323}
 
     .pane-image{display:none!important}
     .panel-right{display:none!important}
@@ -2121,7 +2121,7 @@
   /* ── Mobile header: rounded card + centred wordmark ── */
   @media (max-width:767px){
     .site-top{
-      background:#1a1816;
+      background:#2a2a2a;
       border-bottom:none;
       border-radius:14px;
       box-shadow:0 4px 16px rgba(0,0,0,0.35);
@@ -2273,7 +2273,7 @@
     background:var(--soft);border:1px solid var(--rule);color:var(--ink);
     padding:3px 7px;border-radius:1px;outline:none;
   }
-  html.dark .rn-pin-input{background:#2a2826;border-color:#3a3834;color:var(--inv-fg)}
+  html.dark .rn-pin-input{background:#363636;border-color:#3a3834;color:var(--inv-fg)}
   .rn-pin-input:focus{border-color:var(--muted)}
   .rn-pin-btn{font-family:var(--mono);font-size:13px;background:none;border:none;padding:0 2px;cursor:pointer;color:var(--muted);line-height:1}
   .rn-pin-btn:hover{color:var(--ink)}
@@ -2309,7 +2309,7 @@
     border:1px solid var(--rule);border-radius:1px;
     padding:6px 8px;resize:none;outline:none;
   }
-  html.dark .rn-textarea{background:#2a2826;border-color:#3a3834;color:var(--inv-fg)}
+  html.dark .rn-textarea{background:#363636;border-color:#3a3834;color:var(--inv-fg)}
   .rn-textarea:focus{border-color:var(--muted)}
   .rn-add-foot{display:flex;justify-content:flex-end;margin-top:5px}
   .rn-add-btn{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;background:var(--ink);color:var(--bg);border:none;padding:3px 10px;border-radius:1px;cursor:pointer}
@@ -2828,7 +2828,7 @@
 
   #timeline-pane{
     display:none;position:fixed;inset:0;z-index:400;
-    flex-direction:column;background:#1a1816;
+    flex-direction:column;background:#2a2a2a;
     --tl-ink:#f0ede6; --tl-muted:#9a958b; --tl-hint:#6c675f;
     --tl-rule:rgba(240,237,230,0.14); --tl-plate:#2b2723; --tl-amber:#e4a47e;
   }
@@ -2862,7 +2862,7 @@
   .tl-close:hover{color:var(--tl-ink)}
 
   /* Scroll stage — the one place that scrolls; holds the inline SVG. */
-  .tl-stage{flex:1;overflow-x:auto;overflow-y:hidden;background:#242220;position:relative}
+  .tl-stage{flex:1;overflow-x:auto;overflow-y:hidden;background:#2e2e2e;position:relative}
   .tl-stage svg{display:block;height:100%}
   .tl-stage::-webkit-scrollbar{height:9px}
   .tl-stage::-webkit-scrollbar-thumb{background:rgba(240,237,230,0.18);border-radius:5px}
@@ -2935,7 +2935,7 @@
 
   #files-pane{
     display:none;position:fixed;inset:0;z-index:400;
-    flex-direction:column;background:#1a1816;
+    flex-direction:column;background:#2a2a2a;
     --f-ink:#f0ede6; --f-muted:#9a958b; --f-hint:#6c675f;
     --f-rule:rgba(240,237,230,0.14); --f-row:rgba(240,237,230,0.03);
     --f-accent:#c9a44e; --f-link:#e4a47e;
@@ -3304,7 +3304,7 @@
 <style>
   #map-toggle svg{display:block}
   #map-toggle.on{color:var(--red)}
-  #site-overlay{position:fixed;z-index:1200;background:#242220;overflow:hidden;
+  #site-overlay{position:fixed;z-index:1200;background:#2e2e2e;overflow:hidden;
     top:41px;left:0;width:100vw;height:calc(100vh - 82px);
     opacity:0;visibility:hidden;pointer-events:none;
     /* opacity duration + easing matched to the panel width transition (260ms)
@@ -3351,14 +3351,14 @@
   /* a parent-level dark backdrop behind BOTH overlays — guarantees the white browse
      stage can never show through a transparent iframe during the hand-off */
   #view-backdrop{position:fixed;top:41px;left:0;width:100vw;height:calc(100vh - 82px);z-index:1100;
-    background:#242220;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 260ms cubic-bezier(0.4,0,0.2,1)}
+    background:#2e2e2e;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 260ms cubic-bezier(0.4,0,0.2,1)}
   body.site-mode #view-backdrop,body.tl-mode #view-backdrop{opacity:1;visibility:visible;transition:opacity 260ms cubic-bezier(0.55,0,0.8,0.35)}
   /* Closing: fade the backdrop out (standard curve) WHILE the mode class stays on
      so the overlay keeps its inset and the panels show through as they extend —
      the mirror of the opening (see close()'s deferred mode-class teardown). */
   body.site-mode.view-exiting #view-backdrop,body.tl-mode.view-exiting #view-backdrop{opacity:0;transition:opacity 260ms cubic-bezier(0.4,0,0.2,1)}
   @media (max-width:767px){ #view-backdrop{top:0;height:100vh} #view-toolbar{display:none!important} }
-  #timeline-overlay{position:fixed;z-index:1300;background:#242220;overflow:hidden;top:41px;left:0;width:100vw;height:calc(100vh - 82px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity 260ms cubic-bezier(0.4,0,0.2,1)}
+  #timeline-overlay{position:fixed;z-index:1300;background:#2e2e2e;overflow:hidden;top:41px;left:0;width:100vw;height:calc(100vh - 82px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity 260ms cubic-bezier(0.4,0,0.2,1)}
   #timeline-overlay.preload{visibility:visible}
   #timeline-overlay.show{opacity:1;visibility:visible;pointer-events:auto;transition:opacity 260ms cubic-bezier(0.55,0,0.8,0.35)}
   #timeline-overlay iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
@@ -4033,7 +4033,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.10-test.14";
+  const VERSION      = "v1.10-test.15";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
