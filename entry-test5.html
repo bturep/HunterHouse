@@ -578,7 +578,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.79</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.80</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1525,6 +1525,9 @@
     st.textContent =
       "body.place-mode .about-text,body.place-mode .enter-cue,body.place-mode #film-cite{pointer-events:auto!important;cursor:move;outline:1.5px dashed rgba(220,40,40,.55);outline-offset:5px}" +
       "body.place-mode .scard .layer{pointer-events:auto!important;cursor:move;outline:1.5px dashed rgba(43,143,255,.5);outline-offset:-3px}" +
+      /* editing a background: reveal the FULL image (overflow shown) with the crop frame outlined */
+      "body.place-mode .bgclip.bg-open{overflow:visible!important;z-index:60}" +
+      "body.place-mode .bgclip.bg-open::after{content:'';position:absolute;inset:0;outline:2px dashed #2b8fff;pointer-events:none;z-index:2}" +
       "body.place-mode .p-sel{outline:2px solid #2b8fff!important;outline-offset:5px}" +
       "body.place-mode .p-edit{cursor:text!important;outline:2px solid #2fb46a!important}" +
       ".p-wh{position:absolute;right:-7px;top:50%;width:12px;height:44px;transform:translateY(-50%);background:#2b8fff;border-radius:3px;cursor:ew-resize;z-index:70}" +
@@ -1600,11 +1603,16 @@
       pr.innerHTML = "<b>" + nameOf(t) + "</b> " + r.L.toFixed(1) + "vw," + r.T.toFixed(1) + "vh · " + w + "px · " + fs + "px" + (t.isText ? " · " + (t.el.classList.contains("p-2col") ? "2col" : "1col") : "");
     }
     function select(t) {
+      document.querySelectorAll(".bgclip.bg-open").forEach(function (c) { c.classList.remove("bg-open"); });   // close any open crop-preview
       if (sel) sel.el.classList.remove("p-sel");
       sel = t;
       if (!t) { wh.remove(); pr.textContent = "— select an element"; return; }
       t.el.classList.add("p-sel");
-      if (t.isText) { t.el.appendChild(wh); wh.style.display = "block"; } else { wh.remove(); }
+      if (t.isText) { t.el.appendChild(wh); wh.style.display = "block"; }
+      else {
+        wh.remove();
+        if (t.isImg) { if (!t.el.style.objectFit) t.el.style.objectFit = "contain"; var bc = t.el.closest(".bgclip"); if (bc) bc.classList.add("bg-open"); }   // reveal the full image + frame
+      }
       readEl(t);
     }
     document.addEventListener("pointerdown", function (e) {
@@ -1703,7 +1711,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.79 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.80 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
