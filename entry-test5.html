@@ -201,15 +201,16 @@
   .scard.cover .about-text{color:#f6f5f5;text-shadow:0 1px 22px rgba(0,0,0,.6)}
   .scard.cover .at-foot{color:rgba(246,245,245,.85)}
   .scard.cover .at-contact a{color:#f6f5f5}
-  /* placement. ARCHIVE/ABOUT share --edge (left margin). HUNTER/HOUSE caption +
-     button LOCK to the name-square's rest geometry so the text always aligns with
-     the mark: square centre = 50vw - --nsq-ls, size min(26vh,230px), resting at
-     50vh. --nm-x = text left (square right + gap); --nm-top/-bot = square top/bottom.
-     Keep --nsq-ls / --nsq-half in sync with driveNameSquare (LS=0.12*iw, S=min(26vh,230px)). */
+  /* placement. ARCHIVE/ABOUT share --edge. HUNTER/HOUSE caption+button LOCK to the
+     name-square's HELD spot (square centred; architect held LOW at 50vh+off, hunter
+     house held HIGH at 50vh-off; off = 0.615*size). --nm-x = text left (square right
+     + gap); per-card --nm-top/-bot = that square's top/bottom. Keep in sync with
+     driveNameSquare (centred, S=min(26vh,230px), off=0.615*S). */
   .scard{--edge:12vw;
-    --nsq-ls:12vw; --nsq-half:min(13vh,115px); --nsq-gap:34px;
-    --nm-x:calc(50vw - var(--nsq-ls) + var(--nsq-half) + var(--nsq-gap));
-    --nm-top:calc(50vh - var(--nsq-half)); --nm-bot:calc(50vh + var(--nsq-half))}
+    --nsq-half:min(13vh,115px); --nsq-off:calc(0.615 * min(26vh,230px)); --nsq-gap:34px;
+    --nm-x:calc(50vw + var(--nsq-half) + var(--nsq-gap))}
+  .scard[data-section="hunter"]{--nm-top:calc(50vh + var(--nsq-off) - var(--nsq-half)); --nm-bot:calc(50vh + var(--nsq-off) + var(--nsq-half))}  /* architect LOW */
+  .scard[data-section="house"]{--nm-top:calc(50vh - var(--nsq-off) - var(--nsq-half)); --nm-bot:calc(50vh - var(--nsq-off) + var(--nsq-half))}  /* hunter house HIGH */
   .scard[data-section="hunter"]  .about-text{left:var(--nm-x); top:var(--nm-top); width:280px; right:auto; bottom:auto; transform:none}
   .scard[data-section="house"]   .about-text{left:var(--nm-x); top:var(--nm-top); width:455px; right:auto; bottom:auto; transform:none}
   .scard[data-section="archive"] .about-text{left:var(--edge); top:41.28vh; width:385px; right:auto; bottom:auto; transform:none}
@@ -577,7 +578,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.72</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.73</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1295,23 +1296,21 @@
   var nsHH = nsBox ? nsBox.querySelector(".nsq-hh") : null;
   function nsLerp(a, b, t) { return a + (b - a) * t; }
   function nsClamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
-  // Film: the double stacked VERTICALLY at the original gap, CENTRED. Scrolling in:
-  // the section's square rises to the VERTICAL CENTRE and drifts slightly LEFT
-  // (off-centre) and holds; the other fades. Swaps per page.
-  //   film → both (centred) · HUNTER → architect (centre-left) · HOUSE → hunter house · after → gone
+  // Film: the double stacked VERTICALLY at the original gap, CENTRED. Each square
+  // HOLDS its exact film spot on its section page (architect stays LOW, hunter house
+  // stays HIGH) — no rising, no re-centring; the other just fades. Swaps per page.
+  //   film → both (centred) · HUNTER → architect holds low · HOUSE → hunter house holds high · after → gone
   function driveNameSquare(st) {
     if (!nsBox) return;
     var V = window.innerHeight, mob = window.innerWidth < 768;
     var S = mob ? Math.min(0.23 * V, 150) : Math.min(0.26 * V, 230), off = 0.615 * S;   // original box distance
-    var LS = mob ? 0 : 0.12 * window.innerWidth;                                // section off-centre nudge (none on mobile)
     function ramp(a, b, x) { return nsClamp01((x - a) / (b - a)); }
-    var xShift = LS * ramp(0.15 * V, 0.7 * V, st);                              // 0 on the film → LS on the section cards
-    function place(el, ty, op) { el.style.transform = "translate(-50%,-50%) translateX(" + (-xShift) + "px) translateY(" + ty + "px)"; el.style.opacity = op; }
-    // RH (architect): film below-centre → rises to centre by HUNTER; fades at HUNTER→HOUSE
-    place(nsArch, off * (1 - ramp(0.15 * V, 0.7 * V, st)), 1 - ramp(1.5 * V, 1.7 * V, st));
-    // HH (hunter house): film above-centre (fades leaving film); returns at centre for HOUSE, then out
-    if (st < 1.4 * V) place(nsHH, -off, 1 - ramp(0.3 * V, 0.55 * V, st));
-    else place(nsHH, 0, ramp(1.5 * V, 1.7 * V, st) * (1 - ramp(2.4 * V, 2.7 * V, st)));
+    nsHH.style.transform = "translate(-50%,-50%) translateY(" + (-off) + "px)";   // top (held high)
+    nsArch.style.transform = "translate(-50%,-50%) translateY(" + off + "px)";    // bottom (held low)
+    // HH (top): film → off through HUNTER → on for HOUSE → off after
+    nsHH.style.opacity = (st < 1.0 * V) ? (1 - ramp(0.4 * V, 0.6 * V, st)) : (ramp(1.4 * V, 1.6 * V, st) * (1 - ramp(2.4 * V, 2.6 * V, st)));
+    // RH (bottom): holds through film + HUNTER → off for HOUSE onward
+    nsArch.style.opacity = 1 - ramp(1.4 * V, 1.6 * V, st);
   }
   function onSurveyScroll() {
     updateWordmark();
@@ -1680,7 +1679,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.72 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.73 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
