@@ -249,10 +249,12 @@
   #svid video{width:100%;height:100%;object-fit:cover;display:block}
   /* entry title = Hunter's hand-lettered nameblock (image) */
   #svid .vname{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);height:min(58vh,660px);width:auto;will-change:transform}
-  /* persistent name-square (the two hand-lettered squares, transformed by driveNameSquare) */
-  #namesq{position:fixed;left:0;top:0;z-index:7;pointer-events:none;will-change:opacity}
-  #namesq .nsq{position:absolute;left:0;top:0;width:110px;height:110px;object-fit:contain;transform-origin:0 0;
-    filter:drop-shadow(0 1px 7px rgba(0,0,0,.5));will-change:transform,opacity}
+  /* persistent name-square: both squares pinned dead-centre at one fixed size;
+     driveNameSquare only crossfades their opacity (no move, no scale). */
+  #namesq{position:fixed;inset:0;z-index:7;pointer-events:none}
+  #namesq .nsq{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:min(40vh,380px);height:min(40vh,380px);object-fit:contain;
+    filter:drop-shadow(0 1px 8px rgba(0,0,0,.5));opacity:0;will-change:opacity}
   #svid .vcue{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(246,245,245,.72);
     transition:opacity .12s ease}
@@ -549,7 +551,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.60</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.61</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1267,22 +1269,19 @@
   var nsHH = nsBox ? nsBox.querySelector(".nsq-hh") : null;
   function nsLerp(a, b, t) { return a + (b - a) * t; }
   function nsClamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
+  // Dead-centre, fixed size. Only opacity changes: each square DISAPPEARS at the
+  // section edge, then the next FILLS IN (sequential, registered 1:1).
+  //   film → HUNTER HOUSE · HUNTER → RIC HUNTER ARCHITECT · HOUSE → HUNTER HOUSE · after → gone
   function driveNameSquare(st) {
     if (!nsBox) return;
-    var iw = window.innerWidth, ih = window.innerHeight, V = ih, NS = 110;
-    var bx = iw - 46 - NS, by = 46, bs = 1;                       // badge (top-right)
-    var Hn = Math.min(0.58 * ih, 660), L = 0.448 * Hn, gap = 0.104 * Hn, sc = L / NS;
-    var ncx = iw / 2, ncy = 0.47 * ih;
-    var fArchX = ncx - L / 2, fArchY = ncy + (L + gap) / 2 - L / 2;  // film lower square (architect)
-    var fHHX = ncx - L / 2, fHHY = ncy - (L + gap) / 2 - L / 2;      // film upper square (hunter house)
-    function place(el, x, y, s, op) { el.style.transform = "translate(" + x + "px," + y + "px) scale(" + s + ")"; el.style.opacity = op; }
-    var p1 = nsClamp01(st / V);                                   // film -> hunter travel
-    var q = nsClamp01((st - 1.5 * V) / (0.5 * V));                // hunter -> house swap
-    var fade = 1 - nsClamp01((st - 2.5 * V) / (0.5 * V));         // fade out after house
-    place(nsArch, nsLerp(fArchX, bx, p1), nsLerp(fArchY, by, p1), nsLerp(sc, bs, p1), (1 - q) * fade);
-    if (st < 1.2 * V) place(nsHH, nsLerp(fHHX, bx, p1), nsLerp(fHHY, by, p1), nsLerp(sc, bs, p1), nsClamp01(1 - p1 * 1.7) * fade);
-    else place(nsHH, bx, by, bs, q * fade);
-    nsBox.style.opacity = (st > 3 * V) ? 0 : 1;
+    var V = window.innerHeight;
+    function ramp(a, b, x) { return nsClamp01((x - a) / (b - a)); }   // 0 at a → 1 at b
+    var hh = 0, rh = 0;
+    if (st <= 0.5 * V) hh = 1 - ramp(0.35 * V, 0.5 * V, st);                                 // film HH, out by the edge
+    else if (st <= 1.5 * V) rh = ramp(0.5 * V, 0.65 * V, st) * (1 - ramp(1.35 * V, 1.5 * V, st)); // HUNTER = architect
+    else hh = ramp(1.5 * V, 1.65 * V, st) * (1 - ramp(2.35 * V, 2.6 * V, st));               // HOUSE = HH, then out
+    nsHH.style.opacity = hh;
+    nsArch.style.opacity = rh;
   }
   function onSurveyScroll() {
     updateWordmark();
@@ -1651,7 +1650,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.60 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.61 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
