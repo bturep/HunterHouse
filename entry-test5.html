@@ -201,24 +201,29 @@
   .scard.cover .about-text{color:#f6f5f5;text-shadow:0 1px 22px rgba(0,0,0,.6)}
   .scard.cover .at-foot{color:rgba(246,245,245,.85)}
   .scard.cover .at-contact a{color:#f6f5f5}
-  /* placement — set by Brandon in ?place mode (2026-08-06). All caption blocks
-     share one left margin (--edge) so they line up card-to-card; change --edge
-     in one place to shift the whole column. */
-  .scard{--edge:12vw}   /* shared left margin for captions AND left-aligned buttons */
-  .scard[data-section="hunter"]  .about-text{left:66.49vw; top:38.79vh; width:280px; right:auto; bottom:auto; transform:none}
-  .scard[data-section="house"]   .about-text{left:50.15vw; top:37.90vh; width:455px; right:auto; bottom:auto; transform:none}
+  /* placement. ARCHIVE/ABOUT share --edge (left margin). HUNTER/HOUSE caption +
+     button LOCK to the name-square's rest geometry so the text always aligns with
+     the mark: square centre = 50vw - --nsq-ls, size min(26vh,230px), resting at
+     50vh. --nm-x = text left (square right + gap); --nm-top/-bot = square top/bottom.
+     Keep --nsq-ls / --nsq-half in sync with driveNameSquare (LS=0.12*iw, S=min(26vh,230px)). */
+  .scard{--edge:12vw;
+    --nsq-ls:12vw; --nsq-half:min(13vh,115px); --nsq-gap:34px;
+    --nm-x:calc(50vw - var(--nsq-ls) + var(--nsq-half) + var(--nsq-gap));
+    --nm-top:calc(50vh - var(--nsq-half)); --nm-bot:calc(50vh + var(--nsq-half))}
+  .scard[data-section="hunter"]  .about-text{left:var(--nm-x); top:var(--nm-top); width:280px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="house"]   .about-text{left:var(--nm-x); top:var(--nm-top); width:455px; right:auto; bottom:auto; transform:none}
   .scard[data-section="archive"] .about-text{left:var(--edge); top:41.28vh; width:385px; right:auto; bottom:auto; transform:none}
   .scard[data-section="about"]   .about-text{left:var(--edge); top:3.95vh;  width:535px; right:auto; bottom:auto; transform:none}  /* top aligned to menu HUNTER */
   .scard[data-section="hunter"] .at-statement{font-size:26px}
   .scard[data-section="about"] .at-statement{font-size:25px}
-  .scard[data-section="hunter"]  .enter-cue{left:75.14vw; top:75.43vh; right:auto; bottom:auto; transform:none}
-  .scard[data-section="house"]   .enter-cue{left:50.27vw; top:56.40vh; right:auto; bottom:auto; transform:none}
+  .scard[data-section="hunter"]  .enter-cue{left:var(--nm-x); top:calc(var(--nm-bot) + 12px); right:auto; bottom:auto; transform:none}  /* just below the mark's bottom edge */
+  .scard[data-section="house"]   .enter-cue{left:var(--nm-x); top:calc(var(--nm-bot) + 12px); right:auto; bottom:auto; transform:none}
   .scard[data-section="archive"] .enter-cue{left:var(--edge); top:62.17vh; right:auto; bottom:auto; transform:none}  /* left on the shared margin */
   /* background-image framing (?place: pan/fit/zoom) */
-  .scard[data-section="hunter"]  .layer{object-position:32.2% 40.5%; object-fit:cover}
-  .scard[data-section="house"]   .layer{object-position:50% 50%; object-fit:cover}
+  .scard[data-section="hunter"]  .layer{object-position:56.0% 37.0%; object-fit:cover}
+  .scard[data-section="house"]   .layer{object-position:49.7% 50.1%; object-fit:cover}
   .scard[data-section="archive"] .layer{object-position:55.5% 50.3%; object-fit:cover}
-  .scard[data-section="about"]   .layer{object-position:42.9% -196.7%; object-fit:contain; transform:scale(1.30)}
+  .scard[data-section="about"]   .layer{object-position:50% 100%; object-fit:contain}   /* elevation anchored to the bottom — stable, no reset */
   /* the section title-block — typeset (scales cleanly), centred over the card
      image, with the leader text beneath. Title sized ~ the nameblock's HOUSE.
      On entry the title flies to its menu slot (see #titlefly). */
@@ -553,7 +558,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.69</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.70</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1654,7 +1659,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.69 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.70 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
