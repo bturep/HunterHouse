@@ -6,7 +6,7 @@
 <!-- maximum-scale removed 2026-06-11 (Baden mode / AUDIT.md §1.1): it blocked
      iPadOS pinch-zoom + system "Larger Text" (WCAG 1.4.4). Affects all visitors. -->
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#242424">
+<meta name="theme-color" content="#1d1d1d">
 <meta name="color-scheme" content="dark light">
 <!-- Referrer policy: never send path/query (which can carry a ?researcher= token or
      ?id=) to cross-origin hosts. Explicit rather than relying on the browser default. -->
@@ -30,7 +30,7 @@
 <link rel="apple-touch-icon" href="assets/icon-180-next.png">
 <link rel="icon" type="image/png" href="assets/icon-192-next.png">
 <!-- Paint holdout: sets dark bg before render-blocking external CSS resolves -->
-<style>html{background:#232323}</style>
+<style>html{background:#1c1c1c}</style>
 <!-- ════════════════════════════════════════════════════════════════════════
      BADEN MODE — entry + persistence (Mowry Baden viewing room).
      Runs in <head> so html.baden is set before first paint → the desktop SPA
@@ -127,10 +127,10 @@
 <link rel="stylesheet" href="assets/light.css">
 <style>
   /* v0.16 EXPERIMENT: coordinate the dark theme to the entry ARCHIVE card's
-     average colour (#232323). Overrides light.css's warm-brown dark tokens for
+     average colour (#1c1c1c). Overrides light.css's warm-brown dark tokens for
      next.html ONLY (this inline block loads after light.css; live browse.html is
      untouched). --bg is the dominant pane colour; --paper/--soft step lighter. */
-  html.dark{--bg:#232323;--paper:#242424;--soft:#252525}
+  html.dark{--bg:#1c1c1c;--paper:#1d1d1d;--soft:#1e1e1e}
   /* View transition: markid morphs from splash centre to browse corner */
   @view-transition{navigation:auto}
   .markid{view-transition-name:hh-mark}
@@ -250,7 +250,7 @@
     flex-direction:column;align-items:center;justify-content:center;
     background:var(--soft);padding:48px 40px 64px;
   }
-  html.dark #about-pane{background:#252525}
+  html.dark #about-pane{background:#1e1e1e}
   #about-pane.open{display:flex}
   /* Header title swap: when the about-pane is open, the .markid in the
      header bar is hidden — the pane's big ap-title is the only title.
@@ -614,7 +614,7 @@
   /* 28px left matches .site-top and .list-head, so the curator name in the
      card lines up vertically under the "Hunter House Archive"
      mark in the header. Right stays 20px, mirroring .list-head's right side. */
-  html.dark .curation-card{background:#252525}
+  html.dark .curation-card{background:#1e1e1e}
   .curation-card[hidden]{display:none}
   .cc-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:8px}
   .cc-curator{font-family:var(--mono);font-size:9px;letter-spacing:0.18em;
@@ -918,7 +918,7 @@
   }
   .fpi-meta a{color:var(--copper-deep);text-decoration:none;border-bottom:1px solid var(--copper-pale)}
   .fpi-meta a:hover{border-bottom-color:var(--copper-deep)}
-  html.dark #fp-info-pop{background:#252525;border-color:#3a3733}
+  html.dark #fp-info-pop{background:#1e1e1e;border-color:#3a3733}
 
   /* ── Facet counts + zero-greys (promoted from lab-a 2026-07-10) ── */
   .fp-chip .fp-ct{margin-left:7px;font-size:9.5px;opacity:0.85;letter-spacing:0.02em;color:var(--muted)}
@@ -1056,12 +1056,12 @@
   /* test.89: an OPEN header tints faintly toward its collection colour —
      the block itself confirms whose room you just opened. */
   .phase-divider.ph-head:not(.closed){background:color-mix(in srgb, var(--soft) 88%, var(--bin, var(--copper)))}
-  html.dark body .phase-divider.ph-head:not(.closed){background:color-mix(in srgb, #242424 88%, var(--bin, var(--copper)))}
+  html.dark body .phase-divider.ph-head:not(.closed){background:color-mix(in srgb, #1d1d1d 88%, var(--bin, var(--copper)))}
   /* test.90: the LETTERS view is a single block — identity colour has
      nothing to differentiate against, so structure speaks the generic
      copper and the header stays on plain soft. */
   body.letters-view .phase-divider.ph-head:not(.closed){background:var(--soft)}
-  html.dark body.letters-view .phase-divider.ph-head:not(.closed){background:#242424}
+  html.dark body.letters-view .phase-divider.ph-head:not(.closed){background:#1d1d1d}
   /* test.91: copper is HHC's identity — the letters carry NO colour at
      all: rule-grey structure, ink selection. */
   body.letters-view .ph-head:not(.closed),body.letters-view .row.in-bin{border-left-color:var(--rule)}
@@ -1069,14 +1069,14 @@
   body.letters-view .pane-list .row.sel{box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 35%, transparent),
     inset 0 -1px 0 color-mix(in srgb, var(--ink) 35%, transparent)}
   .row.in-bin{background:color-mix(in srgb, var(--bg) 96.5%, var(--ink))}
-  html.dark body .pane-image,html.dark body .image-stage{background:#222222}   /* v55: stage lifted a touch; the chosen item matches it */
-  html.dark body .row.in-bin{background:#232323}
-  html.dark body .phase-divider.ph-head,html.dark body .br-row{background:#242424}
+  html.dark body .pane-image,html.dark body .image-stage{background:#1b1b1b}   /* v55: stage lifted a touch; the chosen item matches it */
+  html.dark body .row.in-bin{background:#1c1c1c}
+  html.dark body .phase-divider.ph-head,html.dark body .br-row{background:#1d1d1d}
   html.dark body .site-top,html.dark body .lp-toolbar,html.dark body .lp-filter,
-  html.dark body .meta-head,html.dark body .image-foot,html.dark body .panel-handle{background:#252525}
+  html.dark body .meta-head,html.dark body .image-foot,html.dark body .panel-handle{background:#1e1e1e}
   html.dark body .panel-handle::before{background:#8a847c}
-  html.dark body .panel-right{background:#252525}
-  html.dark body .panel-left{background:#252525}
+  html.dark body .panel-right{background:#1e1e1e}
+  html.dark body .panel-left{background:#1e1e1e}
   /* — spine (v22/v24): sienna marks the extent of an OPEN collection —
      header, rows, rail shadow; closed bars carry a transparent stub. — */
   /* v62: each collection owns a colour — spine, selection lines and rail
@@ -1102,7 +1102,7 @@
   /* v60: the spine runs THROUGH the selection as its left edge — same
      2px, same copper, seamless; the top/bottom lines meet it. */
   .pane-list .row.sel::before{display:none}   /* v58: the base 3px red indicator was the real extra left thickness */
-  html.dark body .row.sel{background:#222222}
+  html.dark body .row.sel{background:#1b1b1b}
   /* — bin rail (v23/v32): passed collections stack compact at the top;
      the pane ends in a 41px chrome foot carrying the item count (v33). — */
   #bin-rail-top{position:absolute;left:7px;right:7px;z-index:8;overflow:hidden;background:var(--bg)}
@@ -1118,7 +1118,7 @@
   #list-foot{height:28px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
     display:flex;align-items:center;padding:0 20px;
     font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.06em}
-  html.dark body #list-foot{background:#252525}
+  html.dark body #list-foot{background:#1e1e1e}
   /* — pip slot + mirrored gutters (v35/v37/v38); v42 extends the same
      slots to the record pane — content inset between two 7px lanes, the
      meta pip runs in the inner one. Chrome (head, data footer) stays
@@ -1130,7 +1130,7 @@
      a recessed content block within the chrome panel, same step as the
      collection bars on the left. */
   .pane-meta .meta-body{margin:0 7px;background:var(--soft)}
-  html.dark body .pane-meta .meta-body{background:#242424}
+  html.dark body .pane-meta .meta-body{background:#1d1d1d}
   /* v44: no rule under ITEM RECORD — the recessed body's own edge is the
      separator, mirroring the left toolbar's seamless seam. */
   .pane-meta .meta-head{border-bottom:1px solid var(--rule)}   /* v66: title bar again — reverses v44/v47; the recessed body changed what the line sits against */
@@ -1140,7 +1140,7 @@
      the bottom line across all three panes. */
   .meta-foot{height:28px;box-sizing:border-box;flex-shrink:0;border-top:1px solid var(--rule);background:var(--bg);
     display:flex;align-items:center;justify-content:flex-end;gap:16px;padding:0 22px}
-  html.dark body .meta-foot{background:#252525}
+  html.dark body .meta-foot{background:#1e1e1e}
   /* v50/v53: only the ? lives here (Aa + fullscreen went home to the top
      bar). The info pane occupies the ITEM RECORD space — it stops above
      this foot — and while it is open the ? reads as ✕ in the exact
@@ -1152,7 +1152,7 @@
   /* v92: the ? pane wears the record body's own cloth — the recessed
      soft block inset between the 7px pip lanes, not a bare curtain. */
   .panel-right #info-pane{top:41px;bottom:28px;left:7px;right:7px;background:var(--soft)}   /* v94: starts below the title bar (which reads ?) */
-  html.dark body .panel-right #info-pane{background:#242424}
+  html.dark body .panel-right #info-pane{background:#1d1d1d}
   /* v85: public-only page — the record never shows the notes/unlock panel */
   #meta-content #rn-panel{display:none}
   .panel-right #info-pane-close{display:none}
@@ -1173,7 +1173,7 @@
     background:var(--bg);border-top:1px solid var(--rule);
     opacity:0;pointer-events:none;transition:opacity 240ms ease}
   body.hh-splash #splash-foot{opacity:1}
-  html.dark body #splash-foot{background:#252525}
+  html.dark body #splash-foot{background:#1e1e1e}
   /* — pull tabs (v10/v18) — */
   .panel-handle{width:12px;height:44px;background:var(--bg);border:1px solid var(--rule)}
   .panel-left .panel-handle{right:-13px;border-left:0;border-radius:0 4px 4px 0}
@@ -1793,7 +1793,7 @@
   /* dark mode overrides for hardcoded colours */
   /* dark mode: image pane goes black, structural borders go black */
   html.dark .pane-image,
-  html.dark .image-stage{background:#252525}
+  html.dark .image-stage{background:#1e1e1e}
 
   .btn{
     display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 14px;
@@ -1896,7 +1896,7 @@
     padding:max(48px, calc(env(safe-area-inset-top, 0px) + 24px)) 28px 64px;
     -webkit-text-size-adjust:100%;text-size-adjust:100%;
   }
-  html.dark #mob-about{background:#252525}
+  html.dark #mob-about{background:#1e1e1e}
   #mob-about.open{display:flex}
   /* × close button mirrors #about-pane-close — same shape, same position
      relative to .ap-inner — so the mobile HHFA pane reads identical. */
@@ -1923,7 +1923,7 @@
     flex-direction:column;align-items:center;justify-content:center;
     background:var(--soft);
   }
-  html.dark #load-screen{background:#252525}
+  html.dark #load-screen{background:#1e1e1e}
   body.loading #load-screen{display:flex}
   .load-mark{
     width:60px;height:60px;opacity:0.15;margin-bottom:22px;
@@ -1970,7 +1970,7 @@
       overflow:hidden;
     }
     .rows{background:var(--soft);position:relative;z-index:1}
-    html.dark .rows{background:#232323}
+    html.dark .rows{background:#1c1c1c}
 
     .pane-image{display:none!important}
     .panel-right{display:none!important}
@@ -2126,7 +2126,7 @@
   /* ── Mobile header: rounded card + centred wordmark ── */
   @media (max-width:767px){
     .site-top{
-      background:#242424;
+      background:#1d1d1d;
       border-bottom:none;
       border-radius:14px;
       box-shadow:0 4px 16px rgba(0,0,0,0.35);
@@ -2278,7 +2278,7 @@
     background:var(--soft);border:1px solid var(--rule);color:var(--ink);
     padding:3px 7px;border-radius:1px;outline:none;
   }
-  html.dark .rn-pin-input{background:#262626;border-color:#3a3834;color:var(--inv-fg)}
+  html.dark .rn-pin-input{background:#1f1f1f;border-color:#3a3834;color:var(--inv-fg)}
   .rn-pin-input:focus{border-color:var(--muted)}
   .rn-pin-btn{font-family:var(--mono);font-size:13px;background:none;border:none;padding:0 2px;cursor:pointer;color:var(--muted);line-height:1}
   .rn-pin-btn:hover{color:var(--ink)}
@@ -2314,7 +2314,7 @@
     border:1px solid var(--rule);border-radius:1px;
     padding:6px 8px;resize:none;outline:none;
   }
-  html.dark .rn-textarea{background:#262626;border-color:#3a3834;color:var(--inv-fg)}
+  html.dark .rn-textarea{background:#1f1f1f;border-color:#3a3834;color:var(--inv-fg)}
   .rn-textarea:focus{border-color:var(--muted)}
   .rn-add-foot{display:flex;justify-content:flex-end;margin-top:5px}
   .rn-add-btn{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;background:var(--ink);color:var(--bg);border:none;padding:3px 10px;border-radius:1px;cursor:pointer}
@@ -2833,7 +2833,7 @@
 
   #timeline-pane{
     display:none;position:fixed;inset:0;z-index:400;
-    flex-direction:column;background:#242424;
+    flex-direction:column;background:#1d1d1d;
     --tl-ink:#f0ede6; --tl-muted:#9a958b; --tl-hint:#6c675f;
     --tl-rule:rgba(240,237,230,0.14); --tl-plate:#2b2723; --tl-amber:#e4a47e;
   }
@@ -2867,7 +2867,7 @@
   .tl-close:hover{color:var(--tl-ink)}
 
   /* Scroll stage — the one place that scrolls; holds the inline SVG. */
-  .tl-stage{flex:1;overflow-x:auto;overflow-y:hidden;background:#252525;position:relative}
+  .tl-stage{flex:1;overflow-x:auto;overflow-y:hidden;background:#1e1e1e;position:relative}
   .tl-stage svg{display:block;height:100%}
   .tl-stage::-webkit-scrollbar{height:9px}
   .tl-stage::-webkit-scrollbar-thumb{background:rgba(240,237,230,0.18);border-radius:5px}
@@ -2940,7 +2940,7 @@
 
   #files-pane{
     display:none;position:fixed;inset:0;z-index:400;
-    flex-direction:column;background:#242424;
+    flex-direction:column;background:#1d1d1d;
     --f-ink:#f0ede6; --f-muted:#9a958b; --f-hint:#6c675f;
     --f-rule:rgba(240,237,230,0.14); --f-row:rgba(240,237,230,0.03);
     --f-accent:#c9a44e; --f-link:#e4a47e;
@@ -3309,7 +3309,7 @@
 <style>
   #map-toggle svg{display:block}
   #map-toggle.on{color:var(--red)}
-  #site-overlay{position:fixed;z-index:1200;background:#252525;overflow:hidden;
+  #site-overlay{position:fixed;z-index:1200;background:#1e1e1e;overflow:hidden;
     top:41px;left:0;width:100vw;height:calc(100vh - 82px);
     opacity:0;visibility:hidden;pointer-events:none;
     /* opacity duration + easing matched to the panel width transition (260ms)
@@ -3356,14 +3356,14 @@
   /* a parent-level dark backdrop behind BOTH overlays — guarantees the white browse
      stage can never show through a transparent iframe during the hand-off */
   #view-backdrop{position:fixed;top:41px;left:0;width:100vw;height:calc(100vh - 82px);z-index:1100;
-    background:#252525;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 260ms cubic-bezier(0.4,0,0.2,1)}
+    background:#1e1e1e;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 260ms cubic-bezier(0.4,0,0.2,1)}
   body.site-mode #view-backdrop,body.tl-mode #view-backdrop{opacity:1;visibility:visible;transition:opacity 260ms cubic-bezier(0.55,0,0.8,0.35)}
   /* Closing: fade the backdrop out (standard curve) WHILE the mode class stays on
      so the overlay keeps its inset and the panels show through as they extend —
      the mirror of the opening (see close()'s deferred mode-class teardown). */
   body.site-mode.view-exiting #view-backdrop,body.tl-mode.view-exiting #view-backdrop{opacity:0;transition:opacity 260ms cubic-bezier(0.4,0,0.2,1)}
   @media (max-width:767px){ #view-backdrop{top:0;height:100vh} #view-toolbar{display:none!important} }
-  #timeline-overlay{position:fixed;z-index:1300;background:#252525;overflow:hidden;top:41px;left:0;width:100vw;height:calc(100vh - 82px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity 260ms cubic-bezier(0.4,0,0.2,1)}
+  #timeline-overlay{position:fixed;z-index:1300;background:#1e1e1e;overflow:hidden;top:41px;left:0;width:100vw;height:calc(100vh - 82px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity 260ms cubic-bezier(0.4,0,0.2,1)}
   #timeline-overlay.preload{visibility:visible}
   #timeline-overlay.show{opacity:1;visibility:visible;pointer-events:auto;transition:opacity 260ms cubic-bezier(0.55,0,0.8,0.35)}
   #timeline-overlay iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
@@ -4038,7 +4038,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.10-test.18";
+  const VERSION      = "v1.10-test.19";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
