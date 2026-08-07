@@ -212,8 +212,8 @@
     --nm-x:calc(50vw - var(--nsq-half))}
   .scard[data-section="hunter"]{--nm-top:calc(50vh + var(--nsq-off) - var(--nsq-half)); --nm-bot:calc(50vh + var(--nsq-off) + var(--nsq-half))}  /* architect LOW */
   .scard[data-section="house"]{--nm-top:calc(50vh - var(--nsq-off) - var(--nsq-half)); --nm-bot:calc(50vh - var(--nsq-off) + var(--nsq-half))}  /* hunter house HIGH */
-  .scard[data-section="hunter"]  .about-text{left:calc(var(--nm-x) + 0.074 * var(--nsq-half)); top:26.69vh; width:280px; right:auto; bottom:auto; transform:none}  /* +inset: align to the RIC HUNTER lettering */
-  .scard[data-section="house"]   .about-text{left:calc(var(--nm-x) + 0.058 * var(--nsq-half)); top:50.43vh; width:455px; right:auto; bottom:auto; transform:none}  /* +inset: align to the HUNTER HOUSE lettering, not the PNG box */
+  .scard[data-section="hunter"]  .about-text{left:var(--menu-x); top:52vh; width:280px; right:auto; bottom:auto; transform:none}   /* left column, below the docked square */
+  .scard[data-section="house"]   .about-text{left:var(--menu-x); top:52vh; width:455px; right:auto; bottom:auto; transform:none}   /* left column, below the docked square */
   .scard[data-section="archive"] .about-text{left:var(--menu-x); top:41.76vh; width:385px; right:auto; bottom:auto; transform:none}  /* left-aligned to the menu margin */
   .scard[data-section="about"]   .about-text{left:2.63vw; top:28.63vh; width:348px; right:auto; bottom:auto; transform:none}
   .scard[data-section="hunter"] .at-statement{font-size:26px}
@@ -627,7 +627,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v1.00</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v1.01</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1353,9 +1353,11 @@
   //  seg3  archive→about  SCROLL (1→1): ARCHIVE slides up, ABOUT rises
   var svidEl = document.getElementById("svid");
   function driveReveal() {
-    var vh = window.innerHeight, st = surveyEl.scrollTop;
+    var vh = window.innerHeight, st = surveyEl.scrollTop, mob = window.innerWidth < 768;
     var sv = Math.min(st, vh);                                   // film slide across the first viewport
-    svidEl.style.transform = "translate3d(0," + (-sv) + "px,0)";
+    // DESKTOP: the film exits to the LEFT (matching the square docking left); MOBILE keeps the up-slide
+    if (mob) svidEl.style.transform = "translate3d(0," + (-sv) + "px,0)";
+    else svidEl.style.transform = "translate3d(" + (-(sv / vh) * window.innerWidth) + "px,0,0)";
     if (vname) vname.style.transform = "translate(-50%,-50%) translate3d(0," + sv + "px,0)";   // hold the nameblock static
     // HOUSE pins/scrolls natively via #act1 (compositor) — no JS transform (no shimmer)
     // HUNTER: stays pinned so ARCHIVE COVERS it (the 2→1 depth step) — no transform
@@ -1376,21 +1378,31 @@
   //   film → both (centred) · HUNTER → architect holds low · HOUSE → hunter house holds high · after → gone
   function driveNameSquare(st) {
     if (!nsBox) return;
-    var V = window.innerHeight, mob = window.innerWidth < 768;
+    var V = window.innerHeight, W = window.innerWidth, mob = W < 768;
     var S = mob ? Math.min(0.29 * V, 200) : Math.min(0.26 * V, 230), off = 0.615 * S;   // original box distance
     function ramp(a, b, x) { return nsClamp01((x - a) / (b - a)); }
-    function place(el, ty, op) { el.style.transform = "translate(-50%,-50%) translateY(" + ty + "px)"; el.style.opacity = op; }
+    function place(el, tx, ty, op) { el.style.transform = "translate(-50%,-50%) translate(" + tx + "px," + ty + "px)"; el.style.opacity = op; }
     if (mob) {
       // MOBILE: film stacks around the centre anchor; each section's square rises to the
       // vertical CENTRE (50%) and holds. Caption sits below (see the mobile @media).
-      place(nsArch, off * (1 - ramp(0.15 * V, 0.7 * V, st)), 1 - ramp(1.5 * V, 1.7 * V, st));
-      if (st < 1.4 * V) place(nsHH, -off, 1 - ramp(0.3 * V, 0.55 * V, st));
-      else place(nsHH, 0, ramp(1.5 * V, 1.7 * V, st) * (1 - ramp(2.4 * V, 2.7 * V, st)));
+      place(nsArch, 0, off * (1 - ramp(0.15 * V, 0.7 * V, st)), 1 - ramp(1.5 * V, 1.7 * V, st));
+      if (st < 1.4 * V) place(nsHH, 0, -off, 1 - ramp(0.3 * V, 0.55 * V, st));
+      else place(nsHH, 0, 0, ramp(1.5 * V, 1.7 * V, st) * (1 - ramp(2.4 * V, 2.7 * V, st)));
       return;
     }
-    // DESKTOP: each square HOLDS its exact film spot (architect low, hunter house high)
-    place(nsHH, -off, (st < 1.0 * V) ? (1 - ramp(0.4 * V, 0.6 * V, st)) : (ramp(1.4 * V, 1.6 * V, st) * (1 - ramp(2.4 * V, 2.6 * V, st))));
-    place(nsArch, off, 1 - ramp(1.4 * V, 1.6 * V, st));
+    // DESKTOP: over the FIRST scroll the pair DOCKS to the LEFT column (left-justified
+    // under the menu, lettering landing on --menu-x) and STAYS; the arch↔hunter-house
+    // swap then happens IN PLACE on the left. Captions share the same --menu-x edge.
+    var menuX = 46, half = S / 2;
+    var DOCK_CY = 0.30 * V;                                 // docked square centre-y (under the menu) — tunable
+    var tyDock = DOCK_CY - 0.5 * V;
+    var txArch = (menuX - 0.037 * S + half) - 0.5 * W;      // shift so the RIC HUNTER lettering lands on menuX
+    var txHH   = (menuX - 0.029 * S + half) - 0.5 * W;      // shift so the HUNTER HOUSE lettering lands on menuX
+    var dockP = ramp(0.10 * V, 0.95 * V, st);               // 0 on the film → 1 by HUNTER, then held
+    var archOp = 1 - ramp(1.4 * V, 1.6 * V, st);
+    var hhOp = (st < 1.0 * V) ? (1 - ramp(0.4 * V, 0.6 * V, st)) : (ramp(1.4 * V, 1.6 * V, st) * (1 - ramp(2.4 * V, 2.6 * V, st)));
+    place(nsArch, txArch * dockP, nsLerp(off, tyDock, dockP), archOp);
+    place(nsHH,   txHH   * dockP, nsLerp(-off, tyDock, dockP), hhOp);
   }
   function onSurveyScroll() {
     updateWordmark();
@@ -1803,7 +1815,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v1.00 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v1.01 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
