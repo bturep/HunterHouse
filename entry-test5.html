@@ -184,7 +184,7 @@
   /* ── per-card image size — set each card's height (or width) independently ──
      Edit the value on any one line to tune that card alone. */
   .scard[data-section="hunter"]{background:#2a2622}  /* FRH-0001 photo (Rick building the deck, 1978) — full-bleed cover, light text */
-  .scard[data-section="about"]{background:#fff; --about-h:100dvh; height:var(--about-h)}   /* ABOUT full-height so it covers the Archive card behind it (shortening lets Archive peek at the bottom) */
+  .scard[data-section="about"]{background:#fff; --about-h:64dvh; height:var(--about-h)}   /* ABOUT card height — tune via ?place H-/H+ (shorter than the others) */
   /* the shared caption form — a large sans statement beside a mono detail column.
      Reused on every card (ABOUT foundation text · HOUSE/HUNTER/ARCHIVE image details). */
   /* the paragraph BLOCK is centred on the card; the text inside stays LEFT-justified */
@@ -402,7 +402,7 @@
     .scard[data-section="house"]  .layer { object-position:9.0% 52.0% !important; object-fit:cover !important }
     .scard[data-section="archive"] .layer { object-position:12.9% 49.6% !important; object-fit:cover !important }
     .scard[data-section="about"]  .layer { object-position:50.0% 100.0% !important; object-fit:contain !important; transform:scale(1.15) !important }
-    .scard[data-section="about"] { --about-h:100dvh !important }   /* full-height so the Archive card doesn't peek at the bottom */
+    .scard[data-section="about"] { --about-h:64dvh !important }
   }
 </style>
 </head>
@@ -600,7 +600,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v1.04</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v1.03</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1771,7 +1771,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v1.04 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v1.03 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
