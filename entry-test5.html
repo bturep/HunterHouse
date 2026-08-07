@@ -366,7 +366,7 @@
   /* ── MOBILE entry layout: name-square centred + smaller in the upper area
      (driveNameSquare mirrors size + LS=0); captions drop full-width below. ── */
   @media (max-width:767px){
-    #namesq .nsq{top:33%;width:min(23vh,150px);height:min(23vh,150px)}
+    #namesq .nsq{top:30%;width:min(29vh,200px);height:min(29vh,200px)}
     /* HUNTER / HOUSE: caption below the square, full width */
     .scard[data-section="hunter"] .about-text,
     .scard[data-section="house"]  .about-text{left:7vw !important;top:56vh !important;width:86vw !important}
@@ -578,7 +578,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.78</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.79</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1303,7 +1303,7 @@
   function driveNameSquare(st) {
     if (!nsBox) return;
     var V = window.innerHeight, mob = window.innerWidth < 768;
-    var S = mob ? Math.min(0.23 * V, 150) : Math.min(0.26 * V, 230), off = 0.615 * S;   // original box distance
+    var S = mob ? Math.min(0.29 * V, 200) : Math.min(0.26 * V, 230), off = 0.615 * S;   // original box distance
     function ramp(a, b, x) { return nsClamp01((x - a) / (b - a)); }
     nsHH.style.transform = "translate(-50%,-50%) translateY(" + (-off) + "px)";   // top (held high)
     nsArch.style.transform = "translate(-50%,-50%) translateY(" + off + "px)";    // bottom (held low)
@@ -1562,7 +1562,7 @@
       targets.push(t);
     });
     var bar = document.createElement("div"); bar.id = "place-bar";
-    bar.innerHTML = 'PLACE <span id="pr">— select an element</span>' +
+    bar.innerHTML = '<b id="pmode">PLACE</b> <span id="pr">— select an element</span>' +
       '<span class="g"><button data-a="w-">– w</button><button data-a="w+">+ w</button></span>' +
       '<span class="g"><button data-a="f-">A–</button><button data-a="f+">A+</button></span>' +
       '<span class="g"><button data-a="col1">1 col</button><button data-a="col2">2 col</button></span>' +
@@ -1583,6 +1583,9 @@
     var pr = document.getElementById("pr");
     var aboutCard = document.querySelector('.scard[data-section="about"]');
     var aboutH = aboutCard ? (parseFloat(getComputedStyle(aboutCard).getPropertyValue("--about-h")) || 66) : 66;
+    var pmode = document.getElementById("pmode");
+    function updPMode() { if (pmode) { var m = window.innerWidth < 768; pmode.textContent = m ? "PLACE · MOBILE" : "PLACE"; pmode.style.color = m ? "#7fc7e6" : ""; } }
+    updPMode(); window.addEventListener("resize", updPMode);
     var sel = null, editing = false, drag = null, resizing = null, imgDrag = null;
     var wh = document.createElement("div"); wh.className = "p-wh"; wh.style.display = "none";
     function cardOf(el) { return el.closest(".scard") || el.closest("#svid") || el.parentElement; }
@@ -1665,10 +1668,25 @@
         } else txt.push(nameOf(t) + ": " + t.el.innerText.trim());
       });
       css.push('.scard[data-section="about"] { --about-h:' + aboutH + 'dvh; }');
-      var out = "/* CSS */\n" + css.join("\n") + "\n\n/* TEXT (only what changed matters) */\n" + txt.join("\n");
+      // MOBILE compose: at phone width, emit the CSS as a @media override (!important
+      // on every declaration) so it becomes its own composition, separate from desktop.
+      var mob = window.innerWidth < 768;
+      var cssOut;
+      if (mob) {
+        var imp = css.map(function (line) {
+          return line.replace(/\{([^}]*)\}/, function (m, decls) {
+            var out2 = decls.split(";").map(function (d) { d = d.trim(); return d ? d + " !important" : ""; }).filter(Boolean).join("; ");
+            return "{ " + out2 + " }";
+          });
+        });
+        cssOut = "/* CSS — MOBILE (@media max-width:767px) */\n@media (max-width:767px){\n  " + imp.join("\n  ") + "\n}";
+      } else {
+        cssOut = "/* CSS */\n" + css.join("\n");
+      }
+      var out = cssOut + "\n\n/* TEXT (only what changed matters) */\n" + txt.join("\n");
       try { navigator.clipboard.writeText(out); } catch (x) {}
       console.log("%c[place] paste to Claude:\n" + out, "color:#7fc7e6");
-      pr.textContent = "copied → clipboard + console";
+      pr.textContent = (mob ? "copied MOBILE css" : "copied") + " → clipboard + console";
     }
     document.addEventListener("keydown", function (e) {
       var tg = e.target; if (tg && (tg.isContentEditable || tg.tagName === "INPUT" || tg.tagName === "TEXTAREA")) return;
@@ -1685,7 +1703,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.78 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.79 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
