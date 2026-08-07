@@ -247,10 +247,8 @@
   #svid{height:100dvh;position:sticky;top:0;overflow:hidden;background:#1b1918;cursor:pointer;
     z-index:7;will-change:transform}
   #svid video{width:100%;height:100%;object-fit:cover;display:block}
-  /* entry title = simple typeset HUNTER HOUSE (Inter Tight). To REVERT to Hunter's
-     hand-lettered nameblock: use the commented image rule below + swap the film element (search "REVERT vname"). */
-  #svid .vname{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);font-family:'JetBrains Mono',Menlo,monospace;font-weight:700;font-size:min(14vh,150px);line-height:.95;letter-spacing:.02em;text-transform:uppercase;text-align:center;color:#f6f5f5;text-shadow:0 2px 40px rgba(0,0,0,.45);white-space:nowrap;will-change:transform}
-  /* REVERT vname (image): #svid .vname{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);height:min(58vh,660px);width:auto;will-change:transform} */
+  /* entry title = Hunter's hand-lettered nameblock (image) */
+  #svid .vname{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);height:min(58vh,660px);width:auto;will-change:transform}
   #svid .vcue{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(246,245,245,.72);
     transition:opacity .12s ease}
@@ -478,8 +476,7 @@
     <video autoplay muted loop playsinline poster="assets/entry/entry-still.jpg?v=3">
       <source src="assets/entry/entry-loop.mp4?v=3" type="video/mp4">
     </video>
-    <div class="vname" aria-label="Hunter House">HUNTER<br>HOUSE</div>
-    <!-- REVERT vname: <img class="vname" src="assets/entry/nameblock-1970-v3.png" alt="Hunter House · Victoria B.C. · 1970 · Ric Hunter Architect"> -->
+    <img class="vname" src="assets/entry/nameblock-1970-v3.png" alt="Hunter House · Victoria B.C. · 1970 · Ric Hunter Architect">
     <div id="film-cite" style="position:absolute;left:2.02vw;top:95.84vh;z-index:2;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(246,245,245,.62);pointer-events:none">Brandon Poole, Film Excerpt · 2026</div>
   </section>
   <!-- HUNTER: revealed first (in #act1) so the menu reads HUNTER · HOUSE · ARCHIVE.
@@ -541,7 +538,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.58</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.59</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1619,7 +1616,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.58 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.59 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
