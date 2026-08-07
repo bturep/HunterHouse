@@ -606,7 +606,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v1.12</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v1.13</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1218,9 +1218,16 @@
       var n = i + 1;                                   // this label's card page (pages[n])
       var dock = ROW0 + i * ROWSTEP;                   // its final slot in the stack
       if (inSurvey) {
-        var cardTop = n * V - st;                      // RAW viewport stop (uncapped) so a label stays off-screen until its card is actually reached — the stopOf() cap for the short ABOUT card must not pull its label up early
-        var ytop = Math.max(dock, cardTop + ROW0);     // ride anchored to the card, but never below the dock
-        if (here >= n) ytop = dock;                    // once this card is current/past, DOCK it (the short ABOUT card never pins to top on its own)
+        var cardTop = n * V - st;                      // RAW viewport stop (uncapped) so a label stays off-screen until its card is actually reached
+        var ytop;
+        if (n === pages.length - 1) {
+          // short LAST card (ABOUT): it never pins to top on its own, so lerp the
+          // label SMOOTHLY from off-screen to its dock as the card rises (no jump)
+          var rise = Math.max(0, Math.min(1, (st - (n - 1) * V) / (stopOf(n) - (n - 1) * V)));
+          ytop = (V + ROW0) + (dock - (V + ROW0)) * rise;
+        } else {
+          ytop = Math.max(dock, cardTop + ROW0);       // ride anchored to the card, but never below the dock
+        }
         a.style.top = ytop + "px";
         var m = topCardAt(ytop + 10);                  // the card actually behind this label
         a.style.color = pDark(m) ? PAPER : INK;        // ink = that card's ink (instant swap at the edge)
@@ -1349,7 +1356,11 @@
     if (pages[3]) pages[3].style.transform = "translate3d(0," + ay + "px,0)";
     // white cover fades in as ABOUT rises → hides every card behind it (clean white
     // surround) and takes the Browse-the-Archive button with it
-    if (aboutCover) aboutCover.style.opacity = String(Math.max(0, Math.min(1, (st - 3 * vh) / (0.45 * vh))));
+    var aboutRise = Math.max(0, Math.min(1, (st - 3 * vh) / (0.45 * vh)));
+    if (aboutCover) aboutCover.style.opacity = String(aboutRise);
+    // lift the short ABOUT card toward the vertical CENTRE as it settles, so the tone
+    // frames it ABOVE and BELOW (not just a blank band on top)
+    if (pages[4]) pages[4].style.transform = "translate3d(0," + (-(0.18 * vh) * aboutRise) + "px,0)";
   }
   // ── name-square morph: nameblock on the film → architect badge (HUNTER) → HUNTER HOUSE (HOUSE) → fade after ──
   var nsBox = document.getElementById("namesq");
@@ -1791,7 +1802,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v1.12 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v1.13 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
