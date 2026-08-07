@@ -184,7 +184,7 @@
   /* ── per-card image size — set each card's height (or width) independently ──
      Edit the value on any one line to tune that card alone. */
   .scard[data-section="hunter"]{background:#2a2622}  /* FRH-0001 photo (Rick building the deck, 1978) — full-bleed cover, light text */
-  .scard[data-section="about"]{background:#fff; --about-h:78dvh; height:var(--about-h)}   /* ABOUT card height — tune --about-h (shorter than the others) */
+  .scard[data-section="about"]{background:#fff; --about-h:66dvh; height:var(--about-h)}   /* ABOUT card height — tune via ?place H-/H+ (shorter than the others) */
   /* the shared caption form — a large sans statement beside a mono detail column.
      Reused on every card (ABOUT foundation text · HOUSE/HUNTER/ARCHIVE image details). */
   /* the paragraph BLOCK is centred on the card; the text inside stays LEFT-justified */
@@ -578,7 +578,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.75</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.76</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1567,6 +1567,7 @@
       '<span class="g"><button data-a="f-">A–</button><button data-a="f+">A+</button></span>' +
       '<span class="g"><button data-a="col1">1 col</button><button data-a="col2">2 col</button></span>' +
       '<span class="g"><button data-a="fit">Fit/Fill</button></span>' +
+      '<span class="g">about H <button data-a="ah-">–</button><button data-a="ah+">+</button></span>' +
       '<span class="g"><button data-a="edit">Edit text</button></span>' +
       '<span class="g"><button data-a="boxes" class="on">Boxes</button></span>' +
       '<span class="g"><button class="copy" data-a="copy">Copy</button></span>' +
@@ -1580,6 +1581,8 @@
     function setBar(show){ bar.style.display = show ? "" : "none"; pchip.style.display = show ? "none" : "block"; }
     pchip.addEventListener("click", function(){ setBar(true); });
     var pr = document.getElementById("pr");
+    var aboutCard = document.querySelector('.scard[data-section="about"]');
+    var aboutH = aboutCard ? (parseFloat(getComputedStyle(aboutCard).getPropertyValue("--about-h")) || 66) : 66;
     var sel = null, editing = false, drag = null, resizing = null, imgDrag = null;
     var wh = document.createElement("div"); wh.className = "p-wh"; wh.style.display = "none";
     function cardOf(el) { return el.closest(".scard") || el.closest("#svid") || el.parentElement; }
@@ -1631,6 +1634,7 @@
       if (a === "edit") { editing = !editing; toggleEdit(editing); e.target.classList.toggle("on", editing); return; }
       if (a === "boxes") { var clean = document.body.classList.toggle("p-clean"); e.target.classList.toggle("on", !clean); e.target.textContent = clean ? "Boxes off" : "Boxes"; return; }
       if (a === "hidebar") { setBar(false); return; }
+      if (a === "ah-" || a === "ah+") { aboutH = Math.max(30, Math.min(100, aboutH + (a === "ah+" ? 2 : -2))); if (aboutCard) aboutCard.style.setProperty("--about-h", aboutH + "dvh"); var svq = document.querySelector("#survey"); if (svq) svq.scrollTop = svq.scrollHeight; pr.textContent = "ABOUT height: " + aboutH + "dvh"; return; }
       if (a === "fit") { if (!sel || !sel.isImg) { pr.textContent = "select a background image first"; return; } sel.el.style.objectFit = (objFit(sel) === "cover" ? "contain" : "cover"); readEl(sel); return; }
       if (!sel) { pr.textContent = "select an element first"; return; }
       if (sel.isImg) {
@@ -1660,6 +1664,7 @@
           Array.prototype.forEach.call(t.el.querySelectorAll(".at-meta,.at-contact"), function (m) { txt.push(nameOf(t) + " detail: " + m.innerText.replace(/\n+/g, " / ").trim()); });
         } else txt.push(nameOf(t) + ": " + t.el.innerText.trim());
       });
+      css.push('.scard[data-section="about"] { --about-h:' + aboutH + 'dvh; }');
       var out = "/* CSS */\n" + css.join("\n") + "\n\n/* TEXT (only what changed matters) */\n" + txt.join("\n");
       try { navigator.clipboard.writeText(out); } catch (x) {}
       console.log("%c[place] paste to Claude:\n" + out, "color:#7fc7e6");
@@ -1680,7 +1685,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.75 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.76 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
