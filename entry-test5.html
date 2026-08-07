@@ -215,17 +215,16 @@
     --nm-x:calc(50vw - var(--nsq-half))}
   .scard[data-section="hunter"]{--nm-top:calc(50vh + var(--nsq-off) - var(--nsq-half)); --nm-bot:calc(50vh + var(--nsq-off) + var(--nsq-half))}  /* architect LOW */
   .scard[data-section="house"]{--nm-top:calc(50vh - var(--nsq-off) - var(--nsq-half)); --nm-bot:calc(50vh - var(--nsq-off) + var(--nsq-half))}  /* hunter house HIGH */
-  .scard[data-section="hunter"]  .about-text{left:var(--menu-x); top:34vh; width:340px; right:auto; bottom:auto; transform:none}   /* squares gone — free to move via ?place */
-  .scard[data-section="house"]   .about-text{left:var(--menu-x); top:43.10vh; width:455px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="hunter"]  .about-text{left:var(--menu-x); top:34vh; width:425px; right:auto; bottom:auto; transform:none}   /* squares gone — free to move via ?place */
+  .scard[data-section="house"]   .about-text{left:var(--menu-x); top:43.10vh; width:497px; right:auto; bottom:auto; transform:none}
   .scard[data-section="archive"] .about-text{left:var(--menu-x); top:41.76vh; width:385px; right:auto; bottom:auto; transform:none}  /* left-aligned to the menu margin */
   .scard[data-section="about"]   .about-text{left:var(--menu-x); top:23.36vh; width:348px; right:auto; bottom:auto; transform:none}
   .scard[data-section="hunter"] .at-statement{font-size:30px}
   .scard[data-section="about"] .at-statement{font-size:27px}
-  /* all buttons SAME location: left on the menu edge, lower edge at the ABOUT text's
-     lower edge (~97.22vh). bottom-anchored so they share one baseline across cards. */
+  /* all buttons SAME location: left on the menu edge, top:92.12vh (?place save) */
   .scard[data-section="hunter"]  .enter-cue,
   .scard[data-section="house"]   .enter-cue,
-  .scard[data-section="archive"] .enter-cue{left:var(--menu-x); bottom:2.78vh; top:auto; right:auto; transform:none}
+  .scard[data-section="archive"] .enter-cue{left:var(--menu-x); top:92.12vh; bottom:auto; right:auto; transform:none}
   /* background-image framing (?place: pan/fit/zoom) */
   .scard[data-section="hunter"]  .layer{object-position:56.0% 37.0%; object-fit:cover}
   .scard[data-section="house"]   .layer{object-position:49.7% 50.1%; object-fit:cover}
@@ -563,7 +562,7 @@
   <section class="scard ps cover" data-section="house">
     <div class="bgclip"><img class="layer" src="assets/entry/cards/home/BACKGROUND.jpg?v=4" alt=""></div>
     <div class="about-text">
-      <p class="at-statement">A Cottage for Ric and Frances Hunter.<br>Raised 1970; Extended 1991; 2018.</p>
+      <p class="at-statement">A Cottage for Ric and Frances Hunter.<br>Built 1970; Extended 1991; 2018.</p>
       <div class="at-foot">
         <div class="at-meta">HH-FRH-0008, Frances in front of House, 1977<br>Photograph, Frances Hunter Collection</div>
       </div>
@@ -579,7 +578,7 @@
   <section class="scard ps cover" data-section="archive">
     <div class="bgclip"><img class="layer" src="assets/entry/cards/archive/nameblock.jpg?v=2" alt="Richard Hunter Architect — studio nameblock"></div>
     <div class="about-text">
-      <p class="at-statement">The full record of the house — drawings, photographs, and correspondence.</p>
+      <p class="at-statement">The full record of the house : drawings, photographs, and correspondence.</p>
       <div class="at-foot">
         <div class="at-meta">HH-HHC-0115, Richard Hunter · Architect, 1986<br>Portfolio Cover, Hunter House Collection</div>
       </div>
@@ -606,7 +605,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v1.10</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v1.11</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1218,8 +1217,9 @@
       var n = i + 1;                                   // this label's card page (pages[n])
       var dock = ROW0 + i * ROWSTEP;                   // its final slot in the stack
       if (inSurvey) {
-        var cardTop = stopOf(n) - st;                  // this card's top edge in the viewport (height-aware)
+        var cardTop = n * V - st;                      // RAW viewport stop (uncapped) so a label stays off-screen until its card is actually reached — the stopOf() cap for the short ABOUT card must not pull its label up early
         var ytop = Math.max(dock, cardTop + ROW0);     // ride anchored to the card, but never below the dock
+        if (here >= n) ytop = dock;                    // once this card is current/past, DOCK it (the short ABOUT card never pins to top on its own)
         a.style.top = ytop + "px";
         var m = topCardAt(ytop + 10);                  // the card actually behind this label
         a.style.color = pDark(m) ? PAPER : INK;        // ink = that card's ink (instant swap at the edge)
@@ -1790,7 +1790,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v1.10 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v1.11 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
