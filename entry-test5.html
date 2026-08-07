@@ -154,7 +154,7 @@
   body.in-section #survey{display:none}
   /* every card PINS (sticky) and the next one rises up from the bottom to cover
      it — a stacking deck, same effect as the pinned intro video */
-  .scard{height:100dvh;position:sticky;top:0;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .scard{height:100dvh;position:sticky;top:0;display:flex;align-items:center;justify-content:center}
   .scard img:not(.stitle){display:block}
   /* the scroll-linked cards ride on their own compositor layer so the pinning
      transform tracks the scroll tightly */
@@ -166,7 +166,7 @@
   #act1 .scard{margin-top:-100dvh;z-index:1}   /* the one card in act1 (the reveal card) sits over the film */
   /* PS-composed card — full-canvas layer PNGs stacked (see assets/entry/cards/<name>/).
      Layers scale to fit so the Photoshop composition is preserved on any screen. */
-  .scard.ps{padding:0;cursor:pointer;background:#f6f5f5}   /* opaque backing so the card covers the pinned intro */
+  .scard.ps{padding:0;background:#f6f5f5}   /* opaque backing so the card covers the pinned intro */
   /* clip container so a zoomed background bleeds off the card edges, never over the captions */
   .scard .bgclip{position:absolute;inset:0;overflow:hidden;z-index:0}
   .scard.ps .layer{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;transform-origin:50% 50%}
@@ -206,20 +206,21 @@
      EVERY width: --nm-x = 50vw - half (the square's left edge, width-tracking). Was
      a hardcoded vw fraction that only lined up at one window width and drifted on
      resize. Keep --nsq-* in sync with driveNameSquare (centred, S=min(26vh,230px)). */
+  :root{--menu-x:46px}   /* the left margin the menu sits on — ARCHIVE text/button share it */
   .scard{--edge:12vw;
     --nsq-half:min(13vh,115px); --nsq-off:calc(0.615 * min(26vh,230px)); --nsq-gap:34px;
     --nm-x:calc(50vw - var(--nsq-half))}
   .scard[data-section="hunter"]{--nm-top:calc(50vh + var(--nsq-off) - var(--nsq-half)); --nm-bot:calc(50vh + var(--nsq-off) + var(--nsq-half))}  /* architect LOW */
   .scard[data-section="house"]{--nm-top:calc(50vh - var(--nsq-off) - var(--nsq-half)); --nm-bot:calc(50vh - var(--nsq-off) + var(--nsq-half))}  /* hunter house HIGH */
-  .scard[data-section="hunter"]  .about-text{left:var(--nm-x); top:26.48vh; width:280px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="hunter"]  .about-text{left:calc(var(--nm-x) + 0.074 * var(--nsq-half)); top:26.69vh; width:280px; right:auto; bottom:auto; transform:none}  /* +inset: align to the RIC HUNTER lettering */
   .scard[data-section="house"]   .about-text{left:calc(var(--nm-x) + 0.058 * var(--nsq-half)); top:50.43vh; width:455px; right:auto; bottom:auto; transform:none}  /* +inset: align to the HUNTER HOUSE lettering, not the PNG box */
-  .scard[data-section="archive"] .about-text{left:var(--edge); top:41.28vh; width:385px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="archive"] .about-text{left:var(--menu-x); top:41.76vh; width:385px; right:auto; bottom:auto; transform:none}  /* left-aligned to the menu margin */
   .scard[data-section="about"]   .about-text{left:2.63vw; top:28.63vh; width:348px; right:auto; bottom:auto; transform:none}
   .scard[data-section="hunter"] .at-statement{font-size:26px}
   .scard[data-section="about"] .at-statement{font-size:25px}
-  .scard[data-section="hunter"]  .enter-cue{left:var(--nm-x); top:80.90vh; right:auto; bottom:auto; transform:none}
-  .scard[data-section="house"]   .enter-cue{left:var(--nm-x); top:67.77vh; right:auto; bottom:auto; transform:none}
-  .scard[data-section="archive"] .enter-cue{left:var(--edge); top:62.17vh; right:auto; bottom:auto; transform:none}  /* left on the shared margin */
+  .scard[data-section="hunter"]  .enter-cue{left:calc(var(--nm-x) + 0.074 * var(--nsq-half)); top:80.95vh; right:auto; bottom:auto; transform:none}
+  .scard[data-section="house"]   .enter-cue{left:calc(var(--nm-x) + 0.058 * var(--nsq-half)); top:67.77vh; right:auto; bottom:auto; transform:none}
+  .scard[data-section="archive"] .enter-cue{left:var(--menu-x); top:62.86vh; right:auto; bottom:auto; transform:none}  /* left-aligned to the menu margin */
   /* background-image framing (?place: pan/fit/zoom) */
   .scard[data-section="hunter"]  .layer{object-position:56.0% 37.0%; object-fit:cover}
   .scard[data-section="house"]   .layer{object-position:49.7% 50.1%; object-fit:cover}
@@ -311,7 +312,8 @@
     transition:transform .5s cubic-bezier(.4,0,.2,1);will-change:transform}
   .plate{flex:0 0 100%;width:100%;height:100%;position:relative;overflow-y:auto;
     -webkit-overflow-scrolling:touch;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;text-align:left;padding:8vh 250px;box-sizing:border-box}
+    align-items:flex-start;justify-content:center;text-align:left;
+    padding:8vh 6vw 8vh var(--menu-x);box-sizing:border-box}   /* text column on the menu/archive left margin */
   /* the text column is centred as a block; the text inside stays left-justified
      (shared width → the blocks share a left edge instead of ragged-centring) */
   .plate .pk,.plate .pt,.plate .pb,.plate .pq,.plate .pqa{width:min(680px,100%)}
@@ -591,7 +593,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.94</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.95</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1763,7 +1765,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.94 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.95 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
