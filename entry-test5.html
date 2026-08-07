@@ -355,6 +355,9 @@
   .enter-cue::after{content:"+";font-size:19px;font-weight:400;letter-spacing:0;line-height:1}
   /* ARCHIVE leaf: same button, but a REAL link out to the instrument (↗, not +) */
   .enter-cue.leaf{pointer-events:auto;cursor:pointer;text-decoration:none}
+  /* HUNTER/HOUSE MORE: the button itself is the only click target (not the card) */
+  .scard[data-section="hunter"] .enter-cue,
+  .scard[data-section="house"]  .enter-cue{pointer-events:auto;cursor:pointer}
   .enter-cue.leaf::after{content:"↗";font-size:17px}
   /* fade a button out while it overlaps the docked menu labels (JS collision check) */
   .enter-cue.cue-hidden{opacity:0 !important;pointer-events:none !important}
@@ -588,7 +591,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.92</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.93</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1543,14 +1546,14 @@
     var idx = pages.findIndex(function (p) { return p.dataset && p.dataset.section === s; });
     if (idx >= 0) goPage(idx);
   }); });
-  document.querySelectorAll("#survey .scard[data-section]").forEach(function (c) {
-    c.addEventListener("click", function (e) {
+  // Only the MORE button opens the room — NOT the whole card. (Archive's "Browse
+  // the Archive" is a real <a> leaf that handles itself; about is a static endpoint.)
+  document.querySelectorAll('.scard[data-section="hunter"] .enter-cue, .scard[data-section="house"] .enter-cue').forEach(function (btn) {
+    var s = btn.closest(".scard").dataset.section;
+    btn.addEventListener("click", function (e) {
       if (document.body.classList.contains("place-mode")) return;
-      if (e.target.closest("a")) return;   // a real link inside the card (e.g. Browse the Archive) handles itself
-      var s = c.dataset.section;
-      if (s === "house" || s === "hunter") { openRoom(s); return; }   // deep sections → lateral room
-      if (s === "archive") { window.open("next.html?enter", "_blank", "noopener"); return; }   // leaf → the instrument, new tab (splash skipped)
-      // about is a static endpoint (the mailto link handles contact)
+      e.stopPropagation();
+      openRoom(s);
     });
   });
   document.querySelectorAll("#survey .gopt[data-section]").forEach(function (o) { o.addEventListener("click", function (e) { e.preventDefault(); openSection(o.dataset.section, o.querySelector(".stitle")); }); });
@@ -1760,7 +1763,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.92 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.93 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
