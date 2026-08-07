@@ -184,7 +184,7 @@
   /* ── per-card image size — set each card's height (or width) independently ──
      Edit the value on any one line to tune that card alone. */
   .scard[data-section="hunter"]{background:#2a2622}  /* FRH-0001 photo (Rick building the deck, 1978) — full-bleed cover, light text */
-  .scard[data-section="about"]{background:#fff; --about-h:66dvh; height:var(--about-h)}   /* ABOUT card height — tune via ?place H-/H+ (shorter than the others) */
+  .scard[data-section="about"]{background:#fff; --about-h:64dvh; height:var(--about-h)}   /* ABOUT card height — tune via ?place H-/H+ (shorter than the others) */
   /* the shared caption form — a large sans statement beside a mono detail column.
      Reused on every card (ABOUT foundation text · HOUSE/HUNTER/ARCHIVE image details). */
   /* the paragraph BLOCK is centred on the card; the text inside stays LEFT-justified */
@@ -214,7 +214,7 @@
   .scard[data-section="hunter"]  .about-text{left:43.55vw; top:26.48vh; width:280px; right:auto; bottom:auto; transform:none}
   .scard[data-section="house"]   .about-text{left:43.55vw; top:50.43vh; width:455px; right:auto; bottom:auto; transform:none}
   .scard[data-section="archive"] .about-text{left:var(--edge); top:41.28vh; width:385px; right:auto; bottom:auto; transform:none}
-  .scard[data-section="about"]   .about-text{left:var(--edge); top:3.95vh;  width:535px; right:auto; bottom:auto; transform:none}  /* top aligned to menu HUNTER */
+  .scard[data-section="about"]   .about-text{left:2.63vw; top:28.63vh; width:348px; right:auto; bottom:auto; transform:none}
   .scard[data-section="hunter"] .at-statement{font-size:26px}
   .scard[data-section="about"] .at-statement{font-size:25px}
   .scard[data-section="hunter"]  .enter-cue{left:43.69vw; top:80.90vh; right:auto; bottom:auto; transform:none}
@@ -224,7 +224,7 @@
   .scard[data-section="hunter"]  .layer{object-position:56.0% 37.0%; object-fit:cover}
   .scard[data-section="house"]   .layer{object-position:49.7% 50.1%; object-fit:cover}
   .scard[data-section="archive"] .layer{object-position:55.5% 50.3%; object-fit:cover}
-  .scard[data-section="about"]   .layer{object-position:50% 100%; object-fit:contain; transform-origin:50% 100%; transform:scale(0.65)}   /* bottom-anchored, scaled small; ?place: drag=move (1:1), +w/-w=scale */
+  .scard[data-section="about"]   .layer{object-position:50% 100%; object-fit:contain; transform-origin:50% 100%; transform:translate(228px,-22px) scale(1.15)}   /* ?place: drag=move (1:1), +w/-w=scale */
   /* the section title-block — typeset (scales cleanly), centred over the card
      image, with the leader text beneath. Title sized ~ the nameblock's HOUSE.
      On entry the title flies to its menu slot (see #titlefly). */
@@ -563,7 +563,7 @@
   <section class="scard ps" data-section="about">
     <div class="bgclip"><img class="layer" src="assets/entry/cards/about/BACKGROUND.jpg" alt="Elevation of the house among the firs"></div>
     <div class="about-text">
-      <p class="at-statement">The Hunter House Foundation stewards the residence at 203 Goward Road and the archival legacy of its architect. It keeps the house a living, working architectural environment; catalogues every drawing, photograph, and letter under a permanent scheme; and opens the record to scholars, students, and the public. Its longer aim is to realize the speculative futures embedded in Hunter's drawings (the cantilevered Skywalk, the unbuilt East Wing, the Zen scheme), building on the ground what the archive holds on paper.</p>
+      <p class="at-statement">The Hunter House Foundation stewards the residence at 203 Goward Road and the archival legacy of its architect and opens the record to scholars, students, and the public.</p>
       <div class="at-foot">
         <div class="at-meta">Established 2026 · Victoria, British Columbia<br>not-for-profit</div>
         <div class="at-contact"><a href="mailto:contact@hunterhouse.org">contact@hunterhouse.org</a><br>203 Goward Road · Saanich · British Columbia</div>
@@ -578,7 +578,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.77</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.78</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1685,7 +1685,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.77 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.78 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
