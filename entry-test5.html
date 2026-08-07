@@ -187,7 +187,8 @@
   .scard[data-section="about"]{background:#fff; --about-h:64dvh; height:var(--about-h); z-index:2}   /* ABOUT height tunable via ?place H-/H+; z-index:2 so its white cover sits above the cards behind */
   /* full-viewport white that fades in as ABOUT rises — hides every card behind the
      short ABOUT card (the Archive/House/Hunter photos) so the surround is clean white */
-  .about-cover{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:0;will-change:opacity}
+  .about-cover{position:fixed;inset:0;background:#d3ccbd;opacity:0;pointer-events:none;z-index:1;will-change:opacity}   /* warm tone backdrop; z-1 = above the other cards, below the white ABOUT card (z-2) so the card reads as a short panel on the tone */
+  .scard[data-section="about"] .bgclip{overflow:hidden}   /* keep the elevation inside the white card, off the tone */
   /* the shared caption form — a large sans statement beside a mono detail column.
      Reused on every card (ABOUT foundation text · HOUSE/HUNTER/ARCHIVE image details). */
   /* the paragraph BLOCK is centred on the card; the text inside stays LEFT-justified */
@@ -533,6 +534,7 @@
 <!-- ── SURVEY: one contracted key-frame card per section (scroll for the whole
      architecture); click / menu enters a section in place. ── -->
 <div id="survey" aria-label="Project survey">
+  <div class="about-cover"></div>   <!-- tone backdrop behind the short white ABOUT card (fades in as ABOUT rises) -->
   <!-- ACT 1: the film + HOUSE share one 200vh runway. HOUSE sticks natively
        (compositor-pinned) beneath the film; the film slides up over it (JS) to
        reveal it. Pinning HOUSE in CSS, not JS, kills the seg0 shimmer. -->
@@ -587,7 +589,6 @@
   </section>
   <!-- ABOUT: coloured elevation of the house among the firs + foundation text -->
   <section class="scard ps" data-section="about">
-    <div class="about-cover"></div>
     <div class="bgclip"><img class="layer" src="assets/entry/cards/about/BACKGROUND.jpg" alt="Elevation of the house among the firs"></div>
     <div class="about-text">
       <p class="at-statement">The Hunter House Foundation stewards the residence at 203 Goward Road and the archival legacy of its architect and opens the record to scholars, students, and the public.</p>
@@ -605,7 +606,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v1.11</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v1.12</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1790,7 +1791,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v1.11 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v1.12 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
