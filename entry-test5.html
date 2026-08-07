@@ -150,7 +150,7 @@
   #hero img.hlogo{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:auto;height:min(62vh,700px);object-fit:contain;z-index:1}
   /* ── SURVEY (contracted): one key-frame card per section ──────────────── */
   #survey{position:fixed;inset:0;z-index:6;overflow-y:auto;overflow-x:hidden;
-    scroll-snap-type:none;background:#f6f5f5;-webkit-overflow-scrolling:touch}
+    scroll-snap-type:none;background:#fff;-webkit-overflow-scrolling:touch}   /* white so the short ABOUT card's surround is white, not the Archive behind it */
   body.in-section #survey{display:none}
   /* every card PINS (sticky) and the next one rises up from the bottom to cover
      it — a stacking deck, same effect as the pinned intro video */
@@ -184,7 +184,10 @@
   /* ── per-card image size — set each card's height (or width) independently ──
      Edit the value on any one line to tune that card alone. */
   .scard[data-section="hunter"]{background:#2a2622}  /* FRH-0001 photo (Rick building the deck, 1978) — full-bleed cover, light text */
-  .scard[data-section="about"]{background:#fff; --about-h:64dvh; height:var(--about-h)}   /* ABOUT card height — tune via ?place H-/H+ (shorter than the others) */
+  .scard[data-section="about"]{background:#fff; --about-h:64dvh; height:var(--about-h); z-index:2}   /* ABOUT height tunable via ?place H-/H+; z-index:2 so its white cover sits above the cards behind */
+  /* full-viewport white that fades in as ABOUT rises — hides every card behind the
+     short ABOUT card (the Archive/House/Hunter photos) so the surround is clean white */
+  .about-cover{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:0;will-change:opacity}
   /* the shared caption form — a large sans statement beside a mono detail column.
      Reused on every card (ABOUT foundation text · HOUSE/HUNTER/ARCHIVE image details). */
   /* the paragraph BLOCK is centred on the card; the text inside stays LEFT-justified */
@@ -213,14 +216,16 @@
   .scard[data-section="hunter"]{--nm-top:calc(50vh + var(--nsq-off) - var(--nsq-half)); --nm-bot:calc(50vh + var(--nsq-off) + var(--nsq-half))}  /* architect LOW */
   .scard[data-section="house"]{--nm-top:calc(50vh - var(--nsq-off) - var(--nsq-half)); --nm-bot:calc(50vh - var(--nsq-off) + var(--nsq-half))}  /* hunter house HIGH */
   .scard[data-section="hunter"]  .about-text{left:var(--menu-x); top:34vh; width:340px; right:auto; bottom:auto; transform:none}   /* squares gone — free to move via ?place */
-  .scard[data-section="house"]   .about-text{left:var(--menu-x); top:34vh; width:455px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="house"]   .about-text{left:var(--menu-x); top:43.10vh; width:455px; right:auto; bottom:auto; transform:none}
   .scard[data-section="archive"] .about-text{left:var(--menu-x); top:41.76vh; width:385px; right:auto; bottom:auto; transform:none}  /* left-aligned to the menu margin */
-  .scard[data-section="about"]   .about-text{left:2.63vw; top:28.63vh; width:348px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="about"]   .about-text{left:var(--menu-x); top:23.36vh; width:348px; right:auto; bottom:auto; transform:none}
   .scard[data-section="hunter"] .at-statement{font-size:30px}
   .scard[data-section="about"] .at-statement{font-size:27px}
-  .scard[data-section="hunter"]  .enter-cue{left:var(--menu-x); top:60vh; right:auto; bottom:auto; transform:none}
-  .scard[data-section="house"]   .enter-cue{left:var(--menu-x); top:60vh; right:auto; bottom:auto; transform:none}
-  .scard[data-section="archive"] .enter-cue{left:var(--menu-x); top:62.86vh; right:auto; bottom:auto; transform:none}  /* left-aligned to the menu margin */
+  /* all buttons SAME location: left on the menu edge, lower edge at the ABOUT text's
+     lower edge (~97.22vh). bottom-anchored so they share one baseline across cards. */
+  .scard[data-section="hunter"]  .enter-cue,
+  .scard[data-section="house"]   .enter-cue,
+  .scard[data-section="archive"] .enter-cue{left:var(--menu-x); bottom:2.78vh; top:auto; right:auto; transform:none}
   /* background-image framing (?place: pan/fit/zoom) */
   .scard[data-section="hunter"]  .layer{object-position:56.0% 37.0%; object-fit:cover}
   .scard[data-section="house"]   .layer{object-position:49.7% 50.1%; object-fit:cover}
@@ -583,6 +588,7 @@
   </section>
   <!-- ABOUT: coloured elevation of the house among the firs + foundation text -->
   <section class="scard ps" data-section="about">
+    <div class="about-cover"></div>
     <div class="bgclip"><img class="layer" src="assets/entry/cards/about/BACKGROUND.jpg" alt="Elevation of the house among the firs"></div>
     <div class="about-text">
       <p class="at-statement">The Hunter House Foundation stewards the residence at 203 Goward Road and the archival legacy of its architect and opens the record to scholars, students, and the public.</p>
@@ -1169,7 +1175,7 @@
   document.querySelectorAll("#survey .scard").forEach(function (c) { pages.push(c); });
   // every page's scroll STOP is a whole viewport (0,V,2V,3V,4V) — read it this way
   // rather than offsetTop, since ACT 1 nests svid+HOUSE (their offsetTop is local).
-  function stopOf(i) { return i * window.innerHeight; }
+  function stopOf(i) { return Math.min(i * window.innerHeight, surveyEl.scrollHeight - window.innerHeight); }   // cap at max scroll so the short ABOUT card is reachable
   var pageIdx = 0, paging = false, wheelLock = false;
   var vname = document.querySelector("#svid .vname");
   var menuEl = document.getElementById("menu");
@@ -1229,6 +1235,9 @@
     var curSec = (pages[here] && pages[here].dataset) ? pages[here].dataset.section : "";
     document.body.classList.toggle("sec-hunter", curSec === "hunter");
     document.body.classList.toggle("sec-house", curSec === "house");
+    // ABOUT sits under the white cover — force the menu to ink (the dark Archive it
+    // would otherwise key off is hidden behind the cover)
+    if (curSec === "about") menuLinks.forEach(function (a) { a.style.color = INK; });
   }
   // Hide any enter-cue button while its box overlaps a VISIBLE docked menu label.
   // Both share the same left edge, so as the archive card slides up into the ABOUT
@@ -1325,6 +1334,7 @@
   //  seg2  hunter→archive COVER  (2→1): ARCHIVE rises over the STATIC HUNTER
   //  seg3  archive→about  SCROLL (1→1): ARCHIVE slides up, ABOUT rises
   var svidEl = document.getElementById("svid");
+  var aboutCover = document.querySelector(".about-cover");
   function driveReveal() {
     var vh = window.innerHeight, st = surveyEl.scrollTop;
     var sv = Math.min(st, vh);                                   // film slide across the first viewport
@@ -1336,6 +1346,9 @@
     // ARCHIVE: pinned through the cover, then slides up into a flat scroll → ABOUT
     var ay = st <= 3 * vh ? 0 : (st <= 4 * vh ? -(st - 3 * vh) : -vh);
     if (pages[3]) pages[3].style.transform = "translate3d(0," + ay + "px,0)";
+    // white cover fades in as ABOUT rises → hides every card behind it (clean white
+    // surround) and takes the Browse-the-Archive button with it
+    if (aboutCover) aboutCover.style.opacity = String(Math.max(0, Math.min(1, (st - 3 * vh) / (0.45 * vh))));
   }
   // ── name-square morph: nameblock on the film → architect badge (HUNTER) → HUNTER HOUSE (HOUSE) → fade after ──
   var nsBox = document.getElementById("namesq");
@@ -1390,11 +1403,17 @@
   var SNAP_ADV = 0.66;   // how far you must scroll toward the next card before it advances
   function doSnap() {
     if (mode !== "survey" || _snapping || paging || _locked) return;
-    var vh = window.innerHeight, st = surveyEl.scrollTop, idx = st / vh, frac = idx - Math.floor(idx), target;
-    if (frac < 0.002 || frac > 0.998) return;   // already parked on a card
-    if (_snapDir >= 0) target = (frac >= SNAP_ADV)       ? Math.ceil(idx)  : Math.floor(idx);   // down: advance only past ADV, else settle back
-    else               target = (frac <= 1 - SNAP_ADV)   ? Math.floor(idx) : Math.ceil(idx);    // up: go back only past ADV, else settle forward
-    target = Math.max(0, Math.min(pages.length - 1, target));
+    var st = surveyEl.scrollTop, last = pages.length - 1;
+    // current lower card = the one whose stop we've passed (stop-aware, not vh-assumed —
+    // handles the short ABOUT card whose gap to Archive is < a viewport)
+    var cur = 0; for (var k = 0; k < pages.length; k++) { if (stopOf(k) <= st + 1) cur = k; }
+    if (cur >= last) return;                                   // already at the last card
+    var lo = stopOf(cur), hi = stopOf(cur + 1), gap = hi - lo;
+    if (gap < 2) return;
+    var prog = (st - lo) / gap;                                // 0..1 across the REAL gap
+    if (prog < 0.002 || prog > 0.998) return;                 // already parked
+    var target = (_snapDir >= 0) ? (prog >= SNAP_ADV ? cur + 1 : cur)
+                                 : (prog <= 1 - SNAP_ADV ? cur : cur + 1);
     var top = stopOf(target);
     if (Math.abs(top - st) < 2) return;
     _snapping = true;
