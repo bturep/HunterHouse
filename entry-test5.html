@@ -265,12 +265,23 @@
     width:min(26vh,230px);height:min(26vh,230px);opacity:0;will-change:transform,opacity}
   #namesq .nsq img{width:100%;height:100%;object-fit:contain;display:block;
     filter:drop-shadow(0 1px 8px rgba(0,0,0,.5));transition:transform .3s cubic-bezier(.4,0,.2,1),filter .3s}
-  /* HOVER AFFORDANCE (the square is the button on HUNTER/HOUSE): a frame fades in,
-     the mark lifts, and an "Enter ↗" label appears. Gated to the active section so
-     only the visible square is interactive; JS owns the wrapper transform, the
-     hover scale rides the inner img so they don't fight. */
-  #namesq .nsq::after{content:"";position:absolute;inset:-18px;border:1.5px solid rgba(246,245,245,.92);
-    border-radius:2px;opacity:0;transform:scale(.94);transition:opacity .25s ease,transform .25s ease;pointer-events:none}
+  /* HOVER AFFORDANCE (the square is the button on HUNTER/HOUSE): four CROP MARKS
+     register at the corners (drafting language, no enclosing box), the mark lifts a
+     touch, and an "Enter ↗" label appears. Gated to the active section so only the
+     visible square is interactive; JS owns the wrapper transform, the hover scale
+     rides the inner img so they don't fight. */
+  #namesq .nsq::after{content:"";position:absolute;inset:-20px;pointer-events:none;
+    opacity:0;transform:scale(.96);transition:opacity .25s ease,transform .25s ease;
+    --ct:1.5px; --cl:16px; --cc:rgba(246,245,245,.92);   /* tick thickness / length / colour */
+    background:
+      linear-gradient(var(--cc),var(--cc)) left top/var(--cl) var(--ct) no-repeat,
+      linear-gradient(var(--cc),var(--cc)) left top/var(--ct) var(--cl) no-repeat,
+      linear-gradient(var(--cc),var(--cc)) right top/var(--cl) var(--ct) no-repeat,
+      linear-gradient(var(--cc),var(--cc)) right top/var(--ct) var(--cl) no-repeat,
+      linear-gradient(var(--cc),var(--cc)) left bottom/var(--cl) var(--ct) no-repeat,
+      linear-gradient(var(--cc),var(--cc)) left bottom/var(--ct) var(--cl) no-repeat,
+      linear-gradient(var(--cc),var(--cc)) right bottom/var(--cl) var(--ct) no-repeat,
+      linear-gradient(var(--cc),var(--cc)) right bottom/var(--ct) var(--cl) no-repeat}
   #namesq .nsq .nsq-hint{position:absolute;left:50%;bottom:-46px;transform:translateX(-50%);
     font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.26em;text-transform:uppercase;
     color:rgba(246,245,245,.94);white-space:nowrap;opacity:0;transition:opacity .25s ease;pointer-events:none;
@@ -616,7 +627,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.96</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.97</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1792,7 +1803,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.96 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.97 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
