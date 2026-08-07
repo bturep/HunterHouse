@@ -356,6 +356,8 @@
   /* ARCHIVE leaf: same button, but a REAL link out to the instrument (↗, not +) */
   .enter-cue.leaf{pointer-events:auto;cursor:pointer;text-decoration:none}
   .enter-cue.leaf::after{content:"↗";font-size:17px}
+  /* fade a button out while it overlaps the docked menu labels (JS collision check) */
+  .enter-cue.cue-hidden{opacity:0 !important;pointer-events:none !important}
   .scard.cover .enter-cue{color:#f6f5f5;text-shadow:0 1px 16px rgba(0,0,0,.55);
     background:rgba(20,18,16,.34);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
   @media (max-width:767px){ .enter-cue{right:5vw;font-size:12px;padding:11px 16px} }
@@ -586,7 +588,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.87</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.88</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1210,6 +1212,27 @@
         a.style.opacity = (n > here) ? 0 : (n === here ? 1 : DIM);
       }
     });
+    updateCueCollision();
+  }
+  // Hide any enter-cue button while its box overlaps a VISIBLE docked menu label.
+  // Both share the same left edge, so as the archive card slides up into the ABOUT
+  // transition the "Browse the Archive" button rises through the menu stack —
+  // fade it out for the moments it collides, restore it once it's clear.
+  var allCues = Array.prototype.slice.call(document.querySelectorAll(".enter-cue"));
+  function updateCueCollision() {
+    var rects = [];
+    menuLinks.forEach(function (a) {
+      if (parseFloat(a.style.opacity || "0") < 0.03) return;   // ignore fully-faded labels
+      rects.push(a.getBoundingClientRect());
+    });
+    allCues.forEach(function (cue) {
+      var c = cue.getBoundingClientRect();
+      if (c.width === 0 || c.height === 0) { cue.classList.remove("cue-hidden"); return; }
+      var hit = rects.some(function (r) {
+        return !(c.right < r.left || c.left > r.right || c.bottom < r.top || c.top > r.bottom);
+      });
+      cue.classList.toggle("cue-hidden", hit);
+    });
   }
   // drive the SITE lens camera by scroll: oblique+zoomed-in at the top of the tall
   // site section → flat top-down + zoomed-out at the bottom
@@ -1733,7 +1756,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.87 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.88 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
