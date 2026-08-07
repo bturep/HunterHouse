@@ -205,19 +205,20 @@
      share one left margin (--edge) so they line up card-to-card; change --edge
      in one place to shift the whole column. */
   .scard{--edge:12vw}   /* shared left margin for captions AND left-aligned buttons */
-  .scard[data-section="hunter"]  .about-text{left:var(--edge); top:63.79vh; width:626px; right:auto; bottom:auto; transform:none}
-  .scard[data-section="house"]   .about-text{left:var(--edge); top:36.17vh; width:455px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="hunter"]  .about-text{left:66.46vw; top:38.12vh; width:280px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="house"]   .about-text{left:50.15vw; top:37.90vh; width:455px; right:auto; bottom:auto; transform:none}
   .scard[data-section="archive"] .about-text{left:var(--edge); top:41.28vh; width:385px; right:auto; bottom:auto; transform:none}
   .scard[data-section="about"]   .about-text{left:var(--edge); top:3.95vh;  width:535px; right:auto; bottom:auto; transform:none}  /* top aligned to menu HUNTER */
+  .scard[data-section="hunter"] .at-statement{font-size:26px}
   .scard[data-section="about"] .at-statement{font-size:25px}
-  .scard[data-section="hunter"]  .enter-cue{left:82.79vw; top:87.07vh; right:auto; bottom:auto; transform:none}  /* bottom aligned to Goward Road line */
-  .scard[data-section="house"]   .enter-cue{left:var(--edge); top:62.14vh; right:auto; bottom:auto; transform:none}  /* on the shared left margin, under the caption */
-  .scard[data-section="archive"] .enter-cue{left:var(--edge); top:72.19vh; right:auto; bottom:auto; transform:none}  /* left on the shared margin */
+  .scard[data-section="hunter"]  .enter-cue{left:75.14vw; top:75.43vh; right:auto; bottom:auto; transform:none}
+  .scard[data-section="house"]   .enter-cue{left:50.27vw; top:56.40vh; right:auto; bottom:auto; transform:none}
+  .scard[data-section="archive"] .enter-cue{left:var(--edge); top:63.21vh; right:auto; bottom:auto; transform:none}  /* left on the shared margin */
   /* background-image framing (?place: pan/fit/zoom) */
-  .scard[data-section="hunter"]  .layer{object-position:50% 50%; object-fit:cover}
+  .scard[data-section="hunter"]  .layer{object-position:32.2% 40.5%; object-fit:cover}
   .scard[data-section="house"]   .layer{object-position:50% 50%; object-fit:cover}
   .scard[data-section="archive"] .layer{object-position:55.5% 50.3%; object-fit:cover}
-  .scard[data-section="about"]   .layer{object-position:62.5% 300.0%; object-fit:cover; transform:scale(1.30)}
+  .scard[data-section="about"]   .layer{object-position:39.4% 746.9%; object-fit:cover; transform:scale(1.30)}
   /* the section title-block — typeset (scales cleanly), centred over the card
      image, with the leader text beneath. Title sized ~ the nameblock's HOUSE.
      On entry the title flies to its menu slot (see #titlefly). */
@@ -498,7 +499,7 @@
   <section class="scard ps cover" data-section="hunter">
     <div class="bgclip"><img class="layer" src="assets/entry/cards/hunter/BACKGROUND.jpg?v=5" alt="Richard Hunter building the deck of his house, 1978"></div>
     <div class="about-text">
-      <p class="at-statement">"Architecture, the sheltering art,<br>is a repository of human experience."<br><br>Richard Morrow Hunter, 1930–2023.<br>Architect, schooled at Oklahoma under Bruce Goff.<br>Fifty years designing one house at 203 Goward Road.</p>
+      <p class="at-statement">Richard Morrow Hunter, Architect. 1930 – 2023.<br><br>Fifty years designing one house.</p>
       <div class="at-foot">
         <div class="at-meta">HH-FRH-0001, Ric building the Choom, 1978<br>Photograph, Frances Hunter Collection</div>
       </div>
@@ -552,7 +553,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.66</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.67</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1653,7 +1654,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.66 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.67 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
