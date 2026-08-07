@@ -578,7 +578,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.82</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.83</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1603,7 +1603,7 @@
     function fontEl(t) { return t.isText ? t.el.querySelector(".at-statement") : t.el; }
     function objFit(t) { return t.el.style.objectFit || getComputedStyle(t.el).objectFit; }
     function readEl(t) {
-      if (t.isImg) { pr.innerHTML = "<b>" + nameOf(t) + "</b> move " + Math.round(t.tx || 0) + "," + Math.round(t.ty || 0) + " · " + objFit(t) + " · z=" + (t.scale || 1).toFixed(2) + " · drag=move, ±w=scale"; return; }
+      if (t.isImg) { var isC = objFit(t) === "cover"; pr.innerHTML = "<b>" + nameOf(t) + "</b> " + (isC ? ("pan " + t.op.x.toFixed(0) + "% " + t.op.y.toFixed(0) + "%") : ("move " + Math.round(t.tx || 0) + "," + Math.round(t.ty || 0))) + " · " + objFit(t) + " · z=" + (t.scale || 1).toFixed(2) + " · drag=" + (isC ? "pan" : "move") + ", ±w=scale"; return; }
       var r = relOf(t), w = Math.round(t.el.getBoundingClientRect().width), fe = fontEl(t);
       var fs = fe ? Math.round(parseFloat(getComputedStyle(fe).fontSize)) : 0;
       pr.innerHTML = "<b>" + nameOf(t) + "</b> " + r.L.toFixed(1) + "vw," + r.T.toFixed(1) + "vh · " + w + "px · " + fs + "px" + (t.isText ? " · " + (t.el.classList.contains("p-2col") ? "2col" : "1col") : "");
@@ -1615,10 +1615,7 @@
       if (!t) { wh.remove(); pr.textContent = "— select an element"; return; }
       t.el.classList.add("p-sel");
       if (t.isText) { t.el.appendChild(wh); wh.style.display = "block"; }
-      else {
-        wh.remove();
-        if (t.isImg) { var bc = t.el.closest(".bgclip"); if (bc) bc.classList.add("bg-open"); }   // keep its fit/size; just open the frame so the overflow shows and you can pan it
-      }
+      else { wh.remove(); }   // image keeps its fit/size; pan = object-position (cover) or translate (contain)
       readEl(t);
     }
     document.addEventListener("pointerdown", function (e) {
@@ -1628,14 +1625,25 @@
       if (!t) return;
       e.preventDefault(); e.stopPropagation();
       select(t);
-      if (t.isImg) { imgDrag = { t: t, sx: e.clientX, sy: e.clientY, tx0: t.tx || 0, ty0: t.ty || 0 }; try { t.el.setPointerCapture(e.pointerId); } catch (x) {} return; }
+      if (t.isImg) { imgDrag = { t: t, sx: e.clientX, sy: e.clientY, tx0: t.tx || 0, ty0: t.ty || 0, opx0: t.op.x, opy0: t.op.y }; try { t.el.setPointerCapture(e.pointerId); } catch (x) {} return; }
       var r = t.el.getBoundingClientRect();
       drag = { t: t, ox: e.clientX - r.left, oy: e.clientY - r.top };
       try { t.el.setPointerCapture(e.pointerId); } catch (x) {}
     }, true);
     document.addEventListener("pointermove", function (e) {
       if (resizing) { resizing.t.el.style.width = Math.max(80, resizing.sw + (e.clientX - resizing.sx)) + "px"; readEl(resizing.t); return; }
-      if (imgDrag) { var it = imgDrag.t; it.tx = imgDrag.tx0 + (e.clientX - imgDrag.sx); it.ty = imgDrag.ty0 + (e.clientY - imgDrag.sy); it.el.style.transform = "translate(" + Math.round(it.tx) + "px," + Math.round(it.ty) + "px) scale(" + (it.scale || 1).toFixed(2) + ")"; readEl(it); return; }
+      if (imgDrag) {
+        var it = imgDrag.t;
+        if (objFit(it) === "cover") {   // pan the crop (reveals side/up-down content, no gap, stays full-size)
+          it.op.x = imgDrag.opx0 - (e.clientX - imgDrag.sx) / window.innerWidth * 100;
+          it.op.y = imgDrag.opy0 - (e.clientY - imgDrag.sy) / window.innerHeight * 100;
+          it.el.style.objectPosition = it.op.x.toFixed(1) + "% " + it.op.y.toFixed(1) + "%";
+        } else {                        // contain (ABOUT): free move
+          it.tx = imgDrag.tx0 + (e.clientX - imgDrag.sx); it.ty = imgDrag.ty0 + (e.clientY - imgDrag.sy);
+          it.el.style.transform = "translate(" + Math.round(it.tx) + "px," + Math.round(it.ty) + "px) scale(" + (it.scale || 1).toFixed(2) + ")";
+        }
+        readEl(it); return;
+      }
       if (!drag) return;
       var el = drag.t.el;
       el.style.left = (e.clientX - drag.ox) + "px"; el.style.top = (e.clientY - drag.oy) + "px";
@@ -1717,7 +1725,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.82 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.83 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
