@@ -334,15 +334,15 @@
   /* the MORE cue — a deep card has more behind it (2b). Right edge, vertically
      centred. "More +" reads as additional content, not a spatial move. */
   .enter-cue{position:absolute;right:4.5vw;top:50%;transform:translateY(-50%);z-index:6;
-    display:inline-flex;align-items:center;gap:11px;padding:0 0 8px;border:0;border-bottom:1.5px solid currentColor;
+    display:inline-flex;align-items:center;gap:12px;padding:14px 24px;border:0;
     font-family:'JetBrains Mono',Menlo,monospace;font-size:14px;font-weight:500;letter-spacing:.26em;
     text-transform:uppercase;color:#1b1918;pointer-events:none;transition:opacity .3s}
   .enter-cue::after{content:"+";font-size:19px;font-weight:400;letter-spacing:0;line-height:1}
   /* ARCHIVE leaf: same button, but a REAL link out to the instrument (↗, not +) */
   .enter-cue.leaf{pointer-events:auto;cursor:pointer;text-decoration:none}
   .enter-cue.leaf::after{content:"↗";font-size:17px}
-  .scard.cover .enter-cue{color:#f6f5f5;text-shadow:0 1px 16px rgba(0,0,0,.55)}
-  @media (max-width:767px){ .enter-cue{right:5vw;font-size:12px;padding:0 0 7px} }
+  .scard.cover .enter-cue{background:#f4f2ec;color:#1b1918;text-shadow:none}
+  @media (max-width:767px){ .enter-cue{right:5vw;font-size:12px;padding:12px 18px} }
   @media (max-width:767px){
     .plate{padding:12vh 26px}
     .plate .pcap{left:26px;max-width:82vw}
@@ -536,7 +536,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.50</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.51</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1605,7 +1605,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.50 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.51 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
