@@ -362,6 +362,25 @@
     .plate{padding:12vh 26px}
     .plate .pcap{left:26px;max-width:82vw}
   }
+  /* ── MOBILE entry layout: name-square centred + smaller in the upper area
+     (driveNameSquare mirrors size + LS=0); captions drop full-width below. ── */
+  @media (max-width:767px){
+    #namesq .nsq{top:33%;width:min(23vh,150px);height:min(23vh,150px)}
+    /* HUNTER / HOUSE: caption below the square, full width */
+    .scard[data-section="hunter"] .about-text,
+    .scard[data-section="house"]  .about-text{left:7vw !important;top:56vh !important;width:86vw !important}
+    .scard[data-section="hunter"] .at-statement{font-size:22px}
+    .scard[data-section="house"]  .at-statement,
+    .scard[data-section="archive"] .at-statement,
+    .scard[data-section="about"]  .at-statement{font-size:19px}
+    .scard[data-section="hunter"] .enter-cue,
+    .scard[data-section="house"]  .enter-cue,
+    .scard[data-section="archive"] .enter-cue{left:7vw !important;top:auto !important;bottom:8vh !important}
+    /* ARCHIVE / ABOUT: full-width captions near the top-left */
+    .scard[data-section="archive"] .about-text{left:7vw !important;top:28vh !important;width:86vw !important}
+    .scard[data-section="about"]   .about-text{left:7vw !important;top:17vh !important;width:86vw !important;flex-direction:column !important}
+    .scard[data-section="about"] .at-statement{max-width:none !important}
+  }
 </style>
 </head>
 <body>
@@ -558,7 +577,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.70</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.71</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1282,8 +1301,9 @@
   //   film → both · HUNTER → architect (centre) · HOUSE → hunter house (centre) · after → gone
   function driveNameSquare(st) {
     if (!nsBox) return;
-    var V = window.innerHeight, S = Math.min(0.26 * V, 230), off = 0.615 * S;   // original box distance
-    var LS = 0.12 * window.innerWidth;                                          // pair offset slightly left
+    var V = window.innerHeight, mob = window.innerWidth < 768;
+    var S = mob ? Math.min(0.23 * V, 150) : Math.min(0.26 * V, 230), off = 0.615 * S;   // original box distance
+    var LS = mob ? 0 : 0.12 * window.innerWidth;                                // pair offset left (centred on mobile)
     function ramp(a, b, x) { return nsClamp01((x - a) / (b - a)); }
     function place(el, ty, op) { el.style.transform = "translate(-50%,-50%) translateX(" + (-LS) + "px) translateY(" + ty + "px)"; el.style.opacity = op; }
     // RH (architect): film below-centre → rises to centre by HUNTER; fades at HUNTER→HOUSE
@@ -1659,7 +1679,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.70 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.71 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
