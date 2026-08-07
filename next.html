@@ -30,7 +30,7 @@
 <link rel="apple-touch-icon" href="assets/icon-180-next.png">
 <link rel="icon" type="image/png" href="assets/icon-192-next.png">
 <!-- Paint holdout: sets dark bg before render-blocking external CSS resolves -->
-<style>html{background:#2a2a2a}</style>
+<style>html{background:#232323}</style>
 <!-- ════════════════════════════════════════════════════════════════════════
      BADEN MODE — entry + persistence (Mowry Baden viewing room).
      Runs in <head> so html.baden is set before first paint → the desktop SPA
@@ -126,6 +126,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/light.css">
 <style>
+  /* v0.16 EXPERIMENT: coordinate the dark theme to the entry ARCHIVE card's
+     average colour (#232323). Overrides light.css's warm-brown dark tokens for
+     next.html ONLY (this inline block loads after light.css; live browse.html is
+     untouched). --bg is the dominant pane colour; --paper/--soft step lighter. */
+  html.dark{--bg:#232323;--paper:#2a2a2a;--soft:#2e2e2e}
   /* View transition: markid morphs from splash centre to browse corner */
   @view-transition{navigation:auto}
   .markid{view-transition-name:hh-mark}
@@ -4033,7 +4038,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.10-test.15";
+  const VERSION      = "v1.10-test.16";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
