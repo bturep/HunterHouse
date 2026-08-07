@@ -249,7 +249,7 @@
   #svid video{width:100%;height:100%;object-fit:cover;display:block}
   /* entry title = simple typeset HUNTER HOUSE (Inter Tight). To REVERT to Hunter's
      hand-lettered nameblock: use the commented image rule below + swap the film element (search "REVERT vname"). */
-  #svid .vname{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);font-family:"Inter Tight",system-ui,sans-serif;font-weight:800;font-size:min(9vw,130px);line-height:1;letter-spacing:.01em;text-transform:uppercase;text-align:center;color:#f6f5f5;text-shadow:0 2px 40px rgba(0,0,0,.45);white-space:nowrap;will-change:transform}
+  #svid .vname{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);font-family:'JetBrains Mono',Menlo,monospace;font-weight:700;font-size:min(7.6vw,108px);line-height:1;letter-spacing:.02em;text-transform:uppercase;text-align:center;color:#f6f5f5;text-shadow:0 2px 40px rgba(0,0,0,.45);white-space:nowrap;will-change:transform}
   /* REVERT vname (image): #svid .vname{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);height:min(58vh,660px);width:auto;will-change:transform} */
   #svid .vcue{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(246,245,245,.72);
@@ -541,7 +541,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.55</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.56</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1508,8 +1508,16 @@
       '<span class="g"><button data-a="fit">Fit/Fill</button></span>' +
       '<span class="g"><button data-a="edit">Edit text</button></span>' +
       '<span class="g"><button data-a="boxes" class="on">Boxes</button></span>' +
-      '<span class="g"><button class="copy" data-a="copy">Copy</button></span>';
+      '<span class="g"><button class="copy" data-a="copy">Copy</button></span>' +
+      '<span class="g"><button data-a="hidebar" title="hide the bar (B)">–</button></span>';
     document.body.appendChild(bar);
+    // hide/show the whole bar (B key or the '–' button); a small chip restores it
+    var pchip = document.createElement("button");
+    pchip.id = "place-chip"; pchip.textContent = "PLACE";
+    pchip.style.cssText = "position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:9999;background:#1b1918;color:#f6f5f5;font:11px/1 'JetBrains Mono',Menlo,monospace;letter-spacing:.12em;padding:6px 11px;border:0;border-radius:6px;cursor:pointer;display:none;box-shadow:0 6px 30px rgba(0,0,0,.5)";
+    document.body.appendChild(pchip);
+    function setBar(show){ bar.style.display = show ? "" : "none"; pchip.style.display = show ? "none" : "block"; }
+    pchip.addEventListener("click", function(){ setBar(true); });
     var pr = document.getElementById("pr");
     var sel = null, editing = false, drag = null, resizing = null, imgDrag = null;
     var wh = document.createElement("div"); wh.className = "p-wh"; wh.style.display = "none";
@@ -1561,6 +1569,7 @@
       if (a === "copy") return doCopy();
       if (a === "edit") { editing = !editing; toggleEdit(editing); e.target.classList.toggle("on", editing); return; }
       if (a === "boxes") { var clean = document.body.classList.toggle("p-clean"); e.target.classList.toggle("on", !clean); e.target.textContent = clean ? "Boxes off" : "Boxes"; return; }
+      if (a === "hidebar") { setBar(false); return; }
       if (a === "fit") { if (!sel || !sel.isImg) { pr.textContent = "select a background image first"; return; } sel.el.style.objectFit = (objFit(sel) === "cover" ? "contain" : "cover"); readEl(sel); return; }
       if (!sel) { pr.textContent = "select an element first"; return; }
       if (sel.isImg) {
@@ -1596,9 +1605,9 @@
       pr.textContent = "copied → clipboard + console";
     }
     document.addEventListener("keydown", function (e) {
-      if (e.key !== "h" && e.key !== "H") return;
       var tg = e.target; if (tg && (tg.isContentEditable || tg.tagName === "INPUT" || tg.tagName === "TEXTAREA")) return;
-      e.preventDefault(); var btn = bar.querySelector('[data-a="boxes"]'); if (btn) btn.click();
+      if (e.key === "h" || e.key === "H") { e.preventDefault(); var btn = bar.querySelector('[data-a="boxes"]'); if (btn) btn.click(); }
+      else if (e.key === "b" || e.key === "B") { e.preventDefault(); setBar(bar.style.display === "none"); }
     }, true);
     console.log("[place] mode ON. Click to select · drag to move · blue handle or ±w = width · A± = font · 1/2 col · Edit text · Boxes (H) hides outlines · backgrounds: drag to pan + Fit/Fill · Copy.");
   })();
@@ -1610,7 +1619,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.55 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.56 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
