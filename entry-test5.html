@@ -150,7 +150,7 @@
   #hero img.hlogo{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:auto;height:min(62vh,700px);object-fit:contain;z-index:1}
   /* ── SURVEY (contracted): one key-frame card per section ──────────────── */
   #survey{position:fixed;inset:0;z-index:6;overflow-y:auto;overflow-x:hidden;
-    scroll-snap-type:none;background:#fff;-webkit-overflow-scrolling:touch}   /* white so the short ABOUT card's surround is white, not the Archive behind it */
+    scroll-snap-type:none;background:#f6f5f5;-webkit-overflow-scrolling:touch}
   body.in-section #survey{display:none}
   /* every card PINS (sticky) and the next one rises up from the bottom to cover
      it — a stacking deck, same effect as the pinned intro video */
@@ -184,11 +184,8 @@
   /* ── per-card image size — set each card's height (or width) independently ──
      Edit the value on any one line to tune that card alone. */
   .scard[data-section="hunter"]{background:#2a2622}  /* FRH-0001 photo (Rick building the deck, 1978) — full-bleed cover, light text */
-  .scard[data-section="about"]{background:#fff; --about-h:64dvh; height:var(--about-h); z-index:2}   /* ABOUT height tunable via ?place H-/H+; z-index:2 so its white cover sits above the cards behind */
-  /* full-viewport white that fades in as ABOUT rises — hides every card behind the
-     short ABOUT card (the Archive/House/Hunter photos) so the surround is clean white */
-  .about-cover{position:fixed;inset:0;background:#d3ccbd;opacity:0;pointer-events:none;z-index:1;will-change:opacity}   /* warm tone backdrop; z-1 = above the other cards, below the white ABOUT card (z-2) so the card reads as a short panel on the tone */
-  .scard[data-section="about"] .bgclip{overflow:hidden}   /* keep the elevation inside the white card, off the tone */
+  .scard[data-section="about"]{background:#fff; --about-h:64dvh; height:var(--about-h)}   /* short card, anchored to the bottom of the deck; the bottom of Archive shows above it */
+  .scard[data-section="about"] .bgclip{overflow:hidden}   /* keep the elevation inside the white card, off the Archive above */
   /* the shared caption form — a large sans statement beside a mono detail column.
      Reused on every card (ABOUT foundation text · HOUSE/HUNTER/ARCHIVE image details). */
   /* the paragraph BLOCK is centred on the card; the text inside stays LEFT-justified */
@@ -371,6 +368,9 @@
   .enter-cue.leaf::after{content:"↗";font-size:17px}
   /* fade a button out while it overlaps the docked menu labels (JS collision check) */
   .enter-cue.cue-hidden{opacity:0 !important;pointer-events:none !important}
+  /* on the ABOUT endpoint the bottom of Archive shows above the card, but its Browse
+     button should not — hide it there */
+  body.sec-about .scard[data-section="archive"] .enter-cue{opacity:0;pointer-events:none}
   .scard.cover .enter-cue{color:#f6f5f5;text-shadow:0 1px 16px rgba(0,0,0,.55);
     background:rgba(20,18,16,.34);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
   @media (max-width:767px){ .enter-cue{right:5vw;font-size:12px;padding:11px 16px} }
@@ -534,7 +534,6 @@
 <!-- ── SURVEY: one contracted key-frame card per section (scroll for the whole
      architecture); click / menu enters a section in place. ── -->
 <div id="survey" aria-label="Project survey">
-  <div class="about-cover"></div>   <!-- tone backdrop behind the short white ABOUT card (fades in as ABOUT rises) -->
   <!-- ACT 1: the film + HOUSE share one 200vh runway. HOUSE sticks natively
        (compositor-pinned) beneath the film; the film slides up over it (JS) to
        reveal it. Pinning HOUSE in CSS, not JS, kills the seg0 shimmer. -->
@@ -606,7 +605,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v1.13</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v1.14</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1243,9 +1242,7 @@
     var curSec = (pages[here] && pages[here].dataset) ? pages[here].dataset.section : "";
     document.body.classList.toggle("sec-hunter", curSec === "hunter");
     document.body.classList.toggle("sec-house", curSec === "house");
-    // ABOUT sits under the white cover — force the menu to ink (the dark Archive it
-    // would otherwise key off is hidden behind the cover)
-    if (curSec === "about") menuLinks.forEach(function (a) { a.style.color = INK; });
+    document.body.classList.toggle("sec-about", curSec === "about");   // hides the Archive Browse button (see CSS)
   }
   // Hide any enter-cue button while its box overlaps a VISIBLE docked menu label.
   // Both share the same left edge, so as the archive card slides up into the ABOUT
@@ -1342,7 +1339,6 @@
   //  seg2  hunter→archive COVER  (2→1): ARCHIVE rises over the STATIC HUNTER
   //  seg3  archive→about  SCROLL (1→1): ARCHIVE slides up, ABOUT rises
   var svidEl = document.getElementById("svid");
-  var aboutCover = document.querySelector(".about-cover");
   function driveReveal() {
     var vh = window.innerHeight, st = surveyEl.scrollTop;
     var sv = Math.min(st, vh);                                   // film slide across the first viewport
@@ -1352,15 +1348,10 @@
     // HUNTER: stays pinned so ARCHIVE COVERS it (the 2→1 depth step) — no transform
     if (pages[2]) pages[2].style.transform = "none";
     // ARCHIVE: pinned through the cover, then slides up into a flat scroll → ABOUT
+    // ARCHIVE slides up as ABOUT rises — the short ABOUT card is anchored to the
+    // BOTTOM, so the BOTTOM OF ARCHIVE stays visible above it (intended).
     var ay = st <= 3 * vh ? 0 : (st <= 4 * vh ? -(st - 3 * vh) : -vh);
     if (pages[3]) pages[3].style.transform = "translate3d(0," + ay + "px,0)";
-    // white cover fades in as ABOUT rises → hides every card behind it (clean white
-    // surround) and takes the Browse-the-Archive button with it
-    var aboutRise = Math.max(0, Math.min(1, (st - 3 * vh) / (0.45 * vh)));
-    if (aboutCover) aboutCover.style.opacity = String(aboutRise);
-    // lift the short ABOUT card toward the vertical CENTRE as it settles, so the tone
-    // frames it ABOVE and BELOW (not just a blank band on top)
-    if (pages[4]) pages[4].style.transform = "translate3d(0," + (-(0.18 * vh) * aboutRise) + "px,0)";
   }
   // ── name-square morph: nameblock on the film → architect badge (HUNTER) → HUNTER HOUSE (HOUSE) → fade after ──
   var nsBox = document.getElementById("namesq");
@@ -1802,7 +1793,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v1.13 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v1.14 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
