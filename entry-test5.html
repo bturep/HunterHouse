@@ -367,20 +367,25 @@
      (driveNameSquare mirrors size + LS=0); captions drop full-width below. ── */
   @media (max-width:767px){
     #namesq .nsq{top:50%;width:min(29vh,200px);height:min(29vh,200px)}   /* centred vertically on mobile */
-    /* HUNTER / HOUSE: caption below the centred square, full width */
-    .scard[data-section="hunter"] .about-text,
-    .scard[data-section="house"]  .about-text{left:7vw !important;top:66vh !important;width:86vw !important}
     .scard[data-section="hunter"] .at-statement{font-size:22px}
     .scard[data-section="house"]  .at-statement,
     .scard[data-section="archive"] .at-statement,
     .scard[data-section="about"]  .at-statement{font-size:19px}
-    .scard[data-section="hunter"] .enter-cue,
-    .scard[data-section="house"]  .enter-cue,
-    .scard[data-section="archive"] .enter-cue{left:7vw !important;top:auto !important;bottom:8vh !important}
-    /* ARCHIVE / ABOUT: full-width captions near the top-left */
-    .scard[data-section="archive"] .about-text{left:7vw !important;top:28vh !important;width:86vw !important}
-    .scard[data-section="about"]   .about-text{left:7vw !important;top:17vh !important;width:86vw !important;flex-direction:column !important}
     .scard[data-section="about"] .at-statement{max-width:none !important}
+    /* ── composed mobile layout (?place · MOBILE save) ── */
+    .scard[data-section="hunter"] .about-text { left:7.00vw !important; top:66.00vh !important; width:430px !important; right:auto !important; bottom:auto !important; transform:none !important }
+    .scard[data-section="house"]  .about-text { left:7.00vw !important; top:66.00vh !important; width:430px !important; right:auto !important; bottom:auto !important; transform:none !important }
+    .scard[data-section="archive"] .about-text { left:7.00vw !important; top:28.00vh !important; width:430px !important; right:auto !important; bottom:auto !important; transform:none !important }
+    .scard[data-section="about"]  .about-text { left:7.00vw !important; top:17.00vh !important; width:430px !important; right:auto !important; bottom:auto !important; transform:none !important; flex-direction:column !important }
+    .scard[data-section="hunter"] .enter-cue { left:7.00vw !important; top:87.32vh !important; right:auto !important; bottom:auto !important; transform:none !important }
+    .scard[data-section="house"]  .enter-cue { left:7.00vw !important; top:87.32vh !important; right:auto !important; bottom:auto !important; transform:none !important }
+    .scard[data-section="archive"] .enter-cue { left:7.00vw !important; top:87.53vh !important; right:auto !important; bottom:auto !important; transform:none !important }
+    #film-cite { left:2.02vw !important; top:95.84vh !important; right:auto !important; bottom:auto !important; transform:none !important; font-size:10px !important }
+    .scard[data-section="hunter"] .layer { object-position:45.7% 36.1% !important; object-fit:cover !important }
+    .scard[data-section="house"]  .layer { object-position:9.0% 52.0% !important; object-fit:cover !important }
+    .scard[data-section="archive"] .layer { object-position:12.9% 49.6% !important; object-fit:cover !important }
+    .scard[data-section="about"]  .layer { object-position:50.0% 100.0% !important; object-fit:contain !important; transform:translate(-11px,1px) scale(1.15) !important }
+    .scard[data-section="about"] { --about-h:64dvh !important }
   }
 </style>
 </head>
@@ -578,7 +583,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.83</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.84</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1631,23 +1636,23 @@
       try { t.el.setPointerCapture(e.pointerId); } catch (x) {}
     }, true);
     document.addEventListener("pointermove", function (e) {
-      if (resizing) { resizing.t.el.style.width = Math.max(80, resizing.sw + (e.clientX - resizing.sx)) + "px"; readEl(resizing.t); return; }
+      if (resizing) { resizing.t.el.style.setProperty("width", Math.max(80, resizing.sw + (e.clientX - resizing.sx)) + "px", "important"); readEl(resizing.t); return; }
       if (imgDrag) {
         var it = imgDrag.t;
         if (objFit(it) === "cover") {   // pan the crop (reveals side/up-down content, no gap, stays full-size)
           it.op.x = imgDrag.opx0 - (e.clientX - imgDrag.sx) / window.innerWidth * 100;
           it.op.y = imgDrag.opy0 - (e.clientY - imgDrag.sy) / window.innerHeight * 100;
-          it.el.style.objectPosition = it.op.x.toFixed(1) + "% " + it.op.y.toFixed(1) + "%";
+          it.el.style.setProperty("object-position", it.op.x.toFixed(1) + "% " + it.op.y.toFixed(1) + "%", "important");
         } else {                        // contain (ABOUT): free move
           it.tx = imgDrag.tx0 + (e.clientX - imgDrag.sx); it.ty = imgDrag.ty0 + (e.clientY - imgDrag.sy);
-          it.el.style.transform = "translate(" + Math.round(it.tx) + "px," + Math.round(it.ty) + "px) scale(" + (it.scale || 1).toFixed(2) + ")";
+          it.el.style.setProperty("transform", "translate(" + Math.round(it.tx) + "px," + Math.round(it.ty) + "px) scale(" + (it.scale || 1).toFixed(2) + ")", "important");
         }
         readEl(it); return;
       }
       if (!drag) return;
       var el = drag.t.el;
-      el.style.left = (e.clientX - drag.ox) + "px"; el.style.top = (e.clientY - drag.oy) + "px";
-      el.style.right = "auto"; el.style.bottom = "auto"; el.style.transform = "none";
+      el.style.setProperty("left", (e.clientX - drag.ox) + "px", "important"); el.style.setProperty("top", (e.clientY - drag.oy) + "px", "important");
+      el.style.setProperty("right", "auto", "important"); el.style.setProperty("bottom", "auto", "important"); el.style.setProperty("transform", "none", "important");
       readEl(drag.t);
     }, true);
     document.addEventListener("pointerup", function () { if (drag) { readEl(drag.t); drag = null; } if (imgDrag) { readEl(imgDrag.t); imgDrag = null; } resizing = null; }, true);
@@ -1660,15 +1665,15 @@
       if (a === "boxes") { var clean = document.body.classList.toggle("p-clean"); e.target.classList.toggle("on", !clean); e.target.textContent = clean ? "Boxes off" : "Boxes"; return; }
       if (a === "hidebar") { setBar(false); return; }
       if (a === "ah-" || a === "ah+") { aboutH = Math.max(30, Math.min(100, aboutH + (a === "ah+" ? 2 : -2))); if (aboutCard) aboutCard.style.setProperty("--about-h", aboutH + "dvh"); var svq = document.querySelector("#survey"); if (svq) svq.scrollTop = svq.scrollHeight; pr.textContent = "ABOUT height: " + aboutH + "dvh"; return; }
-      if (a === "fit") { if (!sel || !sel.isImg) { pr.textContent = "select a background image first"; return; } sel.el.style.objectFit = (objFit(sel) === "cover" ? "contain" : "cover"); readEl(sel); return; }
+      if (a === "fit") { if (!sel || !sel.isImg) { pr.textContent = "select a background image first"; return; } sel.el.style.setProperty("object-fit", (objFit(sel) === "cover" ? "contain" : "cover"), "important"); readEl(sel); return; }
       if (!sel) { pr.textContent = "select an element first"; return; }
       if (sel.isImg) {
-        if (a === "w-" || a === "w+") { sel.scale = Math.max(0.05, (sel.scale || 1) + (a === "w+" ? 0.05 : -0.05)); sel.el.style.transform = "translate(" + Math.round(sel.tx || 0) + "px," + Math.round(sel.ty || 0) + "px) scale(" + sel.scale.toFixed(2) + ")"; readEl(sel); }
+        if (a === "w-" || a === "w+") { sel.scale = Math.max(0.05, (sel.scale || 1) + (a === "w+" ? 0.05 : -0.05)); sel.el.style.setProperty("transform", "translate(" + Math.round(sel.tx || 0) + "px," + Math.round(sel.ty || 0) + "px) scale(" + sel.scale.toFixed(2) + ")", "important"); readEl(sel); }
         else pr.textContent = "image: ±w = zoom · drag = pan · Fit/Fill";
         return;
       }
       var fe = fontEl(sel);
-      if (a === "w-" || a === "w+") sel.el.style.width = Math.max(80, sel.el.getBoundingClientRect().width + (a === "w+" ? 20 : -20)) + "px";
+      if (a === "w-" || a === "w+") sel.el.style.setProperty("width", Math.max(80, sel.el.getBoundingClientRect().width + (a === "w+" ? 20 : -20)) + "px", "important");
       else if ((a === "f-" || a === "f+") && fe) fe.style.fontSize = Math.max(8, parseFloat(getComputedStyle(fe).fontSize) + (a === "f+" ? 1 : -1)) + "px";
       else if (a === "col1") sel.el.classList.remove("p-2col");
       else if (a === "col2") sel.el.classList.add("p-2col");
@@ -1725,7 +1730,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.83 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.84 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
