@@ -600,7 +600,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v1.02</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v1.03</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1353,16 +1353,9 @@
     var S = mob ? Math.min(0.29 * V, 200) : Math.min(0.26 * V, 230), off = 0.615 * S;   // original box distance
     function ramp(a, b, x) { return nsClamp01((x - a) / (b - a)); }
     function place(el, ty, op) { el.style.transform = "translate(-50%,-50%) translateY(" + ty + "px)"; el.style.opacity = op; }
-    if (mob) {
-      // MOBILE: film stacks around the centre anchor; each section's square rises to the
-      // vertical CENTRE (50%) and holds. Caption sits below (see the mobile @media).
-      place(nsArch, off * (1 - ramp(0.15 * V, 0.7 * V, st)), 1 - ramp(1.5 * V, 1.7 * V, st));
-      if (st < 1.4 * V) place(nsHH, -off, 1 - ramp(0.3 * V, 0.55 * V, st));
-      else place(nsHH, 0, ramp(1.5 * V, 1.7 * V, st) * (1 - ramp(2.4 * V, 2.7 * V, st)));
-      return;
-    }
-    // DESKTOP: the squares are the FILM title ONLY — both fade out as you scroll off
-    // the film; HUNTER/HOUSE have no square (caption + MORE button carry those cards).
+    // Squares are the FILM title ONLY (desktop AND mobile) — both fade out as you
+    // scroll off the film; HUNTER/HOUSE have no square (caption + MORE button carry
+    // those cards). Centred-square behaviour (v1.00) stays in git if wanted back.
     var filmFade = 1 - ramp(0.15 * V, 0.7 * V, st);
     place(nsHH, -off, filmFade);
     place(nsArch, off, filmFade);
@@ -1778,7 +1771,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v1.02 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v1.03 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
