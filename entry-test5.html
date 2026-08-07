@@ -262,21 +262,26 @@
      to HUNTER HOUSE (HOUSE). Small fixed size; only translateY + opacity move. */
   #namesq{position:fixed;inset:0;z-index:7;pointer-events:none}
   #namesq .nsq{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    width:min(26vh,230px);height:min(26vh,230px);opacity:0;will-change:transform,opacity;z-index:1}
+    width:min(26vh,230px);height:min(26vh,230px);opacity:0;will-change:transform,opacity}
   #namesq .nsq img{width:100%;height:100%;object-fit:contain;display:block;
     filter:drop-shadow(0 1px 8px rgba(0,0,0,.5));transition:transform .3s cubic-bezier(.4,0,.2,1),filter .3s}
-  /* HOVER AFFORDANCE (the square is the button on HUNTER/HOUSE): the area AROUND the
-     square gets a light blur — a soft focus — while the mark + a little breathing
-     room stay sharp (radial mask hole centred on the held square). The mark lifts a
-     touch and an "Enter ↗" label appears. Gated to the active section. */
-  #namesq .nsq-blur{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;
-    transition:opacity .34s ease;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);--hy:50%;
-    -webkit-mask-image:radial-gradient(circle at 50% var(--hy), transparent calc(0.72 * min(26vh,230px)), #000 calc(1.15 * min(26vh,230px)));
-            mask-image:radial-gradient(circle at 50% var(--hy), transparent calc(0.72 * min(26vh,230px)), #000 calc(1.15 * min(26vh,230px)))}
-  body.sec-hunter #namesq .nsq-blur{--hy:calc(50% + 0.615 * min(26vh,230px))}   /* architect held LOW */
-  body.sec-house  #namesq .nsq-blur{--hy:calc(50% - 0.615 * min(26vh,230px))}   /* hunter house held HIGH */
-  body.sec-hunter #namesq:has(.nsq-arch:hover) .nsq-blur,
-  body.sec-house  #namesq:has(.nsq-hh:hover)   .nsq-blur{opacity:1}
+  /* HOVER AFFORDANCE (the square is the button on HUNTER/HOUSE): four CROP MARKS
+     register at the corners (drafting language, no enclosing box), the mark lifts a
+     touch, and an "Enter ↗" label appears. Gated to the active section so only the
+     visible square is interactive; JS owns the wrapper transform, the hover scale
+     rides the inner img so they don't fight. */
+  #namesq .nsq::after{content:"";position:absolute;inset:-20px;pointer-events:none;
+    opacity:0;transform:scale(.96);transition:opacity .25s ease,transform .25s ease;
+    --ct:1.5px; --cl:16px; --cc:rgba(246,245,245,.92);   /* tick thickness / length / colour */
+    background:
+      linear-gradient(var(--cc),var(--cc)) left top/var(--cl) var(--ct) no-repeat,
+      linear-gradient(var(--cc),var(--cc)) left top/var(--ct) var(--cl) no-repeat,
+      linear-gradient(var(--cc),var(--cc)) right top/var(--cl) var(--ct) no-repeat,
+      linear-gradient(var(--cc),var(--cc)) right top/var(--ct) var(--cl) no-repeat,
+      linear-gradient(var(--cc),var(--cc)) left bottom/var(--cl) var(--ct) no-repeat,
+      linear-gradient(var(--cc),var(--cc)) left bottom/var(--ct) var(--cl) no-repeat,
+      linear-gradient(var(--cc),var(--cc)) right bottom/var(--cl) var(--ct) no-repeat,
+      linear-gradient(var(--cc),var(--cc)) right bottom/var(--ct) var(--cl) no-repeat}
   #namesq .nsq .nsq-hint{position:absolute;left:50%;bottom:-46px;transform:translateX(-50%);
     font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.26em;text-transform:uppercase;
     color:rgba(246,245,245,.94);white-space:nowrap;opacity:0;transition:opacity .25s ease;pointer-events:none;
@@ -284,7 +289,9 @@
   body.sec-hunter #namesq .nsq-arch,
   body.sec-house  #namesq .nsq-hh{pointer-events:auto;cursor:pointer}
   body.sec-hunter #namesq .nsq-arch:hover img,
-  body.sec-house  #namesq .nsq-hh:hover img{transform:scale(1.035);filter:drop-shadow(0 5px 22px rgba(0,0,0,.6))}
+  body.sec-house  #namesq .nsq-hh:hover img{transform:scale(1.045);filter:drop-shadow(0 5px 22px rgba(0,0,0,.6))}
+  body.sec-hunter #namesq .nsq-arch:hover::after,
+  body.sec-house  #namesq .nsq-hh:hover::after{opacity:1;transform:scale(1)}
   body.sec-hunter #namesq .nsq-arch:hover .nsq-hint,
   body.sec-house  #namesq .nsq-hh:hover .nsq-hint{opacity:1}
   #svid .vcue{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);font-family:'JetBrains Mono',Menlo,monospace;
@@ -396,8 +403,10 @@
   /* ── MOBILE entry layout: name-square centred + smaller in the upper area
      (driveNameSquare mirrors size + LS=0); captions drop full-width below. ── */
   @media (max-width:767px){
-    /* (no hover on touch — the soft-focus blur is a desktop affordance; the square
-       stays tappable on mobile without it, so the composed photo isn't hidden) */
+    /* no hover on touch — show the square's frame persistently so it reads as tappable
+       (the "Enter" hint is skipped here; it would collide with the caption below) */
+    body.sec-hunter #namesq .nsq-arch::after,
+    body.sec-house  #namesq .nsq-hh::after{opacity:.75;transform:scale(1)}
     /* ── ONE knob: the shared left edge. The menu links AND every caption/button
        align to --menu-x, so changing this single value moves them together. ── */
     html{ --menu-x:46px }
@@ -530,7 +539,6 @@
 <!-- Persistent name-square: reconstructs the nameblock on the film, then the top square leaves
      and the architect square travels to a badge (HUNTER); swaps to HUNTER HOUSE on HOUSE; fades after. -->
 <div id="namesq" aria-hidden="true">
-  <div class="nsq-blur"></div>
   <div class="nsq nsq-arch" data-section="hunter" role="button" tabindex="-1" aria-label="Enter Hunter"><img src="assets/entry/square-architect.png" alt=""><span class="nsq-hint">Enter&nbsp;↗</span></div>
   <div class="nsq nsq-hh" data-section="house" role="button" tabindex="-1" aria-label="Enter House"><img src="assets/entry/square-hunterhouse.png" alt=""><span class="nsq-hint">Enter&nbsp;↗</span></div>
 </div>
@@ -619,7 +627,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.98</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v0.99</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1795,7 +1803,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v0.98 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v0.99 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
