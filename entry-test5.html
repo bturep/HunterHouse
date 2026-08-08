@@ -605,7 +605,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v1.21</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v1.22</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1792,31 +1792,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v1.21 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
-})();
-</script>
-<!-- ── animated film-grain / video-noise overlay over the whole page ── -->
-<canvas id="grain" aria-hidden="true"></canvas>
-<style>
-  #grain{position:fixed;inset:0;width:100vw;height:100vh;z-index:9000;pointer-events:none;
-    opacity:.5;mix-blend-mode:overlay}
-  body.place-mode #grain{display:none}   /* off while composing in ?place */
-</style>
-<script>
-(function(){
-  var c=document.getElementById('grain'); if(!c) return;
-  var x=c.getContext('2d',{alpha:true}), W,H,img;
-  function resize(){ var s=0.6; W=c.width=Math.max(1,Math.round(window.innerWidth*s)); H=c.height=Math.max(1,Math.round(window.innerHeight*s)); img=x.createImageData(W,H); }
-  resize(); window.addEventListener('resize',resize,{passive:true});
-  var last=0;
-  function tick(now){
-    requestAnimationFrame(tick);
-    if(now-last<83) return; last=now;                 // ~12fps grain flicker
-    var d=img.data;
-    for(var i=0;i<d.length;i+=4){ var v=(Math.random()*255)|0; d[i]=d[i+1]=d[i+2]=v; d[i+3]=255; }
-    x.putImageData(img,0,0);
-  }
-  requestAnimationFrame(tick);
+  console.log("entry-test5 e5-v1.22 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 </body>
