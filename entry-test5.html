@@ -224,7 +224,7 @@
   .scard[data-section="house"]   .enter-cue,
   .scard[data-section="archive"] .enter-cue{left:var(--menu-x); top:92.12vh; bottom:auto; right:auto; transform:none}
   /* background-image framing (?place: pan/fit/zoom) */
-  .scard[data-section="hunter"]  .layer{object-position:0.7% 46.4%; object-fit:cover; filter:grayscale(1)}   /* HUNTER card monochromatic — desaturated background */
+  .scard[data-section="hunter"]  .layer{object-position:0.7% 46.4%; object-fit:cover}
   .scard[data-section="house"]   .layer{object-position:0.9% 53.8%; object-fit:cover}
   .scard[data-section="archive"] .layer{object-position:12.9% 49.6%; object-fit:cover}
   .scard[data-section="about"]   .layer{object-position:50% 100%; object-fit:contain; transform-origin:50% 100%; transform:translate(164px,-9px) scale(1.15)}   /* ?place: drag=move (1:1), +w/-w=scale */
@@ -601,7 +601,7 @@
   <button class="room-x" id="room-x" aria-label="Close">×</button>
   <div class="room-pager"><button id="room-prev" aria-label="Previous">‹</button><span><span id="room-n">1</span> / <span id="room-m">1</span></span><button id="room-next" aria-label="Next">›</button></div>
 </div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v1.30</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">e5-v1.31</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1788,7 +1788,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v1.30 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v1.31 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 <!-- ── adaptive entry film: pick a resolution tier by connection + display ── -->
