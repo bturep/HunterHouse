@@ -52,10 +52,10 @@
     font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.05em;color:rgba(27,25,24,.35)}
   /* the text column — left of screen, top and bottom as margin, room to run longer */
   #flow .txtlayer{padding:9vh 0}
-  #flow .txt{font-weight:500;font-size:17px;line-height:1.7;color:#000;max-width:min(46vw,620px);max-height:82vh;overflow:hidden}
-  #flow .txt p{margin-bottom:1.1em}
-  /* the typed letter page — the monospace body reads ≈ the description size at this
-     column width (~620px → ~17px); trimmed of its whitespace so the type fills the frame */
+  #flow .txt{font-weight:500;font-size:16px;line-height:1.7;color:#000;max-width:min(54vw,820px);max-height:82vh;overflow:hidden}
+  #flow .txt p{margin-bottom:1.1em;max-width:600px}   /* the prose keeps a comfortable measure; the letter image runs wider */
+  /* the typed letter page — runs the full column width so the monospace body reads
+     large; feathered edges (baked into the PNG) blend it over the sketch */
   #flow .txt .descimg{display:block;width:100%;height:auto;margin:0 0 1.3em}
   #flow .photocol{width:min(38vw,480px)}
   #flow .photocol img{width:100%;display:block}
@@ -353,8 +353,8 @@
     var planL = document.querySelector("#flow .planlayer");
     var p1 = ease(Math.max(0, Math.min(1, (zr - 0.55) / 0.25)));   // elevation centre→left, text in from the right (over it)
     var p2 = ease(Math.max(0, Math.min(1, (zr - 1.20) / 0.25)));   // text→left, plan in from the right, elevation off left
-    skL.style.transform   = "translateX(" + (-18 * p1 - 92 * p2) + "vw) scale(" + (1 - 0.2 * p1) + ")";   // big centred → smaller + left → off left
-    txtL.style.transform  = "translateX(" + (100 - 74 * p1 - 50 * p2) + "vw)";   // off right → over the elevation (right) → left
+    skL.style.transform   = "translateX(" + (-32 * p1 - 78 * p2) + "vw) scale(" + (1 - 0.4 * p1) + ")";   // steps well left + smaller (0.6) so the letter has room → off left
+    txtL.style.transform  = "translateX(" + (100 - 84 * p1 - 38 * p2) + "vw)";   // off right → sketch-left+text (wider column) → left (nudged so the wide column clears the edge)
     planL.style.transform = "translateX(" + (100 - 78 * p2) + "vw)";            // off right → right
     ps.forEach(function (p) { p.style.clipPath = "none"; p.style.visibility = "visible"; });
 
