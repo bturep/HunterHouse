@@ -133,6 +133,31 @@
   /* Hunter's own 1970 nameblock (CAA-0007 title block), centred; it rides
      off with the photograph — no flight, no fade choreography */
   #hero img.hlogo{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:auto;height:min(62vh,700px);object-fit:contain;z-index:1}
+
+  /* ── mobile — the desktop two-column readings stack; galleries go 2-up ──── */
+  @media (max-width: 700px) {
+    /* galleries: two per row, tighter gutters, taller thumbs so they read */
+    #pgal-col, #ihc .igrid { grid-template-columns:repeat(2,1fr); gap:14px 12px; width:94vw; padding:0 12px; }
+    #pgal .pfig img, #ihc .ifig img { height:23vh; }
+    #pgal .ihead-row, #ihc .ihead { font-size:9px; letter-spacing:.16em; }
+    #pgal .icite, #ihc .ifig .icite { font-size:8px; }
+
+    /* the reading: sketch over text, photo column full width */
+    #flow .sk, #flow .skcite { width:92vw; }
+    #flow .body { flex-direction:column; gap:22px; margin-top:5vh; padding:0 20px 16vh; max-width:none; }
+    #flow .txt { flex:none; font-size:16px; max-width:none; }
+    #flow .photocol { width:100%; }
+
+    /* the second reading: image over text */
+    #reading2 .r2body { flex-direction:column; gap:22px; padding:0 20px; align-items:stretch; max-width:none; width:92vw; }
+    #reading2 .photocol { width:100%; }
+    #reading2 .txt { flex:none; font-size:16px; max-width:none; }
+
+    /* fullscreen-drawing captions clear of the edge */
+    #sheet .scite { left:16px; bottom:16px; }
+  }
+  /* the entry-test2 build badge — irrelevant inside the drill-down */
+  #ver { display:none; }
 </style>
 </head>
 <body>
@@ -638,8 +663,20 @@
     else z = target;
     apply();
   }
+  var Z_MAX = 8.5;        // reading (top) .. gallery 2 (end of HOUSE)
+  var exitPush = 0;       // overscroll accumulated past the held end
+  function requestExit() { try { parent.postMessage({ hd: "close" }, "*"); } catch (e) {} }
   function nudge(d) {
-    target = Math.max(Z_HERO, Math.min(8.5, target + d));   // reading (top) .. gallery 2 (end of HOUSE)
+    var before = target;
+    target = Math.max(Z_HERO, Math.min(Z_MAX, target + d));
+    // once parked on the final gallery, a further downward push releases you
+    // back to the entry survey — the section is over
+    if (d > 0 && before >= Z_MAX - 0.001 && z >= Z_MAX - 0.05) {
+      exitPush += d;
+      if (exitPush > 0.7) { exitPush = 0; requestExit(); }
+    } else if (d < 0) {
+      exitPush = 0;
+    }
     if (!raf) raf = requestAnimationFrame(step);
   }
   window.addEventListener("wheel", function (e) { e.preventDefault(); nudge(e.deltaY / 900); }, { passive: false });
