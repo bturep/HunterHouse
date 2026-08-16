@@ -328,25 +328,11 @@
       reading.style.visibility = "visible";
     }
 
-    // the window scrolls down; lines arrive as it goes; the sketch departs
+    // the window scrolls down; the text block rides into view whole; the sketch departs
     var zS = Math.max(0, Math.min(1, (Math.min(zr, 1.75) - 0.5) / (Z_END - Z_READ0)));   // the reading holds a beat (zr 0..0.5) before it moves
     var scrollMax = Math.max(0, flow.scrollHeight - window.innerHeight * 0.55);
     flow.style.transform = "translateY(" + (-zS * scrollMax) + "px)";
-    var lineH = 17 * 1.7;
-    var total = 0, metrics = [];
-    ps.forEach(function (p) {
-      var lines = Math.max(1, Math.round(p.getBoundingClientRect().height / lineH));
-      metrics.push({ p: p, lines: lines });
-      total += lines;
-    });
-    var shown = Math.floor(Math.min(1, zS * 1.15) * total + 1e-6);
-    var left = shown;
-    metrics.forEach(function (mm) {
-      var take = Math.max(0, Math.min(mm.lines, left));
-      left -= take;
-      mm.p.style.clipPath = "inset(0 0 " + ((1 - take / mm.lines) * 100) + "% 0)";
-      mm.p.style.visibility = take > 0 ? "visible" : "hidden";
-    });
+    ps.forEach(function (p) { p.style.clipPath = "none"; p.style.visibility = "visible"; });
     // the photograph fades in once the sketch has scrolled away
     flow.classList.toggle("photo-on", zS > 0.30);
 
@@ -413,23 +399,8 @@
     r2.style.visibility = (r2In > 0 && r2Out < 1) ? "visible" : "hidden";
     r2.style.opacity = (r2In > 0 ? 1 : 0) * (1 - r2Out);
     r2.style.transform = "translateY(" + ((1 - ease(r2In)) * 100) + "vh)";   // arrives from BELOW
-    if (r2In > 0 && r2Out < 1) {
-      var z2 = Math.max(0, Math.min(1, (zr - 5.3) / 1.2));
-      var lineH2 = 17 * 1.7, total2 = 0, met2 = [];
-      ps2.forEach(function (pp) {
-        var lines = Math.max(1, Math.round(pp.getBoundingClientRect().height / lineH2));
-        met2.push({ p: pp, lines: lines });
-        total2 += lines;
-      });
-      var shown2 = Math.floor(Math.min(1, z2 * 1.15) * total2 + 1e-6);
-      var left2 = shown2;
-      met2.forEach(function (mm) {
-        var take = Math.max(0, Math.min(mm.lines, left2));
-        left2 -= take;
-        mm.p.style.clipPath = "inset(0 0 " + ((1 - take / mm.lines) * 100) + "% 0)";
-        mm.p.style.visibility = take > 0 ? "visible" : "hidden";
-      });
-    }
+    // the addition text is present as a whole — it fades in with the card (r2 opacity)
+    ps2.forEach(function (pp) { pp.style.clipPath = "none"; pp.style.visibility = "visible"; });
     // GALLERY 2 — the Ivan Hunter selection, entering right after the addition text
     // (this is the END of the HOUSE section). No fade-out — it holds.
     var ihc = document.getElementById("ihc");
