@@ -43,17 +43,16 @@
   /* the reading — a scrolling flow: sketch, then text below (line by line),
      with the photograph column on the right */
   #reading{position:fixed;inset:0;z-index:6;overflow:hidden;visibility:hidden;background:#f4f1e8 url('assets/entry/reading-paper.jpg') center/cover no-repeat}
-  #flow{position:absolute;inset:0}
-  /* the three horizontal layers — each driven by translateX in apply() */
-  #flow .txtlayer{position:absolute;top:0;left:0;height:100vh;width:46vw;display:flex;align-items:center;justify-content:center;padding:0 4vw 0 6vw;box-sizing:border-box;will-change:transform}
-  #flow .txt{font-weight:500;font-size:17px;line-height:1.7;color:#000;max-width:560px}
-  #flow .txt p{margin-bottom:1.1em}
-  #flow .sklayer{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transform-origin:center;will-change:transform}
-  #flow .sk{display:block;width:auto;height:auto;max-width:94vw;max-height:84vh}
+  #flow{position:absolute;inset:0;overflow:hidden}
+  /* three full-screen layers, each flex-centred; translateX (vw) slots them in
+     apply() so the reading reads as a right-to-left pan (I | T | I) */
+  #flow .sklayer, #flow .txtlayer, #flow .planlayer{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;will-change:transform}
+  #flow .sk{display:block;width:auto;height:auto;max-width:50vw;max-height:84vh}
   #flow .skcite{margin-top:12px;text-align:center;
     font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.05em;color:rgba(27,25,24,.35)}
-  #flow .planlayer{position:absolute;top:0;right:0;height:100vh;width:54vw;display:flex;align-items:center;justify-content:center;will-change:transform}
-  #flow .photocol{width:min(40vw,520px)}
+  #flow .txt{font-weight:500;font-size:17px;line-height:1.7;color:#000;max-width:min(42vw,540px)}
+  #flow .txt p{margin-bottom:1.1em}
+  #flow .photocol{width:min(38vw,480px)}
   #flow .photocol img{width:100%;display:block}
   #flow .photocol .cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:9px;text-align:center}
   /* shared column cite (the reading's own is scoped to #flow) */
@@ -144,14 +143,13 @@
     #pgal .ihead-row, #ihc .ihead { font-size:9px; letter-spacing:.16em; }
     #pgal .icite, #ihc .ifig .icite { font-size:8px; }
 
-    /* the reading horizontal spread — wider panels so each reads on a phone
-       (the elevation+text overlap in the middle beat is inherent to a narrow screen) */
-    #flow .sk { max-width:92vw; max-height:64vh; }
-    #flow .skcite { font-size:8px; }
-    #flow .txtlayer { width:78vw; padding:0 6vw; }
-    #flow .txt { font-size:15px; max-width:none; }
-    #flow .planlayer { width:78vw; }
-    #flow .photocol { width:min(66vw,420px); }
+    /* the reading pan — content sized to its slot on a phone
+       (a side-by-side pan is inherently tight on a narrow screen — needs its own pass) */
+    #flow .sk { max-width:48vw; max-height:56vh; }
+    #flow .skcite { font-size:7px; }
+    #flow .txt { font-size:12px; line-height:1.5; max-width:46vw; }
+    #flow .txt p { margin-bottom:0.7em; }
+    #flow .photocol { width:44vw; }
 
     /* the second reading: image over text */
     #reading2 .r2body { flex-direction:column; gap:22px; padding:0 20px; align-items:stretch; max-width:none; width:92vw; }
@@ -168,8 +166,13 @@
 <body>
 <div id="reading" aria-label="Reading">
   <div id="flow">
-    <!-- I | T | I — a horizontal spread: elevation (full) → text swipes in left →
-         plan swipes in right as the elevation exits → the plan zooms (the sheet) -->
+    <!-- I | T | I — a horizontal strip that pans right-to-left: elevation centred →
+         elevation slides left as text enters from the right → elevation off left,
+         plan enters from the right, text settles left → the plan zooms (the sheet) -->
+    <div class="sklayer">
+      <img class="sk" src="assets/entry/letter-elev-2.png" alt="">
+      <div class="skcite">Letter L001 · Hunter to Luise Mendelsohn · 13 September 1970</div>
+    </div>
     <div class="txtlayer">
       <div class="txt">
         <!-- Hunter's own words — Letter L001, lightly normalized for display -->
@@ -177,10 +180,6 @@
         <p>“Nothing extraordinary in an absolute sense but if it comes off as I expect the total cost of less than $12,000 will make it very extraordinary. I never thought I'd do anything so simple and boxy but here it is! Inside and out covered alike with cedar boards of various widths and thicknesses. Irregular window widths — rhythm of tree trunks in a forest. Large Japanese style bath and central glass domed garden. I'll do all the finishing as well as manufacturing (manual) of doors and windows . . . (corner beams are rain scuppers)”</p>
         <p class="txt-cite">— Richard Hunter to Luise Mendelsohn · 13 September 1970 · Letter L001</p>
       </div>
-    </div>
-    <div class="sklayer">
-      <img class="sk" src="assets/entry/letter-elev-2.png" alt="">
-      <div class="skcite">Letter L001 · Hunter to Luise Mendelsohn · 13 September 1970</div>
     </div>
     <div class="planlayer">
       <div class="photocol">
@@ -334,18 +333,16 @@
       reading.style.visibility = "visible";
     }
 
-    // ── the horizontal spread (I | T | I) — elevation full → text swipes in from
-    //    the left + elevation to the right half → plan swipes in right as the
-    //    elevation exits → the plan rests in the right half for the sheet zoom
-    var txtL = document.querySelector("#flow .txtlayer");
+    // ── the reading reads as a right-to-left pan (I | T | I) ───────────────
+    // slots: centre 0 · left −24vw · right +24vw · off-left −100vw · off-right +100vw
     var skL = document.querySelector("#flow .sklayer");
+    var txtL = document.querySelector("#flow .txtlayer");
     var planL = document.querySelector("#flow .planlayer");
-    var s2 = ease(Math.max(0, Math.min(1, (zr - 0.4) / 0.6)));      // zr .4→1.0  text in, elevation to right half
-    var eExit = ease(Math.max(0, Math.min(1, (zr - 1.0) / 0.5)));   // zr 1.0→1.5 elevation exits right
-    var pIn = ease(Math.max(0, Math.min(1, (zr - 1.15) / 0.55)));   // zr 1.15→1.7 plan slides into the right half
-    txtL.style.transform = "translateX(" + ((s2 - 1) * 100) + "%)";                       // off-left → left half
-    skL.style.transform = "translateX(" + (24 * s2 + 96 * eExit) + "vw) scale(" + (1 - 0.5 * s2) + ")";  // full → right half → off right
-    planL.style.transform = "translateX(" + ((1 - pIn) * 100) + "%)";                     // off-right → right half
+    var p1 = ease(Math.max(0, Math.min(1, (zr - 0.35) / 0.65)));   // zr .35→1.0  elevation centre→left, text off-right→right
+    var p2 = ease(Math.max(0, Math.min(1, (zr - 1.0) / 0.7)));     // zr 1.0→1.7  elevation left→off, text right→left, plan off-right→right
+    skL.style.transform   = "translateX(" + (-24 * p1 - 76 * p2) + "vw)";   // centre → left → off left
+    txtL.style.transform  = "translateX(" + (100 - 76 * p1 - 48 * p2) + "vw)";  // off right → right → left
+    planL.style.transform = "translateX(" + (100 - 76 * p2) + "vw)";        // off right → right
     ps.forEach(function (p) { p.style.clipPath = "none"; p.style.visibility = "visible"; });
 
     // ── the SHEET (CAA-0008 fullscreen) → IHC grid → HUNTER → SITE ────────
