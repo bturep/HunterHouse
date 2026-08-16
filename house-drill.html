@@ -54,6 +54,7 @@
   #flow .txtlayer{padding:9vh 0}
   #flow .txt{font-weight:500;font-size:17px;line-height:1.7;color:#000;max-width:min(40vw,520px);max-height:82vh;overflow:hidden}
   #flow .txt p{margin-bottom:1.1em}
+  #flow .txt .descimg{display:block;width:100%;height:auto;margin:0 0 1.3em}   /* the typed letter page — sized to the text column */
   #flow .photocol{width:min(38vw,480px)}
   #flow .photocol img{width:100%;display:block}
   #flow .photocol .cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:9px;text-align:center}
@@ -177,13 +178,17 @@
     </div>
     <div class="txtlayer">
       <div class="txt">
-        <!-- Hunter's own words — Letter L001, lightly normalized for display -->
+        <!-- REVERT: the original set-as-text quotes are kept here (commented) — to
+             restore, delete the <img> below and un-comment these two <p>s.
         <p>“… I am taking the day off from my most recent job of being ankle deep in the dirt of the forty foot square ugly excavation for a little house we'll start building next week on our land. Looks like this:”</p>
         <p>“Nothing extraordinary in an absolute sense but if it comes off as I expect the total cost of less than $12,000 will make it very extraordinary. I never thought I'd do anything so simple and boxy but here it is! Inside and out covered alike with cedar boards of various widths and thicknesses. Irregular window widths — rhythm of tree trunks in a forest. Large Japanese style bath and central glass domed garden. I'll do all the finishing as well as manufacturing (manual) of doors and windows . . . (corner beams are rain scuppers)”</p>
+        -->
+        <!-- the letter description, as Hunter's own typed page (transparent PNG, sits on the paper) -->
+        <img class="descimg" src="assets/entry/letter-description.png" alt="Richard Hunter, Letter L001 — “Nothing extraordinary in an absolute sense … (corner beams are rain scuppers)”">
         <p class="txt-cite">— Richard Hunter to Luise Mendelsohn · 13 September 1970 · Letter L001</p>
-        <!-- placeholder editorial narrative — real copy to come (Brandon) -->
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
-        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.</p>
+        <!-- longer editorial description — real copy to come (Brandon) -->
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+        <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</p>
       </div>
     </div>
     <div class="planlayer">
