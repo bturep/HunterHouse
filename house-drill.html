@@ -43,11 +43,13 @@
   /* the reading — a scrolling flow: sketch, then text below (line by line),
      with the photograph column on the right */
   #reading{position:fixed;inset:0;z-index:6;overflow:hidden;visibility:hidden;background:#f6f5f5}
-  #flow{position:absolute;left:0;right:0;top:0;will-change:transform}
-  #flow .sk{display:block;width:min(1100px,90vw);margin:0 auto}
-  #flow .skcite{width:min(1100px,90vw);margin:6px auto 0;text-align:left;
+  #flow{position:absolute;left:0;right:0;top:0;will-change:transform;display:flex;flex-direction:column}
+  #flow .skwrap, #flow .body{flex:none}
+  #flow .skwrap{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  #flow .sk{display:block;width:auto;height:auto;max-width:96vw;max-height:84vh}
+  #flow .skcite{width:min(1100px,90vw);margin:12px auto 0;text-align:left;
     font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.05em;color:rgba(27,25,24,.3)}
-  #flow .body{display:flex;gap:64px;max-width:1240px;margin:9vh auto 0;padding:0 40px 18vh}
+  #flow .body{display:flex;gap:64px;width:min(1240px,92vw);height:100vh;margin:0 auto;padding:0 40px;box-sizing:border-box;align-items:center;justify-content:center}
   #flow .txt{flex:1;font-weight:500;font-size:17px;line-height:1.7;color:#000;max-width:660px}
   #flow .txt p{margin-bottom:1.1em}
   #flow .photocol{width:460px;flex:none}
@@ -142,9 +144,10 @@
     #pgal .ihead-row, #ihc .ihead { font-size:9px; letter-spacing:.16em; }
     #pgal .icite, #ihc .ifig .icite { font-size:8px; }
 
-    /* the reading: sketch over text, photo column full width */
-    #flow .sk, #flow .skcite { width:92vw; }
-    #flow .body { flex-direction:column; gap:22px; margin-top:5vh; padding:0 20px 16vh; max-width:none; }
+    /* the reading: sketch fills its screen; text over plan on the next screen */
+    #flow .sk { max-width:94vw; max-height:70vh; }
+    #flow .skcite { width:94vw; }
+    #flow .body { flex-direction:column; gap:22px; height:auto; min-height:100vh; padding:8vh 20px; width:92vw; justify-content:center; }
     #flow .txt { flex:none; font-size:16px; max-width:none; }
     #flow .photocol { width:100%; }
 
@@ -163,8 +166,10 @@
 <body>
 <div id="reading" aria-label="Reading">
   <div id="flow">
-    <img class="sk" src="assets/entry/letter-elev-2.png" alt="">
-    <div class="skcite">Letter L001 · Hunter to Luise Mendelsohn · 13 September 1970</div>
+    <div class="skwrap">
+      <img class="sk" src="assets/entry/letter-elev-2.png" alt="">
+      <div class="skcite">Letter L001 · Hunter to Luise Mendelsohn · 13 September 1970</div>
+    </div>
     <div class="body">
       <div class="txt">
         <!-- Hunter's own words — Letter L001, lightly normalized for display -->
@@ -259,9 +264,8 @@
   var wm = document.getElementById("wordmark");
 
   function centreSketch() {
-    var w = Math.min(1100, window.innerWidth * 0.9);
-    var h = w * 1183 / 2000;
-    flow.style.paddingTop = Math.max(24, (window.innerHeight - h) / 2) + "px";
+    // the sketch is centred by its .skwrap (100vh flex); no padding offset needed
+    flow.style.paddingTop = "0px";
   }
 
   // ── the reading flow ───────────────────────────────────────────────────
@@ -329,8 +333,8 @@
     }
 
     // the window scrolls down; the text block rides into view whole; the sketch departs
-    var zS = Math.max(0, Math.min(1, (Math.min(zr, 1.75) - 0.5) / (Z_END - Z_READ0)));   // the reading holds a beat (zr 0..0.5) before it moves
-    var scrollMax = Math.max(0, flow.scrollHeight - window.innerHeight * 0.55);
+    var zS = Math.max(0, Math.min(1, (Math.min(zr, 1.75) - 0.5) / 1.25));   // hold a beat (zr 0..0.5), then scroll completes at zr 1.75 (body fills the screen just as the sheet begins)
+    var scrollMax = Math.max(0, flow.scrollHeight - window.innerHeight);
     flow.style.transform = "translateY(" + (-zS * scrollMax) + "px)";
     ps.forEach(function (p) { p.style.clipPath = "none"; p.style.visibility = "visible"; });
     // the photograph fades in once the sketch has scrolled away
