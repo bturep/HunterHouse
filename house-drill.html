@@ -193,10 +193,6 @@
     </div>
   </div>
 </div>
-<div id="caa18" aria-label="Hunter House, Studio and Garden — coloured drawing">
-  <img id="caa18-img" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg" data-large="https://archive.hunterhousefoundation.com/canadian-architecture-archive/large/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_large.jpg" alt="Hunter House, Studio and Garden — coloured drawing">
-  <div class="ccite18">Hunter House, Studio and Garden · HH-CAA-0018 · click the drawing to explore</div>
-</div>
 <div id="ihc" aria-label="Photographs by Ivan Hunter">
   <div class="ihead">The house photographed by Ivan Hunter · 2024</div>
   <div class="igrid">
@@ -208,26 +204,6 @@
     <div class="ifig"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024"><div class="icite">HH-IHC-0038</div></div>
   </div>
 </div>
-<div id="hunter" aria-label="Richard Morrow Hunter">
-  <div class="hbody">
-    <div class="photocol">
-      <img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0001_RickWorkingOnSquare_1978-08_prev.jpg" alt="Rick working on Square, August 1978">
-      <div class="pcite">Rick working on Square, August 1978 · HH-FRH-0001</div>
-    </div>
-    <div class="htxt">
-      <h2>Richard Morrow Hunter</h2>
-      <div class="hsub">1930 – 2023 · Architect</div>
-      <p>Trained at the University of Colorado and the University of Oklahoma, Hunter practised in California and Alaska before relocating to Victoria, British Columbia, in 1968.</p>
-      <p>His residence at 203 Goward Road occupied him from 1970 until 2020 — five decades of continuous design on a single site. Across those years he remained its sole architect, sole client, and sole resident. The working file he kept of its drawings is the principal subject of this Foundation.</p>
-      <p><a class="more" href="richard-hunter.html">Read the full biography →</a></p>
-    </div>
-  </div>
-</div>
-<div id="siteplan" aria-label="The site">
-  <iframe id="siteplan-lens" title="Hunter House site — contour model" src="mock-home2.html" allow="fullscreen"></iframe>
-  <div class="slabel">Site — 203 Goward Road</div>
-</div>
-<div id="site-cue">Site ↓</div>
 <div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
 <div id="hero" aria-hidden="true">
   <!-- Brandon's film footage (Sequence 01, 11:36-11:48 loop), no scrim.
@@ -432,71 +408,23 @@
         mm.p.style.visibility = take > 0 ? "visible" : "hidden";
       });
     }
-    // CAA-0018 fullscreen — the addition drawing, explorable
-    var c18 = document.getElementById("caa18");
-    var cIn18 = Math.max(0, Math.min(1, (zr - 8.3) / 0.4));
-    var cOut18 = Math.max(0, Math.min(1, (zr - 9.7) / 0.4));
-    c18.style.visibility = (cIn18 > 0 && cOut18 < 1) ? "visible" : "hidden";
-    c18.style.opacity = cIn18 * (1 - cOut18);
-    // the Ivan Hunter selection — staggered rise
+    // GALLERY 2 — the Ivan Hunter selection, entering right after the addition text
+    // (this is the END of the HOUSE section). No fade-out — it holds.
     var ihc = document.getElementById("ihc");
-    var iIn = Math.max(0, Math.min(1, (zr - 9.7) / 0.4));
-    var iOut = Math.max(0, Math.min(1, (zr - 10.8) / 0.4));
-    ihc.style.visibility = (iIn > 0 && iOut < 1) ? "visible" : "hidden";
-    ihc.style.opacity = iIn * (1 - iOut);
+    var iIn = Math.max(0, Math.min(1, (zr - 8.3) / 0.4));
+    ihc.style.visibility = iIn > 0 ? "visible" : "hidden";
+    ihc.style.opacity = iIn;
     ihcFigs.forEach(function (fg, i) {
       var d = Math.max(0, Math.min(1, (iIn * 1.5 - i * 0.09)));
       fg.style.opacity = d;
       fg.style.transform = "translateY(" + ((1 - ease(d)) * 26) + "px)";
     });
-    // HUNTER
-    var hu = document.getElementById("hunter");
-    var hIn = Math.max(0, Math.min(1, (zr - 10.8) / 0.4));
-    var hOut = Math.max(0, Math.min(1, (zr - 11.9) / 0.3));
-    hu.style.visibility = (hIn > 0 && hOut < 1) ? "visible" : "hidden";
-    hu.style.opacity = hIn * (1 - hOut);
-    // SITE — a static opening on the bare plan; scroll writes the labels in
-    var zP = Math.max(0, Math.min(1, (zr - 11.9) / 0.3));
-    document.getElementById("site-cue").style.opacity = Math.max(0, Math.min(1, (zr - 11.75) / 0.2)) * (1 - zP);
-    var sp = document.getElementById("siteplan");
-    sp.style.visibility = zP > 0 ? "visible" : "hidden";
-    sp.style.opacity = zP;
-    sp.style.pointerEvents = zP >= 1 ? "auto" : "none";
-    var zL = Math.max(0, Math.min(1, (zr - 12.4) / 0.6));
-    if (window.__labelReveal) { try { window.__labelReveal(zL); } catch (e2) {} }
     // the menu carries the section — bracket the one you're in. Keyed to the
     // scroll TARGET, not the eased z, so the indicator never lags the intent.
     var zrT = Math.max(0, target - Z_HERO);
     var sec = zrT < 10.8 ? 0 : (zrT < 12.05 ? 1 : 2);
     menuLinks.forEach(function (a, i) { a.classList.toggle("on", i === sec); });
   }
-
-  // CAA-0018 explore: click zooms at the cursor; while zoomed the pan
-  // follows the mouse; click again to fit. (First-pass mechanic.)
-  (function () {
-    var box = document.getElementById("caa18");
-    var img = document.getElementById("caa18-img");
-    box.addEventListener("click", function (e) {
-      if (e.target !== img) return;
-      var zoomed = box.classList.toggle("zoomed");
-      if (zoomed) {
-        var r = img.getBoundingClientRect();
-        img.style.transformOrigin = ((e.clientX - r.left) / r.width * 100) + "% " + ((e.clientY - r.top) / r.height * 100) + "%";
-        img.style.transform = "scale(2.4)";
-      } else {
-        img.style.transform = "scale(1)";
-      }
-    });
-    box.addEventListener("mousemove", function (e) {
-      if (!box.classList.contains("zoomed")) return;
-      var r0 = img.getBoundingClientRect();
-      // origin in the UNSCALED box: use the layout rect via offset metrics
-      var w = img.offsetWidth, h = img.offsetHeight;
-      var cx = Math.max(0, Math.min(1, e.clientX / window.innerWidth));
-      var cy = Math.max(0, Math.min(1, e.clientY / window.innerHeight));
-      img.style.transformOrigin = (cx * 100) + "% " + (cy * 100) + "%";
-    });
-  })();
 
   // drag-to-look wiring for the sheet
   var sheetEl = document.getElementById("sheet");
@@ -532,7 +460,7 @@
   // the heavy drawings climb a tier ladder — a tiny thumb paints instantly,
   // then the 2000px preview, then the 3840px large as each arrives; the
   // sheet is never blank even while the entry video streams
-  ["sheet-img", "caa18-img"].forEach(function (id) {
+  ["sheet-img"].forEach(function (id) {
     var el = document.getElementById(id);
     function climb(attr) {
       var url = el.getAttribute(attr);
@@ -575,6 +503,7 @@
   // Lake …) are KEPT but start at 0 — scroll writes them in via __labelReveal.
   (function () {
     var f = document.getElementById("siteplan-lens");
+    if (!f) return;   // site plan removed from the HOUSE drill-down — skip its lens setup
     function strip() {
       try {
         var d = f.contentDocument;
@@ -704,7 +633,7 @@
     apply();
   }
   function nudge(d) {
-    target = Math.max(Z_HERO, Math.min(14.1, target + d));   // can't scroll back above the reading
+    target = Math.max(Z_HERO, Math.min(10.0, target + d));   // reading (top) .. gallery 2 (end of HOUSE)
     if (!raf) raf = requestAnimationFrame(step);
   }
   window.addEventListener("wheel", function (e) { e.preventDefault(); nudge(e.deltaY / 900); }, { passive: false });
