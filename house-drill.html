@@ -126,7 +126,7 @@
   #site-cue{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:8;opacity:0;
     font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(27,25,24,.6)}
   /* the entry photograph — full-bleed, scrolled past; the title rides above it */
-  #hero{position:fixed;inset:0;z-index:7;background:#1b1918;pointer-events:none;will-change:transform;overflow:hidden}
+  #hero{position:fixed;inset:0;z-index:7;background:#1b1918;pointer-events:none;will-change:transform;overflow:hidden;display:none}   /* drill-down lands on the reading — film hero removed */
   #hero img,#hero video{width:100%;height:100%;object-fit:cover;display:block}
   #hero::after{content:"";position:absolute;inset:0;background:transparent}
   #hero .hcite{position:absolute;left:34px;bottom:22px;z-index:1;font-family:'JetBrains Mono',Menlo,monospace;
@@ -238,8 +238,8 @@
   <img class="hlogo" src="assets/entry/nameblock-1970.png" alt="Hunter House · Victoria B.C. · 1970 · Ric Hunter Architect">
   <div class="hcite">Film footage · 2026 · nameblock from HH-CAA-0007, 1970</div>
 </div>
-<div id="wordmark" style="position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#1b1918;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
-<nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62);transform:translateY(-110%);opacity:0;will-change:transform,opacity">
+<div id="wordmark" style="display:none;position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#1b1918;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
+<nav id="menu" aria-label="Site" style="display:none;position:fixed;top:0;left:0;right:0;z-index:8;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62);transform:translateY(-110%);opacity:0;will-change:transform,opacity">
   <a data-z="1" style="padding:6px 15px;cursor:pointer">House</a>
   <a data-z="12.2" style="padding:6px 15px;cursor:pointer">Hunter</a>
   <a data-z="13.8" style="padding:6px 15px;cursor:pointer">Site</a>
@@ -252,7 +252,7 @@
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
 // then the v0.30 phases shifted +1: reading scroll · gallery · site plan.
 (function () {
-  var z = 0, target = 0, Z_HERO = 1;
+  var z = 1, target = 1, Z_HERO = 1;   // start ON the reading (film hero z 0..1 skipped)
   var ease = function (t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; };
   var hero = document.getElementById("hero");
   var menuEl = document.getElementById("menu");
@@ -704,7 +704,7 @@
     apply();
   }
   function nudge(d) {
-    target = Math.max(0, Math.min(14.1, target + d));
+    target = Math.max(Z_HERO, Math.min(14.1, target + d));   // can't scroll back above the reading
     if (!raf) raf = requestAnimationFrame(step);
   }
   window.addEventListener("wheel", function (e) { e.preventDefault(); nudge(e.deltaY / 900); }, { passive: false });
