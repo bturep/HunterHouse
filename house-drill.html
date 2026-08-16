@@ -67,13 +67,12 @@
     font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
   /* the period gallery — photographs of the original house, one after another,
      full aspect; the page's scroll rides down the stack */
-  #pgal{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5;overflow:hidden}
-  #pgal-col{position:absolute;left:0;right:0;top:0;will-change:transform;
-    display:flex;flex-direction:column;align-items:center;gap:9vh;padding:14vh 0 34vh}
-  #pgal .ihead-row{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(27,25,24,.55)}
-  #pgal .pfig{cursor:zoom-in}
-  #pgal .pfig img{max-height:72vh;max-width:74vw;width:auto;height:auto;display:block;border:1px solid rgba(27,25,24,.14)}
-  #pgal .icite{font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.45);margin-top:8px;text-align:center}
+  #pgal{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  #pgal-col{display:grid;grid-template-columns:repeat(3,1fr);gap:24px 22px;width:min(1150px,92vw);padding:0 40px;box-sizing:border-box}
+  #pgal .ihead-row{grid-column:1/-1;text-align:center;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(27,25,24,.55);margin-bottom:2px}
+  #pgal .pfig{cursor:zoom-in;will-change:transform,opacity}
+  #pgal .pfig img{width:100%;height:30vh;object-fit:cover;display:block;border:1px solid rgba(27,25,24,.14)}
+  #pgal .icite{font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.45);margin-top:6px;text-align:center}
   /* the second reading — image left (FRH-0022), text down the centre */
   #reading2{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5;
     display:flex;align-items:center;justify-content:center}
@@ -368,31 +367,29 @@
         "translate(" + (window.innerWidth / 2 + dragX) + "px," + (window.innerHeight / 2 + dragY - exitP * window.innerHeight * 1.55) + "px) " +
         "rotate(" + v.rot + "deg) scale(" + scl + ") translate(" + (-v.cx) + "px," + (-v.cy) + "px)";
     }
-    // the period gallery — the scroll rides down the stack, one photograph
-    // after another (revealed by the curtain, not faded)
+    // GALLERY 1 — the original-house photographs, a COMPACT clickable grid
+    // (staggered fade-in, no long scroll)
     var pg = document.getElementById("pgal");
     var pIn = Math.max(0, Math.min(1, (zr - 3.8) / 0.4));
-    var pOut = Math.max(0, Math.min(1, (zr - 6.2) / 0.4));
+    var pOut = Math.max(0, Math.min(1, (zr - 4.9) / 0.4));
     pg.style.visibility = (pIn > 0 && pOut < 1) ? "visible" : "hidden";
     pg.style.opacity = (pIn > 0 ? 1 : 0) * (1 - pOut);
     if (pIn > 0 && pOut < 1) {
-      var pcol = document.getElementById("pgal-col");
-      var lastFig = pgalFigs[pgalFigs.length - 1];
-      var pMax = Math.max(0, lastFig.offsetTop + lastFig.offsetHeight / 2 - window.innerHeight / 2);
-      var pT = Math.max(0, Math.min(1, (zr - 4.2) / 2.0));
-      // on the way out the column KEEPS SCROLLING while it fades — the text
-      // section follows from below, one continuous movement
-      pcol.style.transform = "translateY(" + (-(pT * pMax + ease(pOut) * window.innerHeight * 0.6)) + "px)";
+      pgalFigs.forEach(function (fg, i) {
+        var d = Math.max(0, Math.min(1, (pIn * 1.5 - i * 0.08)));
+        fg.style.opacity = d;
+        fg.style.transform = "translateY(" + ((1 - ease(d)) * 22) + "px)";
+      });
     }
-    // the second reading — FRH-0022 left, the addition text line by line
+    // SECTION 2 — the addition: FRH-0022 left, the text line by line
     var r2 = document.getElementById("reading2");
-    var r2In = Math.max(0, Math.min(1, (zr - 6.2) / 0.4));
-    var r2Out = Math.max(0, Math.min(1, (zr - 8.3) / 0.4));
+    var r2In = Math.max(0, Math.min(1, (zr - 4.9) / 0.4));
+    var r2Out = Math.max(0, Math.min(1, (zr - 6.6) / 0.4));
     r2.style.visibility = (r2In > 0 && r2Out < 1) ? "visible" : "hidden";
     r2.style.opacity = (r2In > 0 ? 1 : 0) * (1 - r2Out);
     r2.style.transform = "translateY(" + ((1 - ease(r2In)) * 100) + "vh)";   // arrives from BELOW
     if (r2In > 0 && r2Out < 1) {
-      var z2 = Math.max(0, Math.min(1, (zr - 6.6) / 1.4));
+      var z2 = Math.max(0, Math.min(1, (zr - 5.3) / 1.2));
       var lineH2 = 17 * 1.7, total2 = 0, met2 = [];
       ps2.forEach(function (pp) {
         var lines = Math.max(1, Math.round(pp.getBoundingClientRect().height / lineH2));
@@ -411,7 +408,7 @@
     // GALLERY 2 — the Ivan Hunter selection, entering right after the addition text
     // (this is the END of the HOUSE section). No fade-out — it holds.
     var ihc = document.getElementById("ihc");
-    var iIn = Math.max(0, Math.min(1, (zr - 8.3) / 0.4));
+    var iIn = Math.max(0, Math.min(1, (zr - 6.6) / 0.4));
     ihc.style.visibility = iIn > 0 ? "visible" : "hidden";
     ihc.style.opacity = iIn;
     ihcFigs.forEach(function (fg, i) {
@@ -489,6 +486,15 @@
   pgalFigs.forEach(function (fg) {
     fg.addEventListener("click", function () {
       openCloseup(fg.querySelector("img").src, fg.dataset.cite || "", fg.dataset.rot);
+    });
+  });
+  ihcFigs.forEach(function (fg) {
+    var im = fg.querySelector("img");
+    if (!im) return;
+    fg.style.cursor = "zoom-in";
+    fg.addEventListener("click", function () {
+      var ct = fg.querySelector(".icite");
+      openCloseup(im.src, ct ? ct.textContent : "", fg.dataset.rot);
     });
   });
   colImgEl.style.cursor = "zoom-in";
@@ -633,7 +639,7 @@
     apply();
   }
   function nudge(d) {
-    target = Math.max(Z_HERO, Math.min(10.0, target + d));   // reading (top) .. gallery 2 (end of HOUSE)
+    target = Math.max(Z_HERO, Math.min(8.5, target + d));   // reading (top) .. gallery 2 (end of HOUSE)
     if (!raf) raf = requestAnimationFrame(step);
   }
   window.addEventListener("wheel", function (e) { e.preventDefault(); nudge(e.deltaY / 900); }, { passive: false });
