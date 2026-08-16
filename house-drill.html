@@ -537,7 +537,7 @@
             window.__lensWin = w;
             // once the site plan is interactive (pointer-events:auto) the
             // iframe swallows wheel/keys — forward them so scroll-BACK works
-            var fwWheel = function (ev) { ev.preventDefault(); if (Math.abs(ev.deltaY) > 2) gesture(ev.deltaY > 0 ? 1 : -1); };
+            var fwWheel = function (ev) { ev.preventDefault(); if (Math.abs(ev.deltaY) > 20) advance(ev.deltaY > 0 ? 1 : -1); };
             var fwKeys = function (ev) {
               if (ev.key === "ArrowDown" || ev.key === "PageDown" || ev.key === " ") { ev.preventDefault(); advance(1); }
               if (ev.key === "ArrowUp" || ev.key === "PageUp") { ev.preventDefault(); advance(-1); }
@@ -641,14 +641,20 @@
     strip();
   })();
 
-  var raf = null;
+  // a timed ease-in-out tween between states — deliberate, with finesse (was a
+  // fast exponential smoothing that felt snappy/abrupt)
+  var raf = null, animFrom = 1, animStart = 0, ANIM_MS = 720;
+  function _now() { return (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now(); }
+  function easeIO(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }   // easeInOutCubic
   function step() {
     raf = null;
-    z += (target - z) * 0.16;
-    if (Math.abs(target - z) > 0.001) raf = requestAnimationFrame(step);
-    else z = target;
+    var t = Math.min(1, (_now() - animStart) / ANIM_MS);
+    z = animFrom + (target - animFrom) * easeIO(t);
     apply();
+    if (t < 1) raf = requestAnimationFrame(step);
+    else z = target;
   }
+  function glide() { animFrom = z; animStart = _now(); if (!raf) raf = requestAnimationFrame(step); }
   // ── snap scroll: each gesture advances AT MOST one state (like the home page) ──
   // z per state: elevation · +text · +plan · plan-zoom · elevation(measured) · gallery1 · addition · gallery2
   var STOPS = [1.00, 2.00, 2.60, 3.70, 4.70, 5.50, 6.80, 8.20];
@@ -656,28 +662,38 @@
   function requestExit() { try { parent.postMessage({ hd: "close" }, "*"); } catch (e) {} }
   function advance(dir) {
     if (dir > 0 && stopIdx >= STOPS.length - 1) { requestExit(); return; }   // past the last state → leave
-    stopIdx = Math.max(0, Math.min(STOPS.length - 1, stopIdx + dir));
-    target = STOPS[stopIdx];
-    if (!raf) raf = requestAnimationFrame(step);
+    var ni = Math.max(0, Math.min(STOPS.length - 1, stopIdx + dir));
+    if (ni === stopIdx) return;                                              // already at an edge
+    stopIdx = ni; target = STOPS[stopIdx];
+    glide();
   }
-  // one gesture = one advance: fire on the first event, then lock until the
-  // wheel/touch has gone quiet for a beat (so a vigorous swipe's momentum can't
-  // carry through more than one state)
-  var gLock = false, gTimer = null;
-  function gesture(dir) {
-    if (!gLock) { gLock = true; advance(dir); }
-    clearTimeout(gTimer);
-    gTimer = setTimeout(function () { gLock = false; }, 160);
-  }
-  window.addEventListener("wheel", function (e) { e.preventDefault(); if (Math.abs(e.deltaY) > 2) gesture(e.deltaY > 0 ? 1 : -1); }, { passive: false });
-  var ty = null, tMoved = 0;
-  window.addEventListener("touchstart", function (e) { ty = e.touches[0].clientY; tMoved = 0; }, { passive: true });
-  window.addEventListener("touchmove", function (e) {
-    if (ty === null) return;
-    tMoved += ty - e.touches[0].clientY; ty = e.touches[0].clientY;
-    if (Math.abs(tMoved) > 40) { gesture(tMoved > 0 ? 1 : -1); ty = null; }   // one swipe = one state
+  // momentum-safe pager (mirrors the home page): the cooldown extends while wheel
+  // events keep arriving, so a whole momentum tail is absorbed as ONE state; a
+  // GENUINE new swipe — a strong delta AFTER the momentum has decayed — breaks
+  // through and advances again. Momentum can't produce a strong delta once decayed,
+  // so it can never double; but a real second swipe is never eaten.
+  var _locked = false, _lockT = null, _decayed = false;
+  function _cool() { clearTimeout(_lockT); _lockT = setTimeout(function () { _locked = false; }, 260); }
+  window.addEventListener("wheel", function (e) {
+    e.preventDefault();
+    var ad = Math.abs(e.deltaY), dir = e.deltaY > 0 ? 1 : -1;
+    if (_locked) {
+      _cool();
+      if (ad < 15) _decayed = true;
+      if (ad >= 45 && _decayed) { advance(dir); _decayed = false; }
+      return;
+    }
+    if (ad < 20) return;                                   // ignore noise
+    advance(dir); _locked = true; _decayed = false; _cool();
+  }, { passive: false });
+  var _tY0 = 0, _tT0 = 0, _tActive = false;
+  window.addEventListener("touchstart", function (e) { _tY0 = e.touches[0].clientY; _tT0 = Date.now(); _tActive = true; }, { passive: true });
+  window.addEventListener("touchmove", function (e) { if (_tActive) e.preventDefault(); }, { passive: false });
+  window.addEventListener("touchend", function (e) {
+    if (!_tActive) return; _tActive = false;
+    var dy = e.changedTouches[0].clientY - _tY0, dt = Math.max(1, Date.now() - _tT0), v = dy / dt;   // dy<0 = swipe up = next
+    if (!_locked && Math.abs(dy) > 24 && Math.abs(v) > 0.25) { advance(dy < 0 ? 1 : -1); _locked = true; _cool(); }
   }, { passive: true });
-  window.addEventListener("touchend", function () { ty = null; }, { passive: true });
   window.addEventListener("keydown", function (e) {
     if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); advance(1); }
     if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); advance(-1); }
@@ -685,7 +701,7 @@
   document.querySelectorAll("#menu a[data-z]").forEach(function (a) {
     a.addEventListener("click", function () {
       target = parseFloat(a.dataset.z);
-      if (!raf) raf = requestAnimationFrame(step);
+      glide();
     });
   });
   window.addEventListener("resize", function () { centreSketch(); apply(); });
