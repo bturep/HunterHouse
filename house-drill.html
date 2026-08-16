@@ -641,20 +641,18 @@
     strip();
   })();
 
-  // a timed ease-in-out tween between states — deliberate, with finesse (was a
-  // fast exponential smoothing that felt snappy/abrupt)
-  var raf = null, animFrom = 1, animStart = 0, ANIM_MS = 720;
-  function _now() { return (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now(); }
-  function easeIO(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }   // easeInOutCubic
+  // the ORIGINAL entry-test2 driver — exponential ease-out: a smooth, slow settle
+  // that never whips. Slowed from 0.16 → 0.07 so each snap is deliberate and the
+  // sketch-plan → measured-plan zoom + fade reads slowly.
+  var raf = null, EASE = 0.07;
   function step() {
     raf = null;
-    var t = Math.min(1, (_now() - animStart) / ANIM_MS);
-    z = animFrom + (target - animFrom) * easeIO(t);
+    z += (target - z) * EASE;
     apply();
-    if (t < 1) raf = requestAnimationFrame(step);
+    if (Math.abs(target - z) > 0.001) raf = requestAnimationFrame(step);
     else z = target;
   }
-  function glide() { animFrom = z; animStart = _now(); if (!raf) raf = requestAnimationFrame(step); }
+  function glide() { if (!raf) raf = requestAnimationFrame(step); }
   // ── snap scroll: each gesture advances AT MOST one state (like the home page) ──
   // z per state: elevation · +text · +plan · plan-zoom · elevation(measured) · gallery1 · addition · gallery2
   var STOPS = [1.00, 2.00, 2.60, 3.70, 4.70, 5.50, 6.80, 8.20];
