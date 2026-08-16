@@ -52,9 +52,11 @@
     font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.05em;color:rgba(27,25,24,.35)}
   /* the text column — left of screen, top and bottom as margin, room to run longer */
   #flow .txtlayer{padding:9vh 0}
-  #flow .txt{font-weight:500;font-size:17px;line-height:1.7;color:#000;max-width:min(40vw,520px);max-height:82vh;overflow:hidden}
+  #flow .txt{font-weight:500;font-size:17px;line-height:1.7;color:#000;max-width:min(46vw,620px);max-height:82vh;overflow:hidden}
   #flow .txt p{margin-bottom:1.1em}
-  #flow .txt .descimg{display:block;width:100%;height:auto;margin:0 0 1.3em}   /* the typed letter page — sized to the text column */
+  /* the typed letter page — the monospace body reads ≈ the description size at this
+     column width (~620px → ~17px); trimmed of its whitespace so the type fills the frame */
+  #flow .txt .descimg{display:block;width:100%;height:auto;margin:0 0 1.3em}
   #flow .photocol{width:min(38vw,480px)}
   #flow .photocol img{width:100%;display:block}
   #flow .photocol .cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:9px;text-align:center}
