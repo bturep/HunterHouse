@@ -537,10 +537,10 @@
             window.__lensWin = w;
             // once the site plan is interactive (pointer-events:auto) the
             // iframe swallows wheel/keys — forward them so scroll-BACK works
-            var fwWheel = function (ev) { ev.preventDefault(); nudge(ev.deltaY / 900); };
+            var fwWheel = function (ev) { ev.preventDefault(); if (Math.abs(ev.deltaY) > 2) gesture(ev.deltaY > 0 ? 1 : -1); };
             var fwKeys = function (ev) {
-              if (ev.key === "ArrowDown" || ev.key === "PageDown" || ev.key === " ") { ev.preventDefault(); nudge(0.5); }
-              if (ev.key === "ArrowUp" || ev.key === "PageUp") { ev.preventDefault(); nudge(-0.5); }
+              if (ev.key === "ArrowDown" || ev.key === "PageDown" || ev.key === " ") { ev.preventDefault(); advance(1); }
+              if (ev.key === "ArrowUp" || ev.key === "PageUp") { ev.preventDefault(); advance(-1); }
             };
             try {
               var dd = f.contentDocument;
@@ -649,31 +649,38 @@
     else z = target;
     apply();
   }
-  var Z_MAX = 8.5;        // reading (top) .. gallery 2 (end of HOUSE)
-  var exitPush = 0;       // overscroll accumulated past the held end
+  // ── snap scroll: each gesture advances AT MOST one state (like the home page) ──
+  // z per state: elevation · +text · +plan · plan-zoom · elevation(measured) · gallery1 · addition · gallery2
+  var STOPS = [1.00, 2.00, 2.60, 3.70, 4.70, 5.50, 6.80, 8.20];
+  var stopIdx = 0;
   function requestExit() { try { parent.postMessage({ hd: "close" }, "*"); } catch (e) {} }
-  function nudge(d) {
-    var before = target;
-    target = Math.max(Z_HERO, Math.min(Z_MAX, target + d));
-    // once parked on the final gallery, a further downward push releases you
-    // back to the entry survey — the section is over
-    if (d > 0 && before >= Z_MAX - 0.001 && z >= Z_MAX - 0.05) {
-      exitPush += d;
-      if (exitPush > 0.7) { exitPush = 0; requestExit(); }
-    } else if (d < 0) {
-      exitPush = 0;
-    }
+  function advance(dir) {
+    if (dir > 0 && stopIdx >= STOPS.length - 1) { requestExit(); return; }   // past the last state → leave
+    stopIdx = Math.max(0, Math.min(STOPS.length - 1, stopIdx + dir));
+    target = STOPS[stopIdx];
     if (!raf) raf = requestAnimationFrame(step);
   }
-  window.addEventListener("wheel", function (e) { e.preventDefault(); nudge(e.deltaY / 900); }, { passive: false });
-  var ty = null;
-  window.addEventListener("touchstart", function (e) { ty = e.touches[0].clientY; }, { passive: true });
+  // one gesture = one advance: fire on the first event, then lock until the
+  // wheel/touch has gone quiet for a beat (so a vigorous swipe's momentum can't
+  // carry through more than one state)
+  var gLock = false, gTimer = null;
+  function gesture(dir) {
+    if (!gLock) { gLock = true; advance(dir); }
+    clearTimeout(gTimer);
+    gTimer = setTimeout(function () { gLock = false; }, 160);
+  }
+  window.addEventListener("wheel", function (e) { e.preventDefault(); if (Math.abs(e.deltaY) > 2) gesture(e.deltaY > 0 ? 1 : -1); }, { passive: false });
+  var ty = null, tMoved = 0;
+  window.addEventListener("touchstart", function (e) { ty = e.touches[0].clientY; tMoved = 0; }, { passive: true });
   window.addEventListener("touchmove", function (e) {
-    if (ty !== null) { nudge((ty - e.touches[0].clientY) / 300); ty = e.touches[0].clientY; }
+    if (ty === null) return;
+    tMoved += ty - e.touches[0].clientY; ty = e.touches[0].clientY;
+    if (Math.abs(tMoved) > 40) { gesture(tMoved > 0 ? 1 : -1); ty = null; }   // one swipe = one state
   }, { passive: true });
+  window.addEventListener("touchend", function () { ty = null; }, { passive: true });
   window.addEventListener("keydown", function (e) {
-    if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); nudge(0.5); }
-    if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); nudge(-0.5); }
+    if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); advance(1); }
+    if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); advance(-1); }
   });
   document.querySelectorAll("#menu a[data-z]").forEach(function (a) {
     a.addEventListener("click", function () {
