@@ -47,10 +47,10 @@
   /* three full-screen layers, each flex-centred; translateX (vw) slots them in
      apply() so the reading reads as a right-to-left pan (I | T | I) */
   #flow .sklayer, #flow .txtlayer, #flow .planlayer{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;will-change:transform}
-  #flow .sk{display:block;width:auto;height:auto;max-width:50vw;max-height:84vh}
+  #flow .sk{display:block;width:auto;height:auto;max-width:66vw;max-height:88vh}
   #flow .skcite{margin-top:12px;text-align:center;
     font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.05em;color:rgba(27,25,24,.35)}
-  #flow .txt{font-weight:500;font-size:17px;line-height:1.7;color:#000;max-width:min(42vw,540px)}
+  #flow .txt{font-weight:500;font-size:17px;line-height:1.7;color:#000;max-width:min(40vw,520px)}
   #flow .txt p{margin-bottom:1.1em}
   #flow .photocol{width:min(38vw,480px)}
   #flow .photocol img{width:100%;display:block}
@@ -334,15 +334,16 @@
     }
 
     // ── the reading reads as a right-to-left pan (I | T | I) ───────────────
-    // slots: centre 0 · left −24vw · right +24vw · off-left −100vw · off-right +100vw
+    // HOLDS between the moves so each beat lands distinctly:
+    //  0–.40 elevation · .40–.75 move · .75–1.05 elevation+text · 1.05–1.40 move · 1.40–1.75 text+plan
     var skL = document.querySelector("#flow .sklayer");
     var txtL = document.querySelector("#flow .txtlayer");
     var planL = document.querySelector("#flow .planlayer");
-    var p1 = ease(Math.max(0, Math.min(1, (zr - 0.35) / 0.65)));   // zr .35→1.0  elevation centre→left, text off-right→right
-    var p2 = ease(Math.max(0, Math.min(1, (zr - 1.0) / 0.7)));     // zr 1.0→1.7  elevation left→off, text right→left, plan off-right→right
-    skL.style.transform   = "translateX(" + (-24 * p1 - 76 * p2) + "vw)";   // centre → left → off left
-    txtL.style.transform  = "translateX(" + (100 - 76 * p1 - 48 * p2) + "vw)";  // off right → right → left
-    planL.style.transform = "translateX(" + (100 - 76 * p2) + "vw)";        // off right → right
+    var p1 = ease(Math.max(0, Math.min(1, (zr - 0.40) / 0.35)));   // elevation centre→left, text in from the right (over it)
+    var p2 = ease(Math.max(0, Math.min(1, (zr - 1.05) / 0.35)));   // text→left, plan in from the right, elevation off left
+    skL.style.transform   = "translateX(" + (-18 * p1 - 92 * p2) + "vw)";        // centre → left → off left
+    txtL.style.transform  = "translateX(" + (100 - 82 * p1 - 42 * p2) + "vw)";   // off right → over the elevation → left
+    planL.style.transform = "translateX(" + (100 - 78 * p2) + "vw)";            // off right → right
     ps.forEach(function (p) { p.style.clipPath = "none"; p.style.visibility = "visible"; });
 
     // ── the SHEET (CAA-0008 fullscreen) → IHC grid → HUNTER → SITE ────────
