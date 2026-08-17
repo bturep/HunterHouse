@@ -40,6 +40,13 @@
   #closeup.on{display:flex}
   #closeup img{max-width:92vw;max-height:84vh;border:1px solid rgba(27,25,24,.14)}
   #closeup .ccite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:10px}
+  /* prev / next arrows — step through the images in the same gallery */
+  #closeup .cu-nav{position:fixed;top:50%;transform:translateY(-50%);z-index:11;width:52px;height:52px;border:0;border-radius:50%;
+    background:rgba(27,25,24,.07);color:#1b1918;font-size:26px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);transition:background .2s}
+  #closeup .cu-nav:hover{background:rgba(27,25,24,.16)}
+  #closeup .cu-prev{left:26px}
+  #closeup .cu-next{right:26px}
   /* the reading — a scrolling flow: sketch, then text below (line by line),
      with the photograph column on the right */
   #reading{position:fixed;inset:0;z-index:6;overflow:hidden;visibility:hidden;background:#f4f1e8 url('assets/entry/reading-paper.jpg') center/cover no-repeat}
@@ -251,7 +258,7 @@
     <div class="ifig"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024"><div class="icite">HH-IHC-0038</div></div>
   </div>
 </div>
-<div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
+<div id="closeup" aria-label="Close view"><button class="cu-nav cu-prev" aria-label="Previous image">‹</button><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div><button class="cu-nav cu-next" aria-label="Next image">›</button></div>
 <div id="hero" aria-hidden="true">
   <!-- Brandon's film footage (Sequence 01, 11:36-11:48 loop), no scrim.
        Poster = the 11:38:05 still, so the entry opens on his chosen frame. -->
@@ -505,24 +512,40 @@
     document.getElementById("closeup-cite").textContent = cite;
     closeup.classList.add("on");
   }
-  pgalFigs.forEach(function (fg) {
-    fg.addEventListener("click", function () {
-      openCloseup(fg.querySelector("img").src, fg.dataset.cite || "", fg.dataset.rot);
-    });
-  });
-  ihcFigs.forEach(function (fg) {
-    var im = fg.querySelector("img");
-    if (!im) return;
+  // closeup navigation — step through the images of whichever gallery you opened
+  function figData(fg) {
+    var im = fg.querySelector("img"), cite = fg.dataset.cite;
+    if (!cite) { var ct = fg.querySelector(".icite"); cite = ct ? ct.textContent : ""; }
+    return { src: im ? im.src : "", cite: cite, rot: fg.dataset.rot };
+  }
+  var cuFigs = [], cuIdx = -1;
+  function showCloseupAt(i) {
+    if (!cuFigs.length) return;
+    cuIdx = (i + cuFigs.length) % cuFigs.length;   // wrap around
+    var d = figData(cuFigs[cuIdx]);
+    openCloseup(d.src, d.cite, d.rot);
+  }
+  pgalFigs.forEach(function (fg, i) {
     fg.style.cursor = "zoom-in";
-    fg.addEventListener("click", function () {
-      var ct = fg.querySelector(".icite");
-      openCloseup(im.src, ct ? ct.textContent : "", fg.dataset.rot);
-    });
+    fg.addEventListener("click", function () { cuFigs = pgalFigs; showCloseupAt(i); });
+  });
+  ihcFigs.forEach(function (fg, i) {
+    if (!fg.querySelector("img")) return;
+    fg.style.cursor = "zoom-in";
+    fg.addEventListener("click", function () { cuFigs = ihcFigs; showCloseupAt(i); });
   });
   colImgEl.style.cursor = "zoom-in";
-  colImgEl.addEventListener("click", function () { openCloseup(colImgEl.src, colCiteEl.textContent); });
+  colImgEl.addEventListener("click", function () { cuFigs = []; cuIdx = -1; openCloseup(colImgEl.src, colCiteEl.textContent); });
+  var cuPrev = document.querySelector("#closeup .cu-prev"), cuNext = document.querySelector("#closeup .cu-next");
+  cuPrev.addEventListener("click", function (e) { e.stopPropagation(); showCloseupAt(cuIdx - 1); });
+  cuNext.addEventListener("click", function (e) { e.stopPropagation(); showCloseupAt(cuIdx + 1); });
   closeup.addEventListener("click", function () { closeup.classList.remove("on"); });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeup.classList.remove("on"); });
+  document.addEventListener("keydown", function (e) {
+    if (!closeup.classList.contains("on")) return;
+    if (e.key === "Escape") closeup.classList.remove("on");
+    else if (e.key === "ArrowRight" && cuFigs.length) { e.preventDefault(); e.stopPropagation(); showCloseupAt(cuIdx + 1); }
+    else if (e.key === "ArrowLeft" && cuFigs.length) { e.preventDefault(); e.stopPropagation(); showCloseupAt(cuIdx - 1); }
+  });
 
   // the site-plan iframe: strip the mock's chrome, then re-ink to the
   // SIMPLEST plan — every line black on paper (the CSS invert does the flip),
