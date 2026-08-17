@@ -72,12 +72,12 @@
     font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
   /* the period gallery — photographs of the original house, one after another,
      full aspect; the page's scroll rides down the stack */
-  #pgal{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  #pgal{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5;overflow:hidden;display:flex;align-items:flex-start;justify-content:center}   /* top-aligned; padding-top set in JS so the top photo row = the tower image top */
   #pgal-col{display:grid;grid-template-columns:repeat(3,1fr);gap:24px 22px;width:min(1150px,92vw);padding:0 40px;box-sizing:border-box}
   #pgal .ihead-row{grid-column:1/-1;text-align:center;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(27,25,24,.55);margin-bottom:2px}
   #pgal .pfig{cursor:zoom-in;will-change:transform,opacity}
   /* .pth clips; the image inside zooms slightly to lose the scanner-bed edge */
-  #pgal .pfig .pth{display:block;overflow:hidden;height:30vh;border:1px solid rgba(27,25,24,.14)}
+  #pgal .pfig .pth{display:block;overflow:hidden;height:33vh;border:1px solid rgba(27,25,24,.14)}
   #pgal .pfig .pth img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.1);transform-origin:center}
   #pgal .icite{font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.45);margin-top:6px;text-align:center}
   /* the second reading — image left (FRH-0022), text down the centre */
@@ -98,11 +98,11 @@
     font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
   /* the Ivan Hunter selection — a quiet grid */
   #ihc{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px}
+    display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:26px}   /* top-aligned; padding-top set in JS so the top photo row = the tower image top */
   #ihc .ihead{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(27,25,24,.55)}
   #ihc .igrid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px 22px;width:min(1150px,92vw);padding:0 40px}
   #ihc .ifig{will-change:transform,opacity}
-  #ihc .ifig img{width:100%;height:30vh;object-fit:cover;display:block;border:1px solid rgba(27,25,24,.14)}
+  #ihc .ifig img{width:100%;height:33vh;object-fit:cover;display:block;border:1px solid rgba(27,25,24,.14)}
   #ihc .ifig .icite{font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.45);margin-top:6px;text-align:center}
   /* HUNTER — the man behind the file */
   #hunter{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5;
@@ -735,8 +735,27 @@
       glide();
     });
   });
-  window.addEventListener("resize", function () { centreSketch(); apply(); });
+  // align the (enlarged) gallery photo grids' top edge with the tower image's top,
+  // so the top row of photos lines up with the tower image across the sliding sections.
+  function alignGalleries() {
+    var tImg = document.querySelector("#reading2 .photocol img");
+    if (!tImg || !tImg.getBoundingClientRect().height) return;
+    var towerTop = tImg.getBoundingClientRect().top;
+    [["#pgal", ".pfig .pth"], ["#ihc", ".ifig img"]].forEach(function (pair) {
+      var sec = document.querySelector(pair[0]), ph = sec && sec.querySelector(pair[1]);
+      if (!ph) return;
+      sec.style.paddingTop = "0px";
+      var cur = ph.getBoundingClientRect().top;
+      sec.style.paddingTop = Math.max(0, towerTop - cur) + "px";
+    });
+  }
+  window.addEventListener("resize", function () { centreSketch(); apply(); alignGalleries(); });
   flow.querySelector(".sk").addEventListener("load", function () { centreSketch(); apply(); });
+  (function () {
+    var tw = document.querySelector("#reading2 .photocol img");
+    if (tw) { if (tw.complete && tw.naturalHeight) alignGalleries(); else tw.addEventListener("load", alignGalleries); }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(alignGalleries);
+  })();
   // the title's centring transform is measured from its text width — re-apply
   // once the webfont arrives (fallback-font metrics left it ~4px off centre)
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
