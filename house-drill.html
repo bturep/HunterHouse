@@ -52,11 +52,14 @@
     font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.05em;color:rgba(27,25,24,.35)}
   /* the text column — left of screen, top and bottom as margin, room to run longer */
   #flow .txtlayer{padding:9vh 0}
-  #flow .txt{font-weight:500;font-size:16px;line-height:1.7;color:#000;max-width:min(54vw,820px);max-height:82vh;overflow:hidden}
-  #flow .txt p{margin-bottom:1.1em;max-width:600px}   /* the prose keeps a comfortable measure; the letter image runs wider */
-  /* the typed letter page — runs the full column width so the monospace body reads
-     large; feathered edges (baked into the PNG) blend it over the sketch */
-  #flow .txt .descimg{display:block;width:100%;height:auto;margin:0 0 1.3em}
+  #flow .txt{font-weight:500;font-size:17px;line-height:1.7;color:#000;max-width:min(46vw,620px);position:relative}
+  #flow .txt p{margin-bottom:1.1em}
+  /* the typed letter page FLOATS over the column — its centre pinned to the column
+     centre; --desc-scale / --desc-x / --desc-y tune its size + position (?tune panel).
+     Feathered edges (baked into the PNG) blend it onto the paper. */
+  #flow .txt .descimg{position:absolute;left:50%;top:50%;width:min(46vw,620px);height:auto;
+    transform:translate(-50%,-50%) translate(var(--desc-x,0px),var(--desc-y,-250px)) scale(var(--desc-scale,1.2));
+    transform-origin:center center;pointer-events:none}
   #flow .photocol{width:min(38vw,480px)}
   #flow .photocol img{width:100%;display:block}
   #flow .photocol .cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:9px;text-align:center}
@@ -353,8 +356,8 @@
     var planL = document.querySelector("#flow .planlayer");
     var p1 = ease(Math.max(0, Math.min(1, (zr - 0.55) / 0.25)));   // elevation centre→left, text in from the right (over it)
     var p2 = ease(Math.max(0, Math.min(1, (zr - 1.20) / 0.25)));   // text→left, plan in from the right, elevation off left
-    skL.style.transform   = "translateX(" + (-32 * p1 - 78 * p2) + "vw) scale(" + (1 - 0.4 * p1) + ")";   // steps well left + smaller (0.6) so the letter has room → off left
-    txtL.style.transform  = "translateX(" + (100 - 84 * p1 - 38 * p2) + "vw)";   // off right → sketch-left+text (wider column) → left (nudged so the wide column clears the edge)
+    skL.style.transform   = "translateX(" + (-18 * p1 - 92 * p2) + "vw) scale(" + (1 - 0.2 * p1) + ")";   // big centred → smaller + left → off left
+    txtL.style.transform  = "translateX(" + (100 - 74 * p1 - 50 * p2) + "vw)";   // off right → over the elevation (right) → left
     planL.style.transform = "translateX(" + (100 - 78 * p2) + "vw)";            // off right → right
     ps.forEach(function (p) { p.style.clipPath = "none"; p.style.visibility = "visible"; });
 
@@ -718,6 +721,34 @@
 
   apply();
   console.log("entry-test2 v0.88");
+})();
+
+// ── letter-image tuner: open house-drill.html?tune to size + position the typed
+//    letter live. Drag the sliders, read the values off the panel, tell Brandon → bake. ──
+(function () {
+  if (!/[?&]tune/.test(location.search)) return;
+  var root = document.documentElement.style;
+  var wrap = document.createElement("div");
+  wrap.style.cssText = "position:fixed;left:14px;top:14px;z-index:50;background:rgba(255,255,255,.94);border:1px solid #cfcabf;border-radius:9px;padding:12px 14px;font:12px/1.6 'JetBrains Mono',Menlo,monospace;color:#222;width:238px;box-shadow:0 6px 24px rgba(0,0,0,.12)";
+  var rows = [["scale", 0.4, 2.8, 0.02, 1.2], ["x", -600, 600, 2, 0], ["y", -600, 600, 2, -250]];
+  var html = "<div style='font-weight:700;margin-bottom:8px'>letter tune</div>";
+  rows.forEach(function (r) {
+    html += "<label style='display:block;margin-bottom:7px'>" + r[0] + " <b id='tv-" + r[0] + "'></b>" +
+      "<input id='ts-" + r[0] + "' type='range' min='" + r[1] + "' max='" + r[2] + "' step='" + r[3] + "' value='" + r[4] + "' style='width:100%;margin-top:2px'></label>";
+  });
+  html += "<div id='tv-out' style='margin-top:6px;color:#7a7568;user-select:all;word-break:break-all'></div>";
+  wrap.innerHTML = html;
+  document.body.appendChild(wrap);
+  function upd() {
+    var s = document.getElementById("ts-scale").value, x = document.getElementById("ts-x").value, y = document.getElementById("ts-y").value;
+    root.setProperty("--desc-scale", s); root.setProperty("--desc-x", x + "px"); root.setProperty("--desc-y", y + "px");
+    document.getElementById("tv-scale").textContent = (+s).toFixed(2);
+    document.getElementById("tv-x").textContent = x + "px";
+    document.getElementById("tv-y").textContent = y + "px";
+    document.getElementById("tv-out").textContent = "--desc-scale:" + s + "; --desc-x:" + x + "px; --desc-y:" + y + "px;";
+  }
+  rows.forEach(function (r) { document.getElementById("ts-" + r[0]).addEventListener("input", upd); });
+  upd();
 })();
 </script>
 </body>
