@@ -360,18 +360,18 @@
     var shOn = zr > T0 - 0.001 && zr < 4.25;
     sheet.style.visibility = shOn ? "visible" : "hidden";
     var po = document.getElementById("sheet-plan-over");
-    po.style.visibility = (shOn && zr < 3.15) ? "visible" : "hidden";
+    po.style.visibility = (shOn && zr < 3.05) ? "visible" : "hidden";
     reading.style.opacity = zr > T0 ? Math.max(0, 1 - (zr - T0) / 0.3) : 1;
     colPhoto.style.visibility = zr > T0 ? "hidden" : "visible";
     if (shOn) {
-      // TWO PARTS, one snap each: (1) ZOOM — the sketch flies to centre + grows
-      // (1.75..2.05), then holds enlarged; (2) FADE — a slower crossfade to the
-      // measured plan (2.45..3.00). The zoomed sketch is its own settled stop.
+      // ONE slow move: the sketch flies to centre + grows (1.75..2.05), then the
+      // measured plan crossfades IN as the sketch fades OUT (2.15..2.95). The long
+      // timed ease makes the whole thing read very slowly.
       sheet.style.opacity = Math.min(1, (zr - T0) / 0.3);
       // the last elevation PUSHES UP off the top to reveal the gallery
       var exitP = ease(Math.max(0, Math.min(1, (zr - 3.8) / 0.4)));
       document.querySelector("#sheet .scite").style.opacity = 1 - exitP;
-      document.getElementById("sheet-wrap").style.opacity = Math.max(0, Math.min(1, (zr - 2.45) / 0.55));   // measured plan fades IN — the slower fade
+      document.getElementById("sheet-wrap").style.opacity = Math.max(0, Math.min(1, (zr - 2.15) / 0.80));   // measured plan fades IN — follows the fly, slow
       var eM = ease(Math.max(0, Math.min(1, (zr - T0) / 0.3)));
       var r0 = colPhoto.querySelector("img").getBoundingClientRect();
       // Brandon's registered crop rect (sheet units) projected through the
@@ -385,7 +385,7 @@
       po.style.left  = (r0.left + (tL - r0.left) * eM) + "px";
       po.style.top   = (r0.top  + (tT - r0.top)  * eM) + "px";
       po.style.width = (r0.width + (tW - r0.width) * eM) + "px";
-      po.style.opacity = Math.max(0, Math.min(1, 1 - (zr - 2.45) / 0.55));   // sketch fades OUT slowly (gone by ~3.0), the plan revealed beneath
+      po.style.opacity = Math.max(0, Math.min(1, 1 - (zr - 2.15) / 0.80));   // sketch fades OUT slowly (gone by ~2.95) as the plan is revealed
       var v = sheetView(zr);
       var scl = window.innerHeight / v.fit;
       document.getElementById("sheet-wrap").style.transform =
@@ -643,27 +643,44 @@
   // the ORIGINAL entry-test2 driver — exponential ease-out: a smooth, slow settle
   // that never whips. Slowed from 0.16 → 0.07 so each snap is deliberate and the
   // sketch-plan → measured-plan zoom + fade reads slowly.
+  // most moves ride the exponential ease-out (EASE). The plan match-cut is a single
+  // VERY slow move, so it runs on a long timed ease-in-out instead.
   var raf = null, EASE = 0.05;
+  var animMode = "exp", animFrom = 0, animStart = 0, animDur = 720;
+  function _now() { return (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now(); }
+  function easeIO(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }   // ease-in-out quad (gentle)
   function step() {
     raf = null;
-    z += (target - z) * EASE;
-    apply();
-    if (Math.abs(target - z) > 0.001) raf = requestAnimationFrame(step);
-    else z = target;
+    if (animMode === "timed") {
+      var t = Math.min(1, (_now() - animStart) / animDur);
+      z = animFrom + (target - animFrom) * easeIO(t);
+      apply();
+      if (t < 1) raf = requestAnimationFrame(step); else z = target;
+    } else {
+      z += (target - z) * EASE;
+      apply();
+      if (Math.abs(target - z) > 0.001) raf = requestAnimationFrame(step); else z = target;
+    }
   }
-  function glide() { if (!raf) raf = requestAnimationFrame(step); }
+  function glide(mode, dur) {
+    animMode = mode || "exp";
+    if (animMode === "timed") { animFrom = z; animStart = _now(); animDur = dur; }
+    if (!raf) raf = requestAnimationFrame(step);
+  }
   // ── snap scroll: each gesture advances AT MOST one state (like the home page) ──
-  // z per state: sketch-left+text · +plan(sketch) · plan ZOOMED · plan FADED(measured) · elevation(measured) · gallery1 · addition · gallery2
+  // z per state: sketch-left+text · +plan(sketch) · plan MATCH-CUT(measured) · elevation(measured) · gallery1 · addition · gallery2
   // (the centred-elevation landing, z 1.00, is intentionally skipped — we open on the second)
-  var STOPS = [2.00, 2.60, 3.15, 4.00, 4.70, 5.50, 6.80, 8.20];
+  var STOPS = [2.00, 2.60, 4.00, 4.70, 5.50, 6.80, 8.20];
+  var MC_A = 1, MC_B = 2;   // the plan match-cut: text+plan (1) ↔ measured plan (2) — one slow move
   var stopIdx = 0;
   function requestExit() { try { parent.postMessage({ hd: "close" }, "*"); } catch (e) {} }
   function advance(dir) {
     if (dir > 0 && stopIdx >= STOPS.length - 1) { requestExit(); return; }   // past the last state → leave
     var ni = Math.max(0, Math.min(STOPS.length - 1, stopIdx + dir));
     if (ni === stopIdx) return;                                              // already at an edge
+    var matchCut = (stopIdx === MC_A && ni === MC_B) || (stopIdx === MC_B && ni === MC_A);
     stopIdx = ni; target = STOPS[stopIdx];
-    glide();
+    if (matchCut) glide("timed", 3400); else glide("exp");   // the sketch→measured plan crossfade is one long slow move
   }
   // momentum-safe pager (mirrors the home page): the cooldown extends while wheel
   // events keep arriving, so a whole momentum tail is absorbed as ONE state; a
