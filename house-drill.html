@@ -52,14 +52,8 @@
     font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.05em;color:rgba(27,25,24,.35)}
   /* the text column — left of screen, top and bottom as margin, room to run longer */
   #flow .txtlayer{padding:9vh 0}
-  #flow .txt{font-weight:500;font-size:17px;line-height:1.7;color:#000;max-width:min(46vw,620px);position:relative}
+  #flow .txt{font-weight:500;font-size:17px;line-height:1.7;color:#000;max-width:min(46vw,620px);max-height:82vh;overflow:hidden}
   #flow .txt p{margin-bottom:1.1em}
-  /* the typed letter page FLOATS over the column — its centre pinned to the column
-     centre; --desc-scale / --desc-x / --desc-y tune its size + position (?tune panel).
-     Feathered edges (baked into the PNG) blend it onto the paper. */
-  #flow .txt .descimg{position:absolute;left:50%;top:50%;width:min(46vw,620px);height:auto;
-    transform:translate(-50%,-50%) translate(var(--desc-x,0px),var(--desc-y,-250px)) scale(var(--desc-scale,1.2));
-    transform-origin:center center;pointer-events:none}
   #flow .photocol{width:min(38vw,480px)}
   #flow .photocol img{width:100%;display:block}
   #flow .photocol .cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:9px;text-align:center}
@@ -183,17 +177,12 @@
     </div>
     <div class="txtlayer">
       <div class="txt">
-        <!-- REVERT: the original set-as-text quotes are kept here (commented) — to
-             restore, delete the <img> below and un-comment these two <p>s.
+        <!-- Hunter's own words — Letter L001, lightly normalized for display -->
         <p>“… I am taking the day off from my most recent job of being ankle deep in the dirt of the forty foot square ugly excavation for a little house we'll start building next week on our land. Looks like this:”</p>
         <p>“Nothing extraordinary in an absolute sense but if it comes off as I expect the total cost of less than $12,000 will make it very extraordinary. I never thought I'd do anything so simple and boxy but here it is! Inside and out covered alike with cedar boards of various widths and thicknesses. Irregular window widths — rhythm of tree trunks in a forest. Large Japanese style bath and central glass domed garden. I'll do all the finishing as well as manufacturing (manual) of doors and windows . . . (corner beams are rain scuppers)”</p>
-        -->
-        <!-- the letter description, as Hunter's own typed page (transparent PNG, sits on the paper) -->
-        <img class="descimg" src="assets/entry/letter-description.png" alt="Richard Hunter, Letter L001 — “Nothing extraordinary in an absolute sense … (corner beams are rain scuppers)”">
         <p class="txt-cite">— Richard Hunter to Luise Mendelsohn · 13 September 1970 · Letter L001</p>
         <!-- longer editorial description — real copy to come (Brandon) -->
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
-        <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</p>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
       </div>
     </div>
     <div class="planlayer">
@@ -721,34 +710,6 @@
 
   apply();
   console.log("entry-test2 v0.88");
-})();
-
-// ── letter-image tuner: open house-drill.html?tune to size + position the typed
-//    letter live. Drag the sliders, read the values off the panel, tell Brandon → bake. ──
-(function () {
-  if (!/[?&]tune/.test(location.search)) return;
-  var root = document.documentElement.style;
-  var wrap = document.createElement("div");
-  wrap.style.cssText = "position:fixed;left:14px;top:14px;z-index:50;background:rgba(255,255,255,.94);border:1px solid #cfcabf;border-radius:9px;padding:12px 14px;font:12px/1.6 'JetBrains Mono',Menlo,monospace;color:#222;width:238px;box-shadow:0 6px 24px rgba(0,0,0,.12)";
-  var rows = [["scale", 0.4, 2.8, 0.02, 1.2], ["x", -600, 600, 2, 0], ["y", -600, 600, 2, -250]];
-  var html = "<div style='font-weight:700;margin-bottom:8px'>letter tune</div>";
-  rows.forEach(function (r) {
-    html += "<label style='display:block;margin-bottom:7px'>" + r[0] + " <b id='tv-" + r[0] + "'></b>" +
-      "<input id='ts-" + r[0] + "' type='range' min='" + r[1] + "' max='" + r[2] + "' step='" + r[3] + "' value='" + r[4] + "' style='width:100%;margin-top:2px'></label>";
-  });
-  html += "<div id='tv-out' style='margin-top:6px;color:#7a7568;user-select:all;word-break:break-all'></div>";
-  wrap.innerHTML = html;
-  document.body.appendChild(wrap);
-  function upd() {
-    var s = document.getElementById("ts-scale").value, x = document.getElementById("ts-x").value, y = document.getElementById("ts-y").value;
-    root.setProperty("--desc-scale", s); root.setProperty("--desc-x", x + "px"); root.setProperty("--desc-y", y + "px");
-    document.getElementById("tv-scale").textContent = (+s).toFixed(2);
-    document.getElementById("tv-x").textContent = x + "px";
-    document.getElementById("tv-y").textContent = y + "px";
-    document.getElementById("tv-out").textContent = "--desc-scale:" + s + "; --desc-x:" + x + "px; --desc-y:" + y + "px;";
-  }
-  rows.forEach(function (r) { document.getElementById("ts-" + r[0]).addEventListener("input", upd); });
-  upd();
 })();
 </script>
 </body>
