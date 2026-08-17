@@ -412,40 +412,32 @@
         "translate(" + (window.innerWidth / 2 + dragX) + "px," + (window.innerHeight / 2 + dragY - exitP * window.innerHeight * 1.55) + "px) " +
         "rotate(" + v.rot + "deg) scale(" + scl + ") translate(" + (-v.cx) + "px," + (-v.cy) + "px)";
     }
-    // GALLERY 1 — the original-house photographs, a COMPACT clickable grid
-    // (staggered fade-in, no long scroll)
+    // HORIZONTAL SLIDES: gallery 1 → tower/addition → gallery 2 slide sideways
+    // (each enters from the right, holds, exits left; the out/in ranges are shared
+    // so the outgoing and incoming edges travel together like a carousel).
+    // GALLERY 1 — the original-house photograph grid, slides in from the right
     var pg = document.getElementById("pgal");
-    var pIn = Math.max(0, Math.min(1, (zr - 3.8) / 0.4));
-    var pOut = Math.max(0, Math.min(1, (zr - 4.9) / 0.4));
-    pg.style.visibility = (pIn > 0 && pOut < 1) ? "visible" : "hidden";
-    pg.style.opacity = (pIn > 0 ? 1 : 0) * (1 - pOut);
-    if (pIn > 0 && pOut < 1) {
-      pgalFigs.forEach(function (fg, i) {
-        var d = Math.max(0, Math.min(1, (pIn * 1.5 - i * 0.08)));
-        fg.style.opacity = d;
-        fg.style.transform = "translateY(" + ((1 - ease(d)) * 22) + "px)";
-      });
-    }
-    // SECTION 2 — the addition: FRH-0022 left, the text line by line
+    var pIn = Math.max(0, Math.min(1, (zr - 3.7) / 0.7));
+    var pOut = Math.max(0, Math.min(1, (zr - 4.6) / 1.1));
+    var pOn = pIn > 0 && pOut < 1;
+    pg.style.visibility = pOn ? "visible" : "hidden";
+    pg.style.opacity = pOn ? "1" : "0";
+    pg.style.transform = "translateX(" + (((1 - ease(pIn)) - ease(pOut)) * 100) + "vw)";
+    // SECTION 2 — the addition (tower): slides in from the right as gallery 1 exits left
     var r2 = document.getElementById("reading2");
-    var r2In = Math.max(0, Math.min(1, (zr - 4.9) / 0.4));
-    var r2Out = Math.max(0, Math.min(1, (zr - 6.6) / 0.4));
-    r2.style.visibility = (r2In > 0 && r2Out < 1) ? "visible" : "hidden";
-    r2.style.opacity = (r2In > 0 ? 1 : 0) * (1 - r2Out);
-    r2.style.transform = "translateY(" + ((1 - ease(r2In)) * 100) + "vh)";   // arrives from BELOW
-    // the addition text is present as a whole — it fades in with the card (r2 opacity)
+    var r2In = Math.max(0, Math.min(1, (zr - 4.6) / 1.1));
+    var r2Out = Math.max(0, Math.min(1, (zr - 5.9) / 1.2));
+    var r2On = r2In > 0 && r2Out < 1;
+    r2.style.visibility = r2On ? "visible" : "hidden";
+    r2.style.opacity = r2On ? "1" : "0";
+    r2.style.transform = "translateX(" + (((1 - ease(r2In)) - ease(r2Out)) * 100) + "vw)";
     ps2.forEach(function (pp) { pp.style.clipPath = "none"; pp.style.visibility = "visible"; });
-    // GALLERY 2 — the Ivan Hunter selection, entering right after the addition text
-    // (this is the END of the HOUSE section). No fade-out — it holds.
+    // GALLERY 2 — the Ivan Hunter grid: slides in as the addition exits left (END, holds)
     var ihc = document.getElementById("ihc");
-    var iIn = Math.max(0, Math.min(1, (zr - 6.6) / 0.4));
+    var iIn = Math.max(0, Math.min(1, (zr - 5.9) / 1.2));
     ihc.style.visibility = iIn > 0 ? "visible" : "hidden";
-    ihc.style.opacity = iIn;
-    ihcFigs.forEach(function (fg, i) {
-      var d = Math.max(0, Math.min(1, (iIn * 1.5 - i * 0.09)));
-      fg.style.opacity = d;
-      fg.style.transform = "translateY(" + ((1 - ease(d)) * 26) + "px)";
-    });
+    ihc.style.opacity = iIn > 0 ? "1" : "0";
+    ihc.style.transform = "translateX(" + ((1 - ease(iIn)) * 100) + "vw)";
     // the menu carries the section — bracket the one you're in. Keyed to the
     // scroll TARGET, not the eased z, so the indicator never lags the intent.
     var zrT = Math.max(0, target - Z_HERO);
@@ -698,9 +690,13 @@
     if (dir > 0 && stopIdx >= STOPS.length - 1) { requestExit(); return; }   // past the last state → leave
     var ni = Math.max(0, Math.min(STOPS.length - 1, stopIdx + dir));
     if (ni === stopIdx) return;                                              // already at an edge
-    var matchCut = (stopIdx === MC_A && ni === MC_B) || (stopIdx === MC_B && ni === MC_A);
+    var lo = Math.min(stopIdx, ni), hi = Math.max(stopIdx, ni);
+    var matchCut = lo === MC_A && hi === MC_B;
+    var slide = hi === lo + 1 && lo >= 3 && hi <= 6;   // gallery 1 ↔ tower ↔ gallery 2 — horizontal slides
     stopIdx = ni; target = STOPS[stopIdx];
-    if (matchCut) glide("timed", 3400); else glide("exp");   // the sketch→measured plan crossfade is one long slow move
+    if (matchCut) glide("timed", 3400);                // the sketch→measured plan crossfade is one long slow move
+    else if (slide) glide("timed", 1050);              // the horizontal carousel slides — deliberate
+    else glide("exp");
   }
   // momentum-safe pager (mirrors the home page): the cooldown extends while wheel
   // events keep arriving, so a whole momentum tail is absorbed as ONE state; a
