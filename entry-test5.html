@@ -268,6 +268,13 @@
      leaves and the architect square rises to centre (HUNTER), swapping in place
      to HUNTER HOUSE (HOUSE). Small fixed size; only translateY + opacity move. */
   #namesq{position:fixed;inset:0;z-index:7;pointer-events:none}
+  #namesq{display:none}   /* hand-drawn nameblock hidden 2026-08-17 — recall by DELETING this one line */
+  /* typeset title on the film, in the menu font — replaces the hand-drawn nameblock */
+  #film-title{position:fixed;left:50%;top:46%;transform:translate(-50%,-50%);z-index:7;text-align:center;
+    white-space:nowrap;pointer-events:none;will-change:opacity;
+    font-family:'JetBrains Mono',Menlo,monospace;font-weight:500;font-size:14px;letter-spacing:.16em;
+    text-transform:uppercase;color:rgba(246,245,245,.94);text-shadow:0 1px 14px rgba(0,0,0,.55)}
+  #film-title b{font-weight:700;letter-spacing:.10em}
   #namesq .nsq{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
     width:min(26vh,230px);height:min(26vh,230px);opacity:0;will-change:transform,opacity}
   #namesq .nsq img{width:100%;height:100%;object-fit:contain;display:block;
@@ -540,6 +547,8 @@
   <div class="nsq nsq-arch" data-section="hunter" role="button" tabindex="-1" aria-label="Enter Hunter"><img src="assets/entry/square-architect.png" alt=""><span class="nsq-hint">Enter&nbsp;↗</span></div>
   <div class="nsq nsq-hh" data-section="house" role="button" tabindex="-1" aria-label="Enter House"><img src="assets/entry/square-hunterhouse.png" alt=""><span class="nsq-hint">Enter&nbsp;↗</span></div>
 </div>
+<!-- typeset title on the film (menu font) — replaces the hand-drawn nameblock -->
+<div id="film-title" aria-hidden="true"><b>Hunter House</b>&ensp;|&ensp;Victoria BC&ensp;|&ensp;203 Goward Rd&ensp;|&ensp;Richard Morrow Hunter, Architect</div>
 <nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62);transform:translateY(-110%);opacity:0;will-change:transform,opacity">
   <!-- ARIAL-bold text labels (was hand-lettered PNGs — img.mi kept in CSS for a quick swap-back) -->
   <a data-section="hunter" style="cursor:pointer" aria-label="Hunter">Hunter</a>
@@ -628,7 +637,7 @@
   <iframe id="hd-frame" title="The House" src="about:blank" scrolling="no"></iframe>
 </div>
 <div id="hd-crumb" role="button" tabindex="0" aria-label="Back to the survey"><span class="hc-a">Hunter</span><span class="hc-b">House</span></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v1.69</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v1.70</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1200,6 +1209,7 @@
   function stopOf(i) { return Math.min(i * window.innerHeight, surveyEl.scrollHeight - window.innerHeight); }   // cap at max scroll so the short ABOUT card is reachable
   var pageIdx = 0, paging = false, wheelLock = false;
   var vname = document.querySelector("#svid .vname");
+  var filmTitleEl = document.getElementById("film-title");
   var menuEl = document.getElementById("menu");
   var titlefly = document.getElementById("titlefly");
   // top-left nav: labels stack in as you scroll the cards. Menu item i belongs
@@ -1414,6 +1424,7 @@
     var filmFade = 1 - ramp(0.15 * V, 0.7 * V, st);
     place(nsHH, -off, filmFade);
     place(nsArch, off, filmFade);
+    if (filmTitleEl) filmTitleEl.style.opacity = filmFade;   // the typeset title fades off with the film too
   }
   function onSurveyScroll() {
     updateWordmark();
@@ -1858,7 +1869,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v1.69 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v1.70 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 <!-- ── adaptive entry film: pick a resolution tier by connection + display ── -->
