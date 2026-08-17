@@ -367,15 +367,16 @@
   /* the HUNTER HOUSE breadcrumb replaces the × — EXACTLY the menu's HUNTER + HOUSE:
      same font (JetBrains Mono 28/700, .03em, uppercase), same left margin (--menu-x),
      same stacked dock positions (top 32 / 64), same colours (HUNTER grey INK @ DIM .34,
-     HOUSE black). It appears INSTANTLY — no fade — so it lands right on top of the menu
-     already there and the text simply stays put (no fade-out / pop-in). */
+     HOUSE black). It is the DARK copy that sits over the menu; it's clip-revealed to
+     only show where the sliding panel has already covered — so each letter inks from
+     the light menu to the dark crumb exactly as the panel edge sweeps past it (JS). */
   #hd-crumb .hc-a, #hd-crumb .hc-b{position:fixed;left:var(--menu-x,46px);z-index:26;white-space:nowrap;cursor:pointer;
     font-family:'JetBrains Mono',Menlo,monospace;font-weight:700;font-size:28px;letter-spacing:.03em;
-    text-transform:uppercase;color:#1b1918;opacity:0;pointer-events:none}
-  #hd-crumb .hc-a{top:32px}
-  #hd-crumb .hc-b{top:64px}
-  body.room-open #hd-crumb .hc-a{opacity:.34;pointer-events:auto}   /* HUNTER — grey (DIM) */
-  body.room-open #hd-crumb .hc-b{opacity:1;pointer-events:auto}      /* HOUSE — black */
+    text-transform:uppercase;color:#1b1918;pointer-events:none;
+    -webkit-clip-path:inset(-6px -8px -6px 100%);clip-path:inset(-6px -8px -6px 100%)}   /* hidden until the panel edge reveals it */
+  #hd-crumb .hc-a{top:32px;opacity:.34}   /* HUNTER — grey (DIM) */
+  #hd-crumb .hc-b{top:64px;opacity:1}      /* HOUSE — black */
+  body.room-open #hd-crumb .hc-a, body.room-open #hd-crumb .hc-b{pointer-events:auto}
   .room-pager{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:22;
     display:flex;align-items:center;gap:18px;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:12px;letter-spacing:.1em;color:#76726a;user-select:none}
@@ -639,7 +640,7 @@
   <iframe id="hd-frame" title="The House" src="about:blank" scrolling="no"></iframe>
 </div>
 <div id="hd-crumb" role="button" tabindex="0" aria-label="Back to the survey"><span class="hc-a">Hunter</span><span class="hc-b">House</span></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v1.76</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v1.77</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1595,6 +1596,7 @@
     document.body.classList.add("room-open");
     surveyEl.style.overflow = "hidden";
     houseDrill.classList.add("open"); houseDrill.setAttribute("aria-hidden", "false");
+    startInk();
   }
   function closeHouseDrill() {
     if (!hdOpen) return;
@@ -1602,8 +1604,25 @@
     houseDrill.classList.remove("open"); houseDrill.setAttribute("aria-hidden", "true");
     document.body.classList.remove("room-open");
     surveyEl.style.overflow = "";
+    startInk();
     setTimeout(function () { if (!hdOpen) hdFrame.src = "about:blank"; }, 560);   // free the iframe/video after the slide-out
   }
+  // Ink the crumb as the panel edge sweeps past it: the dark HUNTER HOUSE is clip-
+  // revealed to only where the panel (its animated left edge) has already covered, so
+  // each letter flips from the light menu to the dark crumb as the edge passes over it.
+  var hcA = document.querySelector("#hd-crumb .hc-a"), hcB = document.querySelector("#hd-crumb .hc-b");
+  var _inkEnd = 0, _inkRaf = null;
+  function inkStep() {
+    _inkRaf = null;
+    var tf = getComputedStyle(houseDrill).transform, edge = 0;
+    if (tf && tf !== "none") { try { edge = new DOMMatrixReadOnly(tf).m41; } catch (e) { edge = 0; } }  // panel left edge (px)
+    [hcA, hcB].forEach(function (el) {
+      var L = Math.max(0, edge - el.getBoundingClientRect().left);
+      el.style.clipPath = el.style.webkitClipPath = "inset(-6px -8px -6px " + L + "px)";
+    });
+    if (performance.now() < _inkEnd) _inkRaf = requestAnimationFrame(inkStep);
+  }
+  function startInk() { _inkEnd = performance.now() + 700; if (!_inkRaf) _inkRaf = requestAnimationFrame(inkStep); }
   var hdCrumb = document.getElementById("hd-crumb");
   hdCrumb.addEventListener("click", closeHouseDrill);
   hdCrumb.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); closeHouseDrill(); } });
@@ -1871,7 +1890,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v1.76 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
+  console.log("entry-test5 e5-v1.77 — 1C lateral rooms (HOUSE/HUNTER) with horizontal plate paging");
 })();
 </script>
 <!-- ── adaptive entry film: pick a resolution tier by connection + display ── -->
