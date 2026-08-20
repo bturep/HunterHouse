@@ -495,7 +495,7 @@
         <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
       </div>
       <div class="photocol">
-        <img src="assets/entry/caa8-plan-crop.jpg" alt="Plan — Cottage for Ric and Frances Hunter, 1970">
+        <img src="assets/entry/caa8-plan-crop.png" alt="Plan — Cottage for Ric and Frances Hunter, 1970">
         <div class="cite">Plan sketch · Letter L001 · 1970</div>
       </div>
     </div>
@@ -508,7 +508,7 @@
   </div>
   <div class="scite">Cottage for Ric &amp; Frances Hunter — plan &amp; elevations, 25 August 1970 · HH-CAA-0008</div>
 </div>
-<img id="sheet-plan-over" src="assets/entry/caa8-plan-crop.jpg" alt="">
+<img id="sheet-plan-over" src="assets/entry/caa8-plan-crop.png" alt="">
 <div id="pgal" aria-label="Photographs of the original house">
   <div id="pgal-col">
     <div class="ihead-row">The original house · photographs 1970 – 1986</div>
@@ -675,7 +675,7 @@
   <iframe id="hd-frame" title="The House" src="about:blank" scrolling="no"></iframe>
 </div>
 <div id="hd-crumb" role="button" tabindex="0" aria-label="Back to the survey"><span class="hc-a">Hunter</span><span class="hc-b">House</span></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v1.88</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v1.89</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1626,7 +1626,7 @@
   // ── HOUSE drill-down (iframe reading mechanic) ──
   var houseDrill = document.getElementById("house-drill"), hdFrame = document.getElementById("hd-frame"), hdOpen = false;
   function openHouseDrill() {
-    if (hdFrame.getAttribute("src") !== "house-drill.html?v=31") hdFrame.src = "house-drill.html?v=31";   // (re)load fresh
+    if (hdFrame.getAttribute("src") !== "house-drill.html?v=32") hdFrame.src = "house-drill.html?v=32";   // (re)load fresh
     hdOpen = true;
     document.body.classList.add("room-open");
     surveyEl.style.overflow = "hidden";
@@ -1925,7 +1925,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v1.88 -- HOUSE plan sketch replaced by a registered crop of CAA-0008 (house-drill v0.89)");
+  console.log("entry-test5 e5-v1.89 -- HOUSE plan = transparent CAA-0008 cutout, full bbox, faster (house-drill v0.90)");
 })();
 </script>
 <!-- ── adaptive entry film: pick a resolution tier by connection + display ── -->

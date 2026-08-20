@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.89 — the sectioned entry (Brandon, 2026-07-21):
+<!-- entry-test2 v0.90 — the sectioned entry (Brandon, 2026-07-21):
      HERO (film loop, no scrim; Hunter's 1970 NAMEBLOCK centred,
        riding off with the photo; wordmark fades in top-left) ->
      HOUSE: the 1970 letter elevation sketch + Hunter's OWN WORDS (L001) beside the
@@ -207,7 +207,7 @@
     </div>
     <div class="planlayer">
       <div class="photocol">
-        <img src="assets/entry/caa8-plan-crop.jpg" alt="Plan — Cottage for Ric and Frances Hunter, 1970">
+        <img src="assets/entry/caa8-plan-crop.png" alt="Plan — Cottage for Ric and Frances Hunter, 1970">
         <div class="cite">Plan · Cottage for Ric &amp; Frances Hunter · HH-CAA-0008 · 1970</div>
       </div>
     </div>
@@ -220,7 +220,7 @@
   </div>
   <div class="scite">Cottage for Ric &amp; Frances Hunter — plan &amp; elevations, 25 August 1970 · HH-CAA-0008</div>
 </div>
-<img id="sheet-plan-over" src="assets/entry/caa8-plan-crop.jpg" alt="">
+<img id="sheet-plan-over" src="assets/entry/caa8-plan-crop.png" alt="">
 <div id="pgal" aria-label="Photographs of the original house">
   <div id="pgal-col">
     <div class="ihead-row">The original house · photographs 1970 – 1986</div>
@@ -276,7 +276,7 @@
   <a style="padding:6px 15px">Archive</a>
   <a style="padding:6px 15px">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.89</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.90</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -403,9 +403,10 @@
       var eM = ease(Math.max(0, Math.min(1, (zr - T0) / 0.3)));
       var r0 = colPhoto.querySelector("img").getBoundingClientRect();
       // Registered plan rect (sheet units) projected through the plan-view camera
-      // (cx 814, cy 669, fit 830). caa8-plan-crop.jpg is cut from exactly this box,
-      // so the flying crop lands congruent with the sheet's plan -- pixel-perfect.
-      var SKB = { x0: 477.0, y0: 356.0, x1: 1119.0, y1: 999.0 };   // plan box on the sheet (crop source rect)
+      // (cx 814, cy 669, fit 830). caa8-plan-crop.png is cut from exactly this box
+      // (Brandon's transparent cutout, alpha bbox), so the flying crop lands congruent
+      // with the sheet's plan -- pixel-perfect, no clip on the trees/diamond edges.
+      var SKB = { x0: 354.7, y0: 322.9, x1: 1182.3, y1: 1019.3 };   // plan box on the sheet (crop source rect)
       var s0 = window.innerHeight / 830;
       var tL = (SKB.x0 - 814) * s0 + window.innerWidth / 2;
       var tT = (SKB.y0 - 669) * s0 + window.innerHeight / 2;
@@ -718,7 +719,7 @@
     var matchCut = lo === MC_A && hi === MC_B;
     var slide = hi === lo + 1 && lo >= 3 && hi <= 6;   // gallery 1 ↔ tower ↔ gallery 2 — horizontal slides
     stopIdx = ni; target = STOPS[stopIdx];
-    if (matchCut) glide("timed", 3400);                // the plan→sheet crossfade is one long slow move
+    if (matchCut) glide("timed", 1300);                // the plan→sheet crossfade -- brisk now (was 3400)
     else if (slide) glide("timed", 1050);              // the horizontal carousel slides — deliberate
     else glide("exp");
   }
@@ -785,7 +786,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.89 -- plan sketch replaced by a crop of CAA-0008 (seamless plan-into-sheet)");
+  console.log("entry-test2 v0.90 -- plan = Brandon transparent cutout of CAA-0008 (full bbox, faster crossfade)");
 })();
 </script>
 </body>
