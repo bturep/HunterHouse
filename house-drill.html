@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.88 — the sectioned entry (Brandon, 2026-07-21):
+<!-- entry-test2 v0.89 — the sectioned entry (Brandon, 2026-07-21):
      HERO (film loop, no scrim; Hunter's 1970 NAMEBLOCK centred,
        riding off with the photo; wordmark fades in top-left) ->
-     HOUSE: the 1970 letter sketch + Hunter's OWN WORDS (L001) beside the
-       letter's plan sketch -> the sketch dissolves into CAA-0008 FULLSCREEN,
+     HOUSE: the 1970 letter elevation sketch + Hunter's OWN WORDS (L001) beside the
+       measured plan (a crop of CAA-0008) -> the plan resolves into CAA-0008 FULLSCREEN,
        zoomed to its square plan; scroll pans down to the MAIN elevation
        (rotation cycle removed) -> a vertical gallery of period photographs (CAA-0028
        level-cropped, 0031, FRH-0009, FRH-0010, 0029; click to view) ->
@@ -207,8 +207,8 @@
     </div>
     <div class="planlayer">
       <div class="photocol">
-        <img src="assets/entry/letter-plan-match.png" alt="Plan sketch from the letter — IVAN, SHAN, WEAVE, DRAW, LIVING, GARDEN">
-        <div class="cite">Plan sketch · Letter L001 · 1970</div>
+        <img src="assets/entry/caa8-plan-crop.jpg" alt="Plan — Cottage for Ric and Frances Hunter, 1970">
+        <div class="cite">Plan · Cottage for Ric &amp; Frances Hunter · HH-CAA-0008 · 1970</div>
       </div>
     </div>
   </div>
@@ -220,7 +220,7 @@
   </div>
   <div class="scite">Cottage for Ric &amp; Frances Hunter — plan &amp; elevations, 25 August 1970 · HH-CAA-0008</div>
 </div>
-<img id="sheet-plan-over" src="assets/entry/letter-plan-match.png" alt="">
+<img id="sheet-plan-over" src="assets/entry/caa8-plan-crop.jpg" alt="">
 <div id="pgal" aria-label="Photographs of the original house">
   <div id="pgal-col">
     <div class="ihead-row">The original house · photographs 1970 – 1986</div>
@@ -276,7 +276,7 @@
   <a style="padding:6px 15px">Archive</a>
   <a style="padding:6px 15px">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.88</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.89</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -391,9 +391,10 @@
     reading.style.opacity = zr > T0 ? Math.max(0, 1 - (zr - T0) / 0.3) : 1;
     colPhoto.style.visibility = zr > T0 ? "hidden" : "visible";
     if (shOn) {
-      // ONE slow move: the sketch flies to centre + grows (1.75..2.05), then the
-      // measured plan crossfades IN as the sketch fades OUT (2.15..2.95). The long
-      // timed ease makes the whole thing read very slowly.
+      // ONE slow move: the plan crop flies to centre + grows (1.75..2.05), then the
+      // full sheet crossfades IN as the crop fades OUT (2.15..2.95). The crop is cut
+      // from the sheet at the SKB box below, so the crossfade is pixel-identical --
+      // no match-cut, just the plan resolving into the drawing it came from.
       sheet.style.opacity = Math.min(1, (zr - T0) / 0.3);
       // the last elevation PUSHES UP off the top to reveal the gallery
       var exitP = ease(Math.max(0, Math.min(1, (zr - 3.8) / 0.4)));
@@ -401,10 +402,10 @@
       document.getElementById("sheet-wrap").style.opacity = Math.max(0, Math.min(1, (zr - 2.15) / 0.80));   // measured plan fades IN — follows the fly, slow
       var eM = ease(Math.max(0, Math.min(1, (zr - T0) / 0.3)));
       var r0 = colPhoto.querySelector("img").getBoundingClientRect();
-      // Brandon's registered crop rect (sheet units) projected through the
-      // plan-view camera (cx 814, cy 669, fit 830) — the landing IS the
-      // registration he set in the drawing file
-      var SKB = { x0: 477.0, y0: 356.0, x1: 1119.0, y1: 999.0 };   // baked-sketch box (template-matched to the updated sheet)
+      // Registered plan rect (sheet units) projected through the plan-view camera
+      // (cx 814, cy 669, fit 830). caa8-plan-crop.jpg is cut from exactly this box,
+      // so the flying crop lands congruent with the sheet's plan -- pixel-perfect.
+      var SKB = { x0: 477.0, y0: 356.0, x1: 1119.0, y1: 999.0 };   // plan box on the sheet (crop source rect)
       var s0 = window.innerHeight / 830;
       var tL = (SKB.x0 - 814) * s0 + window.innerWidth / 2;
       var tT = (SKB.y0 - 669) * s0 + window.innerHeight / 2;
@@ -412,7 +413,7 @@
       po.style.left  = (r0.left + (tL - r0.left) * eM) + "px";
       po.style.top   = (r0.top  + (tT - r0.top)  * eM) + "px";
       po.style.width = (r0.width + (tW - r0.width) * eM) + "px";
-      po.style.opacity = Math.max(0, Math.min(1, 1 - (zr - 2.15) / 0.80));   // sketch fades OUT slowly (gone by ~2.95) as the plan is revealed
+      po.style.opacity = Math.max(0, Math.min(1, 1 - (zr - 2.15) / 0.80));   // plan crop fades OUT slowly (gone by ~2.95) as the full sheet is revealed
       var v = sheetView(zr);
       var scl = window.innerHeight / v.fit;
       document.getElementById("sheet-wrap").style.transform =
@@ -501,7 +502,7 @@
     climb(el.getAttribute("data-mid") ? "data-mid" : "data-large");
   });
 
-  // click-to-enlarge: the reading's plan sketch
+  // click-to-enlarge: the reading's plan
   var colImgEl = document.querySelector("#flow .photocol img");
   var colCiteEl = document.querySelector("#flow .photocol .cite");
   var closeup = document.getElementById("closeup");
@@ -677,9 +678,9 @@
 
   // the ORIGINAL entry-test2 driver — exponential ease-out: a smooth, slow settle
   // that never whips. Slowed from 0.16 → 0.07 so each snap is deliberate and the
-  // sketch-plan → measured-plan zoom + fade reads slowly.
-  // most moves ride the exponential ease-out (EASE). The plan match-cut is a single
-  // VERY slow move, so it runs on a long timed ease-in-out instead.
+  // plan → full-sheet zoom + fade reads slowly.
+  // most moves ride the exponential ease-out (EASE). The plan-into-sheet crossfade is
+  // a single VERY slow move, so it runs on a long timed ease-in-out instead.
   var raf = null, EASE = 0.05;
   var animMode = "exp", animFrom = 0, animStart = 0, animDur = 720;
   function _now() { return (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now(); }
@@ -703,10 +704,10 @@
     if (!raf) raf = requestAnimationFrame(step);
   }
   // ── snap scroll: each gesture advances AT MOST one state (like the home page) ──
-  // z per state: sketch-left+text · +plan(sketch) · plan MATCH-CUT(measured) · elevation(measured) · gallery1 · addition · gallery2
+  // z per state: elevation-left+text · +plan · plan→SHEET crossfade · elevation(measured) · gallery1 · addition · gallery2
   // (the centred-elevation landing, z 1.00, is intentionally skipped — we open on the second)
   var STOPS = [2.00, 2.60, 4.00, 4.70, 5.50, 6.80, 8.20];
-  var MC_A = 1, MC_B = 2;   // the plan match-cut: text+plan (1) ↔ measured plan (2) — one slow move
+  var MC_A = 1, MC_B = 2;   // the plan→sheet crossfade: text+plan (1) ↔ full sheet (2) — one slow move
   var stopIdx = 0;
   function requestExit() { try { parent.postMessage({ hd: "close" }, "*"); } catch (e) {} }
   function advance(dir) {
@@ -717,7 +718,7 @@
     var matchCut = lo === MC_A && hi === MC_B;
     var slide = hi === lo + 1 && lo >= 3 && hi <= 6;   // gallery 1 ↔ tower ↔ gallery 2 — horizontal slides
     stopIdx = ni; target = STOPS[stopIdx];
-    if (matchCut) glide("timed", 3400);                // the sketch→measured plan crossfade is one long slow move
+    if (matchCut) glide("timed", 3400);                // the plan→sheet crossfade is one long slow move
     else if (slide) glide("timed", 1050);              // the horizontal carousel slides — deliberate
     else glide("exp");
   }
@@ -784,7 +785,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.88");
+  console.log("entry-test2 v0.89 -- plan sketch replaced by a crop of CAA-0008 (seamless plan-into-sheet)");
 })();
 </script>
 </body>
