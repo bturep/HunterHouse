@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.91 — the sectioned entry (Brandon, 2026-07-21):
+<!-- entry-test2 v0.92 — the sectioned entry (Brandon, 2026-07-21):
      HERO (film loop, no scrim; Hunter's 1970 NAMEBLOCK centred,
        riding off with the photo; wordmark fades in top-left) ->
      HOUSE: the 1970 letter elevation sketch + Hunter's OWN WORDS (L001) beside the
@@ -276,7 +276,7 @@
   <a style="padding:6px 15px">Archive</a>
   <a style="padding:6px 15px">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.91</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.92</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -391,15 +391,16 @@
     reading.style.opacity = zr > T0 ? Math.max(0, 1 - (zr - T0) / 0.3) : 1;
     colPhoto.style.visibility = zr > T0 ? "hidden" : "visible";
     if (shOn) {
-      // ONE slow move: the plan crop flies to centre + grows (1.75..2.05), then the
-      // full sheet crossfades IN as the crop fades OUT (2.15..2.95). The crop is cut
-      // from the sheet at the SKB box below, so the crossfade is pixel-identical --
-      // no match-cut, just the plan resolving into the drawing it came from.
+      // The plan crop flies to centre + grows (1.75..2.05), then hands off to the full
+      // sheet. NO cross-dissolve: the full sheet snaps to FULL opacity UNDERNEATH the
+      // still-solid crop (invisible -- the crop covers it), and only then does the crop
+      // fade out (2.30..2.85) over the now-solid sheet. Black linework sits over identical
+      // black, so it never passes through a grey midpoint -- no dimming.
       sheet.style.opacity = Math.min(1, (zr - T0) / 0.3);
       // the last elevation PUSHES UP off the top to reveal the gallery
       var exitP = ease(Math.max(0, Math.min(1, (zr - 3.8) / 0.4)));
       document.querySelector("#sheet .scite").style.opacity = 1 - exitP;
-      document.getElementById("sheet-wrap").style.opacity = Math.max(0, Math.min(1, (zr - 2.15) / 0.80));   // measured plan fades IN — follows the fly, slow
+      document.getElementById("sheet-wrap").style.opacity = Math.max(0, Math.min(1, (zr - 2.05) / 0.20));   // full sheet to FULL behind the solid crop, right after landing
       var eM = ease(Math.max(0, Math.min(1, (zr - T0) / 0.3)));
       var r0 = colPhoto.querySelector("img").getBoundingClientRect();
       // Registered plan rect (sheet units) projected through the plan-view camera
@@ -414,7 +415,7 @@
       po.style.left  = (r0.left + (tL - r0.left) * eM) + "px";
       po.style.top   = (r0.top  + (tT - r0.top)  * eM) + "px";
       po.style.width = (r0.width + (tW - r0.width) * eM) + "px";
-      po.style.opacity = Math.max(0, Math.min(1, 1 - (zr - 2.15) / 0.80));   // plan crop fades OUT slowly (gone by ~2.95) as the full sheet is revealed
+      po.style.opacity = Math.max(0, Math.min(1, 1 - (zr - 2.30) / 0.55));   // crop stays SOLID until the sheet is full, then fades out over black-on-black (gone by ~2.85) -- no dimming
       var v = sheetView(zr);
       var scl = window.innerHeight / v.fit;
       document.getElementById("sheet-wrap").style.transform =
@@ -786,7 +787,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.91 -- reading-pause plan much larger (photocol min 38vw/480 -> 46vw/720)");
+  console.log("entry-test2 v0.92 -- plan->sheet handoff: no cross-dissolve, sheet snaps up under the solid crop then crop fades (no linework dimming)");
 })();
 </script>
 </body>
