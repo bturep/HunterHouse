@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.93 — the sectioned entry (Brandon, 2026-07-21):
+<!-- entry-test2 v0.94 — the sectioned entry (Brandon, 2026-07-21):
      HERO (film loop, no scrim; Hunter's 1970 NAMEBLOCK centred,
        riding off with the photo; wordmark fades in top-left) ->
-     HOUSE: the 1970 letter elevation sketch + Hunter's OWN WORDS (L001) beside the
-       measured plan (a crop of CAA-0008) -> the plan resolves into CAA-0008 FULLSCREEN,
-       zoomed to its square plan; scroll pans down to the MAIN elevation
-       (rotation cycle removed) -> a vertical gallery of period photographs (CAA-0028
-       level-cropped, 0031, FRH-0009, FRH-0010, 0029; click to view) ->
+     HOUSE: the 1970 letter elevation sketch + Hunter's OWN WORDS (L001, text right)
+       -> the text MOVES OVER to the left (content changes) as the measured plan (a
+       crop of CAA-0008) takes the right at full size -> STRAIGHT to a vertical gallery
+       of period photographs (CAA-0028 level-cropped, 0031, FRH-0009, FRH-0010, 0029;
+       click to view). [full-sheet crossfade + elevation zoom removed] ->
        the 1990s ADDITION: FRH-0022 left + placeholder text (line by
        line) -> CAA-0018 fullscreen, click-to-explore -> a grid of six
        Ivan Hunter photographs ->
@@ -66,13 +66,7 @@
   #flow .photocol{width:min(46vw,720px)}
   #flow .photocol img{width:100%;display:block}
   #flow .photocol .cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:9px;text-align:center}
-  #flow .planlayer{display:none}   /* retired -- the plan now sits centred as #sheet-plan-over (the po crop) */
-  /* the plan beat: the plan centred at its landed size, text in two flanking
-     columns (left/width/top set in JS from the plan's on-screen rect) */
-  #planbeat{position:fixed;inset:0;z-index:9;pointer-events:none;opacity:0;visibility:hidden}
-  #planbeat .pb-col{position:absolute;max-height:82vh;overflow:hidden;font-weight:500;font-size:14px;line-height:1.6;color:#000}
-  #planbeat .pb-col p{margin-bottom:1em}
-  #planbeat .pb-col .txt-cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
+  #flow .planlayer{display:none}   /* retired -- the plan now sits right-aligned as #sheet-plan-over (the po crop) */
   /* shared column cite (the reading's own is scoped to #flow) */
   .pcite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:9px}
   .txt-cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
@@ -86,7 +80,7 @@
     font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
   /* the period gallery — photographs of the original house, one after another,
      full aspect; the page's scroll rides down the stack */
-  #pgal{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5;overflow:hidden;display:flex;align-items:flex-start;justify-content:center}   /* top-aligned; padding-top set in JS so the top photo row = the tower image top */
+  #pgal{position:fixed;inset:0;z-index:9;visibility:hidden;opacity:0;background:#f6f5f5;overflow:hidden;display:flex;align-items:flex-start;justify-content:center}   /* top-aligned; padding-top set in JS so the top photo row = the tower image top */
   #pgal-col{display:grid;grid-template-columns:repeat(3,1fr);gap:24px 22px;width:min(1150px,92vw);padding:0 40px;box-sizing:border-box}
   #pgal .ihead-row{grid-column:1/-1;text-align:center;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(27,25,24,.55);margin-bottom:2px}
   #pgal .pfig{cursor:zoom-in;will-change:transform,opacity}
@@ -95,7 +89,7 @@
   #pgal .pfig .pth img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.1);transform-origin:center}
   #pgal .icite{font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.45);margin-top:6px;text-align:center}
   /* the second reading — image left (FRH-0022), text down the centre */
-  #reading2{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5;
+  #reading2{position:fixed;inset:0;z-index:9;visibility:hidden;opacity:0;background:#f6f5f5;
     display:flex;align-items:center;justify-content:center}
   #reading2 .r2body{display:flex;gap:64px;max-width:1240px;padding:0 40px;align-items:flex-start}
   #reading2 .photocol{width:460px;flex:none}
@@ -111,7 +105,7 @@
   #caa18 .ccite18{position:fixed;left:34px;bottom:22px;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
   /* the Ivan Hunter selection — a quiet grid */
-  #ihc{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5;
+  #ihc{position:fixed;inset:0;z-index:9;visibility:hidden;opacity:0;background:#f6f5f5;
     display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:26px}   /* top-aligned; padding-top set in JS so the top photo row = the tower image top */
   #ihc .ihead{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(27,25,24,.55)}
   #ihc .igrid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px 22px;width:min(1150px,92vw);padding:0 40px}
@@ -221,20 +215,6 @@
   </div>
 </div>
 
-<!-- the plan beat: two text columns that flank the centred plan crop (#sheet-plan-over).
-     Positions are set in JS so they hug the plan's on-screen rect. Placeholder copy. -->
-<div id="planbeat" aria-hidden="true">
-  <div class="pb-col pb-l">
-    <p>“… I am taking the day off from my most recent job of being ankle deep in the dirt of the forty foot square ugly excavation for a little house we'll start building next week on our land.”</p>
-    <p>“Nothing extraordinary in an absolute sense but if it comes off as I expect the total cost of less than $12,000 will make it very extraordinary.”</p>
-  </div>
-  <div class="pb-col pb-r">
-    <p>“I never thought I'd do anything so simple and boxy but here it is! Inside and out covered alike with cedar boards of various widths and thicknesses. Irregular window widths — rhythm of tree trunks in a forest.”</p>
-    <p>“Large Japanese style bath and central glass domed garden. I'll do all the finishing as well as manufacturing (manual) of doors and windows . . . (corner beams are rain scuppers)”</p>
-    <p class="txt-cite">— Richard Hunter · Letter L001 · 1970</p>
-  </div>
-</div>
-
 <div id="sheet" aria-label="Cottage for Ric and Frances Hunter — plan and elevations">
   <div id="sheet-wrap">
     <img id="sheet-img" fetchpriority="high" src="assets/entry/caa8-sheet_thumb.jpg" data-mid="assets/entry/caa8-sheet_prev.jpg" data-large="assets/entry/caa8-sheet_large.jpg" alt="Cottage for Ric and Frances Hunter — plan and elevations, 1970">
@@ -297,7 +277,7 @@
   <a style="padding:6px 15px">Archive</a>
   <a style="padding:6px 15px">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.93</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.94</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -386,86 +366,60 @@
     var planL = document.querySelector("#flow .planlayer");
     var p1 = ease(Math.max(0, Math.min(1, (zr - 0.55) / 0.25)));   // elevation centre→left, text in from the right (over it)
     var p2 = ease(Math.max(0, Math.min(1, (zr - 1.20) / 0.25)));   // text→left, plan in from the right, elevation off left
-    skL.style.transform   = "translateX(" + (-18 * p1 - 92 * p2) + "vw) scale(" + (1 - 0.2 * p1) + ")";   // big centred → smaller + left → off left
-    txtL.style.transform  = "translateX(" + (100 - 74 * p1 - 150 * p2) + "vw)";   // off right → beside the elevation → OFF left as the plan beat takes over
-    // beat 1 text (page-r, beside the elevation) fades out as the layer exits;
-    // page-l is retired -- the plan-beat copy is the flanking columns (#planbeat)
+    // ── plan geometry: SAME size as before (tW), but RIGHT-aligned now ─────────
+    var s0 = window.innerHeight / 830;
+    var tW = (1182.3 - 354.7) * s0;                    // plan width -- unchanged size
+    var planH = tW * (1337 / 1589);                    // crop aspect
+    var pad = window.innerWidth * 0.045, gap = window.innerWidth * 0.035;
+    var planLeft = window.innerWidth - pad - tW;       // right-aligned
+    var planTop = (window.innerHeight - planH) / 2;    // vertically centred
+    var lx = pad, lw = Math.max(120, planLeft - gap - pad);   // the left text region
+
+    // ── beat 1 (elevation + text-right) → beat 2 (text-left + plan-right) ──────
+    // the elevation slides off left; the SAME text block "moves over" from the
+    // right (beside the elevation) to the left (beside the plan) as its content
+    // crossfades page-r -> page-l. p2 drives the move; p1 is the beat-1 entrance.
+    skL.style.transform = "translateX(" + (-18 * p1 - 92 * p2) + "vw) scale(" + (1 - 0.2 * p1) + ")";
+    var b1w = Math.min(0.46 * window.innerWidth, 620);        // roomy beat-1 width
+    var b2cx = lx + lw / 2;                                   // beat-2 centre (left region)
+    var txtX = (1 - 0.74 * p1) * window.innerWidth * (1 - p2) + (b2cx - window.innerWidth / 2) * p2;
+    txtL.style.transform = "translateX(" + txtX + "px)";
+    var txtEl = document.querySelector("#flow .txt");
+    txtEl.style.maxWidth = "none";
+    txtEl.style.width = (b1w * (1 - p2) + lw * p2) + "px";
     var pgR = document.querySelector("#flow .page-r"), pgL = document.querySelector("#flow .page-l");
     if (pgR && pgL) {
-      pgR.style.opacity = 1 - Math.max(0, Math.min(1, p2 / 0.30));
-      pgL.style.opacity = 0;
+      pgR.style.opacity = 1 - Math.max(0, Math.min(1, (p2 - 0.25) / 0.30));   // beat-1 copy out
+      pgL.style.opacity = Math.max(0, Math.min(1, (p2 - 0.45) / 0.30));       // beat-2 copy in (same 17px)
     }
     ps.forEach(function (p) { p.style.clipPath = "none"; p.style.visibility = "visible"; });
 
-    // ── the SHEET (CAA-0008 fullscreen) → IHC grid → HUNTER → SITE ────────
-    // zr 1.25..1.5 the letter plan dissolves into the sheet's square plan ·
-    // 1.9..2.3 pan down to the south band · then CCW rotations: east (2.9),
-    // north (3.5), west (4.1) · 4.4..4.8 IHC grid · 5.5 HUNTER · 6.6 SITE.
-    var T0 = 1.75;
-    var sheet = document.getElementById("sheet");
+    // ── the PLAN crop (no fly): right-aligned, fades in for beat 2, fades out as
+    //    gallery 1 slides in. The full measured sheet AND the elevation zoom are
+    //    removed -- after the plan beat we go STRAIGHT to the gallery. ──────────
+    document.getElementById("sheet").style.visibility = "hidden";   // full drawing retired from this flow
     var po = document.getElementById("sheet-plan-over");
-    var planbeat = document.getElementById("planbeat");
-    var cl = function (a, b) { return Math.max(0, Math.min(1, (zr - a) / (b - a))); };
-
-    // ── the plan crop sits at its LANDED rect for the whole plan beat ──────────
-    // No fly: the crop is centred at the exact spot the full sheet will occupy
-    // (plan camera cx814,cy669,fit830, SKB projected), so the sheet hands off in
-    // place. caa8-plan-crop.png is Brandon's transparent cutout at that alpha bbox.
-    var SKB = { x0: 354.7, y0: 322.9, x1: 1182.3, y1: 1019.3 };   // plan box on the sheet (crop source rect)
-    var s0 = window.innerHeight / 830;
-    var tL = (SKB.x0 - 814) * s0 + window.innerWidth / 2;
-    var tT = (SKB.y0 - 669) * s0 + window.innerHeight / 2;
-    var tW = (SKB.x1 - SKB.x0) * s0;
-    po.style.left = tL + "px"; po.style.top = tT + "px"; po.style.width = tW + "px";
-
-    // opacity schedule (zr): plan+columns fade IN 1.20..1.45 · columns OUT 1.70..1.98 ·
-    // full sheet snaps up UNDER the solid crop 2.05..2.25 · crop fades OUT 2.30..2.85
-    var planIn = cl(1.20, 1.45), colsOut = cl(1.70, 1.98), poOut = cl(2.30, 2.85);
-    po.style.visibility = (zr > 1.18 && zr < 2.9) ? "visible" : "hidden";
-    po.style.opacity = Math.min(planIn, 1 - poOut);
-
-    // flanking text columns hug the plan's on-screen rect, vertically centred
-    var gap = window.innerWidth * 0.03, pad = window.innerWidth * 0.045;
-    var pbL = planbeat.querySelector(".pb-l"), pbR = planbeat.querySelector(".pb-r");
-    pbL.style.left = pad + "px";  pbL.style.width = Math.max(0, tL - gap - pad) + "px";
-    pbR.style.left = (tL + tW + gap) + "px"; pbR.style.width = Math.max(0, window.innerWidth - pad - (tL + tW + gap)) + "px";
-    pbL.style.top = pbR.style.top = "50%";
-    pbL.style.transform = pbR.style.transform = "translateY(-50%)";
-    planbeat.style.visibility = (zr > 1.18 && zr < 2.05) ? "visible" : "hidden";
-    planbeat.style.opacity = Math.min(planIn, 1 - colsOut);
-
-    var shOn = zr > T0 - 0.001 && zr < 4.25;
-    sheet.style.visibility = shOn ? "visible" : "hidden";
-    reading.style.opacity = zr > T0 ? Math.max(0, 1 - (zr - T0) / 0.3) : 1;
-    if (shOn) {
-      // Handoff, no cross-dissolve: the full sheet snaps to FULL opacity UNDERNEATH the
-      // still-solid crop (invisible -- the crop covers it), then the crop fades out over
-      // the now-solid sheet. Black-over-identical-black stays black -- no linework dimming.
-      sheet.style.opacity = Math.min(1, (zr - T0) / 0.3);
-      var exitP = ease(Math.max(0, Math.min(1, (zr - 3.8) / 0.4)));   // last elevation pushes up to reveal the gallery
-      document.querySelector("#sheet .scite").style.opacity = 1 - exitP;
-      document.getElementById("sheet-wrap").style.opacity = cl(2.05, 2.25);   // full sheet to FULL behind the solid crop
-      var v = sheetView(zr);
-      var scl = window.innerHeight / v.fit;
-      document.getElementById("sheet-wrap").style.transform =
-        "translate(" + (window.innerWidth / 2 + dragX) + "px," + (window.innerHeight / 2 + dragY - exitP * window.innerHeight * 1.55) + "px) " +
-        "rotate(" + v.rot + "deg) scale(" + scl + ") translate(" + (-v.cx) + "px," + (-v.cy) + "px)";
-    }
+    var planIn  = Math.max(0, Math.min(1, (zr - 1.20) / 0.25));
+    var planOut = Math.max(0, Math.min(1, (zr - 1.70) / 0.30));      // gone by ~2.0, before the gallery covers
+    po.style.left = planLeft + "px"; po.style.top = planTop + "px"; po.style.width = tW + "px";
+    po.style.visibility = (zr > 1.18 && zr < 2.05) ? "visible" : "hidden";
+    po.style.opacity = Math.min(planIn, 1 - planOut);
+    reading.style.opacity = 1 - Math.max(0, Math.min(1, (zr - 1.70) / 0.35));   // reading out as the gallery enters
     // HORIZONTAL SLIDES: gallery 1 → tower/addition → gallery 2 slide sideways
     // (each enters from the right, holds, exits left; the out/in ranges are shared
     // so the outgoing and incoming edges travel together like a carousel).
-    // GALLERY 1 — the original-house photograph grid, slides in from the right
+    // GALLERY 1 — slides in from the right right AFTER the plan beat (sheet/elevation removed)
     var pg = document.getElementById("pgal");
-    var pIn = Math.max(0, Math.min(1, (zr - 3.7) / 0.7));
-    var pOut = Math.max(0, Math.min(1, (zr - 4.6) / 1.1));
+    var pIn = Math.max(0, Math.min(1, (zr - 1.85) / 0.65));
+    var pOut = Math.max(0, Math.min(1, (zr - 3.25) / 0.55));
     var pOn = pIn > 0 && pOut < 1;
     pg.style.visibility = pOn ? "visible" : "hidden";
     pg.style.opacity = pOn ? "1" : "0";
     pg.style.transform = "translateX(" + (((1 - ease(pIn)) - ease(pOut)) * 100) + "vw)";
     // SECTION 2 — the addition (tower): slides in from the right as gallery 1 exits left
     var r2 = document.getElementById("reading2");
-    var r2In = Math.max(0, Math.min(1, (zr - 4.6) / 1.1));
-    var r2Out = Math.max(0, Math.min(1, (zr - 5.9) / 1.2));
+    var r2In = Math.max(0, Math.min(1, (zr - 3.25) / 0.55));
+    var r2Out = Math.max(0, Math.min(1, (zr - 4.35) / 0.55));
     var r2On = r2In > 0 && r2Out < 1;
     r2.style.visibility = r2On ? "visible" : "hidden";
     r2.style.opacity = r2On ? "1" : "0";
@@ -473,7 +427,7 @@
     ps2.forEach(function (pp) { pp.style.clipPath = "none"; pp.style.visibility = "visible"; });
     // GALLERY 2 — the Ivan Hunter grid: slides in as the addition exits left (END, holds)
     var ihc = document.getElementById("ihc");
-    var iIn = Math.max(0, Math.min(1, (zr - 5.9) / 1.2));
+    var iIn = Math.max(0, Math.min(1, (zr - 4.35) / 0.55));
     ihc.style.visibility = iIn > 0 ? "visible" : "hidden";
     ihc.style.opacity = iIn > 0 ? "1" : "0";
     ihc.style.transform = "translateX(" + ((1 - ease(iIn)) * 100) + "vw)";
@@ -735,10 +689,9 @@
     if (!raf) raf = requestAnimationFrame(step);
   }
   // ── snap scroll: each gesture advances AT MOST one state (like the home page) ──
-  // z per state: elevation-left+text · +plan · plan→SHEET crossfade · elevation(measured) · gallery1 · addition · gallery2
-  // (the centred-elevation landing, z 1.00, is intentionally skipped — we open on the second)
-  var STOPS = [2.00, 2.60, 4.00, 4.70, 5.50, 6.80, 8.20];
-  var MC_A = 1, MC_B = 2;   // the plan→sheet crossfade: text+plan (1) ↔ full sheet (2) — one slow move
+  // z per state: elevation-left+text · text-left+plan-right · gallery1 · addition · gallery2
+  // (the plan→sheet crossfade and the elevation zoom were removed -- straight to the gallery)
+  var STOPS = [2.00, 2.60, 3.70, 4.80, 5.90];
   var stopIdx = 0;
   function requestExit() { try { parent.postMessage({ hd: "close" }, "*"); } catch (e) {} }
   function advance(dir) {
@@ -746,12 +699,10 @@
     var ni = Math.max(0, Math.min(STOPS.length - 1, stopIdx + dir));
     if (ni === stopIdx) return;                                              // already at an edge
     var lo = Math.min(stopIdx, ni), hi = Math.max(stopIdx, ni);
-    var matchCut = lo === MC_A && hi === MC_B;
-    var slide = hi === lo + 1 && lo >= 3 && hi <= 6;   // gallery 1 ↔ tower ↔ gallery 2 — horizontal slides
+    var slide = hi === lo + 1 && lo >= 1 && hi <= 4;   // beat2→gallery1 + the gallery carousel — horizontal slides
     stopIdx = ni; target = STOPS[stopIdx];
-    if (matchCut) glide("timed", 1300);                // the plan→sheet crossfade -- brisk now (was 3400)
-    else if (slide) glide("timed", 1050);              // the horizontal carousel slides — deliberate
-    else glide("exp");
+    if (slide) glide("timed", 1050);                   // the horizontal slides — deliberate
+    else glide("exp");                                 // the reading move (beat1→beat2)
   }
   // momentum-safe pager (mirrors the home page): the cooldown extends while wheel
   // events keep arriving, so a whole momentum tail is absorbed as ONE state; a
@@ -816,7 +767,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.93 -- plan beat: plan centred at its landed size, text in two flanking columns, no fly");
+  console.log("entry-test2 v0.94 -- plan RIGHT (same size) + text moves over to the LEFT; full-sheet + elevation removed, straight to gallery");
 })();
 </script>
 </body>
