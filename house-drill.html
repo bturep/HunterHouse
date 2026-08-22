@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.95 — the sectioned entry (Brandon, 2026-07-21):
+<!-- entry-test2 v0.96 — the sectioned entry (Brandon, 2026-07-21):
      HERO (film loop, no scrim; Hunter's 1970 NAMEBLOCK centred,
        riding off with the photo; wordmark fades in top-left) ->
      HOUSE: the 1970 letter elevation sketch + Hunter's OWN WORDS (L001, text right)
@@ -277,7 +277,7 @@
   <a style="padding:6px 15px">Archive</a>
   <a style="padding:6px 15px">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.95</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.96</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -382,10 +382,11 @@
     skL.style.transform = "translateX(" + (-18 * p1 - 92 * p2) + "vw) scale(" + (1 - 0.2 * p1) + ")";
     var b1w = Math.min(0.46 * window.innerWidth, 620);        // roomy beat-1 width
     var b2cx = lx + lw / 2;                                   // beat-2 centre (left region)
-    // exitP slides the beat-2 panel (text + plan) OFF LEFT as gallery 1 slides IN from the right
+    // exitP slides the beat-2 panel (text + plan) OFF LEFT as gallery 1 slides IN from the right.
+    // BOTH subtract the SAME exit delta (exitDX) so they pan left in lockstep -- identical rate.
     var exitP = ease(Math.max(0, Math.min(1, (zr - 1.85) / 0.70)));
-    var txtX = (1 - 0.74 * p1) * window.innerWidth * (1 - p2) + (b2cx - window.innerWidth / 2) * p2
-               - exitP * (b2cx + lw / 2 + 40);               // slide off left on exit
+    var exitDX = exitP * (window.innerWidth + tW);           // shared -- big enough to clear everything left
+    var txtX = (1 - 0.74 * p1) * window.innerWidth * (1 - p2) + (b2cx - window.innerWidth / 2) * p2 - exitDX;
     txtL.style.transform = "translateX(" + txtX + "px)";
     var txtEl = document.querySelector("#flow .txt");
     txtEl.style.maxWidth = "none";
@@ -404,7 +405,7 @@
     var po = document.getElementById("sheet-plan-over");
     po.style.left = planLeft + "px"; po.style.top = planTop + "px"; po.style.width = tW + "px";
     var planTX = (1 - p2) * (window.innerWidth - planLeft + 40)      // enters from off-right (p2)
-               - exitP * (planLeft + tW + 40);                      // exits off-left (exitP)
+               - exitDX;                                            // exits off-left in lockstep with the text
     po.style.transform = "translateX(" + planTX + "px)";
     po.style.opacity = 1;                                            // everything slides -- no fades
     po.style.visibility = (zr > 1.18 && zr < 2.60) ? "visible" : "hidden";
@@ -771,7 +772,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.95 -- plan SLIDES in from the right with the text, slides off left as the gallery slides in (no fades)");
+  console.log("entry-test2 v0.96 -- text + plan exit on a shared delta (pan left in lockstep)");
 })();
 </script>
 </body>
