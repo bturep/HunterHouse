@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v0.94 — the sectioned entry (Brandon, 2026-07-21):
+<!-- entry-test2 v0.95 — the sectioned entry (Brandon, 2026-07-21):
      HERO (film loop, no scrim; Hunter's 1970 NAMEBLOCK centred,
        riding off with the photo; wordmark fades in top-left) ->
      HOUSE: the 1970 letter elevation sketch + Hunter's OWN WORDS (L001, text right)
@@ -75,7 +75,7 @@
   #sheet{position:fixed;inset:0;z-index:8;visibility:hidden;opacity:0;background:transparent;overflow:hidden}
   #sheet-wrap{position:absolute;left:0;top:0;width:2000px;height:1530px;transform-origin:0 0;will-change:transform}
   #sheet-img{position:absolute;left:0;top:0;width:2000px;height:1530px;display:block}
-  #sheet-plan-over{position:fixed;z-index:8;visibility:hidden;height:auto;pointer-events:none;will-change:left,top,width,opacity}
+  #sheet-plan-over{position:fixed;z-index:8;visibility:hidden;height:auto;pointer-events:none;will-change:transform,opacity}
   #sheet .scite{position:fixed;left:34px;bottom:22px;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
   /* the period gallery — photographs of the original house, one after another,
@@ -277,7 +277,7 @@
   <a style="padding:6px 15px">Archive</a>
   <a style="padding:6px 15px">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.94</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v0.95</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -382,7 +382,10 @@
     skL.style.transform = "translateX(" + (-18 * p1 - 92 * p2) + "vw) scale(" + (1 - 0.2 * p1) + ")";
     var b1w = Math.min(0.46 * window.innerWidth, 620);        // roomy beat-1 width
     var b2cx = lx + lw / 2;                                   // beat-2 centre (left region)
-    var txtX = (1 - 0.74 * p1) * window.innerWidth * (1 - p2) + (b2cx - window.innerWidth / 2) * p2;
+    // exitP slides the beat-2 panel (text + plan) OFF LEFT as gallery 1 slides IN from the right
+    var exitP = ease(Math.max(0, Math.min(1, (zr - 1.85) / 0.70)));
+    var txtX = (1 - 0.74 * p1) * window.innerWidth * (1 - p2) + (b2cx - window.innerWidth / 2) * p2
+               - exitP * (b2cx + lw / 2 + 40);               // slide off left on exit
     txtL.style.transform = "translateX(" + txtX + "px)";
     var txtEl = document.querySelector("#flow .txt");
     txtEl.style.maxWidth = "none";
@@ -394,17 +397,18 @@
     }
     ps.forEach(function (p) { p.style.clipPath = "none"; p.style.visibility = "visible"; });
 
-    // ── the PLAN crop (no fly): right-aligned, fades in for beat 2, fades out as
-    //    gallery 1 slides in. The full measured sheet AND the elevation zoom are
-    //    removed -- after the plan beat we go STRAIGHT to the gallery. ──────────
+    // ── the PLAN crop (no fly, no fade): SLIDES in from the right WITH the text for
+    //    beat 2, holds, then SLIDES off left as gallery 1 slides in from the right.
+    //    The full measured sheet AND the elevation zoom are removed. ──────────────
     document.getElementById("sheet").style.visibility = "hidden";   // full drawing retired from this flow
     var po = document.getElementById("sheet-plan-over");
-    var planIn  = Math.max(0, Math.min(1, (zr - 1.20) / 0.25));
-    var planOut = Math.max(0, Math.min(1, (zr - 1.70) / 0.30));      // gone by ~2.0, before the gallery covers
     po.style.left = planLeft + "px"; po.style.top = planTop + "px"; po.style.width = tW + "px";
-    po.style.visibility = (zr > 1.18 && zr < 2.05) ? "visible" : "hidden";
-    po.style.opacity = Math.min(planIn, 1 - planOut);
-    reading.style.opacity = 1 - Math.max(0, Math.min(1, (zr - 1.70) / 0.35));   // reading out as the gallery enters
+    var planTX = (1 - p2) * (window.innerWidth - planLeft + 40)      // enters from off-right (p2)
+               - exitP * (planLeft + tW + 40);                      // exits off-left (exitP)
+    po.style.transform = "translateX(" + planTX + "px)";
+    po.style.opacity = 1;                                            // everything slides -- no fades
+    po.style.visibility = (zr > 1.18 && zr < 2.60) ? "visible" : "hidden";
+    reading.style.opacity = 1;                                       // reading content slides out; no fade
     // HORIZONTAL SLIDES: gallery 1 → tower/addition → gallery 2 slide sideways
     // (each enters from the right, holds, exits left; the out/in ranges are shared
     // so the outgoing and incoming edges travel together like a carousel).
@@ -767,7 +771,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v0.94 -- plan RIGHT (same size) + text moves over to the LEFT; full-sheet + elevation removed, straight to gallery");
+  console.log("entry-test2 v0.95 -- plan SLIDES in from the right with the text, slides off left as the gallery slides in (no fades)");
 })();
 </script>
 </body>
