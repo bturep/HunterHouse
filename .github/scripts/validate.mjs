@@ -169,8 +169,10 @@ try {
   if (liveVer.includes("-test."))
     fail(`browse.html: VERSION "${liveVer}" carries -test. — staging version must not ship to live`);
   else pass("browse.html: VERSION is a live version (no -test.)");
-  if (!/<title>\s*Hunter House Archive\s*<\/title>/.test(live))
-    fail("browse.html: <title> is not the live title 'Hunter House Archive' — staging title shipped?");
+  // v1.10.00: the live title became "Hunter House - Archive" (tab pairing with
+  // the entry's "Hunter House - Home" — Brandon, 2026-08-23).
+  if (!/<title>\s*Hunter House - Archive\s*<\/title>/.test(live))
+    fail("browse.html: <title> is not the live title 'Hunter House - Archive'");
   else pass("browse.html: live <title> intact");
   // AUDIT-2026-07-19 M4: the v1.09 promotion shipped the "-next" page icons to
   // live (manifests were repointed; the in-page <link> icons were missed).

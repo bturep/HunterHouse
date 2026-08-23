@@ -102,11 +102,9 @@
     return on;
   })();
 </script>
-<!-- Splash-mode pre-init: if this load will fire splash-mode (desktop), mark
-     body so the header .markid renders at opacity:0 from the very first
-     paint instead of flashing visible-then-fading-out as the main JS init
-     catches up. Mobile skips splash-mode (and thus this pre-init). -->
-<script>if(!matchMedia('(max-width:767px)').matches)document.documentElement.dataset.splashInit='1';</script>
+<!-- Splash PREAMBLE REMOVED (2026-08-23): the entry site is the threshold now;
+     every load lands straight on the grid. The about pane stays reachable via
+     the wordmark. (The old pre-init that hid .markid before splash is gone.) -->
 <script>/* test.94: one type size — the Aa cycle is retired; stored sizes are ignored */</script>
 <!-- SPARQL warm-up. Wakes the Wikibase Cloud endpoint pool during HTML parse
      so the full CATALOGUE_QUERY fired by main() doesn't pay the ~30-60 s
@@ -4038,7 +4036,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.10-test.21";
+  const VERSION      = "v1.11-test.01";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -11022,28 +11020,10 @@ WHERE {
         syncFsBtn();
       });
 
-      // Splash-mode init: on every page load (refresh or first visit), open
-      // the HHFA about pane as a title-wall threshold. Desktop also collapses
-      // both side panels; mobile uses its own #mob-about modal (no panels to
-      // collapse — the tabs handle layout).
-      // FRONT-DOOR ENTRY: ?enter (used by the entry site's "Browse the archive")
-      // skips the title-wall and lands straight on the grid — the entry already
-      // was the threshold, so a second splash is redundant.
-      if (new URLSearchParams(location.search).has("enter")) {
-        document.documentElement.removeAttribute("data-splash-init");
-      } else if (window.matchMedia("(max-width:767px)").matches) {
-        document.body.classList.add("hh-splash");   // × hidden, Continue shown
-        openMobAbout();
-      } else {
-        leftP.classList.add("out");
-        rightP.classList.add("out");
-        document.body.classList.add("hh-splash");   // first-paint title-wall lock
-        openAboutPane();   // adds body.hh-about-open → keeps .markid opacity:0
-        // openAboutPane has the markid pinned via body.hh-about-open now,
-        // so the head-level data-splash-init attribute (which prevented the
-        // visible-then-fade-out flash before this JS ran) can stand down.
-        document.documentElement.removeAttribute("data-splash-init");
-      }
+      // SPLASH PREAMBLE REMOVED (2026-08-23): the entry site (the home page) is
+      // the threshold now — every load, any origin, lands straight on the grid.
+      // (?enter still works as a no-op; the about pane opens via the wordmark.)
+      document.documentElement.removeAttribute("data-splash-init");
       syncFsBtn();   // start with the icon/title matching the DOM
     }
 
