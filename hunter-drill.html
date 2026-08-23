@@ -34,10 +34,14 @@
   #closeup img{max-width:92vw;max-height:84vh;border:1px solid rgba(27,25,24,.14)}
   #closeup .ccite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:10px}
   /* ── the shared system ── */
+  /* rev A: every stop centres a capped INNER FRAME -- the baseline lives inside
+     the frame (its own bottom edge), not against the viewport. */
   .stop{position:fixed;inset:0;z-index:6;overflow:hidden;visibility:hidden;background:#f6f5f5;
-    display:flex;align-items:flex-end;justify-content:space-between;gap:clamp(28px,5vw,70px);
-    padding:46px 46px 74px;will-change:transform}
-  .stopmark{position:absolute;left:46px;top:44px;z-index:2;display:flex;flex-direction:column;gap:12px}
+    display:flex;align-items:center;justify-content:center;
+    padding:120px 0 90px;will-change:transform}   /* clears the crumb above, breathes below */
+  .stop > .inner{width:min(1280px, 100% - 92px);max-height:100%;
+    display:flex;align-items:flex-end;justify-content:space-between;gap:clamp(28px,5vw,70px)}
+  .stopmark{position:absolute;left:46px;top:104px;z-index:2;display:flex;flex-direction:column;gap:12px}   /* rev A: clears the parent crumb (32/64px rows) */
   .stopmark .tick{height:1.5px;background:#1b1918}
   .stopmark .name{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
     font-weight:700;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#1b1918}
@@ -46,7 +50,7 @@
   .cite{width:0;min-width:100%;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.06em;line-height:1.9;color:rgba(27,25,24,.5);
     text-align:right;margin-top:8px}
-  .txtcol{width:min(460px,42vw);flex:0 1 auto;max-height:calc(100vh - 160px);overflow-y:auto;
+  .txtcol{width:min(460px,42vw);flex:0 1 auto;max-height:100%;overflow-y:auto;
     font-weight:500;font-size:17px;line-height:1.7;color:#1b1918}
   .txtcol p{margin-bottom:1.1em}
   .txtcol.ends-prose{padding-bottom:33px}
@@ -60,19 +64,18 @@
     line-height:2;color:rgba(27,25,24,.5);text-align:center;padding:0 24px}
   /* stop 02 -- the chronology (the reviewed list): two columns, colour-coded
      by thread, a small legend beneath. Colours are the paper-ground set. */
-  #st2{align-items:flex-end;justify-content:flex-start}
-  #st2 .tlwrap{display:flex;flex-direction:column;gap:22px;width:100%}
-  #st2 .tl2col{display:flex;gap:64px;align-items:flex-end}
-  #st2 .tlcol{flex:1 1 0;max-width:560px}
+  #st2 .inner{align-items:flex-end}
+  #st2 .tl2col{flex:1 1 auto;display:grid;grid-template-columns:1fr 1fr;gap:0 70px}
   #st2 .trow{display:flex;align-items:baseline;gap:14px;padding:2px 0;font-size:15px;line-height:1.45}
   #st2 .trow .yr{flex:none;width:76px;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:11px;letter-spacing:.04em;color:rgba(27,25,24,.55)}
   #st2 .trow .tt{font-weight:500}
   #st2 .trow .tt.key{font-weight:600}
-  .c-life{color:#1b1918} .c-zen{color:#4f7a6b} .c-practice{color:#5a708c}
-  .c-writing{color:#7c5470} .c-art{color:#a8743c} .c-house{color:#8b3a2a}
-  #st2 .tlegend{display:flex;gap:22px;font-family:'JetBrains Mono',Menlo,monospace;
-    font-size:10px;letter-spacing:.18em}
+  /* ONE colour, by weight (rev A, Brandon's call 2026-08-23): everything in ink,
+     the HOUSE entries -- the spine of the site -- in the accent red. The category
+     classes stay in the markup as semantics; only house colours. */
+  .c-life,.c-zen,.c-practice,.c-writing,.c-art{color:#1b1918}
+  .c-house{color:#8b3a2a}
   #m-exit{display:none}
   /* ── mobile — vertical scroll; sticky stop header; 26px margins ── */
   @media (max-width: 1000px) {
@@ -84,6 +87,8 @@
       display:block; padding:5vh 26px;
     }
     .stopmark { display:none; }   /* the sticky m-stopbar carries the names on mobile */
+    .stop > .inner { display:block; width:auto; max-height:none; overflow:visible; }
+    #st2 .tl2col { display:block; }
     .m-stopbar{position:sticky;top:0;z-index:3;background:rgba(246,245,245,.94);
       -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
       padding:18px 26px 16px;display:flex;flex-direction:column;gap:9px}
@@ -115,19 +120,21 @@
 <!-- 01 · 1986 · The Architect -->
 <div id="st1" class="stop" aria-label="The Architect">
   <div class="stopmark"><div class="tick" style="width:56px"></div><div class="name">1986 · The Architect</div></div>
-  <div class="standin" style="width:min(560px,44vw);height:min(420px, calc(100vh - 260px));flex:none">
+  <div class="inner">
+  <div class="standin" style="width:min(560px,44vw);height:min(420px, 52vh);flex:none">
     <div class="si">Stand-in<br>a drawing from another commission,<br>or a landscape with no building in it<br><br>To source · Hunter House Collection</div>
   </div>
   <div class="txtcol">
     <p class="statement">Educated at the Universities of Colorado and Oklahoma, Richard Hunter counts himself as one of an expanding group of architects in North America, Europe, and Japan whose roots spread from the work of Wright, Mendelsohn, and Goff into oriental cultures, prehistory, and the processes of nature.</p>
     <p class="rec">Richard Hunter · Architect, 1986 · <span class="ref" data-cu="portfolio">HH-HHC-0115</span></p>
   </div>
+  </div>
 </div>
 
 <!-- 02 · 1930 – 2023 · The Life — the reviewed chronology (Brandon 2026-08-23) -->
 <div id="st2" class="stop" aria-label="The Life">
   <div class="stopmark"><div class="tick" style="width:124px"></div><div class="name">1930 – 2023 · The Life</div></div>
-  <div class="tlwrap">
+  <div class="inner">
     <div class="tl2col">
       <div class="tlcol">
       <div class="trow"><span class="yr">1930</span><span class="tt c-life key">Born, Phoenix, Arizona</span></div>
@@ -165,20 +172,20 @@
       <div class="trow"><span class="yr">2023</span><span class="tt c-life key">Dies in Victoria</span></div>
       </div>
     </div>
-    <div class="tlegend"><span class="c-life">LIFE</span><span class="c-zen">ZEN</span><span class="c-practice">PRACTICE</span><span class="c-writing">WRITING</span><span class="c-art">ART</span><span class="c-house">HOUSE</span></div>
   </div>
 </div>
 
 <!-- 03 · 1977 – 1986 · Zen Practice -->
 <div id="st3" class="stop" aria-label="Zen Practice">
   <div class="stopmark"><div class="tick" style="width:192px"></div><div class="name">1977 – 1986 · Zen Practice</div></div>
+  <div class="inner">
   <div style="display:flex;gap:22px;align-items:flex-end;flex:none">
     <div class="fig">
-      <img id="img-frh05" src="assets/entry/frh05-bw.jpg" style="height:min(404px, calc(100vh - 220px))" alt="Richard Hunter seated before the bass drum — Music for Solo Performer, 1986">
+      <img id="img-frh05" src="assets/entry/frh05-bw.jpg" style="height:min(404px, 52vh)" alt="Richard Hunter seated before the bass drum — Music for Solo Performer, 1986">
       <div class="cite">Music for Solo Performer · HH-FRH-0005 · 1986</div>
     </div>
     <div class="fig">
-      <img id="img-zendo" src="assets/entry/zendo-1977-display.jpg" style="height:min(404px, calc(100vh - 220px))" alt="Zendo drawing for the Goward Road site, 1977">
+      <img id="img-zendo" src="assets/entry/zendo-1977-display.jpg" style="height:min(404px, 52vh)" alt="Zendo drawing for the Goward Road site, 1977">
       <div class="cite">Zendo · <span class="ref" data-cu="zendo">HH-HHC-0004</span> · 1977</div>
     </div>
   </div>
@@ -189,12 +196,14 @@
     <p>In 1985 the Victoria Zen Centre held a weekend retreat in the forest at Goward Road — an outdoor platform, work periods, a ten-minute kinhin train through the trees. Their history of it names the place Kendo Ric Hunter's house.</p>
     <p>He drew a Zendo for the site twice, in 1977 and again in 1978. Neither was built.</p>
   </div>
+  </div>
 </div>
 
 <!-- 04 · 2019 – 2023 · The Record -->
 <div id="st4" class="stop" aria-label="The Record">
   <div class="stopmark"><div class="tick" style="width:260px"></div><div class="name">2019 – 2023 · The Record</div></div>
-  <div class="standin" style="width:min(560px,44vw);height:min(420px, calc(100vh - 260px));flex:none">
+  <div class="inner">
+  <div class="standin" style="width:min(560px,44vw);height:min(420px, 52vh);flex:none">
     <div class="si">Stand-in<br>the working file itself —<br>the tubes, the folded sheets, the shelf<br><br>To source · Hunter House Collection</div>
   </div>
   <div class="txtcol">
@@ -204,11 +213,12 @@
     <p class="statement" style="margin-top:26px">Architecture, the sheltering art, is a repository of human experience.</p>
     <p class="rec">Richard Hunter · notebook, undated</p>
   </div>
+  </div>
 </div>
 
 <div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
 <div id="m-exit" role="button" tabindex="0" aria-label="Back to the survey">← Hunter House</div>
-<div id="ver">hd2-v0.22</div>
+<div id="ver">hd2-v0.23</div>
 <script>
 (function () {
   var z = 2, target = 2, Z_HERO = 1;
@@ -343,7 +353,7 @@
   window.addEventListener("resize", apply);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
   apply();
-  console.log("hunter-drill hd2-v0.22 -- responsive measure/images/height caps; stack floor at 1000px");
+  console.log("hunter-drill hd2-v0.23 -- rev A: content frame; Life timeline one colour by weight (house in red)");
 })();
 </script>
 </body>
