@@ -4,7 +4,7 @@
      system -- stop name + growing tick top-left, common 74px baseline, 460px
      text measure, cites right-aligned to the image edge.
        01  1986 · The Architect        the portfolio bio, verbatim (image to source)
-       02  1956 – 1985 · Selected Projects   the 17-project list, chronological
+       02  1930 – 2023 · The Life      the reviewed chronology, colour-coded, 2 columns
        03  1977 – 1986 · Zen Practice  performer bio + FRH-0005 & the 1977 Zendo (404px)
        04  2019 – 2023 · The Record    the CAA donation; closes on the notebook line
      References in the prose open the existing closeup (never a new tab).
@@ -57,14 +57,21 @@
     background:repeating-linear-gradient(-45deg, #eceae4 0 12px, #f3f1eb 12px 24px)}
   .standin .si{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;
     line-height:2;color:rgba(27,25,24,.5);text-align:center;padding:0 24px}
-  /* stop 02 -- the projects list, full width */
+  /* stop 02 -- the chronology (the reviewed list): two columns, colour-coded
+     by thread, a small legend beneath. Colours are the paper-ground set. */
   #st2{align-items:flex-end;justify-content:flex-start}
-  #st2 .plist{width:760px}
-  #st2 .prow{display:flex;justify-content:space-between;align-items:baseline;padding:2px 0;
-    font-weight:500;font-size:16px;line-height:1.4}
-  #st2 .prow .yr{font-family:'JetBrains Mono',Menlo,monospace;font-size:12px;letter-spacing:.04em;color:rgba(27,25,24,.55)}
-  #st2 .src{position:absolute;right:46px;bottom:74px;font-family:'JetBrains Mono',Menlo,monospace;
-    font-size:10px;letter-spacing:.06em;line-height:1.9;color:rgba(27,25,24,.5);text-align:right}
+  #st2 .tlwrap{display:flex;flex-direction:column;gap:22px;width:100%}
+  #st2 .tl2col{display:flex;gap:64px;align-items:flex-end}
+  #st2 .tlcol{flex:1 1 0;max-width:560px}
+  #st2 .trow{display:flex;align-items:baseline;gap:14px;padding:2px 0;font-size:15px;line-height:1.45}
+  #st2 .trow .yr{flex:none;width:76px;font-family:'JetBrains Mono',Menlo,monospace;
+    font-size:11px;letter-spacing:.04em;color:rgba(27,25,24,.55)}
+  #st2 .trow .tt{font-weight:500}
+  #st2 .trow .tt.key{font-weight:600}
+  .c-life{color:#1b1918} .c-zen{color:#4f7a6b} .c-practice{color:#5a708c}
+  .c-writing{color:#7c5470} .c-art{color:#a8743c} .c-house{color:#8b3a2a}
+  #st2 .tlegend{display:flex;gap:22px;font-family:'JetBrains Mono',Menlo,monospace;
+    font-size:10px;letter-spacing:.18em}
   #m-exit{display:none}
   /* ── mobile — vertical scroll; sticky stop header; 26px margins ── */
   @media (max-width: 767px) {
@@ -87,8 +94,10 @@
     .txtcol { width:auto; padding-bottom:0; font-size:16px; line-height:1.6; }
     .txtcol .statement { font-size:20px; }
     .standin { width:100% !important; height:52vw !important; margin-bottom:4vh; }
-    #st2 .plist { width:auto; }
-    #st2 .src { position:static; text-align:left; margin-top:3vh; }
+    #st2 .tl2col { flex-direction:column; gap:0; align-items:stretch; }
+    #st2 .tlcol { max-width:none; }
+    #st2 .trow { font-size:14px; }
+    #st2 .tlegend { flex-wrap:wrap; gap:14px; margin-top:3vh; }
     #m-exit { display:block; margin:6vh auto calc(7vh + env(safe-area-inset-bottom)); padding:16px 22px; width:max-content;
       font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; font-weight:700; font-size:14px;
       letter-spacing:.08em; text-transform:uppercase; color:#1b1918; cursor:pointer;
@@ -114,29 +123,49 @@
   </div>
 </div>
 
-<!-- 02 · 1956 – 1985 · Selected Projects -->
-<div id="st2" class="stop" aria-label="Selected Projects">
-  <div class="stopmark"><div class="tick" style="width:124px"></div><div class="name">1956 – 1985 · Selected Projects</div></div>
-  <div class="plist">
-    <div class="prow"><span>Stainless steel skyscraper design, New York</span><span class="yr">1956</span></div>
-    <div class="prow"><span>Skyhouse, San Francisco</span><span class="yr">1957</span></div>
-    <div class="prow"><span>Department of Culture, Nevada</span><span class="yr">1960</span></div>
-    <div class="prow"><span>Cottage and Garden for Motozo &amp; Haruko Torii, Kyoto, Japan</span><span class="yr">1963 / 1985</span></div>
-    <div class="prow"><span>Tor Aurora, Fairbanks, Alaska</span><span class="yr">1965</span></div>
-    <div class="prow"><span>House for Deborah Pomeroy, Fairbanks, Alaska</span><span class="yr">1966</span></div>
-    <div class="prow"><span>Rabinowitz Residence, Fairbanks, Alaska</span><span class="yr">1967</span></div>
-    <div class="prow"><span>Rankin Residence, Victoria, B.C.</span><span class="yr">1969</span></div>
-    <div class="prow"><span>Mt. Baldy Zen Centre, California</span><span class="yr">1971</span></div>
-    <div class="prow"><span><span class="ref" data-cu="hunterres">Hunter Residence, Victoria, B.C.</span></span><span class="yr">1973</span></div>
-    <div class="prow"><span>Intermediate Care Home, Terrace, B.C.</span><span class="yr">1975</span></div>
-    <div class="prow"><span>Young Residence, Victoria, B.C.</span><span class="yr">1975</span></div>
-    <div class="prow"><span>Sievert Residence, Victoria, B.C.</span><span class="yr">1976</span></div>
-    <div class="prow"><span>Arborean V, Vancouver Island</span><span class="yr">1981 / 1985</span></div>
-    <div class="prow"><span>Cook Residence, Victoria, B.C.</span><span class="yr">1983</span></div>
-    <div class="prow"><span>Not <i>I</i> Playhouse, Paris</span><span class="yr">1984</span></div>
-    <div class="prow"><span>Earthton, Canada</span><span class="yr">1985</span></div>
+<!-- 02 · 1930 – 2023 · The Life — the reviewed chronology (Brandon 2026-08-23) -->
+<div id="st2" class="stop" aria-label="The Life">
+  <div class="stopmark"><div class="tick" style="width:124px"></div><div class="name">1930 – 2023 · The Life</div></div>
+  <div class="tlwrap">
+    <div class="tl2col">
+      <div class="tlcol">
+      <div class="trow"><span class="yr">1930</span><span class="tt c-life key">Born, Phoenix, Arizona</span></div>
+      <div class="trow"><span class="yr">1955</span><span class="tt c-writing key">Eric Mendelsohn Portfolio</span></div>
+      <div class="trow"><span class="yr">1958</span><span class="tt c-practice">Graduates, University of Oklahoma</span></div>
+      <div class="trow"><span class="yr">1958</span><span class="tt c-zen key">First trip to Japan — Zen at Daitoku-ji, Kyoto</span></div>
+      <div class="trow"><span class="yr">1959 – 61</span><span class="tt c-practice">Welton Becket Assoc., San Francisco</span></div>
+      <div class="trow"><span class="yr">1961 – 62</span><span class="tt c-practice">Fairbanks Int'l Airport, unbuilt</span></div>
+      <div class="trow"><span class="yr">1962 – 64</span><span class="tt c-zen">Lives in Kyoto</span></div>
+      <div class="trow"><span class="yr">1964 – 68</span><span class="tt c-practice">Architect in Fairbanks, Alaska</span></div>
+      <div class="trow"><span class="yr">1966</span><span class="tt c-writing">A Concise History of East Asia — photographs</span></div>
+      <div class="trow"><span class="yr">1968</span><span class="tt c-life">Moves to Victoria, B.C.</span></div>
+      <div class="trow"><span class="yr">1969 – 74</span><span class="tt c-practice">Private practice I, Victoria</span></div>
+      <div class="trow"><span class="yr">1970 – 73</span><span class="tt c-house key">Designs and builds the Hunter Residence</span></div>
+      <div class="trow"><span class="yr">1974</span><span class="tt c-life">Canadian citizenship</span></div>
+      <div class="trow"><span class="yr">1974</span><span class="tt c-art">In Praise of Hands, Toronto — chemigraphy</span></div>
+      <div class="trow"><span class="yr">1974 – 81</span><span class="tt c-practice">Design architect, B.C. Government</span></div>
+      <div class="trow"><span class="yr">1975</span><span class="tt c-zen key">Hosts Sasaki Roshi — two talks at 203 Goward</span></div>
+      </div>
+      <div class="tlcol">
+      <div class="trow"><span class="yr">1976</span><span class="tt c-art">Habitat UN Conference, Vancouver</span></div>
+      <div class="trow"><span class="yr">1977</span><span class="tt c-art">Fiberworks, Cleveland Museum of Art</span></div>
+      <div class="trow"><span class="yr">1978</span><span class="tt c-practice">Skeenaview Care Home, Terrace</span></div>
+      <div class="trow"><span class="yr">1980</span><span class="tt c-practice">100 Mile House care facility</span></div>
+      <div class="trow"><span class="yr">1981 – 82</span><span class="tt c-zen key">Ten-month family journey: Japan, China, India, Egypt, England</span></div>
+      <div class="trow"><span class="yr">1981 – 86</span><span class="tt c-practice">Private practice II, Victoria</span></div>
+      <div class="trow"><span class="yr">1983</span><span class="tt c-practice">Vietnamese Buddhist community master plan, Vancouver</span></div>
+      <div class="trow"><span class="yr">1984</span><span class="tt c-practice">Lady Minto Hospital, Ganges</span></div>
+      <div class="trow"><span class="yr">1986</span><span class="tt c-writing key">Hunter portfolio published</span></div>
+      <div class="trow"><span class="yr">1986</span><span class="tt c-art key">Performs Lucier's Music for Solo Performer, UVic</span></div>
+      <div class="trow"><span class="yr">1988</span><span class="tt c-practice key">Disowns client alterations — the “Pumple letter”</span></div>
+      <div class="trow"><span class="yr">1990</span><span class="tt c-house key">West Wing addition — permit and construction</span></div>
+      <div class="trow"><span class="yr">2005 – 06</span><span class="tt c-writing">“On the Early Sketches of Eric Mendelsohn”</span></div>
+      <div class="trow"><span class="yr">2018</span><span class="tt c-house key">Dining room design addition</span></div>
+      <div class="trow"><span class="yr">2023</span><span class="tt c-life key">Dies in Victoria</span></div>
+      </div>
+    </div>
+    <div class="tlegend"><span class="c-life">LIFE</span><span class="c-zen">ZEN</span><span class="c-practice">PRACTICE</span><span class="c-writing">WRITING</span><span class="c-art">ART</span><span class="c-house">HOUSE</span></div>
   </div>
-  <div class="src">Richard Hunter · Architect, 1986 · <span class="ref" data-cu="portfolio">HH-HHC-0115</span></div>
 </div>
 
 <!-- 03 · 1977 – 1986 · Zen Practice -->
@@ -178,7 +207,7 @@
 
 <div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
 <div id="m-exit" role="button" tabindex="0" aria-label="Back to the survey">← Hunter House</div>
-<div id="ver">hd2-v0.20</div>
+<div id="ver">hd2-v0.21</div>
 <script>
 (function () {
   var z = 2, target = 2, Z_HERO = 1;
@@ -298,7 +327,7 @@
 
   // ── mobile: the sticky stopbar name swaps + tick grows with scroll ──
   if (MOBILE) {
-    var names = ["1986 · The Architect", "1956 – 1985 · Selected Projects", "1977 – 1986 · Zen Practice", "2019 – 2023 · The Record"];
+    var names = ["1986 · The Architect", "1930 – 2023 · The Life", "1977 – 1986 · Zen Practice", "2019 – 2023 · The Record"];
     var mname = document.getElementById("mname"), mtick = document.getElementById("mtick");
     var onScroll = function () {
       var y = window.scrollY + 80, idx = 0;
@@ -313,7 +342,7 @@
   window.addEventListener("resize", apply);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
   apply();
-  console.log("hunter-drill hd2-v0.20 -- rebuilt to the drills handoff: four stops, stopmarks, 74px baseline, 460px measure");
+  console.log("hunter-drill hd2-v0.21 -- stop 02 = the reviewed chronology (colour-coded, legend)");
 })();
 </script>
 </body>
