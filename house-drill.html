@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- entry-test2 v1.00 — the sectioned entry (Brandon, 2026-07-21):
+<!-- house-drill v1.01 — the HOUSE drill-down (forked from entry-test2) (Brandon, 2026-07-21):
      HERO (film loop, no scrim; Hunter's 1970 NAMEBLOCK centred,
        riding off with the photo; wordmark fades in top-left) ->
      HOUSE: the 1970 letter elevation sketch + Hunter's OWN WORDS (L001, text right)
@@ -24,8 +24,8 @@
 <meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500;800&display=swap" rel="stylesheet">
-<link rel="preload" as="image" fetchpriority="high" href="assets/entry/caa8-sheet_thumb.jpg">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="preload" as="image" fetchpriority="high" href="assets/entry/caa8-plan-crop.png">
 <link rel="preload" as="image" href="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
@@ -153,7 +153,7 @@
   /* ── mobile — VERTICAL SCROLL: the slide engine is off (JS MOBILE guard); every
      section is unpinned from position:fixed into normal document flow and stacked
      top-to-bottom. !important beats any inline style the driver may have set. ──── */
-  @media (max-width: 700px) {
+  @media (max-width: 767px) {
     html, body { overflow-x:hidden; overflow-y:auto; height:auto; -webkit-overflow-scrolling:touch; }
     #stage { position:static; }
     #sheet, #hero, #wordmark, #menu { display:none !important; }   /* full drawing + desktop chrome */
@@ -298,15 +298,7 @@
   </div>
 </div>
 <div id="closeup" aria-label="Close view"><button class="cu-nav cu-prev" aria-label="Previous image">‹</button><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div><button class="cu-nav cu-next" aria-label="Next image">›</button></div>
-<div id="hero" aria-hidden="true">
-  <!-- Brandon's film footage (Sequence 01, 11:36-11:48 loop), no scrim.
-       Poster = the 11:38:05 still, so the entry opens on his chosen frame. -->
-  <video autoplay muted loop playsinline fetchpriority="low" poster="assets/entry/entry-still.jpg">
-    <source src="assets/entry/entry-loop.mp4" type="video/mp4">
-  </video>
-  <img class="hlogo" src="assets/entry/nameblock-1970.png" alt="Hunter House · Victoria B.C. · 1970 · Ric Hunter Architect">
-  <div class="hcite">Film footage · 2026 · nameblock from HH-CAA-0007, 1970</div>
-</div>
+<div id="hero" aria-hidden="true"><!-- retired -- film hero lives in the parent entry; media removed (entry-loop.mp4 404'd on every open) --></div>
 <div id="wordmark" style="display:none;position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#1b1918;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
 <nav id="menu" aria-label="Site" style="display:none;position:fixed;top:0;left:0;right:0;z-index:8;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62);transform:translateY(-110%);opacity:0;will-change:transform,opacity">
   <a data-z="1" style="padding:6px 15px;cursor:pointer">House</a>
@@ -315,7 +307,7 @@
   <a style="padding:6px 15px">Archive</a>
   <a style="padding:6px 15px">About</a>
 </nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v1.00</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v1.01</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -325,7 +317,10 @@
   // MOBILE: below the breakpoint the whole slide engine is OFF -- the page becomes a
   // plain vertical scroll (sections unpinned to normal flow by the @media block, all
   // with !important). The driver, the input hijack and the gallery-align are no-ops.
-  var MOBILE = window.matchMedia("(max-width: 700px)").matches;
+  var MOBILE = window.matchMedia("(max-width: 767px)").matches;
+  // crossing the breakpoint live (tablet rotation) would strand a hybrid state --
+  // the engine is wired at load, so the honest recovery is a reload.
+  window.matchMedia("(max-width: 767px)").addEventListener("change", function () { location.reload(); });
   var ease = function (t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; };
   var hero = document.getElementById("hero");
   var menuEl = document.getElementById("menu");
@@ -374,24 +369,8 @@
 
   function apply() {
     if (MOBILE) return;   // mobile = static vertical scroll; the @media block owns layout
-    // ── the entry photograph: HUNTER HOUSE centred, scrolled past ──────────
-    var eH = ease(Math.max(0, Math.min(1, z / Z_HERO)));
-    hero.style.transform = "translateY(" + (-eH * 104) + "vh)";
-    hero.style.visibility = eH >= 1 ? "hidden" : "visible";
-    // the menu arrives the moment scroll starts
-    var mIn = Math.max(0, Math.min(1, z / 0.22));
-    menuEl.style.transform = "translateY(" + ((1 - mIn) * -110) + "%)";
-    menuEl.style.opacity = mIn;
-    // the nameblock stays STATIC at centre while the photograph scrolls:
-    // counter-translate against the hero's motion; the hero's rising bottom
-    // edge (overflow:hidden) clips the white lettering until it is gone —
-    // white on paper would merge, so the photo is the mark's only ground
-    var counter = "translateY(" + (eH * 104) + "vh)";
-    document.querySelector("#hero .hlogo").style.transform = "translate(-50%,-50%) " + counter;
-    // the top-left wordmark fades in as the photo clears
-    wm.style.opacity = Math.max(0, Math.min(1, (z - 0.45) / 0.3));
-    // the version badge reads paper-white over the entry footage, ink after
-    document.getElementById("ver").style.color = eH < 0.6 ? "rgba(246,245,245,.6)" : "rgba(27,25,24,.35)";
+    // (hero/menu/wordmark choreography removed -- all three are retired, display:none;
+    //  the drill opens directly on the reading. z still starts at 2 = past the old hero.)
 
     // ── the reading (everything below runs in zr = z - Z_HERO space) ───────
     var zr = Math.max(0, z - Z_HERO);
@@ -525,23 +504,8 @@
   window.addEventListener("pointerup", dragRelease);
   window.addEventListener("pointercancel", dragRelease);
 
-  // the heavy drawings climb a tier ladder — a tiny thumb paints instantly,
-  // then the 2000px preview, then the 3840px large as each arrives; the
-  // sheet is never blank even while the entry video streams
-  ["sheet-img"].forEach(function (id) {
-    var el = document.getElementById(id);
-    function climb(attr) {
-      var url = el.getAttribute(attr);
-      if (!url) { if (attr === "data-mid") climb("data-large"); return; }
-      var im = new Image();
-      im.onload = function () {
-        el.src = url;
-        if (attr === "data-mid") climb("data-large");
-      };
-      im.src = url;
-    }
-    climb(el.getAttribute("data-mid") ? "data-mid" : "data-large");
-  });
+  // tier-ladder climb REMOVED (audit 2026-08-22): #sheet is retired from this flow;
+  // the climber was re-downloading ~1.8 MB of prev+large tiers on every drill open.
 
   // click-to-enlarge: the reading's plan
   var colImgEl = document.querySelector("#flow .photocol img");
@@ -769,6 +733,7 @@
   function _cool() { clearTimeout(_lockT); _lockT = setTimeout(function () { _locked = false; }, 260); }
   window.addEventListener("wheel", function (e) {
     if (MOBILE) return;   // let the page scroll natively on mobile
+    if (closeup.classList.contains("on")) { e.preventDefault(); return; }   // modal open -- don't drive the carousel behind it
     e.preventDefault();
     var ad = Math.abs(e.deltaY), dir = e.deltaY > 0 ? 1 : -1;
     if (_locked) {
@@ -791,6 +756,8 @@
   }, { passive: true });
   window.addEventListener("keydown", function (e) {
     if (MOBILE) return;
+    if (closeup.classList.contains("on")) return;   // the closeup's own handler owns keys while open
+    if (e.key === "Escape") { requestExit(); return; }   // Esc leaves the drill (works with focus inside the iframe)
     if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); advance(1); }
     if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); advance(-1); }
   });
@@ -827,7 +794,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test2 v1.00 -- preload the CAA-0018 preview (heavy image was slow to paint)");
+  console.log("house-drill v1.01 -- audit batch 1: bugs (404, breakpoints, input guards, JBM import)");
 })();
 </script>
 </body>

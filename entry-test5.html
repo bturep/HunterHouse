@@ -427,13 +427,13 @@
     .scard[data-section="about"]  .at-statement{font-size:19px}   /* one size across all cards on mobile */
     .scard[data-section="about"] .at-statement{max-width:none !important}
     /* ── composed mobile layout (?place · MOBILE save). All lefts = --menu-x. ── */
-    .scard[data-section="hunter"] .about-text { left:var(--menu-x) !important; top:67.70vh !important; width:370px !important; right:auto !important; bottom:auto !important; transform:none !important }
-    .scard[data-section="house"]  .about-text { left:var(--menu-x) !important; top:72.81vh !important; width:430px !important; right:auto !important; bottom:auto !important; transform:none !important }
-    .scard[data-section="archive"] .about-text { left:var(--menu-x) !important; top:32.73vh !important; width:343px !important; right:auto !important; bottom:auto !important; transform:none !important }
-    .scard[data-section="about"]  .about-text { left:var(--menu-x) !important; top:12.32vh !important; width:430px !important; right:auto !important; bottom:auto !important; transform:none !important; flex-direction:column !important }
-    .scard[data-section="hunter"] .enter-cue { left:var(--menu-x) !important; top:89.87vh !important; right:auto !important; bottom:auto !important; transform:none !important }
-    .scard[data-section="house"]  .enter-cue { left:var(--menu-x) !important; top:89.87vh !important; right:auto !important; bottom:auto !important; transform:none !important }
-    .scard[data-section="archive"] .enter-cue { left:var(--menu-x) !important; top:89.87vh !important; right:auto !important; bottom:auto !important; transform:none !important }
+    .scard[data-section="hunter"] .about-text { left:var(--menu-x) !important; top:67.70dvh !important; width:370px !important; right:auto !important; bottom:auto !important; transform:none !important }
+    .scard[data-section="house"]  .about-text { left:var(--menu-x) !important; top:72.81dvh !important; width:430px !important; right:auto !important; bottom:auto !important; transform:none !important }
+    .scard[data-section="archive"] .about-text { left:var(--menu-x) !important; top:32.73dvh !important; width:343px !important; right:auto !important; bottom:auto !important; transform:none !important }
+    .scard[data-section="about"]  .about-text { left:var(--menu-x) !important; top:12.32dvh !important; width:430px !important; right:auto !important; bottom:auto !important; transform:none !important; flex-direction:column !important }
+    .scard[data-section="hunter"] .enter-cue { left:var(--menu-x) !important; top:89.87dvh !important; right:auto !important; bottom:auto !important; transform:none !important }
+    .scard[data-section="house"]  .enter-cue { left:var(--menu-x) !important; top:89.87dvh !important; right:auto !important; bottom:auto !important; transform:none !important }
+    .scard[data-section="archive"] .enter-cue { left:var(--menu-x) !important; top:89.87dvh !important; right:auto !important; bottom:auto !important; transform:none !important }
     #film-cite { left:2.02vw !important; top:95.84vh !important; right:auto !important; bottom:auto !important; transform:none !important; font-size:10px !important }
     .scard[data-section="hunter"] .layer { object-position:0.7% 46.4% !important; object-fit:cover !important }
     .scard[data-section="house"]  .layer { object-position:87.5% 49.1% !important; object-fit:cover !important }
@@ -675,7 +675,7 @@
   <iframe id="hd-frame" title="The House" src="about:blank"></iframe>
 </div>
 <div id="hd-crumb" role="button" tabindex="0" aria-label="Back to the survey"><span class="hc-a">Hunter</span><span class="hc-b">House</span></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v1.99</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.00</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -973,23 +973,9 @@
   window.addEventListener("pointerup", dragRelease);
   window.addEventListener("pointercancel", dragRelease);
 
-  // the heavy drawings climb a tier ladder — a tiny thumb paints instantly,
-  // then the 2000px preview, then the 3840px large as each arrives; the
-  // sheet is never blank even while the entry video streams
-  ["sheet-img", "caa18-img"].forEach(function (id) {
-    var el = document.getElementById(id);
-    function climb(attr) {
-      var url = el.getAttribute(attr);
-      if (!url) { if (attr === "data-mid") climb("data-large"); return; }
-      var im = new Image();
-      im.onload = function () {
-        el.src = url;
-        if (attr === "data-mid") climb("data-large");
-      };
-      im.src = url;
-    }
-    climb(el.getAttribute("data-mid") ? "data-mid" : "data-large");
-  });
+  // tier-ladder climb REMOVED (audit 2026-08-22): #sheet-img and #caa18-img belong to
+  // the retired inline HOUSE flow (display:none) -- the ladder was silently downloading
+  // the 2000px + 3840px tiers (multi-MB) for images that never show.
 
   // click-to-enlarge: the reading's plan sketch
   var colImgEl = document.querySelector("#flow .photocol img");
@@ -1626,11 +1612,13 @@
   // ── HOUSE drill-down (iframe reading mechanic) ──
   var houseDrill = document.getElementById("house-drill"), hdFrame = document.getElementById("hd-frame"), hdOpen = false;
   function openHouseDrill() {
-    if (hdFrame.getAttribute("src") !== "house-drill.html?v=42") hdFrame.src = "house-drill.html?v=42";   // (re)load fresh
+    if (hdFrame.getAttribute("src") !== "house-drill.html?v=43") hdFrame.src = "house-drill.html?v=43";   // (re)load fresh
     hdOpen = true;
     document.body.classList.add("room-open");
     surveyEl.style.overflow = "hidden";
     houseDrill.classList.add("open"); houseDrill.setAttribute("aria-hidden", "false");
+    // hand keyboard focus to the drill so its keys (arrows, Esc) work immediately
+    setTimeout(function () { try { hdFrame.contentWindow.focus(); } catch (e) {} }, 600);
     startInk();
   }
   function closeHouseDrill() {
@@ -1925,7 +1913,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v1.99 -- preload CAA-0018 image (house-drill v1.00)");
+  console.log("entry-test5 e5-v2.00 -- audit batch 1: iOS dvh CTAs, single film load, no large-tier waste (house-drill v1.01)");
 })();
 </script>
 <!-- ── adaptive entry film: pick a resolution tier by connection + display ── -->
@@ -1952,7 +1940,8 @@
     + ', effType=' + (c.effectiveType || 'n/a')
     + ', downlink=' + (c.downlink != null ? c.downlink + 'Mbps' : 'n/a')
     + ', saveData=' + (!!c.saveData) + '  → ' + src);
-  var vids = document.querySelectorAll('video.tier-vid');
+  // scoped to the live film card only -- the retired #hero copy must NOT load a second full film
+  var vids = document.querySelectorAll('#svid video.tier-vid');
   for (var i=0;i<vids.length;i++){
     var v = vids[i]; v.src = src; try { v.load(); } catch(e){}
     v.addEventListener('loadeddata', (function(el){ return function(){ console.log('[entry film] playing ' + el.videoWidth + 'x' + el.videoHeight); }; })(v), { once:true });
