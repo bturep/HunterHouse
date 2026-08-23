@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- house-drill v1.04 -- the HOUSE drill-down, loaded in entry-test5's iframe.
+<!-- house-drill v1.05 -- the HOUSE drill-down, loaded in entry-test5's iframe.
      DESKTOP (>767px): a z-driven horizontal carousel, six stops (wheel/touch/keys
      advance one stop per gesture):
        (0) the 1970 letter elevation sketch + Hunter's OWN WORDS (L001, text right)
@@ -91,6 +91,15 @@
     cursor:zoom-in;transition:transform .45s ease;will-change:transform}
   #caa18 .c18txt{flex:0 1 520px;max-width:520px;font-weight:500;font-size:17px;line-height:1.7;color:#000}
   #caa18 .c18txt p{margin-bottom:1.1em}
+  /* on desktop the in-panel texts are invisible LAYOUT GHOSTS -- the visible copy is
+     the shared #a2flow block that rides between the two seats (same mechanic as the
+     elevation→plan text). Mobile shows the in-panel texts and hides the layer. */
+  #caa18 .c18txt, #reading2 .txt{visibility:hidden}
+  #a2flow{position:fixed;inset:0;z-index:9;visibility:hidden;pointer-events:none}
+  #a2flow .atxt{position:absolute;display:grid;pointer-events:auto;will-change:left,top,width;
+    font-weight:500;font-size:17px;line-height:1.7;color:#000}
+  #a2flow .apage-r, #a2flow .apage-l{grid-row:1;grid-column:1;align-self:start}
+  #a2flow .atxt p{margin-bottom:1.1em}
   #caa18.zoomed img{cursor:zoom-out}
   /* the Ivan Hunter selection — a quiet grid */
   #ihc{position:fixed;inset:0;z-index:9;visibility:hidden;opacity:0;background:#f6f5f5;
@@ -113,6 +122,10 @@
       opacity:1 !important; visibility:visible !important;
       height:auto !important; min-height:0 !important; overflow:visible !important;
     }
+    /* the shared text layer is desktop-only; mobile shows the in-panel texts */
+    #a2flow { display:none !important; }
+    #caa18 .c18txt, #reading2 .txt { visibility:visible !important; }
+
     /* the CAA-0018 drawing: stacked -- full-width image, its text below */
     #caa18 { padding:5vh 0; flex-direction:column; gap:22px; }
     #caa18 img { max-width:92vw !important; max-height:none !important; width:92vw; height:auto; }
@@ -234,6 +247,8 @@
     </div>
   </div>
 </div>
+<!-- the shared stop-3→4 text block; pages are cloned from the in-panel ghosts at init -->
+<div id="a2flow" aria-hidden="true"><div class="atxt"><div class="apage-r"></div><div class="apage-l"></div></div></div>
 <div id="ihc" aria-label="Photographs by Ivan Hunter">
   <div class="ihead">The house photographed by Ivan Hunter · 2024</div>
   <div class="igrid">
@@ -248,7 +263,7 @@
 <!-- mobile only: a visible way home at the end of the vertical stack (desktop exits by scrolling past the last stop) -->
 <div id="m-exit" role="button" tabindex="0" aria-label="Back to the survey">← Hunter House</div>
 <div id="closeup" aria-label="Close view"><button class="cu-nav cu-prev" aria-label="Previous image">‹</button><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div><button class="cu-nav cu-next" aria-label="Next image">›</button></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v1.04</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v1.05</div>
 
 <script>
 // the z-driven carousel: z eases toward target; STOPS indexes the six states.
@@ -358,6 +373,30 @@
     ihc.style.visibility = iIn > 0 ? "visible" : "hidden";
     ihc.style.opacity = iIn > 0 ? "1" : "0";
     ihc.style.transform = "translateX(" + ((1 - ease(iIn)) * 100) + "vw)";
+
+    // ── the SHARED TEXT across stops 3→4 (same mechanic as the elevation→plan beat):
+    // ONE block rides in with the drawing (seat RIGHT), slides right→left as its
+    // content crossfades (apage-r → apage-l), and exits left with the tower.
+    // Seats are measured from the invisible in-panel ghosts (.c18txt / #r2txt keep
+    // the layout; their content is cloned into the pages at init), minus each
+    // panel's current translate so the seats are panel-independent.
+    var a2 = document.getElementById("a2flow");
+    var atxt = a2.firstElementChild;
+    var W = window.innerWidth;
+    var qe = ease(c18Out);                                    // the move+swap progress (4.35..4.90)
+    var inQ = ease(c18In), outQ = ease(r2Out);
+    var gR = document.querySelector("#caa18 .c18txt").getBoundingClientRect();
+    var gL = document.getElementById("r2txt").getBoundingClientRect();
+    var c18tx = ((1 - inQ) - qe) * W;                          // caa18 panel's translate, px
+    var r2tx = ((1 - qe) - outQ) * W;                          // reading2 panel's translate, px
+    var seatRx = gR.left - c18tx, seatLx = gL.left - r2tx;
+    atxt.style.left  = (seatRx + (seatLx - seatRx) * qe + (1 - inQ) * W - outQ * W) + "px";
+    atxt.style.top   = (gR.top + (gL.top - gR.top) * qe) + "px";
+    atxt.style.width = (gR.width + (gL.width - gR.width) * qe) + "px";
+    var apR = atxt.children[0], apL = atxt.children[1];
+    apR.style.opacity = 1 - Math.max(0, Math.min(1, (qe - 0.25) / 0.30));   // drawing copy out
+    apL.style.opacity = Math.max(0, Math.min(1, (qe - 0.45) / 0.30));       // addition copy in
+    a2.style.visibility = (zr > 3.25 && zr < 6.0) ? "visible" : "hidden";
   }
 
   // click-to-enlarge: the plan crop + the gallery figures
@@ -507,8 +546,13 @@
   // re-apply once the webfont arrives (text metrics shift the layout slightly)
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
+  // single-source copy: the shared stop-3→4 text pages are cloned from the
+  // in-panel ghosts (edit the ghosts' markup; this picks it up)
+  document.querySelector("#a2flow .apage-r").innerHTML = document.querySelector("#caa18 .c18txt").innerHTML;
+  document.querySelector("#a2flow .apage-l").innerHTML = document.getElementById("r2txt").innerHTML;
+
   apply();
-  console.log("house-drill v1.04 -- CAA-0018 left + text right; addition text left + tower right");
+  console.log("house-drill v1.05 -- stop 3->4 text is ONE block: rides in with the drawing, slides right->left + swaps content, exits with the tower");
 })();
 </script>
 </body>
