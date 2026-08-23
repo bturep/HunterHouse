@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- hunter-drill v0.05 -- the HUNTER drill-down, loaded in entry-test5's iframe.
+<!-- hunter-drill v0.06 -- the HUNTER drill-down, loaded in entry-test5's iframe.
      Two stops:
        (0) the MEDITATION PAIR -- FRH-0005 (Music for Solo Performer, 1986) and
            the zazen deck photograph side by side at equal height, one text
@@ -34,14 +34,16 @@
   #closeup img{max-width:92vw;max-height:84vh;border:1px solid rgba(27,25,24,.14)}
   #closeup .ccite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:10px}
   .shot{position:fixed;inset:0;z-index:6;overflow:hidden;visibility:hidden;background:#f6f5f5;will-change:transform}
-  /* stop 0 — the meditation pair: two photographs at equal height, text beneath */
-  #s0{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;padding:0 4.5vw}
-  #s0 .pair{display:flex;gap:24px;align-items:stretch;justify-content:center;height:56vh}
-  #s0 .pfig{display:flex;flex-direction:column;height:100%}
-  #s0 .pfig img{height:100%;width:auto;display:block;cursor:zoom-in}
-  #s0 .pfig .icite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:8px;text-align:center}
-  #s0 .s0txt{width:min(760px,84vw);font-weight:500;font-size:17px;line-height:1.7;color:#1b1918}
-  #s0 .s0txt p{margin-bottom:1.1em}
+  /* stop 0 — the meditation pair: two photographs at equal height, RIGHT-justified
+     (flush to the right edge); the text sits UNDER the music photograph, its
+     column defined exactly by that photograph's edges (width:0 + min-width:100%) */
+  #s0{display:flex;align-items:center;justify-content:flex-end;padding:0}
+  #s0 .pair{display:flex;gap:24px;align-items:flex-start;justify-content:flex-end}
+  #s0 .pfig{display:flex;flex-direction:column}
+  #s0 .pfig img{height:56vh;width:auto;display:block;cursor:zoom-in}
+  #s0 .pfig .icite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:8px;text-align:left}
+  #s0 .s0txt{width:0;min-width:100%;margin-top:18px;font-weight:500;font-size:15px;line-height:1.65;color:#1b1918}
+  #s0 .s0txt p{margin-bottom:1em}
   .txt-cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
   /* stop 1 — the covenant: full-vertical photograph left, text on the paper right */
   #s2{z-index:8;display:flex;align-items:stretch;justify-content:flex-start}
@@ -82,16 +84,16 @@
   <div class="pair">
     <div class="pfig">
       <img id="img0" src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0005_MusicForSoloPerformer_1986-11-14_prev.jpg" alt="Richard Hunter seated before the bass drum — Music for Solo Performer, 1986">
-      <div class="icite">Music for Solo Performer · HH-FRH-0005 · 1986</div>
+      <div class="icite">Hunter performing Alvin Lucier’s Music for Solo Performer (Brain Wave Piece) at UVic School of Music · HH-FRH-0005 · 1986</div>
+      <div class="s0txt">
+        <!-- stop 0 copy — Hunter and zen; short; placeholder, Brandon to write -->
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
+      </div>
     </div>
     <div class="pfig">
       <img id="img1" src="assets/entry/hunter-zen.jpg" alt="Zazen on the deck of the house — three sitters facing the forest">
       <div class="icite">Zazen on the deck · source TBC</div>
     </div>
-  </div>
-  <div class="s0txt">
-    <!-- stop 0 copy — Hunter and zen; placeholder, Brandon to write -->
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
   </div>
 </div>
 <div id="s2" class="shot" aria-label="The covenant">
@@ -107,7 +109,7 @@
 <div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
 <!-- mobile only: a visible way home at the end of the vertical stack -->
 <div id="m-exit" role="button" tabindex="0" aria-label="Back to the survey">← Hunter House</div>
-<div id="ver">hd2-v0.05</div>
+<div id="ver">hd2-v0.06</div>
 <script>
 (function () {
   var z = 2, target = 2, Z_HERO = 1;
@@ -210,7 +212,7 @@
   document.addEventListener("keydown", function (e) {
     if (closeup.classList.contains("on") && e.key === "Escape") closeup.classList.remove("on");
   });
-  [["img0", "Music for Solo Performer · HH-FRH-0005 · 14 November 1986"],
+  [["img0", "Hunter performing Alvin Lucier’s Music for Solo Performer (Brain Wave Piece) at UVic School of Music · HH-FRH-0005 · 14 November 1986"],
    ["img1", "Zazen on the deck · source TBC"],
    ["img2", "Richard Hunter above Prospect Lake · Times Colonist, 23 October 2006 · HH-FRH-0051"]].forEach(function (pair) {
     var el = document.getElementById(pair[0]);
@@ -220,7 +222,7 @@
   window.addEventListener("resize", apply);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
   apply();
-  console.log("hunter-drill hd2-v0.05 -- two stops: the meditation pair (one card) -> the covenant");
+  console.log("hunter-drill hd2-v0.06 -- pair right-justified, text under the music photo; Lucier caption");
 })();
 </script>
 </body>
