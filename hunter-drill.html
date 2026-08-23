@@ -4,7 +4,7 @@
      system -- stop name + growing tick top-left, common 74px baseline, 460px
      text measure, cites right-aligned to the image edge.
        01  1986 · The Architect        the portfolio bio, verbatim (image to source)
-       02  1930 – 2023 · The Life      the reviewed chronology, colour-coded, 2 columns
+       02  1956 – 1985 · Selected Projects   the 17-project list, chronological
        03  1977 – 1986 · Zen Practice  performer bio + FRH-0005 & the 1977 Zendo (404px)
        04  2019 – 2023 · The Record    the CAA donation; closes on the notebook line
      References in the prose open the existing closeup (never a new tab).
@@ -34,24 +34,19 @@
   #closeup img{max-width:92vw;max-height:84vh;border:1px solid rgba(27,25,24,.14)}
   #closeup .ccite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:10px}
   /* ── the shared system ── */
-  /* rev A: every stop centres a capped INNER FRAME -- the baseline lives inside
-     the frame (its own bottom edge), not against the viewport. */
   .stop{position:fixed;inset:0;z-index:6;overflow:hidden;visibility:hidden;background:#f6f5f5;
-    display:flex;align-items:center;justify-content:center;
-    padding:120px 0 90px;will-change:transform}   /* clears the crumb above, breathes below */
-  .stop > .inner{width:min(1280px, 100% - 92px);max-height:100%;
-    display:flex;align-items:flex-end;justify-content:space-between;gap:clamp(28px,5vw,70px)}
-  .stopmark{position:absolute;left:46px;top:104px;z-index:2;display:flex;flex-direction:column;gap:12px}   /* rev A: clears the parent crumb (32/64px rows) */
+    display:flex;align-items:flex-end;justify-content:space-between;gap:70px;
+    padding:46px 46px 74px;will-change:transform}
+  .stopmark{position:absolute;left:46px;top:44px;z-index:2;display:flex;flex-direction:column;gap:12px}
   .stopmark .tick{height:1.5px;background:#1b1918}
   .stopmark .name{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
     font-weight:700;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#1b1918}
   .fig{display:flex;flex-direction:column}
-  .fig img{width:auto;display:block;border:1px solid rgba(27,25,24,.14);cursor:zoom-in;max-width:46vw}
+  .fig img{width:auto;display:block;border:1px solid rgba(27,25,24,.14);cursor:zoom-in}
   .cite{width:0;min-width:100%;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.06em;line-height:1.9;color:rgba(27,25,24,.5);
     text-align:right;margin-top:8px}
-  .txtcol{width:min(460px,42vw);flex:0 1 auto;max-height:100%;overflow-y:auto;
-    font-weight:500;font-size:17px;line-height:1.7;color:#1b1918}
+  .txtcol{width:460px;flex:none;font-weight:500;font-size:17px;line-height:1.7;color:#1b1918}
   .txtcol p{margin-bottom:1.1em}
   .txtcol.ends-prose{padding-bottom:33px}
   .txtcol .rec{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;line-height:1.9;color:rgba(27,25,24,.5)}
@@ -62,23 +57,17 @@
     background:repeating-linear-gradient(-45deg, #eceae4 0 12px, #f3f1eb 12px 24px)}
   .standin .si{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;
     line-height:2;color:rgba(27,25,24,.5);text-align:center;padding:0 24px}
-  /* stop 02 -- the chronology (the reviewed list): two columns, colour-coded
-     by thread, a small legend beneath. Colours are the paper-ground set. */
-  #st2 .inner{align-items:flex-end}
-  #st2 .tl2col{flex:1 1 auto;display:grid;grid-template-columns:1fr 1fr;gap:0 70px}
-  #st2 .trow{display:flex;align-items:baseline;gap:14px;padding:2px 0;font-size:15px;line-height:1.45}
-  #st2 .trow .yr{flex:none;width:76px;font-family:'JetBrains Mono',Menlo,monospace;
-    font-size:11px;letter-spacing:.04em;color:rgba(27,25,24,.55)}
-  #st2 .trow .tt{font-weight:500}
-  #st2 .trow .tt.key{font-weight:600}
-  /* ONE colour, by weight (rev A, Brandon's call 2026-08-23): everything in ink,
-     the HOUSE entries -- the spine of the site -- in the accent red. The category
-     classes stay in the markup as semantics; only house colours. */
-  .c-life,.c-zen,.c-practice,.c-writing,.c-art{color:#1b1918}
-  .c-house{color:#8b3a2a}
+  /* stop 02 -- the projects list, full width */
+  #st2{align-items:flex-end;justify-content:flex-start}
+  #st2 .plist{width:760px}
+  #st2 .prow{display:flex;justify-content:space-between;align-items:baseline;padding:2px 0;
+    font-weight:500;font-size:16px;line-height:1.4}
+  #st2 .prow .yr{font-family:'JetBrains Mono',Menlo,monospace;font-size:12px;letter-spacing:.04em;color:rgba(27,25,24,.55)}
+  #st2 .src{position:absolute;right:46px;bottom:74px;font-family:'JetBrains Mono',Menlo,monospace;
+    font-size:10px;letter-spacing:.06em;line-height:1.9;color:rgba(27,25,24,.5);text-align:right}
   #m-exit{display:none}
   /* ── mobile — vertical scroll; sticky stop header; 26px margins ── */
-  @media (max-width: 1000px) {
+  @media (max-width: 767px) {
     html, body { overflow-x:hidden; overflow-y:auto; height:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
     .stop {
       position:static !important; inset:auto !important; transform:none !important;
@@ -87,8 +76,6 @@
       display:block; padding:5vh 26px;
     }
     .stopmark { display:none; }   /* the sticky m-stopbar carries the names on mobile */
-    .stop > .inner { display:block; width:auto; max-height:none; overflow:visible; }
-    #st2 .tl2col { display:block; }
     .m-stopbar{position:sticky;top:0;z-index:3;background:rgba(246,245,245,.94);
       -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
       padding:18px 26px 16px;display:flex;flex-direction:column;gap:9px}
@@ -100,16 +87,14 @@
     .txtcol { width:auto; padding-bottom:0; font-size:16px; line-height:1.6; }
     .txtcol .statement { font-size:20px; }
     .standin { width:100% !important; height:52vw !important; margin-bottom:4vh; }
-    #st2 .tl2col { flex-direction:column; gap:0; align-items:stretch; }
-    #st2 .tlcol { max-width:none; }
-    #st2 .trow { font-size:14px; }
-    #st2 .tlegend { flex-wrap:wrap; gap:14px; margin-top:3vh; }
+    #st2 .plist { width:auto; }
+    #st2 .src { position:static; text-align:left; margin-top:3vh; }
     #m-exit { display:block; margin:6vh auto calc(7vh + env(safe-area-inset-bottom)); padding:16px 22px; width:max-content;
       font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; font-weight:700; font-size:14px;
       letter-spacing:.08em; text-transform:uppercase; color:#1b1918; cursor:pointer;
       border:1px solid rgba(27,25,24,.25); }
   }
-  @media (min-width: 1001px) { .m-stopbar{display:none} }
+  @media (min-width: 768px) { .m-stopbar{display:none} }
   #ver{position:fixed;right:12px;bottom:10px;z-index:11;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none}
 </style>
 </head>
@@ -120,72 +105,50 @@
 <!-- 01 · 1986 · The Architect -->
 <div id="st1" class="stop" aria-label="The Architect">
   <div class="stopmark"><div class="tick" style="width:56px"></div><div class="name">1986 · The Architect</div></div>
-  <div class="inner">
-  <div class="standin" style="width:min(560px,44vw);height:min(420px, 52vh);flex:none">
+  <div class="standin" style="width:560px;height:420px;flex:none">
     <div class="si">Stand-in<br>a drawing from another commission,<br>or a landscape with no building in it<br><br>To source · Hunter House Collection</div>
   </div>
   <div class="txtcol">
     <p class="statement">Educated at the Universities of Colorado and Oklahoma, Richard Hunter counts himself as one of an expanding group of architects in North America, Europe, and Japan whose roots spread from the work of Wright, Mendelsohn, and Goff into oriental cultures, prehistory, and the processes of nature.</p>
     <p class="rec">Richard Hunter · Architect, 1986 · <span class="ref" data-cu="portfolio">HH-HHC-0115</span></p>
   </div>
-  </div>
 </div>
 
-<!-- 02 · 1930 – 2023 · The Life — the reviewed chronology (Brandon 2026-08-23) -->
-<div id="st2" class="stop" aria-label="The Life">
-  <div class="stopmark"><div class="tick" style="width:124px"></div><div class="name">1930 – 2023 · The Life</div></div>
-  <div class="inner">
-    <div class="tl2col">
-      <div class="tlcol">
-      <div class="trow"><span class="yr">1930</span><span class="tt c-life key">Born, Phoenix, Arizona</span></div>
-      <div class="trow"><span class="yr">1955</span><span class="tt c-writing key">Eric Mendelsohn Portfolio</span></div>
-      <div class="trow"><span class="yr">1958</span><span class="tt c-practice">Graduates, University of Oklahoma</span></div>
-      <div class="trow"><span class="yr">1958</span><span class="tt c-zen key">First trip to Japan — Zen at Daitoku-ji, Kyoto</span></div>
-      <div class="trow"><span class="yr">1959 – 61</span><span class="tt c-practice">Welton Becket Assoc., San Francisco</span></div>
-      <div class="trow"><span class="yr">1961 – 62</span><span class="tt c-practice">Fairbanks Int'l Airport, unbuilt</span></div>
-      <div class="trow"><span class="yr">1962 – 64</span><span class="tt c-zen">Lives in Kyoto</span></div>
-      <div class="trow"><span class="yr">1964 – 68</span><span class="tt c-practice">Architect in Fairbanks, Alaska</span></div>
-      <div class="trow"><span class="yr">1966</span><span class="tt c-writing">A Concise History of East Asia — photographs</span></div>
-      <div class="trow"><span class="yr">1968</span><span class="tt c-life">Moves to Victoria, B.C.</span></div>
-      <div class="trow"><span class="yr">1969 – 74</span><span class="tt c-practice">Private practice I, Victoria</span></div>
-      <div class="trow"><span class="yr">1970 – 73</span><span class="tt c-house key">Designs and builds the Hunter Residence</span></div>
-      <div class="trow"><span class="yr">1974</span><span class="tt c-life">Canadian citizenship</span></div>
-      <div class="trow"><span class="yr">1974</span><span class="tt c-art">In Praise of Hands, Toronto — chemigraphy</span></div>
-      <div class="trow"><span class="yr">1974 – 81</span><span class="tt c-practice">Design architect, B.C. Government</span></div>
-      <div class="trow"><span class="yr">1975</span><span class="tt c-zen key">Hosts Sasaki Roshi — two talks at 203 Goward</span></div>
-      </div>
-      <div class="tlcol">
-      <div class="trow"><span class="yr">1976</span><span class="tt c-art">Habitat UN Conference, Vancouver</span></div>
-      <div class="trow"><span class="yr">1977</span><span class="tt c-art">Fiberworks, Cleveland Museum of Art</span></div>
-      <div class="trow"><span class="yr">1978</span><span class="tt c-practice">Skeenaview Care Home, Terrace</span></div>
-      <div class="trow"><span class="yr">1980</span><span class="tt c-practice">100 Mile House care facility</span></div>
-      <div class="trow"><span class="yr">1981 – 82</span><span class="tt c-zen key">Ten-month family journey: Japan, China, India, Egypt, England</span></div>
-      <div class="trow"><span class="yr">1981 – 86</span><span class="tt c-practice">Private practice II, Victoria</span></div>
-      <div class="trow"><span class="yr">1983</span><span class="tt c-practice">Vietnamese Buddhist community master plan, Vancouver</span></div>
-      <div class="trow"><span class="yr">1984</span><span class="tt c-practice">Lady Minto Hospital, Ganges</span></div>
-      <div class="trow"><span class="yr">1986</span><span class="tt c-writing key">Hunter portfolio published</span></div>
-      <div class="trow"><span class="yr">1986</span><span class="tt c-art key">Performs Lucier's Music for Solo Performer, UVic</span></div>
-      <div class="trow"><span class="yr">1988</span><span class="tt c-practice key">Disowns client alterations — the “Pumple letter”</span></div>
-      <div class="trow"><span class="yr">1990</span><span class="tt c-house key">West Wing addition — permit and construction</span></div>
-      <div class="trow"><span class="yr">2005 – 06</span><span class="tt c-writing">“On the Early Sketches of Eric Mendelsohn”</span></div>
-      <div class="trow"><span class="yr">2018</span><span class="tt c-house key">Dining room design addition</span></div>
-      <div class="trow"><span class="yr">2023</span><span class="tt c-life key">Dies in Victoria</span></div>
-      </div>
-    </div>
+<!-- 02 · 1956 – 1985 · Selected Projects -->
+<div id="st2" class="stop" aria-label="Selected Projects">
+  <div class="stopmark"><div class="tick" style="width:124px"></div><div class="name">1956 – 1985 · Selected Projects</div></div>
+  <div class="plist">
+    <div class="prow"><span>Stainless steel skyscraper design, New York</span><span class="yr">1956</span></div>
+    <div class="prow"><span>Skyhouse, San Francisco</span><span class="yr">1957</span></div>
+    <div class="prow"><span>Department of Culture, Nevada</span><span class="yr">1960</span></div>
+    <div class="prow"><span>Cottage and Garden for Motozo &amp; Haruko Torii, Kyoto, Japan</span><span class="yr">1963 / 1985</span></div>
+    <div class="prow"><span>Tor Aurora, Fairbanks, Alaska</span><span class="yr">1965</span></div>
+    <div class="prow"><span>House for Deborah Pomeroy, Fairbanks, Alaska</span><span class="yr">1966</span></div>
+    <div class="prow"><span>Rabinowitz Residence, Fairbanks, Alaska</span><span class="yr">1967</span></div>
+    <div class="prow"><span>Rankin Residence, Victoria, B.C.</span><span class="yr">1969</span></div>
+    <div class="prow"><span>Mt. Baldy Zen Centre, California</span><span class="yr">1971</span></div>
+    <div class="prow"><span><span class="ref" data-cu="hunterres">Hunter Residence, Victoria, B.C.</span></span><span class="yr">1973</span></div>
+    <div class="prow"><span>Intermediate Care Home, Terrace, B.C.</span><span class="yr">1975</span></div>
+    <div class="prow"><span>Young Residence, Victoria, B.C.</span><span class="yr">1975</span></div>
+    <div class="prow"><span>Sievert Residence, Victoria, B.C.</span><span class="yr">1976</span></div>
+    <div class="prow"><span>Arborean V, Vancouver Island</span><span class="yr">1981 / 1985</span></div>
+    <div class="prow"><span>Cook Residence, Victoria, B.C.</span><span class="yr">1983</span></div>
+    <div class="prow"><span>Not <i>I</i> Playhouse, Paris</span><span class="yr">1984</span></div>
+    <div class="prow"><span>Earthton, Canada</span><span class="yr">1985</span></div>
   </div>
+  <div class="src">Richard Hunter · Architect, 1986 · <span class="ref" data-cu="portfolio">HH-HHC-0115</span></div>
 </div>
 
 <!-- 03 · 1977 – 1986 · Zen Practice -->
 <div id="st3" class="stop" aria-label="Zen Practice">
   <div class="stopmark"><div class="tick" style="width:192px"></div><div class="name">1977 – 1986 · Zen Practice</div></div>
-  <div class="inner">
   <div style="display:flex;gap:22px;align-items:flex-end;flex:none">
     <div class="fig">
-      <img id="img-frh05" src="assets/entry/frh05-bw.jpg" style="height:min(404px, 52vh)" alt="Richard Hunter seated before the bass drum — Music for Solo Performer, 1986">
+      <img id="img-frh05" src="assets/entry/frh05-bw.jpg" style="height:404px" alt="Richard Hunter seated before the bass drum — Music for Solo Performer, 1986">
       <div class="cite">Music for Solo Performer · HH-FRH-0005 · 1986</div>
     </div>
     <div class="fig">
-      <img id="img-zendo" src="assets/entry/zendo-1977-display.jpg" style="height:min(404px, 52vh)" alt="Zendo drawing for the Goward Road site, 1977">
+      <img id="img-zendo" src="assets/entry/zendo-1977-display.jpg" style="height:404px" alt="Zendo drawing for the Goward Road site, 1977">
       <div class="cite">Zendo · <span class="ref" data-cu="zendo">HH-HHC-0004</span> · 1977</div>
     </div>
   </div>
@@ -196,14 +159,12 @@
     <p>In 1985 the Victoria Zen Centre held a weekend retreat in the forest at Goward Road — an outdoor platform, work periods, a ten-minute kinhin train through the trees. Their history of it names the place Kendo Ric Hunter's house.</p>
     <p>He drew a Zendo for the site twice, in 1977 and again in 1978. Neither was built.</p>
   </div>
-  </div>
 </div>
 
 <!-- 04 · 2019 – 2023 · The Record -->
 <div id="st4" class="stop" aria-label="The Record">
   <div class="stopmark"><div class="tick" style="width:260px"></div><div class="name">2019 – 2023 · The Record</div></div>
-  <div class="inner">
-  <div class="standin" style="width:min(560px,44vw);height:min(420px, 52vh);flex:none">
+  <div class="standin" style="width:560px;height:420px;flex:none">
     <div class="si">Stand-in<br>the working file itself —<br>the tubes, the folded sheets, the shelf<br><br>To source · Hunter House Collection</div>
   </div>
   <div class="txtcol">
@@ -213,17 +174,16 @@
     <p class="statement" style="margin-top:26px">Architecture, the sheltering art, is a repository of human experience.</p>
     <p class="rec">Richard Hunter · notebook, undated</p>
   </div>
-  </div>
 </div>
 
 <div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
 <div id="m-exit" role="button" tabindex="0" aria-label="Back to the survey">← Hunter House</div>
-<div id="ver">hd2-v0.23</div>
+<div id="ver">hd2-v0.20</div>
 <script>
 (function () {
   var z = 2, target = 2, Z_HERO = 1;
-  var MOBILE = window.matchMedia("(max-width: 1000px)").matches;
-  window.matchMedia("(max-width: 1000px)").addEventListener("change", function () { location.reload(); });
+  var MOBILE = window.matchMedia("(max-width: 767px)").matches;
+  window.matchMedia("(max-width: 767px)").addEventListener("change", function () { location.reload(); });
   var ease = function (t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; };
   var stops = ["st1","st2","st3","st4"].map(function (id) { return document.getElementById(id); });
 
@@ -338,7 +298,7 @@
 
   // ── mobile: the sticky stopbar name swaps + tick grows with scroll ──
   if (MOBILE) {
-    var names = ["1986 · The Architect", "1930 – 2023 · The Life", "1977 – 1986 · Zen Practice", "2019 – 2023 · The Record"];
+    var names = ["1986 · The Architect", "1956 – 1985 · Selected Projects", "1977 – 1986 · Zen Practice", "2019 – 2023 · The Record"];
     var mname = document.getElementById("mname"), mtick = document.getElementById("mtick");
     var onScroll = function () {
       var y = window.scrollY + 80, idx = 0;
@@ -353,7 +313,7 @@
   window.addEventListener("resize", apply);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
   apply();
-  console.log("hunter-drill hd2-v0.23 -- rev A: content frame; Life timeline one colour by weight (house in red)");
+  console.log("hunter-drill hd2-v0.20 -- rebuilt to the drills handoff: four stops, stopmarks, 74px baseline, 460px measure");
 })();
 </script>
 </body>

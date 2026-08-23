@@ -47,28 +47,26 @@
   /* ══ the shared system (drills handoff 2026-08-23): stop name + growing tick
      top-left · a common 74px baseline · 460px text measure · cites right-aligned
      to the image edge · images height-driven so the border traces the print ══ */
-  .stopmark{position:absolute;left:46px;top:104px;z-index:2;display:flex;flex-direction:column;gap:12px}   /* rev A: clears the parent crumb */
+  .stopmark{position:absolute;left:46px;top:44px;z-index:2;display:flex;flex-direction:column;gap:12px}
   .stopmark .tick{height:1.5px;background:#1b1918}
   .stopmark .name{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
     font-weight:700;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#1b1918}
   .fig{display:flex;flex-direction:column}
   .fig img{width:auto;display:block;border:1px solid rgba(27,25,24,.14)}
-  .fig .cite, .icite, .pcite, .skcite, #sheet-plan-over .cite, #caa18 .cite{
-    font-family:'JetBrains Mono',Menlo,monospace;
+  .fig .cite, .icite{width:0;min-width:100%;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.06em;line-height:1.9;color:rgba(27,25,24,.5);
-    width:0;min-width:100%;text-align:right;margin-top:8px}
+    text-align:right;margin-top:8px}
   /* stops 01-02 — the reading: paper ground; elevation bottom-left; the text is a
      460px column that travels between the two margins (driven in apply()) */
   #reading{position:fixed;inset:0;z-index:6;overflow:hidden;visibility:hidden;background:#f4f1e8 url('assets/entry/reading-paper.jpg') center/cover no-repeat}
   #flow{position:absolute;inset:0;overflow:hidden}
   #flow .sklayer{position:absolute;inset:0;will-change:transform}
-  #flow .skfig{position:absolute;left:var(--frameL,46px);bottom:var(--baseB,90px)}   /* rev A frame */
-  #flow .sk{display:block;max-height:min(470px,52vh);max-width:min(640px,50vw);width:auto;height:auto;cursor:zoom-in}
+  #flow .skfig{position:absolute;left:46px;bottom:74px}
+  #flow .sk{display:block;max-height:470px;max-width:640px;width:auto;height:auto;cursor:zoom-in}
   #flow .skcite{width:0;min-width:100%;text-align:right;margin-top:8px;
     font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;line-height:1.9;color:rgba(27,25,24,.5)}
   #flow .txtlayer{position:absolute;inset:0;pointer-events:none}
-  #flow .txt{position:absolute;bottom:var(--baseB,90px);width:min(460px,42vw);padding-bottom:33px;pointer-events:auto;
-    max-height:calc(100vh - 230px);overflow-y:auto;
+  #flow .txt{position:absolute;bottom:74px;width:460px;padding-bottom:33px;pointer-events:auto;
     font-weight:500;font-size:17px;line-height:1.7;color:#000;display:grid;will-change:left}
   #flow .txt p{margin-bottom:1.1em}
   #flow .txt .page-r, #flow .txt .page-l{grid-row:1;grid-column:1;align-self:end}
@@ -76,55 +74,50 @@
   .txt-cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;line-height:1.9;color:rgba(27,25,24,.5)}
   /* the plan crop (stop 02): 600px wide, on the baseline at the right margin;
      apply() drives only its slide */
-  #sheet-plan-over{position:fixed;right:var(--frameRi,46px);bottom:var(--baseB,90px);z-index:8;visibility:hidden;
+  #sheet-plan-over{position:fixed;right:46px;bottom:74px;z-index:8;visibility:hidden;
     display:flex;flex-direction:column;will-change:transform}
-  #sheet-plan-over img{display:block;width:min(600px,47vw);height:auto;border:1px solid rgba(27,25,24,.14);cursor:zoom-in}
+  #sheet-plan-over img{display:block;width:600px;height:auto;border:1px solid rgba(27,25,24,.14);cursor:zoom-in}
   /* stop 03 — the period gallery: two rows of three, 212px, on the baseline */
   #pgal{position:fixed;inset:0;z-index:9;visibility:hidden;opacity:0;background:#f6f5f5;overflow:hidden;
-    display:flex;align-items:center;justify-content:center;padding:120px 0 90px}
-  .ginner{width:min(1280px, 100% - 92px);max-height:100%;
-    display:flex;flex-direction:column;gap:26px;align-items:center}
-  #pgal .grow, #ihc .grow{display:grid;grid-template-columns:repeat(3,1fr);gap:26px 22px;width:100%}
+    display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:26px;padding:46px 46px 74px}
+  .grow{display:flex;gap:22px;align-items:flex-end;justify-content:center}
   #pgal .pfig{cursor:zoom-in}
-  #pgal .icite, #ihc .icite{white-space:nowrap}
-  #pgal .pfig img{width:100%;height:min(212px,23vh);object-fit:cover;display:block;border:1px solid rgba(27,25,24,.14)}
+  #pgal .pfig img{height:212px;width:auto;display:block;border:1px solid rgba(27,25,24,.14)}
   /* stop 05 — the addition: text LEFT (460), tower RIGHT (380) on the baseline */
   #reading2{position:fixed;inset:0;z-index:9;visibility:hidden;opacity:0;background:#f6f5f5;
     display:flex;align-items:flex-end;justify-content:space-between;gap:70px;padding:46px 46px 74px}
-  #reading2 .r2body{display:flex;flex-direction:row-reverse;justify-content:space-between;align-items:flex-end;gap:clamp(28px,5vw,70px);width:min(1280px, 100% - 92px);max-height:100%}
-  #reading2 .photocol{width:min(380px,30vw,38vh);flex:none;display:flex;flex-direction:column}   /* 38vh ~ a 52vh-tall print at this aspect */
+  #reading2 .r2body{display:flex;flex-direction:row-reverse;justify-content:space-between;align-items:flex-end;gap:70px;width:100%}
+  #reading2 .photocol{width:380px;flex:none;display:flex;flex-direction:column}
   #reading2 .photocol img{width:100%;display:block;border:1px solid rgba(27,25,24,.14);cursor:zoom-in}
   #reading2 .photocol .pcite{width:0;min-width:100%;text-align:right}
-  #reading2 .txt{width:min(460px,42vw);flex:0 1 auto;font-weight:500;font-size:17px;line-height:1.7;color:#000;padding-bottom:0}   /* ends in a record line -- shares the baseline */
+  #reading2 .txt{width:460px;flex:none;font-weight:500;font-size:17px;line-height:1.7;color:#000;padding-bottom:0}   /* ends in a record line -- shares the baseline */
   #reading2 .txt p{margin-bottom:1.1em}
   /* stop 04 — Studio & Garden: CAA-0018 left (≤720×560), text right on the baseline */
   #caa18{position:fixed;inset:0;z-index:9;visibility:hidden;opacity:0;background:#f6f5f5;
-    display:flex;align-items:center;justify-content:center;overflow:hidden;padding:120px 0 90px}
-  #caa18 .inner{width:min(1280px, 100% - 92px);max-height:100%;
-    display:flex;align-items:flex-end;justify-content:space-between;gap:clamp(28px,5vw,70px)}
+    display:flex;align-items:flex-end;justify-content:space-between;gap:70px;overflow:hidden;padding:46px 46px 74px}
   #caa18 .covfig{display:flex;flex-direction:column}
-  #caa18 img{max-width:min(640px,46vw);max-height:min(560px,52vh);width:auto;height:auto;display:block;
+  #caa18 img{max-width:720px;max-height:560px;width:auto;height:auto;display:block;
     border:1px solid rgba(27,25,24,.14);cursor:zoom-in}
-  #caa18 .c18txt{width:min(460px,42vw);flex:0 1 auto;font-weight:500;font-size:17px;line-height:1.7;color:#000}
+  #caa18 .c18txt{width:460px;flex:none;font-weight:500;font-size:17px;line-height:1.7;color:#000}
   #caa18 .c18txt p{margin-bottom:1.1em}
   /* the in-panel texts are invisible LAYOUT GHOSTS on desktop -- the visible copy is
      the shared #a2flow block travelling between the seats. Mobile shows the ghosts. */
   #caa18 .c18txt, #reading2 .txt{visibility:hidden}
   #a2flow{position:fixed;inset:0;z-index:9;visibility:hidden;pointer-events:none}
-  #a2flow .atxt{position:absolute;display:grid;pointer-events:auto;will-change:left,top;width:min(460px,42vw);max-height:calc(100vh - 230px);overflow-y:auto;
+  #a2flow .atxt{position:absolute;display:grid;pointer-events:auto;will-change:left,top;width:460px;
     font-weight:500;font-size:17px;line-height:1.7;color:#000}
   #a2flow .apage-r, #a2flow .apage-l{grid-row:1;grid-column:1;align-self:start}
   #a2flow .atxt p{margin-bottom:1.1em}
   /* stop 06 — the Ivan Hunter gallery: same rules as stop 03 */
   #ihc{position:fixed;inset:0;z-index:9;visibility:hidden;opacity:0;background:#f6f5f5;
-    display:flex;align-items:center;justify-content:center;padding:120px 0 90px}
+    display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:26px;padding:46px 46px 74px}
   #ihc .ifig{cursor:zoom-in}
-  #ihc .ifig img{width:100%;height:min(212px,23vh);object-fit:cover;display:block;border:1px solid rgba(27,25,24,.14)}
+  #ihc .ifig img{height:212px;width:auto;display:block;border:1px solid rgba(27,25,24,.14)}
   #m-exit{display:none}   /* desktop: exit = scroll past the last stop */
   /* ── mobile — VERTICAL SCROLL: the slide engine is off (JS MOBILE guard); every
      section is unpinned from position:fixed into normal document flow and stacked
      top-to-bottom. !important beats any inline style the driver may have set. ──── */
-  @media (max-width: 1000px) {
+  @media (max-width: 767px) {
     html, body { overflow-x:hidden; overflow-y:auto; height:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
     #stage { position:static; }
 
@@ -134,7 +127,6 @@
       height:auto !important; min-height:0 !important; overflow:visible !important;
     }
     .stopmark { display:none; }   /* the sticky m-stopbar carries the names */
-    .stop > .inner, #caa18 .inner, .ginner { display:block; width:auto; max-height:none; overflow:visible; }
     .m-stopbar{position:sticky;top:0;z-index:3;background:rgba(246,245,245,.94);
       -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
       padding:18px 26px 16px;display:flex;flex-direction:column;gap:9px}
@@ -178,8 +170,8 @@
 
     /* galleries: two per row, 150px tall, natural aspect */
     #pgal, #ihc { padding:5vh 26px; align-items:stretch; }
-    #pgal .grow, #ihc .grow { grid-template-columns:repeat(2,1fr); gap:14px 12px; }
-    #pgal .pfig img, #ihc .ifig img { height:150px; object-fit:cover; }
+    .grow { flex-wrap:wrap; gap:14px 12px; justify-content:flex-start; align-items:flex-end; }
+    #pgal .pfig img, #ihc .ifig img { height:150px; }
     #pgal .icite, #ihc .ifig .icite { font-size:10px; }
 
     /* the addition (reading2): image over text */
@@ -240,22 +232,19 @@
 </div>
 <div id="pgal" aria-label="Photographs of the original house">
   <div class="stopmark"><div class="tick" style="width:138px"></div><div class="name">1970 – 1986 · The Original House</div></div>
-  <div class="ginner">
   <div class="grow">
-    <div class="pfig fig" data-cite="Hunter House, exterior, south-west side, c.1970 · HH-CAA-0028"><img src="assets/entry/caa-0028-level.jpg" alt="Hunter House, exterior, south-west side"><div class="icite">Exterior, south-west side · HH-CAA-0028</div></div>
-    <div class="pfig fig" data-cite="Exterior, south-west side — Frances and child, c.1970 · HH-CAA-0031"><img src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0031_Hunter_House_Photograph_Exterior_Frances_Child_1970-01-01_prev.jpg" alt="Exterior — Frances and child"><div class="icite">Frances and child · HH-CAA-0031</div></div>
-    <div class="pfig fig" data-cite="The house from the entry walk, 1977 · HH-FRH-0008"><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0008_HunterHouse_1977_prev.jpg" alt="The house from the entry walk, 1977"><div class="icite">From the entry walk · HH-FRH-0008</div></div>
+    <div class="pfig fig" data-cite="Hunter House, exterior, south-west side, c.1970 · HH-CAA-0028"><img src="assets/entry/caa-0028-level.jpg" alt="Hunter House, exterior, south-west side"><div class="icite">Exterior, south-west side, c.1970 · HH-CAA-0028</div></div>
+    <div class="pfig fig" data-cite="Exterior, south-west side — Frances and child, c.1970 · HH-CAA-0031"><img src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0031_Hunter_House_Photograph_Exterior_Frances_Child_1970-01-01_prev.jpg" alt="Exterior — Frances and child"><div class="icite">Frances and child, c.1970 · HH-CAA-0031</div></div>
+    <div class="pfig fig" data-cite="The house from the entry walk, 1977 · HH-FRH-0008"><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0008_HunterHouse_1977_prev.jpg" alt="The house from the entry walk, 1977"><div class="icite">From the entry walk, 1977 · HH-FRH-0008</div></div>
   </div>
   <div class="grow">
-    <div class="pfig fig" data-cite="The house, 1977 · HH-FRH-0009"><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0009_HunterHouse_1977_prev.jpg" alt="The house, 1977"><div class="icite">The house · HH-FRH-0009</div></div>
-    <div class="pfig fig" data-cite="Wood stove added, 1986 · HH-FRH-0010"><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0010_WoodStoveAdded_1986_prev.jpg" alt="Wood stove added, 1986"><div class="icite">Wood stove added · HH-FRH-0010</div></div>
-    <div class="pfig fig" data-cite="Living room, dining room, kotatsu, c.1970 · HH-CAA-0029"><img src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0029_Hunter_House_Photograph_Living_Dining_Kotatsu_1970-01-01_prev.jpg" alt="Living room, dining room, kotatsu"><div class="icite">Living, dining, kotatsu · HH-CAA-0029</div></div>
-  </div>
+    <div class="pfig fig" data-cite="The house, 1977 · HH-FRH-0009"><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0009_HunterHouse_1977_prev.jpg" alt="The house, 1977"><div class="icite">The house, 1977 · HH-FRH-0009</div></div>
+    <div class="pfig fig" data-cite="Wood stove added, 1986 · HH-FRH-0010"><img src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0010_WoodStoveAdded_1986_prev.jpg" alt="Wood stove added, 1986"><div class="icite">Wood stove added, 1986 · HH-FRH-0010</div></div>
+    <div class="pfig fig" data-cite="Living room, dining room, kotatsu, c.1970 · HH-CAA-0029"><img src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0029_Hunter_House_Photograph_Living_Dining_Kotatsu_1970-01-01_prev.jpg" alt="Living room, dining room, kotatsu"><div class="icite">Living, dining, kotatsu, c.1970 · HH-CAA-0029</div></div>
   </div>
 </div>
 <div id="caa18" aria-label="Hunter House, Studio and Garden — the 1985 addition drawing">
   <div class="stopmark"><div class="tick" style="width:178px"></div><div class="name">1985 · Studio &amp; Garden</div></div>
-  <div class="inner">
   <div class="covfig">
     <img id="caa18-img" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg" alt="Hunter House, Studio and Garden — HH-CAA-0018, 1985">
     <div class="cite">Hunter House, Studio &amp; Garden · HH-CAA-0018 · 1985</div>
@@ -264,7 +253,7 @@
     <!-- placeholder narrative — the 1985 Studio & Garden scheme; Brandon to write -->
     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
     <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-  </div>
+    <p class="txt-cite">Hunter House, Studio &amp; Garden · HH-CAA-0018 · 1985</p>
   </div>
 </div>
 <div id="reading2" aria-label="The addition">
@@ -278,6 +267,7 @@
       <!-- placeholder narrative — the 1990s addition; Brandon to write -->
       <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
       <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+      <p class="txt-cite">The addition · HH-FRH-0022 · 1991</p>
     </div>
   </div>
 </div>
@@ -285,23 +275,21 @@
 <div id="a2flow" aria-hidden="true"><div class="atxt"><div class="apage-r"></div><div class="apage-l"></div></div></div>
 <div id="ihc" aria-label="Photographs by Ivan Hunter">
   <div class="stopmark"><div class="tick" style="width:260px"></div><div class="name">2024 · Photographs</div></div>
-  <div class="ginner">
   <div class="grow">
-    <div class="ifig fig" data-cite="Hunter House, 2024 · HH-IHC-0003"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0003_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024"><div class="icite">HH-IHC-0003</div></div>
-    <div class="ifig fig" data-cite="Hunter House, 2024 · HH-IHC-0008"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0008_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024"><div class="icite">HH-IHC-0008</div></div>
-    <div class="ifig fig" data-cite="Hunter House, 2024 · HH-IHC-0009"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0009_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024"><div class="icite">HH-IHC-0009</div></div>
+    <div class="ifig fig"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0003_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024"><div class="icite">Hunter House, 2024 · HH-IHC-0003</div></div>
+    <div class="ifig fig"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0008_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024"><div class="icite">Hunter House, 2024 · HH-IHC-0008</div></div>
+    <div class="ifig fig"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0009_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024"><div class="icite">Hunter House, 2024 · HH-IHC-0009</div></div>
   </div>
   <div class="grow">
-    <div class="ifig fig" data-cite="Hunter House, 2024 · HH-IHC-0016"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0016_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024"><div class="icite">HH-IHC-0016</div></div>
-    <div class="ifig fig" data-cite="Hunter House, 2024 · HH-IHC-0028"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0028_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024"><div class="icite">HH-IHC-0028</div></div>
-    <div class="ifig fig" data-cite="Hunter House, 2024 · HH-IHC-0038"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024"><div class="icite">HH-IHC-0038</div></div>
-  </div>
+    <div class="ifig fig"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0016_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024"><div class="icite">Hunter House, 2024 · HH-IHC-0016</div></div>
+    <div class="ifig fig"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0028_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024"><div class="icite">Hunter House, 2024 · HH-IHC-0028</div></div>
+    <div class="ifig fig"><img src="https://archive.hunterhousefoundation.com/ivan-hunter-collection/previews/HH-IHC-0038_HunterHouse_2024_prev.jpg" alt="Hunter House, 2024"><div class="icite">Hunter House, 2024 · HH-IHC-0038</div></div>
   </div>
 </div>
 <!-- mobile only: a visible way home at the end of the vertical stack (desktop exits by scrolling past the last stop) -->
 <div id="m-exit" role="button" tabindex="0" aria-label="Back to the survey">← Hunter House</div>
 <div id="closeup" aria-label="Close view"><button class="cu-nav cu-prev" aria-label="Previous image">‹</button><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div><button class="cu-nav cu-next" aria-label="Next image">›</button></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v1.11</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v1.08</div>
 
 <script>
 // the z-driven carousel: z eases toward target; STOPS indexes the six states.
@@ -311,10 +299,10 @@
   // MOBILE: below the breakpoint the whole slide engine is OFF -- the page becomes a
   // plain vertical scroll (sections unpinned to normal flow by the @media block, all
   // with !important). The driver, the input hijack and the gallery-align are no-ops.
-  var MOBILE = window.matchMedia("(max-width: 1000px)").matches;
+  var MOBILE = window.matchMedia("(max-width: 767px)").matches;
   // crossing the breakpoint live (tablet rotation) would strand a hybrid state --
   // the engine is wired at load, so the honest recovery is a reload.
-  window.matchMedia("(max-width: 1000px)").addEventListener("change", function () { location.reload(); });
+  window.matchMedia("(max-width: 767px)").addEventListener("change", function () { location.reload(); });
   var ease = function (t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; };
 
   // ── the reading flow ───────────────────────────────────────────────────
@@ -340,16 +328,7 @@
     var exitP = ease(Math.max(0, Math.min(1, (zr - 1.85) / 0.70)));   // stop-02 exits as gallery 1 arrives
     var exitDX = exitP * (W + 700);                    // shared delta -- text + plan pan in lockstep
     skL.style.transform = "translateX(" + (-p2 * 110) + "vw)";
-    // rev A: the content FRAME -- capped at 1280, centred; seats are its edges
-    var frameW = Math.min(1280, W - 92), frameL = (W - frameW) / 2;
-    var FRI = W - frameL - frameW;                     // right inset
-    var baseB = Math.max(90, Math.round((window.innerHeight - 560) / 2));
-    var rs = document.documentElement.style;
-    rs.setProperty("--frameL", frameL + "px");
-    rs.setProperty("--frameRi", FRI + "px");
-    rs.setProperty("--baseB", baseB + "px");
-    var TXW = Math.min(460, W * 0.42);                 // the measure is a MAXIMUM (min(460px,42vw))
-    var seatR = frameL + frameW - TXW, seatL = frameL; // the frame's two edges
+    var seatR = W - 46 - 460, seatL = 46;              // the two margins; the measure never changes
     var txtEl = document.querySelector("#flow .txt");
     txtEl.style.left = (seatR + (seatL - seatR) * p2 - exitDX) + "px";
     var pgR = document.querySelector("#flow .page-r"), pgL = document.querySelector("#flow .page-l");
@@ -364,7 +343,7 @@
 
     // the plan (CSS-anchored right:46 bottom:74; JS drives only the slide)
     var po = document.getElementById("sheet-plan-over");
-    var planTX = (1 - p2) * (FRI + 660) - exitDX;      // enters from OFF-SCREEN right at any width, exits in lockstep
+    var planTX = (1 - p2) * 700 - exitDX;              // enters from off-right, exits in lockstep
     po.style.transform = "translateX(" + planTX + "px)";
     po.style.visibility = (zr > 1.18 && zr < 2.60) ? "visible" : "hidden";
     reading.style.opacity = 1;                          // everything slides -- no fades
@@ -593,7 +572,7 @@
   document.querySelector("#a2flow .apage-l").innerHTML = document.getElementById("r2txt").innerHTML;
 
   apply();
-  console.log("house-drill v1.11 -- rev A supplement: dup cites out, all cites RECORD/edge-bound, fixed gallery cells, nowrap");
+  console.log("house-drill v1.08 -- the drills handoff: stop names + ticks, 74px baseline, 460 measure, edge-aligned cites, mobile stopbar");
 })();
 </script>
 </body>

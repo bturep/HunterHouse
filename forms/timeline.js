@@ -5,9 +5,11 @@
    shape by year; a host can drive it via postMessage (shape:…). */
 (function(){
   const TL=window.TL, SITE=window.SITE, G=SITE.G;
-  // Palette lives in events-data.js now (the six reviewed threads, 2026-08-23);
-  // no local recolour.
-  const THREAD_TINT={};
+  // Timeline-local thread recolour: fold the gold "House" and the candy-blue
+  // "Writing" into the archive's warm register, leaving the shared data file
+  // (and the 3D site map that also reads it) untouched. Life/Practice/Zen/Art
+  // already use Verso tokens, so they pass through unchanged.
+  const THREAD_TINT={ house:'#b08145', writing:'#7c889e' };
   const TH={}; for(const k in TL.threads){ TH[k]=Object.assign({},TL.threads[k], THREAD_TINT[k]?{color:THREAD_TINT[k]}:{}); }
   // Parse a source string into a collection abbrev (terracotta stamp) + ref.
   // Only true archive items (HH-COLL-NNNN or CAA accessions) earn the stamp;

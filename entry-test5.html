@@ -329,13 +329,11 @@
   /* ── STRUCTURE — Helvetica Bold, caps ───────────────────────────────
      family + weight only on the animated chain; geometry untouched. */
   #menu a,
-  #hd-crumb .hc-a, #hd-crumb .hc-b{
+  #hd-crumb .hc-a, #hd-crumb .hc-b,
+  .enter-cue{
     font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
     font-weight:700;
   }
-  /* (.enter-cue removed from this group, rev A 2026-08-23 -- the button is the
-     rule-led JetBrains Mono label per the card handoff; this override was
-     silently forcing it into Helvetica) */
   /* the entry title on the film — bigger, wider, Hunter's portfolio idiom */
   #film-title{
     font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
@@ -441,7 +439,7 @@
   <iframe id="hd-frame" title="The House" src="about:blank"></iframe>
 </div>
 <div id="hd-crumb" role="button" tabindex="0" aria-label="Back to the survey"><span class="hc-a">Hunter</span><span class="hc-b">House</span></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.25</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.26</div>
 
 <script>
 // entry-test5 — the survey entry: film card + scroll-snap section cards,
@@ -499,11 +497,6 @@
     }
     // dark cards (white ink): the film · the HUNTER photo · the ARCHIVE black field
     var DARK = { hunter: 1, house: 1, archive: 1 }, INK = "#1b1918", PAPER = "#f6f5f5", V = window.innerHeight;
-    // the Hunter accent red for the ACTIVE label -- MUST invert with the ground
-    // (handoff 2026-08-23: #c4826e is 2.9:1 on the white ABOUT card -- below the
-    // 3:1 floor -- so the light card takes the light-mode red). Values = the
-    // light.css tokens: html.dark --red / :root --red.
-    var RED_DARK = "#c4826e", RED_LITE = "#8b3a2a";
     function pDark(k) { var p = pages[k]; return (k === 0) || !!(p && p.dataset && DARK[p.dataset.section]) ||
                         !!(p && p.classList && p.classList.contains("dark-card")); }
     var onDark = pDark(here);
@@ -532,12 +525,11 @@
         var ytop = Math.max(dock, cardTop + ROW0);     // ride anchored to the card, never below the dock — the short bottom-anchored ABOUT card keeps ITS label at its own top (black on the white card), not up in the grey stack
         a.style.top = ytop + "px";
         var m = topCardAt(ytop + 10);                  // the card actually behind this label
-        var isActive = (n === here);                   // ONLY the active label takes the red (inverting per ground)
-        a.style.color = isActive ? (pDark(m) ? RED_DARK : RED_LITE) : (pDark(m) ? PAPER : INK);
+        a.style.color = pDark(m) ? PAPER : INK;        // ink = that card's ink (instant swap at the edge)
         a.style.opacity = (m > n || n < here) ? DIM : (n === here ? 1 - (1 - DIM) * pLeave : 1);   // past → grey; the CURRENT label fades to grey by pLeave as you scroll to the next (ARCHIVE → ABOUT)
       } else {
         a.style.top = dock + "px";
-        a.style.color = (n === here) ? (onDark ? RED_DARK : RED_LITE) : (onDark ? PAPER : INK);
+        a.style.color = onDark ? PAPER : INK;
         a.style.opacity = (n > here) ? 0 : (n === here ? 1 : DIM);
       }
     });
@@ -791,8 +783,8 @@
     roomPrev.disabled = roomIdx === 0; roomNext.disabled = roomIdx === roomLen - 1;
   }
   function openRoom(name) {
-    if (name === "house") { openDrill("house-drill.html?v=53"); return; }    // HOUSE = the iframe reading drill-down
-    if (name === "hunter") { openDrill("hunter-drill.html?v=15"); return; }   // HUNTER = the four-stop drill
+    if (name === "house") { openDrill("house-drill.html?v=50"); return; }    // HOUSE = the iframe reading drill-down
+    if (name === "hunter") { openDrill("hunter-drill.html?v=12"); return; }   // HUNTER = the four-stop drill
     var plates = ROOMS[name]; if (!plates || !plates.length) return;
     roomTrack.innerHTML = plates.map(plateHTML).join("");
     roomLen = plates.length; roomTrack.style.transition = "none"; roomShow(0);
@@ -1106,7 +1098,7 @@
   })();
   setSurveyActive(); driveReveal(); driveNameSquare(surveyEl.scrollTop);
   window.addEventListener("resize", function () { driveReveal(); driveNameSquare(surveyEl.scrollTop); });
-  console.log("entry-test5 e5-v2.25 -- house-drill rev A supplement (v1.11)");
+  console.log("entry-test5 e5-v2.26 -- REVERTED: content = the e5-v2.20 state (everything since 62d06c7 undone)");
 })();
 </script>
 <!-- ── adaptive entry film: pick a resolution tier by connection + display ── -->
