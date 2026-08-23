@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- hunter-drill v0.02 -- the HUNTER drill-down, loaded in entry-test5's iframe.
+<!-- hunter-drill v0.03 -- the HUNTER drill-down, loaded in entry-test5's iframe.
      The HOUSE drill's text-image relationship, kept simpler: three stops, every
      image FULL-SCREEN (cover), text overlaid on a soft scrim (the survey-card
      idiom).
@@ -36,28 +36,30 @@
   #closeup.on{display:flex}
   #closeup img{max-width:92vw;max-height:84vh;border:1px solid rgba(27,25,24,.14)}
   #closeup .ccite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:10px}
-  /* the three full-bleed shots — fixed panels slid by apply() */
-  .shot{position:fixed;inset:0;z-index:6;overflow:hidden;visibility:hidden;background:#1b1918;will-change:transform}
-  .shot img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
-  .shot .scite{position:absolute;left:34px;bottom:22px;z-index:2;pointer-events:none;
-    font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(246,245,245,.62)}
+  /* the three shots — FULL VERTICAL (the whole image, top to bottom, no crop);
+     portrait shots anchor left with the text on the paper beside them */
+  .shot{position:fixed;inset:0;z-index:6;overflow:hidden;visibility:hidden;background:#f6f5f5;
+    display:flex;align-items:stretch;justify-content:flex-start;will-change:transform}
+  .shot img{height:100%;width:auto;display:block;cursor:zoom-in}
+  #s1{justify-content:center}   /* the zen photo is wide -- centred */
+  .shot .scite{position:absolute;right:34px;bottom:22px;z-index:2;pointer-events:none;
+    font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
+  #s1 .scite{right:auto;left:34px;color:rgba(246,245,245,.62)}   /* over the photo */
   #s2{z-index:8}   /* the covenant slides in OVER the zen shot */
-  /* the shared text — overlays the shots on a soft scrim (survey-card idiom) */
+  /* the shared text — no scrim: ink where it sits on paper (stop 0), white with
+     a soft shadow where it rides over the photograph (stop 1) */
   #txtfly{position:fixed;inset:0;z-index:9;pointer-events:none;visibility:hidden}
   #txtfly .txt{position:absolute;top:50%;transform:translateY(-50%);display:grid;pointer-events:auto;
-    font-weight:500;font-size:17px;line-height:1.7;color:#f6f5f5;
-    text-shadow:0 1px 16px rgba(0,0,0,.55);
-    background:rgba(20,18,16,.34);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
-    padding:26px 28px;will-change:left,width}
+    font-weight:500;font-size:17px;line-height:1.7;will-change:left,width}
   #txtfly .txt p{margin-bottom:1.1em}
   #txtfly .page-r, #txtfly .page-l{grid-row:1;grid-column:1;align-self:start}
-  .txt-cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(246,245,245,.62)}
-  /* stop 2's own text — overlaid right on the covenant shot, same scrim */
-  #covtxt{position:absolute;left:4.5vw;top:50%;transform:translateY(-50%);z-index:2;width:min(38vw,520px);
-    font-weight:500;font-size:17px;line-height:1.7;color:#f6f5f5;
-    text-shadow:0 1px 16px rgba(0,0,0,.55);
-    background:rgba(20,18,16,.34);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
-    padding:26px 28px}
+  #txtfly .page-r{color:#1b1918}
+  #txtfly .page-l{color:#f6f5f5;text-shadow:0 1px 16px rgba(0,0,0,.55)}
+  .txt-cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
+  #txtfly .page-l .txt-cite{color:rgba(246,245,245,.62)}
+  /* stop 2's text — on the paper to the right of the full-height photograph */
+  #covtxt{position:absolute;right:4.5vw;top:50%;transform:translateY(-50%);z-index:2;width:min(38vw,520px);
+    font-weight:500;font-size:17px;line-height:1.7;color:#1b1918}
   #covtxt p{margin-bottom:1.1em}
   #m-exit{display:none}   /* desktop: exit = scroll past the last stop */
   /* ── mobile — VERTICAL SCROLL: engine off; natural-aspect images, ink text ── */
@@ -79,8 +81,8 @@
       padding:0; font-size:16px; line-height:1.6;
     }
     #txtfly .page-r, #txtfly .page-l { opacity:1 !important; }
-    #txtfly .page-l { margin-top:3vh; }
-    .txt-cite { color:rgba(27,25,24,.5); }
+    #txtfly .page-l { margin-top:3vh; color:#1b1918; text-shadow:none; }   /* ink in the stack */
+    .txt-cite, #txtfly .page-l .txt-cite { color:rgba(27,25,24,.5); }
     #covtxt { position:static; transform:none; width:auto; margin:4vh 6vw;
       color:#1b1918; text-shadow:none; background:none; -webkit-backdrop-filter:none; backdrop-filter:none;
       padding:0; font-size:16px; line-height:1.6; }
@@ -95,7 +97,7 @@
 </head>
 <body>
 <div id="s0" class="shot" aria-label="Music for Solo Performer">
-  <img id="img0" style="object-position:50% 18%" src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0005_MusicForSoloPerformer_1986-11-14_prev.jpg" alt="Richard Hunter seated before the bass drum — Music for Solo Performer, 1986">
+  <img id="img0" src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0005_MusicForSoloPerformer_1986-11-14_prev.jpg" alt="Richard Hunter seated before the bass drum — Music for Solo Performer, 1986">
   <div class="scite">Music for Solo Performer · HH-FRH-0005 · 14 November 1986</div>
 </div>
 <div id="s1" class="shot" aria-label="Zazen on the deck">
@@ -120,7 +122,7 @@
   </div>
 </div>
 <div id="s2" class="shot" aria-label="The covenant">
-  <img id="img2" style="object-position:50% 30%" src="assets/entry/frh51-lake-crop.jpg" alt="Richard Hunter above Prospect Lake, 2006 — from the Times Colonist covenant feature">
+  <img id="img2" src="assets/entry/frh51-lake-crop.jpg" alt="Richard Hunter above Prospect Lake, 2006 — from the Times Colonist covenant feature">
   <div class="scite">Richard Hunter above Prospect Lake · Times Colonist, 23 October 2006 · HH-FRH-0051</div>
   <div id="covtxt">
     <!-- stop 2 copy — the 2006 covenant; placeholder, Brandon to write -->
@@ -132,7 +134,7 @@
 <div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
 <!-- mobile only: a visible way home at the end of the vertical stack -->
 <div id="m-exit" role="button" tabindex="0" aria-label="Back to the survey">← Hunter House</div>
-<div id="ver">hd2-v0.02</div>
+<div id="ver">hd2-v0.03</div>
 <script>
 (function () {
   var z = 2, target = 2, Z_HERO = 1;
@@ -270,7 +272,7 @@
   window.addEventListener("resize", apply);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
   apply();
-  console.log("hunter-drill hd2-v0.02 -- full-screen shots; text overlaid, slides + swaps (the HOUSE mechanic)");
+  console.log("hunter-drill hd2-v0.03 -- full-vertical shots (no crop), scrims removed; ink on paper, white-with-shadow over the zen photo");
 })();
 </script>
 </body>
