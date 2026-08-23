@@ -421,7 +421,7 @@
   <iframe id="hd-frame" title="The House" src="about:blank"></iframe>
 </div>
 <div id="hd-crumb" role="button" tabindex="0" aria-label="Back to the survey"><span class="hc-a">Hunter</span><span class="hc-b">House</span></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.14</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.15</div>
 
 <script>
 // entry-test5 — the survey entry: film card + scroll-snap section cards,
@@ -763,7 +763,7 @@
   }
   function openRoom(name) {
     if (name === "house") { openDrill("house-drill.html?v=49"); return; }    // HOUSE = the iframe reading drill-down
-    if (name === "hunter") { openDrill("hunter-drill.html?v=9"); return; }   // HUNTER = the simpler three-stop drill
+    if (name === "hunter") { openDrill("hunter-drill.html?v=10"); return; }   // HUNTER = the simpler three-stop drill
     var plates = ROOMS[name]; if (!plates || !plates.length) return;
     roomTrack.innerHTML = plates.map(plateHTML).join("");
     roomLen = plates.length; roomTrack.style.transition = "none"; roomShow(0);
@@ -1077,7 +1077,7 @@
   })();
   setSurveyActive(); driveReveal(); driveNameSquare(surveyEl.scrollTop);
   window.addEventListener("resize", function () { driveReveal(); driveNameSquare(surveyEl.scrollTop); });
-  console.log("entry-test5 e5-v2.14 -- FRH-0051 full crop (hunter-drill hd2-v0.09)");
+  console.log("entry-test5 e5-v2.15 -- covenant at pair height (hunter-drill hd2-v0.10)");
 })();
 </script>
 <!-- ── adaptive entry film: pick a resolution tier by connection + display ── -->

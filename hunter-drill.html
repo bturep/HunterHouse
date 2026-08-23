@@ -46,10 +46,12 @@
   #s0 .s0txt{width:0;min-width:100%;margin-top:18px;font-weight:500;font-size:15px;line-height:1.65;color:#1b1918}
   #s0 .s0txt p{margin-bottom:1em}
   .txt-cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
-  /* stop 1 — the covenant: full-vertical photograph left, text on the paper right */
-  #s2{z-index:8;display:flex;align-items:stretch;justify-content:flex-start}
-  #s2 img{height:100%;width:auto;display:block;cursor:zoom-in}
-  #s2 .scite{position:absolute;right:34px;bottom:22px;z-index:2;pointer-events:none;
+  /* stop 1 — the covenant: the photograph at the pair card's height (56vh),
+     left-anchored + vertically centred; cite bound under it; text on the right */
+  #s2{z-index:8;display:flex;align-items:center;justify-content:flex-start}
+  #s2 .covfig{display:flex;flex-direction:column}
+  #s2 img{height:56vh;width:auto;display:block;cursor:zoom-in}
+  #s2 .scite{width:0;min-width:100%;margin-top:8px;text-align:left;
     font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
   #covtxt{position:absolute;right:4.5vw;top:50%;transform:translateY(-50%);z-index:2;width:min(38vw,520px);
     font-weight:500;font-size:17px;line-height:1.7;color:#1b1918}
@@ -98,8 +100,10 @@
   </div>
 </div>
 <div id="s2" class="shot" aria-label="The covenant">
-  <img id="img2" src="assets/entry/frh51-lake-crop.jpg?v=2" alt="Richard Hunter above Prospect Lake, 2006 — from the Times Colonist covenant feature">
-  <div class="scite">Richard Hunter above Prospect Lake · Times Colonist, 23 October 2006 · HH-FRH-0051</div>
+  <div class="covfig">
+    <img id="img2" src="assets/entry/frh51-lake-crop.jpg?v=2" alt="Richard Hunter above Prospect Lake, 2006 — from the Times Colonist covenant feature">
+    <div class="scite">Richard Hunter above Prospect Lake · Times Colonist, 23 October 2006 · HH-FRH-0051</div>
+  </div>
   <div id="covtxt">
     <!-- stop 1 copy — the 2006 covenant; placeholder, Brandon to write -->
     <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
@@ -110,7 +114,7 @@
 <div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
 <!-- mobile only: a visible way home at the end of the vertical stack -->
 <div id="m-exit" role="button" tabindex="0" aria-label="Back to the survey">← Hunter House</div>
-<div id="ver">hd2-v0.09</div>
+<div id="ver">hd2-v0.10</div>
 <script>
 (function () {
   var z = 2, target = 2, Z_HERO = 1;
@@ -223,7 +227,7 @@
   window.addEventListener("resize", apply);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
   apply();
-  console.log("hunter-drill hd2-v0.09 -- FRH-0051 re-cropped to the photo's TRUE bottom (legs + rock restored)");
+  console.log("hunter-drill hd2-v0.10 -- covenant photo at the pair card height (56vh), cite bound under it");
 })();
 </script>
 </body>
