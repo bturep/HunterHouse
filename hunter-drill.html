@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- hunter-drill v0.06 -- the HUNTER drill-down, loaded in entry-test5's iframe.
+<!-- hunter-drill v0.08 -- the HUNTER drill-down, loaded in entry-test5's iframe.
      Two stops:
        (0) the MEDITATION PAIR -- FRH-0005 (Music for Solo Performer, 1986) and
            the zazen deck photograph side by side at equal height, one text
@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
-<link rel="preload" as="image" fetchpriority="high" href="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0005_MusicForSoloPerformer_1986-11-14_prev.jpg">
+<link rel="preload" as="image" fetchpriority="high" href="assets/entry/frh05-bw.jpg">
 <link rel="preload" as="image" href="assets/entry/hunter-zen.jpg">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
@@ -33,7 +33,8 @@
   #closeup.on{display:flex}
   #closeup img{max-width:92vw;max-height:84vh;border:1px solid rgba(27,25,24,.14)}
   #closeup .ccite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:10px}
-  .shot{position:fixed;inset:0;z-index:6;overflow:hidden;visibility:hidden;background:#f6f5f5;will-change:transform}
+  .shot{position:fixed;inset:0;z-index:6;overflow:hidden;visibility:hidden;
+    background:#f4f1e8 url('assets/entry/reading-paper.jpg') center/cover no-repeat;will-change:transform}   /* the HOUSE reading's paper ground */
   /* stop 0 — the meditation pair: two photographs at equal height, RIGHT-justified
      (flush to the right edge); the text sits UNDER the music photograph, its
      column defined exactly by that photograph's edges (width:0 + min-width:100%) */
@@ -59,7 +60,7 @@
     html, body { overflow-x:hidden; overflow-y:auto; height:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
     .shot {
       position:static !important; inset:auto !important; transform:none !important;
-      opacity:1 !important; visibility:visible !important; background:none !important;
+      opacity:1 !important; visibility:visible !important;
       height:auto !important; min-height:0 !important; overflow:visible !important;
     }
     #s0 { padding:4vh 0 0; gap:0; }
@@ -83,7 +84,7 @@
 <div id="s0" class="shot" aria-label="Richard Hunter — meditation">
   <div class="pair">
     <div class="pfig">
-      <img id="img0" src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0005_MusicForSoloPerformer_1986-11-14_prev.jpg" alt="Richard Hunter seated before the bass drum — Music for Solo Performer, 1986">
+      <img id="img0" src="assets/entry/frh05-bw.jpg" alt="Richard Hunter seated before the bass drum — Music for Solo Performer, 1986">
       <div class="icite">Hunter performing Alvin Lucier’s Music for Solo Performer (Brain Wave Piece) at UVic School of Music · HH-FRH-0005 · 1986</div>
       <div class="s0txt">
         <!-- stop 0 copy — Hunter and zen; short; placeholder, Brandon to write -->
@@ -109,7 +110,7 @@
 <div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
 <!-- mobile only: a visible way home at the end of the vertical stack -->
 <div id="m-exit" role="button" tabindex="0" aria-label="Back to the survey">← Hunter House</div>
-<div id="ver">hd2-v0.07</div>
+<div id="ver">hd2-v0.08</div>
 <script>
 (function () {
   var z = 2, target = 2, Z_HERO = 1;
@@ -222,7 +223,7 @@
   window.addEventListener("resize", apply);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
   apply();
-  console.log("hunter-drill hd2-v0.07 -- fix: long caption width-bound to the photo (it was stretching the column, breaking the right-justify)");
+  console.log("hunter-drill hd2-v0.08 -- Lucier photo BW; the HOUSE paper ground");
 })();
 </script>
 </body>
