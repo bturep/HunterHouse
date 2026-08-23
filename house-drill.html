@@ -263,7 +263,7 @@
 <!-- mobile only: a visible way home at the end of the vertical stack (desktop exits by scrolling past the last stop) -->
 <div id="m-exit" role="button" tabindex="0" aria-label="Back to the survey">← Hunter House</div>
 <div id="closeup" aria-label="Close view"><button class="cu-nav cu-prev" aria-label="Previous image">‹</button><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div><button class="cu-nav cu-next" aria-label="Next image">›</button></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v1.06</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v1.07</div>
 
 <script>
 // the z-driven carousel: z eases toward target; STOPS indexes the six states.
@@ -529,8 +529,8 @@
     if (MOBILE) return;
     if (closeup.classList.contains("on")) return;   // the closeup's own handler owns keys while open
     if (e.key === "Escape") { requestExit(); return; }   // Esc leaves the drill (works with focus inside the iframe)
-    if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); advance(1); }
-    if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); advance(-1); }
+    if (e.key === "ArrowDown" || e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); advance(1); }
+    if (e.key === "ArrowUp" || e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); advance(-1); }
   });
   // align the (enlarged) gallery photo grids' top edge with the tower image's top,
   // so the top row of photos lines up with the tower image across the sliding sections.
@@ -563,7 +563,7 @@
   document.querySelector("#a2flow .apage-l").innerHTML = document.getElementById("r2txt").innerHTML;
 
   apply();
-  console.log("house-drill v1.06 -- every image click-to-zoom; caa18 smaller; momentum guard (one gesture = one stop)");
+  console.log("house-drill v1.07 -- left/right arrows page the carousel");
 })();
 </script>
 </body>

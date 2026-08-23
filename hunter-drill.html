@@ -134,7 +134,7 @@
 <div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
 <!-- mobile only: a visible way home at the end of the vertical stack -->
 <div id="m-exit" role="button" tabindex="0" aria-label="Back to the survey">← Hunter House</div>
-<div id="ver">hd2-v0.03</div>
+<div id="ver">hd2-v0.04</div>
 <script>
 (function () {
   var z = 2, target = 2, Z_HERO = 1;
@@ -248,8 +248,8 @@
     if (MOBILE) return;
     if (closeup.classList.contains("on")) return;
     if (e.key === "Escape") { requestExit(); return; }
-    if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); advance(1); }
-    if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); advance(-1); }
+    if (e.key === "ArrowDown" || e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); advance(1); }
+    if (e.key === "ArrowUp" || e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); advance(-1); }
   });
 
   // ── closeup: every image clickable (shows the full frame, uncropped) ──
@@ -272,7 +272,7 @@
   window.addEventListener("resize", apply);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
   apply();
-  console.log("hunter-drill hd2-v0.03 -- full-vertical shots (no crop), scrims removed; ink on paper, white-with-shadow over the zen photo");
+  console.log("hunter-drill hd2-v0.04 -- left/right arrows page the carousel");
 })();
 </script>
 </body>
