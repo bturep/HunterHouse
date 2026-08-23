@@ -35,18 +35,19 @@
   #closeup .ccite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:10px}
   /* ── the shared system ── */
   .stop{position:fixed;inset:0;z-index:6;overflow:hidden;visibility:hidden;background:#f6f5f5;
-    display:flex;align-items:flex-end;justify-content:space-between;gap:70px;
+    display:flex;align-items:flex-end;justify-content:space-between;gap:clamp(28px,5vw,70px);
     padding:46px 46px 74px;will-change:transform}
   .stopmark{position:absolute;left:46px;top:44px;z-index:2;display:flex;flex-direction:column;gap:12px}
   .stopmark .tick{height:1.5px;background:#1b1918}
   .stopmark .name{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
     font-weight:700;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#1b1918}
   .fig{display:flex;flex-direction:column}
-  .fig img{width:auto;display:block;border:1px solid rgba(27,25,24,.14);cursor:zoom-in}
+  .fig img{width:auto;display:block;border:1px solid rgba(27,25,24,.14);cursor:zoom-in;max-width:46vw}
   .cite{width:0;min-width:100%;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px;letter-spacing:.06em;line-height:1.9;color:rgba(27,25,24,.5);
     text-align:right;margin-top:8px}
-  .txtcol{width:460px;flex:none;font-weight:500;font-size:17px;line-height:1.7;color:#1b1918}
+  .txtcol{width:min(460px,42vw);flex:0 1 auto;max-height:calc(100vh - 160px);overflow-y:auto;
+    font-weight:500;font-size:17px;line-height:1.7;color:#1b1918}
   .txtcol p{margin-bottom:1.1em}
   .txtcol.ends-prose{padding-bottom:33px}
   .txtcol .rec{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;line-height:1.9;color:rgba(27,25,24,.5)}
@@ -74,7 +75,7 @@
     font-size:10px;letter-spacing:.18em}
   #m-exit{display:none}
   /* ── mobile — vertical scroll; sticky stop header; 26px margins ── */
-  @media (max-width: 767px) {
+  @media (max-width: 1000px) {
     html, body { overflow-x:hidden; overflow-y:auto; height:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
     .stop {
       position:static !important; inset:auto !important; transform:none !important;
@@ -103,7 +104,7 @@
       letter-spacing:.08em; text-transform:uppercase; color:#1b1918; cursor:pointer;
       border:1px solid rgba(27,25,24,.25); }
   }
-  @media (min-width: 768px) { .m-stopbar{display:none} }
+  @media (min-width: 1001px) { .m-stopbar{display:none} }
   #ver{position:fixed;right:12px;bottom:10px;z-index:11;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none}
 </style>
 </head>
@@ -114,7 +115,7 @@
 <!-- 01 · 1986 · The Architect -->
 <div id="st1" class="stop" aria-label="The Architect">
   <div class="stopmark"><div class="tick" style="width:56px"></div><div class="name">1986 · The Architect</div></div>
-  <div class="standin" style="width:560px;height:420px;flex:none">
+  <div class="standin" style="width:min(560px,44vw);height:min(420px, calc(100vh - 260px));flex:none">
     <div class="si">Stand-in<br>a drawing from another commission,<br>or a landscape with no building in it<br><br>To source · Hunter House Collection</div>
   </div>
   <div class="txtcol">
@@ -173,11 +174,11 @@
   <div class="stopmark"><div class="tick" style="width:192px"></div><div class="name">1977 – 1986 · Zen Practice</div></div>
   <div style="display:flex;gap:22px;align-items:flex-end;flex:none">
     <div class="fig">
-      <img id="img-frh05" src="assets/entry/frh05-bw.jpg" style="height:404px" alt="Richard Hunter seated before the bass drum — Music for Solo Performer, 1986">
+      <img id="img-frh05" src="assets/entry/frh05-bw.jpg" style="height:min(404px, calc(100vh - 220px))" alt="Richard Hunter seated before the bass drum — Music for Solo Performer, 1986">
       <div class="cite">Music for Solo Performer · HH-FRH-0005 · 1986</div>
     </div>
     <div class="fig">
-      <img id="img-zendo" src="assets/entry/zendo-1977-display.jpg" style="height:404px" alt="Zendo drawing for the Goward Road site, 1977">
+      <img id="img-zendo" src="assets/entry/zendo-1977-display.jpg" style="height:min(404px, calc(100vh - 220px))" alt="Zendo drawing for the Goward Road site, 1977">
       <div class="cite">Zendo · <span class="ref" data-cu="zendo">HH-HHC-0004</span> · 1977</div>
     </div>
   </div>
@@ -193,7 +194,7 @@
 <!-- 04 · 2019 – 2023 · The Record -->
 <div id="st4" class="stop" aria-label="The Record">
   <div class="stopmark"><div class="tick" style="width:260px"></div><div class="name">2019 – 2023 · The Record</div></div>
-  <div class="standin" style="width:560px;height:420px;flex:none">
+  <div class="standin" style="width:min(560px,44vw);height:min(420px, calc(100vh - 260px));flex:none">
     <div class="si">Stand-in<br>the working file itself —<br>the tubes, the folded sheets, the shelf<br><br>To source · Hunter House Collection</div>
   </div>
   <div class="txtcol">
@@ -207,12 +208,12 @@
 
 <div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
 <div id="m-exit" role="button" tabindex="0" aria-label="Back to the survey">← Hunter House</div>
-<div id="ver">hd2-v0.21</div>
+<div id="ver">hd2-v0.22</div>
 <script>
 (function () {
   var z = 2, target = 2, Z_HERO = 1;
-  var MOBILE = window.matchMedia("(max-width: 767px)").matches;
-  window.matchMedia("(max-width: 767px)").addEventListener("change", function () { location.reload(); });
+  var MOBILE = window.matchMedia("(max-width: 1000px)").matches;
+  window.matchMedia("(max-width: 1000px)").addEventListener("change", function () { location.reload(); });
   var ease = function (t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; };
   var stops = ["st1","st2","st3","st4"].map(function (id) { return document.getElementById(id); });
 
@@ -342,7 +343,7 @@
   window.addEventListener("resize", apply);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
   apply();
-  console.log("hunter-drill hd2-v0.21 -- stop 02 = the reviewed chronology (colour-coded, legend)");
+  console.log("hunter-drill hd2-v0.22 -- responsive measure/images/height caps; stack floor at 1000px");
 })();
 </script>
 </body>

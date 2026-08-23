@@ -62,11 +62,12 @@
   #flow{position:absolute;inset:0;overflow:hidden}
   #flow .sklayer{position:absolute;inset:0;will-change:transform}
   #flow .skfig{position:absolute;left:46px;bottom:74px}
-  #flow .sk{display:block;max-height:470px;max-width:640px;width:auto;height:auto;cursor:zoom-in}
+  #flow .sk{display:block;max-height:min(470px,calc(100vh - 220px));max-width:min(640px,50vw);width:auto;height:auto;cursor:zoom-in}
   #flow .skcite{width:0;min-width:100%;text-align:right;margin-top:8px;
     font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;line-height:1.9;color:rgba(27,25,24,.5)}
   #flow .txtlayer{position:absolute;inset:0;pointer-events:none}
-  #flow .txt{position:absolute;bottom:74px;width:460px;padding-bottom:33px;pointer-events:auto;
+  #flow .txt{position:absolute;bottom:74px;width:min(460px,42vw);padding-bottom:33px;pointer-events:auto;
+    max-height:calc(100vh - 160px);overflow-y:auto;
     font-weight:500;font-size:17px;line-height:1.7;color:#000;display:grid;will-change:left}
   #flow .txt p{margin-bottom:1.1em}
   #flow .txt .page-r, #flow .txt .page-l{grid-row:1;grid-column:1;align-self:end}
@@ -76,7 +77,7 @@
      apply() drives only its slide */
   #sheet-plan-over{position:fixed;right:46px;bottom:74px;z-index:8;visibility:hidden;
     display:flex;flex-direction:column;will-change:transform}
-  #sheet-plan-over img{display:block;width:600px;height:auto;border:1px solid rgba(27,25,24,.14);cursor:zoom-in}
+  #sheet-plan-over img{display:block;width:min(600px,47vw);height:auto;border:1px solid rgba(27,25,24,.14);cursor:zoom-in}
   /* stop 03 — the period gallery: two rows of three, 212px, on the baseline */
   #pgal{position:fixed;inset:0;z-index:9;visibility:hidden;opacity:0;background:#f6f5f5;overflow:hidden;
     display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:26px;padding:46px 46px 74px}
@@ -86,25 +87,25 @@
   /* stop 05 — the addition: text LEFT (460), tower RIGHT (380) on the baseline */
   #reading2{position:fixed;inset:0;z-index:9;visibility:hidden;opacity:0;background:#f6f5f5;
     display:flex;align-items:flex-end;justify-content:space-between;gap:70px;padding:46px 46px 74px}
-  #reading2 .r2body{display:flex;flex-direction:row-reverse;justify-content:space-between;align-items:flex-end;gap:70px;width:100%}
-  #reading2 .photocol{width:380px;flex:none;display:flex;flex-direction:column}
+  #reading2 .r2body{display:flex;flex-direction:row-reverse;justify-content:space-between;align-items:flex-end;gap:clamp(28px,5vw,70px);width:100%}
+  #reading2 .photocol{width:min(380px,30vw);flex:none;display:flex;flex-direction:column}
   #reading2 .photocol img{width:100%;display:block;border:1px solid rgba(27,25,24,.14);cursor:zoom-in}
   #reading2 .photocol .pcite{width:0;min-width:100%;text-align:right}
-  #reading2 .txt{width:460px;flex:none;font-weight:500;font-size:17px;line-height:1.7;color:#000;padding-bottom:0}   /* ends in a record line -- shares the baseline */
+  #reading2 .txt{width:min(460px,42vw);flex:0 1 auto;font-weight:500;font-size:17px;line-height:1.7;color:#000;padding-bottom:0}   /* ends in a record line -- shares the baseline */
   #reading2 .txt p{margin-bottom:1.1em}
   /* stop 04 — Studio & Garden: CAA-0018 left (≤720×560), text right on the baseline */
   #caa18{position:fixed;inset:0;z-index:9;visibility:hidden;opacity:0;background:#f6f5f5;
-    display:flex;align-items:flex-end;justify-content:space-between;gap:70px;overflow:hidden;padding:46px 46px 74px}
+    display:flex;align-items:flex-end;justify-content:space-between;gap:clamp(28px,5vw,70px);overflow:hidden;padding:46px 46px 74px}
   #caa18 .covfig{display:flex;flex-direction:column}
-  #caa18 img{max-width:720px;max-height:560px;width:auto;height:auto;display:block;
+  #caa18 img{max-width:min(720px,56vw);max-height:min(560px,calc(100vh - 200px));width:auto;height:auto;display:block;
     border:1px solid rgba(27,25,24,.14);cursor:zoom-in}
-  #caa18 .c18txt{width:460px;flex:none;font-weight:500;font-size:17px;line-height:1.7;color:#000}
+  #caa18 .c18txt{width:min(460px,42vw);flex:0 1 auto;font-weight:500;font-size:17px;line-height:1.7;color:#000}
   #caa18 .c18txt p{margin-bottom:1.1em}
   /* the in-panel texts are invisible LAYOUT GHOSTS on desktop -- the visible copy is
      the shared #a2flow block travelling between the seats. Mobile shows the ghosts. */
   #caa18 .c18txt, #reading2 .txt{visibility:hidden}
   #a2flow{position:fixed;inset:0;z-index:9;visibility:hidden;pointer-events:none}
-  #a2flow .atxt{position:absolute;display:grid;pointer-events:auto;will-change:left,top;width:460px;
+  #a2flow .atxt{position:absolute;display:grid;pointer-events:auto;will-change:left,top;width:min(460px,42vw);max-height:calc(100vh - 160px);overflow-y:auto;
     font-weight:500;font-size:17px;line-height:1.7;color:#000}
   #a2flow .apage-r, #a2flow .apage-l{grid-row:1;grid-column:1;align-self:start}
   #a2flow .atxt p{margin-bottom:1.1em}
@@ -117,7 +118,7 @@
   /* ── mobile — VERTICAL SCROLL: the slide engine is off (JS MOBILE guard); every
      section is unpinned from position:fixed into normal document flow and stacked
      top-to-bottom. !important beats any inline style the driver may have set. ──── */
-  @media (max-width: 767px) {
+  @media (max-width: 1000px) {
     html, body { overflow-x:hidden; overflow-y:auto; height:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
     #stage { position:static; }
 
@@ -289,7 +290,7 @@
 <!-- mobile only: a visible way home at the end of the vertical stack (desktop exits by scrolling past the last stop) -->
 <div id="m-exit" role="button" tabindex="0" aria-label="Back to the survey">← Hunter House</div>
 <div id="closeup" aria-label="Close view"><button class="cu-nav cu-prev" aria-label="Previous image">‹</button><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div><button class="cu-nav cu-next" aria-label="Next image">›</button></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v1.08</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v1.09</div>
 
 <script>
 // the z-driven carousel: z eases toward target; STOPS indexes the six states.
@@ -299,10 +300,10 @@
   // MOBILE: below the breakpoint the whole slide engine is OFF -- the page becomes a
   // plain vertical scroll (sections unpinned to normal flow by the @media block, all
   // with !important). The driver, the input hijack and the gallery-align are no-ops.
-  var MOBILE = window.matchMedia("(max-width: 767px)").matches;
+  var MOBILE = window.matchMedia("(max-width: 1000px)").matches;
   // crossing the breakpoint live (tablet rotation) would strand a hybrid state --
   // the engine is wired at load, so the honest recovery is a reload.
-  window.matchMedia("(max-width: 767px)").addEventListener("change", function () { location.reload(); });
+  window.matchMedia("(max-width: 1000px)").addEventListener("change", function () { location.reload(); });
   var ease = function (t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; };
 
   // ── the reading flow ───────────────────────────────────────────────────
@@ -328,7 +329,8 @@
     var exitP = ease(Math.max(0, Math.min(1, (zr - 1.85) / 0.70)));   // stop-02 exits as gallery 1 arrives
     var exitDX = exitP * (W + 700);                    // shared delta -- text + plan pan in lockstep
     skL.style.transform = "translateX(" + (-p2 * 110) + "vw)";
-    var seatR = W - 46 - 460, seatL = 46;              // the two margins; the measure never changes
+    var TXW = Math.min(460, W * 0.42);                 // the measure is a MAXIMUM (min(460px,42vw))
+    var seatR = W - 46 - TXW, seatL = 46;              // the two margins
     var txtEl = document.querySelector("#flow .txt");
     txtEl.style.left = (seatR + (seatL - seatR) * p2 - exitDX) + "px";
     var pgR = document.querySelector("#flow .page-r"), pgL = document.querySelector("#flow .page-l");
@@ -572,7 +574,7 @@
   document.querySelector("#a2flow .apage-l").innerHTML = document.getElementById("r2txt").innerHTML;
 
   apply();
-  console.log("house-drill v1.08 -- the drills handoff: stop names + ticks, 74px baseline, 460 measure, edge-aligned cites, mobile stopbar");
+  console.log("house-drill v1.09 -- responsive: the measure is a maximum, images yield, prose height-capped; stack floor at 1000px");
 })();
 </script>
 </body>
