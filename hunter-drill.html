@@ -41,7 +41,7 @@
   #s0 .pair{display:flex;gap:24px;align-items:flex-start;justify-content:flex-end}
   #s0 .pfig{display:flex;flex-direction:column}
   #s0 .pfig img{height:56vh;width:auto;display:block;cursor:zoom-in}
-  #s0 .pfig .icite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:8px;text-align:left}
+  #s0 .pfig .icite{width:0;min-width:100%;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:8px;text-align:left}   /* width-bound to the photo -- a long caption must WRAP, not stretch the column */
   #s0 .s0txt{width:0;min-width:100%;margin-top:18px;font-weight:500;font-size:15px;line-height:1.65;color:#1b1918}
   #s0 .s0txt p{margin-bottom:1em}
   .txt-cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
@@ -109,7 +109,7 @@
 <div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
 <!-- mobile only: a visible way home at the end of the vertical stack -->
 <div id="m-exit" role="button" tabindex="0" aria-label="Back to the survey">← Hunter House</div>
-<div id="ver">hd2-v0.06</div>
+<div id="ver">hd2-v0.07</div>
 <script>
 (function () {
   var z = 2, target = 2, Z_HERO = 1;
@@ -222,7 +222,7 @@
   window.addEventListener("resize", apply);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
   apply();
-  console.log("hunter-drill hd2-v0.06 -- pair right-justified, text under the music photo; Lucier caption");
+  console.log("hunter-drill hd2-v0.07 -- fix: long caption width-bound to the photo (it was stretching the column, breaking the right-justify)");
 })();
 </script>
 </body>
