@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<!-- hunter-drill v0.08 -- the HUNTER drill-down, loaded in entry-test5's iframe.
-     Two stops:
-       (0) the MEDITATION PAIR -- FRH-0005 (Music for Solo Performer, 1986) and
-           the zazen deck photograph side by side at equal height, one text
-           block beneath
-       (1) the covenant: FRH-0051's photograph (Hunter above Prospect Lake,
-           Times Colonist 2006, cropped from the clipping) full vertical +
-           text on the paper to its right.
-     Every image click-opens the closeup. Right/Down arrows advance, Left/Up go
-     back; past the last stop (or Esc) requestExit() posts {hd:"close"}.
-     MOBILE (<=767px): the engine is off; everything unpins into a native
-     vertical scroll ending at #m-exit, the way home.
+<!-- hunter-drill v0.20 -- the HUNTER drill-down, loaded in entry-test5's iframe.
+     Rebuilt to the drills design handoff (2026-08-23): four stops on the shared
+     system -- stop name + growing tick top-left, common 74px baseline, 460px
+     text measure, cites right-aligned to the image edge.
+       01  1986 · The Architect        the portfolio bio, verbatim (image to source)
+       02  1956 – 1985 · Selected Projects   the 17-project list, chronological
+       03  1977 – 1986 · Zen Practice  performer bio + FRH-0005 & the 1977 Zendo (404px)
+       04  2019 – 2023 · The Record    the CAA donation; closes on the notebook line
+     References in the prose open the existing closeup (never a new tab).
+     Right/Down advance, Left/Up back; past the end (or Esc) posts {hd:"close"}.
+     MOBILE (<=767px): engine off, vertical scroll, sticky stop header
+     (name swaps per section, tick 30->140), 26px margins, #m-exit at the end.
      noindex + unlinked (mock). -->
 <html lang="en">
 <head>
@@ -20,122 +20,186 @@
 <meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
-<link rel="preload" as="image" fetchpriority="high" href="assets/entry/frh05-bw.jpg">
-<link rel="preload" as="image" href="assets/entry/hunter-zen.jpg">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400;0,500;1,500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="assets/entry/frh05-bw.jpg">
+<link rel="preload" as="image" href="assets/entry/zendo-1977-display.jpg">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;overflow:hidden}
   body{background:#f6f5f5;font-family:"Inter Tight",system-ui,sans-serif;color:#1b1918}
-  /* the closeup — same idiom as the HOUSE drill */
+  /* ── the closeup ── */
   #closeup{position:fixed;inset:0;z-index:10;background:rgba(246,245,245,.97);display:none;
     align-items:center;justify-content:center;flex-direction:column;cursor:zoom-out}
   #closeup.on{display:flex}
   #closeup img{max-width:92vw;max-height:84vh;border:1px solid rgba(27,25,24,.14)}
   #closeup .ccite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:10px}
-  .shot{position:fixed;inset:0;z-index:6;overflow:hidden;visibility:hidden;
-    background:#f4f1e8 url('assets/entry/reading-paper.jpg') center/cover no-repeat;will-change:transform}   /* the HOUSE reading's paper ground */
-  /* stop 0 — the meditation pair: two photographs at equal height, RIGHT-justified
-     (flush to the right edge); the text sits UNDER the music photograph, its
-     column defined exactly by that photograph's edges (width:0 + min-width:100%) */
-  #s0{display:flex;align-items:flex-start;justify-content:flex-end;padding:17vh 0 0}   /* image tops on the shared 17vh line */
-  #s0 .pair{display:flex;gap:24px;align-items:flex-start;justify-content:flex-end}
-  #s0 .pfig{display:flex;flex-direction:column}
-  #s0 .pfig img{height:56vh;width:auto;display:block;cursor:zoom-in}
-  #s0 .pfig .icite{width:0;min-width:100%;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:8px;text-align:left}   /* width-bound to the photo -- a long caption must WRAP, not stretch the column */
-  #s0 .s0txt{width:0;min-width:100%;margin-top:18px;font-weight:500;font-size:15px;line-height:1.65;color:#1b1918}
-  #s0 .s0txt p{margin-bottom:1em}
-  .txt-cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
-  /* stop 1 — the covenant: the photograph at the pair card's height (56vh),
-     left-anchored + vertically centred; cite bound under it; text on the right */
-  #s2{z-index:8;display:flex;align-items:flex-start;justify-content:flex-start;padding-top:17vh}   /* same 17vh image line as the pair */
-  #s2 .covfig{display:flex;flex-direction:column}
-  #s2 img{height:56vh;width:auto;display:block;cursor:zoom-in}
-  #s2 .scite{width:0;min-width:100%;margin-top:8px;text-align:left;
-    font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
-  #covtxt{position:absolute;right:4.5vw;top:50%;transform:translateY(-50%);z-index:2;width:min(38vw,520px);
-    font-weight:500;font-size:17px;line-height:1.7;color:#1b1918}
-  #covtxt p{margin-bottom:1.1em}
-  #m-exit{display:none}   /* desktop: exit = scroll past the last stop */
-  /* ── mobile — VERTICAL SCROLL: engine off; everything unpins and stacks ── */
+  /* ── the shared system ── */
+  .stop{position:fixed;inset:0;z-index:6;overflow:hidden;visibility:hidden;background:#f6f5f5;
+    display:flex;align-items:flex-end;justify-content:space-between;gap:70px;
+    padding:46px 46px 74px;will-change:transform}
+  .stopmark{position:absolute;left:46px;top:44px;z-index:2;display:flex;flex-direction:column;gap:12px}
+  .stopmark .tick{height:1.5px;background:#1b1918}
+  .stopmark .name{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-weight:700;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#1b1918}
+  .fig{display:flex;flex-direction:column}
+  .fig img{width:auto;display:block;border:1px solid rgba(27,25,24,.14);cursor:zoom-in}
+  .cite{width:0;min-width:100%;font-family:'JetBrains Mono',Menlo,monospace;
+    font-size:10px;letter-spacing:.06em;line-height:1.9;color:rgba(27,25,24,.5);
+    text-align:right;margin-top:8px}
+  .txtcol{width:460px;flex:none;font-weight:500;font-size:17px;line-height:1.7;color:#1b1918}
+  .txtcol p{margin-bottom:1.1em}
+  .txtcol.ends-prose{padding-bottom:33px}
+  .txtcol .rec{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;line-height:1.9;color:rgba(27,25,24,.5)}
+  .txtcol .statement{font-size:22px;line-height:1.45;letter-spacing:-.006em;margin-bottom:18px}
+  .ref{text-decoration:underline;text-underline-offset:3px;color:#1b1918;cursor:pointer}
+  /* the unsourced stand-ins (stripes, per the reference) */
+  .standin{border:1px solid rgba(27,25,24,.14);display:flex;align-items:center;justify-content:center;
+    background:repeating-linear-gradient(-45deg, #eceae4 0 12px, #f3f1eb 12px 24px)}
+  .standin .si{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;
+    line-height:2;color:rgba(27,25,24,.5);text-align:center;padding:0 24px}
+  /* stop 02 -- the projects list, full width */
+  #st2{align-items:flex-end;justify-content:flex-start}
+  #st2 .plist{width:760px}
+  #st2 .prow{display:flex;justify-content:space-between;align-items:baseline;padding:2px 0;
+    font-weight:500;font-size:16px;line-height:1.4}
+  #st2 .prow .yr{font-family:'JetBrains Mono',Menlo,monospace;font-size:12px;letter-spacing:.04em;color:rgba(27,25,24,.55)}
+  #st2 .src{position:absolute;right:46px;bottom:74px;font-family:'JetBrains Mono',Menlo,monospace;
+    font-size:10px;letter-spacing:.06em;line-height:1.9;color:rgba(27,25,24,.5);text-align:right}
+  #m-exit{display:none}
+  /* ── mobile — vertical scroll; sticky stop header; 26px margins ── */
   @media (max-width: 767px) {
     html, body { overflow-x:hidden; overflow-y:auto; height:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
-    .shot {
+    .stop {
       position:static !important; inset:auto !important; transform:none !important;
       opacity:1 !important; visibility:visible !important;
       height:auto !important; min-height:0 !important; overflow:visible !important;
+      display:block; padding:5vh 26px;
     }
-    #s0 { padding:4vh 0 0; gap:0; }
-    #s0 .pair { flex-direction:column; height:auto; gap:0; }
-    #s0 .pfig { height:auto; margin-bottom:4vh; }
-    #s0 .pfig img { width:100vw; height:auto; }
-    #s0 .s0txt { width:auto; margin:1vh 6vw 2vh; font-size:16px; line-height:1.6; }
-    #s2 { display:block; }
-    #s2 img { width:100vw; height:auto; }
-    #s2 .scite { position:static; display:block; margin:8px 6vw 0; }
-    #covtxt { position:static; transform:none; width:auto; margin:4vh 6vw; font-size:16px; line-height:1.6; }
+    .stopmark { display:none; }   /* the sticky m-stopbar carries the names on mobile */
+    .m-stopbar{position:sticky;top:0;z-index:3;background:rgba(246,245,245,.94);
+      -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+      padding:18px 26px 16px;display:flex;flex-direction:column;gap:9px}
+    .m-stopbar .tick{height:1.5px;background:#1b1918;width:30px;transition:width .4s ease}
+    .m-stopbar .name{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+      font-weight:700;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#1b1918}
+    .fig { margin-bottom:4vh; }
+    .fig img { width:100% !important; height:auto !important; max-width:none !important; max-height:none !important; }
+    .txtcol { width:auto; padding-bottom:0; font-size:16px; line-height:1.6; }
+    .txtcol .statement { font-size:20px; }
+    .standin { width:100% !important; height:52vw !important; margin-bottom:4vh; }
+    #st2 .plist { width:auto; }
+    #st2 .src { position:static; text-align:left; margin-top:3vh; }
     #m-exit { display:block; margin:6vh auto calc(7vh + env(safe-area-inset-bottom)); padding:16px 22px; width:max-content;
       font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; font-weight:700; font-size:14px;
       letter-spacing:.08em; text-transform:uppercase; color:#1b1918; cursor:pointer;
       border:1px solid rgba(27,25,24,.25); }
   }
+  @media (min-width: 768px) { .m-stopbar{display:none} }
   #ver{position:fixed;right:12px;bottom:10px;z-index:11;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none}
 </style>
 </head>
 <body>
-<div id="s0" class="shot" aria-label="Richard Hunter — meditation">
-  <div class="pair">
-    <div class="pfig">
-      <img id="img0" src="assets/entry/frh05-bw.jpg" alt="Richard Hunter seated before the bass drum — Music for Solo Performer, 1986">
-      <div class="icite">Hunter performing Alvin Lucier’s Music for Solo Performer (Brain Wave Piece) at UVic School of Music · HH-FRH-0005 · 1986</div>
-      <div class="s0txt">
-        <!-- stop 0 copy — Hunter and zen; short; placeholder, Brandon to write -->
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
-      </div>
-    </div>
-    <div class="pfig">
-      <img id="img1" src="assets/entry/hunter-zen.jpg" alt="Zazen on the deck of the house — three sitters facing the forest">
-      <div class="icite">Zazen on the deck · source TBC</div>
-    </div>
+<!-- mobile sticky header: name swaps per section (JS); hidden on desktop -->
+<div class="m-stopbar" aria-hidden="true"><div class="tick" id="mtick"></div><div class="name" id="mname">1986 · The Architect</div></div>
+
+<!-- 01 · 1986 · The Architect -->
+<div id="st1" class="stop" aria-label="The Architect">
+  <div class="stopmark"><div class="tick" style="width:56px"></div><div class="name">1986 · The Architect</div></div>
+  <div class="standin" style="width:560px;height:420px;flex:none">
+    <div class="si">Stand-in<br>a drawing from another commission,<br>or a landscape with no building in it<br><br>To source · Hunter House Collection</div>
+  </div>
+  <div class="txtcol">
+    <p class="statement">Educated at the Universities of Colorado and Oklahoma, Richard Hunter counts himself as one of an expanding group of architects in North America, Europe, and Japan whose roots spread from the work of Wright, Mendelsohn, and Goff into oriental cultures, prehistory, and the processes of nature.</p>
+    <p class="rec">Richard Hunter · Architect, 1986 · <span class="ref" data-cu="portfolio">HH-HHC-0115</span></p>
   </div>
 </div>
-<div id="s2" class="shot" aria-label="The covenant">
-  <div class="covfig">
-    <img id="img2" src="assets/entry/frh51-lake-crop.jpg?v=2" alt="Richard Hunter above Prospect Lake, 2006 — from the Times Colonist covenant feature">
-    <div class="scite">Richard Hunter above Prospect Lake · Times Colonist, 23 October 2006 · HH-FRH-0051</div>
+
+<!-- 02 · 1956 – 1985 · Selected Projects -->
+<div id="st2" class="stop" aria-label="Selected Projects">
+  <div class="stopmark"><div class="tick" style="width:124px"></div><div class="name">1956 – 1985 · Selected Projects</div></div>
+  <div class="plist">
+    <div class="prow"><span>Stainless steel skyscraper design, New York</span><span class="yr">1956</span></div>
+    <div class="prow"><span>Skyhouse, San Francisco</span><span class="yr">1957</span></div>
+    <div class="prow"><span>Department of Culture, Nevada</span><span class="yr">1960</span></div>
+    <div class="prow"><span>Cottage and Garden for Motozo &amp; Haruko Torii, Kyoto, Japan</span><span class="yr">1963 / 1985</span></div>
+    <div class="prow"><span>Tor Aurora, Fairbanks, Alaska</span><span class="yr">1965</span></div>
+    <div class="prow"><span>House for Deborah Pomeroy, Fairbanks, Alaska</span><span class="yr">1966</span></div>
+    <div class="prow"><span>Rabinowitz Residence, Fairbanks, Alaska</span><span class="yr">1967</span></div>
+    <div class="prow"><span>Rankin Residence, Victoria, B.C.</span><span class="yr">1969</span></div>
+    <div class="prow"><span>Mt. Baldy Zen Centre, California</span><span class="yr">1971</span></div>
+    <div class="prow"><span><span class="ref" data-cu="hunterres">Hunter Residence, Victoria, B.C.</span></span><span class="yr">1973</span></div>
+    <div class="prow"><span>Intermediate Care Home, Terrace, B.C.</span><span class="yr">1975</span></div>
+    <div class="prow"><span>Young Residence, Victoria, B.C.</span><span class="yr">1975</span></div>
+    <div class="prow"><span>Sievert Residence, Victoria, B.C.</span><span class="yr">1976</span></div>
+    <div class="prow"><span>Arborean V, Vancouver Island</span><span class="yr">1981 / 1985</span></div>
+    <div class="prow"><span>Cook Residence, Victoria, B.C.</span><span class="yr">1983</span></div>
+    <div class="prow"><span>Not <i>I</i> Playhouse, Paris</span><span class="yr">1984</span></div>
+    <div class="prow"><span>Earthton, Canada</span><span class="yr">1985</span></div>
   </div>
-  <div id="covtxt">
-    <!-- stop 1 copy — the 2006 covenant; placeholder, Brandon to write -->
-    <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
-    <p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
-    <p class="txt-cite">Richard Hunter above Prospect Lake · Times Colonist, 23 October 2006 · HH-FRH-0051</p>
+  <div class="src">Richard Hunter · Architect, 1986 · <span class="ref" data-cu="portfolio">HH-HHC-0115</span></div>
+</div>
+
+<!-- 03 · 1977 – 1986 · Zen Practice -->
+<div id="st3" class="stop" aria-label="Zen Practice">
+  <div class="stopmark"><div class="tick" style="width:192px"></div><div class="name">1977 – 1986 · Zen Practice</div></div>
+  <div style="display:flex;gap:22px;align-items:flex-end;flex:none">
+    <div class="fig">
+      <img id="img-frh05" src="assets/entry/frh05-bw.jpg" style="height:404px" alt="Richard Hunter seated before the bass drum — Music for Solo Performer, 1986">
+      <div class="cite">Music for Solo Performer · HH-FRH-0005 · 1986</div>
+    </div>
+    <div class="fig">
+      <img id="img-zendo" src="assets/entry/zendo-1977-display.jpg" style="height:404px" alt="Zendo drawing for the Goward Road site, 1977">
+      <div class="cite">Zendo · <span class="ref" data-cu="zendo">HH-HHC-0004</span> · 1977</div>
+    </div>
+  </div>
+  <div class="txtcol ends-prose">
+    <p class="statement">Rick Hunter is an architect living in Victoria. He has studied Zen Buddhism for many years.</p>
+    <p class="rec" style="margin-bottom:18px">Performer bio · UVic Sonic Lab programme · <span class="ref" data-cu="programme">HH-FRH-0004</span> · 1986</p>
+    <!-- drafted from HH-FRH-0054 (Victoria Zen Centre history) -- check facts, esp. whether the platform predated the 1985 retreat -->
+    <p>In 1985 the Victoria Zen Centre held a weekend retreat in the forest at Goward Road — an outdoor platform, work periods, a ten-minute kinhin train through the trees. Their history of it names the place Kendo Ric Hunter's house.</p>
+    <p>He drew a Zendo for the site twice, in 1977 and again in 1978. Neither was built.</p>
   </div>
 </div>
+
+<!-- 04 · 2019 – 2023 · The Record -->
+<div id="st4" class="stop" aria-label="The Record">
+  <div class="stopmark"><div class="tick" style="width:260px"></div><div class="name">2019 – 2023 · The Record</div></div>
+  <div class="standin" style="width:560px;height:420px;flex:none">
+    <div class="si">Stand-in<br>the working file itself —<br>the tubes, the folded sheets, the shelf<br><br>To source · Hunter House Collection</div>
+  </div>
+  <div class="txtcol">
+    <!-- drafted from repo material, not verbatim -- Brandon to check -->
+    <p>In 2019 and 2021 he donated the 1970s build documentation to the Canadian Architectural Archives, where it is held as fonds F0076.</p>
+    <p>The working file he kept of the drawings stayed with the house. It is the principal subject of this Foundation.</p>
+    <p class="statement" style="margin-top:26px">Architecture, the sheltering art, is a repository of human experience.</p>
+    <p class="rec">Richard Hunter · notebook, undated</p>
+  </div>
+</div>
+
 <div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
-<!-- mobile only: a visible way home at the end of the vertical stack -->
 <div id="m-exit" role="button" tabindex="0" aria-label="Back to the survey">← Hunter House</div>
-<div id="ver">hd2-v0.11</div>
+<div id="ver">hd2-v0.20</div>
 <script>
 (function () {
   var z = 2, target = 2, Z_HERO = 1;
   var MOBILE = window.matchMedia("(max-width: 767px)").matches;
   window.matchMedia("(max-width: 767px)").addEventListener("change", function () { location.reload(); });
   var ease = function (t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; };
+  var stops = ["st1","st2","st3","st4"].map(function (id) { return document.getElementById(id); });
 
   function apply() {
-    if (MOBILE) return;   // mobile = static vertical scroll; the @media block owns layout
+    if (MOBILE) return;
     var zr = Math.max(0, z - Z_HERO);
-    // stop 0 (the pair) slides off LEFT as the covenant slides in from the RIGHT
-    var exitP = ease(Math.max(0, Math.min(1, (zr - 1.20) / 0.55)));
-    var s0 = document.getElementById("s0"), s2 = document.getElementById("s2");
-    s0.style.transform = "translateX(" + (-exitP * 100) + "vw)";
-    s0.style.visibility = (zr < 1.9) ? "visible" : "hidden";
-    s2.style.transform = "translateX(" + ((1 - exitP) * 100) + "vw)";
-    s2.style.visibility = exitP > 0 ? "visible" : "hidden";
+    // each stop k occupies zr = k+1; slides: out left as the next arrives from the right
+    for (var k = 0; k < 4; k++) {
+      var inP  = k === 0 ? 1 : ease(Math.max(0, Math.min(1, (zr - k) / 0.55)));
+      var outP = k === 3 ? 0 : ease(Math.max(0, Math.min(1, (zr - (k + 1)) / 0.55)));
+      stops[k].style.transform = "translateX(" + (((1 - inP) - outP) * 100) + "vw)";
+      stops[k].style.visibility = (inP > 0 && outP < 1) ? "visible" : "hidden";
+    }
   }
 
-  // ── snap scroll: one gesture = one stop ──
-  var STOPS = [2.00, 3.00];   // the pair · the covenant
+  var STOPS = [2.00, 3.00, 4.00, 5.00];
   var stopIdx = 0;
   function requestExit() { try { parent.postMessage({ hd: "close" }, "*"); } catch (e) {} }
   var mExit = document.getElementById("m-exit");
@@ -145,7 +209,7 @@
     var ni = Math.max(0, Math.min(STOPS.length - 1, stopIdx + dir));
     if (ni === stopIdx) return;
     stopIdx = ni; target = STOPS[stopIdx];
-    glide("timed", 1050);   // the horizontal slide — deliberate
+    glide("timed", 1050);
   }
   var raf = null, EASE = 0.05;
   var animMode = "exp", animFrom = 0, animStart = 0, animDur = 720;
@@ -170,7 +234,7 @@
     if (!raf) raf = requestAnimationFrame(step);
   }
 
-  // ── input: momentum-guarded (one gesture, one stop — no fly-past) ──
+  // ── input: momentum-guarded ──
   var _locked = false, _decayed = false, _lockT = null;
   function _cool() { clearTimeout(_lockT); _lockT = setTimeout(function () { _locked = false; }, 260); }
   var closeup = document.getElementById("closeup");
@@ -178,7 +242,7 @@
     if (MOBILE) return;
     if (closeup.classList.contains("on")) { e.preventDefault(); return; }
     e.preventDefault();
-    if (Math.abs(target - z) > 0.12) return;               // still travelling -- swallow
+    if (Math.abs(target - z) > 0.12) return;
     var ad = Math.abs(e.deltaY), dir = e.deltaY > 0 ? 1 : -1;
     if (_locked) {
       _cool();
@@ -207,7 +271,7 @@
     if (e.key === "ArrowUp" || e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); advance(-1); }
   });
 
-  // ── closeup: every image clickable ──
+  // ── closeup: images + every .ref opens the referenced archive item ──
   function openCloseup(src, cite) {
     document.getElementById("closeup-img").src = src;
     document.getElementById("closeup-cite").textContent = cite;
@@ -217,17 +281,39 @@
   document.addEventListener("keydown", function (e) {
     if (closeup.classList.contains("on") && e.key === "Escape") closeup.classList.remove("on");
   });
-  [["img0", "Hunter performing Alvin Lucier’s Music for Solo Performer (Brain Wave Piece) at UVic School of Music · HH-FRH-0005 · 14 November 1986"],
-   ["img1", "Zazen on the deck · source TBC"],
-   ["img2", "Richard Hunter above Prospect Lake · Times Colonist, 23 October 2006 · HH-FRH-0051"]].forEach(function (pair) {
-    var el = document.getElementById(pair[0]);
-    el.addEventListener("click", function () { openCloseup(el.src, pair[1]); });
+  var CU = {
+    portfolio:  ["https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0115_RichardHunterArchitect-Portfolio_1986_prev.jpg", "Richard Hunter · Architect — portfolio cover · HH-HHC-0115 · 1986"],
+    programme:  ["https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0004_UVicSonicLabConcertProgram_1986-11-14_prev.jpg", "UVic Sonic Lab concert programme · HH-FRH-0004 · 1986"],
+    zendo:      ["https://archive.hunterhousefoundation.com/hunter-house-collection/previews/HH-HHC-0004_Zendo_1977-01-09_prev.jpg", "Zendo · HH-HHC-0004 · 1977"],
+    hunterres:  ["https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0008_OG_Build_1970_Scheme_1_2of3_1970-08-25_prev.jpg", "Cottage for Ric & Frances Hunter — plan & elevations · HH-CAA-0008 · 1970"]
+  };
+  document.querySelectorAll(".ref[data-cu]").forEach(function (el) {
+    var t = CU[el.dataset.cu]; if (!t) return;
+    el.addEventListener("click", function (e) { e.stopPropagation(); openCloseup(t[0], t[1]); });
   });
+  var imFrh = document.getElementById("img-frh05");
+  imFrh.addEventListener("click", function () { openCloseup(imFrh.src, "Music for Solo Performer · HH-FRH-0005 · 1986"); });
+  var imZen = document.getElementById("img-zendo");
+  imZen.addEventListener("click", function () { openCloseup("assets/entry/zendo-1977-closeup.jpg", "Zendo · HH-HHC-0004 · 1977"); });
+
+  // ── mobile: the sticky stopbar name swaps + tick grows with scroll ──
+  if (MOBILE) {
+    var names = ["1986 · The Architect", "1956 – 1985 · Selected Projects", "1977 – 1986 · Zen Practice", "2019 – 2023 · The Record"];
+    var mname = document.getElementById("mname"), mtick = document.getElementById("mtick");
+    var onScroll = function () {
+      var y = window.scrollY + 80, idx = 0;
+      for (var k = 0; k < stops.length; k++) if (stops[k].offsetTop <= y) idx = k;
+      mname.textContent = names[idx];
+      mtick.style.width = (30 + (140 - 30) * (idx / (names.length - 1))) + "px";
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  }
 
   window.addEventListener("resize", apply);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
   apply();
-  console.log("hunter-drill hd2-v0.11 -- image tops aligned across both cards (shared 17vh line)");
+  console.log("hunter-drill hd2-v0.20 -- rebuilt to the drills handoff: four stops, stopmarks, 74px baseline, 460px measure");
 })();
 </script>
 </body>
