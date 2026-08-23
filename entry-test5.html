@@ -418,7 +418,7 @@
   <iframe id="hd-frame" title="The House" src="about:blank"></iframe>
 </div>
 <div id="hd-crumb" role="button" tabindex="0" aria-label="Back to the survey"><span class="hc-a">Hunter</span><span class="hc-b">House</span></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.05</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.06</div>
 
 <script>
 // entry-test5 — the survey entry: film card + scroll-snap section cards,
@@ -759,7 +759,8 @@
     roomPrev.disabled = roomIdx === 0; roomNext.disabled = roomIdx === roomLen - 1;
   }
   function openRoom(name) {
-    if (name === "house") { openHouseDrill(); return; }   // HOUSE = the iframe reading drill-down
+    if (name === "house") { openDrill("house-drill.html?v=48"); return; }    // HOUSE = the iframe reading drill-down
+    if (name === "hunter") { openDrill("hunter-drill.html?v=1"); return; }   // HUNTER = the simpler three-stop drill
     var plates = ROOMS[name]; if (!plates || !plates.length) return;
     roomTrack.innerHTML = plates.map(plateHTML).join("");
     roomLen = plates.length; roomTrack.style.transition = "none"; roomShow(0);
@@ -776,10 +777,10 @@
     document.body.classList.remove("room-open");
     surveyEl.style.overflow = "";
   }
-  // ── HOUSE drill-down (iframe reading mechanic) ──
+  // ── section drill-downs (one shared iframe + crumb; src decides which) ──
   var houseDrill = document.getElementById("house-drill"), hdFrame = document.getElementById("hd-frame"), hdOpen = false;
-  function openHouseDrill() {
-    if (hdFrame.getAttribute("src") !== "house-drill.html?v=48") hdFrame.src = "house-drill.html?v=48";   // (re)load fresh
+  function openDrill(src) {
+    if (hdFrame.getAttribute("src") !== src) hdFrame.src = src;   // (re)load fresh
     hdOpen = true;
     document.body.classList.add("room-open");
     surveyEl.style.overflow = "hidden";
@@ -1071,7 +1072,7 @@
   })();
   setSurveyActive(); driveReveal(); driveNameSquare(surveyEl.scrollTop);
   window.addEventListener("resize", function () { driveReveal(); driveNameSquare(surveyEl.scrollTop); });
-  console.log("entry-test5 e5-v2.05 -- survey momentum guard: no fly-past (house-drill v1.06)");
+  console.log("entry-test5 e5-v2.06 -- HUNTER opens its own three-stop drill (hunter-drill hd2-v0.01)");
 })();
 </script>
 <!-- ── adaptive entry film: pick a resolution tier by connection + display ── -->

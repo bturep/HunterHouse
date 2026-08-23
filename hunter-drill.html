@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<!-- hunter-drill v0.01 -- the HUNTER drill-down, loaded in entry-test5's iframe.
+     The HOUSE drill's text-image relationship, kept simpler: three stops.
+     DESKTOP (>767px): a z-driven horizontal carousel (wheel/touch/keys advance
+     one stop per gesture):
+       (0) FRH-0005 (Music for Solo Performer, 1986) left + text right
+       (1) the text slides to the left column + swaps content; the zazen deck
+           photograph slides in on the right
+       (2) the FRH-0051 photograph (Hunter above Prospect Lake, Times Colonist
+           2006, cropped from the clipping) left + its text right.
+     Every image click-opens the closeup. Past the last stop (or Esc)
+     requestExit() posts {hd:"close"} to the parent.
+     MOBILE (<=767px): the engine is off; sections unpin into a native vertical
+     scroll ending at #m-exit, the way home.
+     noindex + unlinked (mock). -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hunter House — Hunter (test)</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="preload" as="image" fetchpriority="high" href="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0005_MusicForSoloPerformer_1986-11-14_prev.jpg">
+<link rel="preload" as="image" href="assets/entry/hunter-zen.jpg">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden}
+  body{background:#f6f5f5;font-family:"Inter Tight",system-ui,sans-serif;color:#1b1918}
+  /* the closeup — same idiom as the HOUSE drill */
+  #closeup{position:fixed;inset:0;z-index:10;background:rgba(246,245,245,.97);display:none;
+    align-items:center;justify-content:center;flex-direction:column;cursor:zoom-out}
+  #closeup.on{display:flex}
+  #closeup img{max-width:92vw;max-height:84vh;border:1px solid rgba(27,25,24,.14)}
+  #closeup .ccite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:10px}
+  /* stop 0/1 — the reading: photo layer + text layer, panned by apply() */
+  #reading{position:fixed;inset:0;z-index:6;overflow:hidden;background:#f6f5f5}
+  #flow{position:absolute;inset:0;overflow:hidden}
+  #flow .sklayer, #flow .txtlayer{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;will-change:transform}
+  #flow .sk{display:block;width:auto;height:auto;max-width:40vw;max-height:78vh;border:1px solid rgba(27,25,24,.14);cursor:zoom-in}
+  #flow .skcite{margin-top:12px;text-align:center;
+    font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
+  #flow .txtlayer{padding:9vh 0}
+  #flow .txt{font-weight:500;font-size:17px;line-height:1.7;color:#000;max-width:min(46vw,620px);max-height:82vh;overflow:hidden;display:grid}
+  #flow .txt p{margin-bottom:1.1em}
+  #flow .txt .page-r, #flow .txt .page-l{grid-row:1;grid-column:1;align-self:center}
+  .txt-cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
+  /* the zazen photograph — right-aligned beside the settled text at stop 1 */
+  #zen-over{position:fixed;z-index:8;visibility:hidden;height:auto;cursor:zoom-in;
+    border:1px solid rgba(27,25,24,.14);will-change:transform,opacity}
+  /* stop 2 — the covenant: FRH-0051 crop left + text right */
+  #covenant{position:fixed;inset:0;z-index:9;visibility:hidden;opacity:0;background:#f6f5f5;
+    display:flex;align-items:center;justify-content:center;gap:56px;overflow:hidden;padding:0 40px}
+  #covenant img{max-width:44vw;max-height:76vh;display:block;border:1px solid rgba(27,25,24,.14);cursor:zoom-in}
+  #covenant .covtxt{flex:0 1 520px;max-width:520px;font-weight:500;font-size:17px;line-height:1.7;color:#000}
+  #covenant .covtxt p{margin-bottom:1.1em}
+  #m-exit{display:none}   /* desktop: exit = scroll past the last stop */
+  /* ── mobile — VERTICAL SCROLL: engine off, sections unpinned and stacked ── */
+  @media (max-width: 767px) {
+    html, body { overflow-x:hidden; overflow-y:auto; height:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
+    #reading, #covenant {
+      position:static !important; inset:auto !important; transform:none !important;
+      opacity:1 !important; visibility:visible !important;
+      height:auto !important; min-height:0 !important; overflow:visible !important;
+    }
+    #flow { position:static !important; overflow:visible !important; height:auto !important; }
+    #flow .sklayer, #flow .txtlayer {
+      position:static !important; inset:auto !important; transform:none !important;
+      height:auto !important; padding:0 6vw; margin:5vh 0;
+    }
+    #flow .sk { max-width:100% !important; max-height:none !important; }
+    #flow .txt {
+      position:static !important; transform:none !important;
+      width:100% !important; max-width:none !important; max-height:none !important;
+      overflow:visible !important; display:block !important; opacity:1 !important;
+      font-size:16px; line-height:1.6;
+    }
+    #flow .txt p { margin-bottom:1em; }
+    #flow .txt .page-r, #flow .txt .page-l { opacity:1 !important; }   /* both texts read in the stack */
+    #zen-over {
+      position:static !important; display:block !important; left:auto !important; top:auto !important;
+      transform:none !important; opacity:1 !important; visibility:visible !important;
+      width:92vw !important; height:auto !important; margin:2vh auto 5vh;
+    }
+    #covenant { padding:5vh 0; flex-direction:column; gap:22px; }
+    #covenant img { max-width:92vw !important; max-height:none !important; width:92vw; height:auto; }
+    #covenant .covtxt { flex:none; max-width:none; width:92vw; margin:0 auto; font-size:16px; line-height:1.6; }
+    /* the way home at the end of the stack */
+    #m-exit { display:block; margin:6vh auto calc(7vh + env(safe-area-inset-bottom)); padding:16px 22px; width:max-content;
+      font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; font-weight:700; font-size:14px;
+      letter-spacing:.08em; text-transform:uppercase; color:#1b1918; cursor:pointer;
+      border:1px solid rgba(27,25,24,.25); }
+  }
+  #ver{position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none}
+</style>
+</head>
+<body>
+<div id="reading" aria-label="Richard Morrow Hunter">
+  <div id="flow">
+    <div class="sklayer">
+      <img class="sk" src="https://archive.hunterhousefoundation.com/frances-hunter-collection/previews/HH-FRH-0005_MusicForSoloPerformer_1986-11-14_prev.jpg" alt="Richard Hunter seated before the bass drum — Music for Solo Performer, 1986">
+      <div class="skcite">Music for Solo Performer · HH-FRH-0005 · 14 November 1986</div>
+    </div>
+    <div class="txtlayer">
+      <div class="txt">
+        <div class="page-r">
+          <!-- stop 0 copy — Hunter and zen; placeholder, Brandon to write -->
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+          <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+          <p class="txt-cite">Music for Solo Performer · HH-FRH-0005 · 1986</p>
+        </div>
+        <div class="page-l">
+          <!-- stop 1 copy — zazen at the house; placeholder, Brandon to write -->
+          <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</p>
+          <p>Totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+          <p class="txt-cite">Zazen on the deck · source TBC</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<img id="zen-over" src="assets/entry/hunter-zen.jpg" alt="Zazen on the deck of the house — three sitters facing the forest">
+<div id="covenant" aria-label="The covenant">
+  <img id="cov-img" src="assets/entry/frh51-lake-crop.jpg" alt="Richard Hunter above Prospect Lake, 2006 — from the Times Colonist covenant feature">
+  <div class="covtxt">
+    <!-- stop 2 copy — the 2006 covenant; placeholder, Brandon to write -->
+    <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
+    <p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
+    <p class="txt-cite">Richard Hunter above Prospect Lake · Times Colonist, 23 October 2006 · HH-FRH-0051</p>
+  </div>
+</div>
+<div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
+<!-- mobile only: a visible way home at the end of the vertical stack -->
+<div id="m-exit" role="button" tabindex="0" aria-label="Back to the survey">← Hunter House</div>
+<div id="ver">hd2-v0.01</div>
+<script>
+(function () {
+  var z = 2, target = 2, Z_HERO = 1;
+  var MOBILE = window.matchMedia("(max-width: 767px)").matches;
+  window.matchMedia("(max-width: 767px)").addEventListener("change", function () { location.reload(); });
+  var ease = function (t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; };
+
+  function apply() {
+    if (MOBILE) return;   // mobile = static vertical scroll; the @media block owns layout
+    var zr = Math.max(0, z - Z_HERO);
+    var W = window.innerWidth;
+
+    // ── geometry: the zen photo right-aligned; the left text region beside it ──
+    var pad = W * 0.045, gap = W * 0.035;
+    var zW = Math.min(0.48 * W, 900);
+    var zenLeft = W - pad - zW;
+    var lx = pad, lw = Math.max(120, zenLeft - gap - pad);
+
+    // ── stop 0 → 1: photo exits left; the SAME text slides right → left and
+    //    its content crossfades (page-r → page-l) — the HOUSE mechanic ──
+    var skL = document.querySelector("#flow .sklayer");
+    var txtL = document.querySelector("#flow .txtlayer");
+    var p2 = ease(Math.max(0, Math.min(1, (zr - 1.20) / 0.25)));
+    var exitP = ease(Math.max(0, Math.min(1, (zr - 1.85) / 0.70)));   // stop-1 panel exits as the covenant arrives
+    var exitDX = exitP * (W + zW);                                    // shared delta -- text + zen pan in lockstep
+    skL.style.transform = "translateX(" + (-18 - 92 * p2) + "vw) scale(" + (1 - 0.2 * 1) + ")";
+    var b1w = Math.min(0.46 * W, 620);
+    var b2cx = lx + lw / 2;
+    var txtX = 0.26 * W * (1 - p2) + (b2cx - W / 2) * p2 - exitDX;
+    txtL.style.transform = "translateX(" + txtX + "px)";
+    var txtEl = document.querySelector("#flow .txt");
+    txtEl.style.maxWidth = "none";
+    txtEl.style.width = (b1w * (1 - p2) + lw * p2) + "px";
+    var pgR = document.querySelector("#flow .page-r"), pgL = document.querySelector("#flow .page-l");
+    pgR.style.opacity = 1 - Math.max(0, Math.min(1, (p2 - 0.25) / 0.30));
+    pgL.style.opacity = Math.max(0, Math.min(1, (p2 - 0.45) / 0.30));
+
+    // ── the zen photo: slides in from the right with the text, exits in lockstep ──
+    var zo = document.getElementById("zen-over");
+    zo.style.left = zenLeft + "px"; zo.style.width = zW + "px";
+    zo.style.top = "50%";
+    var zenTX = (1 - p2) * (W - zenLeft + 40) - exitDX;
+    zo.style.transform = "translateY(-50%) translateX(" + zenTX + "px)";
+    zo.style.visibility = (zr > 1.18 && zr < 2.60) ? "visible" : "hidden";
+
+    // ── stop 2: the covenant panel slides in from the right and HOLDS ──
+    var cov = document.getElementById("covenant");
+    var cIn = Math.max(0, Math.min(1, (zr - 1.85) / 0.65));
+    cov.style.visibility = cIn > 0 ? "visible" : "hidden";
+    cov.style.opacity = cIn > 0 ? "1" : "0";
+    cov.style.transform = "translateX(" + ((1 - ease(cIn)) * 100) + "vw)";
+  }
+
+  // ── snap scroll: one gesture = one stop ──
+  // z per state: FRH-0005+text-right · text-left+zen-right · covenant
+  var STOPS = [2.00, 2.60, 3.70];
+  var stopIdx = 0;
+  function requestExit() { try { parent.postMessage({ hd: "close" }, "*"); } catch (e) {} }
+  var mExit = document.getElementById("m-exit");
+  if (mExit) { mExit.addEventListener("click", requestExit); mExit.addEventListener("keydown", function (e) { if (e.key === "Enter") requestExit(); }); }
+  function advance(dir) {
+    if (dir > 0 && stopIdx >= STOPS.length - 1) { requestExit(); return; }
+    var ni = Math.max(0, Math.min(STOPS.length - 1, stopIdx + dir));
+    if (ni === stopIdx) return;
+    var lo = Math.min(stopIdx, ni);
+    stopIdx = ni; target = STOPS[stopIdx];
+    if (lo >= 1) glide("timed", 1050);   // the covenant slide — deliberate
+    else glide("exp");                   // the text move-over
+  }
+  var raf = null, EASE = 0.05;
+  var animMode = "exp", animFrom = 0, animStart = 0, animDur = 720;
+  function _now() { return (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now(); }
+  function easeIO(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+  function step() {
+    raf = null;
+    if (animMode === "timed") {
+      var t = Math.min(1, (_now() - animStart) / animDur);
+      z = animFrom + (target - animFrom) * easeIO(t);
+      apply();
+      if (t < 1) raf = requestAnimationFrame(step); else animMode = "exp";
+    } else {
+      z += (target - z) * EASE;
+      apply();
+      if (Math.abs(target - z) > 0.001) raf = requestAnimationFrame(step); else z = target;
+    }
+  }
+  function glide(mode, dur) {
+    animMode = mode || "exp";
+    if (animMode === "timed") { animFrom = z; animStart = _now(); animDur = dur; }
+    if (!raf) raf = requestAnimationFrame(step);
+  }
+
+  // ── input: momentum-guarded (one gesture, one stop — no fly-past) ──
+  var _locked = false, _decayed = false, _lockT = null;
+  function _cool() { clearTimeout(_lockT); _lockT = setTimeout(function () { _locked = false; }, 260); }
+  var closeup = document.getElementById("closeup");
+  window.addEventListener("wheel", function (e) {
+    if (MOBILE) return;
+    if (closeup.classList.contains("on")) { e.preventDefault(); return; }
+    e.preventDefault();
+    if (Math.abs(target - z) > 0.12) return;               // still travelling -- swallow
+    var ad = Math.abs(e.deltaY), dir = e.deltaY > 0 ? 1 : -1;
+    if (_locked) {
+      _cool();
+      if (ad < 8) _decayed = true;
+      if (ad >= 70 && _decayed) { advance(dir); _decayed = false; }
+      return;
+    }
+    if (ad < 20) return;
+    advance(dir); _locked = true; _decayed = false; _cool();
+  }, { passive: false });
+  var _tY0 = 0, _tT0 = 0, _tActive = false;
+  window.addEventListener("touchstart", function (e) { if (MOBILE) return; _tY0 = e.touches[0].clientY; _tT0 = Date.now(); _tActive = true; }, { passive: true });
+  window.addEventListener("touchmove", function (e) { if (MOBILE) return; if (_tActive) e.preventDefault(); }, { passive: false });
+  window.addEventListener("touchend", function (e) {
+    if (MOBILE) return;
+    if (!_tActive) return; _tActive = false;
+    var dy = e.changedTouches[0].clientY - _tY0, dt = Math.max(1, Date.now() - _tT0), v = dy / dt;
+    if (Math.abs(target - z) > 0.12) return;
+    if (!_locked && Math.abs(dy) > 24 && Math.abs(v) > 0.25) { advance(dy < 0 ? 1 : -1); _locked = true; _cool(); }
+  }, { passive: true });
+  window.addEventListener("keydown", function (e) {
+    if (MOBILE) return;
+    if (closeup.classList.contains("on")) return;
+    if (e.key === "Escape") { requestExit(); return; }
+    if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); advance(1); }
+    if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); advance(-1); }
+  });
+
+  // ── closeup: every image clickable ──
+  function openCloseup(src, cite) {
+    document.getElementById("closeup-img").src = src;
+    document.getElementById("closeup-cite").textContent = cite;
+    closeup.classList.add("on");
+  }
+  closeup.addEventListener("click", function () { closeup.classList.remove("on"); });
+  document.addEventListener("keydown", function (e) {
+    if (closeup.classList.contains("on") && e.key === "Escape") closeup.classList.remove("on");
+  });
+  var skImg = document.querySelector("#flow .sk");
+  skImg.addEventListener("click", function () { openCloseup(skImg.src, "Music for Solo Performer · HH-FRH-0005 · 14 November 1986"); });
+  var zenImg = document.getElementById("zen-over");
+  zenImg.addEventListener("click", function () { openCloseup(zenImg.src, "Zazen on the deck · source TBC"); });
+  var covImg = document.getElementById("cov-img");
+  covImg.addEventListener("click", function () { openCloseup(covImg.src, "Richard Hunter above Prospect Lake · Times Colonist, 23 October 2006 · HH-FRH-0051"); });
+
+  window.addEventListener("resize", apply);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
+  apply();
+  console.log("hunter-drill hd2-v0.01 -- three stops: FRH-0005+text -> text-left+zazen-right -> the covenant (FRH-0051 crop)");
+})();
+</script>
+</body>
+</html>
