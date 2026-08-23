@@ -981,7 +981,7 @@
      CATALOGUE (12.5 > 11.5), and Hunter House Archive / Catalogue /
      collection titles all start at x=29 (gutter + spine + padding). */
   .site-top{padding-left:29px;height:44px}   /* v73: resting head 44px; the splash keeps the thin 28px frame and the bar EXPANDS on Continue (base 280ms height transition does the move) */
-  .site-top .mk-static,.site-top .mk-page{font-size:12.5px}
+  .site-top .mk-static,.site-top .mk-page{font-size:15px}   /* handoff: wordmark 15px (still ranks above catalogue) */
   .lp-toolbar .lh-title{font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:0.10em;text-transform:uppercase;color:color-mix(in srgb, var(--ink) 72%, transparent);cursor:default}
   .lp-toolbar #lp-search-input{flex:1;min-width:0;background:none;border:0;outline:none;font-family:var(--mono);font-size:11px;letter-spacing:0.02em;color:var(--ink)}
   .lp-toolbar #lp-search-input::placeholder{color:var(--hint);text-transform:lowercase;letter-spacing:0.06em}
@@ -1218,8 +1218,8 @@
   /* test.84: the wordmark scales UP too — the base lg rule (written for the
      old 11px mark) was dragging the 12.5px lab wordmark DOWN to 12 at the
      middle size. */
-  html.text-lg .site-top .mk-static,html.text-lg .site-top .mk-page{font-size:13.5px}
-  html.text-xl .site-top .mk-static,html.text-xl .site-top .mk-page{font-size:14.5px}
+  html.text-lg .site-top .mk-static,html.text-lg .site-top .mk-page{font-size:16px}
+  html.text-xl .site-top .mk-static,html.text-xl .site-top .mk-page{font-size:17px}
   /* v63/v68: feet at 28px — the collapsed sliver width; the frame is
      one dimension all round (slivers, feet, splash strip). */
   .pane-image .image-foot{height:28px}
@@ -3294,11 +3294,27 @@
   /* gap matches the internal word-space so "HUNTER HOUSE ARCHIVE" reads as one
      continuous wordmark, not "HUNTER HOUSE" with a detached trailing label */
   .mk-home{display:flex;align-items:baseline;gap:0.42em;background:none;border:0;padding:0;margin:0;text-decoration:none;color:inherit;cursor:pointer}
-  .mk-static,.mk-page{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:inherit;line-height:1}
+  /* handoff 2026-08-23: the wordmark joins the STRUCTURE register (Helvetica Bold
+     caps); the section name sits beside it in the accent red. Mono = the record. */
+  .mk-static,.mk-page{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:15px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:inherit;line-height:1}
+  .section-name{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-weight:700;font-size:15px;letter-spacing:0.06em;text-transform:uppercase;color:var(--red);margin-left:18px}
   /* hover dims the whole wordmark as one link (was: only the trailing .mk-page) */
   .mk-home:hover{opacity:.55}
   html.text-lg .mk-static,html.text-lg .mk-page{font-size:12px}
   html.text-xl .mk-static,html.text-xl .mk-page{font-size:13px}
+  /* section headings leave the record face for STRUCTURE (handoff 2026-08-23) */
+  .list-head .l, .lp-toolbar .lh-title, .lh-filter,
+  .ap-title, .ap-section-head,
+  .ip-title, .ip-grp,
+  .fp-lbl,
+  .cc-curator, .cc-title,
+  .cur-note .cn-label,
+  .cur-leave{
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-weight:700; font-size:13px; letter-spacing:0.08em; text-transform:uppercase;
+  }
+  /* the chevron is NOT in Helvetica's set -- it stays mono inside the label */
+  .list-head .l .filter-chevron, .lh-filter .filter-chevron{font-family:var(--mono)}
   /* LIVE GATE: old dual-spine timeline retired from the UI (new lens timeline replaces it).
      Button + #timeline-pane code stay in the DOM so boot-time wiring never throws. */
   .site-topright #timeline-toggle{display:none!important}
@@ -3588,9 +3604,10 @@
 <header class="site-top" id="site-header" role="banner" aria-label="Site header">
   <div class="markid" id="markid">
     <button class="mk-home" id="mk-home" type="button" aria-label="About this archive">
-      <span class="mk-static">Hunter House Archive</span>
+      <span class="mk-static">Hunter House</span>
       <span class="mk-page" id="mk-page"></span>
     </button>
+    <span class="section-name">Archive</span>
   </div>
   <div class="header-search"></div>
   <!-- bottom-centre contextual tools, mirroring the archive's image-foot bar -->
@@ -4036,7 +4053,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.11-test.01";
+  const VERSION      = "v1.11-test.02";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
