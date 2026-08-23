@@ -26,7 +26,7 @@
 <link rel="icon" type="image/png" href="assets/icon-192-next.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="preload" as="image" fetchpriority="high" href="assets/entry/caa8-sheet_thumb.jpg">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
@@ -50,7 +50,7 @@
   #flow{position:absolute;left:0;right:0;top:0;will-change:transform}
   #flow .sk{display:block;width:min(1100px,90vw);margin:0 auto}
   #flow .skcite{width:min(1100px,90vw);margin:6px auto 0;text-align:left;
-    font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.05em;color:rgba(27,25,24,.3)}
+    font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35)}
   #flow .body{display:flex;gap:64px;max-width:1240px;margin:9vh auto 0;padding:0 40px 18vh}
   #flow .txt{flex:1;font-weight:500;font-size:17px;line-height:1.7;color:#000;max-width:660px}
   #flow .txt p{margin-bottom:1.1em}
@@ -149,7 +149,7 @@
      off with the photograph — no flight, no fade choreography */
   #hero img.hlogo{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:auto;height:min(62vh,700px);object-fit:contain;z-index:1}
   /* ── SURVEY (contracted): one key-frame card per section ──────────────── */
-  #survey{position:fixed;inset:0;z-index:6;overflow-y:auto;overflow-x:hidden;
+  #survey{position:fixed;inset:0;z-index:6;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;
     scroll-snap-type:none;background:#f6f5f5;-webkit-overflow-scrolling:touch}
   body.in-section #survey{display:none}
   /* every card PINS (sticky) and the next one rises up from the bottom to cover
@@ -195,7 +195,7 @@
   .at-statement{font-weight:500;
     font-size:clamp(20px,2vw,30px);line-height:1.14;letter-spacing:-.006em;margin:0}
   .at-foot{display:flex;flex-direction:column;align-items:flex-start;gap:14px;font-family:'JetBrains Mono',Menlo,monospace;
-    font-size:11px;letter-spacing:.02em;line-height:1.85;color:#9a978f}
+    font-size:11px;letter-spacing:.02em;line-height:1.85;color:#a8a59c}
   .at-contact a{color:#1b1918;text-decoration:underline;text-underline-offset:3px}
   .at-meta a{color:inherit;text-decoration:underline;text-underline-offset:3px}
   /* over the photo cards the ink is light, with a soft shadow for legibility */
@@ -347,8 +347,8 @@
     text-transform:uppercase;color:#a8a59c;margin:0 0 20px}
   .plate .pt{font-weight:500;font-size:clamp(26px,3vw,38px);line-height:1.06;letter-spacing:-.012em;
     color:#1b1918;margin:0 0 22px}
-  .plate .pb{font-weight:500;font-size:clamp(17px,1.5vw,22px);line-height:1.25;
-    color:#3a372f;margin:0}
+  .plate .pb{font-weight:500;font-size:clamp(17px,1.5vw,22px);line-height:1.45;
+    color:#1b1918;margin:0}   /* audit: leading 1.25→1.45 + base ink -- reads as prose, matches the HOUSE register */
   .plate .pq{font-weight:500;font-size:clamp(20px,2.4vw,32px);
     line-height:1.18;letter-spacing:-.006em;color:#1b1918;margin:0 0 20px}
   .plate .pqa{font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.06em;
@@ -370,14 +370,14 @@
      HOUSE black). It is the DARK copy that sits over the menu; it's clip-revealed to
      only show where the sliding panel has already covered — so each letter inks from
      the light menu to the dark crumb exactly as the panel edge sweeps past it (JS). */
-  #hd-crumb .hc-a, #hd-crumb .hc-b{position:fixed;left:var(--menu-x,46px);z-index:26;white-space:nowrap;cursor:pointer;
+  #hd-crumb .hc-a, #hd-crumb .hc-b{position:fixed;left:var(--menu-x,46px);z-index:26;white-space:nowrap;cursor:pointer;padding:6px 10px 6px 0;
     font-family:'JetBrains Mono',Menlo,monospace;font-weight:700;font-size:28px;letter-spacing:.03em;
     text-transform:uppercase;color:#1b1918;pointer-events:none;
     -webkit-clip-path:inset(-6px -8px -6px 100%);clip-path:inset(-6px -8px -6px 100%)}   /* hidden until the panel edge reveals it */
   #hd-crumb .hc-a{top:32px;opacity:.34}   /* HUNTER — grey (DIM) */
   #hd-crumb .hc-b{top:64px;opacity:1}      /* HOUSE — black */
   body.room-open #hd-crumb .hc-a, body.room-open #hd-crumb .hc-b{pointer-events:auto}
-  .room-pager{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:22;
+  .room-pager{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:22;
     display:flex;align-items:center;gap:18px;font-family:'JetBrains Mono',Menlo,monospace;
     font-size:12px;letter-spacing:.1em;color:#76726a;user-select:none}
   .room-pager button{border:0;background:none;color:#1b1918;font-size:20px;line-height:1;cursor:pointer;
@@ -405,10 +405,10 @@
   body.sec-about .scard[data-section="archive"] .enter-cue{opacity:0;pointer-events:none}
   .scard.cover .enter-cue{color:#f6f5f5;text-shadow:0 1px 16px rgba(0,0,0,.55);
     background:rgba(20,18,16,.34);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
-  @media (max-width:767px){ .enter-cue{right:5vw;font-size:12px;padding:11px 16px} }
+  @media (max-width:767px){ .enter-cue{right:5vw;font-size:12px;padding:16px 18px} }
   @media (max-width:767px){
     .plate{padding:12vh 26px}
-    .plate .pcap{left:26px;max-width:82vw}
+    .plate .pcap{left:26px;max-width:82vw;transform:none}
   }
   /* ── MOBILE entry layout: name-square centred + smaller in the upper area
      (driveNameSquare mirrors size + LS=0); captions drop full-width below. ── */
@@ -589,11 +589,11 @@
 <div id="film-title" aria-hidden="true">Hunter House</div>
 <nav id="menu" aria-label="Site" style="position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62);transform:translateY(-110%);opacity:0;will-change:transform,opacity">
   <!-- ARIAL-bold text labels (was hand-lettered PNGs — img.mi kept in CSS for a quick swap-back) -->
-  <a data-section="hunter" style="cursor:pointer" aria-label="Hunter">Hunter</a>
-  <a data-section="house" style="cursor:pointer" aria-label="House">House</a>
+  <a data-section="hunter" tabindex="0" style="cursor:pointer" aria-label="Hunter">Hunter</a>
+  <a data-section="house" tabindex="0" style="cursor:pointer" aria-label="House">House</a>
   <!-- SITE removed (saved for reinstatement): <a data-section="site" style="padding:0;cursor:pointer" aria-label="Site"><img class="mi" src="assets/entry/title-site.png" alt="Site"></a> -->
-  <a data-section="archive" style="cursor:pointer" aria-label="Archive">Archive</a>
-  <a data-section="about" style="cursor:pointer" aria-label="About">About</a>
+  <a data-section="archive" tabindex="0" style="cursor:pointer" aria-label="Archive">Archive</a>
+  <a data-section="about" tabindex="0" style="cursor:pointer" aria-label="About">About</a>
 </nav>
 <div id="titlefly" aria-hidden="true"></div>
 <div id="dots" aria-hidden="true"></div>
@@ -675,7 +675,7 @@
   <iframe id="hd-frame" title="The House" src="about:blank"></iframe>
 </div>
 <div id="hd-crumb" role="button" tabindex="0" aria-label="Back to the survey"><span class="hc-a">Hunter</span><span class="hc-b">House</span></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.00</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.01</div>
 
 <script>
 // entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
@@ -1563,13 +1563,13 @@
   var ROOMS = {
     house: [
       { kind: "lead", k: "The House · 01", t: "203 Goward Road", b: "Ric Hunter designed and built the house for his own family on a wooded slope above Prospect Lake — begun 1970, lived in for half a century. A place worked out in section, in timber, and by hand." },
-      { kind: "img", src: "assets/entry/cards/home/BACKGROUND.jpg?v=2", cap: "The first sketch — enclosed in a letter, c.1969, before the ground was broken." },
+      { kind: "img", src: "assets/entry/cards/home/BACKGROUND.jpg?v=4", cap: "The first sketch — enclosed in a letter, c.1969, before the ground was broken." },
       { kind: "img", src: "assets/entry/cards/archive/FRH0009.jpg?v=2", cap: "The central glass-domed garden, 1977 — the house grown into its clearing." },
       { kind: "quote", q: "Nothing extraordinary in an absolute sense — but if it comes off as I expect, the total cost of less than $12,000 will make it very extraordinary.", a: "R. Hunter, c.1969" }
     ],
     hunter: [
       { kind: "lead", k: "The Architect · 01", t: "Richard Morrow Hunter", b: "1930–2023. A West Coast architect whose practice is measured less in commissions than in a way of building — patient, structural, and his own. (Placeholder plates.)" },
-      { kind: "img", src: "assets/entry/cards/hunter/BACKGROUND.jpg", cap: "HH-FRH-0005 · Photograph, Frances Hunter Collection." }
+      { kind: "img", src: "assets/entry/cards/hunter/BACKGROUND.jpg?v=8", cap: "HH-FRH-0005 · Photograph, Frances Hunter Collection." }
     ]
   };
   var roomEl = document.getElementById("room"),
@@ -1612,7 +1612,7 @@
   // ── HOUSE drill-down (iframe reading mechanic) ──
   var houseDrill = document.getElementById("house-drill"), hdFrame = document.getElementById("hd-frame"), hdOpen = false;
   function openHouseDrill() {
-    if (hdFrame.getAttribute("src") !== "house-drill.html?v=43") hdFrame.src = "house-drill.html?v=43";   // (re)load fresh
+    if (hdFrame.getAttribute("src") !== "house-drill.html?v=44") hdFrame.src = "house-drill.html?v=44";   // (re)load fresh
     hdOpen = true;
     document.body.classList.add("room-open");
     surveyEl.style.overflow = "hidden";
@@ -1695,7 +1695,10 @@
     // The card's own MORE button opens the room; Browse-the-Archive opens the instrument.
     var idx = pages.findIndex(function (p) { return p.dataset && p.dataset.section === s; });
     if (idx >= 0) goPage(idx);
-  }); });
+  });
+  // keyboard: Enter/Space activate the focused menu link (they're href-less <a>s)
+  a.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); a.click(); } });
+  });
   // The MORE button opens the room for HUNTER/HOUSE (squares removed on those cards).
   // (Archive's "Browse the Archive" is a real <a> leaf that handles itself.)
   document.querySelectorAll('.scard[data-section="hunter"] .enter-cue, .scard[data-section="house"] .enter-cue').forEach(function (btn) {
@@ -1913,7 +1916,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("entry-test5 e5-v2.00 -- audit batch 1: iOS dvh CTAs, single film load, no large-tier waste (house-drill v1.01)");
+  console.log("entry-test5 e5-v2.01 -- audit batch 2: polish (type tokens, tap targets, a11y) (house-drill v1.02)");
 })();
 </script>
 <!-- ── adaptive entry film: pick a resolution tier by connection + display ── -->
