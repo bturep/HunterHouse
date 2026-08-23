@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- house-drill v1.03 -- the HOUSE drill-down, loaded in entry-test5's iframe.
+<!-- house-drill v1.04 -- the HOUSE drill-down, loaded in entry-test5's iframe.
      DESKTOP (>767px): a z-driven horizontal carousel, six stops (wheel/touch/keys
      advance one stop per gesture):
        (0) the 1970 letter elevation sketch + Hunter's OWN WORDS (L001, text right)
@@ -79,19 +79,19 @@
   /* the second reading — image left (FRH-0022), text down the centre */
   #reading2{position:fixed;inset:0;z-index:9;visibility:hidden;opacity:0;background:#f6f5f5;
     display:flex;align-items:center;justify-content:center}
-  #reading2 .r2body{display:flex;gap:64px;max-width:1240px;padding:0 40px;align-items:flex-start}
+  #reading2 .r2body{display:flex;flex-direction:row-reverse;gap:64px;max-width:1240px;padding:0 40px;align-items:flex-start}   /* text LEFT, tower RIGHT (DOM order unchanged so the mobile column keeps the tower on top) */
   #reading2 .photocol{width:460px;flex:none}
   #reading2 .photocol img{width:100%;display:block;border:1px solid rgba(27,25,24,.14)}
   #reading2 .txt{flex:1;max-width:660px;font-weight:500;font-size:17px;line-height:1.7;color:#000}
   #reading2 .txt p{margin-bottom:1.1em}
   /* CAA-0018 fullscreen — click zooms at the cursor; move pans; click again out */
   #caa18{position:fixed;inset:0;z-index:9;visibility:hidden;opacity:0;background:#f6f5f5;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
-  #caa18 img{max-width:92vw;max-height:84vh;display:block;border:1px solid rgba(27,25,24,.14);
+    display:flex;align-items:center;justify-content:center;gap:56px;overflow:hidden;padding:0 40px}
+  #caa18 img{max-width:56vw;max-height:84vh;display:block;border:1px solid rgba(27,25,24,.14);
     cursor:zoom-in;transition:transform .45s ease;will-change:transform}
+  #caa18 .c18txt{flex:0 1 520px;max-width:520px;font-weight:500;font-size:17px;line-height:1.7;color:#000}
+  #caa18 .c18txt p{margin-bottom:1.1em}
   #caa18.zoomed img{cursor:zoom-out}
-  #caa18 .ccite18{position:fixed;left:34px;bottom:22px;font-family:'JetBrains Mono',Menlo,monospace;
-    font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
   /* the Ivan Hunter selection — a quiet grid */
   #ihc{position:fixed;inset:0;z-index:9;visibility:hidden;opacity:0;background:#f6f5f5;
     display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:26px}   /* top-aligned; padding-top set in JS so the top photo row = the tower image top */
@@ -113,10 +113,10 @@
       opacity:1 !important; visibility:visible !important;
       height:auto !important; min-height:0 !important; overflow:visible !important;
     }
-    /* the CAA-0018 drawing: full-width image, static caption below */
-    #caa18 { padding:5vh 0; }
+    /* the CAA-0018 drawing: stacked -- full-width image, its text below */
+    #caa18 { padding:5vh 0; flex-direction:column; gap:22px; }
     #caa18 img { max-width:92vw !important; max-height:none !important; width:92vw; height:auto; }
-    #caa18 .ccite18 { position:static !important; margin:10px auto 0; text-align:center; }
+    #caa18 .c18txt { flex:none; max-width:none; width:92vw; margin:0 auto; font-size:16px; line-height:1.6; }
 
     /* the reading: elevation then text, stacked (was absolute overlapping layers) */
     #flow { position:static !important; overflow:visible !important; height:auto !important; }
@@ -212,7 +212,12 @@
 </div>
 <div id="caa18" aria-label="Hunter House, Studio and Garden — the 1985 addition drawing">
   <img id="caa18-img" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg" alt="Hunter House, Studio and Garden — HH-CAA-0018, 1985">
-  <div class="ccite18">Hunter House, Studio &amp; Garden · HH-CAA-0018 · 1985</div>
+  <div class="c18txt">
+    <!-- placeholder narrative — the 1985 Studio & Garden scheme; Brandon to write -->
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    <p class="txt-cite">Hunter House, Studio &amp; Garden · HH-CAA-0018 · 1985</p>
+  </div>
 </div>
 <div id="reading2" aria-label="The addition">
   <div class="r2body">
@@ -243,7 +248,7 @@
 <!-- mobile only: a visible way home at the end of the vertical stack (desktop exits by scrolling past the last stop) -->
 <div id="m-exit" role="button" tabindex="0" aria-label="Back to the survey">← Hunter House</div>
 <div id="closeup" aria-label="Close view"><button class="cu-nav cu-prev" aria-label="Previous image">‹</button><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div><button class="cu-nav cu-next" aria-label="Next image">›</button></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v1.03</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v1.04</div>
 
 <script>
 // the z-driven carousel: z eases toward target; STOPS indexes the six states.
@@ -503,7 +508,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("house-drill v1.03 -- audit batch 3: dead entry-test2 machinery purged (812 -> ~510 lines); plan click-to-enlarge restored");
+  console.log("house-drill v1.04 -- CAA-0018 left + text right; addition text left + tower right");
 })();
 </script>
 </body>
