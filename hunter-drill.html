@@ -38,7 +38,7 @@
   /* stop 0 — the meditation pair: two photographs at equal height, RIGHT-justified
      (flush to the right edge); the text sits UNDER the music photograph, its
      column defined exactly by that photograph's edges (width:0 + min-width:100%) */
-  #s0{display:flex;align-items:center;justify-content:flex-end;padding:0}
+  #s0{display:flex;align-items:flex-start;justify-content:flex-end;padding:17vh 0 0}   /* image tops on the shared 17vh line */
   #s0 .pair{display:flex;gap:24px;align-items:flex-start;justify-content:flex-end}
   #s0 .pfig{display:flex;flex-direction:column}
   #s0 .pfig img{height:56vh;width:auto;display:block;cursor:zoom-in}
@@ -48,7 +48,7 @@
   .txt-cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
   /* stop 1 — the covenant: the photograph at the pair card's height (56vh),
      left-anchored + vertically centred; cite bound under it; text on the right */
-  #s2{z-index:8;display:flex;align-items:center;justify-content:flex-start}
+  #s2{z-index:8;display:flex;align-items:flex-start;justify-content:flex-start;padding-top:17vh}   /* same 17vh image line as the pair */
   #s2 .covfig{display:flex;flex-direction:column}
   #s2 img{height:56vh;width:auto;display:block;cursor:zoom-in}
   #s2 .scite{width:0;min-width:100%;margin-top:8px;text-align:left;
@@ -114,7 +114,7 @@
 <div id="closeup" aria-label="Close view"><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div></div>
 <!-- mobile only: a visible way home at the end of the vertical stack -->
 <div id="m-exit" role="button" tabindex="0" aria-label="Back to the survey">← Hunter House</div>
-<div id="ver">hd2-v0.10</div>
+<div id="ver">hd2-v0.11</div>
 <script>
 (function () {
   var z = 2, target = 2, Z_HERO = 1;
@@ -227,7 +227,7 @@
   window.addEventListener("resize", apply);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
   apply();
-  console.log("hunter-drill hd2-v0.10 -- covenant photo at the pair card height (56vh), cite bound under it");
+  console.log("hunter-drill hd2-v0.11 -- image tops aligned across both cards (shared 17vh line)");
 })();
 </script>
 </body>
