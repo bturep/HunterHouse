@@ -1,21 +1,20 @@
 <!DOCTYPE html>
-<!-- house-drill v1.02 — the HOUSE drill-down (forked from entry-test2) (Brandon, 2026-07-21):
-     HERO (film loop, no scrim; Hunter's 1970 NAMEBLOCK centred,
-       riding off with the photo; wordmark fades in top-left) ->
-     HOUSE: the 1970 letter elevation sketch + Hunter's OWN WORDS (L001, text right)
-       -> the text MOVES OVER to the left (content changes) as the measured plan (a
-       crop of CAA-0008) takes the right at full size -> STRAIGHT to a vertical gallery
-       of period photographs (CAA-0028 level-cropped, 0031, FRH-0009, FRH-0010, 0029;
-       click to view). [full-sheet crossfade + elevation zoom removed] ->
-       CAA-0018, the 1985 Studio & Garden addition drawing ->
-       the 1990s ADDITION: FRH-0022 left + placeholder text (line by
-       line) -> a grid of six Ivan Hunter photographs ->
-     HUNTER: portrait (FRH-0001) + short biography ->
-     SITE: the SIMPLEST plan — static opening, all-black linework, no house
-       infill, no colour/thickening; scroll reveals the place labels
-       (Goward Rd, Echo Rd, Prospect Lake ...).
-     The menu brackets the active section: [ House ] — the running motif.
-     All reversible. noindex + unlinked (mock). -->
+<!-- house-drill v1.03 -- the HOUSE drill-down, loaded in entry-test5's iframe.
+     DESKTOP (>767px): a z-driven horizontal carousel, six stops (wheel/touch/keys
+     advance one stop per gesture):
+       (0) the 1970 letter elevation sketch + Hunter's OWN WORDS (L001, text right)
+       (1) the text slides to the left column; the measured plan (a crop of
+           CAA-0008, #sheet-plan-over) right-aligned -- click to enlarge
+       (2) period-photograph gallery (#pgal: CAA-0028/0031, FRH-0008/0009/0010,
+           CAA-0029; click to view, prev/next steps the gallery)
+       (3) CAA-0018, the 1985 Studio & Garden addition drawing (#caa18)
+       (4) the 1990s ADDITION (#reading2): FRH-0022 + text
+       (5) a grid of six Ivan Hunter photographs (#ihc).
+     Past the last stop (or Esc) requestExit() posts {hd:"close"} to the parent.
+     MOBILE (<=767px): the slide engine is off; the @media block unpins every
+     section into a native vertical scroll (reading -> plan -> pgal -> caa18 ->
+     reading2 -> ihc) ending at #m-exit, the way home.
+     noindex + unlinked (mock). -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -32,9 +31,6 @@
   html,body{height:100%;overflow:hidden}
   body{background:#f6f5f5;font-family:"Inter Tight",system-ui,sans-serif;color:#1b1918}
   #stage{position:fixed;inset:0}
-  #menu a:hover{color:#1b1918}
-  .st-term{color:#000;border-bottom:1px dashed rgba(27,25,24,.45);cursor:pointer}
-  .st-term:hover{border-bottom-color:#000}
   /* close-up view of the column photograph */
   #closeup{position:fixed;inset:0;z-index:10;background:rgba(246,245,245,.97);display:none;
     align-items:center;justify-content:center;flex-direction:column;cursor:zoom-out}
@@ -52,9 +48,9 @@
      with the photograph column on the right */
   #reading{position:fixed;inset:0;z-index:6;overflow:hidden;visibility:hidden;background:#f4f1e8 url('assets/entry/reading-paper.jpg') center/cover no-repeat}
   #flow{position:absolute;inset:0;overflow:hidden}
-  /* three full-screen layers, each flex-centred; translateX (vw) slots them in
-     apply() so the reading reads as a right-to-left pan (I | T | I) */
-  #flow .sklayer, #flow .txtlayer, #flow .planlayer{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;will-change:transform}
+  /* two full-screen layers, each flex-centred; translateX slots them in
+     apply() so the reading reads as a right-to-left pan */
+  #flow .sklayer, #flow .txtlayer{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;will-change:transform}
   #flow .sk{display:block;width:auto;height:auto;max-width:84vw;max-height:90vh}
   #flow .skcite{margin-top:12px;text-align:center;
     font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35)}
@@ -64,21 +60,12 @@
   #flow .txt p{margin-bottom:1.1em}
   /* the two pages stack in one cell and crossfade (opacity driven in apply) */
   #flow .txt .page-r, #flow .txt .page-l{grid-row:1;grid-column:1;align-self:center}
-  #flow .photocol{width:min(46vw,720px)}
-  #flow .photocol img{width:100%;display:block}
-  #flow .photocol .cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:9px;text-align:center}
-  #flow .planlayer{display:none}   /* retired -- the plan now sits right-aligned as #sheet-plan-over (the po crop) */
-  /* shared column cite (the reading's own is scoped to #flow) */
+  /* shared column cite */
   .pcite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5);margin-top:9px}
   .txt-cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
-  /* the sheet — CAA-0008 fullscreen: plan first, then the frame travels the
-     fold-out elevations, rotating clockwise to read each upright */
-  #sheet{position:fixed;inset:0;z-index:8;visibility:hidden;opacity:0;background:transparent;overflow:hidden}
-  #sheet-wrap{position:absolute;left:0;top:0;width:2000px;height:1530px;transform-origin:0 0;will-change:transform}
-  #sheet-img{position:absolute;left:0;top:0;width:2000px;height:1530px;display:block}
-  #sheet-plan-over{position:fixed;z-index:8;visibility:hidden;height:auto;pointer-events:none;will-change:transform,opacity}
-  #sheet .scite{position:fixed;left:34px;bottom:22px;font-family:'JetBrains Mono',Menlo,monospace;
-    font-size:10px;letter-spacing:.06em;color:rgba(27,25,24,.5)}
+  /* the plan crop (CAA-0008) -- right-aligned beside the settled text at stop 1;
+     apply() drives its slide; click enlarges it in the closeup */
+  #sheet-plan-over{position:fixed;z-index:8;visibility:hidden;height:auto;cursor:zoom-in;will-change:transform,opacity}
   /* the period gallery — photographs of the original house, one after another,
      full aspect; the page's scroll rides down the stack */
   #pgal{position:fixed;inset:0;z-index:9;visibility:hidden;opacity:0;background:#f6f5f5;overflow:hidden;display:flex;align-items:flex-start;justify-content:center}   /* top-aligned; padding-top set in JS so the top photo row = the tower image top */
@@ -113,43 +100,6 @@
   #ihc .ifig{will-change:transform,opacity}
   #ihc .ifig img{width:100%;height:33vh;object-fit:cover;display:block;border:1px solid rgba(27,25,24,.14)}
   #ihc .ifig .icite{font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.45);margin-top:6px;text-align:center}
-  /* HUNTER — the man behind the file */
-  #hunter{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5;
-    display:flex;align-items:center;justify-content:center}
-  #hunter .hbody{display:flex;gap:64px;max-width:1240px;padding:0 40px;align-items:flex-start}
-  #hunter .photocol{width:360px;flex:none}
-  #hunter .photocol img{width:100%;display:block;border:1px solid rgba(27,25,24,.14)}
-  #hunter h2{font-weight:800;font-size:28px;letter-spacing:.01em;margin-bottom:6px}
-  #hunter .hsub{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(27,25,24,.55);margin-bottom:22px}
-  #hunter .htxt{flex:1;max-width:660px;font-weight:500;font-size:17px;line-height:1.7;color:#000}
-  #hunter .htxt p{margin-bottom:1.1em}
-  #hunter a.more{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(27,25,24,.6);text-decoration:none;border-bottom:1px dashed rgba(27,25,24,.4)}
-  /* the menu carries the section — bracket marks the one you're in */
-  #menu a{position:relative}
-  #menu a.on{color:#1b1918}
-  #menu a.on::before{content:"[";position:absolute;left:4px;top:6px}
-  #menu a.on::after{content:"]";position:absolute;right:4px;top:6px}
-  /* the site plan — the contour lens, inverted into this page's aesthetic:
-     black lines on paper. Filter does the whole re-colour; label = black box
-     with the archive's mono. */
-  #siteplan{position:fixed;inset:0;z-index:7;visibility:hidden;opacity:0;background:#f6f5f5}
-  #siteplan iframe{position:absolute;inset:0;width:100%;height:100%;border:0;
-    filter:invert(1)}
-  #siteplan .slabel{position:absolute;left:34px;bottom:26px;background:#1b1918;color:#f6f5f5;
-    font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.18em;
-    text-transform:uppercase;padding:7px 12px;pointer-events:none}
-  #site-cue{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:8;opacity:0;
-    font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(27,25,24,.6)}
-  /* the entry photograph — full-bleed, scrolled past; the title rides above it */
-  #hero{position:fixed;inset:0;z-index:7;background:#1b1918;pointer-events:none;will-change:transform;overflow:hidden;display:none}   /* drill-down lands on the reading — film hero removed */
-  #hero img,#hero video{width:100%;height:100%;object-fit:cover;display:block}
-  #hero::after{content:"";position:absolute;inset:0;background:transparent}
-  #hero .hcite{position:absolute;left:34px;bottom:22px;z-index:1;font-family:'JetBrains Mono',Menlo,monospace;
-    font-size:10px;letter-spacing:.06em;color:rgba(246,245,245,.55)}
-  /* Hunter's own 1970 nameblock (CAA-0007 title block), centred; it rides
-     off with the photograph — no flight, no fade choreography */
-  #hero img.hlogo{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:auto;height:min(62vh,700px);object-fit:contain;z-index:1}
-
   #m-exit{display:none}   /* desktop: exit = scroll past the last stop */
   /* ── mobile — VERTICAL SCROLL: the slide engine is off (JS MOBILE guard); every
      section is unpinned from position:fixed into normal document flow and stacked
@@ -157,7 +107,6 @@
   @media (max-width: 767px) {
     html, body { overflow-x:hidden; overflow-y:auto; height:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
     #stage { position:static; }
-    #sheet, #hero, #wordmark, #menu { display:none !important; }   /* full drawing + desktop chrome */
 
     #reading, #pgal, #caa18, #reading2, #ihc {
       position:static !important; inset:auto !important; transform:none !important;
@@ -175,7 +124,6 @@
       position:static !important; inset:auto !important; transform:none !important;
       height:auto !important; padding:0 6vw; margin:6vh 0;
     }
-    #flow .planlayer { display:none !important; }
     #flow .sk { max-width:100% !important; max-height:none !important; }
     #flow .skcite { font-size:10px; }
     #flow .txt {
@@ -222,9 +170,9 @@
 <body>
 <div id="reading" aria-label="Reading">
   <div id="flow">
-    <!-- I | T | I — a horizontal strip that pans right-to-left: elevation centred →
-         elevation slides left as text enters from the right → elevation off left,
-         plan enters from the right, text settles left → the plan zooms (the sheet) -->
+    <!-- a horizontal strip that pans right-to-left: elevation + text-right ->
+         elevation off left, text settles left, the plan crop (#sheet-plan-over)
+         enters right-aligned -->
     <div class="sklayer">
       <img class="sk" src="assets/entry/letter-elev-2.png" alt="">
       <div class="skcite">Letter L001 · Hunter to Luise Mendelsohn · 13 September 1970</div>
@@ -247,22 +195,10 @@
         </div>
       </div>
     </div>
-    <div class="planlayer">
-      <div class="photocol">
-        <img src="assets/entry/caa8-plan-crop.png" alt="Plan — Cottage for Ric and Frances Hunter, 1970">
-        <div class="cite">Plan · Cottage for Ric &amp; Frances Hunter · HH-CAA-0008 · 1970</div>
-      </div>
-    </div>
   </div>
 </div>
 
-<div id="sheet" aria-label="Cottage for Ric and Frances Hunter — plan and elevations">
-  <div id="sheet-wrap">
-    <img id="sheet-img" fetchpriority="high" src="assets/entry/caa8-sheet_thumb.jpg" data-mid="assets/entry/caa8-sheet_prev.jpg" data-large="assets/entry/caa8-sheet_large.jpg" alt="Cottage for Ric and Frances Hunter — plan and elevations, 1970">
-  </div>
-  <div class="scite">Cottage for Ric &amp; Frances Hunter — plan &amp; elevations, 25 August 1970 · HH-CAA-0008</div>
-</div>
-<img id="sheet-plan-over" src="assets/entry/caa8-plan-crop.png" alt="">
+<img id="sheet-plan-over" src="assets/entry/caa8-plan-crop.png" alt="Plan — Cottage for Ric and Frances Hunter, 1970">
 <div id="pgal" aria-label="Photographs of the original house">
   <div id="pgal-col">
     <div class="ihead-row">The original house · photographs 1970 – 1986</div>
@@ -307,20 +243,11 @@
 <!-- mobile only: a visible way home at the end of the vertical stack (desktop exits by scrolling past the last stop) -->
 <div id="m-exit" role="button" tabindex="0" aria-label="Back to the survey">← Hunter House</div>
 <div id="closeup" aria-label="Close view"><button class="cu-nav cu-prev" aria-label="Previous image">‹</button><img id="closeup-img" src="" alt=""><div class="ccite" id="closeup-cite"></div><button class="cu-nav cu-next" aria-label="Next image">›</button></div>
-<div id="hero" aria-hidden="true"><!-- retired -- film hero lives in the parent entry; media removed (entry-loop.mp4 404'd on every open) --></div>
-<div id="wordmark" style="display:none;position:fixed;top:0;left:0;z-index:8;padding:17px 34px;font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#1b1918;white-space:nowrap;transform-origin:50% 50%;will-change:transform">Hunter House</div>
-<nav id="menu" aria-label="Site" style="display:none;position:fixed;top:0;left:0;right:0;z-index:8;justify-content:center;padding:18px 34px;font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,25,24,.62);transform:translateY(-110%);opacity:0;will-change:transform,opacity">
-  <a data-z="1" style="padding:6px 15px;cursor:pointer">House</a>
-  <a data-z="12.2" style="padding:6px 15px;cursor:pointer">Hunter</a>
-  <a data-z="13.8" style="padding:6px 15px;cursor:pointer">Site</a>
-  <a style="padding:6px 15px">Archive</a>
-  <a style="padding:6px 15px">About</a>
-</nav>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v1.02</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:9px;letter-spacing:.06em;color:rgba(27,25,24,.35);pointer-events:none">v1.03</div>
 
 <script>
-// entry-test2 v0.36 — z: 0..1 the entry photograph (title → wordmark) ·
-// then the v0.30 phases shifted +1: reading scroll · gallery · site plan.
+// the z-driven carousel: z eases toward target; STOPS indexes the six states.
+// z starts at 2 (= past the retired hero band, hence Z_HERO below).
 (function () {
   var z = 2, target = 2, Z_HERO = 1;   // OPEN on sketch-left + text-right (the centred-elevation landing is skipped)
   // MOBILE: below the breakpoint the whole slide engine is OFF -- the page becomes a
@@ -331,70 +258,25 @@
   // the engine is wired at load, so the honest recovery is a reload.
   window.matchMedia("(max-width: 767px)").addEventListener("change", function () { location.reload(); });
   var ease = function (t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; };
-  var hero = document.getElementById("hero");
-  var menuEl = document.getElementById("menu");
-  var wm = document.getElementById("wordmark");
-
-  function centreSketch() {
-    // the layers are centred by their own flex boxes; no legacy padding offset
-    flow.style.paddingTop = "0px";
-  }
 
   // ── the reading flow ───────────────────────────────────────────────────
   var reading = document.getElementById("reading");
   var flow = document.getElementById("flow");
-  var ps = Array.prototype.slice.call(flow.querySelectorAll(".txt p"));
-  var Z_READ0 = 0.0, Z_END = 2.25;
   var ihcFigs = Array.prototype.slice.call(document.querySelectorAll("#ihc .ifig"));
   var pgalFigs = Array.prototype.slice.call(document.querySelectorAll("#pgal .pfig"));
-  var ps2 = Array.prototype.slice.call(document.querySelectorAll("#reading2 .txt p"));
-  // drag-to-look on the sheet: click-drag pans freely; release snaps back
-  // (eased) to the set elevation view — so the plan is always reachable.
-  var dragX = 0, dragY = 0, dragging = false, dragPX = 0, dragPY = 0, dragRaf = null;
-  var menuLinks = Array.prototype.slice.call(document.querySelectorAll("#menu a"));
-  // the sheet's camera keyframes — source coords on the 2000x1530 preview.
-  // rot is CSS degrees (positive = clockwise); fit = source px shown
-  // across the viewport height. Pairs of identical views = dwells.
-  var SHEET_VIEWS = [
-    { z: 2.00, cx: 814,  cy: 669,  rot: 0,    fit: 830 },   // the square plan, filling the vertical
-    { z: 3.10, cx: 814,  cy: 669,  rot: 0,    fit: 830 },   // plan held: beat + crossfade + 0.2 hold; pan starts 3.1
-    { z: 3.60, cx: 795,  cy: 1200, rot: 0,    fit: 565 },   // the MAIN elevation reached
-    { z: 3.80, cx: 795,  cy: 1200, rot: 0,    fit: 565 }    // elevation held 0.2, then the gallery reveal
-  ];
-  function sheetView(zv) {
-    var V = SHEET_VIEWS;
-    if (zv <= V[0].z) return V[0];
-    if (zv >= V[V.length - 1].z) return V[V.length - 1];
-    for (var i = 0; i < V.length - 1; i++) {
-      if (zv >= V[i].z && zv <= V[i + 1].z) {
-        var t = ease((zv - V[i].z) / (V[i + 1].z - V[i].z));
-        var a = V[i], bb = V[i + 1];
-        return { cx: a.cx + (bb.cx - a.cx) * t, cy: a.cy + (bb.cy - a.cy) * t,
-                 rot: a.rot + (bb.rot - a.rot) * t, fit: a.fit + (bb.fit - a.fit) * t };
-      }
-    }
-    return V[V.length - 1];
-  }
 
   function apply() {
     if (MOBILE) return;   // mobile = static vertical scroll; the @media block owns layout
-    // (hero/menu/wordmark choreography removed -- all three are retired, display:none;
-    //  the drill opens directly on the reading. z still starts at 2 = past the old hero.)
 
     // ── the reading (everything below runs in zr = z - Z_HERO space) ───────
     var zr = Math.max(0, z - Z_HERO);
-    var reading = document.getElementById("reading");
-    if (reading.style.visibility !== "visible") {
-      centreSketch();
-      reading.style.visibility = "visible";
-    }
+    if (reading.style.visibility !== "visible") reading.style.visibility = "visible";
 
     // ── the reading reads as a right-to-left pan (I | T | I) ───────────────
     // long HOLDS between short moves so each beat lands distinctly:
     //  0–.55 elevation · .55–.80 move · .80–1.20 elevation+text · 1.20–1.45 move · 1.45–1.75 text+plan
     var skL = document.querySelector("#flow .sklayer");
     var txtL = document.querySelector("#flow .txtlayer");
-    var planL = document.querySelector("#flow .planlayer");
     var p1 = ease(Math.max(0, Math.min(1, (zr - 0.55) / 0.25)));   // elevation centre→left, text in from the right (over it)
     var p2 = ease(Math.max(0, Math.min(1, (zr - 1.20) / 0.25)));   // text→left, plan in from the right, elevation off left
     // ── plan geometry: SAME size as before (tW), but RIGHT-aligned now ─────────
@@ -427,12 +309,9 @@
       pgR.style.opacity = 1 - Math.max(0, Math.min(1, (p2 - 0.25) / 0.30));   // beat-1 copy out
       pgL.style.opacity = Math.max(0, Math.min(1, (p2 - 0.45) / 0.30));       // beat-2 copy in (same 17px)
     }
-    ps.forEach(function (p) { p.style.clipPath = "none"; p.style.visibility = "visible"; });
 
     // ── the PLAN crop (no fly, no fade): SLIDES in from the right WITH the text for
-    //    beat 2, holds, then SLIDES off left as gallery 1 slides in from the right.
-    //    The full measured sheet AND the elevation zoom are removed. ──────────────
-    document.getElementById("sheet").style.visibility = "hidden";   // full drawing retired from this flow
+    //    beat 2, holds, then SLIDES off left as gallery 1 slides in from the right. ──
     var po = document.getElementById("sheet-plan-over");
     po.style.left = planLeft + "px"; po.style.top = planTop + "px"; po.style.width = tW + "px";
     var planTX = (1 - p2) * (window.innerWidth - planLeft + 40)      // enters from off-right (p2)
@@ -468,62 +347,18 @@
     r2.style.visibility = r2On ? "visible" : "hidden";
     r2.style.opacity = r2On ? "1" : "0";
     r2.style.transform = "translateX(" + (((1 - ease(r2In)) - ease(r2Out)) * 100) + "vw)";
-    ps2.forEach(function (pp) { pp.style.clipPath = "none"; pp.style.visibility = "visible"; });
     // GALLERY 2 — the Ivan Hunter grid: slides in as the addition exits left (END, holds)
     var ihc = document.getElementById("ihc");
     var iIn = Math.max(0, Math.min(1, (zr - 5.45) / 0.55));
     ihc.style.visibility = iIn > 0 ? "visible" : "hidden";
     ihc.style.opacity = iIn > 0 ? "1" : "0";
     ihc.style.transform = "translateX(" + ((1 - ease(iIn)) * 100) + "vw)";
-    // the menu carries the section — bracket the one you're in. Keyed to the
-    // scroll TARGET, not the eased z, so the indicator never lags the intent.
-    var zrT = Math.max(0, target - Z_HERO);
-    var sec = zrT < 10.8 ? 0 : (zrT < 12.05 ? 1 : 2);
-    menuLinks.forEach(function (a, i) { a.classList.toggle("on", i === sec); });
   }
 
-  // drag-to-look wiring for the sheet
-  var sheetEl = document.getElementById("sheet");
-  sheetEl.style.cursor = "grab";
-  sheetEl.addEventListener("dragstart", function (e) { e.preventDefault(); });
-  sheetEl.addEventListener("pointerdown", function (e) {
-    if (e.pointerType !== "mouse" || e.button !== 0) return;
-    dragging = true; dragPX = e.clientX; dragPY = e.clientY;
-    sheetEl.style.cursor = "grabbing";
-    if (dragRaf) { cancelAnimationFrame(dragRaf); dragRaf = null; }
-    e.preventDefault();
-  });
-  window.addEventListener("pointermove", function (e) {
-    if (!dragging) return;
-    dragX += e.clientX - dragPX; dragY += e.clientY - dragPY;
-    dragPX = e.clientX; dragPY = e.clientY;
-    apply();
-  });
-  function dragRelease() {
-    if (!dragging) return;
-    dragging = false;
-    sheetEl.style.cursor = "grab";
-    (function settle() {
-      dragX *= 0.85; dragY *= 0.85;
-      if (Math.abs(dragX) < 0.5 && Math.abs(dragY) < 0.5) { dragX = 0; dragY = 0; apply(); dragRaf = null; return; }
-      apply();
-      dragRaf = requestAnimationFrame(settle);
-    })();
-  }
-  window.addEventListener("pointerup", dragRelease);
-  window.addEventListener("pointercancel", dragRelease);
-
-  // tier-ladder climb REMOVED (audit 2026-08-22): #sheet is retired from this flow;
-  // the climber was re-downloading ~1.8 MB of prev+large tiers on every drill open.
-
-  // click-to-enlarge: the reading's plan
-  var colImgEl = document.querySelector("#flow .photocol img");
-  var colCiteEl = document.querySelector("#flow .photocol .cite");
+  // click-to-enlarge: the plan crop + the gallery figures
   var closeup = document.getElementById("closeup");
-  function openCloseup(src, cite, rot) {
-    var ci = document.getElementById("closeup-img");
-    ci.src = src;
-    ci.style.transform = rot ? "rotate(" + rot + "deg)" : "";
+  function openCloseup(src, cite) {
+    document.getElementById("closeup-img").src = src;
     document.getElementById("closeup-cite").textContent = cite;
     closeup.classList.add("on");
   }
@@ -531,14 +366,14 @@
   function figData(fg) {
     var im = fg.querySelector("img"), cite = fg.dataset.cite;
     if (!cite) { var ct = fg.querySelector(".icite"); cite = ct ? ct.textContent : ""; }
-    return { src: im ? im.src : "", cite: cite, rot: fg.dataset.rot };
+    return { src: im ? im.src : "", cite: cite };
   }
   var cuFigs = [], cuIdx = -1;
   function showCloseupAt(i) {
     if (!cuFigs.length) return;
     cuIdx = (i + cuFigs.length) % cuFigs.length;   // wrap around
     var d = figData(cuFigs[cuIdx]);
-    openCloseup(d.src, d.cite, d.rot);
+    openCloseup(d.src, d.cite);
   }
   pgalFigs.forEach(function (fg, i) {
     fg.style.cursor = "zoom-in";
@@ -549,8 +384,8 @@
     fg.style.cursor = "zoom-in";
     fg.addEventListener("click", function () { cuFigs = ihcFigs; showCloseupAt(i); });
   });
-  colImgEl.style.cursor = "zoom-in";
-  colImgEl.addEventListener("click", function () { cuFigs = []; cuIdx = -1; openCloseup(colImgEl.src, colCiteEl.textContent); });
+  var planOverEl = document.getElementById("sheet-plan-over");
+  planOverEl.addEventListener("click", function () { cuFigs = []; cuIdx = -1; openCloseup(planOverEl.src, "Plan · Cottage for Ric & Frances Hunter · HH-CAA-0008 · 1970"); });
   var cuPrev = document.querySelector("#closeup .cu-prev"), cuNext = document.querySelector("#closeup .cu-next");
   cuPrev.addEventListener("click", function (e) { e.stopPropagation(); showCloseupAt(cuIdx - 1); });
   cuNext.addEventListener("click", function (e) { e.stopPropagation(); showCloseupAt(cuIdx + 1); });
@@ -562,139 +397,9 @@
     else if (e.key === "ArrowLeft" && cuFigs.length) { e.preventDefault(); e.stopPropagation(); showCloseupAt(cuIdx - 1); }
   });
 
-  // the site-plan iframe: strip the mock's chrome, then re-ink to the
-  // SIMPLEST plan — every line black on paper (the CSS invert does the flip),
-  // no fills, no house infill, no thickening, no colour identities, no zoom
-  // choreography (static opening). Place labels (Goward Rd, Echo Rd, Prospect
-  // Lake …) are KEPT but start at 0 — scroll writes them in via __labelReveal.
-  (function () {
-    var f = document.getElementById("siteplan-lens");
-    if (!f) return;   // site plan removed from the HOUSE drill-down — skip its lens setup
-    function strip() {
-      try {
-        var d = f.contentDocument;
-        if (!d || d.readyState !== "complete") return;
-        var st = d.createElement("style");
-        st.textContent = ".wordmark,.mock-tag,.veil{display:none !important}";   // the veil inverts to a grey plaque
-        d.head.appendChild(st);
-      } catch (e) {}
-      (function wait(tries) {
-        try {
-          var w = f.contentDocument.getElementById("lens").contentWindow;
-          var V = w.__v;
-          if (V && V.scene) {
-            window.__lensWin = w;
-            // once the site plan is interactive (pointer-events:auto) the
-            // iframe swallows wheel/keys — forward them so scroll-BACK works
-            var fwWheel = function (ev) { ev.preventDefault(); if (Math.abs(ev.deltaY) > 20) advance(ev.deltaY > 0 ? 1 : -1); };
-            var fwKeys = function (ev) {
-              if (ev.key === "ArrowDown" || ev.key === "PageDown" || ev.key === " ") { ev.preventDefault(); advance(1); }
-              if (ev.key === "ArrowUp" || ev.key === "PageUp") { ev.preventDefault(); advance(-1); }
-            };
-            try {
-              var dd = f.contentDocument;
-              if (dd && !dd.__hhFwd) { dd.__hhFwd = 1;
-                dd.addEventListener("wheel", fwWheel, { passive: false, capture: true });
-                dd.addEventListener("keydown", fwKeys, true); }
-            } catch (e0) {}
-            try {
-              if (!w.__hhFwd) { w.__hhFwd = 1;
-                w.addEventListener("wheel", fwWheel, { passive: false, capture: true });
-                w.addEventListener("keydown", fwKeys, true); }
-            } catch (e1) {}
-            var labels = [];
-            // REPLACE materials (not mutate): the mock's hover system rewrites
-            // its captured material refs every frame — fresh clones orphan
-            // those writes while the meshes render our ink.
-            function remat(mm, o) {
-              if (mm.userData && mm.userData.__inked) return mm;
-              if (mm.isLineBasicMaterial) {
-                var nm = mm.clone();
-                nm.vertexColors = false;
-                nm.color.setRGB(1, 1, 1);              // white → inverts to black ink
-                nm.opacity = Math.max(mm.opacity || 1, 0.9);
-                nm.needsUpdate = true; nm.userData.__inked = true;
-                return nm;
-              }
-              if (mm.isSpriteMaterial) {               // sprite labels/markers — scroll-revealed
-                mm.userData.__labelOrig = Math.max(mm.opacity || 1, 0.85);
-                mm.opacity = 0; mm.needsUpdate = true;
-                mm.userData.__inked = true; mm.userData.__isLabel = true;
-                if (o) o.userData.__isLabel = true;
-                labels.push(mm);
-                return mm;
-              }
-              if (mm.isMeshBasicMaterial) {
-                if (mm.map) {
-                  // faint hillshade/aerial washes → gone (grey plaque under
-                  // inversion); the higher-opacity textured planes are the
-                  // place LABELS — kept, starting invisible
-                  if ((mm.opacity === undefined ? 1 : mm.opacity) < 0.5) {
-                    var hm = mm.clone(); hm.opacity = 0; hm.userData.__inked = true; return hm;
-                  }
-                  mm.userData.__labelOrig = Math.max(mm.opacity === undefined ? 1 : mm.opacity, 0.9);
-                  mm.transparent = true; mm.opacity = 0; mm.needsUpdate = true;
-                  mm.userData.__inked = true; mm.userData.__isLabel = true;
-                  if (o) o.userData.__isLabel = true;
-                  labels.push(mm);
-                  return mm;
-                }
-                var fm = mm.clone();                   // fills (house, lake, rooms) → none: pure linework
-                fm.transparent = true; fm.opacity = 0; fm.needsUpdate = true; fm.userData.__inked = true;
-                return fm;
-              }
-              return mm;
-            }
-            window.__reink = function () {
-              V.scene.background && V.scene.background.set(0x0a0a0a);   // inverts to the paper tone
-              V.scene.traverse(function (o) {
-                if (!o.material) return;
-                if (Array.isArray(o.material)) o.material = o.material.map(function (mm) { return remat(mm, o); });
-                else o.material = remat(o.material, o);
-              });
-            };
-            window.__labelReveal = function (amt) {
-              labels.forEach(function (mm) { mm.opacity = (mm.userData.__labelOrig || 1) * amt; });
-            };
-            // late passes: catch boot races + meshes added after first ink
-            setTimeout(window.__reink, 1200);
-            setTimeout(window.__reink, 3000);
-            setTimeout(window.__reink, 6000);
-            // the lens re-shows the aerial plates on its own schedule — keep
-            // them dead (labels exempt), cheap traverse 4x/sec
-            if (!window.__deadMat) window.__deadMat = new w.THREE.MeshBasicMaterial({ visible: false, transparent: true, opacity: 0 });
-            window.__deadMat.userData.__gone = true;
-            if (!window.__inkGuard) window.__inkGuard = setInterval(function () {
-              try {
-                V.scene.traverse(function (o) {
-                  if (o.userData.__isLabel) return;
-                  if (o.userData.__gone) { o.material = window.__deadMat; return; }
-                  var m0 = o.material && (Array.isArray(o.material) ? o.material[0] : o.material);
-                  if (!m0 || m0.userData.__gone || m0.userData.__isLabel) return;
-                  if ((m0.map && !m0.isSpriteMaterial) || m0.isShaderMaterial ||
-                      m0.type === "MeshStandardMaterial" || m0.type === "MeshLambertMaterial") {
-                    o.userData.__gone = true;
-                    o.material = window.__deadMat;
-                  }
-                });
-              } catch (e) {}
-            }, 120);
-            window.__reink();
-            return;
-          }
-        } catch (e) {}
-        if (tries < 240) setTimeout(function () { wait(tries + 1); }, 50);
-      })(0);
-    }
-    f.addEventListener("load", strip);
-    strip();
-  })();
-
-  // the ORIGINAL entry-test2 driver — exponential ease-out: a smooth, slow settle
-  // that never whips. Slowed from 0.16 → 0.07 so each snap is deliberate and the
-  // plan → full-sheet zoom + fade reads slowly.
-  // most moves ride the exponential ease-out (EASE). The plan-into-sheet crossfade is
-  // a single VERY slow move, so it runs on a long timed ease-in-out instead.
+  // the driver -- exponential ease-out: a smooth, slow settle that never whips.
+  // The reading move rides the exponential ease (EASE); the horizontal carousel
+  // slides run on a long timed ease-in-out instead.
   var raf = null, EASE = 0.05;
   var animMode = "exp", animFrom = 0, animStart = 0, animDur = 720;
   function _now() { return (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now(); }
@@ -772,12 +477,6 @@
     if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); advance(1); }
     if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); advance(-1); }
   });
-  document.querySelectorAll("#menu a[data-z]").forEach(function (a) {
-    a.addEventListener("click", function () {
-      target = parseFloat(a.dataset.z);
-      glide();
-    });
-  });
   // align the (enlarged) gallery photo grids' top edge with the tower image's top,
   // so the top row of photos lines up with the tower image across the sliding sections.
   function alignGalleries() {
@@ -793,19 +492,18 @@
       sec.style.paddingTop = Math.max(0, towerTop - cur) + "px";
     });
   }
-  window.addEventListener("resize", function () { centreSketch(); apply(); alignGalleries(); });
-  flow.querySelector(".sk").addEventListener("load", function () { centreSketch(); apply(); });
+  window.addEventListener("resize", function () { apply(); alignGalleries(); });
+  flow.querySelector(".sk").addEventListener("load", function () { apply(); });
   (function () {
     var tw = document.querySelector("#reading2 .photocol img");
     if (tw) { if (tw.complete && tw.naturalHeight) alignGalleries(); else tw.addEventListener("load", alignGalleries); }
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(alignGalleries);
   })();
-  // the title's centring transform is measured from its text width — re-apply
-  // once the webfont arrives (fallback-font metrics left it ~4px off centre)
+  // re-apply once the webfont arrives (text metrics shift the layout slightly)
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { apply(); });
 
   apply();
-  console.log("house-drill v1.02 -- audit batch 2: mobile legibility, way-home button, overscroll contain");
+  console.log("house-drill v1.03 -- audit batch 3: dead entry-test2 machinery purged (812 -> ~510 lines); plan click-to-enlarge restored");
 })();
 </script>
 </body>
