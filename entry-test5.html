@@ -62,6 +62,18 @@
   .scard.ps{padding:0;background:#f6f5f5}   /* opaque backing so the card covers the pinned intro */
   /* clip container so a zoomed background bleeds off the card edges, never over the captions */
   .scard .bgclip{position:absolute;inset:0;overflow:hidden;z-index:0}
+  /* handoff 2026-08-23: legibility via two wide gradients, no visible edge, NO backing
+     rectangle -- above the photograph, below the type. Per-card strengths via vars. */
+  .scard .bgclip::after{content:""; position:absolute; inset:0; pointer-events:none; z-index:1;
+    background:
+      linear-gradient(to top,   rgba(12,10,9,var(--g-bottom,0)) 0%, rgba(12,10,9,0) 62%),
+      linear-gradient(to right, rgba(12,10,9,var(--g-left,0))   0%, rgba(12,10,9,0) 58%)}
+  .scard[data-section="hunter"] { --g-bottom:.62; --g-left:.42 }
+  .scard[data-section="house"]  { --g-bottom:.66; --g-left:.50 }
+  .scard[data-section="archive"]{ --g-bottom:.30; --g-left:.20 }
+  /* ABOUT is the light card: a light scrim from the left only */
+  .scard[data-section="about"] .bgclip::after{
+    background:linear-gradient(to right, rgba(248,247,246,.82) 0%, rgba(248,247,246,0) 58%)}
   .scard.ps .layer{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;transform-origin:50% 50%}
   /* a second background that fades in smoothly once the card is selected */
   .scard.ps .bg2{opacity:0;transition:opacity .7s ease}
@@ -87,13 +99,16 @@
     text-align:left;z-index:5;color:#1b1918}
   .at-statement{font-weight:500;
     font-size:clamp(20px,2vw,30px);line-height:1.14;letter-spacing:-.006em;margin:0}
-  .at-foot{display:flex;flex-direction:column;align-items:flex-start;gap:14px;font-family:'JetBrains Mono',Menlo,monospace;
-    font-size:11px;letter-spacing:.02em;line-height:1.85;color:#a8a59c}
+  /* handoff 2026-08-23: the record pinned to the bottom-left corner (a .scard child now) */
+  .scard .at-foot{position:absolute; left:var(--menu-x); bottom:46px; z-index:5;
+    display:flex; flex-direction:column; align-items:flex-start; gap:14px;
+    font-family:'JetBrains Mono',Menlo,monospace;
+    font-size:10px; letter-spacing:.03em; line-height:1.9; color:#8d8981}
   .at-contact a{color:#1b1918;text-decoration:underline;text-underline-offset:3px}
   .at-meta a{color:inherit;text-decoration:underline;text-underline-offset:3px}
   /* over the photo cards the ink is light, with a soft shadow for legibility */
   .scard.cover .about-text{color:#f6f5f5;text-shadow:0 1px 22px rgba(0,0,0,.6)}
-  .scard.cover .at-foot{color:rgba(246,245,245,.85)}
+  .scard.cover .at-foot{color:rgba(246,245,245,.66); text-shadow:0 1px 22px rgba(0,0,0,.65)}
   .scard.cover .at-contact a{color:#f6f5f5}
   /* placement. ARCHIVE/ABOUT share --edge. HUNTER/HOUSE caption+button share the
      name-square's LEFT EDGE so they stay in a single left column with the nametag at
@@ -106,16 +121,14 @@
     --nm-x:calc(50vw - var(--nsq-half))}
   .scard[data-section="hunter"]{--nm-top:calc(50vh + var(--nsq-off) - var(--nsq-half)); --nm-bot:calc(50vh + var(--nsq-off) + var(--nsq-half))}  /* architect LOW */
   .scard[data-section="house"]{--nm-top:calc(50vh - var(--nsq-off) - var(--nsq-half)); --nm-bot:calc(50vh - var(--nsq-off) + var(--nsq-half))}  /* hunter house HIGH */
-  .scard[data-section="hunter"]  .about-text{left:var(--menu-x); top:65.28vh; width:425px; right:auto; bottom:auto; transform:none}   /* squares gone — free to move via ?place */
-  .scard[data-section="house"]   .about-text{left:var(--menu-x); top:73.21vh; width:497px; right:auto; bottom:auto; transform:none}
-  .scard[data-section="archive"] .about-text{left:var(--menu-x); top:68.20vh; width:385px; right:auto; bottom:auto; transform:none}  /* left-aligned to the menu margin */
-  .scard[data-section="about"]   .about-text{left:var(--menu-x); top:23.36vh; width:348px; right:auto; bottom:auto; transform:none}
+  /* handoff 2026-08-23: statements mid-left on one 580px measure (authored breaks hold) */
+  .scard[data-section="hunter"]  .about-text{left:var(--menu-x); top:43.5vh; width:580px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="house"]   .about-text{left:var(--menu-x); top:46.9vh; width:580px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="archive"] .about-text{left:var(--menu-x); top:45.9vh; width:580px; right:auto; bottom:auto; transform:none}
+  .scard[data-section="about"]   .about-text{left:var(--menu-x); top:26.2vh; width:580px; right:auto; bottom:auto; transform:none}
   .scard[data-section="hunter"] .at-statement{font-size:30px}
   .scard[data-section="about"] .at-statement{font-size:27px}
-  /* all buttons SAME location: left on the menu edge, top:92.12vh (?place save) */
-  .scard[data-section="hunter"]  .enter-cue,
-  .scard[data-section="house"]   .enter-cue,
-  .scard[data-section="archive"] .enter-cue{left:var(--menu-x); top:92.12vh; bottom:auto; right:auto; transform:none}
+  /* (the per-card button placements are gone -- the button lives bottom-right, see .enter-cue) */
   /* Archive foreground scroll-fade tracks the scroll directly — no opacity transition,
      so the caption and button fade at the SAME rate (the button's default .3s made it lag) */
   .scard[data-section="hunter"] .enter-cue,  .scard[data-section="hunter"] .about-text,
@@ -125,7 +138,7 @@
   .scard[data-section="hunter"]  .layer{object-position:0.7% 46.4%; object-fit:cover}
   .scard[data-section="house"]   .layer{object-position:0.9% 53.8%; object-fit:cover}
   .scard[data-section="archive"] .layer{object-position:12.9% 49.6%; object-fit:cover}
-  .scard[data-section="about"]   .layer{object-position:50% 100%; object-fit:contain; transform-origin:50% 100%; transform:translate(164px,-9px) scale(1.15)}   /* ?place: drag=move (1:1), +w/-w=scale */
+  .scard[data-section="about"]   .layer{object-position:108% 118%; object-fit:contain; transform-origin:100% 100%; transform:none}   /* handoff: the elevation lower-right; statement takes the upper-left field */
   /* the film INTRO panel — first in the survey scroll.
      It sits ON TOP (z above the cards) and is slid UP by scroll (see driveReveal),
      revealing the HOUSE card already in place beneath it — a reveal, not a cover.
@@ -237,27 +250,28 @@
   .room-pager button:hover{opacity:1}
   .room-pager button:disabled{opacity:.22;cursor:default}
   body.room-open #menu{pointer-events:none}   /* nav suspended, but kept visible so the panel edge sweeps over it (menu → crumb hands off, no fade); the opaque panel covers it once open */
-  /* the MORE cue — a deep card has more behind it (2b). Right edge, vertically
-     centred. "More +" reads as additional content, not a spatial move. */
-  .enter-cue{position:absolute;right:4.5vw;top:50%;transform:translateY(-50%);z-index:6;
-    display:inline-flex;align-items:center;gap:12px;padding:13px 22px;border:1.5px solid currentColor;
-    font-family:'JetBrains Mono',Menlo,monospace;font-size:14px;font-weight:500;letter-spacing:.26em;
-    text-transform:uppercase;color:#1b1918;pointer-events:none;transition:opacity .3s}
-  .enter-cue::after{content:"+";font-size:19px;font-weight:400;letter-spacing:0;line-height:1}
+  /* handoff 2026-08-23: the MORE cue — a mono label led in by a rule, bottom-right
+     corner (opposite the record). No box, no pill. */
+  .enter-cue{position:absolute; right:46px; bottom:48px; top:auto; left:auto; transform:none; z-index:6;
+    display:inline-flex; align-items:center; gap:16px; padding:0; border:0;
+    font-family:'JetBrains Mono',Menlo,monospace; font-weight:500;
+    font-size:13px; letter-spacing:.22em; text-transform:uppercase;
+    color:#1b1918; pointer-events:none; transition:opacity .3s}
+  .enter-cue::before{content:""; width:56px; height:1.5px; background:currentColor; display:block}
+  .enter-cue::after{content:"+"; font-size:15px; font-weight:400; letter-spacing:0; line-height:1}
   /* ARCHIVE leaf: same button, but a REAL link out to the instrument (↗, not +) */
   .enter-cue.leaf{pointer-events:auto;cursor:pointer;text-decoration:none}
   /* HUNTER/HOUSE MORE buttons — the click target (squares removed on these cards) */
   .scard[data-section="hunter"] .enter-cue,
   .scard[data-section="house"]  .enter-cue{pointer-events:auto;cursor:pointer}
-  .enter-cue.leaf::after{content:"↗";font-size:17px}
+  .enter-cue.leaf::after{content:"↗";font-size:15px}
   /* fade a button out while it overlaps the docked menu labels (JS collision check) */
   .enter-cue.cue-hidden{opacity:0 !important;pointer-events:none !important}
   /* on the ABOUT endpoint the bottom of Archive shows above the card, but its Browse
      button should not — hide it there */
   body.sec-about .scard[data-section="archive"] .enter-cue{opacity:0;pointer-events:none}
-  .scard.cover .enter-cue{color:#f6f5f5;text-shadow:0 1px 16px rgba(0,0,0,.55);
-    background:rgba(20,18,16,.34);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
-  @media (max-width:767px){ .enter-cue{right:5vw;font-size:12px;padding:16px 18px} }
+  .scard.cover .enter-cue{color:#f6f5f5;text-shadow:0 1px 22px rgba(0,0,0,.65);
+    background:none;backdrop-filter:none;-webkit-backdrop-filter:none}   /* the gradient scrim does the legibility work now */
   @media (max-width:767px){
     .plate{padding:12vh 26px}
     .plate .pcap{left:26px;max-width:82vw;transform:none}
@@ -283,9 +297,13 @@
     .scard[data-section="house"]  .about-text { left:var(--menu-x) !important; top:72.81dvh !important; width:430px !important; right:auto !important; bottom:auto !important; transform:none !important }
     .scard[data-section="archive"] .about-text { left:var(--menu-x) !important; top:32.73dvh !important; width:343px !important; right:auto !important; bottom:auto !important; transform:none !important }
     .scard[data-section="about"]  .about-text { left:var(--menu-x) !important; top:12.32dvh !important; width:430px !important; right:auto !important; bottom:auto !important; transform:none !important; flex-direction:column !important }
-    .scard[data-section="hunter"] .enter-cue { left:var(--menu-x) !important; top:89.87dvh !important; right:auto !important; bottom:auto !important; transform:none !important }
-    .scard[data-section="house"]  .enter-cue { left:var(--menu-x) !important; top:89.87dvh !important; right:auto !important; bottom:auto !important; transform:none !important }
-    .scard[data-section="archive"] .enter-cue { left:var(--menu-x) !important; top:89.87dvh !important; right:auto !important; bottom:auto !important; transform:none !important }
+    /* handoff 2026-08-23: buttons bottom-right on mobile too */
+    .scard[data-section="hunter"] .enter-cue,
+    .scard[data-section="house"]  .enter-cue,
+    .scard[data-section="archive"] .enter-cue{
+      left:auto !important; right:26px !important; top:auto !important; bottom:40px !important; transform:none !important;
+      font-size:12px !important}
+    .enter-cue::before{width:36px}
     #film-cite { left:2.02vw !important; top:95.84vh !important; right:auto !important; bottom:auto !important; transform:none !important; font-size:10px !important }
     .scard[data-section="hunter"] .layer { object-position:0.7% 46.4% !important; object-fit:cover !important }
     .scard[data-section="house"]  .layer { object-position:87.5% 49.1% !important; object-fit:cover !important }
@@ -363,10 +381,10 @@
   <section class="scard ps cover" data-section="hunter">
     <div class="bgclip"><img class="layer" src="assets/entry/cards/hunter/BACKGROUND.jpg?v=8" alt="Richard Hunter building the deck of his house, 1978"></div>
     <div class="about-text">
-      <p class="at-statement">Richard Morrow Hunter, Architect. 1930 – 2023.<br><br>Fifty years designing one house.</p>
-      <div class="at-foot">
-        <div class="at-meta">HH-FRH-0001, Ric building the Choom, 1978<br>Photograph, Frances Hunter Collection</div>
-      </div>
+      <p class="at-statement">Richard Morrow Hunter,<br>Architect. 1930 – 2023.<br><br>Fifty years designing one house.</p>
+    </div>
+    <div class="at-foot">
+      <div class="at-meta">HH-FRH-0001, Ric building the Choom, 1978<br>Photograph, Frances Hunter Collection</div>
     </div>
     <div class="enter-cue">More</div>
   </section>
@@ -376,9 +394,9 @@
     <div class="bgclip"><img class="layer" src="assets/entry/cards/home/BACKGROUND.jpg?v=4" alt=""></div>
     <div class="about-text">
       <p class="at-statement">A Cottage for Ric and Frances Hunter.<br>Built 1970; Extended 1991; 2018.</p>
-      <div class="at-foot">
-        <div class="at-meta">HH-FRH-0008, Frances in front of House, 1977<br>Photograph, Frances Hunter Collection</div>
-      </div>
+    </div>
+    <div class="at-foot">
+      <div class="at-meta">HH-FRH-0008, Frances in front of House, 1977<br>Photograph, Frances Hunter Collection</div>
     </div>
     <div class="enter-cue">More</div>
   </section>
@@ -391,10 +409,10 @@
   <section class="scard ps cover" data-section="archive">
     <div class="bgclip"><img class="layer" src="assets/entry/cards/archive/nameblock.jpg?v=2" alt="Richard Hunter Architect — studio nameblock"></div>
     <div class="about-text">
-      <p class="at-statement">The full record of the house : drawings, photographs, and correspondence.</p>
-      <div class="at-foot">
-        <div class="at-meta">HH-HHC-0115, Richard Hunter · Architect, 1986<br>Portfolio Cover, Hunter House Collection</div>
-      </div>
+      <p class="at-statement">The full record of the house : drawings,<br>photographs, and correspondence.</p>
+    </div>
+    <div class="at-foot">
+      <div class="at-meta">HH-HHC-0115, Richard Hunter · Architect, 1986<br>Portfolio Cover, Hunter House Collection</div>
     </div>
     <a class="enter-cue leaf" href="next.html?enter" target="_blank" rel="noopener">Browse the Archive</a>
   </section>
@@ -403,10 +421,10 @@
     <div class="bgclip"><img class="layer" src="assets/entry/cards/about/BACKGROUND.jpg" alt="Elevation of the house among the firs"></div>
     <div class="about-text">
       <p class="at-statement">The Hunter House Foundation stewards the residence at 203 Goward Road and the archive of its construction, opening the record to scholars, students, and the public.</p>
-      <div class="at-foot">
-        <div class="at-meta">Established 2026 · Victoria, British Columbia<br>not-for-profit</div>
-        <div class="at-contact"><a href="mailto:contact@hunterhouse.org">contact@hunterhouse.org</a><br>203 Goward Road · Saanich · British Columbia</div>
-      </div>
+    </div>
+    <div class="at-foot">
+      <div class="at-meta">Established 2026 · Victoria, British Columbia<br>not-for-profit</div>
+      <div class="at-contact"><a href="mailto:contact@hunterhouse.org">contact@hunterhouse.org</a><br>203 Goward Road · Saanich · British Columbia</div>
     </div>
   </section>
 </div>
@@ -421,7 +439,7 @@
   <iframe id="hd-frame" title="The House" src="about:blank"></iframe>
 </div>
 <div id="hd-crumb" role="button" tabindex="0" aria-label="Back to the survey"><span class="hc-a">Hunter</span><span class="hc-b">House</span></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.16</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.17</div>
 
 <script>
 // entry-test5 — the survey entry: film card + scroll-snap section cards,
@@ -597,15 +615,18 @@
     SECT_FADE.forEach(function (s) {
       var f = String(1 - Math.max(0, Math.min(1, (st - s.i * vh) / (fadeWin * vh))));
       if (s.cap) s.cap.style.opacity = f;
+      if (s.foot) s.foot.style.opacity = f;
       if (s.btn) s.btn.style.opacity = f;
     });
   }
   var _archLastSt = -1, _archDir = 1;
   // every section's foreground, keyed to its scroll page (hunter 1 · house 2 · archive 3)
   var SECT_FADE = ["hunter", "house", "archive"].map(function (sec, k) {
+    var q = '.scard[data-section="' + sec + '"] ';
     return { i: k + 1,
-      cap: document.querySelector('.scard[data-section="' + sec + '"] .about-text'),
-      btn: document.querySelector('.scard[data-section="' + sec + '"] .enter-cue') };
+      cap: document.querySelector(q + '.about-text'),
+      foot: document.querySelector(q + '.at-foot'),
+      btn: document.querySelector(q + '.enter-cue') };
   });
   // ── name-square morph: nameblock on the film → architect badge (HUNTER) → HUNTER HOUSE (HOUSE) → fade after ──
   var nsBox = document.getElementById("namesq");
@@ -1077,7 +1098,7 @@
   })();
   setSurveyActive(); driveReveal(); driveNameSquare(surveyEl.scrollTop);
   window.addEventListener("resize", function () { driveReveal(); driveNameSquare(surveyEl.scrollTop); });
-  console.log("entry-test5 e5-v2.16 -- HUNTER image line aligned (hunter-drill hd2-v0.11)");
+  console.log("entry-test5 e5-v2.17 -- survey-card typography handoff applied (three anchors, rule-led button, gradient scrims, ABOUT recompose)");
 })();
 </script>
 <!-- ── adaptive entry film: pick a resolution tier by connection + display ── -->
