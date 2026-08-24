@@ -1185,9 +1185,9 @@
      SQUARE — the top twin of the ? in the bottom-right foot, sitting in
      the right sliver's own column. */
   #text-toggle{display:none!important}
-  .site-top #fs-toggle{position:absolute;bottom:0;right:0;width:28px;height:28px;
-    border-left:1px solid var(--rule);border-top:1px solid var(--rule);margin:0;padding:0;
-    display:flex;align-items:center;justify-content:center}   /* a true 28px corner SQUARE (the bar grew to 44px; height:100% stretched the cell) */
+  .site-top #fs-toggle{position:absolute;top:0;right:0;width:44px;height:100%;
+    border-left:1px solid var(--rule);margin:0;padding:0;
+    display:flex;align-items:center;justify-content:center}   /* square by WIDTH: the cell widened to match the 44px bar -- side rule only, no top */
   /* test.83: Aa reaches the WHOLE type system — the lg/xl overrides were
      written for the pre-lab classes, so only the legacy record-title rule
      still connected. One step per size, whole reading surface. */
@@ -4036,7 +4036,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.10.03";
+  const VERSION      = "v1.10.04";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
