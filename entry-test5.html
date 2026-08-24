@@ -100,8 +100,8 @@
   .at-statement{font-weight:500;
     font-size:clamp(20px,2vw,30px);line-height:1.14;letter-spacing:-.006em;margin:0}
   /* handoff 2026-08-23: the record pinned to the bottom-left corner (a .scard child now) */
-  .scard .at-foot{position:absolute; left:var(--menu-x); bottom:46px; z-index:5;
-    display:flex; flex-direction:column; align-items:flex-start; gap:14px;
+  .scard .at-foot{position:absolute; right:46px; left:auto; bottom:46px; z-index:5;
+    display:flex; flex-direction:column; align-items:flex-end; text-align:right; gap:14px;
     font-family:'JetBrains Mono',Menlo,monospace;
     font-size:10px; letter-spacing:.03em; line-height:1.9; color:#8d8981}
   .at-contact a{color:#1b1918;text-decoration:underline;text-underline-offset:3px}
@@ -252,7 +252,7 @@
   body.room-open #menu{pointer-events:none}   /* nav suspended, but kept visible so the panel edge sweeps over it (menu → crumb hands off, no fade); the opaque panel covers it once open */
   /* handoff 2026-08-23: the MORE cue — a mono label led in by a rule, bottom-right
      corner (opposite the record). No box, no pill. */
-  .enter-cue{position:absolute; right:46px; bottom:48px; top:auto; left:auto; transform:none; z-index:6;
+  .enter-cue{position:absolute; left:var(--menu-x); right:auto; bottom:48px; top:auto; transform:none; z-index:6;
     display:inline-flex; align-items:center; gap:16px; padding:0; border:0;
     font-family:'JetBrains Mono',Menlo,monospace; font-weight:500;
     font-size:13px; letter-spacing:.22em; text-transform:uppercase;
@@ -301,8 +301,9 @@
     .scard[data-section="hunter"] .enter-cue,
     .scard[data-section="house"]  .enter-cue,
     .scard[data-section="archive"] .enter-cue{
-      left:auto !important; right:26px !important; top:auto !important; bottom:40px !important; transform:none !important;
+      left:26px !important; right:auto !important; top:auto !important; bottom:40px !important; transform:none !important;
       font-size:12px !important}
+    .scard .at-foot{ right:26px; }
     .enter-cue::before{width:36px}
     #film-cite { left:2.02vw !important; top:95.84vh !important; right:auto !important; bottom:auto !important; transform:none !important; font-size:10px !important }
     .scard[data-section="hunter"] .layer { object-position:0.7% 46.4% !important; object-fit:cover !important }
@@ -439,7 +440,7 @@
   <iframe id="hd-frame" title="The House" src="about:blank"></iframe>
 </div>
 <div id="hd-crumb" role="button" tabindex="0" aria-label="Back to the survey"><span class="hc-a">Hunter</span><span class="hc-b">House</span></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.26</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.27</div>
 
 <script>
 // entry-test5 — the survey entry: film card + scroll-snap section cards,
@@ -1098,7 +1099,7 @@
   })();
   setSurveyActive(); driveReveal(); driveNameSquare(surveyEl.scrollTop);
   window.addEventListener("resize", function () { driveReveal(); driveNameSquare(surveyEl.scrollTop); });
-  console.log("entry-test5 e5-v2.26 -- REVERTED: content = the e5-v2.20 state (everything since 62d06c7 undone)");
+  console.log("entry-test5 e5-v2.27 -- card corners swapped: MORE bottom-left, record bottom-right");
 })();
 </script>
 <!-- ── adaptive entry film: pick a resolution tier by connection + display ── -->
