@@ -1,0 +1,327 @@
+{
+  "period": "2026-08",
+  "dataset": "Hunter_House_Archive",
+  "totals": {
+    "events": 1227,
+    "views": 1104,
+    "searches": 8,
+    "zero_result_searches": 1,
+    "downloads": 20
+  },
+  "events_by_type": {
+    "search0": 1,
+    "pageview": 46,
+    "view": 1104,
+    "search": 8,
+    "deeplink": 48,
+    "download": 20
+  },
+  "top_items": [
+    {
+      "id": "HH-CAA-0018",
+      "views": 94
+    },
+    {
+      "id": "HH-FRH-0009",
+      "views": 16
+    },
+    {
+      "id": "HH-HHC-0008",
+      "views": 15
+    },
+    {
+      "id": "HH-CAA-0008",
+      "views": 15
+    },
+    {
+      "id": "HH-HHC-0001",
+      "views": 15
+    },
+    {
+      "id": "HH-FRH-0050",
+      "views": 13
+    },
+    {
+      "id": "HH-FRH-0008",
+      "views": 13
+    },
+    {
+      "id": "HH-FRH-0006",
+      "views": 12
+    },
+    {
+      "id": "HH-FRH-0051",
+      "views": 12
+    },
+    {
+      "id": "HH-FRH-0049",
+      "views": 12
+    },
+    {
+      "id": "HH-FRH-0002",
+      "views": 11
+    },
+    {
+      "id": "HH-CAA-0009",
+      "views": 11
+    },
+    {
+      "id": "HH-HHC-0010",
+      "views": 11
+    },
+    {
+      "id": "HH-HHC-0115",
+      "views": 11
+    },
+    {
+      "id": "HH-HHC-0004",
+      "views": 10
+    },
+    {
+      "id": "HH-FRH-0010",
+      "views": 10
+    },
+    {
+      "id": "HH-FRH-0053",
+      "views": 10
+    },
+    {
+      "id": "HH-FRH-0007",
+      "views": 10
+    },
+    {
+      "id": "HH-IHC-0003",
+      "views": 10
+    },
+    {
+      "id": "HH-CAA-0007",
+      "views": 10
+    },
+    {
+      "id": "HH-FRH-0026",
+      "views": 10
+    },
+    {
+      "id": "HH-FRH-0001",
+      "views": 10
+    },
+    {
+      "id": "HH-HHC-0003",
+      "views": 9
+    },
+    {
+      "id": "HH-HHC-0005",
+      "views": 9
+    },
+    {
+      "id": "HH-HHC-0009",
+      "views": 9
+    },
+    {
+      "id": "HH-CAA-0017",
+      "views": 9
+    },
+    {
+      "id": "HH-FRH-0027",
+      "views": 9
+    },
+    {
+      "id": "HH-FRH-0054",
+      "views": 9
+    },
+    {
+      "id": "HH-FRH-0003",
+      "views": 9
+    },
+    {
+      "id": "HH-HHC-0006",
+      "views": 9
+    },
+    {
+      "id": "HH-FRH-0052",
+      "views": 9
+    },
+    {
+      "id": "HH-FRH-0004",
+      "views": 8
+    },
+    {
+      "id": "HH-IHC-0001",
+      "views": 8
+    },
+    {
+      "id": "HH-CAA-0016",
+      "views": 8
+    },
+    {
+      "id": "HH-HHC-0017",
+      "views": 8
+    },
+    {
+      "id": "HH-FRH-0028",
+      "views": 8
+    },
+    {
+      "id": "HH-CAA-0001",
+      "views": 8
+    },
+    {
+      "id": "HH-FRH-0025",
+      "views": 7
+    },
+    {
+      "id": "HH-HHC-0002",
+      "views": 7
+    },
+    {
+      "id": "HH-IHC-0002",
+      "views": 7
+    },
+    {
+      "id": "HH-FRH-0056",
+      "views": 7
+    },
+    {
+      "id": "HH-CAA-0005",
+      "views": 7
+    },
+    {
+      "id": "HH-CAA-0002",
+      "views": 7
+    },
+    {
+      "id": "HH-FRH-0012",
+      "views": 6
+    },
+    {
+      "id": "HH-EGC-0049",
+      "views": 6
+    },
+    {
+      "id": "HH-HHC-0112",
+      "views": 6
+    },
+    {
+      "id": "HH-FRH-0043",
+      "views": 6
+    },
+    {
+      "id": "HH-FRH-0013",
+      "views": 6
+    },
+    {
+      "id": "HH-HHC-0067",
+      "views": 6
+    },
+    {
+      "id": "HH-HHC-0084",
+      "views": 6
+    }
+  ],
+  "top_searches": [
+    {
+      "q": "Dock",
+      "n": 1
+    },
+    {
+      "q": "view",
+      "n": 1
+    },
+    {
+      "q": "homes",
+      "n": 1
+    },
+    {
+      "q": "Doc",
+      "n": 1
+    },
+    {
+      "q": "emluk",
+      "n": 1
+    },
+    {
+      "q": "site",
+      "n": 1
+    },
+    {
+      "q": "cascade",
+      "n": 1
+    },
+    {
+      "q": "home",
+      "n": 1
+    }
+  ],
+  "zero_result_searches": [
+    {
+      "q": "homesch",
+      "n": 1
+    }
+  ],
+  "downloads_by_collection": [
+    {
+      "collection": "hunter-house-collection",
+      "n": 9
+    },
+    {
+      "collection": "canadian-architecture-archive",
+      "n": 6
+    },
+    {
+      "collection": "ivan-hunter-collection",
+      "n": 3
+    },
+    {
+      "collection": "frances-hunter-collection",
+      "n": 2
+    }
+  ],
+  "pageviews_by_page": [
+    {
+      "page": "index.html",
+      "n": 44
+    },
+    {
+      "page": "gallery",
+      "n": 1
+    },
+    {
+      "page": "gallery.html",
+      "n": 1
+    }
+  ],
+  "by_country": [
+    {
+      "country": "CA",
+      "n": 1115
+    },
+    {
+      "country": "US",
+      "n": 93
+    },
+    {
+      "country": "BR",
+      "n": 13
+    },
+    {
+      "country": "IE",
+      "n": 2
+    },
+    {
+      "country": "NL",
+      "n": 1
+    },
+    {
+      "country": "DE",
+      "n": 1
+    },
+    {
+      "country": "RU",
+      "n": 1
+    },
+    {
+      "country": "PT",
+      "n": 1
+    }
+  ]
+}
