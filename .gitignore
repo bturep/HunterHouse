@@ -47,3 +47,6 @@ test-results/
 playwright-report/
 tour-design-brief.txt
 TODO.md
+
+# Site source assets (PSD/TIFF/DWG masters, screenshots, working notes) -- local only, NEVER publish
+_source/
