@@ -1,0 +1,279 @@
+{
+  "period": "2026-09",
+  "dataset": "Hunter_House_Archive",
+  "totals": {
+    "events": 323,
+    "views": 276,
+    "searches": 2,
+    "zero_result_searches": 1,
+    "downloads": 3
+  },
+  "events_by_type": {
+    "search0": 1,
+    "pageview": 30,
+    "view": 276,
+    "search": 2,
+    "deeplink": 11,
+    "download": 3
+  },
+  "top_items": [
+    {
+      "id": "HH-CAA-0018",
+      "views": 38
+    },
+    {
+      "id": "HH-CAA-0001",
+      "views": 6
+    },
+    {
+      "id": "HH-FRH-0007",
+      "views": 5
+    },
+    {
+      "id": "HH-FRH-0056",
+      "views": 5
+    },
+    {
+      "id": "HH-HHC-0004",
+      "views": 5
+    },
+    {
+      "id": "HH-HHC-0017",
+      "views": 5
+    },
+    {
+      "id": "HH-HHC-0009",
+      "views": 4
+    },
+    {
+      "id": "HH-HHC-0012",
+      "views": 4
+    },
+    {
+      "id": "HH-CAA-0016",
+      "views": 4
+    },
+    {
+      "id": "HH-HHC-0011",
+      "views": 4
+    },
+    {
+      "id": "HH-HHC-0008",
+      "views": 4
+    },
+    {
+      "id": "HH-FRH-0001",
+      "views": 4
+    },
+    {
+      "id": "HH-CAA-0019",
+      "views": 4
+    },
+    {
+      "id": "HH-HHC-0007",
+      "views": 4
+    },
+    {
+      "id": "HH-CAA-0026",
+      "views": 3
+    },
+    {
+      "id": "HH-HHC-0005",
+      "views": 3
+    },
+    {
+      "id": "HH-FRH-0012",
+      "views": 3
+    },
+    {
+      "id": "HH-HHC-0001",
+      "views": 3
+    },
+    {
+      "id": "HH-CAA-0007",
+      "views": 3
+    },
+    {
+      "id": "HH-FRH-0009",
+      "views": 3
+    },
+    {
+      "id": "HH-FRH-0005",
+      "views": 3
+    },
+    {
+      "id": "HH-CAA-0008",
+      "views": 3
+    },
+    {
+      "id": "HH-IHC-0004",
+      "views": 3
+    },
+    {
+      "id": "HH-FRH-0008",
+      "views": 3
+    },
+    {
+      "id": "HH-FRH-0006",
+      "views": 3
+    },
+    {
+      "id": "HH-CAA-0036",
+      "views": 3
+    },
+    {
+      "id": "SACRED-PROFANITIES",
+      "views": 3
+    },
+    {
+      "id": "HH-HHC-0018",
+      "views": 3
+    },
+    {
+      "id": "HH-HHC-0002",
+      "views": 3
+    },
+    {
+      "id": "HH-HHC-0019",
+      "views": 3
+    },
+    {
+      "id": "L030",
+      "views": 3
+    },
+    {
+      "id": "HH-FRH-0055",
+      "views": 3
+    },
+    {
+      "id": "HH-CAA-0017",
+      "views": 3
+    },
+    {
+      "id": "HH-CAA-0020",
+      "views": 3
+    },
+    {
+      "id": "L031",
+      "views": 3
+    },
+    {
+      "id": "HH-HHC-0010",
+      "views": 3
+    },
+    {
+      "id": "HH-CAA-0005",
+      "views": 3
+    },
+    {
+      "id": "HH-HHC-0006",
+      "views": 3
+    },
+    {
+      "id": "L015",
+      "views": 2
+    },
+    {
+      "id": "HH-CAA-0027",
+      "views": 2
+    },
+    {
+      "id": "HH-FRH-0014",
+      "views": 2
+    },
+    {
+      "id": "HH-CAA-0003",
+      "views": 2
+    },
+    {
+      "id": "HH-IHC-0001",
+      "views": 2
+    },
+    {
+      "id": "HH-IHC-0006",
+      "views": 2
+    },
+    {
+      "id": "HH-HHC-0016",
+      "views": 2
+    },
+    {
+      "id": "HH-HHC-0020",
+      "views": 2
+    },
+    {
+      "id": "HH-CAA-0025",
+      "views": 2
+    },
+    {
+      "id": "HH-FRH-0015",
+      "views": 2
+    },
+    {
+      "id": "HH-CAA-0011",
+      "views": 2
+    },
+    {
+      "id": "HH-HHC-0013",
+      "views": 2
+    }
+  ],
+  "top_searches": [
+    {
+      "q": "suic",
+      "n": 1
+    },
+    {
+      "q": "suicide",
+      "n": 1
+    }
+  ],
+  "zero_result_searches": [
+    {
+      "q": "suiced",
+      "n": 1
+    }
+  ],
+  "downloads_by_collection": [
+    {
+      "collection": "frances-hunter-collection",
+      "n": 2
+    },
+    {
+      "collection": "canadian-architecture-archive",
+      "n": 1
+    }
+  ],
+  "pageviews_by_page": [
+    {
+      "page": "index.html",
+      "n": 27
+    },
+    {
+      "page": "gallery",
+      "n": 3
+    }
+  ],
+  "by_country": [
+    {
+      "country": "CA",
+      "n": 306
+    },
+    {
+      "country": "US",
+      "n": 11
+    },
+    {
+      "country": "GB",
+      "n": 4
+    },
+    {
+      "country": "CH",
+      "n": 1
+    },
+    {
+      "country": "RU",
+      "n": 1
+    }
+  ]
+}
