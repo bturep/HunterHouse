@@ -332,7 +332,9 @@ A self-contained, read-only copy of everything: a byte-true mirror of the R2 buc
 - **Builder:** `scripts/build_doomsday.py <target> [--stage <fast local dir>]`. Re-runnable; each step only refetches what changed. `--stage` downloads to a local SSD first and then copies to the drive one file at a time (cheap flash sticks crawl under parallel writes).
 - **Offline server:** `scripts/doomsday/serve.py` (stdlib only). `site/` on the drive is an untouched `git archive` of the repo; the server stands in for R2, the Worker (`/list`, `/dl`, `/gated/*`, `/event`) and SPARQL, and rewrites those origins as pages are served. SPARQL is always 503, so the browser takes the catalogue-snapshot path (§5.5). Letters open without a token on the drive (deliberate: the drive is the confidential object).
 - **Letters:** the PC's R2 key cannot read `hhf-gated`, so the `gated` step pulls the dataset + page images through the Worker and needs the researcher token: `HH_GATED_TOKEN=<token> ... --only gated tools fixity`.
-- **When to refresh:** after every `browse.html` promotion to live and after any masters ingest. `--only site tools fixity` for a site-only change; a full run for an ingest.
+- **No-server fallback:** the `index` step writes `CATALOGUE.html` + `LETTERS.html` at the drive root from `catalogue.csv` and the letters dataset: plain HTML, no JS, relative links to the files on the drive. Opens by double-click with no Python; the layer most likely to outlast browsers' support for the full site.
+- **Second copy:** `--copy-to K:\BACKUPS\HH-ARCHIVE-DOOMSDAY` syncs the finished folder to BACKUP_MAST (which the personal archive mirrors to I:) and runs that copy's own `verify.py`. Refuses a non-empty folder that isn't an earlier copy.
+- **When to refresh:** after every website change pushed live (any `browse.html` / UI change) and after any masters ingest, always with `--copy-to`. Site/UI change: `--only site repo tools index fixity --copy-to K:\BACKUPS\HH-ARCHIVE-DOOMSDAY`. Ingest: a full run with `--stage` and `--copy-to`.
 
 ---
 

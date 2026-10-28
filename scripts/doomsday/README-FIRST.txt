@@ -15,7 +15,9 @@ A small window opens and your web browser shows the archive. Leave that window o
 
 The letters: http://127.0.0.1:8787/browse.html?open=letters
 
-The only requirement is Python 3, which is already on most Macs and is a free install on Windows from https://www.python.org/downloads/ (tick "Add python.exe to PATH" during install).
+The only requirement is Python 3, which is already on most Macs and is a free install on Windows from https://www.python.org/downloads/ (tick "Add python.exe to PATH" during install). On Linux, open a terminal in this folder and type: sh start.command
+
+IF THE ARCHIVE WON'T START: double-click CATALOGUE.html. It is a plain page that opens in any web browser with no program, no Python and no internet, listing every object with its details, a picture, and links to the image and master files on this drive. LETTERS.html does the same for the correspondence. These two pages are the simplest way in and the one most likely to keep working decades from now.
 
 
 TO CHECK THE DRIVE IS INTACT
@@ -39,6 +41,8 @@ repo/HunterHouse.bundle  -- The website's complete version history (a git bundle
 
 fixity/  -- Fingerprints (SHA-256) of every file, the image storage's own listing at build time, and the check that the copy matched it.
 
+CATALOGUE.html, LETTERS.html  -- The no-program fallback pages described above.
+
 serve.py, verify.py  -- The two small programs the launchers run. Plain Python, readable, no installs.
 
 BUILD-INFO.json  -- When this copy was made, and which version of the website it holds.
@@ -49,3 +53,7 @@ HOW IT WORKS (FOR WHOEVER MAINTAINS IT)
 The website normally loads its images from archive.hunterhousefoundation.com, its catalogue from hunterhouse.wikibase.cloud, and the letters from a Cloudflare Worker. serve.py stands in for all three: it serves site/ and r2/ from this drive and rewrites those web addresses to local ones as pages are sent to the browser. The files on the drive are never modified. The online catalogue query is deliberately disabled, so the site falls back to the catalogue snapshot (r2/catalogue/catalogue.json). Editing is off; this copy is read-only. The 3D explorer under forms/ loads a library from the internet and will not work offline; everything else does.
 
 The copy is built and refreshed by scripts/build_doomsday.py in the HunterHouse repository. Refresh it whenever a new version of the website is published or new masters are ingested.
+
+KEEPING IT ALIVE
+
+USB sticks are not archival: flash memory can fade when left unplugged for years. So: plug this in and run VERIFY once a year; keep at least one other copy (an identical copy is kept on the BACKUP_MAST hard drive under BACKUPS\HH-ARCHIVE-DOOMSDAY, which is itself mirrored to a second drive); and every five years or so, copy the whole folder onto fresh media and run VERIFY there. The files themselves (TIFF, JPEG, PDF, CSV, JSON, HTML, plain text) are among the most durable formats there are and need no special software.
