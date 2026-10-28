@@ -323,6 +323,17 @@ archive.hunterhousefoundation.com/catalogue/catalogue.csv    ← human export (n
 
 Distinct from the §5.3 metadata sidecars: those are per-item `wbgetentities` dumps for *disaster recovery* (rebuild Wikibase via `wbeditentity`). The catalogue snapshot is one consolidated, browser-shaped file for *runtime read resilience*. Different shape, different job.
 
+### 5.6 Doomsday copy -- the whole archive, offline, on a drive
+
+*(First built 2026-10-27, onto a 64 GB USB stick labelled `HH-DOOMSDAY`, kept at the house.)*
+
+A self-contained, read-only copy of everything: a byte-true mirror of the R2 bucket (masters + tiers + sidecars), the site at a recorded commit, a `git bundle` of this repo, a Wikibase dump (`backup_metadata.py`), the gated letters, and a SHA-256 manifest. It opens on any machine with Python 3 via `START.bat` / `start.command`; `VERIFY.bat` / `verify.command` re-check fixity.
+
+- **Builder:** `scripts/build_doomsday.py <target> [--stage <fast local dir>]`. Re-runnable; each step only refetches what changed. `--stage` downloads to a local SSD first and then copies to the drive one file at a time (cheap flash sticks crawl under parallel writes).
+- **Offline server:** `scripts/doomsday/serve.py` (stdlib only). `site/` on the drive is an untouched `git archive` of the repo; the server stands in for R2, the Worker (`/list`, `/dl`, `/gated/*`, `/event`) and SPARQL, and rewrites those origins as pages are served. SPARQL is always 503, so the browser takes the catalogue-snapshot path (§5.5). Letters open without a token on the drive (deliberate: the drive is the confidential object).
+- **Letters:** the PC's R2 key cannot read `hhf-gated`, so the `gated` step pulls the dataset + page images through the Worker and needs the researcher token: `HH_GATED_TOKEN=<token> ... --only gated tools fixity`.
+- **When to refresh:** after every `browse.html` promotion to live and after any masters ingest. `--only site tools fixity` for a site-only change; a full run for an ingest.
+
 ---
 
 ## 6. Write path — `scripts/edit_proxy.py`

@@ -65,11 +65,28 @@ def run(cmd, **kw):
 
 # -- steps -----------------------------------------------------------------
 
-def step_mirror(t):
+def step_mirror(t, stage=None):
     r2 = os.path.join(t, "r2")
     os.makedirs(r2, exist_ok=True)
-    run(["rclone", "copy", BUCKET, r2, "--transfers", "6", "--checkers", "12",
-         "--stats", "1m", "--stats-one-line"])
+    stats = ["--stats", "1m", "--stats-one-line"]
+    if stage:
+        # USB flash sticks crawl under parallel writes (measured 2026-10-27: a
+        # Kingston DT 3.0 does 8 MB/s alone, <1 MB/s with six writers). So
+        # download in parallel to a fast local disk, then copy onto the drive
+        # one file at a time. sync, not copy: r2/ stays an exact mirror.
+        # sync deletes anything in the stage folder that is not in the bucket,
+        # so only ever sync into a folder this script created (marker file).
+        os.makedirs(stage, exist_ok=True)
+        marker = os.path.join(stage, ".hh-doomsday-stage")
+        if os.listdir(stage) and not os.path.exists(marker):
+            raise SystemExit("--stage folder is not empty and not a doomsday stage: " + stage)
+        open(marker, "a").close()
+        run(["rclone", "sync", BUCKET, stage, "--transfers", "8", "--checkers", "16",
+             "--exclude", "/.hh-doomsday-stage"] + stats)
+        run(["rclone", "sync", stage, r2, "--transfers", "1", "--checkers", "4",
+             "--exclude", "/.hh-doomsday-stage"] + stats)
+    else:
+        run(["rclone", "copy", BUCKET, r2, "--transfers", "2", "--checkers", "8"] + stats)
     fx = os.path.join(t, "fixity")
     os.makedirs(fx, exist_ok=True)
     # The bucket listing with sizes + MD5 at build time (the remote's own record).
@@ -229,6 +246,7 @@ def main():
     ap.add_argument("target", help="folder on the drive, e.g. J:\\HH-ARCHIVE-DOOMSDAY")
     ap.add_argument("--only", nargs="+", choices=STEPS, help="run just these steps")
     ap.add_argument("--skip", nargs="+", choices=STEPS, default=[], help="skip these steps")
+    ap.add_argument("--stage", help="fast local folder to download into first (for slow USB sticks)")
     a = ap.parse_args()
     t = os.path.abspath(a.target)
     os.makedirs(t, exist_ok=True)
@@ -236,7 +254,10 @@ def main():
     for s in STEPS:
         if s in steps:
             say("== %s ==" % s)
-            globals()["step_" + s](t)
+            if s == "mirror":
+                step_mirror(t, a.stage)
+            else:
+                globals()["step_" + s](t)
     say("done: " + ", ".join(steps))
 
 
