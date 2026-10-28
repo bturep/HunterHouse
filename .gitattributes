@@ -1,0 +1,5 @@
+# Launchers must keep native line endings on every checkout (a CRLF shebang
+# breaks start.command on the Mac). Added for scripts/doomsday/, 2026-10-27.
+*.command text eol=lf
+*.sh text eol=lf
+*.bat text eol=crlf
