@@ -140,7 +140,9 @@ def step_repo(t):
 
 def step_wikibase(t):
     out = os.path.join(t, "wikibase", "wikibase_full_" + TODAY)
-    run([sys.executable, os.path.join(REPO, "scripts", "backup_metadata.py"), "--out", out])
+    # UTF-8 stdout: the dump prints arrows, which a Windows cp1252 console can't encode.
+    run([sys.executable, os.path.join(REPO, "scripts", "backup_metadata.py"), "--out", out],
+        env=dict(os.environ, PYTHONIOENCODING="utf-8"))
     # The consolidated snapshot, alongside, for anyone without the site.
     cat = os.path.join(t, "r2", "catalogue")
     if os.path.isdir(cat):
