@@ -1,0 +1,265 @@
+{
+  "period": "2026-10",
+  "dataset": "Hunter_House_Archive",
+  "totals": {
+    "events": 349,
+    "views": 299,
+    "searches": 4,
+    "zero_result_searches": 0,
+    "downloads": 3
+  },
+  "events_by_type": {
+    "pageview": 28,
+    "view": 299,
+    "search": 4,
+    "deeplink": 15,
+    "download": 3
+  },
+  "top_items": [
+    {
+      "id": "HH-CAA-0018",
+      "views": 23
+    },
+    {
+      "id": "HH-HHC-0083",
+      "views": 19
+    },
+    {
+      "id": "HH-HHC-0001",
+      "views": 13
+    },
+    {
+      "id": "HH-HHC-0002",
+      "views": 9
+    },
+    {
+      "id": "HH-CAA-0007",
+      "views": 6
+    },
+    {
+      "id": "HH-HHC-0084",
+      "views": 6
+    },
+    {
+      "id": "HH-HHC-0003",
+      "views": 5
+    },
+    {
+      "id": "HH-CAA-0006",
+      "views": 5
+    },
+    {
+      "id": "HH-CAA-0002",
+      "views": 5
+    },
+    {
+      "id": "HH-CAA-0004",
+      "views": 4
+    },
+    {
+      "id": "HH-CAA-0005",
+      "views": 4
+    },
+    {
+      "id": "HH-IHC-0002",
+      "views": 4
+    },
+    {
+      "id": "HH-CAA-0001",
+      "views": 4
+    },
+    {
+      "id": "HH-HHC-0112",
+      "views": 4
+    },
+    {
+      "id": "HH-FRH-0050",
+      "views": 4
+    },
+    {
+      "id": "HH-HHC-0004",
+      "views": 4
+    },
+    {
+      "id": "HH-CAA-0010",
+      "views": 3
+    },
+    {
+      "id": "HH-FRH-0055",
+      "views": 3
+    },
+    {
+      "id": "HH-FRH-0053",
+      "views": 3
+    },
+    {
+      "id": "HH-FRH-0002",
+      "views": 3
+    },
+    {
+      "id": "HH-FRH-0051",
+      "views": 3
+    },
+    {
+      "id": "HH-FRH-0052",
+      "views": 3
+    },
+    {
+      "id": "HH-FRH-0054",
+      "views": 3
+    },
+    {
+      "id": "HH-HHC-0005",
+      "views": 3
+    },
+    {
+      "id": "HH-FRH-0005",
+      "views": 3
+    },
+    {
+      "id": "HH-CAA-0011",
+      "views": 3
+    },
+    {
+      "id": "HH-HHC-0081",
+      "views": 3
+    },
+    {
+      "id": "HH-FRH-0001",
+      "views": 3
+    },
+    {
+      "id": "HH-FRH-0004",
+      "views": 2
+    },
+    {
+      "id": "HH-CAA-0003",
+      "views": 2
+    },
+    {
+      "id": "HH-FRH-0008",
+      "views": 2
+    },
+    {
+      "id": "HH-FRH-0003",
+      "views": 2
+    },
+    {
+      "id": "HH-HHC-0086",
+      "views": 2
+    },
+    {
+      "id": "HH-CAA-0017",
+      "views": 2
+    },
+    {
+      "id": "HH-HHC-0111",
+      "views": 2
+    },
+    {
+      "id": "HH-HHC-0006",
+      "views": 2
+    },
+    {
+      "id": "HH-IHC-0015",
+      "views": 2
+    },
+    {
+      "id": "HH-EGC-0036",
+      "views": 2
+    },
+    {
+      "id": "HH-IHC-0007",
+      "views": 2
+    },
+    {
+      "id": "HH-EGC-0001",
+      "views": 2
+    },
+    {
+      "id": "HH-HHC-0073",
+      "views": 2
+    },
+    {
+      "id": "HH-FRH-0009",
+      "views": 2
+    },
+    {
+      "id": "HH-IHC-0012",
+      "views": 2
+    },
+    {
+      "id": "HH-IHC-0005",
+      "views": 2
+    },
+    {
+      "id": "HH-CAA-0016",
+      "views": 2
+    },
+    {
+      "id": "HH-HHC-0055",
+      "views": 2
+    },
+    {
+      "id": "HH-HHC-0008",
+      "views": 2
+    },
+    {
+      "id": "HH-FRH-0010",
+      "views": 2
+    },
+    {
+      "id": "HH-IHC-0006",
+      "views": 2
+    },
+    {
+      "id": "HH-FRH-0049",
+      "views": 2
+    }
+  ],
+  "top_searches": [
+    {
+      "q": "Survey",
+      "n": 2
+    },
+    {
+      "q": "survey",
+      "n": 2
+    }
+  ],
+  "zero_result_searches": [],
+  "downloads_by_collection": [
+    {
+      "collection": "hunter-house-collection",
+      "n": 2
+    },
+    {
+      "collection": "canadian-architecture-archive",
+      "n": 1
+    }
+  ],
+  "pageviews_by_page": [
+    {
+      "page": "index.html",
+      "n": 28
+    }
+  ],
+  "by_country": [
+    {
+      "country": "CA",
+      "n": 313
+    },
+    {
+      "country": "US",
+      "n": 34
+    },
+    {
+      "country": "BR",
+      "n": 1
+    },
+    {
+      "country": "DE",
+      "n": 1
+    }
+  ]
+}
