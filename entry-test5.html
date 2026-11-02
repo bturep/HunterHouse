@@ -310,6 +310,21 @@
     .scard[data-section="archive"] .layer { object-position:12.9% 49.6% !important; object-fit:cover !important }
     .scard[data-section="about"]  .layer { object-position:50.0% 100.0% !important; object-fit:contain !important; transform:scale(1.15) !important }
     .scard[data-section="about"] { --about-h:64dvh !important }
+    /* (2026-11-02) phones: a statement is never wider than the screen (the composed
+       430/370px widths overflowed a 390px phone); max-width wins over the width */
+    .scard[data-section="hunter"] .about-text,
+    .scard[data-section="house"]  .about-text,
+    .scard[data-section="archive"] .about-text,
+    .scard[data-section="about"]  .about-text { max-width:calc(100vw - var(--menu-x) - 26px) !important }
+    /* the button owns the bottom row on phones; each card's record sits above it
+       (it collided with the button's rule on HUNTER/HOUSE, and with the long
+       "Browse the Archive" on ARCHIVE) */
+    .scard[data-section="hunter"] .at-foot,
+    .scard[data-section="house"]  .at-foot,
+    .scard[data-section="archive"] .at-foot { bottom:84px !important }
+    .scard[data-section="archive"] .at-statement br { display:none }   /* the desktop line break orphaned "drawings," */
+    /* ABOUT: the details flow directly under the statement (moved there by JS), clear of the drawing */
+    .scard[data-section="about"] .about-text .at-foot { position:static !important; margin-top:4px }
   }
 </style>
 <!-- ═══ e5-type-warm (removable in one deletion) ═══
@@ -411,7 +426,7 @@
   <section class="scard ps cover" data-section="archive">
     <div class="bgclip"><img class="layer" src="assets/entry/cards/archive/nameblock.jpg?v=2" alt="Richard Hunter Architect — studio nameblock"></div>
     <div class="about-text">
-      <p class="at-statement">The full record of the house : drawings,<br>photographs, and correspondence.</p>
+      <p class="at-statement">The full record of the house : drawings, <br>photographs, and correspondence.</p>
     </div>
     <div class="at-foot">
       <div class="at-meta">HH-HHC-0115, Richard Hunter · Architect, 1986<br>Portfolio Cover, Hunter House Collection</div>
@@ -441,7 +456,7 @@
   <iframe id="hd-frame" title="The House" src="about:blank"></iframe>
 </div>
 <div id="hd-crumb" role="button" tabindex="0" aria-label="Back to the survey"><span class="hc-a">Hunter</span><span class="hc-b">House</span></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.36</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.37</div>
 
 <script>
 // entry-test5 — the survey entry: film card + scroll-snap section cards,
@@ -844,7 +859,7 @@
     roomPrev.disabled = roomIdx === 0; roomNext.disabled = roomIdx === roomLen - 1;
   }
   function openRoom(name) {
-    if (name === "house") { openDrill("house-drill.html?v=59"); return; }    // HOUSE = the iframe reading drill-down
+    if (name === "house") { openDrill("house-drill.html?v=60"); return; }    // HOUSE = the iframe reading drill-down
     if (name === "hunter") { openDrill("hunter-drill.html?v=16"); return; }   // HUNTER = the four-stop drill
     var plates = ROOMS[name]; if (!plates || !plates.length) return;
     roomTrack.innerHTML = plates.map(plateHTML).join("");
@@ -1157,9 +1172,22 @@
     }, true);
     console.log("[place] mode ON. Click to select · drag to move · blue handle or ±w = width · A± = font · 1/2 col · Edit text · Boxes (H) hides outlines · backgrounds: drag to pan + Fit/Fill · Copy.");
   })();
+  // ABOUT details (2026-11-02): on phones they flow directly under the statement, on
+  // the clear white field (pinned bottom-left they sat on the drawing); desktop keeps
+  // them pinned. Moves the node in and back as the width crosses the breakpoint.
+  (function () {
+    var card = document.querySelector('.scard[data-section="about"]'); if (!card) return;
+    var foot = card.querySelector(".at-foot"), txt = card.querySelector(".about-text"); if (!foot || !txt) return;
+    var mq = window.matchMedia("(max-width:767px)");
+    function place() {
+      if (mq.matches) { if (foot.parentNode !== txt) txt.appendChild(foot); }
+      else if (foot.parentNode !== card) card.insertBefore(foot, txt.nextSibling);
+    }
+    place(); mq.addEventListener("change", place);
+  })();
   setSurveyActive(); driveReveal(); driveNameSquare(surveyEl.scrollTop);
   window.addEventListener("resize", function () { driveReveal(); driveNameSquare(surveyEl.scrollTop); });
-  console.log("entry-test5 e5-v2.36 -- house drill: Studio & Garden stop dated 1990");
+  console.log("entry-test5 e5-v2.37 -- phones: statements fit the screen, ARCHIVE record above its button, ABOUT details under the statement; CAA-0018 dated 1990");
 })();
 </script>
 <!-- ── adaptive entry film: pick a resolution tier by connection + display ── -->
