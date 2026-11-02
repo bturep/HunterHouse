@@ -441,7 +441,7 @@
   <iframe id="hd-frame" title="The House" src="about:blank"></iframe>
 </div>
 <div id="hd-crumb" role="button" tabindex="0" aria-label="Back to the survey"><span class="hc-a">Hunter</span><span class="hc-b">House</span></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.29</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.30</div>
 
 <script>
 // entry-test5 — the survey entry: film card + scroll-snap section cards,
@@ -686,6 +686,8 @@
   // commit (past ADV of the way there); short of that it eases back into place.
   var _snapDir = 1, _snapLast = surveyEl.scrollTop, _snapTimer = null, _snapping = false;
   var SNAP_ADV = 0.66;   // how far you must scroll toward the next card before it advances
+  var SNAP_ADV_WHEEL = 0.25;   // mouse wheel: a deliberate 2-3 notches commits to the next card
+  var _snapAdv = SNAP_ADV;     // the threshold for the input currently in use
   function doSnap() {
     if (mode !== "survey" || _snapping || paging || _locked) return;
     var st = surveyEl.scrollTop, last = pages.length - 1;
@@ -697,8 +699,8 @@
     if (gap < 2) return;
     var prog = (st - lo) / gap;                                // 0..1 across the REAL gap
     if (prog < 0.002 || prog > 0.998) return;                 // already parked
-    var target = (_snapDir >= 0) ? (prog >= SNAP_ADV ? cur + 1 : cur)
-                                 : (prog <= 1 - SNAP_ADV ? cur : cur + 1);
+    var target = (_snapDir >= 0) ? (prog >= _snapAdv ? cur + 1 : cur)
+                                 : (prog <= 1 - _snapAdv ? cur : cur + 1);
     var top = stopOf(target);
     if (Math.abs(top - st) < 2) return;
     _snapping = true;
@@ -726,9 +728,39 @@
   var _tY0 = 0, _tLastY = 0, _tT0 = 0, _tActive = false;
   function _pageFrom(dir) { goPage(pageIdx + dir); }   // one page from the COMMITTED page (not the mid-glide scroll)
   function _cool() { clearTimeout(_lockT); _lockT = setTimeout(function () { _locked = false; }, 260); }   // extends over momentum gaps
+  // ── MOUSE WHEEL (e5-v2.30): a notched wheel (PC) SCROLLS fluidly instead of paging
+  //  a whole card per notch. Each notch adds its distance to a target; the view eases
+  //  toward it every frame (the scroll-driven reveal/cover motions play out as you go),
+  //  and once the wheel stops the settle-snap lands on a card (_snapAdv: 2-3 notches
+  //  commit forward, fewer ease back). Trackpads (Mac) keep the pager below unchanged.
+  //  Detection: a Mac trackpad reports wheelDeltaY === -3*deltaY; notched wheels report
+  //  large round steps (~100px) or line/page units (Firefox).
+  var WHEEL_EASE = 0.18;        // fraction of the remaining distance covered per frame
+  var _wTarget = null, _wRaf = 0;
+  function _isNotchedWheel(e) {
+    if (e.deltaMode !== 0) return true;                                       // lines/pages = a wheel
+    if (e.wheelDeltaY && Math.abs(e.wheelDeltaY) === Math.abs(3 * e.deltaY)) return false;   // Mac trackpad signature
+    return Math.abs(e.deltaY) >= 50;                                          // a big discrete step = a notch
+  }
+  function _wheelStep() {
+    var st = surveyEl.scrollTop, d = _wTarget - st;
+    if (Math.abs(d) < 3) { surveyEl.scrollTop = _wTarget; _wTarget = null; _wRaf = 0; return; }
+    surveyEl.scrollTop = st + d * WHEEL_EASE;
+    _wRaf = requestAnimationFrame(_wheelStep);
+  }
+  function _wheelGlide(e) {
+    var px = e.deltaY * (e.deltaMode === 1 ? 33 : (e.deltaMode === 2 ? window.innerHeight : 1));
+    var max = surveyEl.scrollHeight - surveyEl.clientHeight;
+    if (_wTarget === null) _wTarget = surveyEl.scrollTop;
+    _wTarget = Math.max(0, Math.min(max, _wTarget + px));
+    _snapAdv = SNAP_ADV_WHEEL; _snapping = false;   // a new notch overrides a settle already under way
+    if (!_wRaf) _wRaf = requestAnimationFrame(_wheelStep);
+  }
   window.addEventListener("wheel", function (e) {
     if (mode !== "survey" || document.body.classList.contains("room-open")) return;
     e.preventDefault();
+    if (_isNotchedWheel(e)) { if (!paging && !_locked) _wheelGlide(e); return; }
+    _snapAdv = SNAP_ADV;
     var now = Date.now(), gap = now - _wLastT, ad = Math.abs(e.deltaY), dir = e.deltaY > 0 ? 1 : -1;
     _wLastT = now;
     if (_locked) {                                 // still inside the last gesture's momentum tail
@@ -748,7 +780,7 @@
     // a tap that begins on a control (menu link, a button) must fire as a CLICK —
     // don't engage the drag-scrub, whose touchmove preventDefault would eat the click.
     if (e.target.closest("#menu a, .enter-cue, a")) return;
-    _tY0 = _tLastY = e.touches[0].clientY; _tT0 = Date.now(); _tActive = true;
+    _tY0 = _tLastY = e.touches[0].clientY; _tT0 = Date.now(); _tActive = true; _snapAdv = SNAP_ADV;
   }, { passive: true });
   window.addEventListener("touchmove", function (e) {
     if (!_tActive) return;
@@ -1106,7 +1138,7 @@
   })();
   setSurveyActive(); driveReveal(); driveNameSquare(surveyEl.scrollTop);
   window.addEventListener("resize", function () { driveReveal(); driveNameSquare(surveyEl.scrollTop); });
-  console.log("entry-test5 e5-v2.29 -- the pre-revert state (d014b26): MORE bottom-right, record bottom-left");
+  console.log("entry-test5 e5-v2.30 -- mouse wheel scrolls fluidly + settles on a card (trackpad paging unchanged)");
 })();
 </script>
 <!-- ── adaptive entry film: pick a resolution tier by connection + display ── -->
