@@ -7,7 +7,7 @@
            CAA-0008, #sheet-plan-over) right-aligned -- click to enlarge
        (2) period-photograph gallery (#pgal: CAA-0028/0031, FRH-0008/0009/0010,
            CAA-0029; click to view, prev/next steps the gallery)
-       (3) CAA-0018, the 1985 Studio & Garden addition drawing (#caa18)
+       (3) CAA-0018, the Studio & Garden addition drawing (#caa18; stop dated 1990 -- the work; the drawing's record says 1985)
        (4) the 1990s ADDITION (#reading2): FRH-0022 + text
        (5) a grid of six Ivan Hunter photographs (#ihc).
      Past the last stop (or Esc) requestExit() posts {hd:"close"} to the parent.
@@ -285,15 +285,15 @@
   </div>
   </div>
 </div>
-<div id="caa18" aria-label="Hunter House, Studio and Garden — the 1985 addition drawing">
-  <div class="stopmark"><div class="tick" style="width:178px"></div><div class="name">1985 · Studio &amp; Garden</div></div>
+<div id="caa18" aria-label="Hunter House, Studio and Garden (1990) — the addition drawing">
+  <div class="stopmark"><div class="tick" style="width:178px"></div><div class="name">1990 · Studio &amp; Garden</div></div>
   <div class="inner">
   <div class="covfig">
     <img id="caa18-img" src="https://archive.hunterhousefoundation.com/canadian-architecture-archive/previews/HH-CAA-0018_Scheme_II_Pencil_Studies_Coloured_Legend_3of3_1985-01-01_prev.jpg" alt="Hunter House, Studio and Garden — HH-CAA-0018, 1985">
     <div class="cite">Hunter House, Studio &amp; Garden · HH-CAA-0018 · 1985</div>
   </div>
   <div class="c18txt">
-    <!-- placeholder narrative — the 1985 Studio & Garden scheme; Brandon to write -->
+    <!-- placeholder narrative — the 1990 Studio & Garden; Brandon to write -->
     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
     <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
   </div>
@@ -422,7 +422,7 @@
     pg.style.visibility = pOn ? "visible" : "hidden";
     pg.style.opacity = pOn ? "1" : "0";
     pg.style.transform = "translateX(" + (((1 - ease(pIn)) - ease(pOut)) * 100) + "vw)";
-    // CAA-0018 — the 1985 addition drawing: slides in as gallery 1 exits, before the tower
+    // CAA-0018 — the Studio & Garden drawing (stop 1990): slides in as gallery 1 exits, before the tower
     var c18 = document.getElementById("caa18");
     var c18In = Math.max(0, Math.min(1, (zr - 3.25) / 0.55));
     var c18Out = Math.max(0, Math.min(1, (zr - 4.35) / 0.55));
@@ -613,7 +613,7 @@
       [document.getElementById("reading"), "1970 · The Letter"],
       [document.getElementById("sheet-plan-over"), "1970 · The Plan"],
       [document.getElementById("pgal"), "1970 – 1986 · The Original House"],
-      [document.getElementById("caa18"), "1985 · Studio & Garden"],
+      [document.getElementById("caa18"), "1990 · Studio & Garden"],
       [document.getElementById("reading2"), "1991 · The Addition"],
       [document.getElementById("ihc"), "2024 · Photographs"]
     ];
