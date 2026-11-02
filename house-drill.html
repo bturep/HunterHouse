@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- house-drill v1.08 -- the HOUSE drill-down, loaded in entry-test5's iframe.
+<!-- house-drill v1.09 -- the HOUSE drill-down, loaded in entry-test5's iframe.
      DESKTOP (>767px): a z-driven horizontal carousel, six stops (wheel/touch/keys
      advance one stop per gesture):
        (0) the 1970 letter elevation sketch + Hunter's OWN WORDS (L001, text right)
@@ -48,7 +48,9 @@
      top-left · a common 74px baseline · 460px text measure · cites right-aligned
      to the image edge · images height-driven so the border traces the print ══ */
   .stopmark{position:absolute;left:46px;top:104px;z-index:2;display:flex;flex-direction:column;gap:12px}   /* rev A: clears the parent crumb */
-  .stopmark .tick{height:1.5px;background:#1b1918}
+  .stopmark .tick{height:1.5px;background:#1b1918;visibility:hidden}   /* hidden (2026-11-02: read as an underline on the crumb's HOUSE); kept in flow so the names hold their seats */
+  #rd-name{white-space:nowrap}
+  #rd-name2{position:absolute;left:0;bottom:0;white-space:nowrap}       /* stop 02's name: wipes in over stop 01's (JS) */
   .stopmark .name{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
     font-weight:700;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#1b1918}
   .fig{display:flex;flex-direction:column}
@@ -138,7 +140,7 @@
     .m-stopbar{position:sticky;top:0;z-index:3;background:rgba(246,245,245,.94);
       -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
       padding:18px 26px 16px;display:flex;flex-direction:column;gap:9px}
-    .m-stopbar .tick{height:1.5px;background:#1b1918;width:30px;transition:width .4s ease}
+    .m-stopbar .tick{height:1.5px;background:#1b1918;width:30px;transition:width .4s ease;visibility:hidden}
     .m-stopbar .name{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
       font-weight:700;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#1b1918}
     /* the shared text layer is desktop-only; mobile shows the in-panel texts */
@@ -202,7 +204,7 @@
 <!-- mobile sticky header: name swaps per section (JS); hidden on desktop -->
 <div class="m-stopbar" aria-hidden="true" style="display:none"><div class="tick" id="mtick"></div><div class="name" id="mname">1970 · The Letter</div></div>
 <div id="reading" aria-label="Reading">
-  <div class="stopmark"><div class="tick" id="rd-tick" style="width:56px"></div><div class="name" id="rd-name">1970 · The Letter</div></div>
+  <div class="stopmark"><div class="tick" id="rd-tick" style="width:56px"></div><div class="name" id="rd-name">1970 · The Letter</div><div class="name" id="rd-name2" aria-hidden="true">1970 · The Plan</div></div>
   <div id="flow">
     <!-- a horizontal strip that pans right-to-left: elevation + text-right ->
          elevation off left, text settles left, the plan crop (#sheet-plan-over)
@@ -357,10 +359,17 @@
       pgR.style.opacity = 1 - Math.max(0, Math.min(1, (p2 - 0.25) / 0.30));   // stop-01 copy out
       pgL.style.opacity = Math.max(0, Math.min(1, (p2 - 0.45) / 0.30));       // stop-02 copy in
     }
-    // the reading stopmark swaps between the two stops it hosts
-    var rdName = document.getElementById("rd-name"), rdTick = document.getElementById("rd-tick");
-    if (p2 > 0.5) { rdName.textContent = "1970 · The Plan"; rdTick.style.width = "97px"; }
-    else { rdName.textContent = "1970 · The Letter"; rdTick.style.width = "56px"; }
+    // the reading stopmark hosts two stops. (2026-11-02) the same WIPE as the panel
+    // stops: stop 02's name rides in from the right on an edge travelling with p2;
+    // stop 01's name is covered as the edge passes over it. Reverses with the scroll.
+    var rdName = document.getElementById("rd-name"), rdName2 = document.getElementById("rd-name2");
+    var nmL = rdName.parentNode.getBoundingClientRect().left;        // the names' seat (46px)
+    var edge = (1 - p2) * W;                                         // the travelling edge, viewport px
+    rdName2.style.transform = "translateX(" + edge + "px)";
+    var shown = Math.max(0, edge - nmL);                             // stop 01's name still left of the edge
+    var cut = Math.max(0, rdName.offsetWidth - shown);
+    rdName.style.clipPath = rdName.style.webkitClipPath = "inset(-4px " + cut + "px -4px 0)";
+    rdName2.style.visibility = p2 > 0 ? "visible" : "hidden";
 
     // the plan (CSS-anchored right:46 bottom:74; JS drives only the slide)
     var po = document.getElementById("sheet-plan-over");
