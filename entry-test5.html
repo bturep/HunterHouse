@@ -316,12 +316,13 @@
     .scard[data-section="house"]  .about-text,
     .scard[data-section="archive"] .about-text,
     .scard[data-section="about"]  .about-text { max-width:calc(100vw - var(--menu-x) - 26px) !important }
-    /* the button owns the bottom row on phones; each card's record sits above it
-       (it collided with the button's rule on HUNTER/HOUSE, and with the long
-       "Browse the Archive" on ARCHIVE) */
-    .scard[data-section="hunter"] .at-foot,
-    .scard[data-section="house"]  .at-foot,
-    .scard[data-section="archive"] .at-foot { bottom:84px !important }
+    /* phones: MORE / Browse the Archive sits directly under each card's statement
+       (moved there by JS); the records keep their bottom-left corner. */
+    .scard[data-section="hunter"]  .about-text .enter-cue,
+    .scard[data-section="house"]   .about-text .enter-cue,
+    .scard[data-section="archive"] .about-text .enter-cue {
+      position:static !important; left:auto !important; right:auto !important; top:auto !important; bottom:auto !important;
+      align-self:flex-start; margin-top:2px }
     .scard[data-section="archive"] .at-statement br { display:none }   /* the desktop line break orphaned "drawings," */
     /* ABOUT: the details flow directly under the statement (moved there by JS), clear of the drawing */
     .scard[data-section="about"] .about-text .at-foot { position:static !important; margin-top:4px }
@@ -456,7 +457,7 @@
   <iframe id="hd-frame" title="The House" src="about:blank"></iframe>
 </div>
 <div id="hd-crumb" role="button" tabindex="0" aria-label="Back to the survey"><span class="hc-a">Hunter</span><span class="hc-b">House</span></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.37</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.38</div>
 
 <script>
 // entry-test5 — the survey entry: film card + scroll-snap section cards,
@@ -1172,22 +1173,30 @@
     }, true);
     console.log("[place] mode ON. Click to select · drag to move · blue handle or ±w = width · A± = font · 1/2 col · Edit text · Boxes (H) hides outlines · backgrounds: drag to pan + Fit/Fill · Copy.");
   })();
-  // ABOUT details (2026-11-02): on phones they flow directly under the statement, on
-  // the clear white field (pinned bottom-left they sat on the drawing); desktop keeps
-  // them pinned. Moves the node in and back as the width crosses the breakpoint.
+  // PHONES (2026-11-02): pieces that collide when pinned to the card's corners move
+  // to flow directly under the statement -- ABOUT's details (they sat on the
+  // drawing) and the MORE / Browse the Archive link on HUNTER, HOUSE, ARCHIVE (it ran
+  // into the bottom-left record). Desktop keeps them pinned; nodes move in and back
+  // as the width crosses the breakpoint, so handlers and fades are untouched.
   (function () {
-    var card = document.querySelector('.scard[data-section="about"]'); if (!card) return;
-    var foot = card.querySelector(".at-foot"), txt = card.querySelector(".about-text"); if (!foot || !txt) return;
     var mq = window.matchMedia("(max-width:767px)");
+    var moves = [["about", ".at-foot"], ["hunter", ".enter-cue"], ["house", ".enter-cue"], ["archive", ".enter-cue"]]
+      .map(function (m) {
+        var card = document.querySelector('.scard[data-section="' + m[0] + '"]');
+        var el = card && card.querySelector(m[1]), txt = card && card.querySelector(".about-text");
+        return (el && txt) ? { card: card, el: el, txt: txt, home: el.nextSibling } : null;
+      }).filter(Boolean);
     function place() {
-      if (mq.matches) { if (foot.parentNode !== txt) txt.appendChild(foot); }
-      else if (foot.parentNode !== card) card.insertBefore(foot, txt.nextSibling);
+      moves.forEach(function (m) {
+        if (mq.matches) { if (m.el.parentNode !== m.txt) m.txt.appendChild(m.el); }
+        else if (m.el.parentNode !== m.card) m.card.insertBefore(m.el, m.home);
+      });
     }
     place(); mq.addEventListener("change", place);
   })();
   setSurveyActive(); driveReveal(); driveNameSquare(surveyEl.scrollTop);
   window.addEventListener("resize", function () { driveReveal(); driveNameSquare(surveyEl.scrollTop); });
-  console.log("entry-test5 e5-v2.37 -- phones: statements fit the screen, ARCHIVE record above its button, ABOUT details under the statement; CAA-0018 dated 1990");
+  console.log("entry-test5 e5-v2.38 -- phones: MORE / Browse sits under each statement; records stay bottom-left");
 })();
 </script>
 <!-- ── adaptive entry film: pick a resolution tier by connection + display ── -->
