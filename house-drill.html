@@ -78,6 +78,13 @@
     font-weight:500;font-size:calc(17px * var(--s,1));line-height:1.7;color:#000;display:grid;will-change:left}
   #flow .txt p{margin-bottom:1.1em}
   #flow .txt .page-r, #flow .txt .page-l{grid-row:1;grid-column:1;align-self:end}
+  /* BOTTOMS ALIGN (2026-11-02): the text column stands on the same baseline as the
+     image column, so captions share one line. No bottom padding, no trailing
+     paragraph margin; page-l (no caption of its own) is lifted by one caption block
+     (8px gap + 19px line, x --s) so its last line meets the plan IMAGE's bottom edge. */
+  #flow .txt{padding-bottom:0}
+  #flow .txt p:last-child{margin-bottom:0}
+  #flow .txt .page-l{padding-bottom:calc(27px * var(--s,1))}
   .pcite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;line-height:1.9;color:rgba(27,25,24,.5);margin-top:8px}
   .txt-cite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;line-height:1.9;color:rgba(27,25,24,.5)}
   /* the plan crop (stop 02): 600px wide, on the baseline at the right margin;
