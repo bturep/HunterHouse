@@ -441,7 +441,7 @@
   <iframe id="hd-frame" title="The House" src="about:blank"></iframe>
 </div>
 <div id="hd-crumb" role="button" tabindex="0" aria-label="Back to the survey"><span class="hc-a">Hunter</span><span class="hc-b">House</span></div>
-<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.30</div>
+<div id="ver" style="position:fixed;right:12px;bottom:10px;z-index:9;font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.9);background:#000;padding:3px 7px;border-radius:4px;pointer-events:none">e5-v2.31</div>
 
 <script>
 // entry-test5 — the survey entry: film card + scroll-snap section cards,
@@ -583,12 +583,32 @@
       if (w && w.__v && w.__v.setScrollPose) w.__v.setScrollPose(p);
     } catch (e) {}
   }
+  // ONE scroll animator for the survey (e5-v2.31). Native scrollTo({behavior:"smooth"})
+  // can silently land instantly (browser/OS settings, headless), which made settles and
+  // page changes JUMP. Every programmatic move now runs here, on one rAF, so nothing
+  // competes. ease "out" = starts at speed (a settle continuing your scroll);
+  // "inout" = a page change from rest (menu, trackpad swipe).
+  var _gRaf = 0;
+  // interrupting a glide also clears its in-flight flags (its done() will never run)
+  function stopGlide() { if (_gRaf) { cancelAnimationFrame(_gRaf); paging = false; _snapping = false; } _gRaf = 0; }
+  function glideTo(top, ms, ease, done) {
+    stopGlide();
+    if (_wRaf) { cancelAnimationFrame(_wRaf); _wRaf = 0; } _wTarget = null;   // a page change overrides a wheel glide
+    var from = surveyEl.scrollTop, d = top - from, t0 = performance.now();
+    if (Math.abs(d) < 1) { surveyEl.scrollTop = top; if (done) done(); return; }
+    (function f(now) {
+      var k = Math.min(1, (now - t0) / ms);
+      var e = ease === "out" ? 1 - Math.pow(1 - k, 3)
+                             : (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+      surveyEl.scrollTop = from + d * e;
+      if (k < 1) _gRaf = requestAnimationFrame(f); else { _gRaf = 0; if (done) done(); }
+    })(t0);
+  }
   function goPage(i) {
     pageIdx = Math.max(0, Math.min(pages.length - 1, i));
     paging = true;
-    surveyEl.scrollTo({ top: stopOf(pageIdx), behavior: "smooth" });
+    glideTo(stopOf(pageIdx), 620, "inout", function () { paging = false; });
     setSurveyActive();
-    setTimeout(function () { paging = false; }, 640);
   }
   // the nameblock stays static while the film scrolls up so its rising edge
   // clips it away (OG) — driven by scrollTop during the page glide
@@ -704,8 +724,7 @@
     var top = stopOf(target);
     if (Math.abs(top - st) < 2) return;
     _snapping = true;
-    surveyEl.scrollTo({ top: top, behavior: "smooth" });
-    setTimeout(function () { _snapping = false; }, 560);
+    glideTo(top, 520, "out", function () { _snapping = false; });
   }
   surveyEl.addEventListener("scroll", function () {
     if (mode !== "survey" || _snapping) return;
@@ -713,7 +732,7 @@
     if (st > _snapLast + 0.5) _snapDir = 1; else if (st < _snapLast - 0.5) _snapDir = -1;
     _snapLast = st;
     clearTimeout(_snapTimer);
-    _snapTimer = setTimeout(doSnap, 180);   // a touch more dwell before it settles
+    _snapTimer = setTimeout(doSnap, _snapAdv === SNAP_ADV_WHEEL ? 90 : 180);   // wheel: settle sooner so it reads as one continuous move
   }, { passive: true });
 
   // ── SURVEY paging — audited ───────────────────────────────────────────────
@@ -751,9 +770,10 @@
   function _wheelGlide(e) {
     var px = e.deltaY * (e.deltaMode === 1 ? 33 : (e.deltaMode === 2 ? window.innerHeight : 1));
     var max = surveyEl.scrollHeight - surveyEl.clientHeight;
+    if (_snapping) { stopGlide(); _snapping = false; _wTarget = null; }   // a new notch overrides a settle already under way
     if (_wTarget === null) _wTarget = surveyEl.scrollTop;
     _wTarget = Math.max(0, Math.min(max, _wTarget + px));
-    _snapAdv = SNAP_ADV_WHEEL; _snapping = false;   // a new notch overrides a settle already under way
+    _snapAdv = SNAP_ADV_WHEEL;
     if (!_wRaf) _wRaf = requestAnimationFrame(_wheelStep);
   }
   window.addEventListener("wheel", function (e) {
@@ -781,6 +801,7 @@
     // don't engage the drag-scrub, whose touchmove preventDefault would eat the click.
     if (e.target.closest("#menu a, .enter-cue, a")) return;
     _tY0 = _tLastY = e.touches[0].clientY; _tT0 = Date.now(); _tActive = true; _snapAdv = SNAP_ADV;
+    stopGlide();                                   // a finger on the glass takes over from any glide
   }, { passive: true });
   window.addEventListener("touchmove", function (e) {
     if (!_tActive) return;
@@ -1138,7 +1159,7 @@
   })();
   setSurveyActive(); driveReveal(); driveNameSquare(surveyEl.scrollTop);
   window.addEventListener("resize", function () { driveReveal(); driveNameSquare(surveyEl.scrollTop); });
-  console.log("entry-test5 e5-v2.30 -- mouse wheel scrolls fluidly + settles on a card (trackpad paging unchanged)");
+  console.log("entry-test5 e5-v2.31 -- one scroll animator: settles + page changes glide (no native smooth jumps)");
 })();
 </script>
 <!-- ── adaptive entry film: pick a resolution tier by connection + display ── -->
