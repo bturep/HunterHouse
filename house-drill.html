@@ -65,13 +65,17 @@
   #flow{position:absolute;inset:0;overflow:hidden}
   #flow .sklayer{position:absolute;inset:0;will-change:transform}
   #flow .skfig{position:absolute;left:var(--frameL,46px);bottom:var(--baseB,90px)}   /* rev A frame */
-  #flow .sk{display:block;max-height:min(470px,52vh);max-width:min(640px,50vw);width:auto;height:auto;cursor:zoom-in}
-  #flow .skcite{width:0;min-width:100%;text-align:right;margin-top:8px;
-    font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;line-height:1.9;color:rgba(27,25,24,.5)}
+  /* LARGE-SCREEN SCALE (2026-11-02): --s = min(W/1280, H/810) clamped 1..SCALE_MAX
+     (set in apply()). 1280x810 is the design; above it every size on the reading
+     stage (stops 01-02) grows together, so a big screen sees the same composition,
+     larger. At or below 1280 --s is 1 = unchanged. */
+  #flow .sk{display:block;max-height:min(calc(470px * var(--s,1)),52vh);max-width:min(calc(640px * var(--s,1)),50vw);width:auto;height:auto;cursor:zoom-in}
+  #flow .skcite{width:0;min-width:100%;text-align:right;margin-top:calc(8px * var(--s,1));
+    font-family:'JetBrains Mono',Menlo,monospace;font-size:calc(10px * var(--s,1));letter-spacing:.06em;line-height:1.9;color:rgba(27,25,24,.5)}
   #flow .txtlayer{position:absolute;inset:0;pointer-events:none}
-  #flow .txt{position:absolute;bottom:var(--baseB,90px);width:min(460px,42vw);padding-bottom:33px;pointer-events:auto;
+  #flow .txt{position:absolute;bottom:var(--baseB,90px);width:min(calc(460px * var(--s,1)),42vw);padding-bottom:calc(33px * var(--s,1));pointer-events:auto;
     max-height:calc(100vh - 230px);overflow-y:auto;
-    font-weight:500;font-size:17px;line-height:1.7;color:#000;display:grid;will-change:left}
+    font-weight:500;font-size:calc(17px * var(--s,1));line-height:1.7;color:#000;display:grid;will-change:left}
   #flow .txt p{margin-bottom:1.1em}
   #flow .txt .page-r, #flow .txt .page-l{grid-row:1;grid-column:1;align-self:end}
   .pcite{font-family:'JetBrains Mono',Menlo,monospace;font-size:10px;letter-spacing:.06em;line-height:1.9;color:rgba(27,25,24,.5);margin-top:8px}
@@ -80,7 +84,9 @@
      apply() drives only its slide */
   #sheet-plan-over{position:fixed;right:var(--frameRi,46px);bottom:var(--baseB,90px);z-index:8;visibility:hidden;
     display:flex;flex-direction:column;will-change:transform}
-  #sheet-plan-over img{display:block;width:min(600px,47vw);height:auto;border:1px solid rgba(27,25,24,.14);cursor:zoom-in}
+  #sheet-plan-over img{display:block;width:min(calc(600px * var(--s,1)),47vw);height:auto;border:1px solid rgba(27,25,24,.14);cursor:zoom-in}
+  /* the reading stage's cites scale with it (the shared cite rule above stays 10px for the other stops) */
+  #sheet-plan-over .cite, #flow .pcite, #flow .txt-cite{font-size:calc(10px * var(--s,1));margin-top:calc(8px * var(--s,1))}
   /* stop 03 — the period gallery: two rows of three, 212px, on the baseline */
   #pgal{position:fixed;inset:0;z-index:9;visibility:hidden;opacity:0;background:#f6f5f5;overflow:hidden;
     display:flex;align-items:center;justify-content:center;padding:120px 0 90px}
@@ -309,6 +315,7 @@
 // the z-driven carousel: z eases toward target; STOPS indexes the six states.
 // z starts at 2 (= past the retired hero band, hence Z_HERO below).
 (function () {
+  var SCALE_MAX = 1.5;   // large-screen ceiling for the reading stage (1 = never grow); tune by eye
   var z = 2, target = 2, Z_HERO = 1;   // OPEN on sketch-left + text-right (the centred-elevation landing is skipped)
   // MOBILE: below the breakpoint the whole slide engine is OFF -- the page becomes a
   // plain vertical scroll (sections unpinned to normal flow by the @media block, all
@@ -343,14 +350,17 @@
     var exitDX = exitP * (W + 700);                    // shared delta -- text + plan pan in lockstep
     skL.style.transform = "translateX(" + (-p2 * 110) + "vw)";
     // rev A: the content FRAME -- capped at 1280, centred; seats are its edges
-    var frameW = Math.min(1280, W - 92), frameL = (W - frameW) / 2;
+    // large-screen scale: the 1280x810 design grows uniformly, capped at SCALE_MAX
+    var S = Math.max(1, Math.min(SCALE_MAX, W / 1280, window.innerHeight / 810));
+    var frameW = Math.min(1280 * S, W - 92), frameL = (W - frameW) / 2;
     var FRI = W - frameL - frameW;                     // right inset
-    var baseB = Math.max(90, Math.round((window.innerHeight - 560) / 2));
+    var baseB = Math.max(90, Math.round((window.innerHeight - 560 * S) / 2));
     var rs = document.documentElement.style;
+    rs.setProperty("--s", S.toFixed(4));
     rs.setProperty("--frameL", frameL + "px");
     rs.setProperty("--frameRi", FRI + "px");
     rs.setProperty("--baseB", baseB + "px");
-    var TXW = Math.min(460, W * 0.42);                 // the measure is a MAXIMUM (min(460px,42vw))
+    var TXW = Math.min(460 * S, W * 0.42);             // the measure is a MAXIMUM (min(460px*s,42vw))
     var seatR = frameL + frameW - TXW, seatL = frameL; // the frame's two edges
     var txtEl = document.querySelector("#flow .txt");
     txtEl.style.left = (seatR + (seatL - seatR) * p2 - exitDX) + "px";
@@ -373,7 +383,7 @@
 
     // the plan (CSS-anchored right:46 bottom:74; JS drives only the slide)
     var po = document.getElementById("sheet-plan-over");
-    var planTX = (1 - p2) * (FRI + 660) - exitDX;      // enters from OFF-SCREEN right at any width, exits in lockstep
+    var planTX = (1 - p2) * (FRI + 660 * S) - exitDX;      // enters from OFF-SCREEN right at any width, exits in lockstep
     po.style.transform = "translateX(" + planTX + "px)";
     po.style.visibility = (zr > 1.18 && zr < 2.60) ? "visible" : "hidden";
     reading.style.opacity = 1;                          // everything slides -- no fades
