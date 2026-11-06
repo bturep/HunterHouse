@@ -33,8 +33,8 @@ import openpyxl
 import requests
 
 # ─────────────────────────── paths ──────────────────────────────────────────
-WORKBOOK   = "/Users/brandonpoole/Projects/HunterHouse/EGC_intake.xlsx"
-SCANS_ROOT = "/Users/brandonpoole/Downloads/237659_Brandon Poole_203 Goward Rd_Scans_14May26"
+WORKBOOK   = os.path.expanduser("~/Projects/HunterHouse/EGC_intake.xlsx")
+SCANS_ROOT = os.path.expanduser("~/Downloads/237659_Brandon Poole_203 Goward Rd_Scans_14May26")
 WORK       = "/tmp/hh_egc_ingest"
 
 # ─────────────────────────── R2 ─────────────────────────────────────────────

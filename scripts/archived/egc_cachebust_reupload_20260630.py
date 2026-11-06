@@ -2,7 +2,7 @@ import os, sys, json, time, subprocess, hashlib, requests, shutil
 sys.path.insert(0,"scripts"); from _wikibase import WikibaseSession
 from PIL import Image, ExifTags
 _DTO={v:k for k,v in ExifTags.TAGS.items()}["DateTimeOriginal"]
-KEEP="/Users/brandonpoole/Downloads/high resolution finished/Keep"
+KEEP=os.path.expanduser("~/Downloads/high resolution finished/Keep")
 R2="hh-r2:hunter-house-archive"; COLL="eric-gesinger-collection"
 PUB="https://archive.hunterhousefoundation.com/"+COLL; WORK="/tmp/hh_cb"; CAL="http://www.wikidata.org/entity/Q1985727"
 TIERS={"_thumb.jpg":(600,75),"_prev.jpg":(2000,82),"_large.jpg":(3840,85)}

@@ -30,7 +30,7 @@ import urllib.request
 import requests
 
 # ─────────────────────────── CONFIG (edit per item) ─────────────────────────
-SOURCE        = "/Users/brandonpoole/Pictures/RichardHunterPortfolio19860013.tif"
+SOURCE        = os.path.expanduser("~/Pictures/RichardHunterPortfolio19860013.tif")
 ARCH_ID       = "HH-HHC-0112"
 QID_OVERWRITE = None                 # set to a QID to wbeditentity clear:1 (overwrite); None = CREATE fresh.
                                      # SAFE RESTING STATE IS None — a stale QID here means a bare --execute wipes that item.
