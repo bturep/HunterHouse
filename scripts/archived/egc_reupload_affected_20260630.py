@@ -16,7 +16,7 @@ from PIL import Image, ExifTags
 _DTO = {v:k for k,v in ExifTags.TAGS.items()}["DateTimeOriginal"]
 
 EXECUTE = "--execute" in sys.argv
-KEEP = "/Users/brandonpoole/Downloads/high resolution finished/Keep"
+KEEP = os.path.expanduser("~/Downloads/high resolution finished/Keep")
 R2   = "hh-r2:hunter-house-archive"; COLL="eric-gesinger-collection"
 WORK = "/tmp/hh_egc_reupload"
 CAL  = "http://www.wikidata.org/entity/Q1985727"

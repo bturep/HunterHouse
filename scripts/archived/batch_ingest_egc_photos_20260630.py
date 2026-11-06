@@ -99,7 +99,7 @@ GENRES = {
              "living room of the Hunter Residence."),
 }
 
-PHOTO_DIR = "/Users/brandonpoole/Downloads/high resolution finished/Keep"
+PHOTO_DIR = os.path.expanduser("~/Downloads/high resolution finished/Keep")
 # (filename, genre) in ls order → arch IDs HH-EGC-0032 … 0059
 PHOTOS = [
     ("01-GesingerInteriors dinig room.jpg",               "dining_interior"),
@@ -133,7 +133,7 @@ PHOTOS = [
 ]
 
 STOOL_DRAWING = dict(
-    src="/Users/brandonpoole/Desktop/Frances Hunter Archive/Letters/EGC_additional, stool.tif",
+    src=os.path.expanduser("~/Desktop/Frances Hunter Archive/Letters/EGC_additional, stool.tif"),
     arch_id="HH-EGC-0031", label="Stool", date="2018-10-26",
 )
 

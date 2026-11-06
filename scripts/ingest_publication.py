@@ -40,7 +40,7 @@ import requests
 from PIL import Image
 
 # ─────────────────────────── CONFIG (edit per publication) ──────────────────
-SOURCE_DIR  = "/Users/brandonpoole/Desktop/1986publication"
+SOURCE_DIR  = os.path.expanduser("~/Desktop/1986publication")
 ARCH_ID     = "HH-HHC-0115"
 LABEL       = "Richard Hunter Architect — Portfolio (1986, self-published)"
 DESCRIPTION = "self-published portfolio; HHC; 1986"

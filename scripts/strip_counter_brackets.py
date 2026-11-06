@@ -8,13 +8,14 @@ Leaves all other bracket content (e.g. [Tilted Form], [Framing Plan]) intact.
 Run with --dry-run first to review changes.
 """
 
+import os
 import urllib.request, urllib.parse, json, http.cookiejar, sys, re, time
 
 API    = "https://hunterhouse.wikibase.cloud/w/api.php"
 SPARQL = "https://hunterhouse.wikibase.cloud/query/sparql"
 DRY_RUN = "--dry-run" in sys.argv
 
-with open("/Users/brandonpoole/Documents/hh-wikibase-migration/.env") as f:
+with open(os.path.expanduser("~/Documents/hh-wikibase-migration/.env")) as f:
     env = dict(line.strip().split("=", 1) for line in f if "=" in line and not line.startswith("#"))
 
 USER     = "MyBot@my-bot"
