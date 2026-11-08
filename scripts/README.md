@@ -44,20 +44,15 @@ The site's own browser code (`sw.js`, `events-data.js`, `forms/*.js`, `assets/`)
 
 ## 4. One-off, done
 
-Kept as the record of what was run. Each is marked **one-off, done?** for the maintainer to confirm before any move to `scripts/archived/`; none was moved in this pass, because Pages serves every tracked file and a move changes its URL.
-
 | # | Script | What it did | Run by | Wrote to |
 |---|---|---|---|---|
-| 1 | `scripts/patch_dates.py` | Added P82 dates and descriptions to 18 undated items. Still the named model for bulk Python writes | Maintainer, once | Wikibase |
-| 2 | `scripts/clean_titles.py` | Cleaned bracketed annotations from item labels in one pass | Maintainer, once | Wikibase |
-| 3 | `scripts/strip_counter_brackets.py` | Stripped `[N/N]` counters from item labels | Maintainer, once | Wikibase |
-| 4 | `scripts/recolor_previews.py` | Converted R2 JPEG tiers from the scanner ICC profile to sRGB (the Chrome cyan-cast fix) | Maintainer, once | R2 tiers |
-| 5 | `scripts/batch_ingest_frh_keep.py` | Ingested the 2026-07-19 Keep/ batch (six public items) | Maintainer, once | R2, Wikibase |
-| 6 | `scripts/hosting_policy_2026.py` | Brought the Wikibase into line with the Wikibase Cloud hosting policy (2026-09-30). Idempotent | Maintainer, once | Wikibase |
+| 1 | `scripts/patch_dates.py` | Added P82 dates and descriptions to 18 undated items. Kept in place because it is still the named model for bulk Python writes (see the Wikibase editing paths in the project memory) | Maintainer, once | Wikibase |
+
+On 2026-11-08 five more one-offs moved to `scripts/archived/` (Brandon: "retire, do not delete"); see 5. A grep of the repo (html, js, md, yml, py, sh) found nothing served or run that references them, only this file and `ARCHITECTURE.md`.
 
 ## 5. Retired
 
-This repo's retired scripts live in `scripts/archived/` (the folder predates the estate's `_retired/` name and is kept, since moving it would change public URLs). Completed one-shot migrations, kept for reference; none is called by anything.
+This repo's retired scripts live in `scripts/archived/` (the folder predates the estate's `_retired/` name and is kept, since moving it would change public URLs). Completed one-shot migrations, kept for reference; none is called by anything. Rows 30 to 34 moved here 2026-11-08 with `git mv`.
 
 | # | Script | What it did |
 |---|---|---|
@@ -90,3 +85,8 @@ This repo's retired scripts live in `scripts/archived/` (the folder predates the
 | 27 | `revert_hhc_renumber.py` | Revert script for the HHC renumber |
 | 28 | `revert_ids.py` | Revert script for the ID rename |
 | 29 | `rotate_images_20260611.py` | Rotated archive images in place on R2; retired because it re-encoded masters (P144 display rotation replaced it) |
+| 30 | `clean_titles.py` | Cleaned bracketed annotations from item labels in one pass |
+| 31 | `strip_counter_brackets.py` | Stripped `[N/N]` counters from item labels |
+| 32 | `recolor_previews.py` | Converted R2 JPEG tiers from the scanner ICC profile to sRGB (the Chrome cyan-cast fix) |
+| 33 | `batch_ingest_frh_keep.py` | Ingested the 2026-07-19 Keep/ batch (six public items, HH-FRH-0051 to 0056) |
+| 34 | `hosting_policy_2026.py` | Brought the Wikibase into line with the Wikibase Cloud hosting policy (2026-09-30); idempotent |
