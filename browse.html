@@ -4036,7 +4036,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.10.04";
+  const VERSION      = "v1.10.06";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.
@@ -10297,10 +10297,10 @@ WHERE {
     rec: null,        // live recording session
     NOTES_API: ANALYTICS_BASE + "/api/notes",
     // Shared secret for the notes write path — must match the Worker's NOTES_TOKEN
-    // secret (set 2026-06-12; rotate with `wrangler secret put NOTES_TOKEN` + update
+    // secret (set 2026-06-12, rotated 2026-11-09; rotate with `wrangler secret put NOTES_TOKEN` + update
     // here). It ships in this public file by design: deterrence against URL-scraping
     // bots, not strong auth — the real defences are the Worker's size caps + WAV check.
-    NOTES_TOKEN: "35686d20565759d8bd90fcf8f8e1351d9c04971e7a82da73",
+    NOTES_TOKEN: "827137e0d26e56ee9916afbc77147f95184f5305d0241293",
     AUTHOR: "Mowry Baden",
     // Where "Export my notes" mailto-fallback drafts are addressed. Must be a real,
     // monitored mailbox — no @hunterhousefoundation.com boxes exist (2026-06-12).
