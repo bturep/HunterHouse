@@ -179,6 +179,11 @@ try {
   if (/icon-1(80|92)-next\.png/.test(live))
     fail("browse.html: page <link> icons reference the -next icon set — staging icons must not ship to live");
   else pass("browse.html: page icon links are the live set");
+  // Audit 2026-11-10: next.html carries a robots noindex (it is a near-duplicate
+  // of the live page). A promotion that copies it across would de-index the archive.
+  if (/<meta[^>]+name=["']?robots["']?[^>]*noindex/i.test(live))
+    fail("browse.html: carries a robots noindex -- the staging tag must not ship to live");
+  else pass("browse.html: no robots noindex (live page stays indexable)");
 } catch (e) { fail("promotion-invariant checks: " + e.message); }
 
 // (6) sw.js must parse, and an assets/ or sw.js change should come with a

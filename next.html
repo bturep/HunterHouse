@@ -7,6 +7,9 @@
      iPadOS pinch-zoom + system "Larger Text" (WCAG 1.4.4). Affects all visitors. -->
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#171717">
+<!-- STAGING ONLY: keeps this near-duplicate of browse.html out of search indexes.
+     Strip at promotion; validate.mjs fails if it ever reaches browse.html. -->
+<meta name="robots" content="noindex,nofollow">
 <meta name="color-scheme" content="dark light">
 <!-- Referrer policy: never send path/query (which can carry a ?researcher= token or
      ?id=) to cross-origin hosts. Explicit rather than relying on the browser default. -->
@@ -4036,7 +4039,7 @@
   // ╚══════════════════════════════════════════════════════════════════════╝
 
   // ── Config ────────────────────────────────────────────────────────────────
-  const VERSION      = "v1.11-test.07";
+  const VERSION      = "v1.11-test.08";
   // What the UI shows. Live/public (no "-test") shows only vMAJOR.SESSION
   // (e.g. v1.05); staging ("-test") shows the full label. CACHE_KEY below
   // still uses the full VERSION, so per-patch cache busting is unaffected.

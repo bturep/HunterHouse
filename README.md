@@ -16,7 +16,7 @@ The catalogue browser reads its data at runtime from a public **Wikibase Cloud**
 HunterHouse/
 ├── index.html            Home — crawlable landing page (split-layout front door)
 ├── browse.html           The archive browser — single-file SPA (live SPARQL + R2 snapshot)
-├── next.html             Staging copy of browse.html, a version line ahead (v1.10-test.NN)
+├── next.html             Staging copy of browse.html, a version line ahead (v1.11-test.NN)
 ├── richard-hunter.html   Biography (schema.org Person + sameAs Wikidata)
 ├── the-house.html        Narrative on the Hunter Residence and the drawing record
 ├── archive.html          How the catalogue is organised

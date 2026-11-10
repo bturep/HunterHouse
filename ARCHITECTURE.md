@@ -23,7 +23,12 @@ For a software engineer inspecting the live site. Scope = what `https://hunterho
 > items; the FRH public objects were renumbered to generic `HH-FRH-0001..0050` (old IDs on P97
 > + 50 redirect stubs in `archive/`); public multi-page objects (a program + two sketchbooks)
 > flip page-by-page via the generic `item.pages[]` pager. A seven-agent audit
-> (`AUDIT-2026-07-19.md`, private repo) drove description/link/security cleanups. The body below
+> (`AUDIT-2026-07-19.md`, private repo) drove description/link/security cleanups.
+>
+> **→ 2026-11-10 (live `v1.10.06` / staging `v1.11-test.08`):** the v1.10 line was promoted
+> 2026-08-23 (the archive opens straight to the grid). Catalogue is **309** items. `next.html`
+> now carries a robots `noindex` that must be stripped at promotion (`validate.mjs` enforces it).
+> The lab pages (`lab-a` to `lab-d`, `next-test79`) were deleted from `main` 2026-11-06. The body below
 > still describes 2026-06-11 mechanics — trust it for architecture shape, not current counts.
 
 ---
